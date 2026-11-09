@@ -12892,7 +12892,7 @@ async function _pgSave(){
     if(S._pg!==g)return; // signed out (or the page replaced) while the save was on its way: nothing to sign back in
     // On the copy as it is now: what was read meanwhile (the profile's perks) is kept, not written over by the copy from before the save.
     const _base=(S.loggedIn&&S.loggedIn.id===cust.id)?S.loggedIn:cust;
-    S.loggedIn={..._base,...fresh,birth_date:g.birth,nationality:g.nat};setSession(S.loggedIn);
+    S.loggedIn={..._base,...fresh,birth_date:g.birth,nationality:g.nat};setSession(S.loggedIn);_bdgProfNew(_base,S.loggedIn); // a save that fills the profile: Race Ready on the account page
     const next=g.next;S._pg=null;renderProfileGate();
     if(next)next(); // the event they picked, now that the profile is complete
   }catch(e){
@@ -13382,7 +13382,7 @@ async function _fixSave(){
   if(vals.emergency||vals.emergency2||none.includes('emergency')||none.includes('emergency2'))S._em=null; // My Account and the runner step read them again
   if(vals.whatsapp)S._wa=null; // and the WhatsApp card
   if(S._fix!==g)return; // signed out while it was on its way: nothing to sign back in
-  S.loggedIn={...((S.loggedIn&&S.loggedIn.id===cust.id)?S.loggedIn:cust),...took};setSession(S.loggedIn);
+  const _was=(S.loggedIn&&S.loggedIn.id===cust.id)?S.loggedIn:cust;S.loggedIn={..._was,...took};setSession(S.loggedIn);_bdgProfNew(_was,S.loggedIn); // Race Ready, if this filled the profile
   S._fixCache={id:cust.id,at:Date.now(),fields:left};
   if(left.length){
     g.saving=false;g.fields=left;g.v={};g.err={};_fixItems(left).forEach(k=>{g.err[k]=t('fixErrCheck');});
@@ -17513,7 +17513,7 @@ async function _saveFirstHeight(cust,h){
     }else{
       const{error}=await sb.from('customers').update({height:h}).eq('id',cust.id);if(error)return; // fire-and-forget: the booking has landed; the height only pre-fills the next one, which saves it again if this was refused
     }
-    S.loggedIn={...(S.loggedIn||cust),height:h};setSession(S.loggedIn);
+    const _was=S.loggedIn||cust;S.loggedIn={..._was,height:h};setSession(S.loggedIn);_bdgProfNew(_was,S.loggedIn); // Race Ready, if the height was the last field
   }catch(e){}
 }
 // A booking run is claimed before the first await, not after the checks: those checks can
@@ -19164,30 +19164,34 @@ function _mrBadges(allK,completedK,seasons,cust){
   const km=Math.max(0,...Object.values(kmN));
   nights.forEach(([,n])=>{if(n.done)cleanBest=Math.max(cleanBest,++clean);else if(n.noshow)clean=0;});
   const R=_bdgRuns(dates),P=(n,of)=>Math.min(n,of)+'/'+of,pct=cust?_profPct(cust):0,PW=_bdgPerfect(completedK); // every kind of session the week held (_bdgPerfect)
-  const nd96=allK.some(e=>(e.status==='done'||e.status==='active')&&(ses.get(e.sessionId)||{}).ride_kind==='snd96');
+  // The event badges below carry the day they were first earned (at: the session's day; a donation its own time), so
+  // the account page pops one up as new only while it is (_bdgFresh, 2026-11-09).
+  const kd=k=>e=>e.status==='done'&&(ses.get(e.sessionId)||{}).ride_kind===k; // finished a session of that kind
+  const day1=(L,f)=>L.filter(f).map(e=>String(e.sessionDate||e.sessionId||'').slice(0,10)).filter(d=>/^\d{4}-\d\d-\d\d$/.test(d)).sort()[0]||'';
+  const fNd=e=>(e.status==='done'||e.status==='active')&&(ses.get(e.sessionId)||{}).ride_kind==='snd96',nd96=allK.some(fNd);
   // Run for Her: finished, i.e. marked done at the end of the run (the owner, 2026-10-05: "who completes this event").
-  const rfh=allK.some(e=>e.status==='done'&&(ses.get(e.sessionId)||{}).ride_kind==='runher');
-  const dfe=allK.some(e=>e.status==='done'&&(ses.get(e.sessionId)||{}).ride_kind==='defe5k'); // the Defe run (2026-10-18)
+  const rfh=allK.some(kd('runher'));
+  const dfe=allK.some(kd('defe5k')); // the Defe run (2026-10-18)
   // Victory Lap: checked out, or the session closed out - both leave the booking done (the owner, 2026-10-17).
-  const vlp=allK.some(e=>e.status==='done'&&(ses.get(e.sessionId)||{}).ride_kind==='vlap');
+  const vlp=allK.some(kd('vlap'));
   // Rode with Defe: checked in (on the bike or done) on the Saturday ride with Defe, 24 October 2026, members and
   // Defe's riders alike (the owner, 2026-10-18).
-  const dfr=all.some(e=>(e.status==='done'||e.status==='active')&&DEFE_RIDE_IDS.includes(e.sessionId));
+  const fDr=e=>(e.status==='done'||e.status==='active')&&DEFE_RIDE_IDS.includes(e.sessionId),dfr=all.some(fDr);
   // Blood Donor (2026-11-05): staff's Donated mark, so taking the mark back takes the badge back with it.
-  const bld=allK.some(e=>e.donatedAt);
+  const bld=allK.some(e=>e.donatedAt),bldAt=bld?allK.map(e=>e.donatedAt).filter(Boolean).sort()[0]:'';
   // Blood Donation Visitor (the owner, 2026-11-06): everyone who came, donors and visitors alike: checked out of a
   // blood session (the booking done), or marked Donated. Blood Donor stays with those who donated.
-  const bvs=bld||allK.some(e=>e.status==='done'&&(ses.get(e.sessionId)||{}).ride_kind==='blood');
+  const bvs=bld||allK.some(kd('blood'));
   const led=_ledN(allK); // the Marshal ladder is earned by leading rides too (the owner, 2026-11-06); staff still give it by hand
   return[
     ...(cust?[{s:'complete_profile',on:pct>=100,p:pct+'%'}]:[]), // Race Ready: from the account's profile (the rider's page, and a staffer's Badges dialog)
-    {s:'national_day_96',on:nd96,hide:true}, // the 23 September 2026 ride: shown to those who rode it
-    {s:'run_for_her',on:rfh,hide:true}, // the pink ribbon: shown to those who finished it
-    {s:'defe_5k',on:dfe,hide:true}, // Defe's ribbon medal: shown to those who finished the Defe run (2026-10-18)
-    {s:'victory_lap',on:vlp,hide:true}, // the lap ring: shown to those who finished it
-    {s:'defe_ride',on:dfr,hide:true}, // the ribbon wheel: shown to those who rode it
-    {s:'blood_donor',on:bld,hide:true}, // the drop: shown to those who gave blood
-    {s:'blood_visitor',on:bvs,hide:true}, // the drop's outline: shown to everyone who came, donors and visitors
+    {s:'national_day_96',on:nd96,hide:true,at:nd96?day1(allK,fNd):''}, // the 23 September 2026 ride: shown to those who rode it
+    {s:'run_for_her',on:rfh,hide:true,at:rfh?day1(allK,kd('runher')):''}, // the pink ribbon: shown to those who finished it
+    {s:'defe_5k',on:dfe,hide:true,at:dfe?day1(allK,kd('defe5k')):''}, // Defe's ribbon medal: shown to those who finished the Defe run (2026-10-18)
+    {s:'victory_lap',on:vlp,hide:true,at:vlp?day1(allK,kd('vlap')):''}, // the lap ring: shown to those who finished it
+    {s:'defe_ride',on:dfr,hide:true,at:dfr?day1(all,fDr):''}, // the ribbon wheel: shown to those who rode it
+    {s:'blood_donor',on:bld,hide:true,at:bldAt}, // the drop: shown to those who gave blood
+    {s:'blood_visitor',on:bvs,hide:true,at:bvs?[bldAt,day1(allK,kd('blood'))].filter(Boolean).sort()[0]||'':''}, // the drop's outline: shown to everyone who came, donors and visitors
     {s:'first_lap',on:rides>=1,p:rides+'/1'},
     {s:'regular',on:rides>=5,p:P(rides,5)},
     {s:'podium',on:rides>=10,p:P(rides,10)},
@@ -19279,7 +19283,7 @@ function _mrBadgeList(cust){
   const all=getQueue().filter(e=>e.customerId===cust.id),given=new Map(_bdgMineList(cust).map(g=>[g.slug,g]));
   const cat=Array.isArray(S._bdgCat)&&S._bdgCat.length?new Map(S._bdgCat.map(b=>[b.slug,b])):null;
   const ride=_mrBadges(all,all.filter(_bdgRode),S._bdgSeasons,cust).map(r=>{const g=given.get(r.s),x=BD_SYS[r.s]||[];if(!(r.gv&&g))given.delete(r.s);
-    return{b:g||r.b||{slug:r.s,system:true,icon:x[0],color:x[1]},on:r.on||!!g,p:r.p,g,sn:r.sn,hide:r.hide&&!r.on&&!g};});
+    return{b:g||r.b||{slug:r.s,system:true,icon:x[0],color:x[1]},on:r.on||!!g,p:r.p,g,sn:r.sn,at:r.at,hide:r.hide&&!r.on&&!g};});
   const manual=(cat?[...cat.values()].filter(b=>!b.auto):BDG_GIVEN_SYS.map(s=>({slug:s,system:true,icon:BD_SYS[s][0],color:BD_SYS[s][1]}))).map(b=>({b,on:false,m:true}));
   const seen=new Set(),L=[];
   [...[...given.values()].map(g=>({b:g,on:true,g})),...ride,...manual].forEach(x=>{
@@ -19659,30 +19663,44 @@ async function _bdrSend(){
   m.list=[{id:a.id,slug:d.slug,status:'pending',at:new Date().toISOString(),proof_kind:d.proof?d.proof.kind:null},...m.list.filter(x=>!(x.slug===d.slug&&x.status==='pending'))];
   _mrBadgesPaint();_bdrClose();toast(t('bdrSent'),'success');
 }
-// A badge given since this device last showed one pops up once (the newest) while the account page
-// is on screen. Kept per account in this browser, a convenience: another phone shows it again, and
-// with no storage it never pops rather than popping on every visit.
+// A badge pops up as new once on a device, and only while it IS new: given or earned in the last three days
+// (BDG_FRESH_MS). What the device remembers was the only test until 2026-11-09, so every badge a rider already held
+// popped as "New badge!" on a phone or browser that had not shown it, and again each time Safari wiped the site's
+// storage after a week away (the user: "showing me getting badges i already have from before"). With no storage it
+// never pops rather than popping on every visit.
+const BDG_FRESH_MS=3*864e5;
+function _bdgFresh(at){const v=Date.parse(at||'');return Number.isFinite(v)&&Date.now()-v<BDG_FRESH_MS;}
+// The newest badge staff gave, while the account page is on screen.
 function _bdgCelebrate(){
   const cust=S.loggedIn;if(!cust||S.view!=='customer'||S.custTab!=='account'||document.getElementById('badge-pop'))return;
   const at=g=>Date.parse(g&&g.at)||0,top=_bdgMineList(cust).reduce((a,g)=>at(g)>at(a)?g:a,null);
-  if(!top)return;
+  if(!top||!_bdgFresh(top.at))return;
   const k='cq_bdg_seen_'+cust.id;
   try{if(at(top)<=(+localStorage.getItem(k)||0))return;localStorage.setItem(k,String(at(top)));}catch(_){return;}
   const i=_mrBadgeList(cust).findIndex(x=>x.g===top||(x.lv&&x.lv.some(y=>y.g===top)));
   if(i>=0)_mrBadgeInfo(i,true);
 }
-// Race Ready and National Day 96 pop up the first time this device sees them earned (Race Ready the
-// moment the last field is saved). One at a time: the next waits for the next paint.
+// The badges the app works out itself pop up the same way: an event's badge within three days of its session (Blood
+// Donor of the donation), Race Ready when the rider's own save fills the profile's last field (_bdgProfNew; a profile
+// that arrives full is not news), a Recruiter level when more friends have ridden than this device last counted (the
+// first count a device sees is only noted). One at a time: the next waits for the next paint.
 const BDG_CHEER={recruiter:'cq_bdg_rec1_',recruiter_3:'cq_bdg_rec3_',recruiter_5:'cq_bdg_rec5_',recruiter_10:'cq_bdg_rec10_',complete_profile:'cq_bdg_prof_',national_day_96:'cq_bdg_nd96_',run_for_her:'cq_bdg_rfh_',defe_5k:'cq_bdg_dfe_',victory_lap:'cq_bdg_vl_',defe_ride:'cq_bdg_dfr_',blood_donor:'cq_bdg_bld_',blood_visitor:'cq_bdg_bvs_'};
+const BDG_REC_N={recruiter:1,recruiter_3:3,recruiter_5:5,recruiter_10:10};
+function _bdgProfNew(was,now){if(was&&now&&_profPct(was)<100&&_profPct(now)>=100)S._bdgProfNew=now.id;}
 function _bdgProfCheer(){
   const cust=S.loggedIn;if(!cust||S.view!=='customer'||S.custTab!=='account'||document.getElementById('badge-pop'))return;
-  const L=_mrBadgeList(cust);
+  const L=_mrBadgeList(cust),n=_refFriendsRode(cust),kn='cq_bdg_recn_'+cust.id;
+  let was;try{was=localStorage.getItem(kn);}catch(_){return;}
+  was=was==null||was===''||!Number.isFinite(+was)?null:+was;
+  const fresh=(x,s)=>s==='complete_profile'?S._bdgProfNew===cust.id:s in BDG_REC_N?n!=null&&was!=null&&was<BDG_REC_N[s]&&BDG_REC_N[s]<=n:_bdgFresh(x.at);
   for(const slug in BDG_CHEER){
-    const i=L.findIndex(x=>x.b.slug===slug&&x.on&&!x.g);if(i<0)continue;
+    const i=L.findIndex(x=>x.b.slug===slug&&x.on&&!x.g);if(i<0||!fresh(L[i],slug))continue;
     const k=BDG_CHEER[slug]+cust.id;
-    try{if(localStorage.getItem(k))continue;localStorage.setItem(k,'1');}catch(_){return;}
+    try{if(localStorage.getItem(k))continue;localStorage.setItem(k,'1');if(slug in BDG_REC_N)localStorage.setItem(kn,String(n));}catch(_){return;}
+    if(slug==='complete_profile')S._bdgProfNew=null;
     _mrBadgeInfo(i,true);return;
   }
+  if(n!=null&&was!==n)try{localStorage.setItem(kn,String(n));}catch(_){}
 }
 // Season dashboard (stats + badges). Lives at the top of My Account.
 // Is this booking still ahead of the rider (or under them right now)? Waiting or waitlisted it
@@ -21000,7 +21018,7 @@ async function _saveAccount(){
       // Laid over the account as it is now (2026-10-07): the copy from before these round trips put
       // back a sign-out made meanwhile and dropped what other reads (ride news, deletion) brought.
       const _now=S.loggedIn||getSession();if(!_now||_now.id!==cust.id)return;
-      S.loggedIn={..._withProfile(_now,cur),...v,socials,...about};
+      S.loggedIn={..._withProfile(_now,cur),...v,socials,...about};_bdgProfNew(_now,S.loggedIn); // this save filled the profile: Race Ready pops up
       // A new email can change how the account signs in: not fresh, so the page asks customer_about again.
       setSession(S.loggedIn);S._accType=null;S._accGender=null;S._profFresh=v.email!==(cur.email??'')?null:{id:cust.id,at:Date.now()};
       if(v.height){S._rHeight=String(v.height);}
@@ -21330,9 +21348,9 @@ function accUploadPhoto(input){pickImage(input,url=>_saveAccPhoto(url),256);try{
 // holding unsaved edits keeps them - only its photo row is drawn again.
 function _accPhotoSet(cust,photo){
   const cur=S.loggedIn;if(!cur||cur.id!==cust.id)return false;
-  S.loggedIn={...cur,photo};setSession(S.loggedIn);
+  S.loggedIn={...cur,photo};setSession(S.loggedIn);_bdgProfNew(cur,S.loggedIn); // the photo was the profile's last field: Race Ready
   const row=_accDirty()&&document.querySelector('#tab-account .cu-photo-row');
-  if(row)row.outerHTML=_accPhotoRow(S.loggedIn);else renderAccount();
+  if(row){row.outerHTML=_accPhotoRow(S.loggedIn);setTimeout(_bdgProfCheer,0);}else renderAccount();
   renderTopbarRight();return true;
 }
 // A refused or failed photo save is said in the rider's language, never the server's English text (bug hunt 2026-10-28).

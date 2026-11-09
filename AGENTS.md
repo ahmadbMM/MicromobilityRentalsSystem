@@ -458,8 +458,14 @@ give from a rider's Badges button in Customers > Accounts or Community > Members
 ride from Community > Badges (`/community/badges`, `_commBadges`); take-back and delete ask on a second
 tap (`_bdgArm`); every badge in that dialog has an "i" (`_bdgInfoBtn`, the bike type's `type-info-btn`) opening
 what it means, how it is earned and its dates under it (`_bdgInfoPanel`). The rider reads theirs through `customer_my_badges` (token-checked; an account merged
-into theirs counts) on the account page, given ones first; the newest pops up once per device
-(`_bdgCelebrate`, `cq_bdg_seen_<id>`). Without the tables the Badges button is hidden and the tab says
+into theirs counts) on the account page, given ones first; the newest pops up once per device, and only
+while new: given in the last three days (`_bdgCelebrate`, `cq_bdg_seen_<id>`, `_bdgFresh`/`BDG_FRESH_MS`,
+2026-11-09: device memory alone popped every badge held from before on a new phone, another browser, or after
+Safari wiped the site's storage). The app-worked badges in `BDG_CHEER` follow the same rule (`_bdgProfCheer`):
+an event badge carries its first session's day as `at` (Blood Donor the donation's time), Race Ready pops only
+when the rider's own save fills the profile (`_bdgProfNew` in the account save, photo, profile gate, fix-up and
+height saves; never a profile read that arrives full), a Recruiter level only when the friends who rode outgrow
+this device's last count (`cq_bdg_recn_<id>`; the first count a device sees is only noted). Without the tables the Badges button is hidden and the tab says
 so; without the function riders see the ride badges only. `tests/badges.spec.ts`.
 
 More ride badges (migration 20260929010000, the research shortlist): Back on Track (hidden until
@@ -510,7 +516,7 @@ their past members-only rides.
 Race Ready (`complete_profile`) is earned at 100% on the account page's profile meter (`_profPct`,
 shared with the meter) and drawn `special`: gold into green, an inner ring, a shine on the chip and a
 glow in the popup (`.bdg-sp`, `.mr-badge.special`; the table holds 'gold', `_bdgCol` maps app badges
-to the app's colour). It pops up once per device when first seen earned (`_bdgProfCheer`). Every app
+to the app's colour). It pops up once, when the rider's own save fills the profile (`_bdgProfNew`, `_bdgProfCheer`). Every app
 badge's popup has an about line under its name (`key+'A'`, `_bdgAbout`) saying what it means, above
 How to earn (`key+'D'`).
 National Day 96 (`national_day_96`, migration 20260929020000) is earned by a check-in (done or on the

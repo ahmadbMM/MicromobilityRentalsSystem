@@ -405,6 +405,35 @@ test.describe('@customer:account badges', () => {
     expect(await page.evaluate(`(()=>{const b=S._bdgMine.list[0],en=_bdgName(b);S.lang='ar';const ar=_bdgName(b);S.lang='en';return[en,ar];})()`)).toEqual(['Night Owl', 'بومة الليل']);
   });
 
+  // The user, 2026-11-09: "when entering my account as a customer why is it showing me getting badges i already have
+  // from before". This device has never shown them (a new phone, another browser, storage Safari wiped): still no pop-up.
+  test('badges held from before never pop up as new on a device that never showed them', async ({ page }) => {
+    const old = [mine[0], { ...mine[1], at: new Date(Date.now() - 10 * 864e5).toISOString() }];
+    await rider(page, { 'rpc:customer_my_badges': old });
+    await page.waitForFunction('S._bdgMine&&!S._bdgMine.busy&&S._bdgMine.list.length===2');
+    await page.evaluate(`renderAccount()`);
+    await page.waitForTimeout(300);
+    await expect(page.locator('#badge-pop')).toHaveCount(0);
+    await expect(page.locator('#tab-account .mr-badges .mr-badge.given')).toHaveCount(2); // held all the same
+    expect(await page.evaluate(`[_bdgFresh(new Date(Date.now()-2*864e5).toISOString()),_bdgFresh(new Date(Date.now()-4*864e5).toISOString()),_bdgFresh(''),_bdgFresh('2099-01-01')]`)).toEqual([true, false, false, true]);
+  });
+
+  test('a Recruiter level pops up when more friends ride than this device last counted, never for the first count it sees', async ({ page }) => {
+    await rider(page, { 'rpc:customer_referral': { ok: true, on: true, code: 'K7MQ2X', days: 60, cap: 10, joined: 3, rode: 1, earned: 1, referred: false, can_enter: false, rewards: [] } });
+    await expect.poll(() => page.evaluate('S._refMine&&S._refMine.rode')).toBe(1);
+    const pop = page.locator('#badge-pop');
+    await page.evaluate(`renderAccount()`);
+    await expect.poll(() => page.evaluate(`localStorage.getItem('cq_bdg_recn_c1')`)).toBe('1');
+    await expect(pop).toHaveCount(0);
+    await page.evaluate(`S._refMine={...S._refMine,rode:3};renderAccount()`);
+    await expect(pop).toContainText('New badge!');
+    expect(await page.evaluate(`localStorage.getItem('cq_bdg_recn_c1')`)).toBe('3');
+    await pop.getByRole('button', { name: 'Close' }).click();
+    await page.evaluate(`renderAccount()`);
+    await page.waitForTimeout(300);
+    await expect(pop).toHaveCount(0);
+  });
+
   test('the T100 race badges: given by staff, drawn as finisher medals in gold, silver and bronze (2026-10-08, redrawn 2026-10-09)', async ({ page }) => {
     const t100 = [{ slug: 't100', icon: 't100', color: 'gold', name: 'T100 Finisher', system: true, note: 'Jeddah', at: new Date(Date.now() - 36e5).toISOString() }];
     await rider(page, { 'rpc:customer_my_badges': t100 });
@@ -752,9 +781,13 @@ test.describe('@customer:account Race Ready and the about lines', () => {
     await page.evaluate(`setCustTab('account','badges')`); // the badges are the account's Badges part (2026-11-09)
   }
 
-  test('a whole profile earns Race Ready: drawn special, and it pops up once', async ({ page }) => {
-    await rider(page, full);
+  test('a whole profile earns Race Ready: drawn special, and it pops up once when the rider\'s own save fills it', async ({ page }) => {
+    await rider(page, { ...full, photo: '' });
+    await page.waitForFunction('S._bdgMine&&!S._bdgMine.busy');
     const pop = page.locator('#badge-pop');
+    await expect(pop).toHaveCount(0);
+    // The photo was the last field: saved, Race Ready pops up (2026-11-09: only a save of the rider's own, _bdgProfNew).
+    await page.evaluate(`_accPhotoSet(S.loggedIn,${JSON.stringify(full.photo)})`);
     await expect(pop).toContainText('New badge!');
     await expect(pop).toContainText('Race Ready');
     await expect(pop.locator('.badge-pop-box.special')).toHaveCount(1);
@@ -769,6 +802,15 @@ test.describe('@customer:account Race Ready and the about lines', () => {
     await page.evaluate(`renderAccount()`);
     await page.waitForTimeout(200);
     await expect(pop).toHaveCount(0);
+  });
+
+  test('a profile that arrives whole is no news: Race Ready is held, with no pop-up, on a device that never showed it (2026-11-09)', async ({ page }) => {
+    await rider(page, full);
+    await page.waitForFunction('S._bdgMine&&!S._bdgMine.busy');
+    await page.evaluate(`renderAccount()`);
+    await page.waitForTimeout(300);
+    await expect(page.locator('#badge-pop')).toHaveCount(0);
+    await expect(page.locator('#tab-account .mr-badge', { hasText: 'Race Ready' })).not.toHaveClass(/locked/);
   });
 
   test('every app badge explains itself, and Grid Regular says what the grid is', async ({ page }) => {
@@ -796,20 +838,21 @@ test.describe('@customer:account National Day 96', () => {
     await waitForSb(page);
     await page.evaluate(`setCustTab('account','badges')`); // the badges are the account's Badges part (2026-11-09)
   }
-  test('a rider checked in on the National Day ride gets it, drawn in the greens, and it pops up once', async ({ page }) => {
+  test('a rider checked in on the National Day ride gets it, drawn in the greens; long over, it never pops up as new', async ({ page }) => {
     await rider(page, 'done'); // unpaid: it is attendance
     const pop = page.locator('#badge-pop');
-    await expect(pop).toContainText('New badge!');
-    await expect(pop).toContainText('National Day 96');
-    await expect(pop.locator('.badge-pop-about')).toContainText('filled the Corniche in green');
-    await expect(pop.locator('.badge-pop-box.special.sp-national')).toHaveCount(1);
-    await pop.getByRole('button', { name: 'Close' }).click();
     const chip = page.locator('#tab-account .mr-badge', { hasText: 'National Day 96' });
     await expect(chip).toHaveClass(/special sp-national/);
     await expect(chip.locator('svg.bdg-sp stop').first()).toHaveAttribute('stop-color', '#5fd99a');
+    // 23 September is weeks behind: held, but no "New badge!" on a device that never showed it (2026-11-09)
     await page.evaluate(`renderAccount()`);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
     await expect(pop).toHaveCount(0);
+    await chip.click();
+    await expect(pop).toContainText('National Day 96');
+    await expect(pop).not.toContainText('New badge!');
+    await expect(pop.locator('.badge-pop-about')).toContainText('filled the Corniche in green');
+    await expect(pop.locator('.badge-pop-box.special.sp-national')).toHaveCount(1);
   });
   test('a no-show on it never sees it', async ({ page }) => {
     await rider(page, 'noshow');

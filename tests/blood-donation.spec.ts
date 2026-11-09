@@ -540,6 +540,14 @@ test.describe('@customer:blood The Blood Donor and Volunteer badges', () => {
     await expect(page.locator('#tab-account .mr-badges .mr-badge', { hasText: 'Blood Donor' })).toHaveCount(1);
   });
 
+  test('a donation weeks ago: the badge is held, with no pop-up on a device that never showed it (2026-11-09)', async ({ page }) => {
+    await rider(page, new Date(Date.now() - 20 * 864e5).toISOString());
+    await expect(page.locator('#tab-account .mr-badges .mr-badge', { hasText: 'Blood Donor' })).toHaveCount(1);
+    await page.evaluate(`renderAccount()`);
+    await page.waitForTimeout(300);
+    await expect(page.locator('#badge-pop')).toHaveCount(0);
+  });
+
   test('the mark taken back, or never given, shows no badge at all: not even to earn', async ({ page }) => {
     await rider(page, null);
     await expect(page.locator('#mr-badges-host')).toHaveCount(1);
