@@ -2084,7 +2084,7 @@ tables `lockers` and `locker_rentals`.
   from `customer_locker_offer`: the kind, the prices, what is left per period). After the booking,
   `_lkAfterBook` reserves them on the first riders' rows through `customer_locker_reserve` (the rider's own,
   waiting or waitlisted, not paid, not a Petromin form registration - `rider_registrations.matched_entry_id`),
-  before the Wallet switch so the wallet can pay it too. The ticket says the period and, once staff gave one, the
+  before the Wallet switch so the wallet can pay it too. The summary card beside the review counts it as well (`_regGrandStr`). The ticket says the period and, once staff gave one, the
   number (`customer_lockers`), with Remove until a number is given (`customer_locker_cancel`).
 - **Capacity**: the units in service less the live rentals (reserved or in use) taking each slot (`_lk_left`).
   Waitlisted bookings hold a locker too (the owner). Every write locks the evening (`_lk_lock`), so two phones
@@ -2096,7 +2096,9 @@ tables `lockers` and `locker_rentals`.
   (a tile per unit), `/lockers/reservations`, `/lockers/units` (add L1-Ln, out of service, retire, each tag's link and
   QR label, all labels on one sheet) and `/lockers/history` (60 days). Any evening can be looked at. The check-in has
   a Locker line (`_lkCiHtml`): the number typed or a tag tapped gives it, and a booking with none can be given one
-  (on its bill while unpaid, else into the Sales cart). A locker's sheet (`_lkSheetOpen`: a tag, a QR, a tile) says who
+  (on its bill while unpaid, else into the Sales cart). Every booking's menu has Assign a locker (`_lkAssignOpen`, the owner
+  2026-11-09): its locker, or one to give; a booking whose night offers none rents it the walk-up way for its account and
+  that evening, fee into the Sales cart. Both periods read as one span, 6 PM - 11 PM. A locker's sheet (`_lkSheetOpen`: a tag, a QR, a tile) says who
   has it and gives it to a rider waiting for a number, hands it back or moves it. A walk-up (no booking that night)
   rents from the sheet or the section (`_lkRentOpen`, `staff_locker_walkup`) and pays at the Sales till: the line goes
   into the cart with the account linked. Front desk, managers, owners and leaders have the section.

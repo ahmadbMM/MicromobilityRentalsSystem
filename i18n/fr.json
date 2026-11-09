@@ -7501,5 +7501,8 @@
   "zsOpp": "Opportunité",
   "zsSoFar": "Jusqu’ici",
   "zvSelStop": "Arrêter la sélection",
-  "zvSubTeam": "L’équipe de bénévoles : créneaux, candidatures, personnes, opportunités, heures et récompenses."
+  "zvSubTeam": "L’équipe de bénévoles : créneaux, candidatures, personnes, opportunités, heures et récompenses.",
+  "wvAgreeBtn": "J'accepte",
+  "lkAssign": "Attribuer un casier",
+  "lkAssignGo": "Attribuer"
 }

@@ -121,10 +121,40 @@ test.describe('@staff:lockers the Lockers section', () => {
     await page.evaluate(`setStaffTab('queue');showCheckinModal('q2')`);
     const box = page.locator('#lk-ci');
     await expect(box.getByRole('button')).toHaveCount(3);
-    await box.getByRole('button', { name: '6 PM - 8 PM + 9 PM - 11 PM' }).click();
+    await box.getByRole('button', { name: '6 PM - 11 PM' }).click(); // both periods read as one span (the owner, 2026-11-09)
     await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_reserve').length).toBe(1);
     expect(seen.find((c) => c.name === 'staff_locker_reserve')!.body).toEqual({ p_booking_id: 'q2', p_period: 'both', p_on_bill: true });
     await expect.poll(() => page.evaluate(`_lkFeeOf(_qGet('q2'))`)).toBe(15); // the line the server wrote, drawn without a reload
+  });
+
+  test('Assign a locker is on every booking\'s menu; it gives the booking\'s locker its number', async ({ page }) => {
+    const seen = calls(page);
+    await staff(page, { 'rpc:staff_locker_assign': { ok: true, code: 'L2' } });
+    await page.evaluate(`setStaffTab('queue');renderStaffQueue()`);
+    await page.waitForFunction(`(S._rowMenus||{}).q2&&S._rowMenus.q1`);
+    expect(await page.evaluate(`['q1','q2'].every(id=>S._rowMenus[id].some(i=>/Assign a locker/.test(i.label)))`)).toBe(true);
+    await page.evaluate(`_lkAssignOpen('q2')`);
+    const dlg = page.getByRole('dialog', { name: /Assign a locker · #2 Omar Other/ });
+    await expect(dlg).toContainText('6 PM - 8 PM');
+    await dlg.locator('#lk-as-in').fill('l2');
+    await dlg.locator('#lk-as-in').press('Enter');
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_assign').length).toBe(1);
+    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R2', p_code: 'L2' });
+  });
+
+  test('Assign a locker on a booking whose night offers none: rented for its account that evening, the fee into the Sales cart', async ({ page }) => {
+    const seen = calls(page);
+    const sat = bk('q5', 5, { session_id: 's3', session_date: ksaDay(2), name: 'Rana Rider', customer_id: 'c1' });
+    await staff(page, { queue_entries: [...queue, sat], 'rpc:staff_locker_walkup': { ok: true, id: 'R7', price: 15 } });
+    await page.evaluate(`_lkAssignOpen('q5')`);
+    const dlg = page.getByRole('dialog', { name: /Assign a locker · #5 Rana Rider/ });
+    await expect(dlg.locator('.lk-rent-ps .toggle-btn')).toHaveCount(4); // any period: the night offers none of its own
+    await dlg.getByRole('button', { name: /6 PM - 11 PM · SAR 15/ }).click();
+    await dlg.locator('#lk-as-go').click();
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_walkup').length).toBe(1);
+    expect(seen.find((c) => c.name === 'staff_locker_walkup')!.body).toEqual({ p_customer: 'c1', p_name: 'Rana Rider', p_period: 'both', p_day: ksaDay(2) });
+    await expect.poll(() => page.evaluate(`JSON.stringify({id:S._ctCustId,cart:(S._ctCart||[]).map(l=>[l.name,l.price])})`)).toBe(JSON.stringify({ id: 'c1', cart: [['Locker · 6 PM - 11 PM', 15]] }));
+    expect(await page.evaluate('S.staffTab')).not.toBe('cashier'); // the cart waits; the desk stays where it was
   });
 
   test('a locker\'s tag on a staff phone: off the address bar, its sheet opens', async ({ page }) => {
@@ -176,6 +206,11 @@ test.describe('@customer:reserve lockers', () => {
     expect(await page.evaluate(`(()=>{S.regLocker='early';S.regLockerN=1;return _lkRegFee(_sessGet('s1'))})()`)).toBe(10);
     expect(await page.evaluate(`(()=>{S.regLockerN=2;return _lkRegFee(_sessGet('s1'))})()`)).toBe(20);
     expect(await page.evaluate(`(()=>{S.regLockerN=5;return _lkRegFee(_sessGet('s1'))})()`)).toBe(20); // never more than the riders booked
+    // the summary card beside the review says the same total, and names the locker (2026-11-09: the two totals differed)
+    const sums = await page.evaluate(`(()=>{const s=_sessGet('s1');S.regQty=1;S.regBikeTypes=['Road'];S.regLockerN=1;S.regLocker='';const a=_regGrandStr(s);S.regLocker='both';const b=_regGrandStr(s),side=_regSideHtml(s);return{a,b,side};})()`) as { a: string; b: string; side: string };
+    const num = (x: string) => Number((x.match(/[\d.]+/g) || []).pop());
+    expect(num(sums.b) - num(sums.a)).toBe(15);
+    expect(sums.side).toContain('6 PM - 11 PM');
   });
 
   test('a Petromin night offers its one period; a free ride offers none', async ({ page }) => {

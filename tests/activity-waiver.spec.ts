@@ -64,6 +64,18 @@ test.describe('@customer:reserve activity waiver', () => {
       await dlg.locator('.btn-secondary').click();
       await expect(dlg).toHaveCount(0);
       await expect(panel).toContainText('I have read the waiver and agree on behalf of everyone on this booking');
+      // the sentence opens the same words (the user, 2026-11-09), and the pop-up's I agree ticks the box
+      await panel.locator('#reg-waiver-lbl').click();
+      await expect(dlg).toContainText('Every activity we run carries some risk.');
+      await expect(panel.locator('#reg-waiver-cb')).not.toBeChecked(); // opening the words ticks nothing
+      await dlg.getByRole('button', { name: 'I agree' }).click();
+      await expect(dlg).toHaveCount(0);
+      await expect(panel.locator('#reg-waiver-cb')).toBeChecked();
+      await expect(panel.locator('#reg-waiver-cb')).toBeFocused();
+      await panel.locator('#reg-waiver-cb').uncheck(); // the box alone ticks and unticks
+      await panel.locator('#reg-waiver-lbl').click();
+      await expect(dlg.getByRole('button', { name: 'I agree' })).toBeVisible();
+      await dlg.locator('.btn-secondary').click();
       await expect(panel.locator('.reg-stepper')).toHaveAttribute('aria-label', ev === 'event' ? 'Step 3 of 3' : 'Step 2 of 2');
       // unticked: Confirm is off, and a submit called directly posts no acceptance nobody gave
       await expect(panel.locator('.mm-reg-foot .btn-primary')).toBeDisabled();

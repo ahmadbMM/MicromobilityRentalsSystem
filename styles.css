@@ -1013,6 +1013,10 @@
     #tab-register .cu-waiver{display:flex;align-items:center;gap:12px;background:var(--s1);border:1.5px solid var(--border);border-radius:12px;padding:15px 18px;margin-top:12px;cursor:pointer;min-height:52px;box-sizing:border-box;}
     #tab-register .cu-waiver-cb{width:20px;height:20px;flex:none;}
     #tab-register .cu-waiver-lbl{font-size:13.5px;font-weight:600;}
+    /* the sentence opens the waiver's words, the box ticks (2026-11-09) */
+    #tab-register .cu-waiver{cursor:default;}
+    #tab-register .cu-waiver-tick{display:flex;align-items:center;justify-content:center;flex:none;min-width:44px;min-height:44px;margin:-12px 0;margin-inline-start:-12px;cursor:pointer;}
+    #tab-register .cu-waiver-open{flex:1;min-width:0;padding:0;margin:0;border:0;background:none;font:inherit;color:inherit;text-align:start;cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;}
     #tab-register .cu-wrap8{display:flex;gap:8px;flex-wrap:wrap;}
     #tab-register .cu-waiver-ok{border-color:var(--green);}
 

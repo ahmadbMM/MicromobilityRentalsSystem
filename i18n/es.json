@@ -7501,5 +7501,8 @@
   "zsOpp": "Oportunidad",
   "zsSoFar": "Hasta ahora",
   "zvSelStop": "Dejar de seleccionar",
-  "zvSubTeam": "El equipo de voluntarios: turnos, solicitudes, personas, oportunidades, horas y recompensas."
+  "zvSubTeam": "El equipo de voluntarios: turnos, solicitudes, personas, oportunidades, horas y recompensas.",
+  "wvAgreeBtn": "Acepto",
+  "lkAssign": "Asignar una taquilla",
+  "lkAssignGo": "Asignar"
 }
