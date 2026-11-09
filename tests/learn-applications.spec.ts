@@ -132,7 +132,7 @@ test.describe('@staff:community learn to ride', () => {
     await expect(box.locator('.ca-pwd')).toHaveText('Tq8mZr3Kpw');
     const msg = await box.locator('#la-msg-text').inputValue();
     const day = new Intl.DateTimeFormat('en-GB-u-ca-gregory', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Riyadh' }).format(new Date(`${d}T18:30:00+03:00`));
-    for (const txt of ['Hi Nadia,', 'learn-to-ride lesson', 'Your lesson is booked:', day, '6:30 pm', 'JCC Gate 3', 'https://micromobilityrentals.pages.dev',
+    for (const txt of ['Hi Nadia,', 'learn-to-ride lesson', 'Your lesson is booked:', day, '6:30 pm', 'JCC Gate 3', 'https://experiences.micromobility.sa',
       'Email: nadia.omar@gmail.com', 'Mobile: 0552220001', 'Temporary password: Tq8mZr3Kpw', 'choose your own password', 'reply to this message']) expect(msg).toContain(txt);
     const wa = await box.locator('a.la-wa').getAttribute('href');
     expect(wa).toMatch(/^https:\/\/wa\.me\/966552220001\?text=/);

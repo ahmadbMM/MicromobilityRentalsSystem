@@ -61,8 +61,8 @@ jobs:
         run: |
           npm run build:html
           npm run build:wallet
-          git diff --exit-code -- index.html app.js app.css lang staff-parts service-worker.js staff.js _headers certificate.css assets/certificate.html functions/api/wallet-pass.js \
-            || { echo '::error::index.html/app.js/app.css/lang/staff-parts/service-worker.js/staff.js/_headers/certificate.css/assets/certificate.html/functions/api/wallet-pass.js are stale — run `npm run build:html && npm run build:wallet` and commit the result.'; exit 1; }
+          git diff --exit-code -- index.html app.js app.css lang staff-parts service-worker.js functions/_middleware.js sitemap.xml robots.txt staff.js _headers certificate.css assets/certificate.html functions/api/wallet-pass.js \
+            || { echo '::error::index.html/app.js/app.css/lang/staff-parts/service-worker.js/functions/_middleware.js/sitemap.xml/robots.txt/staff.js/_headers/certificate.css/assets/certificate.html/functions/api/wallet-pass.js are stale — run `npm run build:html && npm run build:wallet` and commit the result.'; exit 1; }
           # git diff never sees a file the build made that git does not have yet (a new staff part, a
           # new language pack): the deploy would ship it while the repo has no copy of it.
           new=$(git ls-files --others --exclude-standard -- lang staff-parts)
@@ -206,7 +206,7 @@ jobs:
           # is the answer itself: our functions always reply with JSON carrying an "ok" field,
           # which neither the static server's 405 nor the middleware's plain-text 404 does.
           # This deployment's own address when the deploy step found it (the alias may still be the old one).
-          base="${DEPLOY_URL:-https://micromobilityrentals.pages.dev}"
+          base="${DEPLOY_URL:-https://experiences.micromobility.sa}"
           probe="$RUNNER_TEMP/probe.json"
           for attempt in 1 2 3; do
             code=$(curl -s -o "$probe" -w '%{http_code}' --max-time 20 -X POST \

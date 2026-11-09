@@ -55,7 +55,7 @@ test('staff ask a new sign-up for changes, get the link and message, and the car
   expect(txt).toContain('Before your lesson, please update the following on your sign-up:');
   expect(txt).toContain('• Company\n• Instagram');
   expect(txt).toContain('Note from our team: Where do you work?');
-  expect(txt).toContain(`https://micromobilityrentals.pages.dev/?learnfix=${TOKEN}&lang=en`);
+  expect(txt).toContain(`https://experiences.micromobility.sa/?learnfix=${TOKEN}&lang=en`);
   expect(txt).not.toContain('Temporary password');
   await msg.locator('#la-msg-lang').selectOption('ar');
   expect(await msg.locator('#la-msg-text').inputValue()).toContain('• الشركة');

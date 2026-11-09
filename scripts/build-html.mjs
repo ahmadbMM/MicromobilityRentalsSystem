@@ -159,6 +159,15 @@ const origin = String(site.origin || '').replace(/\/+$/, '');
 if (!/^https?:\/\/[^/]+$/.test(origin)) {
   throw new Error(`build: site.config.json origin must be a bare origin, got ${JSON.stringify(site.origin)}`);
 }
+// The addresses the site has had (2026-11-09: micromobilityrentals.pages.dev, before
+// experiences.micromobility.sa). functions/_middleware.js hands their visitors over to origin and
+// redirects everything else there; the page takes what the hand-over carried only from one of them.
+const formerOrigins = (Array.isArray(site.formerOrigins) ? site.formerOrigins : []).map((o) => String(o || '').replace(/\/+$/, ''));
+for (const o of formerOrigins) {
+  if (!/^https:\/\/[^/]+$/.test(o) || o === origin) throw new Error(`build: site.config.json formerOrigins must be bare https origins other than origin, got ${JSON.stringify(o)}`);
+}
+// Every half that ships names the site through these two placeholders; neither may survive.
+const stampSite = (code) => code.split('__SITE_ORIGIN__').join(origin).split('__SITE_FORMER_ORIGINS__').join(JSON.stringify(formerOrigins));
 
 // ── The staff half, split off into staff.js (scripts/split-staff.mjs) ──────────
 // A customer's phone used to download the whole app, two thirds of it staff-only. The main
@@ -252,8 +261,8 @@ if (!staffMin.code) throw new Error('build: staff.js did not minify');
 // it (the reports and the till's receipt) are drawn by the staff half, so staff.js is stamped here,
 // before its own hash is taken.
 const fontsHash = createHash('sha256').update(await readFile(new URL('../fonts/fonts.css', import.meta.url))).digest('hex').slice(0, 10);
-staffMin.code = staffMin.code.replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`)
-  .split('__SITE_ORIGIN__').join(origin); // the staff half names the site too (CA_SITE and the like): never the placeholder
+staffMin.code = staffMin.code.replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`);
+staffMin.code = stampSite(staffMin.code); // the staff half names the site too (CA_SITE and the like): never the placeholder
 if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(staffMin.code)) throw new Error('build: a fonts.css reference in staff.js was left without its hash');
 const partsDir = new URL('../staff-parts/', import.meta.url);
 await rm(partsDir, { recursive: true, force: true });
@@ -262,7 +271,7 @@ const staffParts = {}, staffPartsV = {};
 for (const [name, code] of Object.entries(sections.parts)) {
   const min = await terserMinify(code, TERSER_OPTS);
   if (!min.code) throw new Error(`build: staff-parts/${name}.js did not minify`);
-  const c = min.code.replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`).split('__SITE_ORIGIN__').join(origin);
+  const c = stampSite(min.code.replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`));
   if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(c)) throw new Error(`build: a fonts.css reference in staff-parts/${name}.js was left without its hash`);
   staffParts[name] = c;
   staffPartsV[name] = createHash('sha256').update(c).digest('hex').slice(0, 10);
@@ -291,9 +300,8 @@ const srcWithMain = src;
 const main = mainScript(src);
 const appMin = await terserMinify(main.code, TERSER_OPTS);
 if (!appMin.code) throw new Error('build: app.js did not minify');
-let appCode = appMin.code
-  .replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`)
-  .split('__SITE_ORIGIN__').join(origin);
+let appCode = stampSite(appMin.code
+  .replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`));
 if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(appCode)) throw new Error('build: a fonts.css reference in app.js was left without its hash');
 const appHash = createHash('sha256').update(appCode).digest('hex').slice(0, 10);
 await writeFile(new URL('../app.js', import.meta.url), appCode); // written here, as staff.js is: the service worker's precache list is checked against the tree below
@@ -430,7 +438,7 @@ const cacheFirst = onDisk.filter((rel) => !NOT_CACHE_FIRST.has(rel)).sort();
 // byte-identical, so the hourly reg.update() of a tab left open found nothing new and the tab never
 // heard of the deploy; a new name is a new worker, whose activation tells open tabs (shell-updated).
 const shellHasher = createHash('sha256').update(cssHash).update(appHash).update(appCssHash).update(staffHash).update(JSON.stringify(staffPartsV))
-  .update(out).update(origin);
+  .update(out).update(origin).update(JSON.stringify(formerOrigins));
 for (const rel of cacheFirst) {
   let bytes;
   try { bytes = await readFile(new URL(`../${rel}`, import.meta.url)); }
@@ -440,8 +448,10 @@ for (const rel of cacheFirst) {
 const shellHash = shellHasher.digest('hex').slice(0, 10);
 sw = sw
   .replace(/styles\.css\?v=[a-z0-9]+/g, `styles.css?v=${cssHash}`)
-  .replace(/const CACHE = '[^']*';/, `const CACHE = 'mmcq-${shellHash}';`);
+  .replace(/const CACHE = '[^']*';/, `const CACHE = 'mmcq-${shellHash}';`)
+  .replace(/^const LIVE_CUSTOMER_HOST = self\.location\.hostname === '[^']*';$/m, `const LIVE_CUSTOMER_HOST = self.location.hostname === '${new URL(origin).hostname}';`);
 if (!/const CACHE = 'mmcq-/.test(sw)) throw new Error('build: could not rewrite the SW cache name');
+if (!sw.includes(`const LIVE_CUSTOMER_HOST = self.location.hostname === '${new URL(origin).hostname}';`)) throw new Error('build: could not stamp the live host into service-worker.js');
 if (sw !== swBefore) await writeFile(swUrl, sw);
 
 // ── Public origin, from one place ────────────────────────────────────────────
@@ -449,8 +459,10 @@ if (sw !== swBefore) await writeFile(swUrl, sw);
 // JSON-LD, the sitemap and robots.txt independently, so moving to the custom domain meant
 // finding every copy. app.src.html carries __SITE_ORIGIN__ and the two SEO files are
 // rewritten here, all from site.config.json.
-if (out.includes('__SITE_ORIGIN__')) out = out.split('__SITE_ORIGIN__').join(origin);
-if (out.includes('__SITE_ORIGIN__')) throw new Error('build: site origin placeholder survived substitution');
+out = stampSite(out);
+for (const [name, code] of [['index.html', out], ['app.js', appCode], ['staff.js', staffMin.code], ...Object.entries(staffParts).map(([n, c]) => [`staff-parts/${n}.js`, c])]) {
+  if (/__SITE_(?:FORMER_)?ORIGINS?__/.test(code)) throw new Error(`build: a site origin placeholder survived substitution in ${name}`);
+}
 
 // sitemap.xml: one entry per language, each declaring the others as alternates, so the
 // Arabic and Spanish pages are discoverable rather than hidden behind localStorage.
@@ -477,6 +489,18 @@ const robotsBefore = robots;
 robots = robots.replace(/^Sitemap: .*$/m, `Sitemap: ${origin}/sitemap.xml`);
 if (!/^Sitemap: /m.test(robots)) throw new Error('build: robots.txt has no Sitemap line to rewrite');
 if (robots !== robotsBefore) await writeFile(robotsUrl, robots);
+
+// The middleware answers by host: the site's own (no way into staff from it) and the ones it has had
+// (a hand-over page, a 301, a worker that retires the old one). It is deployed as it is written, so
+// the build stamps the two lines it reads them from, as it stamps service-worker.js.
+const mwUrl = new URL('../functions/_middleware.js', import.meta.url);
+const mwBefore = await readFile(mwUrl, 'utf8');
+const formerHosts = formerOrigins.map((o) => new URL(o).hostname);
+const mw = mwBefore
+  .replace(/^const SITE_ORIGIN = '[^']*';$/m, `const SITE_ORIGIN = '${origin}';`)
+  .replace(/^const FORMER_HOSTS = \[[^\]\n]*\];$/m, `const FORMER_HOSTS = ${JSON.stringify(formerHosts).replace(/"/g, "'").replace(/,/g, ', ')};`);
+if (!mw.includes(`const SITE_ORIGIN = '${origin}';`) || !/^const FORMER_HOSTS = \[/m.test(mw)) throw new Error('build: could not stamp the site origin into functions/_middleware.js');
+if (mw !== mwBefore) await writeFile(mwUrl, mw);
 
 // No build/tooling banner in the shipped file — index.html is public (View Source),
 // so the "edit app.src.html, not index.html" rule lives in AGENTS.md / CLAUDE.md instead.

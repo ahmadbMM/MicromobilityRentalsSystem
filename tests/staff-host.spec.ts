@@ -72,9 +72,9 @@ test.describe('the middleware on the staff address', () => {
     expect((await run('https://staff.micromobility.sa/AGENTS.md')).status).toBe(404);
   });
   test('leaves the customer address alone', async () => {
-    const r = await run('https://micromobilityrentals.pages.dev/');
+    const r = await run('https://experiences.micromobility.sa/');
     expect(r.headers.get('x-robots-tag')).toBeNull();
-    expect(await (await run('https://micromobilityrentals.pages.dev/robots.txt')).text()).toBe('asset');
+    expect(await (await run('https://experiences.micromobility.sa/robots.txt')).text()).toBe('asset');
   });
 });
 
@@ -86,7 +86,8 @@ test.describe('the customer address, once staff has its own', () => {
     return mod.onRequest({ request: new Request(url), next: () => new Response('asset') }) as Promise<Response>;
   };
   test('the server sends every staff link on to the staff address', async () => {
-    const live = 'https://micromobilityrentals.pages.dev';
+    // The live address since 2026-11-09; the old one (tests/site-move.spec.ts) sends them on too.
+    const live = 'https://experiences.micromobility.sa';
     for (const [path, to] of [['/staff/', 'https://staff.micromobility.sa/'], ['/staff', 'https://staff.micromobility.sa/'],
       ['/?staff', 'https://staff.micromobility.sa/'], ['/?bike=042', 'https://staff.micromobility.sa/?bike=042'],
       ['/?bike=04A1B2C3D4', 'https://staff.micromobility.sa/?bike=04A1B2C3D4'], ['/?bike=<x>', 'https://staff.micromobility.sa/']]) {
@@ -111,8 +112,13 @@ test.describe('the customer address, once staff has its own', () => {
       _staffRedirectFor('micromobilityrentals.pages.dev','',true),
       _staffRedirectFor('micromobilityrentals.pages.dev','?lang=ar',false),
       _staffRedirectFor('127.0.0.1','?staff',false),
-      _staffRedirectFor('staff.micromobility.sa','?bike=042',false)]`);
-    expect(r).toEqual(['https://staff.micromobility.sa/?bike=042', 'https://staff.micromobility.sa/', 'https://staff.micromobility.sa/', '', '', '']);
+      _staffRedirectFor('staff.micromobility.sa','?bike=042',false),
+      _staffRedirectFor('experiences.micromobility.sa','?bike=042',false),
+      _staffRedirectFor('Experiences.Micromobility.sa','?staff',false),
+      _staffRedirectFor('experiences.micromobility.sa','?lang=ar',false),
+      _staffRedirectFor('abc123.micromobilityrentals.pages.dev','?staff',false)]`);
+    expect(r).toEqual(['https://staff.micromobility.sa/?bike=042', 'https://staff.micromobility.sa/', 'https://staff.micromobility.sa/', '', '', '',
+      'https://staff.micromobility.sa/?bike=042', 'https://staff.micromobility.sa/', '', '']);
   });
   test('locally the Staff Access button is still there (only the live address hides it)', async ({ page }) => {
     await stubSupabase(page, { sessions, queue_entries: [], bikes: [] });

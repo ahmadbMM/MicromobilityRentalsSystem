@@ -16,7 +16,7 @@ API contract in §4 is then exactly what the new frontend must call.
 
 ## 1. System snapshot (what exists today)
 
-- **Live site:** https://micromobilityrentals.pages.dev (Cloudflare Pages, static, no build server).
+- **Live site:** https://experiences.micromobility.sa (Cloudflare Pages, static, no build server; https://micromobilityrentals.pages.dev until 2026-11-09, which now hands visitors over and redirects).
 - **Current frontend:** one vanilla-JS single-page app (`app.src.html`, minified to `index.html`).
   The new site may use any stack — this spec is behavioral, not technological.
 - **Backend:** Supabase project `qpffkzmsfyilicwcsszz` (region eu-central-1, Frankfurt) since 2026-10-02; before that `amyqxovbnlreassrqihr` (ap-south-1).

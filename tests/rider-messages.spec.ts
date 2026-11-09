@@ -44,7 +44,7 @@ test('a Saturday booking opens its three messages, ride details read off the ses
   expect(txt).toContain('Meet up time: *5:45AM*');
   expect(txt).toContain('Start time: *6:15AM*');
   expect(txt).toContain(MEET);
-  expect(txt).toContain('https://micromobilityrentals.pages.dev/');
+  expect(txt).toContain('https://experiences.micromobility.sa/');
   const wa = await box.locator('a.rm-wa').getAttribute('href');
   expect(wa).toMatch(/^https:\/\/wa\.me\/966550000009\?text=/);
   expect(decodeURIComponent(wa!.split('text=')[1])).toBe(txt);

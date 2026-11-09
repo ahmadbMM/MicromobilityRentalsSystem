@@ -3,6 +3,12 @@
 // root; this blocks source, SQL, docs, configs, tests, dotfiles from the public.
 // App assets (.html/.css/.js/.png + manifest.json) pass through to next().
 const STAFF_ORIGIN = 'https://staff.micromobility.sa';
+// The site's public address and the hosts it has had (2026-11-09: micromobilityrentals.pages.dev
+// moved to experiences.micromobility.sa). Both lines are written by scripts/build-html.mjs from
+// site.config.json: change the address there.
+const SITE_ORIGIN = 'https://experiences.micromobility.sa';
+const FORMER_HOSTS = ['micromobilityrentals.pages.dev'];
+const SITE_HOST = new URL(SITE_ORIGIN).hostname;
 // The app's own addresses (2026-09-27): one per section and sub-view - the same list as the
 // router in app.src.html (STAFF_PATHS, CUST_PATHS, SUB_PATHS) and service-worker.js (APP_ROUTE);
 // tests/paths.spec.ts checks the three agree. Pages has no file for /bookings/waitlist, so its
@@ -91,9 +97,12 @@ export async function onRequest(context) {
   }
 
   // The live customer address keeps no way into staff: the /staff/ stub, /?staff and an NFC
-  // tag's /?bike= all go on to the staff address. Previews and other hosts are untouched.
+  // tag's /?bike= all go on to the staff address. A former address sends them there in one hop,
+  // not by way of the new one. Previews and other hosts are untouched.
   const reqUrl = new URL(context.request.url);
-  if (reqUrl.hostname.toLowerCase() === 'micromobilityrentals.pages.dev') {
+  const host = reqUrl.hostname.toLowerCase();
+  const former = FORMER_HOSTS.includes(host);
+  if (host === SITE_HOST || former) {
     const bike = (reqUrl.searchParams.get('bike') || '').trim();
     if (path === '/staff' || path.startsWith('/staff/') || STAFF_ROUTE.test(path) || reqUrl.searchParams.has('staff') || reqUrl.searchParams.has('bike')) {
       // A staff section's own address keeps its path and query on the way over. The path is the
@@ -105,6 +114,8 @@ export async function onRequest(context) {
       return new Response(null, { status: 302, headers: { location: to, 'cache-control': 'no-store' } });
     }
   }
+
+  if (former) return moved(context, reqUrl, path);
 
   // staff.micromobility.sa serves the same app, and nothing on it is for search engines: its
   // robots.txt shuts every crawler out and every answer carries noindex.
@@ -121,6 +132,119 @@ export async function onRequest(context) {
   const out = new Response(res.body, res);
   out.headers.set('X-Robots-Tag', 'noindex, nofollow');
   return out;
+}
+
+// ── A former address (2026-11-09) ─────────────────────────────────────────────
+// Everything on it goes to the same path and query on SITE_ORIGIN, with three exceptions:
+// - /api/* is still answered here. Pages opened before the move call it by a relative path, and
+//   the database's push drain (_push_drain_call) posts to it; a redirect would break both (a
+//   cross-origin redirect of a fetch fails CORS, and a POST would arrive as a GET).
+// - /service-worker.js is a worker that retires the old one. A phone that opened the app here has
+//   its worker answer every visit from the cache without asking the server, so a redirect alone
+//   would never reach it; and a browser refuses a worker script that redirects, keeping the old
+//   worker for good. This one replaces it, empties the caches, unregisters itself and tells the
+//   open pages to reload, which then come to the server and are handed over.
+// - A browser's visit gets the hand-over page instead of the 301. What the app keeps on the device
+//   (the rider's sign-in, language, bookings waiting to be sent) is stored per address, so a bare
+//   redirect would sign every rider out. The page carries it to SITE_ORIGIN in the address's
+//   fragment, which no server sees, and the app there takes it in (app.src.html, the first script).
+//   So does the old worker's own refresh of the shell (a same-origin fetch of /): it stores the
+//   page, and the next visit it answers from the cache is handed over too.
+// Crawlers, link previews and anything else send no Sec-Fetch-* headers and get the 301 itself.
+const SHELL_PATH = (p) => p === '/' || p === '/index.html' || APP_ROUTE.test(p);
+function moved(context, url, path) {
+  const req = context.request;
+  if (path.startsWith('/api/')) return context.next();
+  if (path === '/service-worker.js') return retiredWorker();
+  // The raw path and query, as the URL parser keeps them: percent-encoded, so always a valid header.
+  const to = SITE_ORIGIN + (path === '/index.html' ? '/' : url.pathname) + url.search;
+  const h = req.headers;
+  const page = (h.get('sec-fetch-mode') === 'navigate' && h.get('sec-fetch-dest') === 'document') ||
+    (h.get('sec-fetch-site') === 'same-origin' && h.get('sec-fetch-dest') === 'empty' && SHELL_PATH(path));
+  if (req.method === 'GET' && page) return handOverPage(to);
+  const keep = req.method === 'GET' || req.method === 'HEAD';
+  return new Response(null, { status: keep ? 301 : 308, headers: { location: to, 'cache-control': 'public, max-age=3600' } });
+}
+
+// Runs on the former address, in the visitor's browser. It reads what the app stored there, takes
+// it off that address (so a later visit to an old link hands over nothing a second time, and never
+// overwrites a sign-in made since), retires any worker and cache left there, and goes on to the
+// same path and query on SITE_ORIGIN. The original fragment rides along as mm-hash (a sign-in
+// return carries #access_token=...). A fragment that is itself a hand-over is dropped: only this
+// page writes one, from this device's own storage. Kept to what the app stores (cq_*, mm_*, and
+// supabase-js's sb-*), per value and in all, so the address stays short enough for every browser.
+const HAND_OVER_JS = `(function(){
+var TO=${JSON.stringify(SITE_ORIGIN)},KEEP=/^(cq_|mm_|sb-)/,SKIP=/^(cq_snapshot|cq_staff|cq_role|cq_team|cq_access|cq_op_|cq_kiosk|cq_booth|cq_desk_|cq_sales_|cq_ct_|cq_ho$|cq_weather|cq_errors|cq_full_log)/,FIRST=/^(cq_session|sb-|cq_lang|mm_lang|cq_book_outbox|cq_ref|cq_device_id)/;
+var hash=location.hash.replace(/^#/,'');if(/^mm-move=/.test(hash))hash='';
+var path=location.pathname==='/index.html'?'/':location.pathname,dest=TO+path+location.search,list=[],data={},size=0,taken=[];
+function read(st,tag){try{for(var i=0;i<st.length;i++){var k=st.key(i),v=st.getItem(k);if(k&&v!=null&&KEEP.test(k)&&!SKIP.test(k)&&v.length<=16384)list.push([tag,k,v,st]);}}catch(e){}}
+read(window.localStorage,'l');read(window.sessionStorage,'s');
+list.sort(function(a,b){return (FIRST.test(b[1])?1:0)-(FIRST.test(a[1])?1:0);});
+for(var i=0;i<list.length;i++){var e=list[i];if(size+e[1].length+e[2].length>24000)continue;data[e[0]+':'+e[1]]=e[2];size+=e[1].length+e[2].length;taken.push(e);}
+var frag=hash;
+if(taken.length){try{
+var b=btoa(unescape(encodeURIComponent(JSON.stringify(data)))).split('+').join('-').split('/').join('_').replace(/=+$/,'');
+frag='mm-move='+b+(hash?'&mm-hash='+encodeURIComponent(hash):'');
+for(var j=0;j<taken.length;j++)try{taken[j][3].removeItem(taken[j][1]);}catch(e){}
+}catch(e){frag=hash;}}
+var gone=false;function go(){if(gone)return;gone=true;location.replace(dest+(frag?'#'+frag:''));}
+setTimeout(go,700);
+var jobs=[];
+try{if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)jobs.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister();}));}));}catch(e){}
+try{if(window.caches)jobs.push(caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));}));}catch(e){}
+if(jobs.length&&window.Promise)Promise.all(jobs).then(go,go);else go();
+})();`;
+
+function handOverPage(to) {
+  const esc = (s) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  const nonce = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))));
+  const where = esc(SITE_HOST);
+  const html = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><meta name="referrer" content="origin"><meta name="color-scheme" content="light dark">
+<link rel="canonical" href="${esc(to)}"><title>MicroMobility Experiences</title>
+<noscript><meta http-equiv="refresh" content="0;url=${esc(to)}"></noscript>
+<script nonce="${nonce}">${HAND_OVER_JS}</script>
+</head><body><noscript>
+<p>MicroMobility Experiences has moved to <a href="${esc(to)}">${where}</a>.</p>
+<p dir="rtl" lang="ar">انتقلت تجارب MicroMobility إلى <a href="${esc(to)}">${where}</a>.</p>
+</noscript></body></html>`;
+  return new Response(html, {
+    status: 200,
+    headers: {
+      'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex',
+      // The app on SITE_ORIGIN takes a hand-over only from a page whose origin the browser names as
+      // a former address: no third party can plant a sign-in on a rider's phone with a crafted link.
+      'referrer-policy': 'origin', 'link': `<${to}>; rel="canonical"`, 'x-content-type-options': 'nosniff',
+      'content-security-policy': `default-src 'none'; script-src 'nonce-${nonce}'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`,
+    },
+  });
+}
+
+// The worker a phone that used the former address finds on its next update check (any visit, and
+// the open app's hourly reg.update()). It answers nothing (no fetch handler), so from the moment
+// it takes over every request goes to the network. Activating, it empties every cache the old
+// worker kept, unregisters, and says 'shell-updated': the app's own update path then reloads the
+// page (at once if it only just opened, else from its Refresh bar or when it is next hidden), and
+// that load is handed over. Never cached, so the browser always sees this exact script.
+const RETIRED_WORKER = `// ${FORMER_HOSTS.join(', ')} moved to ${SITE_ORIGIN} (2026-11-09). This worker retires the old one.
+self.addEventListener('install', function () { self.skipWaiting(); });
+self.addEventListener('activate', function (e) {
+  e.waitUntil(self.clients.claim().catch(function () {})
+    .then(function () { return caches.keys(); })
+    .then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); })
+    .catch(function () {})
+    .then(function () { return self.registration.unregister(); })
+    .catch(function () {})
+    .then(function () { return self.clients.matchAll({ type: 'window' }); })
+    .then(function (cs) { cs.forEach(function (c) { c.postMessage({ type: 'shell-updated' }); }); })
+    .catch(function () {}));
+});
+`;
+function retiredWorker() {
+  return new Response(RETIRED_WORKER, {
+    headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' },
+  });
 }
 
 function notFound() {

@@ -1,6 +1,9 @@
 {
-  "_comment": "Single source of truth for the public origin. The build substitutes __SITE_ORIGIN__ in index.html and rewrites sitemap.xml + robots.txt, so switching to the custom domain is a one-line change here. Do not add a trailing slash.",
-  "origin": "https://micromobilityrentals.pages.dev",
+  "_comment": "Single source of truth for the public origin. The build substitutes __SITE_ORIGIN__ in index.html and the scripts, rewrites sitemap.xml + robots.txt, and stamps functions/_middleware.js and service-worker.js, so moving the site is a change here. Do not add a trailing slash. formerOrigins: addresses the site has had; their pages hand a visitor (and what their browser holds) over to origin, and everything else there redirects to it (functions/_middleware.js).",
+  "origin": "https://experiences.micromobility.sa",
+  "formerOrigins": [
+    "https://micromobilityrentals.pages.dev"
+  ],
   "languages": [
     "en",
     "ar",

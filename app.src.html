@@ -46,6 +46,16 @@
        carries. logo.png is the wordmark lockup: 241x256, so a tab squashed it, and the
        word under the mark was a grey smudge at 16 px. -->
   <link rel="icon" type="image/png" href="/favicon.png">
+  <!-- The move to experiences.micromobility.sa (2026-11-09). A visit to a former address
+       (site.config.json formerOrigins) is handed over by a page there (functions/_middleware.js,
+       handOverPage) that carries what the app had stored on that address - the sign-in, the
+       language, bookings waiting to be sent - in this address's fragment:
+       #mm-move=<base64url JSON>&mm-hash=<the fragment the visit had>. It is taken in here, before
+       anything reads storage or the fragment (supabase-js reads a sign-in return's #access_token
+       there), and only when the browser names a former address as where the visit came from, so a
+       crafted link cannot plant someone else's sign-in. Nothing this address already holds is
+       overwritten. The fragment goes from the address bar either way. -->
+  <script>(function(){try{var h=location.hash;if(h.indexOf('#mm-move=')!==0)return;var raw='',back='';h.slice(1).split('&').forEach(function(p){if(p.indexOf('mm-move=')===0)raw=p.slice(8);else if(p.indexOf('mm-hash=')===0)back=decodeURIComponent(p.slice(8));});history.replaceState(history.state,'',location.pathname+location.search+(back?'#'+back:''));var from='';try{from=new URL(document.referrer).origin;}catch(e){}if(__SITE_FORMER_ORIGINS__.indexOf(from)<0)return;var d=JSON.parse(decodeURIComponent(escape(atob(raw.split('-').join('+').split('_').join('/'))))),had=localStorage.getItem('cq_session')!==null||sessionStorage.getItem('cq_session')!==null;Object.keys(d).forEach(function(k){var st=k.slice(0,2)==='l:'?localStorage:k.slice(0,2)==='s:'?sessionStorage:null,key=k.slice(2),v=d[k];if(!st||typeof v!=='string'||!/^(cq_|mm_|sb-)/.test(key)||(key==='cq_session'&&had))return;if(st.getItem(key)===null)st.setItem(key,v);});}catch(e){}})();</script>
   <!-- Each language address names ITSELF as canonical. One static href="/" told search engines
        that /?lang=ar and every other alternate below was a copy of the English root, so they
        dropped those addresses and the hreflang set with them. It is written here, from ?lang
@@ -7379,9 +7389,11 @@ function _isStaffHost(){try{return /^staff\./i.test(location.hostname);}catch(e)
 // signed in as staff opens the customer site like anyone's, and a staff link (/?staff, the
 // /staff/ stub, an NFC tag's /?bike=) is sent on to the staff address. The middleware does the
 // same on the server; this covers a page the service worker answered from its cache. Previews,
-// local runs and the suite keep the old entrances.
+// local runs and the suite keep the old entrances. The live hosts are the site's own and the ones
+// it has had (site.config.json, written in by the build; experiences.micromobility.sa since 2026-11-09).
 const STAFF_ORIGIN='https://staff.micromobility.sa';
-function _isLiveCustomerHost(h){return(h||location.hostname).toLowerCase()==='micromobilityrentals.pages.dev';}
+const LIVE_HOSTS=['__SITE_ORIGIN__',...__SITE_FORMER_ORIGINS__].map(o=>o.replace(/^https?:\/\//,'').toLowerCase());
+function _isLiveCustomerHost(h){return LIVE_HOSTS.includes((h||location.hostname).toLowerCase());}
 function _staffRedirectFor(h,search,staffEntry,pathname){
   if(!_isLiveCustomerHost(h))return'';
   const q=new URLSearchParams(search||'');
@@ -22874,7 +22886,7 @@ function _n6rDetailHtml(s){
 const N6R_EV=['jcc','community','snd96','workshop','event','runher','petromin','vlap','arena','blood'];
 // Push to the riders who agreed to ride news is left out: the push sender reaches one rider a call (30 in 10 minutes).
 const N6R_ANN={en:'{0} is open for booking: {1}, {2}{3}. {4} places left. Book here: {5}',ar:'الحجز مفتوح الآن في {0}: {1}، {2}{3}. الأماكن المتبقية: {4}. احجز من هنا: {5}'};
-function _n6rBookLink(s){const ev=_nsKindOf(s),o=_isStaffHost()?'https://micromobilityrentals.pages.dev':location.origin;return o+'/'+(N6R_EV.includes(ev)?'?ev='+ev+'&session='+encodeURIComponent(s.id):'');}
+function _n6rBookLink(s){const ev=_nsKindOf(s),o=_isStaffHost()?'__SITE_ORIGIN__':location.origin;return o+'/'+(N6R_EV.includes(ev)?'?ev='+ev+'&session='+encodeURIComponent(s.id):'');}
 function _n6rAnnText(s,lang){
   const L=LANG[lang]||LANG.en,tt=k=>(L&&L[k])||LANG.en[k]||'';
   const name=s.title&&!_stockEvName(s.title)?String(s.title):tt(SS_KIND_KEY[_rideKind(s)]||'evJccName');
@@ -25789,7 +25801,7 @@ const CA_MSG={
   ne:{"hi": "नमस्ते {name},", "welcome": "MicroMobility समुदायमा स्वागत छ!", "approved": "तपाईंको सदस्यता आवेदन स्वीकृत भएको जानकारी दिन पाउँदा हामी निकै खुसी छौं। अब तपाईं सँगै राइड गर्न मन पराउने राइडरहरूको समुदायको हिस्सा हुनुहुन्छ, र हामी तपाईंसँग राइड गर्न आतुर छौं।", "ready": "तपाईंको खाता तयार छ। यहाँ लग इन गर्नुहोस्:", "email": "इमेल", "mobile": "मोबाइल", "temp": "अस्थायी पासवर्ड", "both": "तपाईं आफ्नो इमेल वा मोबाइल नम्बर, जुनसुकैबाट लग इन गर्न सक्नुहुन्छ।", "first": "पहिलो पटक लग इन गर्दा तपाईंलाई आफ्नै पासवर्ड छान्न भनिनेछ।", "forgot": "पासवर्ड बिर्सनुभयो भने, लग इन स्क्रिनमा “पासवर्ड बिर्सनुभयो?” मा ट्याप गर्नुहोस्।", "oauth": "पहिलेजस्तै Google वा Apple बाट लग इन गर्नुहोस्।", "rides": "अब तपाईं हाम्रा सामुदायिक राइडहरू बुक गर्न सक्नुहुन्छ, जुन सदस्यहरूका लागि मात्र हुन्।", "seeYou": "सडकमा भेटौंला!", "team": "MicroMobility टोली", "rejThanks": "MicroMobility समुदायमा सामेल हुन आवेदन दिनुभएकोमा र हामीसँग राइड गर्न रुचि देखाउनुभएकोमा धन्यवाद।", "rejBody": "हामीले तपाईंको आवेदन हेरेका छौं, र दुर्भाग्यवश अहिले हामी तपाईंलाई सदस्यता दिन सक्दैनौं।", "rejWelcome": "हाम्रा सार्वजनिक राइडहरूमा तपाईंलाई सधैं स्वागत छ, र भविष्यमा फेरि आवेदन दिन पनि स्वागत छ।", "ig": "राइडका तस्बिर र समाचारका लागि Instagram मा हामीलाई फलो गर्नुहोस्:"},
   bn:{"hi": "হ্যালো {name},", "welcome": "MicroMobility কমিউনিটিতে আপনাকে স্বাগতম!", "approved": "আনন্দের সঙ্গে জানাচ্ছি যে আপনার সদস্যপদের আবেদন অনুমোদিত হয়েছে। আপনি এখন এমন এক রাইডার কমিউনিটির অংশ, যাঁরা একসঙ্গে রাইড করতে ভালোবাসেন, আর আপনার সঙ্গে রাইড করার জন্য আমরা মুখিয়ে আছি।", "ready": "আপনার অ্যাকাউন্ট তৈরি। এখানে লগ ইন করুন:", "email": "ইমেইল", "mobile": "মোবাইল", "temp": "অস্থায়ী পাসওয়ার্ড", "both": "আপনি ইমেইল অথবা মোবাইল নম্বর, যেকোনোটি দিয়েই লগ ইন করতে পারবেন।", "first": "প্রথমবার লগ ইন করার সময় আপনাকে নিজের একটি পাসওয়ার্ড বেছে নিতে বলা হবে।", "forgot": "পাসওয়ার্ড ভুলে গেলে লগ ইন স্ক্রিনে “পাসওয়ার্ড ভুলে গেছেন?”-এ ট্যাপ করুন।", "oauth": "আগের মতোই Google বা Apple দিয়ে লগ ইন করুন।", "rides": "এখন আপনি আমাদের কমিউনিটি রাইড বুক করতে পারবেন, যা শুধু সদস্যদের জন্য।", "seeYou": "রাস্তায় দেখা হবে!", "team": "MicroMobility টিম", "rejThanks": "MicroMobility কমিউনিটিতে যোগ দেওয়ার আবেদন করার জন্য এবং আমাদের সঙ্গে রাইড করার আগ্রহের জন্য ধন্যবাদ।", "rejBody": "আমরা আপনার আবেদনটি দেখেছি এবং দুঃখের সঙ্গে জানাচ্ছি যে এই মুহূর্তে আমরা আপনাকে সদস্যপদ দিতে পারছি না।", "rejWelcome": "আমাদের পাবলিক রাইডগুলোতে আপনি সবসময় স্বাগত, আর ভবিষ্যতে আবার আবেদন করতেও স্বাগত।", "ig": "রাইডের ছবি আর খবর পেতে Instagram-এ আমাদের ফলো করুন:"},
 };
-const CA_SITE='https://micromobilityrentals.pages.dev';
+const CA_SITE='__SITE_ORIGIN__';
 const CA_IG='https://www.instagram.com/MicroMobilitySA/'; // every message about a community application ends with it (the owner, 2026-09-30)
 // Invite to ride (the owner, 2026-09-30): the invitation to a Saturday Social Ride. Its own
 // sentences and the ride's words; the greeting and the sign-off are CA_MSG's. It carries no account

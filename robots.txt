@@ -6,4 +6,4 @@ Allow: /
 Disallow: /staff/
 Disallow: /design_handoff_erp_reskin/
 
-Sitemap: https://micromobilityrentals.pages.dev/sitemap.xml
+Sitemap: https://experiences.micromobility.sa/sitemap.xml

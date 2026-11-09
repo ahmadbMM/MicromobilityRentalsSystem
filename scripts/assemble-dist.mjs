@@ -46,7 +46,9 @@ export const DIRS = ['functions', 'staff', 'staff-parts', 'vendor', 'splash', 'f
 // (the staff host's), /404.html, and any address the denylist exists to refuse. Rules follow
 // Cloudflare's: "/dir/*" is /dir and everything under it, "/file" that file; a list may not overlap
 // itself, 100 rules at most, 100 characters each (wrangler refuses the deploy otherwise).
-const ROUTES_KEEP_FILES = new Set(['index.html', '404.html', '_headers', '_redirects', 'robots.txt', 'sitemap.xml']);
+// service-worker.js too (2026-11-09): on a former address (site.config.json formerOrigins) the
+// middleware answers it with the worker that retires the old one; on the site's own it passes it on.
+const ROUTES_KEEP_FILES = new Set(['index.html', '404.html', '_headers', '_redirects', 'robots.txt', 'sitemap.xml', 'service-worker.js']);
 const ROUTES_KEEP_DIRS = new Set(['functions', 'staff']);
 export function routesJson() {
   return {

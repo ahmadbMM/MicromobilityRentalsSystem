@@ -80,6 +80,7 @@ test.describe('@build dist/_routes.json', () => {
   test('the middleware still runs for the pages, the app\'s addresses, /api, /staff and everything the denylist refuses', () => {
     for (const path of [
       '/', '/index.html', '/404.html', '/robots.txt', '/sitemap.xml', '/staff', '/staff/', '/staff/index.html',
+      '/service-worker.js', // a former address answers it with the worker that retires the old one (2026-11-09)
       '/api/log-error', '/api/hold', '/api/wallet-pass', '/reserve', '/my-bookings', '/account', '/signup',
       '/bookings', '/bookings/waitlist', '/community/applications', '/website/bikes/fields', '/vendors/venues',
       '/package.json', '/AGENTS.md', '/app.src.html', '/functions/api/log-error.js', '/tests/x.png', '/scripts/serve.mjs',

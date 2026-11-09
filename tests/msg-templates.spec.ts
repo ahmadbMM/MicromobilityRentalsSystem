@@ -26,7 +26,7 @@ test('the fill-ins are filled, and a line whose fill-in is empty is left out', a
   await boot(page, { rm_ride: { en: 'Ride on *{date}*\nMeet at {meet_time}\nMap: {meet_link}\nBook: {booking_link}' } });
   await page.waitForFunction(`S._tpl&&S._tpl.rm_ride`);
   const txt = await page.evaluate(`_rmText(getQueue()[0],'ride','en')`);
-  expect(txt).toBe('Ride on *3rd of October*\nMeet at 5:45AM\nBook: https://micromobilityrentals.pages.dev/');
+  expect(txt).toBe('Ride on *3rd of October*\nMeet at 5:45AM\nBook: https://experiences.micromobility.sa/');
 });
 
 test('with no text of its own a message is the built-in one', async ({ page }) => {

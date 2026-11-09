@@ -61,7 +61,7 @@ test('staff pick the fields, get the link and a message in the applicant’s lan
   expect(txt).toContain('please update the following:');
   expect(txt).toContain('• Mobile number\n• Instagram');
   expect(txt).toContain('Note from our team: We could not find this Instagram account');
-  expect(txt).toContain(`https://micromobilityrentals.pages.dev/?appfix=${TOKEN}&lang=en`);
+  expect(txt).toContain(`https://experiences.micromobility.sa/?appfix=${TOKEN}&lang=en`);
   expect(decodeURIComponent((await msg.locator('a.ca-wa').getAttribute('href'))!.split('text=')[1])).toBe(txt);
   await msg.locator('#ca-msg-lang').selectOption('ar');
   const ar = await msg.locator('#ca-msg-text').inputValue();

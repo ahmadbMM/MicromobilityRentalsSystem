@@ -81,7 +81,7 @@ test.describe('the server', () => {
     expect((await mw('https://staff.micromobility.sa/bookings', { status: 404, headers: { accept: 'application/json' } })).status).toBe(404);
   });
   test('sends a staff address on the live customer host to the staff address, path and query kept', async () => {
-    const live = 'https://micromobilityrentals.pages.dev';
+    const live = 'https://experiences.micromobility.sa';
     for (const [path, to] of [['/sales', '/sales'], ['/bookings/waitlist?lang=ar', '/bookings/waitlist?lang=ar'], ['/website/bikes/', '/website/bikes'], ['/team', '/team']]) {
       const r = await mw(live + path);
       expect(r.status, path).toBe(302);
