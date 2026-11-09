@@ -779,7 +779,7 @@ test.describe('@customer:account Race Ready and the about lines', () => {
     await expect(page.locator('#badge-pop .badge-pop-d')).not.toBeEmpty();
     // Grid Regular, now a level of First Lap's ladder, keeps its own about and how-to lines
     await page.evaluate(`_bdgPopClose()`);
-    expect(await page.evaluate(`[_bdgAbout({slug:'regular',system:true}),_bdgDesc({slug:'regular',system:true})]`)).toEqual([expect.stringContaining('the grid is where the cars line up to start'), 'Completed 5 rides']);
+    expect(await page.evaluate(`[_bdgAbout({slug:'regular',system:true}),_bdgDesc({slug:'regular',system:true})]`)).toEqual([expect.stringContaining('the grid is where the bikes line up to start'), 'Completed 5 rides']);
     // Every badge the app knows has a name, a how-to line and an about line (check-i18n holds the
     // other nine languages to the same keys).
     const missing = await page.evaluate(`Object.values(BD_SYS).flatMap(([,,k])=>[k,k+'D',k+'A']).filter(k=>!LANG.en[k])`);
