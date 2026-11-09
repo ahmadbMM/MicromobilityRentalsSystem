@@ -12658,3 +12658,115 @@ body.view-staff #tab-sessions .sess-ag-end .sess-lc-count{font-size:12px;font-va
 body.view-staff .sess-detail-nm{display:flex;align-items:center;gap:8px;min-width:0;margin-bottom:2px;font-size:13px;font-weight:600;color:var(--text);}
 body.view-staff .sess-detail-nm>span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 body.view-staff #tab-sessions .ss-kind-c{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+/* ══ THE STORE AND PAYMENTS (2026-11-10, migration 20261110150000) ═══════════════════════════════════════════════
+   Store (#tab-store: orders, products) and Payments (#tab-payments: online payments, refunds owed, settings), the
+   order's sheet (#sto-modal), the product editor (#sto-pe) and the refund dialog (#pay-rf), each a host of its own with
+   the confirm dialog's chrome; "Paid online" and "Paying now" on the desk's pay pills and pay menu. */
+:is(#sto-modal,#sto-pe,#pay-rf) .chrome-dh10{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+:is(#sto-modal,#sto-pe,#pay-rf) .chrome-dt{font-size:18px;font-weight:600;overflow-wrap:anywhere;}
+:is(#sto-modal,#sto-pe,#pay-rf) .chrome-xt{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px;min-width:44px;min-height:44px;}
+:is(#sto-modal,#sto-pe,#pay-rf) .chrome-dact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:12px;}
+:is(#sto-modal,#sto-pe,#pay-rf) .confirm-box{max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;}
+:is(#sto-modal,#sto-pe,#pay-rf) .chrome-dbody{overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:12px;}
+body.view-staff.view-staff #sto-pe .confirm-box{width:min(var(--sf-dlg-l),calc(100vw - 32px));}
+body.view-staff.view-staff #pay-rf .confirm-box{width:min(var(--sf-dlg-m),calc(100vw - 32px));}
+.sto-muted{color:var(--muted);font-size:12px;font-weight:400;}
+.sto-err{color:var(--red);font-weight:600;font-size:13px;}
+.sto-pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;border:1px solid var(--border);color:var(--text);background:var(--s1);}
+.sto-pill:is(.sto-p-paid,.sto-p-preparing,.pay-p-partly_refunded){border-color:var(--orange);color:var(--orange);}
+.sto-pill:is(.sto-p-ready,.sto-p-shipped,.sto-p-pub,.pay-p-paid){border-color:var(--green);color:var(--green);}
+.sto-pill:is(.sto-p-cancelled,.sto-p-refunded,.pay-p-refunded,.pay-p-cancelled,.pay-p-expired,.sto-p-draft){color:var(--muted);}
+/* Store: orders */
+#tab-store .sto-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+#tab-store .sto-pills{flex-wrap:wrap;gap:6px;}
+#tab-store .sto-search,#tab-payments .sto-search{flex:1 1 240px;max-width:420px;}
+#tab-store .sto-list,#tab-store .sto-prods{display:flex;flex-direction:column;}
+#tab-store .sto-row,#tab-store .sto-prod{display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:100%;padding:10px 4px;border:none;border-top:1px solid var(--border);background:transparent none;color:var(--text);text-align:start;cursor:pointer;font:inherit;}
+#tab-store .sto-row:hover,#tab-store .sto-prod:hover{background:var(--s1);}
+#tab-store .sto-row>span,#tab-store .sto-prod>span{display:flex;flex-direction:column;gap:2px;min-width:0;}
+#tab-store .sto-r-no{flex:0 0 120px;}
+#tab-store .sto-r-who{flex:1 1 180px;}
+#tab-store .sto-r-what{flex:1 1 160px;}
+#tab-store .sto-r-amt,#tab-store .sto-p-price{flex:0 0 110px;font-weight:700;text-align:end;}
+#tab-store .sto-row .sto-pill,#tab-store .sto-prod .sto-pill{flex:0 0 auto;display:inline-block;}
+#tab-store .sto-row.sto-st-paid{box-shadow:inset 3px 0 0 var(--orange);}
+#tab-store .sto-thumb{flex:0 0 56px;width:56px;height:56px;border-radius:8px;overflow:hidden;background:var(--s1);align-items:center;justify-content:center;color:var(--muted);}
+#tab-store .sto-thumb img{width:100%;height:100%;object-fit:cover;}
+#tab-store .sto-p-n{flex:1 1 200px;}
+#tab-store .sto-p-stock{flex:0 0 120px;}
+/* the order's sheet */
+#sto-modal .sto-sh-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+#sto-modal .sto-due{padding:8px 12px;border-radius:8px;border:1px solid var(--orange);color:var(--orange);font-weight:600;}
+#sto-modal .sto-sec{display:flex;flex-direction:column;gap:6px;padding-top:10px;border-top:1px solid var(--border);}
+:is(#sto-modal,#sto-pe) .sto-h{font-size:13px;font-weight:700;color:var(--text);margin-top:4px;}
+#sto-modal .sto-form{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:8px;background:var(--s1);}
+#sto-modal .sto-it{display:flex;align-items:baseline;gap:10px;}
+#sto-modal .sto-it-n{flex:1 1 auto;display:flex;flex-direction:column;min-width:0;}
+#sto-modal .sto-it-q{flex:0 0 auto;color:var(--muted);font-size:13px;}
+#sto-modal .sto-it-t{flex:0 0 90px;text-align:end;font-weight:600;}
+#sto-modal .sto-sums{display:flex;flex-direction:column;gap:2px;padding-top:6px;}
+#sto-modal .sto-kv{display:flex;justify-content:space-between;gap:12px;font-size:13px;}
+#sto-modal .sto-kv>span{color:var(--muted);}
+#sto-modal .sto-kv-tot{font-size:15px;}
+#sto-modal .sto-kv-tot>span{color:var(--text);font-weight:700;}
+#sto-modal .sto-contact{display:flex;flex-direction:column;gap:2px;font-size:14px;}
+#sto-modal .sto-addr{font-size:14px;line-height:1.45;}
+#sto-modal .sto-short{margin-top:4px;}
+:is(#sto-modal,#tab-payments) .sto-tl{margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:3px;font-size:13px;}
+#sto-modal textarea{width:100%;}
+#sto-modal .sto-note-save{align-self:flex-start;}
+/* the product editor */
+#sto-pe .sto-grid2,#sto-pe .sto-grid3{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));}
+#sto-pe .sto-grid3{grid-template-columns:repeat(3,minmax(0,1fr));}
+#sto-pe .sto-grid2 .form-group,#sto-pe .sto-grid3 .form-group{margin:0;}
+#sto-pe :is(input[type=text],input[type=number],select,textarea){width:100%;}
+#sto-pe .sto-specs,#sto-pe .sto-vars{display:flex;flex-direction:column;gap:6px;}
+#sto-pe .sto-spec{display:grid;gap:6px;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) minmax(0,1fr) minmax(0,1.4fr) auto;align-items:center;}
+#sto-pe .sto-imgs{display:flex;gap:10px;flex-wrap:wrap;}
+#sto-pe .sto-img{width:132px;display:flex;flex-direction:column;gap:4px;}
+#sto-pe .sto-img img{width:132px;height:100px;object-fit:cover;border-radius:8px;background:var(--s1);}
+#sto-pe .sto-img-acts{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}
+#sto-pe .sto-chks{display:flex;flex-direction:column;gap:6px;}
+:is(#sto-pe,#tab-payments) .sto-chk{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;}
+:is(#sto-pe,#tab-payments) .sto-chk input[type=checkbox]{-webkit-appearance:checkbox;appearance:auto;display:block;position:static;flex:none;width:18px;height:18px;min-height:0;margin:0;padding:0;opacity:1;}
+#sto-pe .sto-var{display:grid;gap:6px;grid-template-columns:minmax(0,1fr) minmax(0,.7fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr) minmax(0,.9fr);align-items:center;padding:8px;border:1px solid var(--border);border-radius:8px;}
+#sto-pe .sto-var-off{opacity:.65;}
+#sto-pe .sto-hex{display:flex;align-items:center;gap:6px;}
+#sto-pe .sto-sw{flex:0 0 18px;width:18px;height:18px;border-radius:50%;border:1px solid var(--border);background:var(--sw,transparent);}
+#sto-pe .sto-stock{grid-column:1 / span 4;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+#sto-pe .sto-stock input{width:90px;}
+#sto-pe .sto-pe-del{margin-inline-end:auto;}
+#sto-pe .sto-note-l{margin-top:-4px;}
+@media (max-width:767px){
+  #sto-pe .sto-grid2,#sto-pe .sto-grid3,#sto-pe .sto-spec,#sto-pe .sto-var{grid-template-columns:minmax(0,1fr);}
+  #sto-pe .sto-stock{grid-column:auto;}
+  #tab-store .sto-r-no,#tab-store .sto-r-amt,#tab-store .sto-p-price,#tab-store .sto-p-stock{flex-basis:auto;text-align:start;}
+}
+/* Payments */
+#tab-payments .pay-list{display:flex;flex-direction:column;}
+#tab-payments .pay-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 4px;border-top:1px solid var(--border);}
+#tab-payments .pay-row>div{display:flex;flex-direction:column;gap:2px;min-width:0;}
+#tab-payments .pay-r-when{flex:0 0 130px;font-size:13px;}
+#tab-payments .pay-r-what{flex:1 1 220px;}
+#tab-payments .pay-r-how{flex:0 0 150px;font-size:13px;}
+#tab-payments .pay-r-amt{flex:0 0 110px;font-weight:700;text-align:end;}
+#tab-payments .pay-r-st{flex:0 0 140px;align-items:flex-start;}
+#tab-payments .pay-row>.pay-r-acts{flex:0 0 auto;flex-direction:row;gap:6px;flex-wrap:wrap;margin-inline-start:auto;}
+#tab-payments .pay-row.pay-rf-failed .pay-r-when{color:var(--red);}
+#tab-payments .pay-set{display:flex;flex-direction:column;gap:16px;max-width:760px;}
+#tab-payments .pay-set-sec{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid var(--border);}
+#tab-payments .pay-set-sec h2{font-size:16px;font-weight:700;margin:0;}
+#tab-payments .pay-set-sec h3{font-size:14px;font-weight:700;margin:8px 0 0;}
+#tab-payments .pay-set-row{display:flex;gap:12px;flex-wrap:wrap;}
+#tab-payments .pay-set-n{flex:1 1 200px;margin:0;}
+#tab-payments .pay-set-n input,#tab-payments .pay-set-n select{width:100%;}
+#tab-payments .pay-set-warn{padding:8px 12px;border-radius:8px;border:1px solid var(--orange);color:var(--orange);font-size:13px;font-weight:600;}
+#tab-payments .pay-set-acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
+@media (max-width:767px){#tab-payments .pay-r-when,#tab-payments .pay-r-how,#tab-payments .pay-r-amt,#tab-payments .pay-r-st{flex-basis:auto;text-align:start;}}
+#pay-rf .pay-rf-box .ci-opts{display:flex;gap:8px;flex-wrap:wrap;}
+#pay-rf textarea,#pay-rf input[type=number]{width:100%;}
+/* the desk: a booking paid online, a place held while the rider pays */
+.pay-menu-popup .pay-menu-note{padding:6px 8px;font-size:12px;color:var(--muted);max-width:280px;}
+.pay-menu-popup .pay-menu-onl{color:var(--green);font-weight:600;}
+body.view-staff .pay-toggle.pay-held{border-style:dashed;}
+.ci-pay-onl{cursor:default;}

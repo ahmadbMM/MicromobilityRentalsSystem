@@ -66,7 +66,7 @@ test.describe('@staff:money b1 B: money by how it was taken', () => {
       const q = getQueue().filter((e) => e.paid && e.status !== 'cancelled' && e.status !== 'removed');
       return { sum: _mnySum(q), one: _mnySplit(_qGet('e4')), org: _mnySplit(_qGet('e5')) };
     })()`);
-    expect(got).toEqual({ sum: { card: 155, cash: 97.5, unknown: 50, wallet: 0 }, one: { card: 0, cash: 0, unknown: 50, wallet: 0 }, org: { card: 0, cash: 0, unknown: 0, wallet: 0 } });
+    expect(got).toEqual({ sum: { card: 155, cash: 97.5, unknown: 50, wallet: 0, online: 0 }, one: { card: 0, cash: 0, unknown: 50, wallet: 0, online: 0 }, org: { card: 0, cash: 0, unknown: 0, wallet: 0, online: 0 } }); // online (2026-11-10): paid on the website, its own channel
   });
 
   test('the close-out prints not recorded apart, never as cash, and the balance check calls it unaccounted', async ({ page }) => {

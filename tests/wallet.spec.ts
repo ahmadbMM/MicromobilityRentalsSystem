@@ -203,10 +203,10 @@ test.describe('@staff:customers wallet', () => {
   test('the close-out and the till: wallet money is neither card nor cash, and it balances', async ({ page }) => {
     await staff(page, { queue_entries: [bk('q1', 1, { paid: true, pay_method: 'wallet' }), bk('q2', 2, { paid: true, pay_method: 'card' })] });
     const r = await page.evaluate(`(()=>{const q=getQueue();return{split:_mnySplit(q.find(e=>e.id==='q1')),sum:_mnySum(q)}})()`) as { split: Record<string, number>; sum: Record<string, number> };
-    expect(r.split).toEqual({ card: 0, cash: 0, unknown: 0, wallet: 50 });
-    expect(r.sum).toEqual({ card: 50, cash: 0, unknown: 0, wallet: 50 });
+    expect(r.split).toEqual({ card: 0, cash: 0, unknown: 0, wallet: 50, online: 0 }); // online: paid on the website (2026-11-10), its own channel
+    expect(r.sum).toEqual({ card: 50, cash: 0, unknown: 0, wallet: 50, online: 0 });
     const part = await page.evaluate(`(()=>{const e=getQueue()[0];const c={...e,walletPaid:50,price:80,paid:true,pay_method:'card'},w={...e,walletPaid:80,price:80,paid:true,pay_method:'wallet'};return{card:_mnySplit(c),whole:_mnySplit(w)}})()`);
-    expect(part).toEqual({ card: { card: 30, cash: 0, unknown: 0, wallet: 50 }, whole: { card: 0, cash: 0, unknown: 0, wallet: 80 } });
+    expect(part).toEqual({ card: { card: 30, cash: 0, unknown: 0, wallet: 50, online: 0 }, whole: { card: 0, cash: 0, unknown: 0, wallet: 80, online: 0 } });
     const till = await page.evaluate(`(()=>{S._cwMoves=[
       {kind:'topup',amount:100,method:'cash',session_id:'s1',created_at:new Date().toISOString()},
       {kind:'takeout',amount:-20,method:'cash',session_id:'s1',created_at:new Date().toISOString()},

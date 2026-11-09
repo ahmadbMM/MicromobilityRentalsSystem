@@ -541,14 +541,20 @@ const hashes = [...new Set([...inlineHashes(out), ...inlineHashes(staffStub)])];
 const supaRef = (srcWithMain.match(/const SUPABASE_URL\s*=\s*'https:\/\/([a-z0-9]+)\.supabase\.co'/) || [])[1];
 if (!supaRef) throw new Error("build: app.src.html has no const SUPABASE_URL = 'https://<ref>.supabase.co' to pin the policy's connect-src to");
 const supaHost = `${supaRef}.supabase.co`;
+// The website the staff page sends a card refund through (2026-11-10, /api/pay/refund): production's, or staging's when
+// SUPABASE_URL is the staging project's (PAY_WEB in app.src.html names both). It is also the website the page reads
+// (the editor's schema, /api/site-schema) and frames (the editor's preview): micromobility.sa, or staging's in a staging build.
+const payWeb = srcWithMain.match(/const PAY_WEB=\/([a-z0-9]+)\/\.test\(SUPABASE_URL\)\?'(https:\/\/[a-z0-9.-]+)':'(https:\/\/[a-z0-9.-]+)'/);
+if (!payWeb) throw new Error("build: app.src.html has no const PAY_WEB=/<staging ref>/.test(SUPABASE_URL)?'<staging site>':'<site>' to add to the policy's connect-src");
+const payOrigin = payWeb[1] === supaRef ? payWeb[2] : payWeb[3];
 const CSP = [
   "default-src 'self'",
   `script-src 'self' ${hashes.map((h) => `'sha256-${h}'`).join(' ')} https://static.cloudflareinsights.com`,
   "style-src 'self' 'report-sample'", // 'report-sample': a refused style's first 40 characters come with its report
   "font-src 'self' data:",
   "img-src 'self' data: blob: https:",
-  `connect-src 'self' https://micromobility.sa https://${supaHost} wss://${supaHost} https://cloudflareinsights.com https://api.open-meteo.com https://archive-api.open-meteo.com`,
-  "media-src 'self' blob:", "worker-src 'self'", "manifest-src 'self'", "frame-src https://micromobility.sa", "frame-ancestors 'none'", "base-uri 'self'", "object-src 'none'", "form-action 'self'",
+  `connect-src 'self' ${payOrigin} https://${supaHost} wss://${supaHost} https://cloudflareinsights.com https://api.open-meteo.com https://archive-api.open-meteo.com`,
+  "media-src 'self' blob:", "worker-src 'self'", "manifest-src 'self'", `frame-src ${payOrigin}`, "frame-ancestors 'none'", "base-uri 'self'", "object-src 'none'", "form-action 'self'",
   'upgrade-insecure-requests', 'report-uri /api/csp-report', 'report-to csp',
 ].join('; ');
 const headersUrl = new URL('../_headers', import.meta.url);

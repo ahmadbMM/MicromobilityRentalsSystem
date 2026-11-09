@@ -15,8 +15,8 @@ const SHELL_KEY = './';
 // app.src.html (STAFF_PATHS, CUST_PATHS, SUB_PATHS), and tests/paths.spec.ts checks they agree.
 // On the live customer host a staff address is not the shell's: the server sends it on to the
 // staff address, and the worker lets it through to the network so that it can.
-const APP_ROUTE = /^\/(?:reserve|my-bookings|account|members|signup|bookings|waitlist|sessions|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|lockers|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/[a-z0-9-]+){0,2}\/?$/;
-const STAFF_ROUTE = /^\/(?:bookings|waitlist|sessions|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|lockers|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/;
+const APP_ROUTE = /^\/(?:reserve|my-bookings|account|members|signup|bookings|waitlist|sessions|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|lockers|store|payments|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/[a-z0-9-]+){0,2}\/?$/;
+const STAFF_ROUTE = /^\/(?:bookings|waitlist|sessions|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|lockers|store|payments|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/;
 const LIVE_CUSTOMER_HOST = self.location.hostname === 'experiences.micromobility.sa';
 const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) && !(LIVE_CUSTOMER_HOST && STAFF_ROUTE.test(p)));
 // The staff half of the app rides in the shell on every host but the live customer one, so the
