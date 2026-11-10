@@ -34873,6 +34873,7 @@ function renderQRow(e){
   else{const _cnt=document.getElementById('q-result-count');if(_cnt)_cnt.innerHTML=filtered.length!==base.length?`${filtered.length} ${t('resultOf')} ${base.length} ${t('resultRiders')}`:'';}
   _qWrite(document.getElementById('q-results'),_results);
   _qPosApply(document.getElementById('q-results'));
+  _kbMarkSync(); // the J/K mark back on its row, or dropped with it
   {const sa=document.querySelector('#q-results .rq-selall');if(sa)sa.indeterminate=_sel.length>0&&_sel.length<_nSelAll;}
   _qBulkSync();
   if(!_resultsOnly)_qKeepScroll();
@@ -34991,6 +34992,7 @@ function _qPaintRest(rest){
     _qRest=null;
     const tb=document.querySelector('#q-results .queue-table');
     if(tb){tb.insertAdjacentHTML('beforeend',rest);_qPosApply(tb);}
+    _kbMarkSync();
     _qKeepScroll();
   });
 }
@@ -65311,8 +65313,9 @@ const ILLUS_HISTORY=`<svg width="72" height="72" viewBox="0 0 72 72" fill="none"
 
 // Re-render whatever view is currently active (used after a background data refresh).
 function _refreshView(){
-  if(S.view==='staff'){renderStaffQueue();renderSessions();if(!(S.staffTab==='bikes'&&_deferWhileTyping('bikes')))renderBikes();
-    // Any other tab through the renderer that knows them all (Riders and Inventory were missing).
+  if(S.view==='staff'){renderStaffQueue();if(!(S.staffTab==='bikes'&&_deferWhileTyping('bikes')))renderBikes();
+    // Any other tab through the renderer that knows them all (Riders and Inventory were missing). Sessions too: it skips
+    // the repaint while a staffer types in the session form, which a bare renderSessions() here rebuilt under them.
     const tb=S.staffTab;if(tb!=='queue'&&tb!=='bikes')_renderStaffTab(true);
   }else if(S.view==='customer'){
     // The booking wizard past step 1 holds what the rider is typing: a background refresh must
@@ -65354,6 +65357,10 @@ async function _bikeHandoff(){
   if(tab)ch.postMessage({type:'bike_tap_go',nonce,tab,code,kind});
   try{ch.close();}catch(_){}
   if(!tab)return false;
+  // Nothing loaded means nothing live either (bug hunt 2026-11-10): the staff channel this page started on its way in
+  // is let go of, and neither it nor the keep-alive's sign-in and full load start again on this tab.
+  S._handoff=true;
+  try{if(_rtRetryT){clearTimeout(_rtRetryT);_rtRetryT=null;}_rtGen++;if(_rtChannel){const c=_rtChannel;_rtChannel=null;sb.removeChannel(c);}}catch(_){}
   if(kind==='locker'){_readLockerParam();try{sessionStorage.removeItem('cq_pending_locker');}catch(_){}}else{_readBikeParam();try{sessionStorage.removeItem('cq_pending_bike');}catch(_){}}
   const L=_savedLang()||_browserLang()||'en';
   if(L!=='en'&&!_langLoaded(L))await Promise.race([loadLangPack(L).catch(()=>{}),new Promise(r=>setTimeout(r,1500))]);
@@ -65869,6 +65876,7 @@ setInterval(()=>{if(document.hidden)return;const plan=_pollPlan(++_pollN,_rtLive
 const TOKEN_RENEW_MS=15*60*1000;
 async function _staffKeepAlive(){
   try{
+    if(S._handoff)return; // the tab a bike or locker tag opened, which handed it to the open staff tab: it loads nothing
     if(typeof localStorage==='undefined'||localStorage.getItem('cq_staff')!=='1')return;
     if(typeof window!=='undefined'&&window.__noWiden)return; // tests set their own state
     if(!sb||!sb.auth)return;
@@ -66110,7 +66118,7 @@ async function _rtSessionUid(){
 function _rtLive(){return !!S._rtConnected&&(!_rtStaffMode||!S._staffAuthed||!!_rtJoinUid);}
 function _rtStaffRejoin(uid){if(_rtStarted&&_rtStaffMode&&uid&&_rtJoinUid!==uid)setupRealtime();}
 function setupRealtime(){
-  if(!sb||!sb.channel)return;
+  if(!sb||!sb.channel||S._handoff)return; // a tag's hand-off tab holds no channel (_bikeHandoff)
   if(_rtRetryT){clearTimeout(_rtRetryT);_rtRetryT=null;} // this rebuild is the one that was pending
   // Let go of the old channel BEFORE removing it: removing a channel that never joined reports
   // CLOSED synchronously, and while _rtChannel still pointed at it that report passed the guard
@@ -66223,6 +66231,9 @@ function _n6bPresStart(retry){
       if(_n6bPresCh!==ch)return;
       if(status==='SUBSCRIBED'){_n6bPresRetry=0;_n6bPresSent=undefined;_n6bPresSet();}
       else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+        // The signature goes with the list it described: the rejoin's first sync says the same as before the drop, and
+        // matched against the old one it repainted nothing, so the chips stayed hidden (bug hunt 2026-11-10).
+        _n6bPresSig='';
         if(S._n6bPres&&S._n6bPres.size){S._n6bPres=new Map();_n6bPresPaint();}
         if(!S._staffAuthed)return;
         const delay=Math.min(5*60*1000,2000*Math.pow(2,Math.min(_n6bPresRetry++,8)));
@@ -66232,7 +66243,7 @@ function _n6bPresStart(retry){
   }catch(e){console.warn('Staff presence init failed:',e);}
 }
 function _n6bPresStop(){
-  _n6bPresRetry=0;_n6bPresSent=undefined;S._n6bPres=new Map();
+  _n6bPresRetry=0;_n6bPresSent=undefined;S._n6bPres=new Map();_n6bPresSig=''; // a sign-in after this one paints what the server says
   try{if(_n6bPresCh){const c=_n6bPresCh;_n6bPresCh=null;sb.removeChannel(c);}}catch(_){}
 }
 // What this tab has open, said when it changes (a short pause, so a party's chain of check-ins is one message per rider).
@@ -66356,7 +66367,16 @@ let _n6cStMemo=null;
 function _n6cStates(){
   const o=S.staffOptions&&S.staffOptions.biz,k=o&&o.checkin_states;
   if(_n6cStMemo&&_n6cStMemo.k===k&&_n6cStMemo.o===o)return _n6cStMemo.v;
-  const v=_bizV('checkin_states',N6C_ST_DEF,_n6cStOk);_n6cStMemo={k,o,v};return v;
+  const v=_bizV('checkin_states',N6C_ST_DEF,_n6cStOk).map(_n6cStDefOf);_n6cStMemo={k,o,v};return v;
+}
+// A built-in state (Late, Swap) saved under its name in the saving admin's language, as Settings saved it until
+// 2026-11-10, reads as the built-in again when this device knows that name in some language, so each viewer sees it in
+// their own language (bug hunt 2026-11-10).
+function _n6cStDefOf(x){
+  const d=x&&x.label&&!x.lk&&N6C_ST_DEF.find(y=>y.id===x.id);if(!d)return x;
+  const T=[LANG,typeof LANG_STAFF!=='undefined'?LANG_STAFF:{}];
+  const known=T.some(P=>Object.keys(P).some(l=>P[l]&&typeof P[l][d.lk]==='string'&&P[l][d.lk].trim().slice(0,40)===x.label));
+  return known?{id:x.id,lk:d.lk,color:x.color,counts:x.counts}:x;
 }
 function _n6cStLabel(x){return(x&&(x.label||t(x.lk)))||'';}
 function _n6cStOf(e){return e&&e.staffState?_n6cStates().find(x=>x.id===e.staffState)||null:null;}
@@ -66398,7 +66418,7 @@ async function _n6cStSet(id,v){
 // edited, so the bookings that carry it keep it; an empty row is dropped; nothing at all goes back to the built-in two.
 function _n6cStColName(c){return{amber:t('n6cColAmber'),blue:t('n6cColBlue'),violet:t('n6cColViolet'),teal:t('n6cColTeal'),pink:t('n6cColPink'),grey:t('n6cColGrey')}[c]||c;}
 function _n6cStField(id,cur,dis){
-  const L=_n6cStOk(cur)?cur:N6C_ST_DEF,rows=[];
+  const L=_n6cStOk(cur)?cur.map(_n6cStDefOf):N6C_ST_DEF,rows=[];
   for(let i=0;i<6;i++){const x=L[i]||{},col=x.color||N6C_ST_COLORS[i%N6C_ST_COLORS.length];
     rows.push(`<div class="n6c-st-row"><input id="${id}-l${i}" type="text" maxlength="40" aria-label="${esc(t('n6cStLbl').replace('{0}',String(i+1)))}" value="${esc(x.id?_n6cStLabel(x):'')}"${dis}>
       <select id="${id}-c${i}" class="filter-select" aria-label="${esc(t('n6cStColour').replace('{0}',String(i+1)))}"${dis}>${N6C_ST_COLORS.map(c=>`<option value="${c}"${col===c?' selected':''}>${esc(_n6cStColName(c))}</option>`).join('')}</select>
@@ -66412,8 +66432,12 @@ function _n6cStRead(fid){
     let id=prev[i]&&prev[i].id;
     if(!id||used.has(id))id='s_'+Date.now().toString(36).slice(-6)+i;
     used.add(id);
-    const color=val(`${fid}-c${i}`),counts=val(`${fid}-k${i}`);
-    out.push({id,label,color:N6C_ST_COLORS.includes(color)?color:'grey',counts:counts==='noshow'?'noshow':'in'});
+    const color=val(`${fid}-c${i}`),counts=val(`${fid}-k${i}`),col=N6C_ST_COLORS.includes(color)?color:'grey',cnt=counts==='noshow'?'noshow':'in';
+    // A built-in state left under its own name keeps its key, so every viewer reads it in their own language: saved as
+    // the text in the field, it showed in the saving admin's language to everyone (bug hunt 2026-11-10).
+    const d=N6C_ST_DEF.find(y=>y.id===id);
+    if(d&&label===String(t(d.lk)).trim().slice(0,40)){out.push({id,lk:d.lk,color:col,counts:cnt});continue;}
+    out.push({id,label,color:col,counts:cnt});
   }
   return out.length?out:null;
 }
@@ -66634,6 +66658,19 @@ function _kbStaff(k,ev){
   else if(k==='w'&&_deskTabOk('queue')&&_editOk('queue'))showWalkinModal();
   else if(k==='t'&&_deskTabOk('queue')&&_editOk('queue'))openScanModal();
 }
+// The roster's rows on screen, one per booking (J and K walk these).
+function _kbRows(host){return[...host.querySelectorAll('tr[data-id],.q-card[data-id]')].filter((x,i,a)=>x.getClientRects().length&&a.findIndex(y=>y.dataset.id===x.dataset.id)===i);}
+// The J/K mark through a repaint (bug hunt 2026-11-10): the marked rider's row, written again, gets its highlight back, and
+// a mark whose row is no longer on screen (another session, a filter, a search, another section) is dropped. Kept, it
+// went on steering Enter, P and X with nothing on screen showing which rider they would act on.
+function _kbMarkSync(){
+  const id=S._kbRowId;if(!id)return;
+  const host=document.getElementById('q-results');if(!host)return;
+  const el=host.querySelector(`tr[data-id="${CSS.escape(String(id))}"],.q-card[data-id="${CSS.escape(String(id))}"]`);
+  if(el&&el.getClientRects().length){el.classList.add('kb-cur');return;}
+  if(_qRest)return; // the rows still owed to the table (_qPaintRest) may hold it
+  S._kbRowId=null;host.querySelectorAll('.kb-cur').forEach(x=>x.classList.remove('kb-cur'));
+}
 // The desk's own keys (2026-10-09, D9), matched on the key's place (event.code), so an Arabic or Urdu
 // layout presses the same keys. With the check-in drawer open: [ and ] the previous and next rider,
 // 1 2 3 Pending, Paid, On the house (On the house still asks for the PIN at Confirm), X picks No-show
@@ -66656,7 +66693,7 @@ function _kbDesk(k,ev){
     return;
   }
   const host=document.getElementById('q-results');if(!host||S.staffTab!=='queue'||!host.getClientRects().length)return;
-  const els=[...host.querySelectorAll('tr[data-id],.q-card[data-id]')].filter((x,i,a)=>x.getClientRects().length&&a.findIndex(y=>y.dataset.id===x.dataset.id)===i);
+  const els=_kbRows(host);
   if(c==='KeyJ'||c==='KeyK'){
     if(!els.length)return;ev.preventDefault();
     const i=els.findIndex(x=>x.dataset.id===S._kbRowId),n=c==='KeyJ'?Math.min(els.length-1,i+1):Math.max(0,i-1);
@@ -66665,7 +66702,14 @@ function _kbDesk(k,ev){
     return;
   }
   const _bare=ev.target===document.body||ev.target===document.documentElement;
-  if(_bare&&(c==='KeyP'||c==='KeyX'||ev.key==='Enter')&&S._kbRowId){_n6cKbRow(ev.key==='Enter'?'Enter':c,ev).then(done=>{if(!done&&ev.key==='Enter'){const e=_qGet(S._kbRowId);if(e)showCheckinModal(e.id);}});if(ev.key==='Enter')ev.preventDefault();return;}
+  if(_bare&&(c==='KeyP'||c==='KeyX'||ev.key==='Enter')&&S._kbRowId){
+    // Only on the row on screen that shows the mark (bug hunt 2026-11-10): a mark whose row went (another session, a
+    // filter, a search) is dropped, and a row written again without its highlight gets it back before any key acts.
+    // Enter used to end the ride of a rider nothing on screen showed as marked.
+    const cur=els.find(x=>x.dataset.id===S._kbRowId);
+    if(!cur){S._kbRowId=null;return;}
+    if(!cur.classList.contains('kb-cur')){ev.preventDefault();cur.classList.add('kb-cur');return;}
+    _n6cKbRow(ev.key==='Enter'?'Enter':c,ev).then(done=>{if(!done&&ev.key==='Enter'){const e=_qGet(S._kbRowId);if(e)showCheckinModal(e.id);}});if(ev.key==='Enter')ev.preventDefault();return;}
   if(ev.key==='Enter'&&_bare){const e=_qGet(S._kbRowId);if(e){ev.preventDefault();showCheckinModal(e.id);}}
 }
 document.addEventListener('keydown',e=>{
@@ -66777,6 +66821,10 @@ document.addEventListener('keydown',e=>{
     if(modal.id==='nt-panel'){e.preventDefault();_ntClose();return;}
     // Dismissible dialogs only — the PIN gate and the auth page are page-level, not dialogs.
     if(!modal.classList.contains('modal-backdrop')&&!modal.classList.contains('scan-backdrop')&&!modal.classList.contains('badge-pop'))return;
+    // The operator gate and its approval keypad (no backdrop click): Escape is its Cancel button where it has one, and the
+    // key stops here either way. It fell through to the list below, which closed the dialog that asked for the approval
+    // (the cashier, Edit price, the team manager) and left the keypad up (bug hunt 2026-11-10).
+    if(modal.closest('#op-gate-modal')){e.preventDefault();const G=S._opg;if(G&&!G.busy){if(G.pick)_opgBack();else if(G.switching)_opGateDone();}return;}
     modal.click();
     // Handled only if that closed it: the per-dialog Escape list below then stands down, where it
     // used to go on and close the NEXT dialog in its list too (the cashier sale under the team
@@ -66785,10 +66833,21 @@ document.addEventListener('keydown',e=>{
     return;
   }
   const list=_modalFocusables(modal);
-  if(!list.length)return;
-  const first=list[0],last=list[list.length-1],inside=modal.contains(document.activeElement);
-  if(e.shiftKey&&(document.activeElement===first||!inside)){e.preventDefault();last.focus();}
-  else if(!e.shiftKey&&(document.activeElement===last||!inside)){e.preventDefault();first.focus();}
+  // The sign-in page shown as the page (not over one) sits below the top bar, whose logo and language picker stay in
+  // use there (styles.css): they lead the cycle, where the trap used to keep Tab from ever reaching them (bug hunt 2026-11-10).
+  // Tab from outside still starts on the page's first control.
+  const tb=modal.parentElement&&modal.parentElement.classList.contains('as-page')?document.getElementById('topbar'):null,head=tb?_modalFocusables(tb):[];
+  const all=[...head,...list];
+  if(!all.length)return;
+  const ae=document.activeElement,first=all[0],last=all[all.length-1],inside=modal.contains(ae)||!!(tb&&tb.contains(ae));
+  if(!inside){e.preventDefault();(e.shiftKey?last:(list[0]||first)).focus();}
+  else if(e.shiftKey&&ae===first){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&ae===last){e.preventDefault();first.focus();}
+  // The step between the top bar and the page: the page order between them runs through the landing hidden behind it.
+  else if(head.length&&list.length){
+    if(!e.shiftKey&&ae===head[head.length-1]){e.preventDefault();list[0].focus();}
+    else if(e.shiftKey&&ae===list[0]){e.preventDefault();head[head.length-1].focus();}
+  }
 });
 
 // (Realtime is set up once above via setupRealtime(); the old second channel was removed to avoid double-fetching.)
@@ -66800,7 +66859,7 @@ try{window.addEventListener('offline',()=>{S._rtConnected=false;_updateConnUI();
   function eligible(){
     // only a dialog on screen stops the pull (the sign-in markup stays in the page, hidden)
     if(_visibleModals().length||[...document.querySelectorAll('.pay-menu-popup')].some(m=>m.getClientRects().length))return false;
-    if(S.view==='staff')return['queue','sessions','community','volunteers','dashboard'].includes(S.staffTab); // Sessions, People, Volunteers and the Dashboard too (2026-11-06, ST03)
+    if(S.view==='staff')return['queue','waitlist','sessions','community','volunteers','dashboard'].includes(S.staffTab); // Sessions, People, Volunteers and the Dashboard too (2026-11-06, ST03); the Waitlist, its own section since 2026-11-09, as under Bookings
     if(S.view==='customer')return S.custTab==='myrides';
     return false;
   }
@@ -66889,7 +66948,10 @@ try{document.addEventListener('keydown',function(e){
   if(e.key!=='Escape'&&e.keyCode!==27)return;
   if(e.defaultPrevented)return; // the topmost dialog already closed on this Escape (handler above)
   var order=[['team-mgr-modal','closeTeamManager'],['receipt-edit-modal','closeReceiptEdit'],['cashier-modal','closeCashierModal'],['return-pay-modal','closeReturnPayModal'],['reschedule-modal','closeRescheduleModal'],['edit-price-modal','closeEditPriceModal'],['rate-modal','closeRateModal'],['print-opts-modal','_closePrintOpts'],['bike-profile-modal','closeBikeProfile'],['bike-modal','closeModal'],['receipt-modal',''],['auth-modal','closeAuthModal']];
-  for(var i=0;i<order.length;i++){var el=document.getElementById(order[i][0]);if(el&&el.style.display&&el.style.display!=='none'){var fn=order[i][1];if(fn&&typeof window[fn]==='function'){try{window[fn]();}catch(_){el.style.display='none';}}else{el.style.display='none';el.innerHTML='';}return;}}
+  // Only the one holding the topmost dialog: a dialog on top that is in none of these (one that does not close on its
+  // backdrop) used to have the first open one here closed underneath it (bug hunt 2026-11-10).
+  var top=_visibleModals().pop();
+  for(var i=0;i<order.length;i++){var el=document.getElementById(order[i][0]);if(el&&el.style.display&&el.style.display!=='none'&&(!top||el.contains(top))){var fn=order[i][1];if(fn&&typeof window[fn]==='function'){try{window[fn]();}catch(_){el.style.display='none';}}else{el.style.display='none';el.innerHTML='';}return;}}
 });}catch(e){}
 
 // The hold (MM_HOLD): a page left open never navigates, so the worker never learns of it. Each time
