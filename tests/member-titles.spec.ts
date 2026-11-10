@@ -22,6 +22,8 @@ const mine = { ok: true, member: true, hidden: false, shown: 'ttl_leg', titles: 
   { id: 'ttl_leg', name: 'Legend', name_ar: 'أسطورة', color: 'purple', auto: true, expires_on: null },
 ] };
 const directory = { ok: true, members: [] };
+// The Community tab's one read (hub_feed, 2026-11-11): the member's own challenge and nothing about anyone else.
+const feed = { ok: true, today: '2026-11-11', me: { kind: 'first', levels: [1], target: 1, chosen: false, n: 0, ends_on: '2026-11-30', sats: 4 }, club: null, goals: [], numbers: {}, post: null, announce: [], volunteer: null, birthday: false, awarded: [], year: null };
 
 const rpcBodies = (page: Page, fn: string) => {
   const out: Record<string, unknown>[] = [];
@@ -29,7 +31,7 @@ const rpcBodies = (page: Page, fn: string) => {
   return out;
 };
 async function rider(page: Page, fx: Fixtures = {}) {
-  await stubSupabase(page, { sessions: [], customers, queue_entries: [], bikes: [], 'rpc:community_member': true, 'rpc:customer_my_titles': mine, 'rpc:member_directory': directory, 'rpc:customer_title_prefs': { ok: true }, ...fx });
+  await stubSupabase(page, { sessions: [], customers, queue_entries: [], bikes: [], 'rpc:community_member': true, 'rpc:customer_my_titles': mine, 'rpc:member_directory': directory, 'rpc:hub_feed': feed, 'rpc:customer_title_prefs': { ok: true }, ...fx });
   await loginCustomer(page, { id: 'c1', name: 'Lina Haddad' });
   await page.goto('/');
   await waitForSb(page);
@@ -94,15 +96,16 @@ test.describe('@customer:account member titles', () => {
 });
 
 test.describe('@customer:account friend invite', () => {
-  test('the invite sits on the Account part, under Invite friends, not in the titles card (the user, 2026-11-09)', async ({ page }) => {
+  // The invitation sits on the Community tab since 2026-11-11 (M31), not on Account or in the titles card.
+  const invite = (page: Page) => page.locator('#hub-body button', { hasText: 'Invite a friend to a Saturday social ride' });
+  test('the invite sits on the Community tab, not on the account', async ({ page }) => {
     await rider(page, { 'rpc:member_invite_code': { ok: true, code: 'abcdef0123456789' } });
     await account(page); // the Badges part: the titles card, no invite in it
     await expect(page.locator('#tt-mine .tt-invite')).toHaveCount(0);
-    await expect(page.locator('#acc-pane-badges #inv-mine')).toHaveCount(0);
     await page.evaluate(`setCustTab('account','invite')`);
-    await expect(page.locator('#acc-pane-account #inv-mine .tt-invite')).toBeVisible();
-    await expect(page.locator('#acc-pane-account #inv-mine .tt-invite')).toHaveText('Invite a friend to a Saturday social ride');
-    expect(await page.evaluate(`document.getElementById('ref-mine').nextElementSibling.id`)).toBe('inv-mine');
+    await expect(page.locator('#inv-mine')).toHaveCount(0);
+    await page.evaluate(`setCustTab('members')`);
+    await expect(invite(page)).toBeVisible();
   });
 
   test('the invite shares a message asking the friend to fill in the form, with the member\'s link', async ({ page }) => {
@@ -110,9 +113,9 @@ test.describe('@customer:account friend invite', () => {
     await page.addInitScript(() => { (navigator as unknown as { share: unknown }).share = (d: unknown) => { (window as unknown as { _shared: unknown })._shared = d; return Promise.resolve(); }; });
     await page.reload();
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account','invite')`);
-    await page.waitForFunction('S._invCode&&S._invCode.code');
-    await page.locator('#acc-pane-account #inv-mine .tt-invite').click();
+    await page.evaluate(`setCustTab('members')`);
+    await invite(page).click();
+    await expect.poll(() => page.evaluate('!!window._shared')).toBe(true);
     const text = await page.evaluate('window._shared.text') as string;
     expect(text).toContain('fill in this form');
     expect(text).toContain('https://micromobility.sa/community/registration?inv=abcdef0123456789&lang=en');
@@ -123,12 +126,11 @@ test.describe('@customer:account friend invite', () => {
     await page.addInitScript(() => { Object.defineProperty(navigator, 'share', { value: undefined }); window.open = ((u: string) => { (window as unknown as { _opened: string })._opened = u; return null; }) as typeof window.open; });
     await page.reload();
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account','invite')`);
-    await page.waitForFunction('S._invCode&&S._invCode.code');
-    await page.locator('#acc-pane-account #inv-mine .tt-invite').click();
-    expect(await page.evaluate('window._opened')).toContain('https://wa.me/?text=');
+    await page.evaluate(`setCustTab('members')`);
+    await invite(page).click();
+    await expect.poll(() => page.evaluate('window._opened')).toContain('https://wa.me/?text=');
     await page.evaluate(`S._invCode=null;window._opened=null;sb.rpc=()=>Promise.resolve({data:{ok:false,error:'member'}})`);
-    await page.locator('#inv-mine .tt-invite').click();
+    await invite(page).click();
     await expect(page.locator('#toast-container')).toContainText('could not make your invitation');
     expect(await page.evaluate('window._opened')).toBeNull();
   });
@@ -172,12 +174,12 @@ test.describe('@customer:members the Community page', () => {
     await page.waitForFunction('S._infoMem&&S._infoMem.ok');
     await page.locator('#customer-tab-nav [data-ctab="members"], #bnav-members').locator('visible=true').first().click();
     await expect(page).toHaveURL(/\/members/);
-    await expect(page.locator('#hub-nav')).toBeAttached();
+    await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
     await expect(page.locator('#tab-members .mb-row, #mb-q')).toHaveCount(0);
   });
 
   test('a non-member asking for the page leaves it and sees nobody', async ({ page }) => {
-    await rider(page, { 'rpc:member_directory': { ok: false, error: 'member' } });
+    await rider(page, { 'rpc:hub_feed': { ok: false, error: 'member' } });
     await page.evaluate(`setCustTab('members')`);
     await expect(page).toHaveURL(/\/reserve/);
     await expect(page.locator('#tab-members .mb-row')).toHaveCount(0);
@@ -185,20 +187,20 @@ test.describe('@customer:members the Community page', () => {
   });
 
   test('a failed read offers to try again, and the retry opens the page', async ({ page }) => {
-    await rider(page, { 'rpc:member_directory': { __rpcError: { status: 500, code: 'XX000', message: 'boom' } } });
+    await rider(page, { 'rpc:hub_feed': { __rpcError: { status: 500, code: 'XX000', message: 'boom' } } });
     await page.evaluate(`setCustTab('members')`);
-    await expect(page.locator('#tab-members')).toContainText('We could not load the members');
-    await stubSupabase(page, { sessions: [], customers, queue_entries: [], bikes: [], 'rpc:member_directory': directory });
+    await expect(page.locator('#tab-members')).toContainText('We could not do that');
+    await stubSupabase(page, { sessions: [], customers, queue_entries: [], bikes: [], 'rpc:community_member': true, 'rpc:hub_feed': feed });
     await page.locator('#tab-members button', { hasText: 'Try again' }).click();
-    await expect(page.locator('#hub-nav')).toBeAttached();
+    await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
   });
 
   test('a directly opened /members address lands on the page', async ({ page }) => {
-    await stubSupabase(page, { sessions: [], customers, queue_entries: [], bikes: [], 'rpc:customer_my_titles': mine, 'rpc:member_directory': directory });
+    await stubSupabase(page, { sessions: [], customers, queue_entries: [], bikes: [], 'rpc:customer_my_titles': mine, 'rpc:hub_feed': feed });
     await loginCustomer(page, { id: 'c1', name: 'Lina Haddad' });
     await page.goto('/members');
     await waitForSb(page);
-    await expect(page.locator('#hub-nav')).toBeAttached();
+    await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
     await expect(page).toHaveURL(/\/members/);
   });
 });

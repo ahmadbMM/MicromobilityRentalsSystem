@@ -14,6 +14,15 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 with expected(fname, want_definer, note) as (values
   -- Definer: reaches past the caller's RLS, or calls a locked-down helper.
+  ('hub_feed', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('hub_pick_level', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('hub_post_img', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('staff_hub_numbers', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('_hub_award', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('_hub_level_row', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('_hub_club_row', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('_hub_n', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('_hub_club_n', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
   ('_wallet_owner', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('_wallet_post', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('_wallet_amount', true, 'the wallet: reaches tables nobody can read (20261102210000)'),

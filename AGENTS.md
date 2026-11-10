@@ -590,6 +590,31 @@ device for 30 days and after the application calls `community_app_invited`, sepa
 
 **Challenge templates (2026-11-04):** Community > Activities > Challenges lists `AC_TEMPLATES` (`_acTplHtml`), which only fill the form. A template may only ask for what `_hub_count` measures (finished sessions in a date range, never km). Rewards stay empty because a reward is a promise. `AC_RAMADAN` holds Umm al-Qura's expected dates and needs a new year added by 2028. The October 2026 numbers quoted in `acTplHint` and `acTw*` date as the community grows: re-measure them.
 
+## The Community tab rebuilt (2026-11-11)
+
+Migration 20261111100000 and `member-hub.js` (reports/Booking app Community tab.md, items M1-M33). The tab is one feed from one read,
+`hub_feed` (volatile: it also notes the day's open in `hub_opens`, makes the month's rows and gives badges). There is no sub-menu and no
+Back on it, and the old `member_directory` check is gone: `hub_feed` answers `error: 'member'` to a non-member, who is sent to Reserve.
+- **Order:** next session (booked: Show ticket opens Bookings; else the next community session the rider may book, gender-checked
+  with `_sgOk`: Book opens Reserve through `_evOf`), the year card (December and January), Coming up, the member's own challenge,
+  staff season challenges, the club goal, the club's numbers, one staff card (Saturday report > the site's first announcement > the
+  tip of the week, `HUB_TIPS`), a volunteer call when `volunteer_sessions` has one open, the invitation (moved here from Account).
+- **The member's challenge** (`hub_levels`, one row per member per month, made on the month's first read and then kept): first session,
+  second session, back this month, or a level from three (`hub_pick_level`). Every kind of session counts; the word is "sessions".
+- **The club goal** (`hub_club_goals`): the members' Saturday rides per Saturday over the two months before x the month's Saturdays
+  x 1.05, made on the month's first read. A running staff goal takes its place. The member sees only their own share.
+- **Rewards are badges the database gives** (`_hub_award`, on the tab's read): ladders `challenge_1/3/6/12` and `club_goal_1/3/6/12`
+  (both in BDG_LADDERS and the website's LADDERS) and a staff challenge's own `hub_goals.badge_id`. The staff form has no reward text
+  any more. A badge given on the read opens in the app's badge pop-up there (`_hubCheer`).
+- **Totals under 10 are never shown** (`numbers`, the Saturday report's counts): a small session's count says who came.
+- **The year** (December and January): no kudos; "so far" until 26 December, in full from the 27th; slides the member moves through;
+  the share is a 1080x1920 PNG drawn when the recap opens (files only, no text, for iOS), else the words, else WhatsApp.
+- **Staff:** Community > Activities opens on Challenges; Saturday report (`hub_posts`, photo as JPEG text read alone through
+  `hub_post_img`, saved only with the photo rule ticked) and Numbers (`staff_hub_numbers`). The monthly club-goal templates are gone.
+- `member-hub.js` borrows only what rider code names: `window._hubDeps` (set in `_hubLoad`) carries the invitation, its words and
+  the volunteer portal's address, so the build's split keeps them on the riders' side.
+- `club_card` (the website's email + mobile lookup) is revoked from everyone; the website shows a signed-in member their card from `member_area`.
+
 ## The 2026-09-27 feature round (blocks 1-13)
 
 Built from the owner's answers on 2026-09-27/28; the source of each is in the commit messages.

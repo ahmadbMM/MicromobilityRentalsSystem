@@ -8997,6 +8997,51 @@ body:not(.view-staff) .hub-photo figcaption{padding:10px 12px;}
 body:not(.view-staff) .hub-photo-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
 body:not(.view-staff) .hub-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
 body:not(.view-staff) .hub-stat strong{display:block;font-size:var(--fs-20);}
+/* The Community tab as one feed (2026-11-11, member-hub.js): a night hero for the next session, white cards for what the
+   member is working towards, flat cards on the page for the staff's words. Glass stays on the bars; nothing moves in by itself. */
+body:not(.view-staff) .cust-back-btn[hidden]{display:none;}
+body:not(.view-staff) #tab-members .page-title:focus{outline:none;}
+body:not(.view-staff) .hub-skel i{height:120px;}
+body:not(.view-staff) .hub-skel i:first-child{height:180px;}
+body:not(.view-staff) .hub-hero{display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:var(--night);color:var(--night-ink);border-radius:var(--r-hero);padding:20px 22px;margin-bottom:12px;box-shadow:var(--lq-2);}
+body:not(.view-staff) .hub-hero .hub-k{color:var(--neon);}
+body:not(.view-staff) .hub-hero-t{font-size:var(--fs-20);line-height:1.3;}
+body:not(.view-staff) .hub-hero-m{color:var(--night-ink-2);font-size:var(--fs-15);}
+body:not(.view-staff) .hub-hero-b{margin-top:10px;min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+body:not(.view-staff) .hub-chip{display:inline-block;padding:2px 10px;border-radius:999px;border:1px solid var(--night-line);font-size:var(--fs-13);font-weight:600;}
+body:not(.view-staff) .hub-k{display:flex;align-items:center;gap:6px;font-size:var(--fs-13);font-weight:600;color:var(--muted);margin-bottom:2px;}
+body:not(.view-staff) .hub-meta{font-size:var(--fs-13);color:var(--muted);margin-top:4px;}
+body:not(.view-staff) .hub-meta strong{color:var(--go-2);}
+body:not(.view-staff) .hub-flat{background:transparent;box-shadow:none;border-color:var(--line);}
+body:not(.view-staff) .hub-line{margin:6px 0 0;line-height:1.6;color:var(--ink);}
+body:not(.view-staff) .hub-photo{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--r-ctl);margin:8px 0;background:var(--card-3);}
+body:not(.view-staff) .hub-soon{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);}
+body:not(.view-staff) .hub-soon:last-child{border-bottom:0;padding-bottom:0;}
+body:not(.view-staff) .hub-soon-t{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-width:0;}
+body:not(.view-staff) .hub-soon-t small{flex-basis:100%;color:var(--muted);font-size:var(--fs-13);}
+body:not(.view-staff) .hub-soon .btn-sm{flex:none;min-height:44px;}
+body:not(.view-staff) .hub-dots{display:flex;gap:6px;margin:8px 0 4px;}
+body:not(.view-staff) .hub-dots span{flex:1;height:10px;border-radius:999px;background:var(--card-3);}
+body:not(.view-staff) .hub-dots span.on{background:var(--go);}
+body:not(.view-staff) .hub-dots-sm{justify-content:center;}
+body:not(.view-staff) .hub-dots-sm span{flex:0 0 8px;height:8px;}
+body:not(.view-staff) .hub-pick{display:flex;gap:8px;margin:6px 0 8px;}
+body:not(.view-staff) .hub-lv{flex:1;min-height:48px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);font-weight:700;font-size:var(--fs-17);cursor:pointer;}
+body:not(.view-staff) .hub-lv.on{border-color:var(--go);background:var(--go-wash);color:var(--go-2);}
+body:not(.view-staff) .hub-row2{display:flex;align-items:center;gap:10px;}
+body:not(.view-staff) .hub-medal{width:40px;height:40px;flex:none;}
+body:not(.view-staff) .hub-bday{display:flex;align-items:center;gap:10px;color:var(--go-2);}
+body:not(.view-staff) .hub-stale{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+body:not(.view-staff) .hub-link{display:flex;align-items:center;justify-content:center;min-height:44px;text-decoration:none;}
+body:not(.view-staff) .hub-stats .hub-stat strong{font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .hub-slides{min-height:340px;display:flex;flex-direction:column;}
+body:not(.view-staff) .hub-slide{flex:1;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:12px 0;}
+body:not(.view-staff) .hub-num{font-size:var(--fs-34);font-weight:700;color:var(--go-2);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .hub-kinds{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px;}
+body:not(.view-staff) .hub-kinds li{display:flex;align-items:center;gap:8px;}
+body:not(.view-staff) .hub-slide-nav{display:flex;gap:10px;margin-top:12px;}
+body:not(.view-staff) .hub-slide-nav button{flex:1;min-height:48px;}
+@media (max-width:340px){body:not(.view-staff) .hub-stats{grid-template-columns:1fr;}}
 body:not(.view-staff) .mb-new{color:var(--go);font-weight:700;}
 /* ════════════════════════════════════════════════════════════════════════════════════════════════
    LIQUID (2026-11-07, the soft redesign: the user picked "Liquid" for riders). Glass is a material for the
