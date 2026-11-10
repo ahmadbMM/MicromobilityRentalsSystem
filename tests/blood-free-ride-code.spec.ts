@@ -66,6 +66,30 @@ test.describe('Blood Donation free ride code', () => {
     await expect(box.locator('.fr-go')).toHaveCount(0);
   });
 
+  // the user, 2026-11-10: a ride free anyway never spends the code (the database gives it back, 20261110235500)
+  test('not offered when rider 1 brings an own bike', async ({ page }) => {
+    await boot(page, [OPEN]);
+    await expect.poll(() => page.evaluate('(S._bldR||[]).length')).toBe(1);
+    await step2(page, 1, ['Own']);
+    await expect(page.locator('#bld-redeem')).toBeAttached();
+    await expect(page.locator('#bld-redeem .fr-card')).toHaveCount(0);
+    await page.evaluate(`setBikeType(0,'Hybrid')`);
+    await expect(page.locator('#bld-redeem .fr-card')).toContainText('BD-1A2B3C4D');
+  });
+
+  test('not offered when rider 1 rides on the house', async ({ page }) => {
+    await stubSupabase(page, { sessions: [jcc, sat], 'rpc:customer_blood_rewards': [OPEN], 'rpc:promo_lookup': ok });
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05', default_pay: 'house' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate('showView("landing");renderLandingAvail()');
+    await expect.poll(() => page.evaluate('(S._bldR||[]).length')).toBe(1);
+    await expect(page.locator('#land-free-rides .fr-card')).toContainText('BD-1A2B3C4D'); // still theirs to keep
+    await step2(page, 1, ['Hybrid']);
+    await expect(page.locator('#bld-redeem')).toBeAttached();
+    await expect(page.locator('#bld-redeem .fr-card')).toHaveCount(0);
+  });
+
   test('not offered on a ride the code does not pay for', async ({ page }) => {
     await boot(page, [OPEN]);
     expect(await page.evaluate(`[_bldCodeSessOk(_sessDisp('s0')),_bldCodeSessOk(_sessDisp('s1'))]`)).toEqual([true, false]);

@@ -9071,13 +9071,15 @@ function _frLandInner(){
 function _frSoon(x){const d=Math.round((Date.parse(String(x.expires_at).slice(0,10)+'T00:00:00Z')-Date.parse(todayStr()+'T00:00:00Z'))/864e5);
   return d>=0&&d<=7?`<div class="fr-soon">${esc(d===0?t('frEndsToday'):t('frEndsIn').replace('{0}',String(d)))}</div>`:'';}
 // The bike step: once rider 1 (the account holder, whose code it is) has a bike type, one tap redeems the code for that
-// rider's ride. Never on Carbon, a session the code is not good on, an edit, or once a code is applied. The friend's
+// rider's ride. Never on Carbon, a session the code is not good on, an edit, or once a code is applied; never on a ride
+// that is free anyway, an own bike or one on the house (the user, 2026-11-10: the database gives a code on such a ride
+// back, _promo_free_drop in 20261110235500). The friend's
 // referral discount comes off by itself (_refWAuto): it is offered here only once the rider took it off, and says no to
 // Carbon as the free rides do (every referral code, the bonus too, since 20261108200000).
 function _bldRedeemHtml(show){if(!show)return'';_bldRwLoad();return`<div id="bld-redeem">${_bldRedeemInner()}</div>`;}
 function _bldRedeemInner(){
   const s=_sessDisp(S.selSession),ty=S.regBikeTypes[0],carb=/carbon/i.test(ty||'');
-  if(S.promoApplied||S.modifyEntryId||!ty)return'';
+  if(S.promoApplied||S.modifyEntryId||!ty||ty==='Own'||(_regHouseSelf()&&_regHouseFor(ty)))return'';
   const w=_refWOpen();
   if(w&&_refCodeSessOk(s)){
     const wt=`<div class="fr-t">${_codeIc('rw',16)} ${esc(t('refWTitle').replace('{0}',String(w.pct)))}</div>`;

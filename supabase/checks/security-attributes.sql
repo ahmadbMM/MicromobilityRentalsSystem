@@ -75,6 +75,7 @@ with expected(fname, want_definer, note) as (values
   ('_satcode_locked', true, 'Saturday ride codes: reads login_throttle, which no client can read (20261108120000)'),
   ('_ride_code_fill', false, 'Saturday ride codes: a trigger that only reads its own transaction setting (20261108120000)'),
   ('_promo_count',           true,  'writes promo_codes.uses'),
+  ('_promo_free_drop',       true,  'trigger: takes the code off a booking that is free anyway (own bike, free ride, on the house); no client execute (20261110235500)'),
   ('_promo_valid',           true,  'reads promo_codes; revoked from anon+authenticated on purpose'),
   ('_session_fill_status',   true,  'writes sessions.status from a queue_entries trigger'),
   ('_promote_next_waitlist', true,  'promotes across RLS; revoked from anon+authenticated'),
