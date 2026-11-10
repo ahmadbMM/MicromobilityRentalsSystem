@@ -13132,3 +13132,15 @@ html[data-staff-theme="booth"] #confirm-modal .lk-cx-o{border-width:2px;}
 /* booth: the edges solid, the picked door ringed in black too */
 html[data-staff-theme="booth"] #lk-as :is(.lk-as-d,.lk-as-p){border-width:2px;}
 html[data-staff-theme="booth"] #lk-as .lk-as-d.on{outline:2px solid var(--text);outline-offset:1px;}
+/* STAFF ROUND S10 LISTS (2026-11-10): the closed Filters button's Clear, one toolbar row for an office list (its
+   selection in the same row, never a bar at the foot), a row's tick, Team's e-mail under the name, People's second row */
+body.view-staff .f-clr{min-width:32px;padding:0 8px;margin-inline-start:-4px;font-size:16px;line-height:1;}
+body.view-staff .lt-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+body.view-staff .lt-sel{padding:6px 8px;border-radius:8px;background:var(--sf-card,var(--card));box-shadow:inset 0 0 0 1px var(--sf-ctl,var(--border));}
+body.view-staff .lt-box{width:20px;height:20px;margin:2px 0;flex-shrink:0;accent-color:var(--green);cursor:pointer;}
+body.view-staff .bdr-row .lt-box{align-self:center;}
+body.view-staff .tm-mail{font-size:12px;color:var(--muted);overflow-wrap:anywhere;}
+body.view-staff .ppl-sub{margin:0 0 6px;}
+body.view-staff .lg-undone{margin-inline-start:auto;}
+/* the simple phone view keeps none of a list's office tools: the Filters Clear, Select and Export go with the Filters button */
+@media (max-width:767px){html[data-staff-simple] body.view-staff #view-staff .tab-panel :is(.f-clr,.lt-sel-btn,.lt-csv){display:none!important;}}

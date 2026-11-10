@@ -33,7 +33,8 @@ test('People (the old Customers address too) opens on its overview, every tab of
   const tab = page.locator('#tab-community');
   await expect(tab.locator('.page-title')).toHaveText('People');
   const pills = tab.locator('.filter-row').first().locator('.filter-pill');
-  await expect(pills).toHaveText(['Overview', 'Accounts', /^Applications/, /^Flagged/, 'Tags', 'Badges', 'Titles', 'Activities', /^Birthdays/, /^Referrals/, 'Activity', /^Duplicates/]); // Duplicates (admins) carries the likely pairs; Referrals the ones to check (2026-11-08)
+  // five groups since staff round s10 (item 35): each group's own views in a second row once it is open
+  await expect(pills).toHaveText(['Overview', /^Accounts/, 'Membership', 'Recognition', 'Activity', 'More']);
   await expect(pills.first()).toHaveClass(/active/);
   await expect(tab.locator('.dash-kpi', { hasText: 'Accounts' }).locator('strong')).toHaveText('2');
   await expect(tab.locator('.dash-row', { hasText: 'Badr Next' })).toHaveCount(1); // the newest accounts

@@ -2694,3 +2694,52 @@ appears on customers account add it to the 3 dots list on each booking".
   policy refuses. Share (where the browser shares files), Save to device and Copy picture; each is logged.
 - `tests/booking-card.spec.ts` (with a run under the real CSP, and a check that the frame's card computes the same look
   as the rider's own My Bookings).
+
+## Staff round s10: lists, filters, saved views, People groups, Team, History log (2026-11-10, migration 20261111110000)
+
+Builder "lists" of the staff website round s10 (report "Staff website design and function", items 30-32, 35, 37-39 and the
+owner's D1). Spec: `tests/s10-lists.spec.ts`.
+
+- **Filters are declared, not read off the markup.** `_fPanel(key, main, adv, spec, r)` takes the panel's filters as a spec,
+  one `{key, kind, isOn, clear}` each; `_fS(o, 'a b=x', adv)` declares keys of an object (a getter, or S): a key is on while
+  it holds anything but its off value (after `=`; without one, empty or `all`), false or an empty list. **Declare `=all`
+  for a key whose off value is `all`**: without it Clear writes `''`, which a filter testing `!=='all'` reads as a pick.
+  A date range, a typed box or a pill that is one filter is a hand-written entry (`{key, kind, isOn, clear}`). The count is
+  `_fOn(spec)`; the regex over the HTML (`_fOnN`, `_F_NOCOUNT`) is gone, and `_fAdv(key, adv, cls, spec)` takes the spec too
+  (the report dialogs pass theirs). **A new filter panel must pass its spec**, or its button counts nothing. The closed
+  Filters button shows the count and a Clear (x, `.f-clr`, `_fClear(key)`) that clears every filter and redraws with `r`
+  (default `_renderStaffTab`; a panel in a dialog passes its own repaint).
+- **One toolbar for an office list:** `listToolbar({key, q:{v,fn,ph,id}, pills, f:[main,adv,spec,r], views, sel:{ids,acts},
+  csv, extra})` in the core draws search, pills, Filters, saved views, Select and Export (Export only with `_can('export')`).
+  With Select on (`S._ls[key]`, a Set; `_lsMode`, `_lsTog`, `_lsAll`, `_lsBox` for the row's tick) the SAME row carries the
+  selection: "Selected: n", the actions (verb + count + noun: "Close 3 jobs"), "Select all N matching" (`sel.ids` = every
+  row the search and filters let through, not only those drawn) and Done. Never a bar at the foot. Workshop (Close N jobs,
+  Assign N jobs), Messages (Close N messages: the inbox has no read mark), Badge requests (Give N badges, Decline N
+  requests; each goes the one-request way, with its own log line and undo), Ambassadors, Vendors (requests and venues),
+  Team and the Bikes catalog use it. CSV: `_wsCsv`, `_smCsv`, `_ambCsv`, `_bdrCsv`, `_vendorBkCsv`, `_apCsv` (applications,
+  both lists). Accounts' select-all always took every match; its button now says so ("Select all N matching", `lsAllN`).
+- **Private saved views follow the account:** `staff.prefs` key `views.<section>` through `_prefSet` / `staff_my_prefs`
+  (`PREF_SYNC` takes `views.`; the function has accepted that key since 20261009190000), not `cq_views`. The first `_svBar`
+  after sign-in moves this browser's `cq_views` up to that account and removes it (`_svMove`). A section keeps
+  `SV_MAX` (12) views and under 7800 characters (the function's 8000 a key; a refused key would hold every pref back): a view
+  is saved slim (`_svSlim`: only what differs from `_svDef`, the default `_n6pSvZero` puts back). Inventory, Analytics and
+  Ambassadors are `SV_SECS` too. Shared views stay in `staff_options` 'views'.
+- **People in five groups** (`PPL_GROUPS`): Overview, then Accounts (accounts, flagged, wallets), Membership (applications,
+  birthdays), Recognition (badges, titles, the members' page), Activity (activity, referrals), More (tags, duplicates);
+  the open group's views in a second row (`.ppl-sub`). Paths are unchanged. "Activities" reads "Members' page" (`acTab`).
+- **Team:** a search (name and email) and Filters (role, a section the account can open); each card is headed by
+  `staff.display_name` (from `staff_team_more`) with the email under it (`.tm-mail`).
+- **History > Log merges on client ids:** `logAction` gives every line a client id (returned; `meta.cid` names it), kept in
+  `S.fullLog` and written to `staff_actions.client_id` (dropped after the first refusal on a database before the column). A
+  device line is dropped only when the table holds its id; a line from before the ids keeps the old words-and-a-minute match
+  against shared lines without one. `pushUndo` keeps the id, so `_undoableFor` finds a line's undo by it.
+- **An admin undoes a check-in from the Log on any device (D1):** a shared line with kind `checkin`, entity `booking` and an
+  entity_id shows Undo to `_can('undo')`; `_logUndoCi` asks yes/no, reads the booking's status, undoes only a booking still
+  `active` (through `_undoCheckinWrite`, guarded on the bike) and else says why ("Already returned", "Already undone", "No
+  longer checked in"). The undo is its own line, client id `u:<the line's key>` (its client id, or `id:<id>`), which marks
+  the line "Already undone" on every device; the unique index on `client_id` takes one such line. The payment the check-in
+  took is left as it is (only the desk that checked in knows what it was).
+- **Workshop, Messages and Ambassadors** no longer read their whole list on a repaint a minute on: they ask the head-count
+  probe (`_wsPoll` / `_smPoll` / `_ambPoll`, at most once a minute, `W.pAt`), which reads the list only when something changed.
+- Migration 20261111110000: `staff_actions.client_id` (text, at most 60), a unique partial index on it. No new table, policy
+  or function: the table keeps its `is_staff()` insert/read policies.
