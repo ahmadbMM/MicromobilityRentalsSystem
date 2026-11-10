@@ -9001,7 +9001,6 @@ body:not(.view-staff) .hub-stats{display:grid;grid-template-columns:1fr 1fr;gap:
 body:not(.view-staff) .hub-stat strong{display:block;font-size:var(--fs-20);}
 /* The Community tab as one feed (2026-11-11, member-hub.js): a night hero for the next session, white cards for what the
    member is working towards, flat cards on the page for the staff's words. Glass stays on the bars; nothing moves in by itself. */
-body:not(.view-staff) .cust-back-btn[hidden]{display:none;}
 body:not(.view-staff) #tab-members .page-title:focus{outline:none;}
 body:not(.view-staff) .hub-skel i{height:120px;}
 body:not(.view-staff) .hub-skel i:first-child{height:180px;}
@@ -9381,11 +9380,6 @@ body:not(.view-staff) .sess-about.sess-i:focus-visible{outline-offset:-4px;borde
 body:not(.view-staff) .spots-soon{display:inline-flex;align-items:center;gap:5px;}
 /* the waitlist said in the bar and on the review before Confirm (row 1) */
 body:not(.view-staff) .cu-wl-chip{display:inline-flex;align-items:center;min-height:20px;padding:0 8px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--red-line);color:var(--red);font-size:var(--fs-12);font-weight:600;vertical-align:1px;}
-/* step 1's bar holds Back too (row 12); the top Back steps aside while it shows */
-body:not(.view-staff) .mm-reg-foot.reg-foot1{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-body:not(.view-staff) .reg-foot1 .cu-w100{flex:1;width:auto;}
-body:not(.view-staff) .reg-foot-back{flex:none;width:44px;min-width:44px;height:44px;padding:0;display:inline-grid;place-items:center;border-radius:50%;}
-body:not(.view-staff):has(#tab-register.active .reg-foot1) #cust-back-btn{display:none;}
 /* the step-2 bar's total (row 9) */
 body:not(.view-staff) .reg-foot-tot{align-self:center;font-size:var(--fs-17);font-weight:700;color:var(--ink);white-space:nowrap;}
 body:not(.view-staff) .reg-foot-tot:empty{display:none;}

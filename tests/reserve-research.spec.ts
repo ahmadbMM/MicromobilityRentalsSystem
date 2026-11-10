@@ -74,15 +74,15 @@ test.describe('@customer:reserve the research round', () => {
     expect(await page.evaluate('S.regStep')).toBe(2);
   });
 
-  test('the step-2 bar carries the total once a bike is picked, and Back sits in the step-1 bar (rows 9, 12)', async ({ page }) => {
+  test('the step-2 bar carries the total once a bike is picked, and step 1 keeps the page\'s Back (row 9; the user, 2026-11-11)', async ({ page }) => {
     await boot(page);
     await page.evaluate(at(OPEN, 2, "S.regBikeTypes=[''];"));
     await expect(page.locator('#reg-foot-tot')).toBeEmpty();
     await page.locator('#tab-register [data-type-slot="0"][data-type="Road"]').click();
     await expect(page.locator('#reg-foot-tot')).toContainText('75');
     await page.evaluate(at(OPEN, 1));
-    await expect(page.locator('#tab-register .reg-foot1 .reg-foot-back')).toBeVisible();
-    await expect(page.locator('#cust-back-btn')).toBeHidden();
+    await expect(page.locator('#cust-back-btn')).toBeVisible();
+    await expect(page.locator('#tab-register .mm-reg-foot .reg-foot-back')).toHaveCount(0);
   });
 
   test('Change on the review goes back and Continue returns to the review (row 8)', async ({ page }) => {

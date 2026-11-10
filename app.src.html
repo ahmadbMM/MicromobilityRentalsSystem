@@ -14806,7 +14806,6 @@ function renderCustomerTabs(){
   document.getElementById('tab-myrides').classList.toggle('active',S.custTab==='myrides');
   document.getElementById('tab-account').classList.toggle('active',S.custTab==='account');
   document.getElementById('tab-members').classList.toggle('active',S.custTab==='members');
-  const _cbb=document.getElementById('cust-back-btn');if(_cbb)_cbb.hidden=S.custTab==='members'; // a tab root: nowhere to go back to (2026-11-11)
   
   document.querySelectorAll('.cust-bnav-btn').forEach((btn,i)=>{
     const tabs=['register','myrides','members','account'];
@@ -17549,8 +17548,7 @@ function renderRegister(){
   const usualBtn=(_isReturning&&!_soleSess&&_ev==='jcc'&&_usualNights(cust).length)?`<button class="btn-secondary cu-usual" data-on-click="${_on("bookMyUsual")}">${_cuIc('again')} ${t('bookUsualBtn')}</button>`:'';
   // The foot speaks only to say when a shut ride opens; "pick a ride first" went with the other hints (2026-11-08).
   const _rfOpens=!S.selSession&&_soleSess?_bwOpensText(_soleSess):'';
-  // Back lives in the bar on every step, this one too (row 12): the top Back steps aside while a bar shows.
-  const _regBackIc=()=>`<button type="button" class="btn-secondary reg-foot-back" aria-label="${esc(t('regBackBtn'))}" data-on-click="${_on('custBack')}">${_cuIc('back',20,1)}</button>`;
+  // Step one's Back is the page's own, at the top (the user, 2026-11-11: "return the back button"); its bar holds Continue.
   const panel1=`
     ${stepHeader(t(_soleSess?(_ncSel?'regStep1TitleOneSess':'regStep1TitleOne'):(_ncSel?'regStep1TitleSess':'regStep1Title')))}
     ${usualBtn}
@@ -17568,7 +17566,7 @@ function renderRegister(){
         </div>`;
       })()}
     </div>
-    ${available.length?`<div class="mm-reg-foot reg-foot1${S.selSession&&!_soleSess?' has-sum':''}">${S.selSession?_regBackIc()+(_soleSess?'':_regFootSum(_sessDisp(S.selSession))):(_rfOpens?`<p class="reg-foot-why" id="rf-why" data-bw="${esc(_soleSess.id)}">${esc(_rfOpens)}</p>`:'')+_regBackIc()}<button class="btn-primary ${S.selSession&&!_soleSess?'reg-foot-go':'cu-w100'}${S.selSession?'':' cu-off'}" ${S.selSession?'':`disabled${_rfOpens?' aria-describedby="rf-why"':''}`} data-on-click="${_on("regNextFromSession")}">${t('regContinueBtn')}</button></div>`:''}`;
+    ${available.length?`<div class="mm-reg-foot${S.selSession&&!_soleSess?' has-sum':''}">${S.selSession?(_soleSess?'':_regFootSum(_sessDisp(S.selSession))):(_rfOpens?`<p class="reg-foot-why" id="rf-why" data-bw="${esc(_soleSess.id)}">${esc(_rfOpens)}</p>`:'')}<button class="btn-primary ${S.selSession&&!_soleSess?'reg-foot-go':'cu-w100'}${S.selSession?'':' cu-off'}" ${S.selSession?'':`disabled${_rfOpens?' aria-describedby="rf-why"':''}`} data-on-click="${_on("regNextFromSession")}">${t('regContinueBtn')}</button></div>`:''}`;
 
   
   if((_runSel||_vlSel||_bldSel)&&curStep===2)_runAccLoad();
