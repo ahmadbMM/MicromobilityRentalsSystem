@@ -224,7 +224,8 @@ test('the day sheet prints today\'s riders still expected or out', async ({ page
   await staff(page);
   await page.evaluate(`window.__sheet='';window.open=()=>({document:{write:h=>{window.__sheet+=h;},close(){}},focus(){},print(){}})`);
   await page.evaluate(`setStaffTab('queue');setSfSession('all')`);
-  await page.locator('#tab-queue .day-sheet-btn').click();
+  await page.locator('#tab-queue .sh-more').click(); // a tile in the header's More (staff round s10)
+  await page.getByRole('menuitem', { name: 'Print day sheet' }).click();
   const html = await page.evaluate('window.__sheet') as string;
   expect(html).toContain('Day sheet');
   for (const name of ['Amal Saad', 'Badr Omar', 'Dana Faisal']) expect(html).toContain(name);

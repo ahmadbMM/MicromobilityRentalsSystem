@@ -112,19 +112,19 @@ test('a reserved rider shows the held bike under the status', async ({ page }) =
   await expect(cell).toContainText('R-11');
 });
 
-// Every queue action stays on screen. Since 2026-10-27 a phone sets them as equal cells, three to a row (the
-// owner's grids for the phone toolbars; the sideways strip left one cut at the screen's edge), and nothing
-// is folded away. The night's two busiest actions — a walk-up and a scanned ticket — sit on the page on a
-// desktop and float within thumb reach on a phone (asked for 2026-09-22), where they stay put as the roster
-// scrolls, and each appears once, never twice.
-test('the phone header keeps every queue action on screen', async ({ page }, info) => {
+// Every queue action stays in reach. Since staff round s10 (2026-11-10) the header is one section header: on a desk
+// + Walk-in, Session settings and Close out in sight and the rest in More actions; on a phone ONE Desk tools button whose
+// sheet holds them all (it replaced the 2026-10-27 grid of equal cells, three to a row). The night's two busiest actions -
+// a walk-up and a scanned ticket - sit on the page on a desktop and float within thumb reach on a phone (asked for
+// 2026-09-22), where they stay put as the roster scrolls, and each appears once, never twice.
+test('every queue action stays in reach: More on a desk, one Desk tools button on a phone', async ({ page }, info) => {
   await boot(page, [row('q1')]);
   const head = page.locator('#tab-queue .section-header');
-  for (const name of ['Add group', 'Print Report']) {
-    await expect(head.locator('button', { hasText: name })).toBeVisible();
-  }
-  await expect(head.locator('button', { hasText: 'Add rider' })).toHaveCount(0); // not on a circuit night (2026-10-07)
-  await expect(page.locator('#tab-queue button[aria-label="More"]')).toHaveCount(0);
+  await head.locator('.sh-more').click();
+  const sheet = page.locator('.row-sheet');
+  for (const name of ['Add group', 'Print Report']) await expect(sheet.getByRole('menuitem', { name })).toBeVisible();
+  await expect(sheet.getByRole('menuitem', { name: 'Add rider' })).toHaveCount(0); // not on a circuit night (2026-10-07)
+  await page.locator('.row-sheet-close').click();
   if (info.project.name === 'mobile') {
     await expect(page.locator('#tab-queue .scan-fab')).toBeVisible();
     await expect(page.locator('#tab-queue .walkin-fab')).toBeVisible();
@@ -133,13 +133,14 @@ test('the phone header keeps every queue action on screen', async ({ page }, inf
     // the floating pair says what it does without words
     await expect(page.locator('#tab-queue .scan-fab')).toHaveAttribute('aria-label', 'Scan ticket');
     await expect(page.locator('#tab-queue .walkin-fab')).toHaveAttribute('aria-label', 'Walk-in');
-    // what is left of the header: equal cells inside the screen, two rows at most on a circuit night
+    // what is left of the header: the Desk tools button, inside the screen, on the title's row
+    await expect(head.locator('.sh-more')).toHaveText(/Desk tools/);
     const strip = page.locator('.sf-head-actions');
-    const cells = await strip.evaluate((e) => [...e.children].filter((c) => (c as HTMLElement).offsetParent).map((c) => { const r = c.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.right)]; }));
+    const cells = await strip.evaluate((e) => [...e.querySelectorAll('button,a')].filter((c) => (c as HTMLElement).offsetParent).map((c) => Math.round(c.getBoundingClientRect().right)));
     const vw = await page.evaluate('innerWidth') as number;
-    expect(cells.every(([, right]) => right <= vw)).toBe(true);
-    expect(new Set(cells.map(([w]) => w)).size).toBe(1);
-    expect(await strip.evaluate((e) => e.getBoundingClientRect().height < 96)).toBe(true);
+    expect(cells.length).toBe(1);
+    expect(cells.every((right) => right <= vw)).toBe(true);
+    expect(await head.evaluate((e) => e.getBoundingClientRect().height < 64)).toBe(true);
   } else {
     await expect(head.locator('button', { hasText: '+ Walk-in' })).toBeVisible();
     await expect(page.locator('#tab-queue .scan-inline')).toBeVisible();

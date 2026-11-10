@@ -245,7 +245,9 @@ test.describe('@staff:bookings the Saturday ride messages, once per ride', () =>
   test('the button on the ride opens the three messages, with a WhatsApp link that names nobody', async ({ page }) => {
     await staff(page);
     await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${D1}-s';S._sfPicked=true;renderStaffQueue()`);
-    await page.locator('.rm-open').first().click();
+    const rm = page.locator('#tab-queue .rm-open').first();
+    if (await rm.isVisible()) await rm.click();
+    else { await page.locator('#tab-queue .sh-more').click(); await page.getByRole('menuitem', { name: 'Ride messages' }).click(); } // a phone's Desk tools (staff round s10)
     const dlg = page.getByRole('dialog', { name: 'Ride messages' });
     await expect(dlg).toBeVisible();
     await dlg.locator('[data-rm="ride"]').click();
@@ -264,6 +266,7 @@ test.describe('@staff:bookings the Saturday ride messages, once per ride', () =>
     await staff(page, { sessions: [sat(`${D1}-s`, D1), ride(`${D2}-j`, D2)] });
     expect(await page.evaluate(`[!!_rmSessBtn('${D1}-s'),!!_rmSessBtn('${D2}-j')]`)).toEqual([true, false]);
     await page.evaluate(`selectSessionDetail('${D1}-s')`);
-    await expect(page.locator('.sess-detail-actions .rm-open')).toBeVisible();
+    await page.locator('.sess-detail-actions .sh-more').click(); // the detail's More (staff round s10)
+    await expect(page.locator('.row-sheet .rmt-tile', { hasText: 'Ride messages' })).toBeVisible();
   });
 });

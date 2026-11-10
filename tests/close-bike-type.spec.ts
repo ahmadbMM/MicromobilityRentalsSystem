@@ -178,7 +178,9 @@ test.describe('@customer:reserve a booking already made on a closed type', () =>
 test.describe('@staff:sessions closing a bike type', () => {
   const dlg = (page: Page) => page.locator('#tc-box');
   const typeBtn = (page: Page, name: string) => dlg(page).getByRole('button', { name, exact: true });
-  const openBtn = (page: Page) => page.locator('.sess-detail-actions').getByRole('button', { name: /^Close bike types/ });
+  // Close bike types is a tile in the session detail's More since staff round s10: More is opened first when it is not open yet
+  const openBtn = (page: Page) => page.locator('.row-sheet').getByRole('menuitem', { name: /^Close bike types/ });
+  const more = async (page: Page) => { if (!(await page.locator('.row-sheet').isVisible())) await page.locator('.sess-detail-actions .sh-more').click(); };
 
   async function staff(page: Page, sessions: Record<string, unknown>[], failWrite?: Parameters<typeof stubSupabase>[2]) {
     await stubSupabase(page, { sessions, queue_entries: [], bikes: [] }, failWrite);
@@ -192,11 +194,12 @@ test.describe('@staff:sessions closing a bike type', () => {
     await page.waitForFunction('allSessions().length>0');
     return patches;
   }
-  const detail = (page: Page, id: string) => page.evaluate(`setStaffTab('sessions');selectSessionDetail('${id}')`);
+  const detail = (page: Page, id: string) => page.evaluate(`document.querySelectorAll('.row-sheet-bg').forEach(x=>x.remove());setStaffTab('sessions');selectSessionDetail('${id}')`);
 
   test('a type is closed from the session and the save says so to the database; Undo opens it again', async ({ page }) => {
     const patches = await staff(page, [night(OPEN)]);
     await detail(page, OPEN);
+    await more(page);
     await openBtn(page).click();
     await expect(dlg(page)).toBeVisible();
     await expect(typeBtn(page, 'Road')).toHaveAttribute('aria-pressed', 'false');
@@ -218,6 +221,7 @@ test.describe('@staff:sessions closing a bike type', () => {
   test('the session never loses its status or anything else on the way', async ({ page }) => {
     const patches = await staff(page, [night(OPEN, { closed_types: ['Kids'] })]);
     await detail(page, OPEN);
+    await more(page);
     await openBtn(page).click();
     await typeBtn(page, 'Kids').click();
     await dlg(page).getByRole('button', { name: 'Save', exact: true }).click();
@@ -231,7 +235,9 @@ test.describe('@staff:sessions closing a bike type', () => {
     await detail(page, OPEN);
     await expect(page.locator('.sess-detail-tc')).toHaveText('Bike types closed: Kids, Road');
     await expect(page.locator(`.sess-lc .sess-lc-tc`)).toHaveText('Bike types closed: Kids, Road');
+    await more(page);
     await expect(openBtn(page)).toHaveText('Close bike types (2)');
+    await more(page);
     await openBtn(page).click();
     await expect(typeBtn(page, 'Kids')).toHaveAttribute('aria-pressed', 'true');
     await expect(typeBtn(page, 'Road')).toHaveAttribute('aria-pressed', 'true');
@@ -242,12 +248,14 @@ test.describe('@staff:sessions closing a bike type', () => {
     const SAT = '2099-03-07';
     await staff(page, [night(OPEN), night(SAT, { day: 'Saturday', event_kind: 'community', ride_kind: 'saturday', needs_approval: true, hide_queue: true })]);
     await detail(page, OPEN);
+    await more(page);
     await openBtn(page).click();
     await expect(typeBtn(page, 'Road Carbon')).toBeVisible();
     await expect(typeBtn(page, 'Any')).toHaveCount(0);
     await expect(dlg(page).locator('.toggle-btn')).toHaveCount(5); // Road, Hybrid, Mountain, Kids, Road Carbon
     await page.evaluate('closeConfirm()');
     await detail(page, SAT);
+    await more(page);
     await openBtn(page).click();
     await expect(typeBtn(page, 'Road Carbon')).toHaveCount(0);
     await expect(dlg(page).locator('.toggle-btn')).toHaveCount(5); // Road, Hybrid, Mountain, Kids and the rider's own
@@ -256,6 +264,7 @@ test.describe('@staff:sessions closing a bike type', () => {
   test('the last open type stays open: that is the session\'s own Close', async ({ page }) => {
     const patches = await staff(page, [night(OPEN)]);
     await detail(page, OPEN);
+    await more(page);
     await openBtn(page).click();
     const save = dlg(page).getByRole('button', { name: 'Save', exact: true });
     await expect(page.locator('#tc-last')).toBeHidden();
@@ -275,13 +284,16 @@ test.describe('@staff:sessions closing a bike type', () => {
   test('saving with nothing changed writes nothing, and Cancel, the X and Escape leave it alone', async ({ page }) => {
     const patches = await staff(page, [night(OPEN, { closed_types: ['Kids'] })]);
     await detail(page, OPEN);
+    await more(page);
     await openBtn(page).click();
     await dlg(page).getByRole('button', { name: 'Save', exact: true }).click();
     await expect(dlg(page)).toHaveCount(0);
+    await more(page);
     await openBtn(page).click();
     await typeBtn(page, 'Road').click();
     await dlg(page).getByRole('button', { name: 'Cancel', exact: true }).click();
     await expect(dlg(page)).toHaveCount(0);
+    await more(page);
     await openBtn(page).click();
     await expect(typeBtn(page, 'Road')).toHaveAttribute('aria-pressed', 'false'); // the abandoned tap did not stay
     await page.keyboard.press('Escape');
@@ -293,6 +305,7 @@ test.describe('@staff:sessions closing a bike type', () => {
   test('a refused write is said, and nothing is offered to undo', async ({ page }) => {
     await staff(page, [night(OPEN)], { table: 'sessions', methods: ['PATCH'] });
     await detail(page, OPEN);
+    await more(page);
     await openBtn(page).click();
     await typeBtn(page, 'Road').click();
     await dlg(page).getByRole('button', { name: 'Save', exact: true }).click();
@@ -309,13 +322,17 @@ test.describe('@staff:sessions closing a bike type', () => {
       night(PAST),
     ]);
     await detail(page, OPEN);
+    await more(page);
     await expect(openBtn(page)).toBeVisible();
     await detail(page, POOL);
+    await more(page);
     await expect(openBtn(page)).toHaveCount(0);
     await detail(page, CLOSED);
+    await more(page);
     await expect(openBtn(page)).toHaveCount(0);
     await expect(page.locator('.sess-detail-tc')).toHaveCount(0); // a closed session is closed whatever its types
     await detail(page, PAST);
+    await more(page);
     await expect(openBtn(page)).toHaveCount(0);
   });
 

@@ -184,7 +184,8 @@ test.describe('@staff:bookings s1010 desk', () => {
 
   test('D13: My shift lists this operator\'s actions today and what is still open', async ({ page }) => {
     await boot(page, { staff_actions: [{ at: new Date().toISOString(), action: 'Check In: #9 Someone', who: 'Spec Staff' }] });
-    await page.locator('.my-shift-btn').filter({ visible: true }).first().click();
+    await page.locator('#tab-queue .sh-more').click(); // My shift is a tile in the header's More (staff round s10)
+    await page.getByRole('menuitem', { name: 'My shift' }).click();
     const s = page.locator('#desk-sheet [role="dialog"]');
     await expect(s).toBeVisible();
     await expect(s.locator('#dk-sheet-t')).toContainText('My shift');

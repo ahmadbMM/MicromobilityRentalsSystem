@@ -73,7 +73,10 @@ test.describe('@staff:people People review', () => {
     await expect(m.locator('.n6p-det')).toContainText('Acme Labs');
     await expect(m.locator('.n6p-det')).toContainText('lina_rides');
     await expect(m.locator('.n6p-notes')).toContainText('Needs the small helmet');
-    await expect(m.locator('.n6p-bar')).toContainText('New booking');
+    await expect(m.locator('.n6p-bar')).toContainText('Edit customer'); // Call, WhatsApp and Edit in sight, the rest in More (staff round s10)
+    await m.locator('.n6p-bar .sh-more').click();
+    await expect(page.locator('.row-sheet')).toContainText('New booking');
+    await page.locator('.row-sheet-close').click();
     await expect(m.locator('.n6p-stage')).toHaveText('First rides');
     await expect(m.locator('.am-chips')).toHaveCount(0);
     await page.evaluate(`S.customerTags=[{customer_id:'c1',tag_id:'t9',added_at:Date.now()}];renderCommunity()`);
@@ -100,7 +103,7 @@ test.describe('@staff:people People review', () => {
 
   test('stages filter Accounts, and the new-account tiles open it (PP05, PP08)', async ({ page }) => {
     await boot(page);
-    await page.evaluate(`setStaffTab('community');S.communityTab='overview';renderCommunity()`);
+    await page.evaluate(`setStaffTab('community');S.communityTab='summary';renderCommunity()`); // the figures are People's Summary (staff round s10)
     await page.locator('#tab-community .dash-kpi', { hasText: 'New this week' }).click();
     expect(await page.evaluate('[S.communityTab,S.amJoined]')).toEqual(['accounts', '7']);
     await expect(page.locator('#am-cust-rows .am-row')).toHaveCount(1);

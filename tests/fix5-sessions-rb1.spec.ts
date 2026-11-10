@@ -137,7 +137,9 @@ test.describe('@staff:sessions rb1 close out (2026-10-05)', () => {
       q('in', OLD, 4, { approval: 'approved', checked_in_at: '2020-02-01T06:10:00Z' }),
     ]);
     await page.evaluate(`selectSessionDetail('${OLD}')`);
-    await expect(page.locator('#tab-sessions .sess-detail-actions')).toContainText('Close out (2)');
+    await page.locator('#tab-sessions .sess-detail-actions .sh-more').click(); // a tile in the detail's More (staff round s10)
+    await expect(page.locator('.row-sheet')).toContainText('Close out (2)');
+    await page.locator('.row-sheet-close').click();
     expect(await page.evaluate(`_coCount('${OLD}')`)).toBe(2);
     const p: { url: string; body: string }[] = [];
     page.on('request', (r) => { if (r.method() === 'PATCH' && r.url().includes('/rest/v1/queue_entries')) p.push({ url: decodeURIComponent(r.url()), body: r.postData() || '' }); });

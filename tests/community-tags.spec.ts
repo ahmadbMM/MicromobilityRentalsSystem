@@ -67,14 +67,14 @@ test('Remove asks first, then takes the tag back', async ({ page }) => {
 
 test('the overviews count from the same data and open their lists', async ({ page }) => {
   await boot(page);
-  await page.evaluate(`setCommTab('overview')`);
+  await page.evaluate(`setCommTab('summary')`); // the figures are People's Summary (staff round s10)
   const tab = page.locator('#tab-community');
   await expect(tab.locator('.dash-kpi', { hasText: 'Community members' }).locator('strong')).toHaveText('2');
   await expect(tab.locator('.dash-kpi', { hasText: 'Tags' }).locator('strong')).toHaveText('2');
   await tab.locator('.dash-kpi', { hasText: 'Community members' }).click();
   await expect(tab.locator('#am-cust-rows')).toContainText('Mona Member');
   await expect(tab.locator('#am-cust-rows')).not.toContainText('Omar Outside'); // Members: the community's only
-  await page.evaluate(`setCustomersTab('overview')`); // the old Customers' overview is People's
+  await page.evaluate(`setCustomersTab('summary')`); // the old Customers' overview is People's (its figures in the Summary since s10)
   await expect(tab.locator('.dash-kpi', { hasText: /^3/ }).first()).toContainText('Accounts');
   await expect(tab.locator('.dash-kpi', { hasText: 'Community members' }).locator('strong')).toHaveText('2');
 });

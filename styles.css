@@ -13132,3 +13132,52 @@ html[data-staff-theme="booth"] #confirm-modal .lk-cx-o{border-width:2px;}
 /* booth: the edges solid, the picked door ringed in black too */
 html[data-staff-theme="booth"] #lk-as :is(.lk-as-d,.lk-as-p){border-width:2px;}
 html[data-staff-theme="booth"] #lk-as .lk-as-d.on{outline:2px solid var(--text);outline-offset:1px;}
+
+/* ══ SECTION HEADER (staff round s10, 2026-11-10) ══════════════════════════════════════════════════════════════════
+   One header for a busy page (_shTools): at most one solid primary, up to four outline buttons used every night, and
+   More actions with the rest as the booking menu's grouped tiles (.rmt-tile). A section's header (.sh-fold) is one
+   "Desk tools" button on a phone, its sheet carrying the outline ones too. */
+body.view-staff .sh-vis{display:contents;}
+body.view-staff .sh-more{white-space:nowrap;border:1px solid var(--sf-ctl,var(--border));background:var(--sf-card,var(--s1));color:var(--text);} /* an outline button, like the ones beside it */
+body.view-staff .sh-more .sh-dt{display:none;}
+@media (min-width:768px){body.view-staff .sh-more.sh-ph{display:none!important;}}
+body.view-staff .row-sheet .rmt-tile>svg{width:20px;height:20px;flex-shrink:0;color:var(--green-d);}
+body.view-staff .row-sheet .rmt-tile:disabled{opacity:.5;cursor:not-allowed;}
+/* a share that runs stays in the header with its Stop; which role it is, the words after it say */
+body.view-staff #tab-queue .rq-hacts .live-share{display:inline-flex;align-items:center;gap:8px;margin:0;}
+body.view-staff #tab-queue .rq-hacts .live-share select{display:none;}
+@media (max-width:767px){
+  body.view-staff .sh-vis.sh-fold{display:none;}
+  body.view-staff .sh-more.sh-fold .sh-ml{display:none;}
+  body.view-staff .sh-more.sh-fold .sh-dt{display:inline;}
+  /* Bookings: the title and its Desk tools on one row (six buttons in a 3x2 grid, a lone key and the ride leader's row before) */
+  body.view-staff #tab-queue .section-header{flex-direction:row;align-items:center;flex-wrap:nowrap;gap:8px;}
+  body.view-staff #tab-queue .section-header>div:first-child{flex:1 1 auto;width:auto;min-width:0;flex-wrap:wrap;row-gap:2px;}
+  body.view-staff #tab-queue .sf-head-actions.rq-hacts{display:flex!important;flex-wrap:wrap;justify-content:flex-end;flex:0 1 auto;width:auto!important;gap:6px;}
+  body.view-staff #tab-queue .sf-head-actions.rq-hacts>*{width:auto;}
+  body.view-staff #tab-queue .sf-head-actions.rq-hacts>.sh-more{min-height:44px;padding-inline:14px;}
+  /* search is a field across the row, not an icon; the saved views and Filters share the row under it */
+  body.view-staff .search-wrap.srch-wide{flex:1 1 100%!important;width:100%!important;max-width:none!important;}
+  body.view-staff .search-wrap.srch-wide .search-input{width:100%!important;}
+  body.view-staff #tab-queue .filter-bar .filter-row>.sv-bar{flex:1 1 0;min-width:0;}
+  body.view-staff #tab-queue .filter-bar .filter-row>.sv-bar .sv-lbl{flex:1 1 0;min-width:0;}
+  body.view-staff #tab-queue .filter-bar .filter-row>.sv-bar .sv-pick{max-width:none;width:100%;min-width:0;}
+  /* the night's figures: Owing beside Not arrived (it sat off the screen's edge), the rest a swipe away, the edge faded */
+  body.view-staff #tab-queue .q-lc-nums .q-lc-sep{display:none;}
+  body.view-staff #tab-queue .q-lc-nums .q-lc-waiting{order:-2;}
+  body.view-staff #tab-queue .q-lc-nums .q-lc-owing{order:-1;}
+  body.view-staff #tab-queue .q-live-count{padding-inline-end:28px;-webkit-mask-image:linear-gradient(to left,transparent,#000 24px);mask-image:linear-gradient(to left,transparent,#000 24px);}
+  html[dir="rtl"] body.view-staff #tab-queue .q-live-count{-webkit-mask-image:linear-gradient(to right,transparent,#000 24px);mask-image:linear-gradient(to right,transparent,#000 24px);}
+  /* the list ends a floating pair's height (58px and its 16px lift, the tab bar and the safe area are .view-main's) above
+     the foot, so at the bottom of the roster or the Filters panel the pair covers nothing */
+  body.view-staff #tab-queue{--fab-h:58px;padding-bottom:calc(var(--fab-h) + 26px);}
+  /* D9: while a search field is typed in with the keyboard up, the pair steps aside */
+  body.view-staff.fab-kb .fab-row{display:none!important;}
+}
+/* D5 (the owner, 2026-11-10): from 1280px the account window is a side panel with no scrim, and the page beside it moves
+   over so the list stays in view; phones and narrower screens keep the centred dialog. */
+@media (min-width:1280px){
+  body.view-staff #cust-modal>.modal-backdrop{inset-inline-start:auto;top:var(--topbar-h,56px);width:min(540px,40vw);padding:0;align-items:stretch;justify-content:stretch;background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;animation:none;}
+  body.view-staff #cust-modal .ah-box{width:100%;max-width:none;height:100%;max-height:none;margin:0;border-radius:0;border-inline-start:1px solid var(--sf-line,var(--border));box-shadow:var(--sf-sh-3,0 8px 24px rgba(0,0,0,.18));overflow-y:auto;}
+  body.view-staff.ah-side #view-staff.active>.view-main{padding-inline-end:calc(min(540px,40vw) + 24px);}
+}

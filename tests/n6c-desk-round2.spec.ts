@@ -68,7 +68,8 @@ test.describe('@staff:bookings The desk, second round', () => {
     await expect(first).toHaveCount(2); // r2 and r3 (r1 rode before; r4 has no account)
     await expect(page.locator('#tab-queue tr[data-id="r1"] .n6c-first')).toHaveCount(0);
 
-    await page.locator('#tab-queue .n6c-prep-btn').click();
+    await page.locator('#tab-queue .sh-more').click(); // the header's More (staff round s10)
+    await page.getByRole('menuitem', { name: 'Bike prep' }).click();
     const dlg = page.locator('#confirm-modal');
     await expect(dlg).toContainText('Bike prep');
     const rows = await dlg.locator('table.n6c-prep tbody tr').allInnerTexts();
@@ -77,7 +78,8 @@ test.describe('@staff:bookings The desk, second round', () => {
     await expect(dlg.locator('thead')).toContainText('No height');
     await dlg.getByRole('button', { name: 'Close' }).last().click();
 
-    await page.locator('#tab-queue .n6c-ft-btn').click();
+    await page.locator('#tab-queue .sh-more').click();
+    await page.getByRole('menuitem', { name: 'First-timers' }).click();
     await expect(dlg).toContainText('First-timers with no second booking (1)');
     await expect(dlg.locator('.n6c-ft-row')).toContainText('Lina First');
   });

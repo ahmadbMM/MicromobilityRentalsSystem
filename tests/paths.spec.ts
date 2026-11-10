@@ -209,6 +209,20 @@ test.describe('staff', () => {
     expect(at(page)).toBe('/sessions/table');
   });
 
+  test('the figures are Sessions\' and People\'s Summary: /sessions/summary and /people/summary (staff round s10)', async ({ page }) => {
+    await staff(page, '/sessions/summary');
+    await page.waitForFunction(`S.staffTab==='sessions'&&S.sessView==='sum'`);
+    expect(at(page)).toBe('/sessions/summary');
+    await expect(page.locator('#tab-sessions .ss-figs')).toBeVisible();
+    await page.locator('.sess-view-toggle .view-toggle-btn').nth(0).click(); // Cards
+    expect(at(page)).toBe('/sessions');
+    await expect(page.locator('#tab-sessions .ss-figs')).toHaveCount(0);
+    await staff(page, '/people/summary');
+    await page.waitForFunction(`S.staffTab==='community'&&S.communityTab==='summary'`);
+    expect(at(page)).toBe('/people/summary');
+    await expect(page.locator('#tab-community .dash-kpi').first()).toBeVisible();
+  });
+
   test('the old Bookings > Sessions addresses open the Sessions section (2026-11-06)', async ({ page }) => {
     await staff(page, '/bookings/sessions/calendar');
     await page.waitForFunction(`S.staffTab==='sessions'&&S.sessView==='cal'`);

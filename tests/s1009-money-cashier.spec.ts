@@ -30,12 +30,18 @@ const posts = (page: Page, table: string) => {
   return out;
 };
 
+// A receipt's Edit, Share, Refund, Void and Changes are tiles in its ⋯ (staff round s10): Print stays on the row.
+async function rcMore(page: Page, name: string) {
+  await page.locator('#tab-cashier .sl-rc-acts .sh-more').first().click();
+  await page.locator('.row-sheet').getByRole('menuitem', { name, exact: true }).click();
+}
+
 test.describe('@staff:sales money controls at the desk', () => {
   test('a void asks why: a reason is required, Other needs words, and the reason goes to the server and the log', async ({ page }) => {
     await boot(page, { 'rpc:staff_void_receipt': { ok: true, receipt_id: 'r1', count: 1, items: [] } });
     const calls = rpcs(page);
     await page.evaluate(`setStaffTab('cashier');S._ctSession='s0';renderCashier()`);
-    await page.locator('#tab-cashier').getByRole('button', { name: 'Void', exact: true }).first().click();
+    await rcMore(page, 'Void');
     const dlg = page.getByRole('dialog', { name: /Why is this sale voided/ });
     await expect(dlg).toBeVisible();
     const go = dlg.getByRole('button', { name: 'Void', exact: true });
@@ -61,7 +67,7 @@ test.describe('@staff:sales money controls at the desk', () => {
     await boot(page);
     await page.evaluate(`setStaffTab('cashier');S._ctSession='s0';renderCashier()`);
     await page.route(/\/rest\/v1\/rpc\/staff_refund_receipt/, (r) => r.abort('internetdisconnected'));
-    await page.locator('#tab-cashier').getByRole('button', { name: 'Refund', exact: true }).first().click();
+    await rcMore(page, 'Refund');
     const dlg = page.getByRole('dialog', { name: /Why is this receipt refunded/ });
     await dlg.getByRole('button', { name: 'Faulty or damaged' }).click();
     await dlg.getByRole('button', { name: 'Refund', exact: true }).click();
@@ -72,7 +78,7 @@ test.describe('@staff:sales money controls at the desk', () => {
     await boot(page);
     const calls = rpcs(page);
     await page.evaluate(`setStaffTab('cashier');S._ctSession='s0';renderCashier()`);
-    await page.locator('#tab-cashier').getByRole('button', { name: 'Void', exact: true }).first().click();
+    await rcMore(page, 'Void');
     await page.getByRole('dialog', { name: /Why is this sale voided/ }).getByRole('button', { name: 'Cancel' }).click();
     await page.waitForTimeout(200);
     expect(calls.filter((c) => /void/.test(c.name))).toEqual([]);

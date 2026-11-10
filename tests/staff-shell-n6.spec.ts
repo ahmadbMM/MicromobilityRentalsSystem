@@ -117,7 +117,8 @@ test('ST05 + ST07: Bookings links to its session in Sessions, whose address name
   await page.evaluate(`setStaffTab('queue',{sid:'2099-02-01'})`);
   const btn = page.locator('#tab-queue .n6t-sess');
   await expect(btn).toHaveText(/Session settings/);
-  await btn.click();
+  if (await btn.isVisible()) await btn.click();
+  else { await page.locator('#tab-queue .sh-more').click(); await page.getByRole('menuitem', { name: 'Session settings' }).click(); } // a phone's Desk tools (staff round s10)
   await expect.poll(() => page.evaluate(`({tab:S.staffTab,sel:S.selSessionDetail})`)).toEqual({ tab: 'sessions', sel: '2099-02-01' });
   await expect(page).toHaveURL(/\/sessions\?session=2099-02-01$/);
   await page.goBack();

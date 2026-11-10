@@ -8026,5 +8026,16 @@
   "paySetNothing": "कुछ नहीं बदला",
   "paySetSaved": "सेटिंग्स सहेजी गईं",
   "paySetSavedLog": "भुगतान सेटिंग्स: {0}",
-  "paySetHist": "हाल के बदलाव"
+  "paySetHist": "हाल के बदलाव",
+  "shDeskTools": "डेस्क टूल",
+  "shGrpSession": "सेशन",
+  "shGrpAdd": "जोड़ें",
+  "shGrpPeople": "लोग",
+  "shGrpReports": "रिपोर्ट",
+  "shGrpYou": "आपकी शिफ़्ट",
+  "shGrpView": "व्यू",
+  "shGrpShare": "शेयर करें",
+  "shGrpRecord": "लिंक और बदलाव",
+  "shGrpImport": "आयात",
+  "shSummary": "सारांश"
 }

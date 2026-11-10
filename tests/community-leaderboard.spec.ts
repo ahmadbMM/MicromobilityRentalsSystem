@@ -33,13 +33,16 @@ test('People (the old Customers address too) opens on its overview, every tab of
   const tab = page.locator('#tab-community');
   await expect(tab.locator('.page-title')).toHaveText('People');
   const pills = tab.locator('.filter-row').first().locator('.filter-pill');
-  await expect(pills).toHaveText(['Overview', 'Accounts', /^Applications/, /^Flagged/, 'Tags', 'Badges', 'Titles', 'Activities', /^Birthdays/, /^Referrals/, 'Activity', /^Duplicates/]); // Duplicates (admins) carries the likely pairs; Referrals the ones to check (2026-11-08)
+  await expect(pills).toHaveText(['Overview', 'Summary', 'Accounts', /^Applications/, /^Flagged/, 'Tags', 'Badges', 'Titles', 'Activities', /^Birthdays/, /^Referrals/, 'Activity', /^Duplicates/]); // Duplicates (admins) carries the likely pairs; Referrals the ones to check (2026-11-08)
   await expect(pills.first()).toHaveClass(/active/);
-  await expect(tab.locator('.dash-kpi', { hasText: 'Accounts' }).locator('strong')).toHaveText('2');
   await expect(tab.locator('.dash-row', { hasText: 'Badr Next' })).toHaveCount(1); // the newest accounts
+  await expect(tab.locator('.dash-kpi')).toHaveCount(0); // the figures are the Summary's (staff round s10)
+  await pills.nth(1).click();
+  expect(await page.evaluate('location.pathname')).toBe('/people/summary');
+  await expect(tab.locator('.dash-kpi', { hasText: 'Accounts' }).locator('strong')).toHaveText('2');
   // a figure opens its list
   await tab.locator('.dash-kpi', { hasText: 'Accounts' }).click();
-  await expect(pills.nth(1)).toHaveClass(/active/);
+  await expect(pills.nth(2)).toHaveClass(/active/);
   await expect(tab.locator('#am-cust-rows')).toContainText('Amal Top');
   expect(await page.evaluate('location.pathname')).toBe('/people/accounts');
   // a tab this device never heard of lands on the overview
@@ -49,7 +52,7 @@ test('People (the old Customers address too) opens on its overview, every tab of
 
 test('Members is a switch on Accounts, not a page; no leaderboard', async ({ page }) => {
   await staff(page);
-  await page.evaluate(`setStaffTab('community')`);
+  await page.evaluate(`setStaffTab('community');setCommTab('summary')`);
   const tab = page.locator('#tab-community');
   await expect(tab).not.toContainText('Leaderboard');
   await expect(tab.locator('.dash-kpi', { hasText: 'Community members' })).toHaveCount(1);

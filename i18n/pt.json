@@ -8026,5 +8026,16 @@
   "paySetNothing": "Nada mudou",
   "paySetSaved": "Configurações salvas",
   "paySetSavedLog": "Configurações de pagamento: {0}",
-  "paySetHist": "Alterações recentes"
+  "paySetHist": "Alterações recentes",
+  "shDeskTools": "Ferramentas do balcão",
+  "shGrpSession": "Sessão",
+  "shGrpAdd": "Adicionar",
+  "shGrpPeople": "Pessoas",
+  "shGrpReports": "Relatórios",
+  "shGrpYou": "O seu turno",
+  "shGrpView": "Vista",
+  "shGrpShare": "Partilhar",
+  "shGrpRecord": "Ligação e alterações",
+  "shGrpImport": "Importar",
+  "shSummary": "Resumo"
 }

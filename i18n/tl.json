@@ -8026,5 +8026,16 @@
   "paySetNothing": "Walang nagbago",
   "paySetSaved": "Na-save ang mga setting",
   "paySetSavedLog": "Mga setting ng bayad: {0}",
-  "paySetHist": "Mga kamakailang pagbabago"
+  "paySetHist": "Mga kamakailang pagbabago",
+  "shDeskTools": "Mga tool ng desk",
+  "shGrpSession": "Sesyon",
+  "shGrpAdd": "Magdagdag",
+  "shGrpPeople": "Mga tao",
+  "shGrpReports": "Mga ulat",
+  "shGrpYou": "Ang shift mo",
+  "shGrpView": "View",
+  "shGrpShare": "Ibahagi",
+  "shGrpRecord": "Link at mga pagbabago",
+  "shGrpImport": "Mag-import",
+  "shSummary": "Buod"
 }

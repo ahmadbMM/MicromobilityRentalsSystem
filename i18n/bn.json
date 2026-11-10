@@ -8026,5 +8026,16 @@
   "paySetNothing": "কিছুই বদলায়নি",
   "paySetSaved": "সেটিংস সংরক্ষিত",
   "paySetSavedLog": "পেমেন্ট সেটিংস: {0}",
-  "paySetHist": "সাম্প্রতিক পরিবর্তন"
+  "paySetHist": "সাম্প্রতিক পরিবর্তন",
+  "shDeskTools": "ডেস্ক টুল",
+  "shGrpSession": "সেশন",
+  "shGrpAdd": "যোগ করুন",
+  "shGrpPeople": "মানুষ",
+  "shGrpReports": "রিপোর্ট",
+  "shGrpYou": "আপনার শিফট",
+  "shGrpView": "ভিউ",
+  "shGrpShare": "শেয়ার করুন",
+  "shGrpRecord": "লিংক ও পরিবর্তন",
+  "shGrpImport": "ইমপোর্ট",
+  "shSummary": "সারাংশ"
 }

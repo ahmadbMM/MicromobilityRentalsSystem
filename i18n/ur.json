@@ -8026,5 +8026,16 @@
   "paySetNothing": "کچھ نہیں بدلا",
   "paySetSaved": "ترتیبات محفوظ ہو گئیں",
   "paySetSavedLog": "ادائیگی کی ترتیبات: {0}",
-  "paySetHist": "حالیہ تبدیلیاں"
+  "paySetHist": "حالیہ تبدیلیاں",
+  "shDeskTools": "ڈیسک کے ٹولز",
+  "shGrpSession": "سیشن",
+  "shGrpAdd": "شامل کریں",
+  "shGrpPeople": "لوگ",
+  "shGrpReports": "رپورٹس",
+  "shGrpYou": "آپ کی شفٹ",
+  "shGrpView": "منظر",
+  "shGrpShare": "شیئر کریں",
+  "shGrpRecord": "لنک اور تبدیلیاں",
+  "shGrpImport": "درآمد",
+  "shSummary": "خلاصہ"
 }

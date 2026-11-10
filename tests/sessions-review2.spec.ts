@@ -64,7 +64,8 @@ test.describe('@staff:sessions the Sessions section, second round', () => {
   test('Announce gives English and Arabic words with the booking link', async ({ page }) => {
     await open(page);
     await page.evaluate(`selectSessionDetail('2099-03-03')`);
-    await page.locator('#tab-sessions').getByRole('button', { name: 'Announce' }).click();
+    await page.locator('#tab-sessions .sess-detail-actions .sh-more').click(); // a tile in the detail's More (staff round s10)
+    await page.getByRole('menuitem', { name: 'Announce' }).click();
     const dlg = page.getByRole('dialog', { name: /Announce/ });
     await expect(dlg.locator('#n6r-ann-en')).toHaveValue(/is open for booking.*\?ev=jcc&session=2099-03-03/s);
     await expect(dlg.locator('#n6r-ann-ar')).toHaveValue(/الحجز مفتوح/);
@@ -100,7 +101,8 @@ test.describe('@staff:sessions the Sessions section, second round', () => {
     expect(await page.evaluate(`_placesCap(_sessGet('2099-03-03'))`)).toBe(4);
     const w = writes(page, /\/rest\/v1\/sessions\?/);
     await page.evaluate(`selectSessionDetail('2099-03-03')`);
-    await page.locator('#tab-sessions').getByRole('button', { name: 'Bikes out of service' }).click();
+    await page.locator('#tab-sessions .sess-detail-actions .sh-more').click(); // a tile in the detail's More (staff round s10)
+    await page.getByRole('menuitem', { name: 'Bikes out of service' }).click();
     const dlg = page.getByRole('dialog', { name: /Bikes out of service/ });
     await dlg.getByLabel('Road', { exact: true }).fill('1');
     await expect(dlg.locator('#n6r-out-warn')).toContainText('Road: 2 riders, 1 places');
