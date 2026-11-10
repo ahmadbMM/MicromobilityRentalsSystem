@@ -42,7 +42,7 @@ end $c$;
 create unique index if not exists staff_actions_client_id_key on public.staff_actions (client_id) where client_id is not null;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261111110000', 'staff_actions_client_id')
+values ('20261111180100', 'staff_actions_client_id')
 on conflict (version) do nothing;
 
 notify pgrst, 'reload schema';

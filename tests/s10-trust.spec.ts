@@ -117,7 +117,7 @@ test.describe('@staff:team s10 trust: section rights', () => {
   });
 
   test('the migration reads a NULL list as the role\'s sections and checks workshop, messages and shared options by section', () => {
-    const sql = readFileSync('supabase/migrations/20261111120000_section_checks.sql', 'utf8');
+    const sql = readFileSync('supabase/migrations/20261111180200_section_checks.sql', 'utf8');
     // the page's ROLE_TABS, in the database's ids
     expect(sql).toMatch(/when 'mechanic' then array\['inventory','workshop'\]/);
     expect(sql).toMatch(/when 'leader' then array\['queue'\]/);

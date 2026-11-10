@@ -276,4 +276,44 @@ test.describe('Community > Birthdays', () => {
     expect(ics).toContain('RRULE:FREQ=YEARLY;BYMONTH=2;BYMONTHDAY=-1');                    // the leap-day birthday
     expect(ics).not.toContain('1995');                                                      // no birth year leaves the page
   });
+
+  // The user, 2026-11-11: pick a Saturday, print every birthday from the Sunday before it to that Saturday, with
+  // the birth date, age, name, email and phone. Always the Community, the age that birthday brings, one table by day.
+  test('@staff:community Print a week: a Saturday picked, the Community birthdays Sunday to Saturday on paper', async ({ page }) => {
+    const jcc = { id: 'tag_jcc', slug: 'jcc', name: 'Jeddah Corniche Circuit', color: '#2f63ad' };
+    await staff(page, {
+      customers: customers.map(c => c.id === 'm1' ? { ...c, email: 'amal@example.com' } : c),
+      tags: [...tags, jcc], customer_tags: [...customer_tags, { customer_id: 'n1', tag_id: 'tag_jcc', added_at: 1 }],
+    });
+    await page.evaluate(`setCommTab('birthdays')`);
+    await page.locator('[aria-controls="fm-bd"]').click();
+    await page.locator('#fm-bd select[aria-label="Tag"]').selectOption('tag_jcc');          // the list shows another tag...
+    await expect(names(page)).toHaveText(['Not Member']);
+    await page.locator('#bd-wk-btn').click();                                               // ...the sheet stays the Community's
+    const sel = page.locator('#bd-wk-sat'), info = page.locator('#bd-wk-info'), go = page.locator('#bd-wk-go');
+    await expect(sel).toHaveValue('2026-10-10');                                            // the coming Saturday (today is Sunday 4 Oct)
+    await expect(sel.locator('option')).toHaveCount(21);
+    expect(await sel.locator('option').evaluateAll(o => o.map(x => new Date((x as HTMLOptionElement).value + 'T00:00:00Z').getUTCDay()))).toEqual(Array(21).fill(6));
+    await expect(info).toContainText(/4 Oct.*10 Oct 2026 · 2 birthdays/);
+    await sel.selectOption('2026-10-03');                                                   // Sun 27 Sep to Sat 3 Oct
+    await expect(info).toContainText('1 birthday');
+    await sel.selectOption('2026-11-07');                                                   // nobody that week
+    await expect(info).toContainText('No Community birthdays that week.');
+    await expect(go).toBeDisabled();
+    await sel.selectOption('2026-10-10');
+    await expect(go).toBeEnabled();
+    const [pop] = await Promise.all([page.waitForEvent('popup'), go.click()]);
+    await expect(page.locator('#bd-wk-sat')).toHaveCount(0);                               // the pop-up goes with the sheet
+    await expect(pop.locator('.mm-doc strong')).toHaveText('Community birthdays');
+    await expect(pop.locator('.mm-title strong')).toContainText(/4 Oct.*10 Oct 2026/);
+    await expect(pop.locator('table thead th')).toHaveText(['Day', 'Name', 'Birth date', 'Age', 'Email', 'Phone']);
+    const cells = await pop.locator('table tbody tr').evaluateAll(rs => rs.map(r => [...(r as HTMLTableRowElement).cells].map(c => (c.textContent || '').trim())));
+    expect(cells).toHaveLength(2);                                                          // the expired tag and the other tag's member stay out
+    expect(cells[0]).toEqual([expect.stringMatching(/Sun.*4 Oct/), 'Amal Today', '4 Oct 1995', '31', 'amal@example.com', '0551112222']);
+    expect(cells[1]).toEqual([expect.stringMatching(/Mon.*5 Oct/), 'Badr Tomorrow', '5 Oct 2008', '18', '—', '0553334444']);
+    // A week across New Year, and a leap-day birthday on 28 February when there is no 29th.
+    expect(await page.evaluate(`(()=>{S.customers=S.customers.map(c=>c.id==='m6'?{...c,birth_date:'1980-12-31'}:c.id==='m4'?{...c,birth_date:'1990-01-02'}:c);
+      return [_bdWkRows('2027-01-02').rows.map(r=>[r.c.name,r.date,r.age]),_bdWkRows('2027-03-06').rows.map(r=>[r.c.name,r.date,r.age])];})()`))
+      .toEqual([[['Omar Soon', '2026-12-31', 46], ['Faisal Recent', '2027-01-02', 37]], [['Dana Leap', '2027-02-28', 27]]]);
+  });
 });

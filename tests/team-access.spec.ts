@@ -113,7 +113,7 @@ test('the Team page sets PINs and what another account can open and change, neve
   await expect.poll(() => accessCalls).toEqual([{ p_user: DESK, p_role: 'frontdesk', p_view: ['queue', 'workshop'], p_edit: ['queue'] }]);
 });
 
-// Staff round s10, item 42: the database reads a NULL list as the role's sections (migration 20261111120000), and a Save
+// Staff round s10, item 42: the database reads a NULL list as the role's sections (migration 20261111180200), and a Save
 // never writes NULL for a role other than admin: "every section the role allows" goes out as the role's own list.
 test('a Save writes the sections out for every role but admin, never "everything"', async ({ page }) => {
   await boot(page);

@@ -187,4 +187,8 @@ drop trigger if exists staff_options_views_guard on public.staff_options;
 create trigger staff_options_views_guard before insert or update or delete on public.staff_options
   for each row execute function public._staff_views_guard();
 
+insert into supabase_migrations.schema_migrations (version, name)
+values ('20261111180200', 'section_checks')
+on conflict (version) do nothing;
+
 commit;

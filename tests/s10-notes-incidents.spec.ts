@@ -4,7 +4,7 @@ import { stubSupabase, stubRealtime, unlockStaff, waitForSb } from './helpers/su
 // Staff round s10 (2026-11-10), items 48-50: a handover note per night (session_notes: the figures bar's Notes (N), its
 // centred pop-up, the Dashboard's card, the bell, another desk's note on staff-ref), an incident on a booking
 // (booking_incidents: Record incident in the ⋯ menu, the account window, History > Incidents) and the places left per
-// bike type in the figures bar and the walk-in form. Migration 20261111130000. Invented riders only; the clock is fixed
+// bike type in the figures bar and the walk-in form. Migration 20261111180300. Invented riders only; the clock is fixed
 // on the session's evening so the night is always "today".
 
 const DAY = '2099-05-05';

@@ -1,5 +1,5 @@
 -- ============================================================================
--- 20261111130000_session_notes_incidents
+-- 20261111180300_session_notes_incidents
 --
 -- Staff website round s10 (2026-11-10), items 48 and 49 of the staff design review:
 --
@@ -47,7 +47,7 @@ create table if not exists public.session_notes (
   edited_at    timestamptz
 );
 create index if not exists session_notes_session on public.session_notes (session_id, created_at);
-comment on table public.session_notes is 'Staff handover notes per session (20261111130000); staff only, never shown to customers';
+comment on table public.session_notes is 'Staff handover notes per session (20261111180300); staff only, never shown to customers';
 
 alter table public.session_notes enable row level security;
 
@@ -142,7 +142,7 @@ create index if not exists booking_incidents_booking on public.booking_incidents
 create index if not exists booking_incidents_session on public.booking_incidents (session_id);
 create index if not exists booking_incidents_customer on public.booking_incidents (customer_id);
 create index if not exists booking_incidents_happened on public.booking_incidents (happened_at desc);
-comment on table public.booking_incidents is 'Incidents recorded on a booking by staff (20261111130000); staff only, never shown to customers';
+comment on table public.booking_incidents is 'Incidents recorded on a booking by staff (20261111180300); staff only, never shown to customers';
 
 alter table public.booking_incidents enable row level security;
 
@@ -217,7 +217,7 @@ begin
 end $chk$;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261111130000', 'session_notes_incidents')
+values ('20261111180300', 'session_notes_incidents')
 on conflict (version) do nothing;
 
 commit;

@@ -40,6 +40,17 @@ certificates"): a line of their own under the Arabic thank-you, the number large
 line when no hours are known. Both apps already pass `{{hours}}`; nothing in either changed but
 the file they print. `SPEC.md`, amendment 6.
 
+**2026-11-11.** The Saudi field set (SPEC.md, amendment 7): the role beside the hours, the skills
+gained in each language, the partner co-issuing it under the title, a QR code to check it and the
+issue date in the right-hand column. Seven new placeholders — `{{role}}`, `{{skills}}`,
+`{{skills_ar}}`, `{{partner}}`, `{{partner_ar}}`, `{{issued}}` and `{{qr}}` — each optional, none
+leaving a gap when empty. `{{qr}}` is the caller's own: a PNG data URL drawn on a canvas (the booking
+app's `QR.paint`, black `#1A1919` on off-white `#FBF9F4`) of
+`https://volunteer.micromobility.sa/#check/<code>`. The fit pass gains a step for long skills. The
+database stamps role, skills and partner on each certificate it issues for an event
+(`volunteer_certs`, migration `20261111140000`); a period certificate leaves them empty. **The
+portal must fill the seven and add the skills step to `fitCert`** before it syncs this version.
+
 ## The wording is said by gender, and stored
 
 The three lines in the body — the one above the name, the one above the green box and the Arabic
@@ -88,8 +99,9 @@ Both fetch `assets/certificate.html`, fill it with the same Mustache subset (`{{
   `npm run sync:cert` and committed there. Re-sync it whenever this folder changes, or the portal
   keeps printing the old design.
 
-Two of the placeholders are each app's own: `{{css}}` is this stylesheet on that app's origin, and
-`{{fonts}}` a sheet of that origin's carrying Space Grotesk and IBM Plex Sans Arabic.
+Three of the placeholders are each app's own: `{{css}}` is this stylesheet on that app's origin,
+`{{fonts}}` a sheet of that origin's carrying Space Grotesk and IBM Plex Sans Arabic, and `{{qr}}`
+the check code drawn by that app (above).
 
 ## Two things the page cannot do itself
 
@@ -99,7 +111,9 @@ no inline `<script>` and no inline `<style>`. So:
 - **The styles are a file**, never a `<style>` block.
 - **The name is fitted by whoever opened the window**, not by a script in the page: the size comes
   from the name's length, then shrinks 1px at a time to 32px until it is on one line (SPEC.md,
-  "Name size"). `_vcFit` in the booking app, `fitCert` in the portal. The same pass scales the whole
+  "Name size"). `_vcFit` in the booking app, `fitCert` in the portal. Since amendment 7 the same
+  pass makes the skills' type smaller, half a pixel at a time down to 11px, until the body ends
+  16px above the footer. The same pass scales the whole
   sheet down on a phone, which the stylesheet reads as `--fit`.
 - **Every script is taken out of the template before it is written.** Cloudflare adds its Web
   Analytics beacon to HTML it serves, and in production `assets/certificate.html` comes back with

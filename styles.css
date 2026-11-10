@@ -183,10 +183,7 @@
     :is(html[lang="ar"],html[lang="ur"]) .landing-event-card{font-family:'IBM Plex Sans Arabic',sans-serif;}
     :is(html[lang="ar"],html[lang="ur"]) .lec-title{font-family:'IBM Plex Sans Arabic',sans-serif;font-style:normal;font-size:19px;}
     /* Signed-in landing = ONLY the event picker: hero, ghost, stripes and strip hide. */
-    #landing-body.events-only .landing-hero-grid,
-    #landing-body.events-only .landing-ghost,
-    #landing-body.events-only .sector-stripes,
-    #landing-body.events-only .landing-avail-rows{display:none;}
+    #landing-body.events-only .landing-hero-grid,#landing-body.events-only .landing-ghost,#landing-body.events-only .sector-stripes{display:none;}
     #landing-body.events-only .landing-events-title{margin-top:10px;}
     /* v2 event cards: a poster — the mark in a band across the top, the name and meta under it.
        The three cards are read as one set, so what is shared is the geometry: the same padding,
@@ -215,23 +212,6 @@
       .lec2 .lec-title{font-size:20px;}
       .lec2-logo{height:54px;}
     }
-    .landing-avail-rows{width:100%;margin-top:56px;border-top:1px solid var(--line2);}
-    .landing-avail-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding:16px 4px;border:none;border-bottom:1px solid var(--border);background:none;
-      font-family:var(--font-body);color:var(--text);cursor:pointer;transition:background .15s;text-align:start;}
-    .landing-avail-row:hover{background:var(--s2);}
-    .landing-avail-row.full{opacity:.45;cursor:not-allowed;}
-    .landing-avail-info{display:flex;align-items:center;gap:12px;min-width:0;flex:1;}
-    .landing-avail-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;background:var(--green);}
-    .landing-avail-dot.full{background:var(--s2);}
-    .landing-avail-date{font-size:15px;font-weight:600;letter-spacing:-.2px;white-space:nowrap;}
-    .landing-avail-time{font-size:12px;color:var(--muted-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;direction:ltr;unicode-bidi:isolate;}
-    .landing-avail-spots{font-size:12.5px;font-weight:700;color:var(--green-d);white-space:nowrap;flex-shrink:0;}
-    .landing-avail-spots.full{color:var(--muted-l);}
-    .landing-avail-spots.low{color:var(--orange);}
-    .landing-avail-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-    .landing-avail-empty{padding:24px 4px;color:var(--muted);font-size:14px;font-weight:600;}
-
     .spots-low{color:var(--orange);}
 
     @keyframes modalFadeIn{from{opacity:0}to{opacity:1}}
@@ -409,9 +389,7 @@
     /* Auth-first: for signed-out visitors the sign in / sign up screen IS the first page,
        separate from the event picker behind it. The landing hides its content and the auth
        box presents as a page (no dismiss button; the backdrop is the page background). */
-    #landing-body.auth-gate .landing-hero-grid,#landing-body.auth-gate .sector-stripes,
-    #landing-body.auth-gate #land-events,#landing-body.auth-gate #land-avail-strip,
-    #landing-body.auth-gate .landing-footer{display:none;}
+    #landing-body.auth-gate .landing-hero-grid,#landing-body.auth-gate .sector-stripes,#landing-body.auth-gate #land-events,#landing-body.auth-gate .landing-footer{display:none;}
     /* Below the topbar (z-100) so language switching and the logo stay usable on the auth page. */
     /* As a page the box sits on the plain page ground, below the header, with nothing of the
        landing or the footer showing through. --topbar-h is measured when the page opens. */
@@ -734,7 +712,6 @@
     html[dir="rtl"] .landing-hero-grid{direction:rtl;}
     html[dir="rtl"] .landing-hero-copy{text-align:right;align-items:flex-end;}
     html[dir="rtl"] .landing-subtitle{text-align:right;}
-    html[dir="rtl"] .landing-avail-row{text-align:right;}
     html[dir="rtl"] .stat-card{direction:rtl;}
     html[dir="rtl"] .analytics-kpi-card{direction:rtl;}
     html[dir="rtl"] .analytics-highlight-card{direction:rtl;}
@@ -2658,7 +2635,6 @@
       .landing-hero-card{border-radius:6px;}
       .landing-hero-card img{height:220px;}
       .landing-hero-cta-btn{width:42px;height:42px;font-size:18px;}
-      .landing-avail-rows{margin-top:32px;}
       .landing-footer{margin-top:20px;}
 
       .form-section{padding:16px;border-radius:7px;}
@@ -3567,17 +3543,14 @@
        green start-light edge; full sessions lose the light. The picker's own grid spaces
        its cards (1fr rows, one 10px gap), so only the landing strip still carries a
        margin of its own - a margin on a grid item would double the gap. */
-    .sess-card,.landing-avail-row{
+    .sess-card{
       background:var(--s1);border:1px solid var(--border);border-inline-start:3px solid var(--green);
       border-radius:0;
     }
-    .landing-avail-row{margin-bottom:10px;}
-    .landing-avail-row.full{border-inline-start-color:var(--border);}
     .sess-card.sess-selected{background:var(--acsoft);border-color:var(--accent2);border-inline-start-color:var(--green);}
-    .landing-avail-rows{border-top:none;}
     /* Status lamps glow like start lights */
-    .sess-card-dot.on,.landing-avail-dot:not(.full){box-shadow:0 0 8px rgba(var(--green-rgb),.9);}
-    .sess-card-date,.landing-avail-date{font-weight:700;}
+    .sess-card-dot.on{box-shadow:0 0 8px rgba(var(--green-rgb),.9);}
+    .sess-card-date{font-weight:700;}
 
     /* Ticket: timing-green top strip */
     .ticket-card{position:relative;overflow:hidden;}
@@ -3647,7 +3620,7 @@
     /* Ghost display text behind the hero (decorative, Latin display face - hidden in AR) */
     #landing-body{position:relative;overflow:hidden;}
     .landing-ghost{position:absolute;top:-6px;inset-inline-end:-24px;white-space:nowrap;font-family:var(--font-display);font-weight:800;font-style:italic;font-size:clamp(96px,15vw,200px);line-height:1;color:transparent;-webkit-text-stroke:1px var(--border);text-transform:uppercase;pointer-events:none;user-select:none;z-index:0;}
-    .landing-hero-grid,.landing-avail-rows,.landing-footer{position:relative;z-index:1;}
+    .landing-hero-grid,.landing-footer{position:relative;z-index:1;}
     :is(html[lang="ar"],html[lang="ur"]) .landing-ghost{display:none;}
 
     /* Speed stripes: green fading divider */
@@ -3656,11 +3629,6 @@
     .sector-stripes i:nth-child(1){background:var(--green);}
     .sector-stripes i:nth-child(2){background:rgba(var(--green-rgb),.45);}
     .sector-stripes i:nth-child(3){background:rgba(var(--green-rgb),.18);}
-
-    /* Start-line dashed strip above the landing session board */
-    .landing-avail-rows{padding-top:26px;}
-    .landing-avail-rows::before{content:'';position:absolute;top:8px;left:0;right:0;height:8px;background:repeating-linear-gradient(90deg,var(--border) 0 12px,transparent 12px 24px);}
-
     /* Footer carries the green strip on top */
     #app-footer{position:relative;}
     #app-footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--green);}
@@ -3709,7 +3677,7 @@
     .analytics-kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--green);}
 
     /* Session rows light up on hover */
-    .sess-card:hover:not(.sess-full),.landing-avail-row:hover:not(.full){border-color:rgba(var(--green-rgb),.4);box-shadow:0 0 14px rgba(var(--green-rgb),.12);}
+    .sess-card:hover:not(.sess-full){border-color:rgba(var(--green-rgb),.4);box-shadow:0 0 14px rgba(var(--green-rgb),.12);}
 
     /* Booking stepper: the active step glows like a start light, digits in race numerals */
     .reg-stepper [aria-current]{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
@@ -4037,7 +4005,7 @@
     body .section-label{font-family:var(--font-body);letter-spacing:0;font-weight:600;font-size:11px;text-transform:none;color:#4f565c;}
     :is(html[lang="ar"],html[lang="ur"]) body .section-label{letter-spacing:0;text-transform:none;font-size:13px;}
     /* Session rows: white 10px slot cards, no start-light edge */
-    body .sess-card,body .landing-avail-row{
+    body .sess-card{
       background:#ffffff;border:1px solid rgba(26,25,25,.14);border-inline-start:1px solid rgba(26,25,25,.14);border-radius:10px;}
     /* Ticket: queue number in ink (design: 76px+/700, -2px tracking, never green) */
     body .ticket-num{color:var(--text);letter-spacing:-2px;}
@@ -8206,6 +8174,8 @@ body.view-staff .n6r-rota-line b{color:var(--text);}
 /* ── Community > Birthdays: today's card, month chart, countdown list, wishes ── */
     body.view-staff .bd-tab-n{display:inline-flex;align-items:center;gap:3px;}
 body.view-staff .bd-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+body.view-staff .bd-head-btns{display:flex;gap:8px;flex-wrap:wrap;}
+body.view-staff .bd-wk-info{font-size:13px;color:var(--muted);margin:-4px 0 14px;line-height:1.5;}
 body.view-staff .bd-missing{font-size:12.5px;color:var(--muted);background:var(--s1);border:1px dashed var(--border);border-radius:var(--sf-r-ctl);padding:9px 12px;margin:0 0 12px;line-height:1.5;}
 body.view-staff .bd-hero{position:relative;overflow:hidden;border-radius:var(--sf-r-card);padding:16px 16px 12px;margin:0 0 14px;
   background:linear-gradient(135deg,rgba(var(--green-rgb),.14),rgba(245,179,1,.12) 60%,rgba(255,107,139,.12));border:1px solid rgba(var(--green-rgb),.3);}
@@ -9049,6 +9019,51 @@ body:not(.view-staff) .hub-photo figcaption{padding:10px 12px;}
 body:not(.view-staff) .hub-photo-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
 body:not(.view-staff) .hub-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
 body:not(.view-staff) .hub-stat strong{display:block;font-size:var(--fs-20);}
+/* The Community tab as one feed (2026-11-11, member-hub.js): a night hero for the next session, white cards for what the
+   member is working towards, flat cards on the page for the staff's words. Glass stays on the bars; nothing moves in by itself. */
+body:not(.view-staff) .cust-back-btn[hidden]{display:none;}
+body:not(.view-staff) #tab-members .page-title:focus{outline:none;}
+body:not(.view-staff) .hub-skel i{height:120px;}
+body:not(.view-staff) .hub-skel i:first-child{height:180px;}
+body:not(.view-staff) .hub-hero{display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:var(--night);color:var(--night-ink);border-radius:var(--r-hero);padding:20px 22px;margin-bottom:12px;box-shadow:var(--lq-2);}
+body:not(.view-staff) .hub-hero .hub-k{color:var(--neon);}
+body:not(.view-staff) .hub-hero-t{font-size:var(--fs-20);line-height:1.3;}
+body:not(.view-staff) .hub-hero-m{color:var(--night-ink-2);font-size:var(--fs-15);}
+body:not(.view-staff) .hub-hero-b{margin-top:10px;min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+body:not(.view-staff) .hub-chip{display:inline-block;padding:2px 10px;border-radius:999px;border:1px solid var(--night-line);font-size:var(--fs-13);font-weight:600;}
+body:not(.view-staff) .hub-k{display:flex;align-items:center;gap:6px;font-size:var(--fs-13);font-weight:600;color:var(--muted);margin-bottom:2px;}
+body:not(.view-staff) .hub-meta{font-size:var(--fs-13);color:var(--muted);margin-top:4px;}
+body:not(.view-staff) .hub-meta strong{color:var(--go-2);}
+body:not(.view-staff) .hub-flat{background:transparent;box-shadow:none;border-color:var(--line);}
+body:not(.view-staff) .hub-line{margin:6px 0 0;line-height:1.6;color:var(--ink);}
+body:not(.view-staff) .hub-photo{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--r-ctl);margin:8px 0;background:var(--card-3);}
+body:not(.view-staff) .hub-soon{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);}
+body:not(.view-staff) .hub-soon:last-child{border-bottom:0;padding-bottom:0;}
+body:not(.view-staff) .hub-soon-t{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-width:0;}
+body:not(.view-staff) .hub-soon-t small{flex-basis:100%;color:var(--muted);font-size:var(--fs-13);}
+body:not(.view-staff) .hub-soon .btn-sm{flex:none;min-height:44px;}
+body:not(.view-staff) .hub-dots{display:flex;gap:6px;margin:8px 0 4px;}
+body:not(.view-staff) .hub-dots span{flex:1;height:10px;border-radius:999px;background:var(--card-3);}
+body:not(.view-staff) .hub-dots span.on{background:var(--go);}
+body:not(.view-staff) .hub-dots-sm{justify-content:center;}
+body:not(.view-staff) .hub-dots-sm span{flex:0 0 8px;height:8px;}
+body:not(.view-staff) .hub-pick{display:flex;gap:8px;margin:6px 0 8px;}
+body:not(.view-staff) .hub-lv{flex:1;min-height:48px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);font-weight:700;font-size:var(--fs-17);cursor:pointer;}
+body:not(.view-staff) .hub-lv.on{border-color:var(--go);background:var(--go-wash);color:var(--go-2);}
+body:not(.view-staff) .hub-row2{display:flex;align-items:center;gap:10px;}
+body:not(.view-staff) .hub-medal{width:40px;height:40px;flex:none;}
+body:not(.view-staff) .hub-bday{display:flex;align-items:center;gap:10px;color:var(--go-2);}
+body:not(.view-staff) .hub-stale{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+body:not(.view-staff) .hub-link{display:flex;align-items:center;justify-content:center;min-height:44px;text-decoration:none;}
+body:not(.view-staff) .hub-stats .hub-stat strong{font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .hub-slides{min-height:340px;display:flex;flex-direction:column;}
+body:not(.view-staff) .hub-slide{flex:1;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:12px 0;}
+body:not(.view-staff) .hub-num{font-size:var(--fs-34);font-weight:700;color:var(--go-2);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .hub-kinds{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px;}
+body:not(.view-staff) .hub-kinds li{display:flex;align-items:center;gap:8px;}
+body:not(.view-staff) .hub-slide-nav{display:flex;gap:10px;margin-top:12px;}
+body:not(.view-staff) .hub-slide-nav button{flex:1;min-height:48px;}
+@media (max-width:340px){body:not(.view-staff) .hub-stats{grid-template-columns:1fr;}}
 body:not(.view-staff) .mb-new{color:var(--go);font-weight:700;}
 /* ════════════════════════════════════════════════════════════════════════════════════════════════
    LIQUID (2026-11-07, the soft redesign: the user picked "Liquid" for riders). Glass is a material for the
@@ -9412,6 +9427,9 @@ body:not(.view-staff) #tab-register .type-grid .toggle-btn.active>.tp-txt::befor
 body:not(.view-staff) #tab-register .type-pick:has(.toggle-btn.active)>.type-info-btn{background:var(--go-wash);border-color:var(--go);color:var(--ink);}
 /* a booking not sent yet: a clock in a quiet disc, no tick (row 2) */
 body:not(.view-staff) .bk-pend .bk-ok-disc{display:grid;place-items:center;background:var(--card-3);color:var(--ink-2);}
+/* a field with an error keeps its red ring while it is being fixed, not the green one (2026-11-11) */
+body:not(.view-staff) :is(input,select,textarea).field-invalid:focus{border-color:var(--red);box-shadow:inset 0 0 0 1px var(--red);}
+body:not(.view-staff) :is(input,select,textarea).field-invalid:focus-visible{outline-color:var(--red);}
 /* the place gone question (row 13) */
 body:not(.view-staff) .pg-dlg .modal-footer{flex-wrap:wrap;}
 /* the bar stays put on a phone, and nothing focused hides under it (rows 7, 12) */
@@ -12274,6 +12292,23 @@ html[data-staff-theme="booth"] body.view-staff #tab-volunteers .rq-more{border-w
 .vm-acct{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
 .vr-hours{width:100%;box-sizing:border-box;min-height:36px;}
 .vd-res-acts{display:flex;flex-wrap:wrap;gap:6px;}
+/* the volunteer enhancements (2026-11-11, migration 20261111140000): why a row is not coming, how long an offer or an
+   application has waited (a red chip after 48 hours), when they plan to leave, who may join, the thank-you sent, and the
+   feedback window's average and stars */
+.vx-why,.vx-mot,.vx-leave{font-size:12px;color:var(--muted);}
+.vx-wait{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);}
+.vx-chip.vx-wait.vx-late{color:var(--vx-r-ink);}
+.vx-stars{display:inline-flex;align-items:center;gap:1px;vertical-align:middle;}
+.vx-star{display:inline-flex;color:var(--sf-line2,#d6dad7);}
+.vx-star.on{color:#b07d00;}
+html[data-staff-theme="dark"] body.view-staff .vx-star.on{color:#fcd34d;}
+.vx-fb-sum{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin-bottom:8px;}
+.vx-fb-avg{display:flex;align-items:center;gap:8px;}
+.vx-fb-avg .num{font-size:28px;font-weight:600;line-height:1;color:var(--text);}
+.vx-fb-who{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;}
+.vx-fb-who .vx-msg{flex-basis:100%;}
+.vsf-det .vsf-err{font-size:12px;font-weight:500;color:var(--vx-r-ink,#991b1b);}
+.vsf-det [aria-invalid="true"]{border-color:var(--vx-e-ns,#dc2626);}
 /* a phone: the figures scroll sideways, each row is a card */
 @media (max-width:767px){
   #tab-volunteers .vx-figs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;}

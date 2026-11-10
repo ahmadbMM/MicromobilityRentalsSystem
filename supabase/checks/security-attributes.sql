@@ -14,6 +14,15 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 with expected(fname, want_definer, note) as (values
   -- Definer: reaches past the caller's RLS, or calls a locked-down helper.
+  ('hub_feed', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('hub_pick_level', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('hub_post_img', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('staff_hub_numbers', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('_hub_award', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('_hub_level_row', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('_hub_club_row', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('_hub_n', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
+  ('_hub_club_n', true, 'the Community tab: reaches tables nobody can read (20261111100000)'),
   ('_wallet_owner', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('_wallet_post', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('_wallet_amount', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
@@ -466,9 +475,26 @@ with expected(fname, want_definer, note) as (values
   ('_sport_answer_check',          true,  'trigger: refuses a sport code outside the lists, whoever writes, and stamps sport_answered_at (20261110233000)'),
   ('_sport_feds',                  false, 'pure: the user''s 74 federation codes (20261110233000)'),
   ('_sport_other_clean',           false, 'pure: what a rider wrote under Other, tidied (20261110233000)'),
-  ('_staff_role_mods',             false, 'pure: a role''s sections, the page''s ROLE_TABS (20261111120000)'),
-  ('_staff_opt_ok',                true,  'staff_options write rule per key; calls is_admin / _staff_mod (20261111120000)'),
-  ('_staff_views_guard',           true,  'trigger: the shared saved views, each needs change on its section (20261111120000)')
+  ('_staff_role_mods',             false, 'pure: a role''s sections, the page''s ROLE_TABS (20261111180200)'),
+  ('_staff_opt_ok',                true,  'staff_options write rule per key; calls is_admin / _staff_mod (20261111180200)'),
+  ('_staff_views_guard',           true,  'trigger: the shared saved views, each needs change on its section (20261111180200)'),
+  -- Volunteer enhancements (20261111140000); the volunteer_* and staff_volunteer_* ones already above were rebuilt there too
+  ('volunteer_plan',               true,  'writes the caller''s own shift (the time they plan to leave); token-checked'),
+  ('volunteer_coming',             true,  'writes the caller''s own shift ("Still coming?", or withdraws it); token-checked'),
+  ('volunteer_feedback',           true,  'writes the caller''s own rating in volunteer_feedback, which no client writes; token-checked'),
+  ('volunteer_motive',             true,  'writes the caller''s own volunteers.motive; token-checked'),
+  ('volunteer_updates',            true,  'reads the caller''s own volunteer_updates (staff-only); token-checked (20261109120000)'),
+  ('staff_volunteer_details_save', true,  'writes volunteer_sessions, which has no write policy; the section is checked'),
+  ('staff_volunteer_reason',       true,  'writes a decline reason on volunteer_shifts / volunteers and the Update; the section is checked'),
+  ('staff_volunteer_thanks',       true,  'writes the thanks on volunteer_sessions and queues Updates; the section is checked'),
+  ('_vol_note',                    true,  'writes volunteer_updates and push_outbox, which no client writes; no client execute (20261109120000)'),
+  ('_vol_shift_notes',             true,  'trigger: writes volunteer_updates through _vol_note (20261109120000)'),
+  ('_vol_person_notes',            true,  'trigger: writes volunteer_updates through _vol_note (20261109120000)'),
+  ('_vol_min_age',                 true,  'reads volunteer_settings through _vol_settings; no client execute'),
+  ('_vol_feedback_follow',         true,  'trigger: moves a rating with its shift (session move, merge, unmerge); writes volunteer_feedback'),
+  ('_vol_shift_reset',             false, 'trigger: only clears the last round''s reasons and plan on NEW; reads no table'),
+  ('_vol_session_end',             false, 'pure: a session''s end from its typed time; reads no table'),
+  ('_purge_old',                   true,  'retention: reaches every personal table; service_role only (20261009165000)')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

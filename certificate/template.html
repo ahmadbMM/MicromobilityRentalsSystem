@@ -28,6 +28,17 @@
                           Arabic thank-you (the owner, 2026-11-10); no line when there are none
     {{certificate_no}}    e.g. "MMV-2026-00012"
     {{check_code}}        the code anyone may check the certificate with (optional)
+  Added 2026-11-11 (SPEC.md, amendment 7), the Saudi field set; each one optional, and an empty
+  one takes its line with it:
+    {{role}}              the volunteer's role at the event, beside the hours
+    {{skills}}            skills or experience gained, English (the session's, stamped at issue)
+    {{skills_ar}}         the same in Arabic, a line of its own
+    {{partner}}           the partner who co-issues it, English, under the title
+    {{partner_ar}}        the same in Arabic, a line of its own
+    {{issued}}            the issue date, e.g. "10 November 2026"; the caller leaves it empty when
+                          it is the date in the footer (a certificate for a period)
+    {{qr}}                a PNG data URL the caller draws on a canvas, encoding the check address
+                          https://volunteer.micromobility.sa/#check/<code>
 
   There is no script here and no style attribute: the window inherits the app's
   Content-Security-Policy, which allows neither. Whoever opens the window fits the name to
@@ -51,6 +62,25 @@
       </div>
     </div>
 
+    <div class="cohost">
+      {{#partner}}
+      <div class="cohost-line"><span class="cohost-label">In partnership with</span> <span class="cohost-name">{{partner}}</span></div>
+      {{/partner}}
+      {{#partner_ar}}
+      <div class="cohost-line ar" dir="rtl" lang="ar"><span class="cohost-label">بالشراكة مع</span> <span class="cohost-name">{{partner_ar}}</span></div>
+      {{/partner_ar}}
+    </div>
+
+    <div class="check">
+      {{#qr}}
+      <img class="qr" src="{{qr}}" alt="QR code to check this certificate">
+      {{/qr}}
+      {{#issued}}
+      <span class="check-label">Issued <span class="ar" lang="ar">· تاريخ الإصدار</span></span>
+      <span class="check-value">{{issued}}</span>
+      {{/issued}}
+    </div>
+
     <div class="body">
       <div class="lead">{{lead}}</div>
       <div class="name">{{volunteer_name}}</div>
@@ -61,9 +91,20 @@
       <div class="recognition">{{recognition}}</div>
       <div class="initiative">{{initiative_name}}</div>
       <div class="thanks-ar ar" dir="rtl" lang="ar">{{arabic_line}}</div>
-      {{#hours}}
-      <div class="hours"><span class="hours-n">{{hours}}</span><span class="hours-label">Volunteer hours <span class="ar" lang="ar">· ساعات التطوع</span></span></div>
-      {{/hours}}
+      <div class="facts">
+        {{#hours}}
+        <div class="hours"><span class="hours-n">{{hours}}</span><span class="hours-label">Volunteer hours <span class="ar" lang="ar">· ساعات التطوع</span></span></div>
+        {{/hours}}
+        {{#role}}
+        <div class="role"><span class="fact-label">Role <span class="ar" lang="ar">· الدور</span></span><span class="role-v">{{role}}</span></div>
+        {{/role}}
+      </div>
+      {{#skills}}
+      <div class="skills"><span class="fact-label">Skills gained</span> <span class="skills-v">{{skills}}</span></div>
+      {{/skills}}
+      {{#skills_ar}}
+      <div class="skills ar" dir="rtl" lang="ar"><span class="fact-label">المهارات المكتسبة</span> <span class="skills-v">{{skills_ar}}</span></div>
+      {{/skills_ar}}
     </div>
 
     <div class="footer">

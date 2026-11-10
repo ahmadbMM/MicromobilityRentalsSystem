@@ -178,7 +178,7 @@ begin
 end $chk$;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261111100000', 'desk_bulk_writes')
+values ('20261111180000', 'desk_bulk_writes')
 on conflict (version) do nothing;
 
 commit;

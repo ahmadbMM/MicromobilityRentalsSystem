@@ -590,6 +590,31 @@ device for 30 days and after the application calls `community_app_invited`, sepa
 
 **Challenge templates (2026-11-04):** Community > Activities > Challenges lists `AC_TEMPLATES` (`_acTplHtml`), which only fill the form. A template may only ask for what `_hub_count` measures (finished sessions in a date range, never km). Rewards stay empty because a reward is a promise. `AC_RAMADAN` holds Umm al-Qura's expected dates and needs a new year added by 2028. The October 2026 numbers quoted in `acTplHint` and `acTw*` date as the community grows: re-measure them.
 
+## The Community tab rebuilt (2026-11-11)
+
+Migration 20261111100000 and `member-hub.js` (reports/Booking app Community tab.md, items M1-M33). The tab is one feed from one read,
+`hub_feed` (volatile: it also notes the day's open in `hub_opens`, makes the month's rows and gives badges). There is no sub-menu and no
+Back on it, and the old `member_directory` check is gone: `hub_feed` answers `error: 'member'` to a non-member, who is sent to Reserve.
+- **Order:** next session (booked: Show ticket opens Bookings; else the next community session the rider may book, gender-checked
+  with `_sgOk`: Book opens Reserve through `_evOf`), the year card (December and January), Coming up, the member's own challenge,
+  staff season challenges, the club goal, the club's numbers, one staff card (Saturday report > the site's first announcement > the
+  tip of the week, `HUB_TIPS`), a volunteer call when `volunteer_sessions` has one open, the invitation (moved here from Account).
+- **The member's challenge** (`hub_levels`, one row per member per month, made on the month's first read and then kept): first session,
+  second session, back this month, or a level from three (`hub_pick_level`). Every kind of session counts; the word is "sessions".
+- **The club goal** (`hub_club_goals`): the members' Saturday rides per Saturday over the two months before x the month's Saturdays
+  x 1.05, made on the month's first read. A running staff goal takes its place. The member sees only their own share.
+- **Rewards are badges the database gives** (`_hub_award`, on the tab's read): ladders `challenge_1/3/6/12` and `club_goal_1/3/6/12`
+  (both in BDG_LADDERS and the website's LADDERS) and a staff challenge's own `hub_goals.badge_id`. The staff form has no reward text
+  any more. A badge given on the read opens in the app's badge pop-up there (`_hubCheer`).
+- **Totals under 10 are never shown** (`numbers`, the Saturday report's counts): a small session's count says who came.
+- **The year** (December and January): no kudos; "so far" until 26 December, in full from the 27th; slides the member moves through;
+  the share is a 1080x1920 PNG drawn when the recap opens (files only, no text, for iOS), else the words, else WhatsApp.
+- **Staff:** Community > Activities opens on Challenges; Saturday report (`hub_posts`, photo as JPEG text read alone through
+  `hub_post_img`, saved only with the photo rule ticked) and Numbers (`staff_hub_numbers`). The monthly club-goal templates are gone.
+- `member-hub.js` borrows only what rider code names: `window._hubDeps` (set in `_hubLoad`) carries the invitation, its words and
+  the volunteer portal's address, so the build's split keeps them on the riders' side.
+- `club_card` (the website's email + mobile lookup) is revoked from everyone; the website shows a signed-in member their card from `member_area`.
+
 ## The 2026-09-27 feature round (blocks 1-13)
 
 Built from the owner's answers on 2026-09-27/28; the source of each is in the commit messages.
@@ -1503,6 +1528,79 @@ moving anything on the page.
 - Tests: `tests/certificate-template.spec.ts` (the build is fresh, and the three samples in
   `certificate/sample-data.json` against SPEC.md's acceptance checklist) and the certificate tests in
   `tests/volunteers-review2.spec.ts`.
+
+## Volunteer enhancements (2026-11-11, migration 20261111140000)
+
+The owner, on the research round of 2026-11-10 (`reports/Volunteer portal enhancements.md`): "implement them all" - the
+nineteen quick fixes, the Tier 1 and Tier 2 features and the report's recommended option for each decision (D2-D12). Out of
+scope: the report's "Later" list, dark mode, push (stays off), anything legal.
+
+- **Database** (one migration; portal functions take `p_id, p_token` first and are anon-callable, staff ones check
+  `_staff_mod('volunteers', true)`; every one is in `supabase/checks/security-attributes.sql`):
+  - `volunteer_sessions`: `meet_point`, `meet_map` (https:// only), `bring`, `provided`, `shirt_pickup`, `demands`,
+    `contact_name` + `contact_phone` (the event-day contact is STAFF, never a volunteer, D7), `partner` / `partner_ar`,
+    `skills` / `skills_ar` (printed on certificates), `gender` (null, `female`, `male`: who may join, D12), and the close-out
+    `thanks_note` / `thanks_at` / `thanks_by`. `staff_volunteer_details_save(p_session, p_data)` writes the thirteen detail
+    keys (a missing key leaves its column, '' clears it; `BAD_INPUT` carries the key as its DETAIL; the phone is digits,
+    `+`, spaces, `()` and `-` with at least 7 digits). `volunteer_opportunities` gives them out (meeting point and map only
+    after `reveal_at`, the contact never).
+  - `volunteer_shifts`: `plan_leave` ('HH:MM'), `coming_at`, `withdraw_reason` (sick, clash, travel, transport, other),
+    `decline_reason` (full, age, timing, profile, other). A status change clears the old reasons; a new offer clears
+    `plan_leave` / `coming_at`. Portal: `volunteer_plan`, `volunteer_coming` (yes stamps `coming_at`; no withdraws an
+    ACCEPTED shift with a reason, before the session starts; `volunteer_interest(..., false)` still takes back interest).
+  - `volunteer_feedback` (one row per shift: rating 1-5, again yes/maybe/no, comment <= 500; staff read it by policy) and
+    `volunteer_feedback(...)`: optional, never holds back a certificate (D6).
+  - `volunteers.motive` (community, learn, cv, people, active; `volunteer_motive`) and `volunteers.decline_reason`.
+    `staff_volunteer_reason(p_customer, p_session?, p_reason?)` is called AFTER the decline: with a session the shift
+    must be declined or ended, without one the volunteer must already be `removed`; the volunteer's latest update carries
+    the reason. Declining an applicant queues a `not_approved` update (trigger).
+  - Settings (`volunteer_settings.data`, through `staff_volunteer_settings_save`): `min_age` 0-99 (null = 18, 0 = no limit;
+    `volunteer_apply` and `volunteer_interest` refuse `VOL_AGE`, D3; history is untouched) and `auto_returning` (null = on:
+    anyone with a done shift is accepted at once through the `auto_accept` path, D10). `volunteer_interest` refuses
+    `VOL_GENDER` on a women-only or men-only opportunity.
+  - `staff_volunteer_thanks(p_session, p_note)` -> `{ok, sent, new}`: one `thanks` update to everyone with a done shift; a
+    second call rewrites the note in place and creates none.
+  - `volunteer_me` adds the team's year totals (no names), hours with no session, and per shift the plan, the coming mark,
+    the reasons, the feedback, the thanks, the impact and, for accepted or done shifts, the details and `ends_at`. Booking
+    rows on the Work page carry blood type only on a blood session and the phone only where today's caps allow.
+  - `volunteer_certs`: `role`, `skills`, `skills_ar`, `partner`, `partner_ar`, stamped at issue by `_vol_cert_make_session`
+    (period certificates and older ones leave them null); every print answer carries the five, the public
+    `volunteer_cert_check` only `role` and `partner`. `volunteer_log` adds plan, coming, feedback, motive, thanks, reason, details.
+- **Staff** (part `volunteers`, CSS in "VOLUNTEERS, REBUILT" in styles.css, words `zv*` / `zf*`):
+  - The volunteer block of a session (`_vsfHtml`, in the session forms and Volunteer settings) has a "Details for
+    volunteers" group (`_vsfDetHtml`, `VSF_DET`), saved after the session itself by `_vsfDetSave`, which checks the map link
+    and the phone first; a refusal is said under the field it names (`_vsfDetErr`, `.vsf-err`, `aria-invalid`). Who may
+    join shows as a chip on the opportunity's row and on Shifts' heading (`_vxWhoHtml`).
+  - Shift reads name the four new columns and fall back once, for the visit, on a database without them (`_vmColsGet`,
+    `_vmShQ`; the same for the certificates' five, `_vmVcQ`). A row shows "Leaves 15:30" (`_vxLeaveHtml`), the
+    "Confirmed coming" chip (in `_n6wChips`), and why a withdrawn or declined one is not coming (`_vxWhyHtml`). Filters:
+    "Coming: Not confirmed" (shown while the opportunity starts within 48 hours, `_vxSoon`; the rows keep their WhatsApp
+    link to ask by hand) and, under Advanced, "Waiting: Over 48 h".
+  - Decline (an offer, an application, many applications) opens a centred dialog with an optional reason (`_vxDecOpen` ->
+    `_vxDecGo`): the decline call, then `staff_volunteer_reason` (`_vxReason`). Offers and applications say how long they
+    have waited (`_vxWaitHtml`; a red chip after 48 hours, D10); Applications sort "Waiting longest" first and filter
+    "Waiting: Over 48 h". The motive shows on Applications, People and the person's window (`_vxMot`).
+  - Close-out on Shifts: "Thank the team" (when the session has done shifts; `_vxThxOpen` / `_vxThxSend`; the heading then
+    says when and to how many) and "Feedback" (`_vxFbOpen`: the average with stars, would-come-again counts and every
+    comment by name - staff may see names).
+  - Settings: "Who can volunteer" (Youngest volunteer age, Accept returning volunteers automatically). Activity names the
+    seven new actions.
+  - The certificate gained the Saudi field set (`certificate/SPEC.md`, amendment 7): `{{role}}`, `{{skills}}`,
+    `{{skills_ar}}`, `{{partner}}`, `{{partner_ar}}`, `{{issued}}` (empty when it is the footer's date) and `{{qr}}`, which
+    `_vcView` fills for every staff print path (`_vcQr`: `QR.paint` on a canvas, brand black on off-white, of
+    `https://volunteer.micromobility.sa/#check/<code>`; `_vcWarm` / `_vcPrint` load the QR library with the template).
+    `_vcFit` makes long skills smaller (to 11px) so the footer keeps its place. A reprint through `volunteer_cert_check`
+    takes the skills and the Arabic partner off the row.
+  - The privacy notice (D8, `PRIVACY_VERSION` 2026-11-11, `PRIVACY_ASK_FROM` unchanged, nobody is asked again): a
+    volunteering row for the motive, ratings, comments, the plan and the coming mark (staff only), and two recipients: a
+    team lead (their own team's names, roles and arrival times) and anyone checking a certificate (name, event, date,
+    hours, role, partner).
+  - Tests: `tests/volunteers-enhance.spec.ts`; `tests/certificate-template.spec.ts` covers the new fields on the samples.
+- **Portal** (mm-platform `apps/volunteers`, built there): the opportunity's details and who may join, the event-day
+  contact and calendar alarms (D4) on accepted shifts, "I plan to leave at", "I'm coming" / "I can no longer help" with a
+  reason, the optional rating after the event, the motive question, decline reasons in Updates, the thank-you and the
+  impact on past shifts, the team's year totals, hours with no session, and an offline screen from a cached shell (D11).
+  The certificate there needs its own `npm run sync:cert`, the seven placeholders filled and the skills step in `fitCert`.
 
 ## Arena Heros Hybrid Race (2026-10-28)
 The owner: "create a session for this event and make it exclusive for community members Arena Heros Hybrid Race": Fri 6 Nov
@@ -2771,7 +2869,7 @@ appears on customers account add it to the 3 dots list on each booking".
 - `tests/booking-card.spec.ts` (with a run under the real CSP, and a check that the frame's card computes the same look
   as the rider's own My Bookings).
 
-## Staff round s10: the desk's writes (2026-11-10, migration 20261111100000)
+## Staff round s10: the desk's writes (2026-11-10, migration 20261111180000)
 
 - **No bulk write fans out.** A desk action that writes one row per rider goes through ONE server call that answers per
   row, or through `_saveLane(xs, fn)` (at most `SAVE_LANE` = 3 on the wire), never `Promise.all` over the rows: the web
@@ -2938,7 +3036,7 @@ Report "Staff website design and function", items 14-17, 28, D5 and D9. `tests/s
   582 before; 250 would need the search, the saved views or the figures off the first screen), People's first person row
   and Sessions' first session above the tab bar (<= 768; 553 and 513-516 measured). A change that pushes them down fails.
 
-## Staff round s10: lists, filters, saved views, People groups, Team, History log (2026-11-10, migration 20261111110000)
+## Staff round s10: lists, filters, saved views, People groups, Team, History log (2026-11-10, migration 20261111180100)
 
 Builder "lists" of the staff website round s10 (report "Staff website design and function", items 30-32, 35, 37-39 and the
 owner's D1). Spec: `tests/s10-lists.spec.ts`.
@@ -2984,7 +3082,7 @@ owner's D1). Spec: `tests/s10-lists.spec.ts`.
   took is left as it is (only the desk that checked in knows what it was).
 - **Workshop, Messages and Ambassadors** no longer read their whole list on a repaint a minute on: they ask the head-count
   probe (`_wsPoll` / `_smPoll` / `_ambPoll`, at most once a minute, `W.pAt`), which reads the list only when something changed.
-- Migration 20261111110000: `staff_actions.client_id` (text, at most 60), a unique partial index on it. No new table, policy
+- Migration 20261111180100: `staff_actions.client_id` (text, at most 60), a unique partial index on it. No new table, policy
   or function: the table keeps its `is_staff()` insert/read policies.
 
 ## Staff round s10: the shell (2026-11-10)
@@ -3036,7 +3134,7 @@ The rail, Ctrl K, the bell, the Dashboard, unsaved-work guards and confirm butto
 - `tests/s10-shell.spec.ts`.
 
 ## Staff round s10: trust (permissions, accessibility, targets, Arabic) (2026-11-10)
-- **Section rights at the database** (migration `20261111120000_section_checks.sql`). `_staff_mod(mod, edit)` no longer
+- **Section rights at the database** (migration `20261111180200_section_checks.sql`). `_staff_mod(mod, edit)` no longer
   passes every section for a NULL list: a NULL view list is the role's sections (`_staff_role_mods(role)`, the page's
   `ROLE_TABS` in the database's ids, derived sections as their parent), a NULL edit list is the view list (or the role's
   map). Ids are read with their aliases (`customers`=`community`=`badgereq`, `vendors`=`fnb`, `sessions`/`lockers`/
@@ -3075,7 +3173,7 @@ The rail, Ctrl K, the bell, the Dashboard, unsaved-work guards and confirm butto
   (`:is(html[lang="ar"],...) *{letter-spacing:0!important}`). Physical properties converted: `.color-del`,
   `.sess-list-scroll`; the rest are symmetric, safe-area, centred or have a `[dir=rtl]` override. Clock formats unchanged (D8).
 
-## Staff round s10: handover notes, incidents, places left per type (2026-11-10, migration 20261111130000)
+## Staff round s10: handover notes, incidents, places left per type (2026-11-10, migration 20261111180300)
 
 Items 48-50 of `reports/Staff website design and function.md` (builder "features").
 - **Handover notes** (`session_notes`: staff read; `_staff_mod('queue', true)` writes; the author or an admin edits or
