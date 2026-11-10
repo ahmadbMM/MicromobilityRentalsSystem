@@ -44,7 +44,9 @@ test.describe('@staff:approvals', () => {
     await page.evaluate(`_opgKey('1');_opgKey('2');_opgKey('3');_opgKey('4')`);
     await expect.poll(() => calls.filter((c) => c.name === 'staff_refund_receipt').length).toBe(1);
     expect(calls.find((c) => c.name === 'staff_pin_approve')!.body).toMatchObject({ p_name: 'Omar', p_pin: '1234' });
-    expect(calls.find((c) => c.name === 'staff_refund_receipt')!.body).toMatchObject({ p_op: 'Spec Staff', p_approval: 'mgr-tok' });
+    // sent under the manager whose token it carries: the server's _pin_ok matches a token to p_op, so the operator's
+    // own name with the manager's token was refused whenever the operator had a PIN (bug hunt 2026-11-10)
+    expect(calls.find((c) => c.name === 'staff_refund_receipt')!.body).toMatchObject({ p_op: 'Omar', p_approval: 'mgr-tok' });
   });
 
   test('under the limit, or for a kind not ticked, the usual approval stands', async ({ page }) => {

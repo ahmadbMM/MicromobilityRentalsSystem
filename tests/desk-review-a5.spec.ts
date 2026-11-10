@@ -11,6 +11,11 @@ type Row = Record<string, unknown>;
 
 function matches(row: Row, params: URLSearchParams) {
   for (const [k, v] of params) {
+    if (k === 'or') { // or=(approval.is.null,approval.eq.pending): any one of its plain conditions
+      const any = v.replace(/^\(|\)$/g, '').split(',').some((c) => { const i = c.indexOf('.'); return matches(row, new URLSearchParams([[c.slice(0, i), c.slice(i + 1)]])); });
+      if (!any) return false;
+      continue;
+    }
     const m = v.match(/^(eq|neq|in|is)\.(.*)$/);
     if (!m || ['select', 'order', 'limit', 'offset'].includes(k)) continue;
     const val = row[k];
@@ -130,6 +135,16 @@ test('bulk Approve counts only the requests it approved', async ({ page }) => {
   await page.locator('#confirm-modal').getByRole('button', { name: 'Approve' }).click();
   await expect(page.locator('#toast-container')).toContainText('1 request(s) approved');
   expect(q[1].approval).toBe('rejected');
+});
+
+test('bulk Approve approves a request with no approval at all, which it counts as pending', async ({ page }) => {
+  const sat = [{ id: SID, session_date: SID, day: 'Saturday', status: 'open', capacity: 20, spots: 20, created_at: 1, event_kind: 'community', ride_kind: 'saturday', needs_approval: true, paid_ride: false }];
+  const q = [row('P1', 'waiting', { approval: 'pending', price: 0 }), row('P3', 'waiting', { approval: null, price: 0 })];
+  await boot(page, q, { sessions: sat });
+  await page.evaluate(`S.sfSession='${SID}';bulkApprovePending()`);
+  await page.locator('#confirm-modal').getByRole('button', { name: 'Approve' }).click();
+  await expect(page.locator('#toast-container')).toContainText('2 request(s) approved');
+  expect(q[1].approval).toBe('approved');
 });
 
 test('the password reset tool prints a server message as text', async ({ page }) => {

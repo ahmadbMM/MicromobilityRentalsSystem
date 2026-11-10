@@ -33628,12 +33628,16 @@ try{matchMedia('(max-width:767px)').addEventListener('change',()=>{if(S.view==='
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderStaffQueue_1(event,el){S.queueView='bookings';renderStaffQueue()}
 function _on_renderStaffQueue_ho(event,el){S.queueView='handover';renderStaffQueue()}
-function _on_renderStaffQueue_4(event,el,a0){event.stopPropagation();showAddonPicker(a0)}
+// The roster's add-on buttons (_4 the desk table's, _9 the phone card's) open the picker only for a rider still expected or out
+// on a bike, the rule they are drawn by: a button still on screen after the rider finished opens nothing (bug hunt 2026-11-10).
+// The price editor's own add-on button is not this rule's.
+function _qAddonOpen(id){const e=_qGet(id);if(e&&['waiting','active','waitlist'].includes(e.status))showAddonPicker(id);}
+function _on_renderStaffQueue_4(event,el,a0){event.stopPropagation();_qAddonOpen(a0)}
 function _on_renderStaffQueue_5(event,el){event.stopPropagation()}
 function _on_renderStaffQueue_6(event,el){event.stopPropagation()}
 function _on_renderStaffQueue_7(event,el){event.stopPropagation()}
 function _on_renderStaffQueue_8(event,el,a0){event.stopPropagation();showPayMenu(a0,event)}
-function _on_renderStaffQueue_9(event,el,a0){event.stopPropagation();showAddonPicker(a0)}
+function _on_renderStaffQueue_9(event,el,a0){event.stopPropagation();_qAddonOpen(a0)}
 function _on_renderStaffQueue_10(event,el){el.style.borderColor='rgba(var(--green-rgb),.35)';el.style.color='var(--text)'}
 function _on_renderStaffQueue_11(event,el){el.style.borderColor='rgba(var(--tint-rgb),.1)';el.style.color='var(--muted)'}
 function _on_renderStaffQueue_12(event,el){S.sfShowFinished=!S.sfShowFinished;renderStaffQueue()}
@@ -34314,7 +34318,9 @@ function renderQRow(e){
     const totalPrice=_r2g(activeGroup.reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0)+adTotal);
     const paidAmt=_r2g(activeGroup.filter(e=>e.paid&&(e.price??DEFAULT_PRICE)>0).reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0)+adPaid);
     const houseAmt=activeGroup.filter(e=>e.paid&&(e.price??DEFAULT_PRICE)===0).length;
-    const remaining=_r2g(totalPrice-paidAmt);
+    // the wallet's part of an unpaid rider is not due at the desk, as on the phone card (_partyMoney) and in close-out (bug hunt 2026-11-10)
+    const walHeld=_r2g(activeGroup.filter(e=>!e.paid).reduce((s,e)=>s+_walPaid(e),0));
+    const remaining=_r2g(totalPrice-paidAmt-walHeld);
     const paidCount=activeGroup.filter(e=>e.paid&&(e.price??DEFAULT_PRICE)>0).length;
     const _ciN=_partyCheckinRows(group).length; // riders a one-tap party check-in would take
     const _pk=_partyKey(primary)||primary.id;
@@ -34536,8 +34542,10 @@ function renderQRow(e){
       ${sessLabel}
       <div>${riderRows}</div>
       ${(()=>{
-        const canEdit=group.some(e=>['waiting','active','waitlist'].includes(e.status))&&!_simpleOn(); // the simple phone view lists add-ons, it adds none
+        // each rider's own state, as the desk table's _adChips: a no-show or a finished member of a live party adds none (bug hunt 2026-11-10)
+        const _edOk=e=>['waiting','active','waitlist'].includes(e.status)&&!_simpleOn(); // the simple phone view lists add-ons, it adds none
         return group.map(e=>{
+          const canEdit=_edOk(e);
           const ad=addonLineItems(entryAddons(e));
           const ce=canEdit||(e.status==='done'&&!_simpleOn()&&ad.some(a=>a.id===LK_LINE)); // a finished ride's locker (as the row's chip)
           if(_isBlood(_rowSess(e))||(!ad.length&&!ce))return'';
@@ -35395,7 +35403,9 @@ async function closeOutSession(sid){
 // 130 waiting on one Saturday meant 130 taps of Approve, every week. One press approves all
 // PENDING requests still WAITING — waitlisted ones are exactly the rows staff parked to
 // decide individually, so they are left alone. The write is guarded on approval='pending':
-// a rider another till just rejected is not resurrected by this.
+// a rider another till just rejected is not resurrected by this. A row with no approval at all
+// (an older one, or a ride that only later asked for approval) is pending as _apprOf reads it, so the
+// guard takes it too: the press counted it and then never approved it (bug hunt 2026-11-10).
 async function bulkApprovePending(){
   const sid=S.sfSession;
   const ids=(_qBySession().get(sid)||[]).filter(e=>_apprOf(e)==='pending'&&e.status==='waiting').map(e=>e.id);
@@ -35406,7 +35416,7 @@ async function bulkApprovePending(){
     confirmLabel:t('apprApproveBtn'),confirmClass:'btn-green',
     onConfirm:async()=>{
       const r=await sb.from('queue_entries').update({approval:'approved'})
-        .in('id',ids).eq('approval','pending').select('id');
+        .in('id',ids).or('approval.is.null,approval.eq.pending').select('id');
       if(_writeErr(r,'bulk approve'))return;
       // The count is the rows this press approved: one another till decided meanwhile is not one.
       const n=_landedIds(r,ids).length;
@@ -35444,18 +35454,24 @@ async function publishCommResults(){
 function _ptnCanEdit(){return (S.staffRole==='admin'||S.staffRole==='manager')&&_editOk('queue');}
 function _ptnLoad(sid,force){
   if(!sid||sid==='all'||!sb)return;
-  S._sp=S._sp||{};
+  S._sp=S._sp||{};S._spWait=S._spWait||{};
   if(!force&&S._sp[sid]!==undefined)return;
+  if(!force&&S._spWait[sid]>Date.now())return; // a read that failed a moment ago: asked again on a paint after the pause
   S._sp[sid]='busy';
   S._spc=S._spc||{};
+  // Only a database without the table (PGRST205 / 42P01) has no panel for good. A read that failed (the network, a 5xx,
+  // a sign-in that lapsed) is asked again by a later paint, after a short pause: it kept [] and hid the ride's partner
+  // places, codes and members limit until the page was reloaded (bug hunt 2026-11-10).
+  const failed=()=>{delete S._sp[sid];S._spWait[sid]=Date.now()+20000;};
   Promise.all([sb.from('session_partners').select('*').eq('session_id',sid),
     Promise.resolve(sb.from('session_partner_codes').select('*').eq('session_id',sid).order('created_at')).catch(()=>null),
     Promise.resolve(sb.from('session_partner_codes').select('name').limit(0)).catch(()=>null)]).then(([r,c,n])=>{
+    if(!r||(r.error&&!/^(PGRST205|42P01)$/.test(String(r.error.code||'')))){failed();return;}
     S._spcNm=!!(n&&!n.error); // the codes' names (20261023220000): a database without the column answers an error, and no name box shows
     S._spc[sid]=(c&&!c.error&&Array.isArray(c.data))?c.data:null; // null: a database before 20261023120000, the single code
-    S._sp[sid]=(r&&!r.error&&Array.isArray(r.data))?r.data:[]; // PGRST205 (no table yet): no panel
+    S._sp[sid]=(!r.error&&Array.isArray(r.data))?r.data:[]; // PGRST205 (no table yet): no panel
     if(S._sp[sid].length&&S.view==='staff'&&S.staffTab==='queue'&&S.sfSession===sid)renderStaffQueue();
-  },()=>{S._sp[sid]=[];});
+  },failed);
 }
 function _ptnPanelHtml(sid){
   if(!sid||sid==='all')return'';
@@ -35683,10 +35699,14 @@ function _satcCopy(){const u=SITE_URL+'/saturday';try{navigator.clipboard.writeT
 // the box it had, ticked by the tap, so the saved state is put on it by hand after each one.
 function _satcLinkSet(on){
   const c=S._satc;if(!c||!c.ok||!_ptnCanEdit()||!sb)return;
-  const paint=()=>{renderStaffQueue();const cb=document.getElementById('satc-link');if(cb)cb.checked=!!c.link;};
+  // The panel's state as it is NOW: the repaint below reloads it when it is five minutes old, and the switch then wrote
+  // onto the copy it replaced, so the line under the box read the old state until the next reload (bug hunt 2026-11-10).
+  const live=()=>S._satc&&S._satc.ok?S._satc:c;
+  const paint=()=>{renderStaffQueue();const cb=document.getElementById('satc-link');if(cb)cb.checked=!!live().link;};
   const go=async()=>{
     if(await _wr(sb.from('saturday_settings').update({link_only:!!on,updated_at:new Date().toISOString()}).eq('id',true),'ride codes switch')){paint();return;}
-    c.link=!!on;
+    c.link=!!on;const n=live();n.link=!!on;
+    if(n.busy)_satcLoad(true); // a read that left before the write would bring the old state back: read once more after it
     logAction(`${t('satcSwitch')}: ${t(on?'amCodeOn':'amCodeOff')}`);
     toast(t(on?'satcLinkOn':'satcLinkOff'),'success');
     paint();
@@ -35926,10 +35946,11 @@ async function _checkinMany(idList){
   });
   landed.forEach(id=>{const e=_qGet(id);if(e)e.status='active';_ruMark(id);});renderStaffQueue(); // paint first, reconcile after; each row's Undo for 10 s
   await (fail?loadDataLight():_reloadRows(ids));
-  if(fail){renderStaffQueue();return landed;} // said on each refused row, in the desk's words for a known code
   // The count is the riders this desk actually checked in: a row another device got to first
-  // is not one of them, and the log is the record staff reconcile the night against.
+  // is not one of them, and the log is the record staff reconcile the night against. Written
+  // when another row was refused too: the ones that landed were left out of it (bug hunt 2026-11-10).
   if(landed.length)logAction(t('logBulkCheckin').replace('{0}',landed.length));
+  if(fail){renderStaffQueue();return landed;} // said on each refused row, in the desk's words for a known code
   toast(`${landed.length+queued.length} ${t('checkInBtn')}${queued.length?' · '+t('dqSavedToast'):''}`);
   renderStaffQueue();
   return landed; // the riders this desk checked in, by id (its length is the count)
@@ -35984,13 +36005,14 @@ function setSfSearch(v){
 }
 // Enter on a name or a phone (the staff review, 2026-10-28, S03-core3-08): the roster as drawn holding one rider still
 // expected, or one party with riders still expected, opens its check-in (the party as its steps). A number shorter than
-// a phone's four digits is a booking number, which the rule in sfSearchEnter answers alone.
+// a phone's four digits is a booking number, which the rule in sfSearchEnter answers alone. Riders expected in two
+// parties or more answer 'many': the search stays filtered and opens nothing, a return neither (bug hunt 2026-11-10).
 function _dkXEnterOne(q){
   if(_searchIsNum(q)&&_searchNum(q).length<4)return null;
   const drawn=(S._qOrder||[]).map(_qGet).filter(Boolean),k=e=>_partyKey(e)||e.id;
   const keys=new Set(drawn.filter(e=>_searchHit(e,q)).map(k));
   const exp=_partyCheckinRows(drawn.filter(e=>keys.has(k(e))));
-  return exp.length&&exp.every(e=>k(e)===k(exp[0]))?exp[0]:null;
+  return !exp.length?null:exp.every(e=>k(e)===k(exp[0]))?exp[0]:'many';
 }
 // A booking number typed in full puts that booking, with its party, at the top of the roster (the staff review,
 // 2026-10-28, S01-core1-01): "42" also lists #420-429, and #42 sat among them in the night's order.
@@ -36055,6 +36077,7 @@ function sfSearchEnter(){
   // No ticket and no booking number: a name or a phone that leaves one rider, or one party, expected on the roster
   // opens that check-in (_dkXEnterOne). Two of a number still open nothing.
   const one=hits.length?null:_dkXEnterOne(q);
+  if(one==='many')return; // two Saras expected and a third on a bike: Enter returned the one riding (bug hunt 2026-11-10)
   if(!hits.length&&!one){const r=_n6bEnterReturn(q,shown);if(r){S.sfSearch='';const inp=document.getElementById('sf-search-input');if(inp)inp.value='';renderStaffQueue(true);doReturn(r.id);}return;}
   if(hits.length!==1&&!one)return;
   // the wrong ticket of a rider expected today opens today's booking, as the camera does (_scanTodayTwin)
@@ -36419,14 +36442,22 @@ function _opGatePick(n){if(!String(n||'').trim())return;setOpName(n);_opGateDone
 // database before the tokens, staff_check_operator_pin answers as before and the token is null.
 let PIN_HOLD_MS=270*1000; // Settings > Business (pin_hold_s), never past 270 s: the server's token lasts five minutes
 let _pinOk={name:'',at:0,token:null};
-function _pinArgs(){return{p_op:_opName()||null,p_approval:(_pinOk.token&&Date.now()-_pinOk.at<PIN_HOLD_MS)?_pinOk.token:null};}
+// opt: the action's, as _pinApprove was given it. An action that needs a manager is sent under the manager whose PIN
+// approved it: the server's _pin_ok takes a token only for the name sent as p_op, so the operator's own name with the
+// manager's token was refused (PIN_REQUIRED) whenever the operator has a PIN, and the manager was asked again and again
+// (bug hunt 2026-11-10). Every other action stays the operator's.
+function _pinArgs(opt){
+  const live=!!_pinOk.token&&Date.now()-_pinOk.at<PIN_HOLD_MS,mgr=live&&!!_pinOk.mgr&&!!_pinOk.name&&_mgrNeeded(opt);
+  return{p_op:mgr?_pinOk.name:(_opName()||null),p_approval:live?_pinOk.token:null};
+}
 async function _gatedRpc(what,fn,opt){
   if(!await _pinApprove(what,opt))return null;
-  let r;try{r=await fn(_pinArgs());}catch(e){r={error:e};}
+  let r;try{r=await fn(_pinArgs(opt));}catch(e){r={error:e};}
   if(r&&r.error&&/PIN_REQUIRED|MANAGER_REQUIRED/.test(String(r.error.message||''))){
     _pinOk={name:'',at:0,token:null};
-    if(!await _pinApprove(what,/MANAGER_REQUIRED/.test(String(r.error.message||''))?{...(opt||{}),force:true}:opt))return null;
-    try{r=await fn(_pinArgs());}catch(e){r={error:e};}
+    const o2=/MANAGER_REQUIRED/.test(String(r.error.message||''))?{...(opt||{}),force:true}:opt;
+    if(!await _pinApprove(what,o2))return null;
+    try{r=await fn(_pinArgs(o2));}catch(e){r={error:e};}
   }
   if(r&&r.error)r.error.said=_rpcSay(r.error);
   return r;
@@ -37030,8 +37061,9 @@ function _setErr(id,m){
   const cur=m===t('errCurPwd'),fid={'set-name-err':'set-name','set-email-err':cur?'set-email-pwd':'set-email','set-pwd-err':cur?'set-pwd-cur':'set-pwd-new'}[id];
   const f=fid&&document.getElementById(fid);if(f){f.setAttribute('aria-invalid','true');f.setAttribute('aria-describedby',id);}
 }
-function _setRpcMsg(e){
+function _setRpcMsg(e,name){
   const m=String((e&&(e.message||e.code))||'');
+  if(/NAME_TAKEN/.test(m))return t('bh28TeamNameTaken').replace('{0}',()=>String(name||'')); // another team-list entry has the name (and its PIN): the account keeps its own (bug hunt 2026-11-10)
   if(/BAD_PASSWORD/.test(m))return t('errCurPwd');
   if(/EMAIL_TAKEN/.test(m))return t('errEmailExists');
   if(/BAD_EMAIL/.test(m))return t('errEmailBad');
@@ -37482,7 +37514,7 @@ async function _tplEdSave(){
 }
 async function _setSave(args){
   let r;try{r=await sb.rpc('staff_my_settings',args);}catch(e){r={error:e};}
-  if(r&&r.error)return{err:_setRpcMsg(r.error)};
+  if(r&&r.error)return{err:_setRpcMsg(r.error,args&&args.p_name)};
   const d=r&&r.data;if(d&&typeof d==='object'){S._meName=d.display_name||null;S._mePhoto=d.photo||null;S._ntOff=Array.isArray(d.nt_off)?d.nt_off:[];}
   return{ok:true};
 }
@@ -37518,6 +37550,9 @@ async function _setNtToggle(k,on){
   const cur=_ntOff().filter(x=>x!==k),next=on?cur:[...cur,k];
   const prev=_ntOff();S._ntOff=next;_ntSync(); // the bell follows at once
   const r=await _setSave({p_nt_off:next});
+  // staff_my_settings keeps only the kinds it knows: one it left out of the list it saved is said and the box put back,
+  // not a switch that turned itself on again at the next sync (bug hunt 2026-11-10)
+  if(!r.err&&!on&&!_ntOff().includes(k))r.err=t('dbPending');
   if(r.err){S._ntOff=prev;_ntSync();toast(r.err,'error');renderSettings();}
 }
 async function _setEmailSave(){
@@ -37578,13 +37613,16 @@ async function _tmLoad(){
   const T=_tm();if(T.busy||!sb)return;T.busy=true;
   try{
     const[o,a,mo]=await Promise.all([sb.rpc('staff_operator_list'),sb.rpc('staff_team_list'),sb.rpc('staff_team_more').then(x=>x,e=>({error:e}))]);
-    // disabled, caps, last sign-in and the account's name (20261009162000); none on a database before it
-    if(mo&&mo.error){T.moreMissing=_rpcAbsent(mo.error);T.more={};}else{T.moreMissing=false;T.more=Object.fromEntries(((mo&&mo.data)||[]).map(x=>[x.user_id,x]));}
+    // disabled, caps, last sign-in and the account's name (20261009162000); none on a database before it. A read that
+    // FAILED is not an empty one (bug hunt 2026-11-10): it drew every account with the default caps, which a Save then
+    // wrote over the real ones. What was read before stays; nothing of it is drawn, copied or saved until a read answers.
+    if(mo&&mo.error){if(_rpcAbsent(mo.error)){T.moreMissing=true;T.moreErr=false;T.more={};}else T.moreErr=true;}
+    else{T.moreMissing=false;T.moreErr=false;T.more=Object.fromEntries(((mo&&mo.data)||[]).map(x=>[x.user_id,x]));}
     if(o&&o.error){T.opsMissing=_tmMissing(o.error);T.ops=(S.teamMembers||[]).map(n=>({name:n,has_pin:null}));}
     else{T.opsMissing=false;T.ops=(o&&o.data)||[];}
     if(a&&a.error){T.acctMissing=_tmMissing(a.error);T.accts=[];}
     else{T.acctMissing=false;T.accts=(a&&a.data)||[];if(!S._pt||S._pt.people===null)_ptLoad();}
-  }catch(e){T.ops=T.ops||[];T.accts=T.accts||[];}
+  }catch(e){T.ops=T.ops||[];T.accts=T.accts||[];T.moreErr=true;}
   finally{T.busy=false;}
   if(S.staffTab==='team')renderTeam();
 }
@@ -37631,7 +37669,7 @@ function renderTeam(){
     </div>`;
   };
   const accts=`<div class="form-section tm-sec"><h2 class="form-title">${t('acctTitle')}</h2>
-    ${T.acctMissing?`<div class="tm-note">${t('dbPending')}</div>`:`<div class="ca-sub">${t('acctSub')}</div>${(T.accts||[]).map(acct).join('')}`}</div>`;
+    ${T.acctMissing?`<div class="tm-note">${t('dbPending')}</div>`:`<div class="ca-sub">${t('acctSub')}</div>${T.moreErr?`<div class="tm-note" role="alert">${t('errConnection')} <button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_tmLoad')}">${t('retryBtn')}</button></div>`:''}${(T.accts||[]).map(acct).join('')}`}</div>`;
   el.innerHTML=head+ops+_tmInviteHtml()+accts;
 }
 // What an account can do, in words, under its toggles (2026-11-06, ST12): the sections it opens, the ones it can change,
@@ -37642,7 +37680,7 @@ function _n6uCanHtml(a,d){
   const sees=secs.filter(inV),ch=sees.filter(inE),all=_staffSections().length,adm=d.role==='admin';
   const names=l=>!l.length?t('tmCanNone'):l.length>=all?t('tmCanEvery'):l.map(_sectionName).join(', ');
   let lim='';
-  if(!_tm().moreMissing){const c=d.caps||_tmCapsOf(a.user_id),off=TM_CAPS.filter(([k])=>!(adm&&k!=='pii')&&!c[_tmCapKey(k)]).map(([,l])=>t(l));lim=off.length?off.join(', '):t('tmCanNoLimit');}
+  if(!_tmMoreOff()){const c=d.caps||_tmCapsOf(a.user_id),off=TM_CAPS.filter(([k])=>!(adm&&k!=='pii')&&!c[_tmCapKey(k)]).map(([,l])=>t(l));lim=off.length?off.join(', '):t('tmCanNoLimit');}
   const line=(k,v)=>`<div class="tm-can-l"><span class="tm-can-k">${t(k)}</span> <span>${esc(v)}</span></div>`;
   return`<div class="tm-can" data-can="${esc(a.user_id)}">${line('tmCanSees',names(sees))}${line('tmCanChanges',names(ch))}${lim?line('tmCanLimits',lim):''}</div>`;
 }
@@ -37663,27 +37701,38 @@ const TM_PRESETS={
 };
 const TM_PRESET_KEY={desk:'presetDesk',leader:'presetLeader',mechanic:'presetMechanic',cashier:'presetCashier',manager:'presetManager',owner:'presetOwner'};
 function _tmMore(uid){const T=_tm();return(T.more&&T.more[uid])||{};}
+// No caps, last sign-in or disabled state to show: a database before them, or a read that failed (bug hunt 2026-11-10).
+function _tmMoreOff(){const T=_tm();return!!(T.moreMissing||T.moreErr||!T.more);}
+// The caps a Save writes: the ones this draft changed (against caps0, the account's caps when the draft first took them)
+// laid over the account's caps as last read, never a whole set copied when the draft was opened, which wrote back what
+// another admin changed meanwhile, or the defaults of a read that failed (bug hunt 2026-11-10). null: no cap changed.
+function _tmCapsOut(uid,d){
+  if(!d||!d.caps||!d.caps0)return null;
+  const ch=TM_CAPS.map(([k])=>_tmCapKey(k)).filter(ck=>!!d.caps[ck]!==!!d.caps0[ck]);if(!ch.length)return null;
+  const pc={...(_tmMoreOff()?d.caps0:_tmCapsOf(uid))};ch.forEach(ck=>{pc[ck]=!!d.caps[ck];});return pc;
+}
 function _tmCapsOf(uid){const c=_tmMore(uid).caps;const o={};TM_CAPS.forEach(([k])=>{const ck=_tmCapKey(k),v=c&&typeof c==='object'?c[ck]:undefined;o[ck]=typeof v==='boolean'?v:!!CAP_DEF[k];});return o;}
 function _tmCapKey(k){return CAP_KEY[k]||'can_'+k;}
 function _tmMoreHtml(a,d,dis){
-  const T=_tm();if(T.moreMissing)return'';
+  if(_tmMoreOff())return'';
   const m=_tmMore(a.user_id),last=m.last_sign_in_at?fmtStamp(m.last_sign_in_at):t('tmNever');
   return`<div class="tm-row tm-meta"><span class="tm-lbl">${t('tmLastSignIn')}</span><span>${esc(last)}</span>${m.disabled_at?`<span class="tm-pin tm-off">${t('tmDisabled')}</span>`:''}
     ${a.is_me?'':`<select class="filter-select tm-preset" aria-label="${esc(t('tmPreset'))}"${dis} data-on-change="${_on('_tmPreset',a.user_id,_P('value'))}"><option value="">${esc(t('tmPreset'))}</option>${Object.keys(TM_PRESETS).map(k=>`<option value="${k}">${esc(t(TM_PRESET_KEY[k]))}</option>`).join('')}</select>`}</div>`;
 }
 function _tmCapsHtml(a,d,dis){
-  if(_tm().moreMissing)return'';
+  if(_tmMoreOff())return'';
   const c=(d&&d.caps)||_tmCapsOf(a.user_id),adm=(d?d.role:a.role)==='admin';
   return`<div class="tm-row"><span class="tm-lbl">${t('tmCaps')}</span><div class="tm-chips">${TM_CAPS.map(([k,l])=>{const fix=adm&&k!=='pii',on=fix||!!c[_tmCapKey(k)]; // admins hold every cap but this one: they see personal data masked too
     return`<button type="button" class="toggle-btn tm-chip${on?' active':''}" aria-pressed="${on}" data-cap="${k}"${dis||fix?' disabled':''} data-on-click="${_on('_tmCapToggle',a.user_id,k)}">${esc(t(l))}</button>`;}).join('')}</div></div>`;
 }
-function _tmCapToggle(uid,k){const d=_tmDraft(uid);if(!d)return;d.caps={...(d.caps||_tmCapsOf(uid))};const ck=_tmCapKey(k);d.caps[ck]=!d.caps[ck];renderTeam();}
+function _tmCapToggle(uid,k){const d=_tmDraft(uid);if(!d||_tmMoreOff())return;if(!d.caps0)d.caps0=_tmCapsOf(uid);d.caps={...(d.caps||d.caps0)};const ck=_tmCapKey(k);d.caps[ck]=!d.caps[ck];renderTeam();}
 function _tmPreset(uid,k){
-  const p=TM_PRESETS[k],d=_tmDraft(uid);if(!p||!d)return;
+  const p=TM_PRESETS[k],d=_tmDraft(uid);if(!p||!d||_tmMoreOff())return;
+  if(!d.caps0)d.caps0=_tmCapsOf(uid);
   d.role=p.role;d.view=null;d.edit=p.edit?[...p.edit]:null;d.caps={...p.caps};_tmNorm(d);renderTeam();
 }
 function _tmAcctActs(a){
-  const T=_tm();if(T.moreMissing)return'';
+  if(_tmMoreOff())return'';
   const m=_tmMore(a.user_id);
   return`<button type="button" class="btn-sm btn-muted" data-on-click="${_on('_tmResetPwd',a.user_id)}">${t('tmResetPwd')}</button>
     <button type="button" class="btn-sm ${m.disabled_at?'btn-green':'btn-red'}" data-on-click="${_on('_tmSetDisabled',a.user_id,!m.disabled_at)}">${t(m.disabled_at?'tmEnable':'tmDisable')}</button>`;
@@ -38307,7 +38356,9 @@ function setTeamView(v){S.teamView=v==='parttimers'?'parttimers':'access';render
 function _ptTag(uid){const p=S._pt&&S._pt.people&&S._pt.people.find(x=>x.user_id===uid);return p?`<span class="tm-pin on pt-tag">${t('ptOne')}</span>`:'';}
 function _tmDraft(uid){
   const T=_tm(),a=(T.accts||[]).find(x=>x.user_id===uid);if(!a||a.is_me)return null;
-  return T.edit[uid]||(T.edit[uid]={role:a.role,view:_modIds(a.modules_view),edit:_modIds(a.modules_edit),caps:_tmCapsOf(uid)});
+  if(T.edit[uid])return T.edit[uid];
+  const c=_tmMoreOff()?null:_tmCapsOf(uid); // no caps read: none taken (a cap tapped later takes them then), never the defaults
+  return(T.edit[uid]={role:a.role,view:_modIds(a.modules_view),edit:_modIds(a.modules_edit),caps:c,caps0:c&&{...c}});
 }
 // A list that holds every section the role has is stored as null, "everything it allows".
 function _tmNorm(d){
@@ -38330,7 +38381,7 @@ function _scYAccBody(a,d){
   if(d.role!==a.role)lines.push(`${t('tmRoleFor').replace('{0}',a.email||'')}: ${_roleLabel(_roleNorm(a.role,'frontdesk'))} → ${_roleLabel(d.role)}`);
   if(d.role==='admin'&&a.role!=='admin')lines.push(t('scYAccAdmin'));
   else{lines.push(`${t('acctView')}: ${names(secs(d.view))}`);lines.push(`${t('acctEdit')}: ${names(d.edit===null&&Array.isArray(d.view)?d.view:secs(d.edit))}`);}
-  if(d.caps&&!_tm().moreMissing&&JSON.stringify(d.caps)!==JSON.stringify(_tmCapsOf(a.user_id)))lines.push(`${t('tmCaps')}: ${TM_CAPS.filter(c=>d.caps[_tmCapKey(c[0])]).map(c=>t(c[1])).join(', ')||'—'}`);
+  const pc=_tmCapsOut(a.user_id,d);if(pc)lines.push(`${t('tmCaps')}: ${TM_CAPS.filter(c=>pc[_tmCapKey(c[0])]).map(c=>t(c[1])).join(', ')||'—'}`);
   return lines.map(l=>`<div>${esc(l)}</div>`).join('');
 }
 async function _tmSave(uid){
@@ -38344,11 +38395,12 @@ async function _tmSave(uid){
   if(!await _pinApprove(what))return;
   const r=await sb.rpc('staff_set_access',{p_user:uid,p_role:d.role,p_view:_modSend(d.view),p_edit:_modSend(d.edit)}); // the sections _modIds derives stay off the wire
   if(_writeErr(r,'staff access'))return;
-  if(d.caps&&!T.moreMissing&&JSON.stringify(d.caps)!==JSON.stringify(_tmCapsOf(uid))){ // what the account may do besides its sections (2026-10-09)
-    const pc={...d.caps};if(!pc.can_see_pii_unmasked)delete pc.can_see_pii_unmasked; // off is the default; a database before 20261009220000 refuses the name
+  const pc=_tmCapsOut(uid,d);
+  if(pc){ // what the account may do besides its sections (2026-10-09)
+    if(!pc.can_see_pii_unmasked)delete pc.can_see_pii_unmasked; // off is the default; a database before 20261009220000 refuses the name
     const rc=await sb.rpc('staff_set_caps',{p_user:uid,p_caps:pc});
     if(_writeErr(rc,'staff caps'))return;
-    logAction(t('tmCapsLog').replace('{0}',a.email||'').replace('{1}',TM_CAPS.filter(c=>d.caps[_tmCapKey(c[0])]).map(c=>t(c[1])).join(', ')||'-'));
+    logAction(t('tmCapsLog').replace('{0}',a.email||'').replace('{1}',TM_CAPS.filter(c=>pc[_tmCapKey(c[0])]).map(c=>t(c[1])).join(', ')||'-'));
   }
   delete T.edit[uid];
   const msg=t('acctSaved').replace('{0}',a.email||'');
@@ -55544,14 +55596,14 @@ async function _salesVoid(key,rows,what,reason){
   // A void takes the receipt's money out of the takings like a refund: the same cap and the same
   // manager limit (bug hunt 2026-10-28); it asked only the operator's own PIN. The server checks both too.
   if(!_can('refund')){toast(t('capNoRefund'),'error');return false;}
-  const ids=rows.map(r=>r.id),opId=_opId(),amt=_rcTotal(rows.filter(x=>x.pay!=='refunded'));
-  const r=await _gatedRpc(what,a=>_rpcOp('staff_void_receipt',{p_receipt_id:key,p_reason:reason,...a,p_op_id:opId}),{kind:'refund',amount:amt});
+  const ids=rows.map(r=>r.id),opId=_opId(),amt=_rcTotal(rows.filter(x=>x.pay!=='refunded')),mo={kind:'refund',amount:amt};
+  const r=await _gatedRpc(what,a=>_rpcOp('staff_void_receipt',{p_receipt_id:key,p_reason:reason,...a,p_op_id:opId}),mo);
   if(r===null)return false;
   if(r.error&&_rpcAbsent(r.error))return _salesApply([],ids)?{restock:rows.filter(x=>x.pay!=='refunded')}:false;
   const had=(S.cashSales||[]).slice();
   S.cashSales=had.filter(x=>ids.indexOf(x.id)<0);
   if(r.error&&_errKind(r.error)==='net'){
-    if(!_outboxEnqueueMany([{kind:'void',id:key,data:{p_receipt_id:key,p_reason:reason,..._pinArgs(),p_op_id:opId},rows:ids}])){S.cashSales=had;return false;}
+    if(!_outboxEnqueueMany([{kind:'void',id:key,data:{p_receipt_id:key,p_reason:reason,..._pinArgs(mo),p_op_id:opId},rows:ids}])){S.cashSales=had;return false;}
     ids.forEach(_voidedAdd);return{restock:[]};
   }
   if(r.error){S.cashSales=had;toast(_errMessage(r.error),'error');return false;}
@@ -55561,14 +55613,14 @@ async function _salesRefund(key,rows,what,reason){
   reason=reason?String(reason).slice(0,300):null; // refund_reason, as the void's
   if(_roNow()){_roRefusal();return false;}
   if(!_can('refund')){toast(t('capNoRefund'),'error');return false;} // Team > the account's caps (2026-10-09); the server checks it too
-  const opId=_opId(),amt=Math.round(rows.reduce((s2,x)=>s2+(x.pay==='refunded'?0:_lineCharge(x)),0)*100)/100;
-  const r=await _gatedRpc(what,a=>_rpcOp('staff_refund_receipt',{p_receipt_id:key,p_reason:reason,...a,p_op_id:opId}),{kind:'refund',amount:amt});
+  const opId=_opId(),amt=Math.round(rows.reduce((s2,x)=>s2+(x.pay==='refunded'?0:_lineCharge(x)),0)*100)/100,mo={kind:'refund',amount:amt};
+  const r=await _gatedRpc(what,a=>_rpcOp('staff_refund_receipt',{p_receipt_id:key,p_reason:reason,...a,p_op_id:opId}),mo);
   if(r===null)return false;
   if(r.error&&_rpcAbsent(r.error))return _salesApply(rows.map(x=>({...x,pay:'refunded'})),[])?{restock:rows.filter(x=>x.pay!=='refunded'&&x.category!=='__cardmeta__')}:false;
   const now=new Date().toISOString(),had=(S.cashSales||[]).slice();
   S.cashSales=had.map(x=>(x.receipt_id||x.id)===key&&x.pay!=='refunded'?{...x,pay:'refunded',refunded_at:now}:x);
   if(r.error&&_errKind(r.error)==='net'){
-    if(!_outboxEnqueueMany([{kind:'refund',id:key,data:{p_receipt_id:key,p_reason:reason,..._pinArgs(),p_op_id:opId}}])){S.cashSales=had;return false;}
+    if(!_outboxEnqueueMany([{kind:'refund',id:key,data:{p_receipt_id:key,p_reason:reason,..._pinArgs(mo),p_op_id:opId}}])){S.cashSales=had;return false;}
     return{restock:[]};
   }
   if(r.error){S.cashSales=had;toast(_errMessage(r.error),'error');return false;}
