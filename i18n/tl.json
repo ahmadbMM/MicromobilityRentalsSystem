@@ -8173,5 +8173,11 @@
   "acNumCh": "Mga hamong nagawa",
   "acNumPicked": "Mga antas na pinili",
   "acNumMet": "Mga hamong natapos",
-  "acNumClub": "Layunin ng club"
+  "acNumClub": "Layunin ng club",
+  "acrColSports": "Mga isport",
+  "acrColSportN": "Bilang ng isport",
+  "acrSectSports": "Mga isport sa bilang",
+  "acrSectSportWho": "Mga customer sa bawat isport, may pangalan",
+  "acrBdSports": "Mga customer sa bawat isport",
+  "acrSortSports": "Pinakamaraming isport muna"
 }

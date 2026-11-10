@@ -8173,5 +8173,11 @@
   "acNumCh": "Retos creados",
   "acNumPicked": "Niveles elegidos",
   "acNumMet": "Retos cumplidos",
-  "acNumClub": "Meta del club"
+  "acNumClub": "Meta del club",
+  "acrColSports": "Deportes",
+  "acrColSportN": "Número de deportes",
+  "acrSectSports": "Los deportes en cifras",
+  "acrSectSportWho": "Clientes en cada deporte, con nombres",
+  "acrBdSports": "Clientes en cada deporte",
+  "acrSortSports": "Más deportes primero"
 }

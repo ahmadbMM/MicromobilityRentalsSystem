@@ -8173,5 +8173,11 @@
   "acNumCh": "बनी चुनौतियाँ",
   "acNumPicked": "चुने गए स्तर",
   "acNumMet": "पूरी हुई चुनौतियाँ",
-  "acNumClub": "क्लब का लक्ष्य"
+  "acNumClub": "क्लब का लक्ष्य",
+  "acrColSports": "खेल",
+  "acrColSportN": "खेलों की संख्या",
+  "acrSectSports": "आंकड़ों में खेल",
+  "acrSectSportWho": "हर खेल में ग्राहक, नामों के साथ",
+  "acrBdSports": "हर खेल में ग्राहक",
+  "acrSortSports": "सबसे ज़्यादा खेल पहले"
 }

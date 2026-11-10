@@ -8173,5 +8173,11 @@
   "acNumCh": "बनेका चुनौती",
   "acNumPicked": "छानिएका स्तर",
   "acNumMet": "पूरा भएका चुनौती",
-  "acNumClub": "क्लबको लक्ष्य"
+  "acNumClub": "क्लबको लक्ष्य",
+  "acrColSports": "खेलहरू",
+  "acrColSportN": "खेलहरूको संख्या",
+  "acrSectSports": "अङ्कमा खेलहरू",
+  "acrSectSportWho": "हरेक खेलमा ग्राहक, नामसहित",
+  "acrBdSports": "हरेक खेलमा ग्राहक",
+  "acrSortSports": "धेरै खेल पहिले"
 }

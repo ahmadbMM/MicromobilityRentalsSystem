@@ -8173,5 +8173,11 @@
   "acNumCh": "তৈরি চ্যালেঞ্জ",
   "acNumPicked": "বেছে নেওয়া স্তর",
   "acNumMet": "পূর্ণ হওয়া চ্যালেঞ্জ",
-  "acNumClub": "ক্লাবের লক্ষ্য"
+  "acNumClub": "ক্লাবের লক্ষ্য",
+  "acrColSports": "খেলা",
+  "acrColSportN": "খেলার সংখ্যা",
+  "acrSectSports": "সংখ্যায় খেলা",
+  "acrSectSportWho": "প্রতিটি খেলায় গ্রাহক, নামসহ",
+  "acrBdSports": "প্রতিটি খেলায় গ্রাহক",
+  "acrSortSports": "সবচেয়ে বেশি খেলা আগে"
 }

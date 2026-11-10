@@ -8173,5 +8173,11 @@
   "acNumCh": "بنائے گئے چیلنج",
   "acNumPicked": "چنی گئی سطحیں",
   "acNumMet": "پورے ہوئے چیلنج",
-  "acNumClub": "کلب کا ہدف"
+  "acNumClub": "کلب کا ہدف",
+  "acrColSports": "کھیل",
+  "acrColSportN": "کھیلوں کی تعداد",
+  "acrSectSports": "کھیل اعداد و شمار میں",
+  "acrSectSportWho": "ہر کھیل میں گاہک، ناموں کے ساتھ",
+  "acrBdSports": "ہر کھیل میں گاہک",
+  "acrSortSports": "زیادہ کھیل پہلے"
 }
