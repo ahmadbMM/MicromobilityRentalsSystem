@@ -4,7 +4,8 @@ import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 // Every community member gives their Instagram (the owner, 2026-10-09: "force all community members to add their
 // instagram accounts for whoever who hasn't have it"). The server asks it of a member with none on file
 // (_customer_asks, 20261009235000); the check-up opens at sign-in with its own words, no "I don't have one", and
-// Log out as the only other way off. A handle staff flagged keeps "I don't have one". Every person here is made up.
+// Log out as the only other way off. A handle staff flagged keeps "I don't have one" on an account that is not a member;
+// a member's is required, so it is not offered there (bug hunt 2026-11-10). Every person here is made up.
 
 const S1 = '2099-01-01';
 const sessions = [{ id: S1, session_date: S1, day: 'Sunday', status: 'open', capacity: 20, created_at: 1, event_kind: 'jcc' }];
@@ -14,12 +15,12 @@ function rpcBodies(page: Page, fn: string) {
   page.on('request', (r) => { if (r.method() === 'POST' && new RegExp(`/rpc/${fn}(\\?|$)`).test(r.url())) out.push(r.postDataJSON()); });
   return out;
 }
-async function open(page: Page, socials: Record<string, string> | null, member = true) {
+async function open(page: Page, socials: Record<string, string> | null, member = true, left: string[] = []) {
   await stubSupabase(page, {
     sessions, queue_entries: [], 'rpc:my_bookings': [],
     'rpc:customer_profile': [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', socials }],
     'rpc:customer_fix_fields': ['instagram'],
-    'rpc:customer_fix_save': [],
+    'rpc:customer_fix_save': left, // what the server still asks after the save
     'rpc:community_member': member, // the client asks who is a member (bug hunt 2026-10-28)
   });
   const sent = rpcBodies(page, 'customer_fix_save');
@@ -57,9 +58,35 @@ test.describe('@customer:fix a community member without an Instagram', () => {
     await expect(page.locator('#fx-title')).not.toHaveText('Add your Instagram');
   });
 
-  test('a handle staff flagged still offers "I don\'t have one"', async ({ page }) => {
-    await open(page, { instagram: 'old.handle' });
+  test('a handle staff flagged on an account that is not a member still offers "I don\'t have one"', async ({ page }) => {
+    await open(page, { instagram: 'old.handle' }, false);
     await expect(page.locator('#fix-gate .fx-none')).toHaveCount(1);
     await expect(page.locator('#fx-title')).not.toHaveText('Add your Instagram');
+  });
+
+  // A member's handle staff flagged: the server never clears a member's Instagram (customer_fix_save), so "I don't have
+  // one" is not offered, and the member types a different handle (bug hunt 2026-11-10).
+  test('a member\'s handle staff flagged offers no "I don\'t have one"', async ({ page }) => {
+    const sent = await open(page, { instagram: 'old.handle' });
+    await expect(page.locator('#fix-gate .fx-none')).toHaveCount(0);
+    await expect(page.locator('#fx-title')).not.toHaveText('Add your Instagram');
+    await page.fill('#fx-soc-instagram', '@new.handle');
+    await page.click('#fx-save');
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].p_values).toEqual({ instagram: 'new.handle' });
+  });
+
+  // Not a member when the check-up opened, one by the time it was saved: the server keeps the handle and asks again.
+  // The box comes back unticked, the handle can be typed, and the line says a member's Instagram is asked.
+  test('"I don\'t have one" the server refused is asked again, unticked and said why', async ({ page }) => {
+    const sent = await open(page, { instagram: 'old.handle' }, false, ['instagram']);
+    await page.locator('.fx-item[data-fx="instagram"] .fx-none').click();
+    await expect(page.locator('#fx-soc-instagram')).toBeDisabled();
+    await page.click('#fx-save');
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].p_values).toEqual({ none: ['instagram'] });
+    await expect(page.locator('.fx-item[data-fx="instagram"] .pg-msg')).toContainText('every community member');
+    await expect(page.locator('#fix-gate .fx-none')).toHaveCount(0);
+    await expect(page.locator('#fx-soc-instagram')).toBeEnabled();
   });
 });

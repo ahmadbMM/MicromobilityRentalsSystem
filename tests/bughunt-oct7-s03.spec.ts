@@ -35,11 +35,40 @@ test.describe('@staff:bookings staff list: Enter acts on a search only', () => {
     await expect(page.locator('#mw-name')).toHaveAttribute('aria-invalid', 'true'); // asks for a name
     await page.waitForTimeout(300);
     expect(rows).toHaveLength(0);
-    // a search still parks its top line
-    await page.locator('#mw-name').fill('Newest');
+    // a search parks the account it names in full
+    await page.locator('#mw-name').fill('newest account');
     await page.locator('#mw-name').press('Enter');
     await expect.poll(() => rows.length).toBe(1);
     expect(rows[0].name).toBe('Newest Account');
+  });
+
+  // Bug hunt 2026-11-10: the suggestions are every name that holds the text, so a new walk-up's name typed and Enter
+  // parked somebody else and wiped the phone typed for the walk-up. Only a name in full parks an account, and never
+  // with a phone typed beside it.
+  test('Enter on a name that is only part of an account\'s, or with a phone, adds the walk-up by hand', async ({ page }) => {
+    await stubSupabase(page, { sessions, queue_entries: [], desk_waitlist: [] });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`S.customers=[{id:'c9',name:'Alia Saleh',phone:'0559990000',created_at:'2099-01-01T00:00:00Z'}];setStaffTab('queue');S.queueView='managed';renderStaffQueue()`);
+    const rows: Record<string, unknown>[] = [];
+    page.on('request', (r) => {
+      if (r.method() !== 'POST' || !r.url().includes('/rest/v1/desk_waitlist')) return;
+      const b = r.postDataJSON();
+      (Array.isArray(b) ? b : [b]).forEach((x: Record<string, unknown>) => rows.push(x));
+    });
+    await page.locator('#mw-name').fill('Ali');
+    await expect(page.locator('#mw-suggest .mw-sug')).toHaveCount(1); // Alia Saleh holds "ali"
+    await page.locator('#mw-name').press('Enter');
+    await expect.poll(() => rows.length).toBe(1);
+    expect(rows[0].name).toBe('Ali');
+    // the account's name in full, but with a phone typed for the walk-up: still the walk-up, phone and all
+    await page.locator('#mw-name').fill('Alia Saleh');
+    await page.locator('#mw-phone').fill('0551234567');
+    await page.locator('#mw-name').press('Enter');
+    await expect.poll(() => rows.length).toBe(2);
+    expect(rows[1].name).toBe('Alia Saleh');
+    expect(rows[1].phone).toBe('+966551234567');
   });
 });
 

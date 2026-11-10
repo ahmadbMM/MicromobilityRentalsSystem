@@ -52,3 +52,23 @@ test('modifying the existing booking: its own rows are the quantity, not extra',
   expect(await page.evaluate('S.regQty')).toBe(3);
   await expect(page.locator('.qty-cap-note')).toBeVisible();
 });
+
+// Staff seat a bigger party on one account at the desk, or the cap is lowered after people booked (bug hunt 2026-11-10):
+// changing that booking keeps every rider, adds none past the three, and Update cancels nobody the rider did not take off.
+test('a booking above the three keeps its riders while it is changed', async ({ page }) => {
+  await boot(page, [mine('m1', 'waiting', 1), mine('m2', 'waiting', 2), mine('m3', 'waiting', 3), mine('m4', 'waiting', 4)]);
+  expect(await page.evaluate('S.regQty')).toBe(4);                       // not cut to three
+  await page.evaluate('changeRegQty(1)');
+  expect(await page.evaluate('S.regQty')).toBe(4);                       // no fifth
+  await expect(page.locator('.qty-cap-note')).toBeVisible();
+  const cancels: unknown[] = [];
+  page.on('request', (r) => {
+    if (!/\/rpc\/customer_booking_update|\/rest\/v1\/queue_entries/.test(r.url()) || r.method() === 'GET') return;
+    if (/cancelled/.test(r.postData() || '')) cancels.push(r.postDataJSON());
+  });
+  await page.evaluate('submitModifyBooking()');
+  expect(cancels).toHaveLength(0);
+  await page.evaluate(`S.modifyEntryId=null; S._alreadyBookedSession=null; selectSessCard('${S1}')`);
+  await page.evaluate(`S.regStep=2; renderRegister(); changeRegQty(-1)`);
+  expect(await page.evaluate('S.regQty')).toBe(3);                       // the rider may still take one off
+});

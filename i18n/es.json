@@ -3435,6 +3435,7 @@
   "n6rWkPrev": "Semana anterior",
   "ntGoNoGo": "Sesiones por debajo de su mínimo de ciclistas: {0}",
   "ntiGoNoGo": "{0}: {1} de {2} ciclistas, hay que decidir",
+  "ntkGoNoGo": "Sesiones por debajo de su mínimo de ciclistas",
   "caRejectTitle": "¿Rechazar la solicitud de {0}?",
   "caRejectBody": "No se envía nada automáticamente. Recibes una respuesta cordial para enviar si quieres.",
   "caNewPwdTitle": "¿Crear una nueva contraseña temporal?",
