@@ -3826,8 +3826,11 @@ async function _syncLoad(kind){
   await _idbDo('readonly',['meta',kind],(m,r)=>{const a=m.get(kind);a.onsuccess=()=>{meta=a.result;};const b=r.getAll();b.onsuccess=()=>{list=b.result;};return b;});
   if(!meta||meta.v!==SYNC_V||meta.url!==SUPABASE_URL||!meta.wm||!Array.isArray(list))return null;
   const rows=new Map();list.forEach(r=>{if(r)rows.set(_syncKey(kind,r),r);});
-  return{wm:meta.wm,fullAt:meta.fullAt||0,savedAt:Date.now(),rows,dirty:new Set(),gone:new Set(),all:false,fill:meta.fill||null}; // fill: a whole read cut short, resumed from its last key (_syncFillRun)
+  return{wm:meta.wm,fullAt:meta.fullAt||0,savedAt:Date.now(),rows,dirty:new Set(),gone:new Set(),all:false,fill:meta.fill||null,disk:true}; // fill: a whole read cut short, resumed from its last key (_syncFillRun); disk: checked against the server's count at its first answer (_syncCheck)
 }
+// A save IndexedDB did not make (2026-11-10) leaves what it held to the next one: the rows it was to write and drop,
+// and the whole copy when that was the job. They were cleared before the write, so a save that failed lost them for
+// good, and a later save of a few changed rows wrote the clock and the "whole" mark over a store without them.
 function _syncSave(kind){
   clearTimeout(_syncSaveT[kind]);
   _syncSaveT[kind]=setTimeout(()=>{
@@ -3837,7 +3840,15 @@ function _syncSave(kind){
       if(all){r.clear();st.rows.forEach((row,k)=>r.put(row,k));}
       else{gone.forEach(k=>r.delete(k));dirty.forEach(k=>{const row=st.rows.get(k);if(row)r.put(row,k);});}
       return m.put({v:SYNC_V,url:SUPABASE_URL,wm:st.wm,fullAt:st.fullAt},kind);
-    }).then(()=>{if(all)_syncLegacyDrop();});
+    }).then(ok=>{
+      if(ok==null){
+        if(_sync[kind]!==st)return;
+        if(all)st.all=true;
+        dirty.forEach(k=>st.dirty.add(k));gone.forEach(k=>{if(!st.dirty.has(k))st.gone.add(k);});
+        return;
+      }
+      if(all)_syncLegacyDrop();
+    });
   },1500);
 }
 function _syncDrop(){
@@ -3919,18 +3930,23 @@ async function _syncFillRun(kind,cut,gen){
       Object.assign(st,{rows:ordered,list,fill:null,fullAt:Date.now(),savedAt:Date.now()});
     }
     _syncFillPut(kind,st,rows,gen);
-    if(done)return{data:st.list.slice(),error:null,whole:true,changed:null};
+    if(done){if(st.all)_syncSave(kind);return{data:st.list.slice(),error:null,whole:true,changed:null};} // a page the store did not take: the whole copy is written again
   }
 }
 // A page into the copy with the read's clock and where it stands, in one transaction, so the key kept is never ahead of
 // the rows kept. rows null: the read's start (the store emptied). The meta drops `fill` once the read is whole.
+// A page IndexedDB did not take (2026-11-10: Safari drops its connection to the store when the page goes to the
+// background) marks the copy for a whole write: the rows held in memory are all there, the store's are not.
 function _syncFillPut(kind,st,rows,gen){
   const fill=st.fill?{...st.fill}:null;
   return _idbDo('readwrite',['meta',kind],(m,r)=>{
     if(gen!==_syncGen)return null; // signed out meanwhile: none of it is written
     if(!rows)r.clear();else rows.forEach(x=>{if(x)r.put(x,_syncKey(kind,x));});
     return m.put(fill?{v:SYNC_V,url:SUPABASE_URL,wm:st.wm,fullAt:0,fill}:{v:SYNC_V,url:SUPABASE_URL,wm:st.wm,fullAt:st.fullAt},kind);
-  }).then(()=>{if(!fill)_syncLegacyDrop();});
+  }).then(ok=>{
+    if(ok==null){if(gen===_syncGen&&_sync[kind]===st){st.all=true;if(!st.fill)_syncSave(kind);}return;}
+    if(!fill)_syncLegacyDrop();
+  });
 }
 // No complete copy of a list here (a sign-in, a new device, a read cut short): it is read whole (_syncFill). The riders
 // wait for it. The bookings wait SYNC_FIRST_WAIT_MS, then answer with the live nights, the year read on behind them; a
@@ -4045,7 +4061,34 @@ async function _syncRun(kind,cut){
     all:full||!!(st&&st.all),dirty:full?new Set():new Set([...(st.dirty||[]),...changed]),gone:full?new Set():new Set([...(st.gone||[]),...gone])};
   if(!full)gone.forEach(k=>next.dirty.delete(k));
   if(moved||(Date.now()-(next.savedAt||0))>30*60*1000)_syncSave(kind); // keep the clock fresh on disk too, without rewriting a row that did not change
+  if(st&&st.disk&&!full)_syncCheck(kind,cut); // the first answer from a copy read off the disk: is it all there?
   return{data:list.slice(),error:null,whole:true,changed:full?null:changed};
+}
+// A copy read off the disk is checked against the server's own count once, at its first answer (2026-11-10). A staff
+// iPhone held 105 of the 4,487 riders as if that were all of them, and Accounts said 105: a whole read lands page by
+// page, a page IndexedDB did not take left the store without it, and a later save of a few changed rows wrote the clock
+// that called the copy whole. From then on only what changed came in, until the fortnightly whole read. The count is
+// one HEAD request (no rows); a copy short of it by more than what can have been added between the two is thrown away
+// and read whole again behind the screen. Only short: a copy holding more than the count is the deltas' business.
+const SYNC_COUNT={
+  q:cut=>{let s=sb.from('queue_entries').select('id',{count:'exact',head:true});if(cut)s=s.gte('session_date',cut);return s;},
+  c:()=>sb.from('customers').select('id',{count:'exact',head:true}),
+  ct:()=>sb.from('customer_tags').select('customer_id',{count:'exact',head:true}),
+};
+function _syncShort(count,held){return count-held>Math.max(5,Math.ceil(count*0.002));}
+function _syncCheck(kind,cut){
+  if(!SYNC_COUNT[kind])return;
+  const gen=_syncGen;
+  Promise.resolve(SYNC_COUNT[kind](cut)).then(r=>{
+    const st=_sync[kind];
+    if(!r||r.error||typeof r.count!=='number'||gen!==_syncGen||!S._staffAuthed||!st||st.fill||_syncFillP[kind])return;
+    if(!_syncShort(r.count,st.rows.size))return;
+    console.warn('sync: the copy of '+SYNC_TABLES[kind]+' holds '+st.rows.size+' of '+r.count+' rows; reading it whole');
+    _sync[kind]=null; // no copy: the next read of this list is whole, and its first write empties the store
+    if(kind==='q'){_qWholeAt=0;_syncLive.q=true;_syncFill('q',cut);return;} // the year behind the screen, laid on by a light reload once in (_syncFilled; _qWholeAt 0 makes it ask for the year)
+    refDirty(); // the riders and the tags: read again now, not at the next full load
+    Promise.resolve(_refInFlight).catch(()=>{}).then(()=>_refFetch()).then(()=>{try{if(S.view==='staff')_renderStaffTab(true);}catch(e){}},()=>{});
+  },()=>{});
 }
 // The bookings from a list the sync answered: a row it did not bring this time keeps the entry built
 // from it before, when that entry still reads exactly as the row does (nothing on this device has
