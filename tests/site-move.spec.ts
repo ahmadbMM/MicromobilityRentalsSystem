@@ -238,6 +238,7 @@ test.describe('@customer:move the hand-over in a browser', () => {
     await page.goto(`${OLD}/api/seed`);
     expect(await page.evaluate(() => [localStorage.getItem('cq_session'), localStorage.getItem('cq_lang'), localStorage.getItem('cq_snapshot'), localStorage.getItem('other')]))
       .toEqual([null, null, 'a staff cache that stays behind', 'not the app\'s']);
+    await page.unrouteAll({ behavior: 'ignoreErrors' }); // the signed-in app still fetching as the page closes
   });
 
   test('a rider already signed in on the new address keeps that sign-in', async ({ page, baseURL }) => {
@@ -254,6 +255,7 @@ test.describe('@customer:move the hand-over in a browser', () => {
     await page.waitForURL(`${NEW}/**`);
     await waitForSb(page);
     expect(await page.evaluate(() => [JSON.parse(localStorage.getItem('cq_session') || '{}').id, localStorage.getItem('cq_lang')])).toEqual(['c2', 'ar']);
+    await page.unrouteAll({ behavior: 'ignoreErrors' }); // the signed-in app still fetching as the page closes
   });
 
   test('a crafted hand-over link plants nothing, sent straight or by way of the old address', async ({ page, baseURL }) => {
@@ -275,6 +277,118 @@ test.describe('@customer:move the hand-over in a browser', () => {
     await waitForSb(page);
     expect(page.url()).not.toContain('mm-move');
     expect(await page.evaluate(() => localStorage.getItem('cq_session'))).toBeNull();
+    await page.unrouteAll({ behavior: 'ignoreErrors' }); // the signed-in app still fetching as the page closes
+  });
+});
+
+// ── A rider who comes to the new address straight ──────────────────────────────
+// Their sign-in stayed on the old address (they never passed the hand-over), so the first time a
+// browser opens the new address with nobody signed in it goes by way of the old one once, whose
+// hand-over brings back what that browser keeps there (the user, 2026-11-11: "why is the website
+// auto signing out accounts, return them to the same way they were"). Automation never makes the
+// trip, so these tests say they are a person's browser.
+const asPerson = (page: Page) => page.addInitScript(() => Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false }));
+const tripsToOld = (page: Page) => {
+  const trips: string[] = [];
+  page.on('request', (r) => { if (r.isNavigationRequest() && r.frame() === page.mainFrame() && r.url().startsWith(OLD)) trips.push(r.url()); });
+  return trips;
+};
+
+test.describe('@customer:move a rider who comes to the new address straight', () => {
+  test('is brought back signed in from the old address, on the same page, and only once', async ({ page, baseURL }) => {
+    const onRequest = await middleware();
+    await stubSupabase(page, fixtures);
+    await serveOld(page, onRequest);
+    await serveNew(page, baseURL!);
+    await asPerson(page);
+    await page.goto(`${OLD}/api/seed`);
+    await page.evaluate((r) => { localStorage.setItem('cq_session', JSON.stringify(r)); localStorage.setItem('cq_lang', 'fr'); }, RIDER);
+    const trips = tripsToOld(page);
+
+    await page.goto(`${NEW}/my-bookings?x=1#keep=1`);
+    await expect.poll(() => trips.length).toBe(1);
+    expect(trips[0]).toBe(`${OLD}/my-bookings?x=1`); // a request never carries its fragment: the page below shows it came back
+    await page.waitForURL(`${NEW}/**`);
+    await waitForSb(page);
+    // @ts-expect-error a probe for the spec
+    expect(await page.evaluate(() => window.__rs[0])).toBe('/my-bookings?x=1#keep=1');
+    expect(await page.evaluate(() => ({
+      // @ts-expect-error app globals
+      signedIn: getSession()?.id, lang: localStorage.getItem('cq_lang'), done: localStorage.getItem('cq_moved_in'),
+    }))).toEqual({ signedIn: 'c1', lang: 'fr', done: '1' });
+
+    // Signed out here later, and something stored on the old address again: no second trip brings it back.
+    await page.evaluate(() => localStorage.removeItem('cq_session'));
+    await page.goto(`${OLD}/api/seed`);
+    await page.evaluate(() => localStorage.setItem('cq_session', JSON.stringify({ id: 'c9', session_token: 'tok-9' })));
+    trips.length = 0;
+    await page.goto(`${NEW}/`);
+    await waitForSb(page);
+    expect(trips).toEqual([]);
+    expect(await page.evaluate(() => localStorage.getItem('cq_session'))).toBeNull();
+    await page.unrouteAll({ behavior: 'ignoreErrors' }); // the signed-in app still fetching as the page closes
+  });
+
+  test('with nothing kept on the old address, one trip and back signed out; then never again', async ({ page, baseURL }) => {
+    const onRequest = await middleware();
+    await stubSupabase(page, fixtures);
+    await serveOld(page, onRequest);
+    await serveNew(page, baseURL!);
+    await asPerson(page);
+    const trips = tripsToOld(page);
+    await page.goto(`${NEW}/reserve?lang=ar`);
+    await expect.poll(() => trips.length).toBe(1);
+    await page.waitForURL(`${NEW}/reserve?lang=ar`);
+    await waitForSb(page);
+    expect(await page.evaluate(() => [localStorage.getItem('cq_session'), localStorage.getItem('cq_moved_in')])).toEqual([null, '1']);
+    await page.reload();
+    await waitForSb(page);
+    expect(trips.length).toBe(1);
+    await page.unrouteAll({ behavior: 'ignoreErrors' }); // the signed-in app still fetching as the page closes
+  });
+
+  test('no trip for a rider already signed in here (a sign-in made since the move)', async ({ page, baseURL }) => {
+    const onRequest = await middleware();
+    await stubSupabase(page, fixtures);
+    await serveOld(page, onRequest);
+    await serveNew(page, baseURL!);
+    await asPerson(page);
+    await page.addInitScript(() => {
+      if (location.origin === 'https://experiences.micromobility.sa' && !localStorage.getItem('cq_session')) localStorage.setItem('cq_session', JSON.stringify({ id: 'c2', session_token: 'tok-2' }));
+    });
+    const trips = tripsToOld(page);
+    await page.goto(`${NEW}/`);
+    await waitForSb(page);
+    expect(trips).toEqual([]);
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('cq_session') || '{}').id)).toBe('c2');
+    await page.unrouteAll({ behavior: 'ignoreErrors' }); // the signed-in app still fetching as the page closes
+  });
+
+  test('no trip for automation, though it is marked done', async ({ page, baseURL }) => {
+    const onRequest = await middleware();
+    await stubSupabase(page, fixtures);
+    await serveOld(page, onRequest);
+    await serveNew(page, baseURL!);
+    const trips = tripsToOld(page);
+    // navigator.webdriver is true here, as in every other test of this file
+    await page.goto(`${NEW}/`);
+    await waitForSb(page);
+    expect(trips).toEqual([]);
+    expect(await page.evaluate(() => localStorage.getItem('cq_moved_in'))).toBe('1');
+    await page.unrouteAll({ behavior: 'ignoreErrors' }); // the signed-in app still fetching as the page closes
+  });
+
+  test('no trip for a ?signin= link (it signs its own account in)', async ({ page, baseURL }) => {
+    const onRequest = await middleware();
+    await stubSupabase(page, fixtures);
+    await serveOld(page, onRequest);
+    await serveNew(page, baseURL!);
+    await asPerson(page);
+    const trips = tripsToOld(page);
+    await page.goto(`${NEW}/?signin=abc`);
+    await waitForSb(page);
+    expect(trips).toEqual([]);
+    await page.unrouteAll({ behavior: 'ignoreErrors' }); // the signed-in app still fetching as the page closes
   });
 });
 
