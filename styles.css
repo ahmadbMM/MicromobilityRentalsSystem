@@ -143,6 +143,7 @@
     .landing-footer{margin-top:40px;text-align:center;}
     .staff-access-btn{background:none;border:none;color:var(--muted);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;padding:8px 16px;border-radius:3px;transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;opacity:1;}
     .staff-access-btn:hover{color:var(--green-d);opacity:1;}
+    /* for arrows the browser does not mirror (← →); not for ‹ › « », which right-to-left text mirrors by itself */
     .mirror-rtl{display:inline-block;}
     html[dir="rtl"] .mirror-rtl{transform:scaleX(-1);}
     /* Customer page back (top of .view-main): wizard step back, else the event picker. */
@@ -2057,7 +2058,7 @@
     .view-toggle{display:flex;background:var(--s2);border:1px solid rgba(var(--tint-rgb),.08);border-radius:3px;overflow:hidden;}
     .view-toggle-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:6px 11px;font-size:14px;transition:background .15s,color .15s,border-color .15s,transform .15s,box-shadow .15s,opacity .15s;}
     .view-toggle-btn.active{background:rgba(var(--green-rgb),.12);color:var(--green);}
-    .confirm-box{background:var(--s2);border:1px solid rgba(var(--tint-rgb),.1);border-radius:6px;padding:24px;width:min(92vw,420px);animation:modalSlideUp .18s ease;}
+    .confirm-box{background:var(--s2);border:1px solid rgba(var(--tint-rgb),.1);border-radius:6px;padding:24px;width:min(92vw,420px);animation:modalSlideUp .18s ease;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);overflow-y:auto;overscroll-behavior:contain;}
 
     /* ── The shared chrome without inline styles (2026-09-28, pass 2 of moving style="..." into
        classes, so the policy can drop style-src 'unsafe-inline'): the markup in the page itself,
@@ -2160,6 +2161,9 @@
     #rider-report-modal .rp-scope .filter-select{flex:1;min-width:0;}
     #upd-bar .rp-upd-t{font-size:13px;font-weight:700;}
     #upd-bar .rp-upd-b{background:var(--green,#03ff89);color:#000;border:none;border-radius:4px;padding:7px 14px;font-weight:900;font-size:12px;cursor:pointer;font-family:inherit;}
+    /* On the staff side the same ink as the party numbers: white on the light and booth greens, black on the dark desk's bright green. */
+    body.view-staff #upd-bar .rp-upd-b{color:#fff;}
+    html[data-staff-theme="dark"] body.view-staff #upd-bar .rp-upd-b{color:#000;}
 
     .empty-state{text-align:center;padding:52px 24px;color:var(--muted);font-size:14px;font-weight:600;letter-spacing:.1px;}
     .cashier-grid{display:grid;}
@@ -2470,7 +2474,7 @@
     :is(#tab-queue,#tab-waitlist) .rq-pcnt{font-size:12px;font-weight:600;white-space:nowrap;}
     :is(#tab-queue,#tab-waitlist) .rq-st{font-size:12px;font-weight:600;}
     :is(#tab-queue,#tab-waitlist) .rq-rc{display:flex;align-items:baseline;gap:5px;}
-    :is(#tab-queue,#tab-waitlist) .rq-num17{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--green);color:#000;font-size:var(--staff-fs-sm,12px);font-weight:600;flex-shrink:0;}
+    :is(#tab-queue,#tab-waitlist) .rq-num17{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--green);color:#fff;font-size:var(--staff-fs-sm,12px);font-weight:600;flex-shrink:0;}
     :is(#tab-queue,#tab-waitlist) .rq-rn900{margin:0;font-weight:600;}
     :is(#tab-queue,#tab-waitlist) .rq-rn600{margin:0;font-weight:600;}
     :is(#tab-queue,#tab-waitlist) .rq-rsub{margin-top:3px;padding-inline-start:22px;}
@@ -2481,7 +2485,9 @@
     :is(#tab-queue,#tab-waitlist) .rq-ctop{border-top:1px solid rgba(var(--tint-rgb),.05);}
     :is(#tab-queue,#tab-waitlist) .rq-sb8{display:flex;align-items:center;justify-content:space-between;gap:8px;}
     :is(#tab-queue,#tab-waitlist) .rq-cl{display:flex;align-items:center;gap:6px;min-width:0;}
-    :is(#tab-queue,#tab-waitlist) .rq-num16{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--green);color:#000;font-size:var(--staff-fs-sm,12px);font-weight:600;flex-shrink:0;}
+    :is(#tab-queue,#tab-waitlist) .rq-num16{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--green);color:#fff;font-size:var(--staff-fs-sm,12px);font-weight:600;flex-shrink:0;}
+    /* The party numbers: white on the light and booth desk greens (#0c7a3d 5.4:1, #05522a 9.4:1; black was 3.9:1 and 2.25:1), black on the dark desk's bright #25d184. */
+    html[data-staff-theme="dark"] :is(#tab-queue,#tab-waitlist) :is(.rq-num16,.rq-num17){color:#000;}
     :is(#tab-queue,#tab-waitlist) .rq-cname{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;}
     :is(#tab-queue,#tab-waitlist) .rq-cname2{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     :is(#tab-queue,#tab-waitlist) .rq-cr{display:flex;align-items:center;gap:6px;flex-shrink:0;}
@@ -3035,44 +3041,44 @@
     #tab-history .hist-pen{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:6px;min-width:24px;min-height:24px;line-height:1;}
     #tab-history .hist-dur{font-size:12px;font-weight:600;color:var(--blue);white-space:nowrap;}
     #tab-history .hist-acts{display:flex;gap:5px;flex-wrap:nowrap;align-items:center;}
-    #tab-history .hist-more{margin-top:12px;text-align:center;}
+    :is(#tab-history,#cact-host) .hist-more{margin-top:12px;text-align:center;}
     #receipt-modal .hist-rc-box{max-width:520px;}
     #receipt-modal .hist-rc-mail{text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
     /* the Log view (renderLogs, in #hist-log-host); a chip's ink is one of three */
-    :is(#tab-history,#tab-customers) .lg-wrap{padding:16px 20px;}
-    :is(#tab-history,#tab-customers) .lg-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-    :is(#tab-history,#tab-customers) .lg-h3{font-size:16px;font-weight:600;color:var(--text);}
-    :is(#tab-history,#tab-customers) .lg-count{font-size:12px;font-weight:600;color:var(--muted);}
-    :is(#tab-history,#tab-customers) .lg-note{font-size:var(--staff-fs-sm,12px);color:var(--muted);margin-bottom:16px;}
-    :is(#tab-history,#tab-customers) .lg-op{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-    :is(#tab-history,#tab-customers) .lg-op-lbl{font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;}
-    :is(#tab-history,#tab-customers) .lg-fs12{font-size:12px;}
-    :is(#tab-history,#tab-customers) .lg-mb8{margin-bottom:8px;}
-    :is(#tab-history,#tab-customers) .lg-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;align-items:center;}
-    :is(#tab-history,#tab-customers) .lg-srch{flex:1;min-width:170px;}
-    :is(#tab-history,#tab-customers) .lg-w100{width:100%;}
-    :is(#tab-history,#tab-customers) .lg-nowrap{white-space:nowrap;}
-    :is(#tab-history,#tab-customers) .lg-day{font-size:var(--staff-fs-sm,12px);font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted);margin:16px 0 6px;}
-    :is(#tab-history,#tab-customers) .lg-row{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border);}
-    :is(#tab-history,#tab-customers) .lg-time{color:var(--muted);font-size:var(--staff-fs-sm,12px);white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums;}
-    :is(#tab-history,#tab-customers) .lg-chip{flex-shrink:0;font-size:var(--staff-fs-sm,12px);font-weight:600;text-transform:none;letter-spacing:0;border:1px solid currentColor;border-radius:2px;padding:1px 6px;opacity:.85;}
-    :is(#tab-history,#tab-customers) .lg-c-green{color:var(--green);}
-    :is(#tab-history,#tab-customers) .lg-c-muted{color:var(--muted);}
-    :is(#tab-history,#tab-customers) .lg-c-red{color:var(--red);}
-    :is(#tab-history,#tab-customers) .lg-label{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    :is(#tab-history,#tab-customers) .lg-who{font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--green);white-space:nowrap;flex-shrink:0;}
-    :is(#tab-history,#tab-customers) .lg-undo{flex-shrink:0;font-size:var(--staff-fs-sm,12px);padding:3px 10px;}
-    :is(#tab-history,#tab-customers) .lg-empty{padding:40px;text-align:center;color:var(--muted);font-size:14px;}
+    :is(#tab-history,#cact-host) .lg-wrap{padding:16px 20px;}
+    :is(#tab-history,#cact-host) .lg-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+    :is(#tab-history,#cact-host) .lg-h3{font-size:16px;font-weight:600;color:var(--text);}
+    :is(#tab-history,#cact-host) .lg-count{font-size:12px;font-weight:600;color:var(--muted);}
+    :is(#tab-history,#cact-host) .lg-note{font-size:var(--staff-fs-sm,12px);color:var(--muted);margin-bottom:16px;}
+    :is(#tab-history,#cact-host) .lg-op{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+    :is(#tab-history,#cact-host) .lg-op-lbl{font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;}
+    :is(#tab-history,#cact-host) .lg-fs12{font-size:12px;}
+    :is(#tab-history,#cact-host) .lg-mb8{margin-bottom:8px;}
+    :is(#tab-history,#cact-host) .lg-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;align-items:center;}
+    :is(#tab-history,#cact-host) .lg-srch{flex:1;min-width:170px;}
+    :is(#tab-history,#cact-host) .lg-w100{width:100%;}
+    :is(#tab-history,#cact-host) .lg-nowrap{white-space:nowrap;}
+    :is(#tab-history,#cact-host) .lg-day{font-size:var(--staff-fs-sm,12px);font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted);margin:16px 0 6px;}
+    :is(#tab-history,#cact-host) .lg-row{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border);}
+    :is(#tab-history,#cact-host) .lg-time{color:var(--muted);font-size:var(--staff-fs-sm,12px);white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums;}
+    :is(#tab-history,#cact-host) .lg-chip{flex-shrink:0;font-size:var(--staff-fs-sm,12px);font-weight:600;text-transform:none;letter-spacing:0;border:1px solid currentColor;border-radius:2px;padding:1px 6px;opacity:.85;}
+    :is(#tab-history,#cact-host) .lg-c-green{color:var(--green);}
+    :is(#tab-history,#cact-host) .lg-c-muted{color:var(--muted);}
+    :is(#tab-history,#cact-host) .lg-c-red{color:var(--red);}
+    :is(#tab-history,#cact-host) .lg-label{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    :is(#tab-history,#cact-host) .lg-who{font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--green);white-space:nowrap;flex-shrink:0;}
+    :is(#tab-history,#cact-host) .lg-undo{flex-shrink:0;font-size:var(--staff-fs-sm,12px);padding:3px 10px;}
+    :is(#tab-history,#cact-host) .lg-empty{padding:40px;text-align:center;color:var(--muted);font-size:14px;}
     /* Customer activity (renderCustActivity, also in #hist-log-host): the action, then what it touched */
-    :is(#tab-history,#tab-customers) .ca-row{align-items:flex-start;}
-    :is(#tab-history,#tab-customers) .ca-row .lg-time,:is(#tab-history,#tab-customers) .ca-row .lg-chip{margin-top:2px;}
-    :is(#tab-history,#tab-customers) .ca-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
-    :is(#tab-history,#tab-customers) .ca-lbl{font-size:13px;}
-    :is(#tab-history,#tab-customers) .ca-det{font-size:12px;color:var(--muted);overflow-wrap:anywhere;}
-    :is(#tab-history,#tab-customers) .ca-src{font-size:var(--staff-fs-sm,12px);color:var(--muted);white-space:nowrap;flex-shrink:0;margin-top:3px;}
-    :is(#tab-history,#tab-customers) .ca-who{font:inherit;font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--green);background:none;border:0;padding:0;cursor:pointer;white-space:nowrap;flex-shrink:0;text-align:end;}
-    :is(#tab-history,#tab-customers) .ca-who:hover,:is(#tab-history,#tab-customers) .ca-who:focus-visible{text-decoration:underline;}
-    @media (max-width:767px){:is(#tab-history,#tab-customers) .ca-src{display:none;}}
+    :is(#tab-history,#cact-host) .ca-row{align-items:flex-start;}
+    :is(#tab-history,#cact-host) .ca-row .lg-time,:is(#tab-history,#cact-host) .ca-row .lg-chip{margin-top:2px;}
+    :is(#tab-history,#cact-host) .ca-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+    :is(#tab-history,#cact-host) .ca-lbl{font-size:13px;}
+    :is(#tab-history,#cact-host) .ca-det{font-size:12px;color:var(--muted);overflow-wrap:anywhere;}
+    :is(#tab-history,#cact-host) .ca-src{font-size:var(--staff-fs-sm,12px);color:var(--muted);white-space:nowrap;flex-shrink:0;margin-top:3px;}
+    :is(#tab-history,#cact-host) .ca-who{font:inherit;font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--green);background:none;border:0;padding:0;cursor:pointer;white-space:nowrap;flex-shrink:0;text-align:end;}
+    :is(#tab-history,#cact-host) .ca-who:hover,:is(#tab-history,#cact-host) .ca-who:focus-visible{text-decoration:underline;}
+    @media (max-width:767px){:is(#tab-history,#cact-host) .ca-src{display:none;}}
 
     /* Pull-to-refresh indicator */
     #ptr-ind{position:fixed;top:env(safe-area-inset-top,0);left:50%;transform:translateX(-50%) translateY(-64px);z-index:9998;width:38px;height:38px;border-radius:50%;background:var(--s2);border:1px solid var(--border);box-shadow:0 4px 14px rgba(16,19,18,.1);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease;pointer-events:none;}
@@ -4301,6 +4307,10 @@
     }
     body.view-staff .toggle-btn.active{background:linear-gradient(var(--sf-accent-wash),var(--sf-accent-wash)) var(--sf-card);border-color:var(--sf-green-ink);color:var(--sf-green-ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--sf-green-ink);}
     body.view-staff .toggle-btn.active::before{content:none;}
+    /* The info toggles (the give-badge dialog's) on the staff card, not the customer's white: white under the
+       dark desk's light ink hid the glyph. #confirm-modal .bdg-i.on still draws the open one green. */
+    body.view-staff .type-info-btn{background:var(--sf-card);border-color:var(--sf-ctl);color:var(--muted);}
+    body.view-staff .type-info-btn:hover{border-color:var(--sf-ctl-h);color:var(--text);}
     body.view-staff .view-toggle{background:var(--sf-card);border:1px solid var(--sf-ctl);border-radius:var(--sf-r-ctl);}
     body.view-staff .view-toggle-btn.active{background:linear-gradient(var(--sf-accent-wash),var(--sf-accent-wash)) var(--sf-card);color:var(--sf-green-ink);}
 
@@ -5644,7 +5654,8 @@ html[data-staff-theme="dark"] .ig-chip.ig-tone .ig-arw{color:hsl(var(--igh) 75% 
 .cust-topbar-link{display:flex;align-items:center;gap:10px;background:none;border:none;padding:4px 6px;margin:0 -6px;border-radius:8px;cursor:pointer;font-family:var(--font-body);text-align:start;color:inherit;min-width:0;}
 .cust-topbar-link:hover{background:rgba(var(--green-rgb),.08);}
 .cust-topbar-link:hover .cust-topbar-name{color:var(--green);}
-.cust-topbar-name,.cust-topbar-email{display:block;}
+.cust-topbar-name{display:block;}
+@media(min-width:768px){.cust-topbar-email{display:block;}} /* phones keep the email out of the header (the 767px rule hides it; a bare display:block here outranked it) */
 /* Reserved: a waiting rider with a bike held for them - its own colour, apart from plain Waiting */
 .badge-reserved{color:#1d4ed8;}
 body.view-staff .badge-reserved{color:#1e40af;}
@@ -8471,7 +8482,7 @@ body:not(.view-staff) .cu-ic{flex:none;vertical-align:-3px;}
 :is(html[dir="rtl"]) body:not(.view-staff) .cu-ic-flip{transform:scaleX(-1);}
 body:not(.view-staff) .cust-back-btn{min-height:44px;color:var(--ink-2);font-size:var(--fs-15);font-weight:600;gap:4px;}
 /* the wizard's own Back sits in its footer from step two; the page Back would be a second one */
-body:not(.view-staff):has(#tab-register .cu-foot) #cust-back-btn{display:none;}
+body:not(.view-staff):has(#tab-register.active .cu-foot) #cust-back-btn{display:none;}
 
 /* ── Chips: neutral; picked is ink with the neon dot (neon on the dark fill, as the brand says) ─── */
 body:not(.view-staff) .toggle-btn{background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-ctl);color:var(--ink);font-weight:600;min-height:44px;}
@@ -9717,6 +9728,10 @@ body.ar-skin:not(.view-staff){
   --paper:#08080a; --card:#131315; --card-2:#1b1b1e; --card-3:#242428;
   --ink:#ffffff; --ink-2:rgba(255,255,255,.76); --ink-3:rgba(255,255,255,.58); --ink-4:rgba(255,255,255,.38);
   --line:rgba(255,255,255,.14); --line-2:rgba(255,255,255,.3);
+  --line-3:rgba(255,255,255,.42); /* a field's border, the wallet switch's off track, an open tick's ring: about 4:1 on the card */
+  /* the glass bars (the Continue bar) in the race's black, under its white inks; the edge in the poster's red */
+  --glass-solid:#0b0b0d; --glass:rgba(11,11,13,.82); --glass-hi:rgba(11,11,13,.9);
+  --glass-rim:rgba(255,255,255,.12); --glass-rim-2:rgba(255,255,255,.06); --glass-edge:rgba(227,38,47,.42);
   --go:#e3262f; --go-2:#c81e27; --go-wash:rgba(227,38,47,.14); --neon:#ff5a61;
   --amber:#ffc46b; --amber-2:#ffc46b; --amber-wash:rgba(255,196,107,.12); --red:#ff8a8f; --red-line:rgba(255,138,143,.4);
   --scrim:rgba(0,0,0,.72); --sh-float:0 24px 60px rgba(0,0,0,.6); --accent2:rgba(227,38,47,.45);
@@ -9864,6 +9879,8 @@ body:not(.view-staff) .ticket-card.th-arena .vl-tk-code strong{color:#fff;}
 /* dark staff theme: the white row held light inherited text (bug hunt 2026-10-28) */
 html[data-staff-theme="dark"] #vl-staff-host .vl-pr-row{background:var(--s2);}
 #vl-staff-host .vl-pr-row.active{border:2px solid var(--vl-ink);padding:9px 11px;}
+/* dark staff theme: the picked row's near-black --vl-ink edge vanished on the dark row; it lights up green instead */
+html[data-staff-theme="dark"] #vl-staff-host .vl-pr-row.active{border-color:var(--green);background:var(--sf-select,var(--s2));}
 #vl-staff-host .vl-cf-set{border:1px solid var(--border,rgba(26,25,25,.14));padding:10px 12px;margin:0 0 12px;display:flex;flex-wrap:wrap;gap:8px 16px;}
 #vl-staff-host .vl-cf-set legend{font-size:13px;font-weight:700;padding:0 4px;}
 #vl-staff-host .vl-cf-chk{display:flex;align-items:center;gap:6px;font-size:14px;}
@@ -10366,18 +10383,18 @@ body.view-staff .mny-aurow{margin:6px 0 10px;}
 :is(#mny-host,#an-team-host) .mny-t{width:100%;border-collapse:collapse;font-size:var(--fs-sm);}
 :is(#mny-host,#an-team-host) .mny-t th{text-align:start;font-size:var(--fs-xs);color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);white-space:nowrap;}
 :is(#mny-host,#an-team-host) .mny-t td{padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:top;}
-:is(#tab-history,#tab-customers) .lg-open{background:transparent none;border:0;padding:0;color:var(--text);text-align:start;font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--border);min-height:24px;}
-:is(#tab-history,#tab-customers) .lg-open:hover{color:var(--green);}
-:is(#tab-history,#tab-customers) .lg-amt{font-size:12px;font-weight:600;white-space:nowrap;}
-:is(#tab-history,#tab-customers) .lg-acct{color:var(--muted);font-weight:600;}
+:is(#tab-history,#cact-host) .lg-open{background:transparent none;border:0;padding:0;color:var(--text);text-align:start;font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--border);min-height:24px;}
+:is(#tab-history,#cact-host) .lg-open:hover{color:var(--green);}
+:is(#tab-history,#cact-host) .lg-amt{font-size:12px;font-weight:600;white-space:nowrap;}
+:is(#tab-history,#cact-host) .lg-acct{color:var(--muted);font-weight:600;}
 /* A line names the device and the account now (2026-10-09): on a phone the who-part shortens and the action takes
    its own line, so the action text is never squeezed to nothing. */
-:is(#tab-history,#tab-customers) .lg-who{min-width:0;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;}
+:is(#tab-history,#cact-host) .lg-who{min-width:0;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;}
 @media (max-width:640px){
-  :is(#tab-history,#tab-customers) .lg-row{flex-wrap:wrap;row-gap:4px;}
-  :is(#tab-history,#tab-customers) .lg-row .lg-label{flex:1 1 100%;white-space:normal;}
+  :is(#tab-history,#cact-host) .lg-row{flex-wrap:wrap;row-gap:4px;}
+  :is(#tab-history,#cact-host) .lg-row .lg-label{flex:1 1 100%;white-space:normal;}
 }
-:is(#tab-history,#tab-customers) .lg-more{text-align:center;padding:12px 0;}
+:is(#tab-history,#cact-host) .lg-more{text-align:center;padding:12px 0;}
 @media (max-width:560px){:is(#mny-modal,#mny-host) .mny-grid2{grid-template-columns:1fr;}}
 
 /* ══ Accessibility and consistency pass (2026-10-09) ═══════════════════════════════════════════
@@ -10867,6 +10884,15 @@ html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.cm-row-mark.ptn-row-m
 body.view-staff .queue-table tbody tr td.cm-cell,body.view-staff .queue-table tbody tr:hover td.cm-cell{background:linear-gradient(to right,var(--rs-bg,var(--s1)) 0 25%,color-mix(in srgb,var(--rs-bg,var(--s1)) 55%,transparent) 100%),url('assets/mm-pattern.svg') right -10px top -8px/80px auto repeat var(--rs-bg,var(--s1));}
 html[dir="rtl"] body.view-staff .queue-table tbody tr td.cm-cell,html[dir="rtl"] body.view-staff .queue-table tbody tr:hover td.cm-cell{background:linear-gradient(to left,var(--rs-bg,var(--s1)) 0 25%,color-mix(in srgb,var(--rs-bg,var(--s1)) 55%,transparent) 100%),url('assets/mm-pattern.svg') left -10px top -8px/80px auto repeat var(--rs-bg,var(--s1));}
 body.view-staff .queue-mobile-view .q-card.cm-row-mark{background:linear-gradient(to bottom right,var(--rs-bg,var(--s1)) 0 35%,color-mix(in srgb,var(--rs-bg,var(--s1)) 60%,transparent) 100%),url('assets/mm-pattern.svg') right -10px top -8px/80px auto repeat var(--rs-bg,var(--s1));}
+/* A member's booking (and a member's partner booking) made with a BD- code: the red band and the red name take the
+   community's (and the partner's) place in both directions. The two blocks above tie or outrank each other by direction,
+   so these name both marks; the community's pattern cell and the card's pattern stay. */
+:root body.view-staff .queue-table tbody tr.bdf-row.cm-row-mark td:first-child{box-shadow:inset 6px 0 0 #c8102e,inset 10px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.bdf-row.cm-row-mark td:first-child{box-shadow:inset -6px 0 0 #c8102e,inset -10px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+:root body.view-staff .queue-mobile-view .q-card.bdf-row.cm-row-mark{box-shadow:inset 6px 0 0 #c8102e,inset 10px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.bdf-row.cm-row-mark{box-shadow:inset -6px 0 0 #c8102e,inset -10px 0 0 var(--rs-edge,transparent);}
+:root body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).bdf-row.cm-row-mark .rider-name{color:#a50d26;}
+html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).bdf-row.cm-row-mark .rider-name{color:#ff8a9a;}
 /* The special needs tag (2026-10-23): a figure in a wheelchair, white on orange (the owner, 2026-10-23; it was blue) - on its tag chip (.tag-svg) and after
    a holder's name wherever staff meet the booking (.sn-mk, _snChip). */
 .sn-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#e8590c;color:#fff;border-radius:2px;vertical-align:middle;}
@@ -10950,6 +10976,16 @@ html[data-theme="dark"] body:not(.view-staff) .code-k-bd,html[data-staff-theme="
 html[data-theme="dark"] body:not(.view-staff) .code-k-vl,html[data-staff-theme="dark"] body.view-staff .code-k-vl,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-vl{--code-k:#8fd0ff;}
 html[data-theme="dark"] body:not(.view-staff) .code-k-promo,html[data-staff-theme="dark"] body.view-staff .code-k-promo,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-promo{--code-k:#f0abd6;}
 html[data-theme="dark"] body:not(.view-staff) .code-k-sat,html[data-staff-theme="dark"] body.view-staff .code-k-sat,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-sat{--code-k:#93c5fd;}
+/* ...but the white themed tickets (Saturday and every ordinary ride, Run for Her, events, Petromin, the pool, Victory Lap,
+   Defe 5K, blood) keep the base inks: the pale ones are for dark screens and the dark tickets (the live night, JCC,
+   Arena), and every rider page carries data-theme="dark", so the line above reached the white tickets too. */
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood) .code-k-rw{--code-k:#0a7a4b;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood) .code-k-rf{--code-k:#0f766e;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood) .code-k-rb{--code-k:#a16207;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood) .code-k-bd{--code-k:#c8102e;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood) .code-k-vl{--code-k:#1f7ae0;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood) .code-k-promo{--code-k:#8c3b6e;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood) .code-k-sat{--code-k:#1d4ed8;}
 .code-full{display:inline-grid;grid-template-columns:auto minmax(0,1fr);column-gap:5px;align-items:center;padding:3px 8px;}
 .code-full .code-ic{grid-row:1;grid-column:1;}
 .code-full .code-c{grid-row:1;grid-column:2;font-weight:700;}
@@ -11843,7 +11879,7 @@ html[data-staff-theme="booth"] body.view-staff{--vx-n-ink:#1f2622;--vx-y-ink:#4a
 #tab-volunteers .vd-pick{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:4px;}
 #tab-volunteers .vd-sel{flex:1 1 auto;min-width:0;max-width:560px;}
 #tab-volunteers .btn-sm.vd-arr{flex:none;min-width:44px;font-size:18px;line-height:1;}
-html[dir="rtl"] #tab-volunteers .vd-arr{transform:scaleX(-1);}
+/* no RTL flip on the arrows: ‹ and › are mirrored characters, the browser already turns them in Arabic and Urdu (a flip turned them back) */
 #tab-volunteers .vx-sess{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px 16px;margin:12px 0;}
 #tab-volunteers .vx-sess-main{min-width:0;}
 #tab-volunteers .vx-sess-t{margin:0;font-size:20px;font-weight:600;line-height:1.3;color:var(--text);}
@@ -12505,8 +12541,9 @@ body.view-staff #tab-community .ppl-find .search-input{padding-inline-start:12px
   html[data-staff-simple] body.view-staff #view-staff .tab-panel :is(.page-sub,.sv-bar,.filter-toggle,.filter-more),
   html[data-staff-simple] body.view-staff #view-staff .tab-panel:not(#tab-dashboard,#tab-analytics) :is(.dash-kpis,.stats-row){display:none!important;}
   /* Bookings: no header buttons, view pills, pace line, second figures line or filter panel; a card without its
-     booked-at time and select box (its actions are the one button and ⋯) */
-  html[data-staff-simple] body.view-staff :is(#tab-queue,#tab-waitlist) :is(.rq-hacts,.q-views>.filter-pill,.n6c-pace,.stat-strip,#fm-q,.q-booked-at,.rq-cchk){display:none!important;}
+     booked-at time and select box (its actions are the one button and ⋯). A blood drive keeps its donor add: it has
+     no walk-in button at the thumb, so that header button is the desk's only way to add a walk-up donor or visitor. */
+  html[data-staff-simple] body.view-staff :is(#tab-queue,#tab-waitlist) :is(.rq-hacts:not(:has(>.bld-add)),.rq-hacts>:not(.bld-add),.q-views>.filter-pill,.n6c-pace,.stat-strip,#fm-q,.q-booked-at,.rq-cchk){display:none!important;}
   /* Sessions: the date pills, search and the cards (no layouts, Customize, New Session, filters, booking window or codes);
      a session's page keeps its numbers, Open in Bookings, open / full / close and its riders (the script) */
   html[data-staff-simple] body.view-staff #tab-sessions :is(.ss-head-btns,.filter-bar,.bw-card,.pc-wrap,.sess-ds-fleet){display:none!important;}
@@ -12678,7 +12715,7 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
 .lk-it-wa{align-self:flex-start;text-decoration:none;}
 #tab-lockers .lk-sweep{display:flex;justify-content:flex-end;margin:-4px 0 10px;}
 #tab-lockers .lk-arr{margin-bottom:16px;}
-#tab-lockers .lk-ev-wrap{flex-basis:100%;padding:4px 0 0 64px;}
+#tab-lockers .lk-ev-wrap{flex-basis:100%;padding:4px 0 0;padding-inline-start:64px;} /* under the name, past the 52px code and the 12px gap, on the start side in Arabic and Urdu too */
 #tab-lockers .lk-ev{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--text);}
 #tab-lockers .lk-rp-wrap{overflow-x:auto;}
 #tab-lockers .lk-rp{width:100%;border-collapse:collapse;font-size:14px;}
@@ -12756,7 +12793,7 @@ body.view-staff #tab-sessions .sess-ag-end{display:flex;align-items:center;gap:8
 body.view-staff #tab-sessions .sess-ag-end .sess-lc-bar{width:44px;margin:0;}
 body.view-staff #tab-sessions .sess-ag-end .ss-fill{display:block;height:100%;}
 body.view-staff #tab-sessions .sess-ag-end .sess-lc-count{font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;}
-#tab-sessions .ss-dense .sess-lc.sess-ag{min-height:40px;padding:5px 10px;}
+body.view-staff #tab-sessions .ss-dense .sess-lc.sess-ag{min-height:40px;padding:5px 10px;} /* (1,4,1): the agenda row rule above is (1,3,1) */
 @media(max-width:520px){
   body.view-staff #tab-sessions .sess-lc.sess-ag{grid-template-columns:minmax(52px,auto) minmax(0,1fr);}
   body.view-staff #tab-sessions .sess-ag-end{grid-column:2;justify-content:flex-start;}

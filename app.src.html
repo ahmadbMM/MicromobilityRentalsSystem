@@ -24821,7 +24821,7 @@ function _n6uJumps(x){
 }
 // A shift's state, as the Volunteers page reads it (_vdState lives in that part).
 function _n6uVolState(x){return x.clock_in&&!x.clock_out?'in':(x.clock_in||x.status==='done')?'out':x.status==='accepted'?'wait':x.status==='interested'?'asked':'off';}
-function _n6uDashRow(txt,n,go){return`<button type="button" class="dash-row" data-on-click="${_on(...go)}"><span class="dash-row-main">${esc(txt)}</span>${n!=null?`<em>${esc(String(n))}</em>`:'<span class="dash-go mirror-rtl" aria-hidden="true">›</span>'}</button>`;}
+function _n6uDashRow(txt,n,go){return`<button type="button" class="dash-row" data-on-click="${_on(...go)}"><span class="dash-row-main">${esc(txt)}</span>${n!=null?`<em>${esc(String(n))}</em>`:'<span class="dash-go" aria-hidden="true">›</span>'}</button>`;}
 function _n6uDashCards(ids){
   const card=(id,title,body)=>`<div class="form-section dash-card" data-dash="${id}"><h2 class="form-title">${esc(title)}</h2>${body}</div>`;
   let out='';
@@ -24890,9 +24890,9 @@ function _sessCalHtml(list){
   }
   return`<div class="sess-cal">
     <div class="cal-head">
-      <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_calMove",-1)}" aria-label="${esc(t('calPrev'))}"><span class="mirror-rtl" aria-hidden="true">‹</span></button>
+      <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_calMove",-1)}" aria-label="${esc(t('calPrev'))}"><span aria-hidden="true">‹</span></button>
       <strong>${esc(title)}</strong>
-      <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_calMove",1)}" aria-label="${esc(t('calNext'))}"><span class="mirror-rtl" aria-hidden="true">›</span></button>
+      <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_calMove",1)}" aria-label="${esc(t('calNext'))}"><span aria-hidden="true">›</span></button>
       <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_on__sessCalHtml_1",_EV,_EL)}">${t('calToday')}</button>${_n6rCalModeHtml()}
     </div>
     <div class="cal-grid">${cells}</div>
@@ -25734,9 +25734,9 @@ function _n6rCalWeekHtml(list){
       <div class="n6r-wk-list">${ss.map(_n6rCalEntry).join('')||`<span class="ss-c-muted">—</span>`}</div></div>`;}
   return`<div class="sess-cal n6r-wk">
     <div class="cal-head">
-      <button type="button" class="btn-sm btn-muted" data-on-click="${_on('_n6rWkMove',-7)}" aria-label="${esc(t('n6rWkPrev'))}"><span class="mirror-rtl" aria-hidden="true">‹</span></button>
+      <button type="button" class="btn-sm btn-muted" data-on-click="${_on('_n6rWkMove',-7)}" aria-label="${esc(t('n6rWkPrev'))}"><span aria-hidden="true">‹</span></button>
       <strong>${esc(t('ssWeekOf').replace('{0}',shortDate(w0)))}</strong>
-      <button type="button" class="btn-sm btn-muted" data-on-click="${_on('_n6rWkMove',7)}" aria-label="${esc(t('n6rWkNext'))}"><span class="mirror-rtl" aria-hidden="true">›</span></button>
+      <button type="button" class="btn-sm btn-muted" data-on-click="${_on('_n6rWkMove',7)}" aria-label="${esc(t('n6rWkNext'))}"><span aria-hidden="true">›</span></button>
       <button type="button" class="btn-sm btn-muted" data-on-click="${_on('_n6rWkMove',0)}">${t('calToday')}</button>${_n6rCalModeHtml()}
     </div><div class="n6r-wk-days">${rows}</div></div>`;
 }
@@ -38243,9 +38243,9 @@ function _ptTotalsHtml(){
     const month=_ptSessions().filter(s=>_ptDay(s).startsWith(P.ym)).sort((a,b)=>(_ptDay(a)+_sessStart(a)).localeCompare(_ptDay(b)+_sessStart(b))),hrs=_ptRideHours();
     chooser=`<div class="sess-cal pt-cal">
       <div class="cal-head">
-        <button type="button" class="btn-sm btn-muted" data-on-click="${_on('_ptMove',-1)}" aria-label="${esc(t('calPrev'))}"><span class="mirror-rtl" aria-hidden="true">‹</span></button>
+        <button type="button" class="btn-sm btn-muted" data-on-click="${_on('_ptMove',-1)}" aria-label="${esc(t('calPrev'))}"><span aria-hidden="true">‹</span></button>
         <strong>${esc(title)}</strong>
-        <button type="button" class="btn-sm btn-muted" data-on-click="${_on('_ptMove',1)}" aria-label="${esc(t('calNext'))}"><span class="mirror-rtl" aria-hidden="true">›</span></button>
+        <button type="button" class="btn-sm btn-muted" data-on-click="${_on('_ptMove',1)}" aria-label="${esc(t('calNext'))}"><span aria-hidden="true">›</span></button>
         <button type="button" class="btn-sm btn-muted" data-on-click="${_on('_ptMoveToday')}">${t('calToday')}</button>
         <span class="view-toggle pt-vt">
           <button type="button" class="view-toggle-btn${P.pick==='cal'?' active':''}" aria-pressed="${P.pick==='cal'}" data-on-click="${_on('_ptPickView','cal')}">${t('calViewCal')}</button>
