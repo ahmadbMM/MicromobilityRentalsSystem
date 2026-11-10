@@ -89,7 +89,7 @@ test('a rider sees the mark beside their own email on Account', async ({ page })
   await loginCustomer(page, { id: 'c1', email: 'spec@gmail.com' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','contact')`);
   const field = page.locator('#tab-account .si-field');
   await expect(field.locator('.si-apple')).toBeVisible();
   await expect(field.locator('.si-google')).toHaveCount(0);
@@ -109,7 +109,7 @@ test('a password account has no mark on Account', async ({ page }) => {
   await loginCustomer(page, { id: 'c1' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','about')`);
   await expect(page.locator('#acc-workplace')).toBeVisible(); // customer_about has answered
   await expect(page.locator('#tab-account .si-ico')).toHaveCount(0);
 });
@@ -157,7 +157,7 @@ test('a rider who changes their email has the mark read again', async ({ page })
   await loginCustomer(page, { id: 'c1', email: 'spec@icloud.com' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','contact')`);
   await expect(page.locator('#tab-account .si-field .si-apple')).toBeVisible();
   let saved = false;
   page.on('request', (r) => { if (r.url().includes('/rpc/customer_update_profile')) saved = true; });
@@ -166,7 +166,7 @@ test('a rider who changes their email has the mark read again', async ({ page })
   await page.route(/\/rest\/v1\/rpc\/customer_about/, (r) => saved ? r.fulfill({ headers: cors, json: [{ profession: null, workplace: null, heard_from: null, sign_in: null }] }) : r.fallback());
 
   await page.locator('#acc-email').fill('spec@example.org');
-  await page.evaluate('saveAccount()');
+  await page.evaluate(`_accPgSave('contact')`);
   await expect.poll(() => saved).toBe(true);
   await expect(page.locator('#tab-account .si-ico')).toHaveCount(0);
   await expect(page.locator('#acc-email')).toHaveValue('spec@example.org');

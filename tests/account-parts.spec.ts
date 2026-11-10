@@ -38,21 +38,20 @@ const part = (page: Page, k: string) => page.locator(`#tab-account [data-acc-vie
 const closePop = async (page: Page) => { const p = page.locator('#badge-pop'); if (await p.isVisible()) await p.getByRole('button', { name: 'Close' }).click(); };
 
 test.describe('@customer:account the account page in three parts', () => {
-  test('Account opens first; Stats and Badges each have an address, Back walks them and the form keeps what was typed', async ({ page }) => {
+  test('Account opens first, on its menu; Stats and Badges each have an address and Back walks them', async ({ page }) => {
     await open(page);
     await page.evaluate(`setCustTab('account')`);
     await closePop(page);
     await expect(page.locator('#tab-account .acc-view')).toHaveText(['Account', 'Stats', 'Badges']);
     await expect(part(page, 'account')).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('#acc-first')).toBeVisible();
+    await expect(page.locator('#acc-r-personal')).toBeVisible();
     await expect(page.locator('#acc-pane-stats')).toBeHidden();
     await expect(page.locator('#acc-pane-badges')).toBeHidden();
     expect(at(page)).toBe('/account');
 
-    await page.locator('#acc-first').fill('Typed');
     await part(page, 'stats').click();
     await expect(page.locator('#tab-account .mr-season')).toBeVisible();
-    await expect(page.locator('#acc-first')).toBeHidden();
+    await expect(page.locator('#acc-r-personal')).toBeHidden();
     expect(at(page)).toBe('/account/stats');
     await part(page, 'badges').click();
     await expect(page.locator('#mr-badges-host')).toBeVisible();
@@ -62,14 +61,31 @@ test.describe('@customer:account the account page in three parts', () => {
     await expect(page.locator('#tab-account .mr-season')).toBeVisible();
     expect(at(page)).toBe('/account/stats');
     await page.goBack();
-    await expect(page.locator('#acc-first')).toHaveValue('Typed');
+    await expect(page.locator('#acc-r-personal')).toBeVisible();
     expect(at(page)).toBe('/account');
 
-    // the tab bar's Account opens Account, whichever part was open
+    // the tab bar's Account opens Account's menu, whichever part or page was open
     await part(page, 'badges').click();
     await page.evaluate(`setCustTab('account')`);
     await expect(part(page, 'account')).toHaveAttribute('aria-pressed', 'true');
     expect(at(page)).toBe('/account');
+    await page.evaluate(`setCustTab('account','contact')`);
+    await page.evaluate(`setCustTab('account')`);
+    await expect(page.locator('#acc-r-personal')).toBeVisible();
+    expect(at(page)).toBe('/account');
+  });
+
+  test('a page with typed edits keeps them while the rider stays on it, and the switch asks before leaving it', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'a phone hides the switch while a page is open');
+    await open(page);
+    await page.evaluate(`setCustTab('account','personal')`);
+    await closePop(page);
+    await page.locator('#acc-first').fill('Typed');
+    await part(page, 'stats').click();
+    await expect(page.locator('#confirm-modal')).toContainText('Discard your changes?');
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Keep editing' }).click();
+    await expect(page.locator('#acc-first')).toHaveValue('Typed');
+    expect(at(page)).toBe('/account/personal');
   });
 
   test('a link to /account/badges opens Badges, and a reload stays there', async ({ page }) => {
@@ -86,7 +102,7 @@ test.describe('@customer:account the account page in three parts', () => {
     expect(at(page)).toBe('/account/badges');
   });
 
-  test('the wallet, Invite friends and the profile are on Account; the season on Stats; the badges on Badges', async ({ page }) => {
+  test('the wallet, Invite friends and the profile are on Account (its pages); the season on Stats; the badges on Badges', async ({ page }) => {
     await open(page);
     await page.evaluate(`setCustTab('account')`);
     const acct = page.locator('#acc-pane-account'), stats = page.locator('#acc-pane-stats'), badges = page.locator('#acc-pane-badges');

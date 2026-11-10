@@ -61,14 +61,16 @@ test('Account: a short name already on file saves as it is; a new one is refused
   await loginCustomer(page, { id: 'c1', name: 'Sara M Khan', session_token: 'tok' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','personal')`);
   await expect(page.locator('#acc-first')).toBeVisible();
-  await page.evaluate('saveAccount()');
-  await expect.poll(() => saves.length).toBe(1);
+  // unchanged, Personal details' Save judges it and lets it be (the account menu saves nothing unchanged, 2026-11-10)
+  await page.evaluate(`_accPgSave('personal')`);
+  await expect(page.locator('#acc-err-personal')).toBeEmpty();
+  expect(saves).toHaveLength(0);
   await page.evaluate(`document.getElementById('acc-middle').value='';document.getElementById('acc-last').value='K'`);
-  await page.evaluate('saveAccount()');
-  await expect(page.locator('#acc-err')).toHaveText(SHORT);
-  expect(saves).toHaveLength(1);
+  await page.evaluate(`_accPgSave('personal')`);
+  await expect(page.locator('#acc-err-personal')).toHaveText(SHORT);
+  expect(saves).toHaveLength(0);
 });
 
 test('the correction pop-up will not take an initial for a name', async ({ page }) => {

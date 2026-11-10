@@ -39,7 +39,7 @@ const contrast = (page: Page, sel: string, bg: string) => page.locator(sel).firs
 
 test('Arabic: a rider’s select draws its chevron at the end edge, with its room there', async ({ page }) => {
   await open(page, 'ar');
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','residence')`);
   await expect(page.locator('#acc-country')).toBeVisible();
   const look = (sel: string) => page.locator(sel).evaluate((el) => { const cs = getComputedStyle(el); return { x: cs.backgroundPositionX, padL: parseFloat(cs.paddingLeft), padR: parseFloat(cs.paddingRight) }; });
   const country = await look('#acc-country');
@@ -51,7 +51,7 @@ test('Arabic: a rider’s select draws its chevron at the end edge, with its roo
 
 test('English: the chevron stays at the right', async ({ page }) => {
   await open(page, 'en');
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','residence')`);
   const x = await page.locator('#acc-country').evaluate((el) => getComputedStyle(el).backgroundPositionX);
   expect(x).toMatch(/^(right 13px|calc\(100% - 13px\))$/);
 });

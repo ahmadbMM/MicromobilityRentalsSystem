@@ -51,8 +51,9 @@ test.describe('@customer:account signing out and in again', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','notifications')`);
     await expect(page.locator('#acc-ride-news')).toBeVisible();
+    await page.evaluate(`setCustTab('account','delete')`);
     await expect(page.locator('#acc-delete')).toBeVisible();
     const before = consents.length;
     await page.evaluate('doLogout(true)');
@@ -61,8 +62,9 @@ test.describe('@customer:account signing out and in again', () => {
     await page.locator('#a-pwd').fill('Password1');
     await page.evaluate('doLogin()');
     await page.waitForFunction(`S.loggedIn&&S.loggedIn.session_token==='tok-2'`);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','notifications')`);
     await expect(page.locator('#acc-ride-news')).toBeVisible();
+    await page.evaluate(`setCustTab('account','delete')`);
     await expect(page.locator('#acc-delete')).toBeVisible();
     expect(consents.length).toBeGreaterThan(before);
     expect(consents[consents.length - 1]).toMatchObject({ p_id: 'c1', p_token: 'tok-2' });

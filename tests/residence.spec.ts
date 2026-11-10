@@ -31,7 +31,7 @@ test('Account: every country, and the city waits for one', async ({ page }) => {
   await loginCustomer(page, { id: 'c1' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','residence')`);
 
   const countries = await page.evaluate(opts('#acc-country')) as [string, string][];
   expect(countries[0][0]).toBe('');
@@ -61,7 +61,7 @@ test('Account: every country, and the city waits for one', async ({ page }) => {
 
   const calls: string[] = [];
   page.on('request', r => { if (/rpc\/customer_update_profile/.test(r.url())) calls.push(r.postData() || ''); });
-  await page.evaluate(`saveAccount()`);
+  await page.evaluate(`_accPgSave('residence')`);
   await expect.poll(() => calls.length).toBe(1);
   expect(JSON.parse(calls[0])).toMatchObject({ p_country: 'Egypt', p_city: 'Alexandria' });
 
@@ -78,7 +78,7 @@ test('a saved city survives the wait for its list, and one the list lacks is kep
   await loginCustomer(page, { id: 'c1', name: 'Spec Rider', country: 'Saudi Arabia', city: 'Khobar' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','residence')`);
   const city = page.locator('#acc-city');
   await expect(city).toHaveValue('Khobar');          // before the list arrives: the saved city alone
   await expect(city.locator('option')).toHaveCount(2);

@@ -107,7 +107,7 @@ test.describe('@customer:account nameless account', () => {
     const errs: string[] = [];
     page.on('pageerror', (e) => errs.push(e.message));
     await rider(page, { 'rpc:customer_about': [{ profession: null, workplace: null, heard_from: null }] }, { name: null, photo: null });
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','personal')`);
     await expect(page.locator('#acc-photo-img')).toBeVisible();
     expect(errs.filter((m) => /split|name/i.test(m))).toEqual([]);
   });

@@ -157,27 +157,25 @@ test.describe('@customer:account WhatsApp on Account', () => {
     await waitForSb(page);
     const sent: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (/rpc\/customer_set_whatsapp/.test(r.url())) sent.push(JSON.parse(r.postData() || '{}')); });
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','contact')`); // a field of the Contact page since 2026-11-10
     return sent;
   }
 
-  test('an answered one shows, Change asks again, and No saves the number with its country code', async ({ page }) => {
+  test('an answered one shows as the question answered, and No saves the number with its country code by the page\'s Save', async ({ page }) => {
     const sent = await account(page, { phone: '0500000001', whatsapp_same: true, whatsapp: null });
     const box = page.locator('#acc-wa');
     await expect(box).toContainText('WhatsApp number');
-    await expect(box.locator('.run-em-n')).toHaveText('0500000001');
-    await expect(box.locator('.run-em-m')).toHaveText('Same as mobile');
-    await box.getByRole('button', { name: 'Change' }).click();
+    await expect(box.getByRole('button', { name: 'Change' })).toHaveCount(0);
     await expect(box.locator('.fx-q')).toHaveText('Is 0500000001 your WhatsApp number too?');
     await expect(box.locator('.fx-opt.on')).toHaveText('Yes');
     await box.locator('.fx-opt', { hasText: 'No' }).click();
     await expect(page.locator('#acc-wa-phone')).toBeFocused();
-    await box.getByRole('button', { name: 'Save' }).click();
+    await page.locator('#acc-save-contact').click();
     await expect(box.locator('#acc-wa-err')).toHaveText('Enter your WhatsApp number.');
     expect(sent).toHaveLength(0);
     await page.selectOption('#acc-wa-cc', '+971');
     await page.fill('#acc-wa-phone', '50 482 9153');
-    await box.getByRole('button', { name: 'Save' }).click();
+    await page.locator('#acc-save-contact').click();
     await expect.poll(() => sent.length).toBe(1);
     expect(sent[0]).toEqual({ p_id: 'c1', p_token: expect.any(String), p_same: false, p_phone: '+971504829153' });
   });
@@ -188,7 +186,7 @@ test.describe('@customer:account WhatsApp on Account', () => {
     await expect(box.locator('.fx-q')).toBeVisible();
     await expect(box.getByRole('button', { name: 'Cancel' })).toHaveCount(0);
     await box.locator('.fx-opt', { hasText: 'Yes' }).click();
-    await box.getByRole('button', { name: 'Save' }).click();
+    await page.locator('#acc-save-contact').click();
     await expect.poll(() => sent.length).toBe(1);
     expect(sent[0]).toMatchObject({ p_same: true, p_phone: null });
   });

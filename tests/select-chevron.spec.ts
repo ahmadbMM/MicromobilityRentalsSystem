@@ -17,7 +17,7 @@ test('Account: country, city and birth-date selects carry their chevron', async 
   await loginCustomer(page, { id: 'c1', name: 'Lina Haddad' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','residence')`);
   await expect(page.locator('#acc-country')).toBeVisible();
   for (const sel of ['#acc-country', '#acc-city', '#acc-birth-y']) {
     const l = await page.locator(sel).evaluate(look);

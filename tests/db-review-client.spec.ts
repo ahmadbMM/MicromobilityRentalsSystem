@@ -121,12 +121,13 @@ test('Account says the phone is taken when the server refuses it', async ({ page
   await loginCustomer(page, { id: 'c1', name: 'Lina Haddad', email: 'lina@example.com', phone: '+966500000001', session_token: 'tok' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
-  await expect(page.locator('#acc-err')).toBeAttached();
+  await page.evaluate(`setCustTab('account','contact')`);
+  await expect(page.locator('#acc-err-contact')).toBeAttached();
   // The tab reads the profile when it opens and draws itself again with the answer (an untouched form): saved before that
   // answer, the redraw wiped the message under test whenever another request on the tab (the wallet, the Invite friends
   // card) made it land late.
   await page.waitForFunction(`!!(S._profFresh&&S._profFresh.id==='c1')`);
-  await page.evaluate(`saveAccount()`);
-  await expect(page.locator('#acc-err')).toHaveText(await page.evaluate(`t('errPhoneExists')`) as string);
+  await page.fill('#acc-phone', '500000002'); // a new number, the one another account holds
+  await page.evaluate(`_accPgSave('contact')`);
+  await expect(page.locator('#acc-err-contact')).toHaveText(await page.evaluate(`t('errPhoneExists')`) as string);
 });

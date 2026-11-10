@@ -90,7 +90,7 @@ test.describe('ambassador card', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','ambassador')`);
     const card = page.locator('#amb-mine');
     await expect(card).toBeVisible();
     await expect(card).toContainText('AMAL10');
@@ -105,7 +105,7 @@ test.describe('ambassador card', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','ambassador')`);
     await page.waitForFunction(`S._ambMine&&S._ambMine.ambassador===false`);
     await expect(page.locator('#amb-mine')).toHaveCount(0);
   });

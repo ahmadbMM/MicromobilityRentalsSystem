@@ -177,15 +177,16 @@ test('Account: an existing name is not re-judged, a new one is', async ({ page }
   await loginCustomer(page, { id: 'c1', name: 'Malik 2 Anas', session_token: 'tok' });   // one of the older names the rule would refuse
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','personal')`);
   await expect(page.locator('#acc-first')).toBeVisible();
-  // unchanged: saves as it is
-  await page.evaluate('saveAccount()');
-  await expect.poll(() => saves.length).toBe(1);
+  // unchanged: judged and let be (the account menu writes nothing unchanged, 2026-11-10)
+  await page.evaluate(`_accPgSave('personal')`);
+  await expect(page.locator('#acc-err-personal')).toBeEmpty();
+  expect(saves).toHaveLength(0);
   // changed to something with a digit: refused here, before the server
   await page.evaluate(`document.getElementById('acc-first').value='Malik3'`);
-  await page.evaluate('saveAccount()');
-  await expect(page.locator('#acc-err')).toHaveText('Names can only contain letters, spaces and periods.');
-  expect(saves).toHaveLength(1);
+  await page.evaluate(`_accPgSave('personal')`);
+  await expect(page.locator('#acc-err-personal')).toHaveText('Names can only contain letters, spaces and periods.');
+  expect(saves).toHaveLength(0);
 });
 

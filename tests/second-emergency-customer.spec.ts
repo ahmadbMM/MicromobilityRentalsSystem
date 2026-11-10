@@ -28,7 +28,7 @@ test.describe('@customer:account second emergency contact', () => {
       await loginCustomer(page);
       await page.goto('/');
       await waitForSb(page);
-      await page.evaluate(`setCustTab('account')`);
+      await page.evaluate(`setCustTab('account','emergency')`);
       await expect(page.locator('#acc-em')).toBeVisible();
     }
 

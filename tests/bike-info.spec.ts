@@ -117,7 +117,7 @@ test.describe('bike type info', () => {
   test('the account page has the same "i", and Choose sets the saved preference', async ({ page }) => {
     await stubSupabase(page, { sessions: [openSession] });
     await loginCustomer(page);
-    await page.goto('/account');
+    await page.goto('/account/riding'); // the bike type is on the account's Riding page (2026-11-10)
     await waitForSb(page);
     await expect(page.locator('#atp-Road')).toBeVisible();
     await page.locator('.type-info-btn[aria-label="About Mountain bikes"]').click();

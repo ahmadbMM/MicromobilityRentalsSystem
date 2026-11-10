@@ -160,9 +160,9 @@ test.describe('@customer:runher Run for Her', () => {
     const sent: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (/rpc\/customer_set_emergency/.test(r.url())) sent.push(r.postDataJSON()); });
     await custBoot(page, { 'rpc:customer_emergency': contact, 'rpc:customer_set_emergency': true, 'rpc:customer_profile': profile() });
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','emergency')`);
     const box = page.locator('#acc-em');
-    await expect(box).toContainText('Emergency contact');
+    await expect(page.locator('#acc-pg-emergency-h')).toHaveText('Emergency contacts'); // the page carries the title (2026-11-10)
     await expect(box).toContainText('Nora Haddad');
     await box.getByRole('button', { name: 'Change' }).click();
     await page.fill('#acc-em-name', 'Omar Haddad');

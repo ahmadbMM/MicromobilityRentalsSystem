@@ -57,7 +57,7 @@ test.describe('@customer:bookings fix5 tickets', () => {
 
   test('the badge popup takes the focus, closes on Escape and gives the focus back', async ({ page }) => {
     await myRides(page, {});
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','personal')`);
     await page.locator('#acc-first').focus();
     await page.evaluate('_mrBadgeInfo(0)');
     await expect(page.locator('#badge-pop .badge-pop-box > button')).toBeFocused();

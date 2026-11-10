@@ -15,7 +15,7 @@ test('Account shows saved handles, cleans pasted URLs, and saves through the RPC
   await loginCustomer(page, { id: 'c1' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','about')`);
   await expect(page.locator('#acc-soc-instagram')).toHaveValue('malik.r');
 
   const calls: string[] = [];
@@ -23,7 +23,7 @@ test('Account shows saved handles, cleans pasted URLs, and saves through the RPC
   await page.fill('#acc-soc-x', 'https://x.com/MalikR/?s=20');
   await page.fill('#acc-soc-tiktok', '@malik.rides');
   await page.fill('#acc-soc-linkedin', 'https://www.linkedin.com/in/malik-r/');
-  await page.evaluate(`saveAccount()`);
+  await page.evaluate(`_accPgSave('about')`);
   await expect.poll(() => calls.length).toBe(1);
   expect(JSON.parse(calls[0]).p_socials).toEqual({ instagram: 'malik.r', x: 'MalikR', tiktok: 'malik.rides', linkedin: 'malik-r' });
   expect(await page.evaluate(`S.loggedIn.socials`)).toEqual({ instagram: 'malik.r', x: 'MalikR', tiktok: 'malik.rides', linkedin: 'malik-r' });
@@ -38,11 +38,11 @@ test('a handle that cannot be right is refused before anything is sent', async (
   await loginCustomer(page, { id: 'c1' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','about')`);
   const calls: string[] = [];
   page.on('request', r => { if (/rpc\/customer_(set_socials|update_profile)/.test(r.url())) calls.push(r.url()); });
   await page.fill('#acc-soc-instagram', 'bad handle!');
-  await page.evaluate(`saveAccount()`);
+  await page.evaluate(`_accPgSave('about')`);
   await expect(page.locator('#tab-account')).toContainText('Check the Instagram handle');
   expect(calls).toHaveLength(0);
 });

@@ -113,7 +113,7 @@ test.describe('@customer:account the sport card', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','sport')`);
   }
 
   test('not answered: the question, and Yes with a federation saves', async ({ page }) => {
@@ -273,7 +273,7 @@ test.describe('@customer:account Other on the sport card', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','sport')`);
     const card = page.locator('#acc-sp');
     await expect(card.locator('.run-em-m')).toHaveText('Saudi Cycling Federation · Kite surfing');
     await card.locator('button', { hasText: 'Change' }).click();

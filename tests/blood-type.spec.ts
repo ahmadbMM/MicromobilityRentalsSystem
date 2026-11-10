@@ -18,7 +18,7 @@ test.describe('@customer:account blood type', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','riding')`); // a field of the Riding page since 2026-11-10, saved by its Save
   }
 
   test('shows the type the account holds, with the eight types and "I don\'t know my blood type"', async ({ page }) => {
@@ -35,20 +35,20 @@ test.describe('@customer:account blood type', () => {
     await account(page, { 'rpc:customer_blood_type': null });
     await expect(page.locator('#acc-bt-sel')).toHaveValue('');
     await page.selectOption('#acc-bt-sel', 'AB+');
-    await page.locator('#acc-bt-save').click();
+    await page.locator('#acc-save-riding').click();
     await expect.poll(() => sent.length).toBe(1);
     expect(sent[0]).toMatchObject({ p_type: 'AB+' });
     await expect(page.locator('#acc-bt-sel')).toHaveValue('AB+');
     await page.selectOption('#acc-bt-sel', 'unknown');
-    await page.locator('#acc-bt-save').click();
+    await page.locator('#acc-save-riding').click();
     await expect.poll(() => sent.length).toBe(2);
     expect(sent[1]).toMatchObject({ p_type: 'unknown' });
   });
 
-  test('a refusal from the database says so under the card', async ({ page }) => {
+  test('a refusal from the database says so under the field', async ({ page }) => {
     await account(page, { 'rpc:customer_blood_type': '', 'rpc:customer_set_blood_type': { __rpcError: { status: 400, code: '22023', message: 'BAD_INPUT', details: 'blood_type' } } });
     await page.selectOption('#acc-bt-sel', 'O+');
-    await page.locator('#acc-bt-save').click();
+    await page.locator('#acc-save-riding').click();
     await expect(page.locator('#acc-bt-err')).toHaveText('Choose a blood type from the list.');
   });
 

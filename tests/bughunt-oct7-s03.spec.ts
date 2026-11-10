@@ -71,7 +71,7 @@ test.describe('@customer:account the emergency contact read', () => {
     page.on('request', (r) => { if (r.url().includes('/rpc/customer_emergency')) asks++; });
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`goCustomer('account')`);
+    await page.evaluate(`setCustTab('account','emergency')`);
     await expect(page.locator('#acc-em')).toContainText('Try again');
     await page.waitForTimeout(1500);
     expect(asks).toBe(1);

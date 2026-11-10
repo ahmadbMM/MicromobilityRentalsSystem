@@ -161,7 +161,7 @@ test.describe('ride news in the profile', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','notifications')`);
     const card = page.locator('#acc-ride-news');
     await expect(card).toContainText('You’re not getting ride news.');
     await card.locator('#acc-rn-btn').click();
@@ -177,7 +177,7 @@ test.describe('ride news in the profile', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','notifications')`);
     await page.waitForFunction('S._rnUnavailable==="c1"');
     await expect(page.locator('#acc-ride-news')).toHaveCount(0);
     await expect(page.locator('#rn-ask')).toHaveCount(0);

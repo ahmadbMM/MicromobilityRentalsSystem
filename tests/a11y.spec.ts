@@ -164,11 +164,14 @@ test.describe('@customer:a11y every field on the rider pages has a name', () => 
     await stubSupabase(page, { sessions: [], bikes: [], queue_entries: [] });
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
-    await expect(page.locator('#acc-first')).toBeVisible();
-    for (const [sel, name] of [['#acc-first', 'First Name'], ['#acc-middle', 'Middle Name'], ['#acc-last', 'Last Name'], ['#acc-email', 'Email Address'],
-      ['#acc-cc', 'Country code'], ['#acc-phone', 'Phone Number'], ['#acc-height', /^Height/], ['#acc-country', 'Country of residence'],
-      ['#acc-city', 'City of residence'], ['#acc-nationality', 'Nationality']] as const) await named(page, sel, name);
+    // each field on its page of the account menu (2026-11-10)
+    for (const [pg, sel, name] of [['personal', '#acc-first', 'First Name'], ['personal', '#acc-middle', 'Middle Name'], ['personal', '#acc-last', 'Last Name'], ['contact', '#acc-email', 'Email Address'],
+      ['contact', '#acc-cc', 'Country code'], ['contact', '#acc-phone', 'Phone Number'], ['riding', '#acc-height', /^Height/], ['residence', '#acc-country', 'Country of residence'],
+      ['residence', '#acc-city', 'City of residence'], ['personal', '#acc-nationality', 'Nationality']] as const) {
+      await page.evaluate(`setCustTab('account','${pg}')`);
+      await expect(page.locator(sel)).toBeVisible();
+      await named(page, sel, name);
+    }
   });
 
   test('Create account names the country code; the cancel dialog names its own reason', async ({ page }) => {

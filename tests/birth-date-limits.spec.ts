@@ -25,7 +25,7 @@ async function account(page: Page, birth_date: string | null = null) {
   await loginCustomer(page, { id: 'c1', name: 'Lina Haddad', session_token: 'tok', birth_date });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','personal')`); // the birth date is on Personal details (2026-11-10)
   await expect(page.locator('#acc-birth-y')).toBeVisible();
   return saves;
 }
@@ -65,7 +65,7 @@ test('a phone that lays out en-CA dates as 10/27/2026 still gets the years, toda
   expect(await page.evaluate(`fmtDate(new Date('2026-10-27T21:30:00Z'))`)).toBe('2026-10-28');
   const years = await page.evaluate(`[...document.querySelectorAll('#acc-birth-y option')].map(o=>o.value).filter(Boolean).map(Number)`) as number[];
   expect(Math.max(...years)).toBe(Y - 5);
-  await page.evaluate(`document.getElementById('acc-birth').value='${FIVE}';saveAccount()`);
+  await page.evaluate(`document.getElementById('acc-birth').value='${FIVE}';_accPgSave('personal')`);
   await expect.poll(() => saves.length).toBe(1);
   expect(saves[0].p_birth_date).toBe(FIVE);
 });
@@ -84,12 +84,12 @@ test('moving to the last year clears a month that year has not reached', async (
 
 test('Account refuses a rider of four or a future date, and saves one of five', async ({ page }) => {
   const saves = await account(page);
-  await page.evaluate(`document.getElementById('acc-birth').value='${FOUR}';saveAccount()`);
-  await expect(page.locator('#acc-err')).toHaveText(YOUNG);
-  await page.evaluate(`document.getElementById('acc-birth').value='${iso(Y + 1, 1, 1)}';saveAccount()`);
-  await expect(page.locator('#acc-err')).toHaveText(FUTURE);
+  await page.evaluate(`document.getElementById('acc-birth').value='${FOUR}';_accPgSave('personal')`);
+  await expect(page.locator('#acc-err-personal')).toHaveText(YOUNG);
+  await page.evaluate(`document.getElementById('acc-birth').value='${iso(Y + 1, 1, 1)}';_accPgSave('personal')`);
+  await expect(page.locator('#acc-err-personal')).toHaveText(FUTURE);
   expect(saves).toHaveLength(0);
-  await page.evaluate(`document.getElementById('acc-birth').value='${FIVE}';saveAccount()`);
+  await page.evaluate(`document.getElementById('acc-birth').value='${FIVE}';_accPgSave('personal')`);
   await expect.poll(() => saves.length).toBe(1);
   expect(saves[0].p_birth_date).toBe(FIVE);
 });
@@ -97,8 +97,8 @@ test('Account refuses a rider of four or a future date, and saves one of five', 
 test('a date stored before the rule shows as it is and has to be fixed before the next save', async ({ page }) => {
   const saves = await account(page, '2099-01-01');
   await expect(page.locator('#acc-birth-y')).toHaveValue('2099');
-  await page.evaluate('saveAccount()');
-  await expect(page.locator('#acc-err')).toHaveText(FUTURE);
+  await page.evaluate(`_accPgSave('personal')`);
+  await expect(page.locator('#acc-err-personal')).toHaveText(FUTURE);
   expect(saves).toHaveLength(0);
 });
 

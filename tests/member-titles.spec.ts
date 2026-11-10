@@ -99,7 +99,7 @@ test.describe('@customer:account friend invite', () => {
     await account(page); // the Badges part: the titles card, no invite in it
     await expect(page.locator('#tt-mine .tt-invite')).toHaveCount(0);
     await expect(page.locator('#acc-pane-badges #inv-mine')).toHaveCount(0);
-    await page.evaluate(`setCustTab('account','account')`);
+    await page.evaluate(`setCustTab('account','invite')`);
     await expect(page.locator('#acc-pane-account #inv-mine .tt-invite')).toBeVisible();
     await expect(page.locator('#acc-pane-account #inv-mine .tt-invite')).toHaveText('Invite a friend to a Saturday social ride');
     expect(await page.evaluate(`document.getElementById('ref-mine').nextElementSibling.id`)).toBe('inv-mine');
@@ -110,7 +110,7 @@ test.describe('@customer:account friend invite', () => {
     await page.addInitScript(() => { (navigator as unknown as { share: unknown }).share = (d: unknown) => { (window as unknown as { _shared: unknown })._shared = d; return Promise.resolve(); }; });
     await page.reload();
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account','account')`);
+    await page.evaluate(`setCustTab('account','invite')`);
     await page.waitForFunction('S._invCode&&S._invCode.code');
     await page.locator('#acc-pane-account #inv-mine .tt-invite').click();
     const text = await page.evaluate('window._shared.text') as string;
@@ -123,7 +123,7 @@ test.describe('@customer:account friend invite', () => {
     await page.addInitScript(() => { Object.defineProperty(navigator, 'share', { value: undefined }); window.open = ((u: string) => { (window as unknown as { _opened: string })._opened = u; return null; }) as typeof window.open; });
     await page.reload();
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account','account')`);
+    await page.evaluate(`setCustTab('account','invite')`);
     await page.waitForFunction('S._invCode&&S._invCode.code');
     await page.locator('#acc-pane-account #inv-mine .tt-invite').click();
     expect(await page.evaluate('window._opened')).toContain('https://wa.me/?text=');

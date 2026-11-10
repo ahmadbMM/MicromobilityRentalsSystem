@@ -27,7 +27,7 @@ test.describe('@customer:account bug hunt oct 7 (s05)', () => {
     await loginCustomer(page, { id: 'c1' });
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','ambassador')`);
     await expect(page.locator('#amb-mine')).toContainText('RIDE10');
     const n = await page.evaluate(`(()=>{document.getElementById('amb-mine').remove();S._ambMine={...S._ambMine,forId:'c2'};_ambMinePaint();return document.querySelectorAll('#amb-mine').length;})()`);
     expect(n).toBe(0);
@@ -38,7 +38,7 @@ test.describe('@customer:account bug hunt oct 7 (s05)', () => {
     await loginCustomer(page, { id: 'c1', name: 'Spec Rider', photo: null, type_preference: 'Road' });
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','personal')`);
     await page.waitForFunction(`!S._profHydrating`);
     await page.fill('#acc-first', 'Lina'); // typed, not saved
     await page.evaluate(`_saveAccPhoto('data:image/png;base64,iVBORw0KGgo=')`);
@@ -62,10 +62,10 @@ test.describe('@customer:account bug hunt oct 7 (s05)', () => {
     await loginCustomer(page, me);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','contact')`);
     await page.waitForFunction(`!S._profHydrating`);
     await page.fill('#acc-email', 'taken@example.com');
-    await page.evaluate(`saveAccount()`);
-    await expect(page.locator('#acc-err')).toHaveText('An account with this email already exists.');
+    await page.evaluate(`_accPgSave('contact')`);
+    await expect(page.locator('#acc-err-contact')).toHaveText('An account with this email already exists.');
   });
 });

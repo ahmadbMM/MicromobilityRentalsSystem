@@ -27,7 +27,7 @@ async function rider(page: Page, fx: Record<string, unknown> = {}, path = '/', s
   await page.goto(path);
   await waitForSb(page);
 }
-const account = (page: Page) => page.evaluate(`showView('customer');setCustTab('account')`);
+const account = (page: Page) => page.evaluate(`showView('customer');setCustTab('account','invite')`);
 
 test.describe('@customer:account referrals', () => {
   test('the Invite friends card: the code, the counts, a free ride waiting, and the link it shares', async ({ page }) => {

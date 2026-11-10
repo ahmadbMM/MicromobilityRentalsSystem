@@ -25,7 +25,7 @@ test('a rider asks for deletion from Account, after confirming, and can withdraw
   await loginCustomer(page);
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','delete')`);
   const sec = page.locator('#acc-delete');
   await expect(sec).toContainText('Delete my account');
   await sec.getByRole('button', { name: 'Request account deletion' }).click();
@@ -45,7 +45,7 @@ test('before the migration the section is not shown', async ({ page }) => {
   await loginCustomer(page);
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','delete')`);
   await page.waitForFunction('S._delUnavailable==="c1"');
   await expect(page.locator('#acc-delete')).toHaveCount(0);
 });

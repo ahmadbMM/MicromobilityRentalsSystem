@@ -217,10 +217,10 @@ test('Account keeps staff corrections and the nationality on file for boxes the 
     return r.fulfill({ status: 200, headers: head, body: JSON.stringify([{ id: 'c1', name: 'Fixed By Staff', email: 'spec@example.com', phone: '+966500000001', height: 170, country: 'Saudi Arabia', city: 'Jeddah', nationality: 'Egypt', socials: { instagram: 'rider.one' } }]) });
   });
   await page.route(/\/rest\/v1\/rpc\/customer_(update_profile|set_socials)/, async (r) => { saves.push({ url: r.request().url(), ...r.request().postDataJSON() }); await r.fulfill({ status: 200, headers: head, body: 'true' }); });
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','riding')`);
   await expect(page.locator('#acc-first')).toHaveValue('Old');              // the first read failed: the sign-in copy shows
   await page.fill('#acc-height', '181');                                      // the one thing the rider changes
-  await page.evaluate('saveAccount()');
+  await page.evaluate(`_accPgSave('riding')`);
   await expect.poll(() => saves.length).toBe(1);
   expect(saves[0]).toMatchObject({ p_name: 'Fixed By Staff', p_height: 181, p_nationality: 'Egypt', p_country: 'Saudi Arabia' });
   expect(await page.evaluate('[S.loggedIn.name,S.loggedIn.nationality]')).toEqual(['Fixed By Staff', 'Egypt']);
@@ -230,10 +230,10 @@ test('Account refuses to save when it cannot read the account first', async ({ p
   const saves: string[] = [];
   await customer(page, { sessions: [], queue_entries: [], 'rpc:customer_profile': { __rpcError: { status: 500, code: 'XX000', message: 'down' } } });
   page.on('request', (r) => { if (/rpc\/customer_update_profile/.test(r.url())) saves.push(r.url()); });
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','riding')`);
   await page.fill('#acc-height', '181');
-  await page.evaluate('saveAccount()');
-  await expect(page.locator('#acc-err')).toHaveText(/Connection error/);
+  await page.evaluate(`_accPgSave('riding')`);
+  await expect(page.locator('#acc-err-riding')).toHaveText(/Connection error/);
   expect(saves).toHaveLength(0);
 });
 

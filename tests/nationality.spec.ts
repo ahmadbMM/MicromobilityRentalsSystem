@@ -15,14 +15,14 @@ test('Account fills nationality in from customer_profile and saves it through th
   await loginCustomer(page, { id: 'c1' });                       // a session from before the field existed
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','personal')`);
   await expect(page.locator('#acc-nationality')).toHaveValue('Egypt');   // hydrated, then painted again
   expect(await page.evaluate(`JSON.parse(localStorage.getItem('cq_session')).nationality`)).toBe('Egypt');
 
   const calls: string[] = [];
   page.on('request', r => { if (/rpc\/customer_update_profile/.test(r.url())) calls.push(r.postData() || ''); });
   await page.selectOption('#acc-nationality', 'Jordan');
-  await page.evaluate(`saveAccount()`);
+  await page.evaluate(`_accPgSave('personal')`);
   await expect.poll(() => calls.length).toBe(1);
   expect(JSON.parse(calls[0]).p_nationality).toBe('Jordan');
   expect(await page.evaluate(`S.loggedIn.nationality`)).toBe('Jordan');
@@ -72,7 +72,7 @@ test('the list holds every country: Saudi Arabia first, then alphabetical in the
   await loginCustomer(page, { id: 'c1' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','personal')`);
   const en = await page.evaluate(`[...document.querySelectorAll('#acc-nationality option')].map(o=>[o.value,o.textContent])`) as [string, string][];
   expect(en[0][0]).toBe('');                                  // the placeholder
   expect(en[1]).toEqual(['Saudi Arabia', 'Saudi Arabia']);   // pinned to the top
@@ -101,7 +101,7 @@ test('Saudi Arabia\'s two places are one country: the top one shows a saved pick
   await loginCustomer(page, { id: 'c1' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','personal')`);
   await expect(page.locator('#acc-nationality')).toHaveValue('Saudi Arabia');
   expect(await page.locator('#acc-nationality').evaluate(el => (el as HTMLSelectElement).selectedIndex)).toBe(1);   // the copy at the top
   expect(await page.locator('#acc-country').evaluate(el => (el as HTMLSelectElement).selectedIndex)).toBe(1);
@@ -111,9 +111,10 @@ test('Saudi Arabia\'s two places are one country: the top one shows a saved pick
   expect(lower).toBeGreaterThan(100);
   await page.locator('#acc-nationality').selectOption({ index: 0 });
   await page.locator('#acc-nationality').selectOption({ index: lower });
+  await page.fill('#acc-middle', 'Ali'); // the same nationality is no change: a name change makes the page save
   const calls: string[] = [];
   page.on('request', r => { if (/rpc\/customer_update_profile/.test(r.url())) calls.push(r.postData() || ''); });
-  await page.evaluate(`saveAccount()`);
+  await page.evaluate(`_accPgSave('personal')`);
   await expect.poll(() => calls.length).toBe(1);
   expect(JSON.parse(calls[0]).p_nationality).toBe('Saudi Arabia');
 });
@@ -161,7 +162,7 @@ test('phone-code pickers show +966 first and again between +964 and +967, one co
   await loginCustomer(page, { id: 'c1', phone: '+966500000001' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','contact')`);
   const cc = page.locator('#acc-cc');
   await expect(cc).toHaveValue('+966');
   const opts = await cc.evaluate(el => [...(el as HTMLSelectElement).options].map(o => [o.value, o.selected]));
@@ -177,9 +178,10 @@ test('phone-code pickers show +966 first and again between +964 and +967, one co
   // The lower copy saves the same number.
   await cc.selectOption({ index: at[1] });
   await expect(cc).toHaveValue('+966');
+  await page.fill('#acc-email', 'spec2@example.com'); // the same code is no change: a new email makes the page save
   const calls: string[] = [];
   page.on('request', r => { if (/rpc\/customer_update_profile/.test(r.url())) calls.push(r.postData() || ''); });
-  await page.evaluate(`saveAccount()`);
+  await page.evaluate(`_accPgSave('contact')`);
   await expect.poll(() => calls.length).toBe(1);
   expect(JSON.parse(calls[0]).p_phone).toBe('+966500000001');
 });

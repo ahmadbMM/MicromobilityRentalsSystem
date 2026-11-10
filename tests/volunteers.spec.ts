@@ -462,7 +462,7 @@ test.describe('@customer:account Volunteering on My Account', () => {
     await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com' });
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','volunteer')`);
     await expect(page.locator('#acc-bt-host')).toBeAttached();
   }
   test('nothing to say, no card', async ({ page }) => {

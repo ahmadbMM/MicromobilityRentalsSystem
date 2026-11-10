@@ -237,7 +237,7 @@ test.describe('@customer:account wallet', () => {
 
   test('My Account shows the balance and its lines, and never a staff note', async ({ page }) => {
     await rider(page, { queue_entries: [], 'rpc:customer_wallet': mine });
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','wallet')`);
     await expect(page.locator('#cw-mine')).toBeVisible();
     await expect(page.locator('#cw-mine .cw-mine-t')).toHaveText('Wallet');
     await expect(page.locator('#cw-mine li')).toContainText('Refund');
@@ -309,7 +309,7 @@ test.describe('@customer:account wallet', () => {
 
   test('a database without the wallet draws nothing', async ({ page }) => {
     await rider(page, { queue_entries: [bk('q1', 1)], 'rpc:my_bookings': [bk('q1', 1)], 'rpc:customer_wallet': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function in the schema cache' } } });
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','wallet')`);
     await page.waitForFunction('S._cwMineOff===true');
     await expect(page.locator('#cw-mine')).toBeHidden();
   });

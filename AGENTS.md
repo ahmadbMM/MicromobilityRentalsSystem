@@ -786,7 +786,8 @@ brought the template look back. Fixed, and guarded so it stays fixed:
   (`_nextOpenRide`, `_bookNextOpen`), not a big grey 0.
 - **My Account says the record in words**: rides and tier with what the next tier takes (no bar), the weeks with
   a ride as a sentence (no 26-mark strip), the record as a plain list, the closest badges with their count (no
-  bars), and what the profile lacks as a sentence (`_profMissing`, key `profMissing`) instead of "56% complete".
+  bars), and what the profile lacks on the account menu's rows in amber ("Add birth date", `_accMiss`; it was a
+  sentence until 2026-11-10 and a "56% complete" meter before that).
 - **A ticket's buttons in one voice**: calendar and directions (drawn icons) side by side, the Wallet button,
   then edit / reschedule / cancel (or rate / book again) as one row of quiet text buttons under a rule.
 - **Badge sheet**: a plain semibold name (no italic capitals), sentence-case headings, a drawn tick.
@@ -902,25 +903,48 @@ The owner, 2026-10-01: "do 1 2 5 6 10" (from an engagement list). All read data 
   minutes, first ride; counted in ride nights, never distance). `_mrBadgesRow` leads with the two begun badges
   with least left (`bd-next`). `tests/ride-night.spec.ts`.
 
-## The account page in three parts (2026-11-09)
+## The account page in three parts (2026-11-09), Account as a menu (2026-11-10)
 
 The owner: "divide the customer my account page into 3 separate pages account stats badges"; picked a switch at
-the top, Account first, the money cards on Account, and more stats.
+the top, Account first, the money cards on Account, and more stats. On 2026-11-10 the user asked for "a full rework on
+the account page" and picked (all after a research pass): a menu whose rows open small pages, the profile card above
+the switch, the wallet and Invite friends as two tiles, what the profile lacks said on its row, Delete my account as
+the last row, and menu and page side by side on a wide screen. The website's /account follows in a second step.
 
-- `renderAccount` draws the switch (`_accViewsHtml`, `.acc-views`) and all three parts, `#acc-pane-account|stats|badges`
-  (`data-acc-pane`), hiding the unpicked ones; `_accSetView(k)` toggles without redrawing (the form keeps what was
-  typed) and pushes the address. The pick is `S.accView` (`_accView()`); `setCustTab('account')` (the tab bars) resets
-  it to Account, `setCustTab('account', part)` opens a part, and a link to `/account/badges` is parked like
-  `/my-bookings` (`_TABLINK_KEY` holds `account/badges`). Back between parts only switches (`_applyNav`).
-- **Account:** wallet, Invite friends, the ambassador's card (`_ambMinePaint`, at its top), the profile form,
-  contacts, blood type, volunteer, ride news, notifications, purchases, delete, the settings rows. **Stats:** the
-  season (`_seasonDashboard`), Your rides, then `_myrMore`: rides by month (the last twelve KSA months as columns,
-  one value on the highest), rides by bike type, completed sessions by event (`_evKindName`; bike-free kinds count
-  here, never as rides; a session the device does not hold is skipped) and Badges earned, which opens Badges.
-  **Badges:** `_mrBadgesRow`, then the member's titles card (`_ttMinePaint`, at its end).
-- A new account card goes into one of the three parts. A spec that clicks or checks visibility in Stats or Badges
-  opens it first (`setCustTab('account','badges')`): hidden parts are not clickable. `tests/account-parts.spec.ts`.
-- The website's /account mirrors it (mm-platform).
+- `renderAccount` draws a sr-only h1, the profile card (`_accIdHtml`: photo, name, tier and rides, or the email before
+  a first ride; it opens Personal details), the switch (`_accViewsHtml`, `.acc-views`) and the three parts,
+  `#acc-pane-account|stats|badges` (`data-acc-pane`), hiding the unpicked ones.
+- **Account is a menu and its pages.** The menu (`.acc-menu`): the tiles (`#acc-t-wallet`, `#acc-t-invite`, shown once
+  their card has answered), then grouped rows `.acc-row` (`#acc-r-<page>`, value in `#acc-v-<page>`): Your details
+  (personal, contact, residence, emergency, riding, sport, about), Activity (ambassador, volunteer, purchases, each
+  only for an account that has it), Settings (notifications, Language, Password, Tech support), then Log out and Delete
+  my account in red. Every page (`ACC_PAGES`, `section.acc-pg#acc-pg-<page>`, `data-acc-pg`) is drawn and the
+  others hidden; `S.accPage` names the open one (null: the menu). `_accRowsPaint` fills the values and shows the
+  conditional rows; every card that loads after the page calls it (wallet, referral, member invite, ambassador,
+  emergency, sport, volunteer, purchases).
+- **Addresses**: a page is `/account/<page>` (`_parsePath`, `_accSub` in `_navState`). `_accOpen(k)` opens one and
+  pushes the address; `_accBack` (the app's Back button on a page, `custBack`) returns by the browser's Back when the
+  menu opened it. `setCustTab('account', partOrPage)` opens a part or a page; the tab bars reset to the menu.
+- **One Save per page** (`_accPgSave(pg)`): the profile columns of that page (`ACC_PG_KEYS`) through `_saveAccount(pg)`,
+  which checks only them and writes every other column as on file; then the WhatsApp number on Contact
+  (`saveWhatsapp`) and the blood type on Riding (`saveBloodType`), each only when changed. Errors go to
+  `#acc-err-<page>` (there is no `#acc-err`). WhatsApp and blood type have no Save of their own any more. Emergency
+  contacts and Sport keep their cards' own Change / Save (records, like a card on file).
+- **Unsaved edits**: leaving a page whose fields differ from what was shown (`_accPgDirty`) asks "Discard your
+  changes?" in a centred pop-up (`_accAskDiscard`), from the page's Back, another row, the switch, and the browser's
+  Back (`_applyNav` puts the page back first).
+- **Missing info**: no sentence. A row whose page lacks a Race Ready field shows "Add …" in amber (`_accMiss`).
+- **Wide screens** (900px up): the menu and the open page side by side; with no page picked Personal details shows on
+  the right (CSS only). A phone shows the menu or one page (`#tab-account.acc-in-pg` hides the card, the switch and
+  the menu).
+- **Stats:** the season (`_seasonDashboard`), Your rides, then `_myrMore`: rides by month (the last twelve KSA months
+  as columns, one value on the highest), rides by bike type, completed sessions by event (`_evKindName`; bike-free
+  kinds count here, never as rides; a session the device does not hold is skipped) and Badges earned, which opens
+  Badges. **Badges:** `_mrBadgesRow`, then the member's titles card (`_ttMinePaint`, at its end).
+- A new account card goes into a page (a new row + `ACC_PAGES` entry + `_ACC_PG_T` title) or into Stats or Badges.
+  A spec that clicks or checks visibility in a page opens it first (`setCustTab('account','contact')`): hidden pages
+  are not clickable. `tests/account-parts.spec.ts`, `tests/account-menu.spec.ts`.
+- The website's /account mirrors the three parts (mm-platform); the menu rework is not mirrored yet.
 
 ## Vendors (F&B, 2026-10-03; first named "F&B Partners", every internal name renamed to vendor(s) the same day)
 

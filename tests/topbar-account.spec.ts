@@ -15,7 +15,7 @@ test('the avatar and name in the header open Account', async ({ page }) => {
   await expect(link).toContainText('Spec');
   await link.click();
   await expect.poll(() => page.evaluate('S.custTab')).toBe('account');
-  await expect(page.locator('#acc-height')).toBeVisible();   // the account form is on screen
+  await expect(page.locator('#acc-r-personal')).toBeVisible();   // the account menu is on screen
   await page.evaluate(`setCustTab('register')`);
   await page.locator('#topbar-right .cust-topbar-link').click();
   await expect.poll(() => page.evaluate('S.custTab')).toBe('account');

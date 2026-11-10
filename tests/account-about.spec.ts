@@ -11,7 +11,8 @@ import { stubSupabase, unlockStaff, loginCustomer, waitForSb } from './helpers/s
 const sessions = [{ id: '2099-01-01', session_date: '2099-01-01', day: 'Sunday', status: 'open', capacity: 20, created_at: 1 }];
 const profile = { id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', gender: 'male', nationality: 'Egypt', socials: null };
 
-async function account(page: Page, extra: Record<string, unknown> = {}) {
+// The questions sit on the account's About you page, gender on Personal details (the account menu, 2026-11-10).
+async function account(page: Page, extra: Record<string, unknown> = {}, pg = 'about') {
   await stubSupabase(page, {
     sessions, queue_entries: [],
     'rpc:customer_profile': [profile],
@@ -21,7 +22,7 @@ async function account(page: Page, extra: Record<string, unknown> = {}) {
   await loginCustomer(page, { id: 'c1' });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setCustTab('account')`);
+  await page.evaluate(`setCustTab('account','${pg}')`);
 }
 const sent = (page: Page, rpc: string) => {
   const calls: Record<string, unknown>[] = [];
@@ -40,20 +41,27 @@ test('the account page shows what the application filled in and saves a change t
   expect(await page.locator('#acc-heard option').count()).toBe(18);
 
   const calls = sent(page, 'customer_set_about'), saves = sent(page, 'customer_update_profile');
-  // nothing changed: the profile is saved, the rest is not sent
-  await page.evaluate(`saveAccount()`);
-  await expect.poll(() => saves.length).toBe(1);
-  await expect.poll(() => page.evaluate(`!!document.getElementById('acc-profession')`)).toBe(true);
+  // nothing changed: Save says so and sends nothing
+  await page.locator('#acc-save-about').click();
+  await expect(page.locator('#toast-container .toast').last()).toContainText('Saved');
+  expect(saves).toHaveLength(0);
   expect(calls).toHaveLength(0);
 
   await page.fill('#acc-workplace', '  King   Abdulaziz University ');
+  await page.selectOption('#acc-heard', 'instagram');
+  await page.locator('#acc-save-about').click();
+  await expect.poll(() => calls.length).toBe(1);
+  expect(calls[0]).toEqual({ p_id: 'c1', p_token: 'tok-spec', p_profession: 'Architect', p_workplace: 'King Abdulaziz University', p_heard_from: 'instagram', p_gender: 'male' });
+  expect(await page.evaluate(`[S.loggedIn.workplace,S.loggedIn.gender,S.loggedIn.heard_from]`)).toEqual(['King Abdulaziz University', 'male', 'instagram']);
+
+  // gender is on Personal details, saved by its own Save (the other answers go as on file)
+  await page.evaluate(`setCustTab('account','personal')`);
   await page.click('#agn-female');
   await expect(page.locator('#agn-female')).toHaveAttribute('aria-pressed', 'true');
-  await page.selectOption('#acc-heard', 'instagram');
-  await page.evaluate(`saveAccount()`);
-  await expect.poll(() => calls.length).toBe(1);
-  expect(calls[0]).toEqual({ p_id: 'c1', p_token: 'tok-spec', p_profession: 'Architect', p_workplace: 'King Abdulaziz University', p_heard_from: 'instagram', p_gender: 'female' });
-  expect(await page.evaluate(`[S.loggedIn.workplace,S.loggedIn.gender,S.loggedIn.heard_from]`)).toEqual(['King Abdulaziz University', 'female', 'instagram']);
+  await page.locator('#acc-save-personal').click();
+  await expect.poll(() => calls.length).toBe(2);
+  expect(calls[1]).toMatchObject({ p_gender: 'female' });
+  expect(await page.evaluate(`S.loggedIn.gender`)).toBe('female');
 });
 
 test('an account the desk made keeps its "desk" answer until the rider picks one, and a box can be cleared', async ({ page }) => {
@@ -62,7 +70,7 @@ test('an account the desk made keeps its "desk" answer until the rider picks one
   const calls = sent(page, 'customer_set_about');
   await page.fill('#acc-profession', '');
   await page.fill('#acc-workplace', 'KFSH');
-  await page.evaluate(`saveAccount()`);
+  await page.locator('#acc-save-about').click();
   await expect.poll(() => calls.length).toBe(1);
   expect(calls[0]).toMatchObject({ p_profession: null, p_workplace: 'KFSH', p_heard_from: null, p_gender: 'male' });
   expect(await page.evaluate(`S.loggedIn.heard_from`)).toBe('desk');
@@ -73,12 +81,12 @@ test('a workplace or profession the forms would refuse is refused before anythin
   const calls: string[] = [];
   page.on('request', (r) => { if (/rpc\/customer_(update_profile|set_about)/.test(r.url())) calls.push(r.url()); });
   await page.fill('#acc-workplace', 'x');
-  await page.evaluate(`saveAccount()`);
-  await expect(page.locator('#acc-err')).toHaveText('Enter your company: 2 to 120 characters.');
+  await page.locator('#acc-save-about').click();
+  await expect(page.locator('#acc-err-about')).toHaveText('Enter your company: 2 to 120 characters.');
   await page.fill('#acc-workplace', 'Almarai');
   await page.fill('#acc-profession', '<b>');
-  await page.evaluate(`saveAccount()`);
-  await expect(page.locator('#acc-err')).toHaveText('Enter your profession: 2 to 80 characters.');
+  await page.locator('#acc-save-about').click();
+  await expect(page.locator('#acc-err-about')).toHaveText('Enter your profession: 2 to 80 characters.');
   expect(calls).toHaveLength(0);
 });
 
@@ -88,17 +96,18 @@ test('the server refusing a workplace says so on the form', async ({ page }) => 
     'rpc:customer_set_about': { __rpcError: { status: 400, code: '22023', message: 'BAD_INPUT', details: 'workplace' } },
   });
   await page.fill('#acc-workplace', 'Saudia');
-  await page.evaluate(`saveAccount()`);
-  await expect(page.locator('#acc-err')).toHaveText('Enter your company: 2 to 120 characters.');
+  await page.locator('#acc-save-about').click();
+  await expect(page.locator('#acc-err-about')).toHaveText('Enter your company: 2 to 120 characters.');
 });
 
 test('before the database has customer_about the page keeps its old form', async ({ page }) => {
-  await account(page, { 'rpc:customer_about': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.customer_about' } } });
+  await account(page, { 'rpc:customer_about': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.customer_about' } } }, 'personal');
   await expect(page.locator('#acc-nationality')).toBeVisible();
   await expect(page.locator('#acc-profession, #acc-workplace, #acc-heard, #agn-male')).toHaveCount(0);
   const calls = sent(page, 'customer_update_profile');
+  await page.evaluate(`setCustTab('account','riding')`);
   await page.fill('#acc-height', '181');
-  await page.evaluate(`saveAccount()`);
+  await page.locator('#acc-save-riding').click();
   await expect.poll(() => calls.length).toBe(1);
 });
 
