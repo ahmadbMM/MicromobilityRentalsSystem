@@ -238,5 +238,5 @@ test('in Arabic the section reads right to left', async ({ page }) => {
   await page.addInitScript(() => { try { localStorage.setItem('cq_lang', 'ar'); localStorage.setItem('cq_lang_pick', '1'); } catch { /* */ } });
   await open(page);
   await expect(panel(page)).toContainText('شاشة «قريباً»');
-  await expect(page.locator('#staff-tab-nav .snav-group[data-group="snavWebsite"]')).toHaveText('الموقع');
+  await expect(page.locator('#staff-tab-nav .snav-group[data-group="snavPartners"]')).toHaveText('الشركاء والموقع'); // the rail's six groups (s10, D7)
 });

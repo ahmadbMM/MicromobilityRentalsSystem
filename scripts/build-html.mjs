@@ -15,6 +15,7 @@ import {
   checkHandlerNames, formatHandlerOffenders, checkBareWrites, formatBareWrites, checkSizeBudget, gzipBytes,
   checkCustomerColors, checkNoEmoji, includedFiles, checkPhoneRulesVersion, checkFieldNames, formatFieldNames,
 } from './split-staff.mjs';
+import { checkConfirmClass } from './check-confirm-class.mjs';
 
 // Modularization foundation: logic can live in separate src/ files and be pulled in
 // at build time via `<!--include:path/to/file.js-->` markers. Inlining (not ES-module
@@ -53,6 +54,14 @@ for (const m of src.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>
     throw new Error(`build: ${h.offenders.length} handler(s) name something that is not a top-level function (the dispatcher reads window[name]):\n${formatHandlerOffenders(h)}`);
   }
   console.log(`build: ${h.checked} handler names checked against ${h.declared} top-level functions (${h.dynamic} dynamic, left alone)`);
+}
+
+// ── Every confirm names its button's style (staff round s10, 2026-11-10) ─────
+// confirmDialog/askConfirm calls pass confirmClass: 'btn-red' for a destructive ask only (see check-confirm-class.mjs).
+{
+  const c = checkConfirmClass(raw);
+  if (c.offenders.length) throw new Error(`build: ${c.offenders.length} confirmDialog/askConfirm call(s) name no confirmClass ('btn-red' for a destructive ask, 'btn-primary' otherwise):\n${c.offenders.map((o) => `  app.src.html:${o.line} ${o.name}`).join('\n')}`);
+  console.log(`build: ${c.calls} confirm dialogs each name their confirm button's class`);
 }
 
 // ── A refused write is said, never swallowed (a WARNING for now) ─────────────

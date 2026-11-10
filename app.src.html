@@ -339,31 +339,33 @@ window.mmLoading=(function(){
   </button>
   <div id="snav-scrim" data-on-click='["closeStaffNav"]' aria-hidden="true"></div>
   <nav class="tab-nav" id="staff-tab-nav" aria-label="Staff sections">
-    <span class="snav-group" data-group="snavRides" role="heading" aria-level="2">Rides</span>
+    <!-- Six groups since 2026-11-10 (the owner, staff round s10, D7): Today, Fleet, Money, People, Partners & web, Admin.
+         Markup only: the section ids, paths, G-key chords and ROLE_TABS are unchanged. -->
+    <span class="snav-group" data-group="snavToday" role="heading" aria-level="2">Today</span>
     <button class="tab-btn"        data-stab="dashboard" data-on-click='["setStaffTab","dashboard"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Dashboard</span></button>
     <button class="tab-btn active" data-stab="queue"     data-on-click='["setStaffTab","queue"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Bookings</span></button>
     <button class="tab-btn"        data-stab="waitlist"  data-on-click='["setStaffTab","waitlist"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Waitlist</span></button>
     <button class="tab-btn"        data-stab="sessions"  data-on-click='["setStaffTab","sessions"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Sessions</span></button>
     <button class="tab-btn"        data-stab="lockers"   data-on-click='["setStaffTab","lockers"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Lockers</span></button>
-    <span class="snav-group" data-group="snavCommerce" role="heading" aria-level="2">Commerce</span>
-    <button class="tab-btn"        data-stab="cashier"   data-on-click='["setStaffTab","cashier"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Sales</span></button>
+    <button class="tab-btn"        data-stab="volunteers" data-on-click='["setStaffTab","volunteers"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Volunteers</span></button>
+    <span class="snav-group" data-group="snavFleet" role="heading" aria-level="2">Fleet</span>
     <button class="tab-btn"        data-stab="inventory" data-on-click='["setStaffTab","inventory"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Inventory</span></button>
     <button class="tab-btn"        data-stab="workshop"  data-on-click='["setStaffTab","workshop"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Workshop</span></button>
-    <button class="tab-btn"        data-stab="store"     data-on-click='["setStaffTab","store"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Store</span></button>
+    <button class="tab-btn"        data-stab="catalog"   data-on-click='["setStaffTab","catalog"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Bikes catalog</span></button>
+    <span class="snav-group" data-group="snavMoney" role="heading" aria-level="2">Money</span>
+    <button class="tab-btn"        data-stab="cashier"   data-on-click='["setStaffTab","cashier"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Sales</span></button>
     <button class="tab-btn"        data-stab="payments"  data-on-click='["setStaffTab","payments"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Payments</span></button>
+    <button class="tab-btn"        data-stab="store"     data-on-click='["setStaffTab","store"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Store</span></button>
     <span class="snav-group" data-group="snavPeople" role="heading" aria-level="2">People</span>
     <button class="tab-btn"        data-stab="community" data-on-click='["setStaffTab","community"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">People</span></button>
     <button class="tab-btn"        data-stab="badgereq"  data-on-click='["setStaffTab","badgereq"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Badge requests</span></button>
-    <button class="tab-btn"        data-stab="ambassadors" data-on-click='["setStaffTab","ambassadors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ambassadors</span></button>
-    <button class="tab-btn"        data-stab="volunteers" data-on-click='["setStaffTab","volunteers"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Volunteers</span></button>
+    <span class="snav-group" data-group="snavPartners" role="heading" aria-level="2">Partners &amp; web</span>
     <button class="tab-btn"        data-stab="vendors"       data-on-click='["setStaffTab","vendors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Vendors</span></button>
-    <span class="snav-group" data-group="snavWebsite" role="heading" aria-level="2">Website</span>
+    <button class="tab-btn"        data-stab="ambassadors" data-on-click='["setStaffTab","ambassadors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ambassadors</span></button>
     <button class="tab-btn"        data-stab="website"   data-on-click='["setStaffTab","website"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">micromobility.sa</span></button>
-    <button class="tab-btn"        data-stab="catalog"   data-on-click='["setStaffTab","catalog"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Bikes catalog</span></button>
     <button class="tab-btn"        data-stab="messages"  data-on-click='["setStaffTab","messages"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Messages</span></button>
-    <span class="snav-group" data-group="snavInsights" role="heading" aria-level="2">Insights</span>
+    <span class="snav-group" data-group="snavAdmin" role="heading" aria-level="2">Admin</span>
     <button class="tab-btn"        data-stab="analytics" data-on-click='["setStaffTab","analytics"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Analytics</span></button>
-    <span class="snav-group" data-group="snavSystem" role="heading" aria-level="2">System</span>
     <button class="tab-btn"        data-stab="history"   data-on-click='["setStaffTab","history"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">History</span></button>
     <button class="tab-btn"        data-stab="team"      data-on-click='["setStaffTab","team"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Team</span></button>
     <button class="tab-btn"        data-stab="settings"  data-on-click='["setStaffTab","settings"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Settings</span></button>
@@ -983,6 +985,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdgPaceline:'Paceline',bdgPacelineD:'10 community rides',
   bdgPeloton:'Peloton',bdgPelotonD:'25 community rides',
   bdgRollingStart:'Rolling Start',bdgRollingStartD:'Your first community ride',
+  snavToday:'Today',snavMoney:'Money',snavFleet:'Fleet',snavAdmin:'Admin',snavPartners:'Partners & web',lvTitle:'Leave without saving?',lvBody:'What you changed here and did not save will be lost.',ntkBdr:'Badge requests waiting',ntiBdr:'Badge request from {0}',ntBdr:'Badge requests waiting: {0}',ntkStoOrd:'Store orders to prepare',ntiStoOrd:'Order {0} to prepare',ntkRefOwed:'Refunds owed',ntiRefOwed:'Refund owed: {0}',ntkFlags:'Accounts asked for fixes',ntiFlags:'{0} was asked to fix details',ntFlags:'Accounts waiting for a fix: {0}',ntgOffice:'Office',dashOffice:'Waiting on the office',dashWsOpen:'Open workshop jobs: {0}',dashWeek:'The next seven nights',dashWsQueue:'Workshop queue',gsLookIn:'Look in', // staff round s10, the shell (2026-11-10)
   bdgGrandTour:'Grand Tour',bdgGrandTourD:'50 community rides',
   bdgHallOfFame:'Hall of Fame',bdgHallOfFameD:'100 community rides',
   bdgKm20:'20 km Club',bdgKm20D:'Cycled 20 km in one ride',bdgKm40:'40 km Club',bdgKm40D:'Cycled 40 km in one ride',bdgKm70:'70 km Club',bdgKm70D:'Cycled 70 km in one ride',bdgKm100:'100 km Club',bdgKm100D:'Cycled 100 km in one ride',
@@ -1600,6 +1603,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdgTripleCrown:'التاج الثلاثي',bdgTripleCrownD:'ركبت ثلاثة أنواع مختلفة من الجولات',
   bdgSlipstream:'التيار الهوائي',bdgSlipstreamD:'5 جولات مجتمعية',
   bdgPaceline:'خط الإيقاع',bdgPacelineD:'10 جولات مجتمعية',
+  snavToday:'اليوم',snavMoney:'المال',snavFleet:'الأسطول',snavAdmin:'الإدارة',snavPartners:'الشركاء والموقع',lvTitle:'الخروج دون حفظ؟',lvBody:'ستفقد ما غيّرته هنا ولم تحفظه.',ntkBdr:'طلبات أوسمة بانتظار الرد',ntiBdr:'طلب وسام من {0}',ntBdr:'طلبات أوسمة بانتظار الرد: {0}',ntkStoOrd:'طلبات المتجر بانتظار التجهيز',ntiStoOrd:'الطلب {0} بانتظار التجهيز',ntkRefOwed:'مبالغ مستحقة الاسترداد',ntiRefOwed:'مبلغ مستحق الاسترداد: {0}',ntkFlags:'حسابات طُلب منها تصحيح بياناتها',ntiFlags:'طُلب من {0} تصحيح بياناته',ntFlags:'حسابات بانتظار تصحيح بياناتها: {0}',ntgOffice:'المكتب',dashOffice:'بانتظار المكتب',dashWsOpen:'أعمال ورشة مفتوحة: {0}',dashWeek:'الليالي السبع القادمة',dashWsQueue:'قائمة انتظار الورشة',gsLookIn:'ابحث في', // staff round s10, the shell (2026-11-10)
   bdgPeloton:'البيلوتون',bdgPelotonD:'25 جولة مجتمعية',
   bdgRollingStart:'الانطلاقة المتحركة',bdgRollingStartD:'أول جولة مجتمعية',
   bdgGrandTour:'الطواف الكبير',bdgGrandTourD:'50 جولة مجتمعية',
@@ -7649,6 +7653,9 @@ function _pushNav(){
 function _applyNav(st){
   if(!st)return;
   _navRestoring=true;
+  // Back or Forward out of a section holding unsaved work (s10, item 40): the page stays, its address comes back, and Leave
+  // without saving goes back again, the drafts dropped.
+  if(st.view==='staff'&&S.view==='staff'&&st.stab&&st.stab!==S.staffTab&&_draftsOn(S.staffTab).length){_navRestoring=false;_pushNav();_draftAsk(S.staffTab,()=>{try{history.back();}catch(_){}});return;}
   if(st.view==='staff'&&_rtStaffDevice()){goStaff();if(st.stab){_setSub(st.stab,st.sub);setStaffTab(st.stab);_openSessionParam();}}
   else if(st.view==='customer'&&getSession()){
     if(st.ev)S.selEvent=st.ev;
@@ -9329,12 +9336,12 @@ function _refCelebrate(){
   try{localStorage.setItem(k,JSON.stringify(seen.concat(fresh.map(x=>x.code),wNew?[w.code]:[]).slice(-50)));}catch(_){return;}
   if(!fresh.length){
     confirmDialog({title:t('refWTitle').replace('{0}',String(w.pct)),body:esc(t('refWTxt').replace('{0}',shortDate(String(w.expires_at)))),
-      confirmLabel:t('frBookBtn'),onConfirm:()=>selectEvent('jcc')});
+      confirmLabel:t('frBookBtn'),confirmClass:'btn-primary',onConfirm:()=>selectEvent('jcc')});
     return;
   }
   const x=fresh.find(y=>y.bonus)||fresh[0];
   confirmDialog({title:t(x.bonus?'refBonusTitle':'refWonTitle'),body:esc(t(x.bonus?'refBonusTxt':'refWonTxt').replace('{0}',x.code).replace('{1}',shortDate(String(x.expires_at)))),
-    confirmLabel:t('frBookBtn'),onConfirm:()=>selectEvent('jcc')});
+    confirmLabel:t('frBookBtn'),confirmClass:'btn-primary',onConfirm:()=>selectEvent('jcc')});
 }
 // The friends who rode with this account's invite, for the Recruiter badge; null while unknown.
 function _refFriendsRode(cust){const m=S._refMine;return m&&cust&&m.id===cust.id&&m.ok===true&&Number.isFinite(Number(m.rode))?Number(m.rode):null;}
@@ -10102,6 +10109,8 @@ function _vmDlg(title,body,wide){
     <div class="vm-dlg-b">${body}</div></div></div>`;
 }
 function _vmDlgBack(event,el){if(event.target===el)closeConfirm();}
+// A volunteer's record leads to their account window (s10, item 36): their bookings, details and history, not only the roster.
+function _vmAcct(id){closeConfirm();openAccountHistory(id);}
 // Add one: any account, found by name, mobile or email.
 function _vmAddOpen(){_vmDlg(t('zvAdd'),`<input id="vm-add-q" class="vm-in" type="text" autocomplete="off" aria-label="${esc(t('zvAddSearch'))}" placeholder="${esc(t('zvAddSearch'))}" data-on-input="${_on("_vmAddSearch",_P("value"))}"><div id="vm-add-res" class="vm-res"></div>`);setTimeout(()=>document.getElementById('vm-add-q')?.focus(),40);}
 function _vmFindCusts(q){
@@ -10180,6 +10189,7 @@ function _vmOpen(id){
     <div class="ss-form-acts">
       <button type="button" class="btn-primary" data-on-click="${_on("_vmSave",id)}">${esc(t('saveBtn'))}</button>
       <button type="button" class="btn-secondary" data-on-click="${_on("_n6wCertOpen",id)}">${esc(t('zvCert'))}</button>
+      <button type="button" class="btn-secondary" data-on-click="${_on("_vmAcct",id)}">${esc(t('gsKindAccount'))}</button>
     </div>
     <h3 class="vm-h">${esc(t('zvHoursUnit'))}: ${esc(_vmH(h))}${ms.next?` <span class="am-meta">${esc(t('zvNextMilestone').replace('{0}',String(ms.next)))}</span>`:''}</h3>
     <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmHoursOpen",id)}">${esc(t('zvAddHours'))}</button>
@@ -11255,7 +11265,7 @@ function _vmCfgSet(k,v){
 }
 function _vmCfgCap(k,v){return _vmCfgSave({caps:{..._vmCfg().caps,[k]:!!v}});}
 function _vmCfgList(k,v){const L=String(v||'').split(',').map(x=>x.trim()).filter(Boolean);return _vmCfgSave({[k]:k==='milestones'?L.map(Number).filter(n=>n>0):L});}
-function _vmAskAgain(){confirmDialog({title:t('zvCfgAgreeAgain'),body:t('zvCfgAgreeAgainQ'),confirmLabel:t('zvCfgAgreeAgain'),onConfirm:()=>_vmCfgSave({agreement_v:_ksaYmd(Date.now())+'-'+Date.now().toString(36)})});}
+function _vmAskAgain(){confirmDialog({title:t('zvCfgAgreeAgain'),body:t('zvCfgAgreeAgainQ'),confirmLabel:t('zvCfgAgreeAgain'),confirmClass:'btn-primary',onConfirm:()=>_vmCfgSave({agreement_v:_ksaYmd(Date.now())+'-'+Date.now().toString(36)})});}
 // ─ the account editor: an account's hours, whichever section it was opened from ─
 function _cfVolMount(id){const h=document.getElementById('cf-vol-host');if(h)_cfVolPaint(id);}
 async function _cfVolPaint(id,force){
@@ -14496,6 +14506,7 @@ function setCustTab(tab,part){
 // o.sid (2026-11-06, ST08): Bookings opens on that ride in one paint; opening it and then picking the ride drew the roster twice.
 function setStaffTab(tab,o){
   if(S.staffRole==='volunteer')return; // a volunteer has one page and no sections
+  if(!(o&&o.lv)&&!_navRestoring&&S.view==='staff'&&tab!==S.staffTab&&_draftAsk(S.staffTab,()=>setStaffTab(tab,{...o,lv:1})))return; // unsaved work here: asked first (s10, item 40)
   if(tab==='handover'){S.queueView=GIVE_BIKE_STEP?'handover':'bookings';tab='queue';} // the bikes side of the desk: a fourth pill
   if(tab==='fnb')tab='vendors'; // the section's id until 2026-10-03 (a saved address or tab)
   if(tab==='customers')tab='community'; // Customers is part of People since 2026-11-06
@@ -14682,6 +14693,16 @@ function _simpleNavFoot(){
   b.textContent=t('setPhoneFullBtn');
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeStaffNav();});
+// The rail brings the open section into view (staff round s10, item 26): at 1280x900 Team and Settings sat below its fold, so
+// a section opened by G-chord, Ctrl K or an address was lit where nobody could see it. Once per section and rail height, so a
+// rail the staffer scrolled stays where they left it through the repaints that follow.
+let _railAt='';
+function _railShow(){
+  const n=document.getElementById('staff-tab-nav'),a=n&&n.querySelector('.tab-btn.active'),k=S.staffTab+'|'+(n?n.clientHeight:0);
+  if(!a||!n.clientHeight||_railAt===k)return;_railAt=k;
+  const r=a.getBoundingClientRect(),b=n.getBoundingClientRect();
+  if(r.top<b.top||r.bottom>b.bottom)n.scrollTop+=r.top-b.top-(b.height-r.height)/2;
+}
 function renderStaffTabs(){
   _prefBoot();_stSaveAll(); // the filters of the section left are kept (Settings > Personal)
   _fillNavIcons();_syncRailPin();
@@ -14699,7 +14720,7 @@ function renderStaffTabs(){
   // A group heading with none of its sections left (an account's own list) goes too.
   {let grp=null,any=false;const fin=()=>{if(grp)grp.style.display=any?'':'none';};
    [...document.getElementById('staff-tab-nav').children].forEach(n=>{if(n.classList.contains('snav-group')){fin();grp=n;any=false;}else if(n.classList.contains('tab-btn')&&n.style.display!=='none')any=true;});fin();}
-  _syncStaffNavLabel();_simpleNavFoot();
+  _syncStaffNavLabel();_simpleNavFoot();_railShow();
   try{_n6uKbTips();}catch(_){}
   document.getElementById('tab-queue')     .classList.toggle('active',S.staffTab==='queue');
   document.getElementById('tab-waitlist')  .classList.toggle('active',S.staffTab==='waitlist');
@@ -15674,7 +15695,7 @@ async function mwRemoveParty(rowId){
   confirmDialog({
     title:t('wlRemoveBtn'),
     body:t('mwRemovePartyBody').replace('{0}',String(g.length)),
-    confirmLabel:t('wlRemoveBtn'),
+    confirmLabel:t('wlRemoveBtn'),confirmClass:'btn-red',
     onConfirm:async()=>{ for(const w of g) await resolveDeskWaitlist(w.id,'removed'); },
   });
 }
@@ -16216,7 +16237,7 @@ function _gsHits(q){
   // A command bar too (2026-11-06, ST06): empty, it lists the last things opened and the actions; one letter on, the sections
   // and actions whose name matches come first. Only what this account may open or change is offered.
   if(!raw)return _n6tIdle();
-  const cmds=_n6tCmds().filter(c=>_dkXF(c.l).includes(_dkXF(raw))).slice(0,8);
+  const cmds=_n6tCmds().filter(c=>_dkXF(c.l+' '+(c.a||'')).includes(_dkXF(raw))).slice(0,8); // its name, or an alias (s10: the other language's name)
   if(raw.length<2)return cmds.length?cmds:null;
   const ql=_dkXF(raw),qn=ql.replace(/^#/,''),adm=isAdmin(),out=cmds.slice(),today=todayStr(); // folded both sides (the staff review, 2026-10-28)
   const has=v=>v!=null&&_dkXF(v).includes(ql);
@@ -16242,7 +16263,7 @@ function _gsHits(q){
       .sort((a,b)=>String(b.session_date||b.id).localeCompare(String(a.session_date||a.id))).slice(0,3)
       .forEach(x=>out.push({k:'gsKindSession',l:_evName(x),m:`${dayLabel(x.day)} · ${shortDate(x.session_date||x.id)}${_sgDot(x)}`,go:['_gsGo','sess',x.id]}));
   }
-  _n6tMoreHits(raw,has,out);
+  _n6tMoreHits(raw,has,out);_gsOffHits(raw,has,out);
   const W=S._ws;
   if(W&&W.jobs&&_deskTabOk('workshop'))W.jobs.filter(j=>has(j.name)||_phoneHit(j.phone,raw)||has(j.bike)).slice(0,3)
     .forEach(j=>out.push({k:'gsKindWorkshop',l:j.name||'',m:[j.bike,j.service_label||j.service].filter(Boolean).join(' · '),go:['_gsGo','ws',j.id]}));
@@ -16293,7 +16314,7 @@ function _gsPaint(){
   if(!hits.length){el.innerHTML=`<div class="gs-note" role="status">${t('gsNone')}</div>`;return;}
   if(inp)inp.setAttribute('aria-activedescendant','gs-opt-0');
   S._gsLast=hits;
-  el.innerHTML=hits.map((h,i)=>`${h.hd?`<div class="gs-hd" role="presentation">${esc(t(h.hd))}</div>`:''}<button type="button" id="gs-opt-${i}" tabindex="-1" class="gs-item${i===0?' sel':''}" role="option" aria-selected="${i===0}" data-on-click="${_on(['_n6tRemember',i],h.go)}"><span class="gs-kind">${esc(t(h.k))}</span><span class="gs-main"><strong>${esc(h.l)}</strong>${h.m?`<small>${esc(h.m)}</small>`:''}</span></button>`).join('');
+  el.innerHTML=hits.map((h,i)=>`${h.hd?`<div class="gs-hd" role="presentation">${esc(t(h.hd))}</div>`:''}<button type="button" id="gs-opt-${i}" tabindex="-1" class="gs-item${i===0?' sel':''}" role="option" aria-selected="${i===0}" data-on-click="${_on(['_n6tRemember',i],h.go)}"><span class="gs-kind">${esc(t(h.k))}</span><span class="gs-main"><strong>${esc(h.l)}</strong>${h.m?`<small>${esc(h.m)}</small>`:''}</span>${h.sc&&!_kbOff()?`<kbd class="gs-kbd">${esc(h.sc)}</kbd>`:''}</button>`).join('');
 }
 function _gsKey(ev){
   if(ev.key==='Escape'){ev.preventDefault();_gsClose();return;}
@@ -16317,7 +16338,7 @@ function _gsGo(kind,id){
     _n6tToRide(e.sessionId);setTimeout(()=>{S._flashId=null;},1600);
     setTimeout(()=>{const r=document.querySelector(`#q-results [data-id="${CSS.escape(String(e.id))}"]`);if(r)try{r.scrollIntoView({block:'center',behavior:_sb()});}catch(_){}},80);
   }else if(kind==='acct')openAccountHistory(id);
-  else if(kind==='vol'){S.volView='roster';setStaffTab('volunteers');const f=globalThis['_vm'+'Open'];if(typeof f==='function')f(id);}
+  else if(kind==='vol')openAccountHistory(id); // the person's account window (s10, item 36); their volunteer record is a tap away there and in Volunteers
   else if(kind==='ca'||kind==='la'){
     // An application opens in its list, alone: its own status pill, its name in the list's search, the list's other filters off.
     const a=((kind==='la'?S._laApps:S._caApps)||[]).find(x=>x.id===id);if(!a)return;
@@ -16331,6 +16352,22 @@ function _gsGo(kind,id){
     setStaffTab('inventory');if(it){S.invSection=_invSecOf(it.category);S.invSearch=it.name||'';}renderInventory();
   }else if(kind==='sess'){if(_deskTabOk('sessions')){S.sessView='list';S.selSessionDetail=id;setStaffTab('sessions');}else _n6tToRide(id);}
   else if(kind==='ws'){setStaffTab('workshop');_wsEdit(id);}
+  else _gsGoOff(kind,id);
+}
+// The office's records (s10, item 29): each opens where it lives, in its own dialog where the section has one, else found by
+// the section's own search. Their sections' code is called by name: the parts that hold it are in by the time a list is.
+function _gsGoOff(kind,id){
+  const fn=(n,...a)=>{const f=globalThis[n];if(typeof f==='function')f(...a);},of=l=>(l||[]).find(x=>x.id===id);
+  if(kind==='bdr'){const c=_custById((of(S._bdrRows)||{}).customer_id);S._bdrV={badge:'',pf:'',sort:'new',...S._bdrV,f:'all',q:(c&&(c.name||c.email))||'',n:40};setStaffTab('badgereq');}
+  else if(kind==='amb'||kind==='sm'){const W=kind==='amb'?S._amb:S._sm,r=W&&of(W.rows);if(r){W.filter='all';W.q=r.email||r.name||'';}setStaffTab(kind==='amb'?'ambassadors':'messages');}
+  else if(kind==='pay'){const p=S._pay&&of(S._pay.rows);if(p)S._pay.q=p.ref||'';S.payView='all';setStaffTab('payments');}
+  else if(kind==='tag'){setCommTab('tags');fn('openTag'+'Edit',id);}
+  else if(kind==='ttl')setCommTab('titles');
+  else if(kind==='tm'){S.teamView='access';setStaffTab('team');}
+  else if(kind==='ven'){S.vendorView='venues';setStaffTab('vendors');fn('_vendor'+'VenOpen',id);}
+  else if(kind==='cat'){_cat().view='models';setStaffTab('catalog');fn('_cat'+'Edit',id);}
+  else if(kind==='ord'){S.stoView='orders';setStaffTab('store');fn('_sto'+'Open',id);}
+  else if(kind==='lk'){const L=S._lk,r=L&&of(Object.values(L.days||{}).flat());if(!r)return;S.lkView='reservations';S.lkDay=r.day;setStaffTab('lockers');_lkEdOpen(id,r.day);}
 }
 // ── Links between Bookings, Sessions and Volunteers, and the addresses that open a record (2026-11-06, ST05, ST07) ──
 function _n6tToSess(sid){if(!_deskTabOk('sessions'))return;S.sessView='list';S.selSessionDetail=sid;if(S.staffTab==='sessions')selectSessionDetail(sid);else setStaffTab('sessions');}
@@ -16367,20 +16404,46 @@ function _n6tOpenLink(){
 // Empty, the bar lists the last eight things opened from it on this device and the actions; typed, the sections and
 // actions whose name matches come first, then what the search finds (volunteers and applications too). Each is offered
 // only where the account may open its section, and an action only where it may also change it (the Owner preset reads).
-const _N6T_REC='cq_gs_recent',_N6T_KIND_TAB={booking:'queue',acct:'community',bike:'inventory',item:'inventory',ws:'workshop',vol:'volunteers',ca:'community',la:'community'};
+const _N6T_REC='cq_gs_recent',_N6T_KIND_TAB={booking:'queue',acct:'community',bike:'inventory',item:'inventory',ws:'workshop',vol:'volunteers',ca:'community',la:'community',bdr:'badgereq',ven:'vendors',amb:'ambassadors',tag:'community',ttl:'community',tm:'team',sm:'messages',cat:'catalog',ord:'store',pay:'payments',lk:'lockers'};
+// Every command says its keyboard shortcut (when this device has them on) and answers to its name in English and Arabic
+// whatever the language on screen (s10, item 29).
+const GS_AKA={dashboard:'لوحة القيادة',queue:'الحجوزات',waitlist:'قائمة الانتظار',sessions:'الجلسات',lockers:'الخزائن',cashier:'المبيعات till',store:'المتجر',payments:'المدفوعات',
+  inventory:'المخزون',workshop:'الورشة',community:'الأشخاص accounts',badgereq:'طلبات الأوسمة',ambassadors:'السفراء',volunteers:'المتطوعون',vendors:'الموردون',website:'الموقع',
+  catalog:'كتالوج الدراجات',messages:'الرسائل',analytics:'التحليلات',history:'السجل',team:'الفريق',settings:'الإعدادات',next:'تسجيل دخول التالي',walkin:'زيارة مباشرة',scan:'مسح التذكرة',newsess:'جلسة جديدة',closeout:'إنهاء الليلة'};
+function _gsAka(k,lk){return(GS_AKA[k]||'')+' '+((LANG.en||{})[lk]||'');}
+// Ctrl K opens every sub-view too ("People › Applications", "Analytics › Ratings"): one per SUB_PATHS entry named here
+// (a section's own page is its Go to), each only where this account may open it.
+const GS_SUBS={queue:'petromin:ridersTitle',sessions:'table:ssLayTable cal:calViewCal',lockers:'reservations:lkViewRes units:lkViewUnits items:lkItems report:lkViewReport history:lkViewHist',
+  store:'products:stoProducts',payments:'refunds:payOwed settings:paySettings',history:'log:logsTitle audit:auTitle exceptions:exTitle till:tillTitle access:piiTitle',
+  inventory:'supplements:invSecSupplements equipment:invSecEquipment',
+  community:'accounts:commTabAccounts applications:commTabApplications learning:appsLearn flagged:commTabFlagged tags:amTagsTitle badges:mrBadgesTitle titles:ttTab activities:acTab birthdays:commTabBirthdays wallets:cwTabWallets referrals:commTabReferrals activity:custTabActivity duplicates:commTabDuplicates',
+  catalog:'categories:catViewCats fields:catViewFields',vendors:'requests:vndVReq venues:vndVVen tiers:vndVTier feedback:vndVFb',
+  analytics:'revenue:anRevenue ridership:anRidership operations:anOperations fleet:anFleetSection months:anNavMonths reports:anNavReports ratings:anRatingsNav customers:anNavCustomers growth:anNavGrowth leaderboard:commTabLeaderboard community:anNavCommunity volunteers:tabVolunteers team:anNavTeam',
+  team:'parttimers:ptTab',volunteers:'applications:zaTab roster:tabPeople sessions:zvTabSessions hours:zrTabHours activity:zvTabActivity settings:zvTabSettings',settings:'business:setTabBusiness pricing:setTabPricing'};
+// The views only some open, as their sections offer them: the admins' alone, History's money views by role, Analytics'
+// volunteers with the Volunteers section.
+function _gsSubOk(k,v){
+  const a=isAdmin(),c=a||_viewOk('cashier'),x={'history.audit':a,'history.exceptions':c,'history.till':c,'history.access':a||S.staffRole==='owner','community.duplicates':a,'store.products':a,'payments.settings':a,'analytics.team':a,'analytics.volunteers':_deskTabOk('volunteers')}[k+'.'+v];
+  return x!==false&&!!SUB_PATHS[k]&&_own(SUB_PATHS[k],v);
+}
 function _n6tCmds(){
-  const out=[],okQ=_deskTabOk('queue'),edQ=okQ&&_editOk('queue'),act=(l,go,m)=>out.push({k:'gsKindAction',l,m:m||'',go});
-  if(edQ)act(t('dashCheckinNext'),['_n6tCmd','next']);
-  if(edQ)act(String(t('addWalkin')).replace(/^\+\s*/,''),['_n6tCmd','walkin']);
-  if(edQ)act(t('scanBtn'),['_n6tCmd','scan']);
+  const out=[],okQ=_deskTabOk('queue'),edQ=okQ&&_editOk('queue'),act=(l,go,m,sc)=>out.push({k:'gsKindAction',l,m:m||'',go,sc,a:_gsAka(go[1])});
+  if(edQ)act(t('dashCheckinNext'),['_n6tCmd','next'],'','N');
+  if(edQ)act(String(t('addWalkin')).replace(/^\+\s*/,''),['_n6tCmd','walkin'],'','W');
+  if(edQ)act(t('scanBtn'),['_n6tCmd','scan'],'','T');
   if(_deskTabOk('sessions')&&_editOk('sessions'))act(String(t('newSession')).replace(/^\+\s*/,''),['_n6tCmd','newsess']);
   if(edQ){const sid=_currentSessId(),s=sid&&sid!=='all'?_sessGet(sid):null;if(s&&String(s.session_date||s.id).slice(0,10)===todayStr()&&_coCount(sid))act(t('gsCmdCloseOut'),['_n6tCmd','closeout',sid],_evName(s));}
-  [..._staffSections(),'settings'].filter(_deskTabOk).forEach(k=>out.push({k:'gsKindGo',l:k==='settings'?t('tabSettings'):_sectionName(k),go:['_n6tCmd','go',k]}));
+  [..._staffSections(),'settings'].filter(_deskTabOk).forEach(k=>{
+    const nm=k==='settings'?t('tabSettings'):_sectionName(k),lk=k==='settings'?'tabSettings':SECTION_KEY[k],g=_n6uGoKey(k);
+    out.push({k:'gsKindGo',l:nm,go:['_n6tCmd','go',k],sc:g?'G '+g.toUpperCase():'',a:_gsAka(k,lk)});
+    String(GS_SUBS[k]||'').split(' ').forEach(p=>{const[v,vk]=p.split(':');if(vk&&_gsSubOk(k,v))out.push({k:'gsKindGo',l:nm+' › '+t(vk),go:['_n6tCmd','sub',k,v],sub:1,a:_gsAka(k,lk)});});
+  });
   return out;
 }
-function _n6tCmd(key,arg){
+function _n6tCmd(key,arg,v){
   _gsClose();
   if(key==='go')setStaffTab(arg);
+  else if(key==='sub'){_setSub(arg,SUB_PATHS[arg][v]);setStaffTab(arg);} // a sub-view: its state, then the section drawn on it
   else if(key==='next')_kbCheckInNext();
   else if(key==='walkin')showWalkinModal();
   else if(key==='scan')openScanModal();
@@ -16398,12 +16461,12 @@ function _n6tRecent(){try{const v=JSON.parse(localStorage.getItem(_N6T_REC)||'[]
 function _n6tRemember(i){
   const h=(S._gsLast||[])[i];if(!h||!Array.isArray(h.go))return;
   const j=JSON.stringify(h.go),list=_n6tRecent().filter(x=>JSON.stringify(x.go)!==j);
-  list.unshift({k:h.k,l:h.l,m:h.m||'',go:h.go});
+  list.unshift({k:h.k,l:h.l,m:h.m||'',go:h.go,sc:h.sc||''});
   try{localStorage.setItem(_N6T_REC,JSON.stringify(list.slice(0,8)));}catch(_){}
 }
 function _n6tIdle(){
   const rec=_n6tRecent().filter(x=>_n6tGoOk(x.go)).map((x,i)=>({...x,hd:i?'':'gsRecent'}));
-  const cmds=_n6tCmds().map((x,i)=>({...x,hd:i?'':'gsCommands'}));
+  const cmds=_n6tCmds().filter(x=>!x.sub).map((x,i)=>({...x,hd:i?'':'gsCommands'})); // the sub-views come when typed for
   const r=[...rec,...cmds];return r.length?r:null;
 }
 // Volunteers (once the section has read them) and membership and learn-to-ride applications, for an account with those sections.
@@ -16416,6 +16479,29 @@ function _n6tMoreHits(raw,has,out){
     list.filter(a=>has(a.name)||has(a.email)||has(a.learner_name)||_phoneHit(a.phone,raw)).sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,3)
       .forEach(a=>out.push({k:k==='la'?'gsKindLearn':'gsKindApp',l:a.learner_name||a.name||a.email||'',m:a.created_at?shortDate(_ksaYmd(a.created_at)):'',go:['_gsGo',k,a.id]}));
   });
+}
+// The office's records (s10, item 29): badge requests, venues, ambassadors, tags, titles, team accounts, website messages,
+// catalogue models, store orders, payments and locker rentals, from the lists this device already holds. A list not read yet
+// is never read for this (each is a whole list): its section's Go to comes last instead, under "Look in".
+function _gsOffHits(raw,has,out){
+  const look=[],nm=id=>{const c=_custById(id);return c?c.name||c.email||'':'';},V=S._vendor,T=S._tm,L=S._lk;
+  const K=[['badgereq','bdr',S._bdrRows,r=>[nm(r.customer_id),r.comment]],
+    ['vendors','ven',V&&V.at?V.venues:null,v=>[v.name]],
+    ['ambassadors','amb',S._amb&&S._amb.rows,a=>[a.name,a.code||'',a.phone,a.instagram]],
+    ['community','tag',S.tags,x=>[x.name,t('amTagsTitle')]],['community','ttl',S.titles,x=>[x.name,t('ttTab')]],
+    ['team','tm',T&&T.accts,a=>{const n=T.more&&T.more[a.user_id]&&T.more[a.user_id].name;return[n||a.email,n?a.email:'',a.email];}],
+    ['messages','sm',S._sm&&S._sm.rows,m=>[m.name||m.email,m.topic||m.company,m.email,m.phone,m.message]],
+    ['catalog','cat',S.cat&&S.cat.loaded?S.cat.models:null,m=>[m.name,m.brand]],
+    ['store','ord',S._sto&&S._sto.orders,o=>['MM-'+o.no+' '+(o.name||''),o.phone]],
+    ['payments','pay',S._pay&&S._pay.rows,p=>[p.description||p.ref,p.ref]],
+    ['lockers','lk',L&&L.days?Object.values(L.days).flat():null,r=>[r.name||nm(r.customer_id),shortDate(r.day)]]];
+  K.forEach(([sec,k,list,f])=>{
+    if(!_deskTabOk(sec))return;
+    if(!Array.isArray(list)){if(!look.includes(sec))look.push(sec);return;}
+    list.map(x=>[x,f(x)]).filter(([,v])=>v.some(w=>has(w)||(/^\+?\d{7,}$/.test(String(w||''))&&_phoneHit(w,raw)))).slice(0,3)
+      .forEach(([x,v])=>out.push({k:SECTION_KEY[sec],l:String(v[0]||'—'),m:String(v[1]||''),go:['_gsGo',k,x.id]}));
+  });
+  look.slice(0,6).forEach((k,i)=>out.push({k:'gsKindGo',l:_sectionName(k),go:['_n6tCmd','go',k],hd:i?'':'gsLookIn'}));
 }
 // The lists those results come from are read when the bar opens, once, as the bell reads the applications.
 function _n6tGsWarm(){
@@ -16476,7 +16562,7 @@ function _ntLoaded(){
 // ride runs long and a rating ages by the clock).
 let _ntkRefs=null,_ntkKey=null,_ntkOut=null;
 function _ntKinds(){
-  const W=S._ws,M=S._sm,V=S.vm,refs=[S.queue,S.inventory,S.bikes,S.customers,S.customerTags,S.staffOptions,W&&W.jobs,M&&M.rows,S._caApps,S._laApps,S._vendorLate,S._rpiSnaps,S.sessions,V&&V.rows,V&&V.shifts,V&&V.sess,S._wlOff];
+  const W=S._ws,M=S._sm,V=S.vm,refs=[S.queue,S.inventory,S.bikes,S.customers,S.customerTags,S.staffOptions,W&&W.jobs,M&&M.rows,S._caApps,S._laApps,S._vendorLate,S._rpiSnaps,S.sessions,V&&V.rows,V&&V.shifts,V&&V.sess,S._wlOff,S._bdrRows,S._flags,S._stoPaid,S._payDue,S._caWaitN,S._laWaitN];
   const c=(o,f)=>o?o.length+':'+o.filter(f).length:'-',q=S.queue||[];
   const key=[q.length,q.filter(e=>e.status==='active'||e.ratingExp).length,c(S.inventory,it=>{const n=Number(it.qty)||0,lo=Number(it.low_threshold)||0;return n<=0||(lo>0&&n<=lo);}),
     (S.bikes||[]).map(b=>b&&b.status).join(),c(W&&W.jobs,j=>j.status==='new'),c(M&&M.rows,m=>m.status==='new'),c(S._caApps,a=>a.status==='pending'),c(S._laApps,a=>a.status==='pending'),
@@ -16508,14 +16594,15 @@ function _ntKindsNow(){
   {const f=globalThis['_n6r'+'Bell'];if(typeof f==='function')f(add,L);} // a session short of its minimum riders at its decision time (2026-11-06, OT02)
   {const f=globalThis['_sn'+'Bell'];if(typeof f==='function')f(add,L);}
   {const f=globalThis['_n6u'+'Bell'];if(typeof f==='function')f(add,L);} // Sessions' nearly full today and Volunteers' sign-ups and open shifts (2026-11-06, ST13): staff-half code, by name as above // a rider with special needs booked (2026-10-23): staff-half code, by name as above // ride reminders and freed places (2026-10-09, R7): staff-half code, named so this customer-half list does not pull it in
+  {const f=globalThis['_nt'+'Office'];if(typeof f==='function')f(add);} // the office's queues (s10, item 33): staff-half code, by name as above
   if(_deskTabOk('analytics'))add('closeout',(S._rpiSnaps||[]).map(x=>({id:x.id,txt:t('ntiCloseout').replace('{0}',shortDate(x.period_from)),at:x.created_at})),'ntCloseout','green',['_on_goReports'],Array.isArray(S._rpiSnaps));
   if(_deskTabOk('workshop'))add('ws',_wsNew().map(j=>({id:j.id,txt:t('ntiWs').replace('{0}',nm(j)),at:j.created_at})),'ntWs','green',['setStaffTab','workshop'],S._ws&&S._ws.jobs);
   // Each kind follows the section its line opens (2026-11-06, ST01), not the admin role: a manager with People, Inventory or
   // Messages saw none of their lines.
   const ok=_deskTabOk,ppl=ok('community');
   {
-    if(ppl)add('apps',_caPending().map(a=>({id:a.id,txt:t('ntiApps').replace('{0}',nm(a)),at:a.created_at})),'ntApps','green',['_on_goCommunity','applications'],Array.isArray(S._caApps));
-    if(ppl)add('learn',_laPending().map(a=>({id:a.id,txt:t('ntiLearn').replace('{0}',nm(a)),at:a.created_at})),'ntLearn','green',['_on_goCommunity','learning'],Array.isArray(S._laApps));
+    if(ppl)add('apps',Array.isArray(S._caApps)?_caPending().map(a=>({id:a.id,txt:t('ntiApps').replace('{0}',nm(a)),at:a.created_at})):_ntCnt('ca','ntApps'),'ntApps','green',['_on_goCommunity','applications'],Array.isArray(S._caApps));
+    if(ppl)add('learn',Array.isArray(S._laApps)?_laPending().map(a=>({id:a.id,txt:t('ntiLearn').replace('{0}',nm(a)),at:a.created_at})):_ntCnt('la','ntLearn'),'ntLearn','green',['_on_goCommunity','learning'],Array.isArray(S._laApps));
     if(ppl)add('refheld',(S._refHeld||[]).map(r=>({id:r.friend_id,txt:t('ntiRefHeld').replace('{0}',(_custById(r.friend_id)||{}).name||'—').replace('{1}',(_custById(r.referrer_id)||{}).name||'—'),at:r.created_at})),'ntRefHeld','warn',['_on_goCommunity','referrals'],Array.isArray(S._refHeld));
     if(ppl)add('bday',_bdTodayOpen().map(r=>({id:r.c.id+'|'+r.y,txt:t('ntiBday').replace('{0}',nm(r.c))})),'ntBday','green',['_on_goCommunity','birthdays'],L.riders);
     if(ok('messages'))add('msgs',_smNew().map(m=>({id:m.id,txt:t('ntiMsgs').replace('{0}',nm(m)),at:m.created_at})),'ntMsgs','green',['setStaffTab','messages'],S._sm&&S._sm.rows);
@@ -16532,6 +16619,34 @@ function _ntKindsNow(){
 // the label the page shows; the admin-only ones are offered to admins only.
 // The third field is the section a kind's line opens (2026-11-06; it was "admins only"): Settings offers a kind to an account that has it.
 const NT_KINDS=[['refheld','ntkRefHeld','community'],['long','ntkLong','queue'],['coopen','ntkCoOpen','queue'],['kiosk','ntkKiosk','queue'],['ws','ntkWs','workshop'],['apps','ntkApps','community'],['learn','ntkLearn','community'],['bday','ntkBday','community'],['msgs','ntkMsgs','messages'],['attn','ntkAttn','inventory'],['lowrate','ntkLowRate','analytics'],['stock','ntkStock','inventory'],['vlate','ntkVendorLate','vendors'],['natnew','ntkNatNew','community'],['closeout','ntkCloseout','analytics'],['remind','ntkRemind','queue'],['wlfree','ntkWlFree','queue'],['sneeds','ntkSn','queue'],['sfull','ntkSFull','sessions'],['gonogo','ntkGoNoGo','sessions'],['vsign','ntkVSign','volunteers'],['vopen','ntkVOpen','volunteers']];
+// The office's four queues (staff round s10, item 33): until then only numbers on the rail. Settings lists these after NT_KINDS.
+const NT_KINDS_OFF=[['bdr','ntkBdr','badgereq'],['stoord','ntkStoOrd','store'],['refowed','ntkRefOwed','payments'],['flags','ntkFlags','community']];
+// Settings groups the switches by the section their lines open (s10, item 33): Desk, People, Fleet, Volunteers, and the
+// Office for every other section.
+const NT_GROUPS=[['presetDesk','queue sessions waitlist lockers'],['snavPeople','community badgereq'],['snavFleet','inventory workshop'],['tabVolunteers','volunteers'],['ntgOffice','']];
+// The office's queues in the bell (s10, item 33): badge requests waiting, store orders paid and waiting to be prepared,
+// refunds owed (due or failed) and accounts asked to fix their details, from what the rail's counts already read
+// (_bdrLoad, _stoCounts) and the Flagged list once People has read it; nothing new is read for them.
+function _ntOffice(add){
+  const ok=_deskTabOk,nm=id=>{const c=_custById(id);return(c&&(c.name||c.email))||'—';};
+  if(ok('badgereq'))add('bdr',(S._bdrRows||[]).filter(r=>r.status==='pending').map(r=>({id:r.id,txt:t('ntiBdr').replace('{0}',nm(r.customer_id)),at:r.created_at})),'ntBdr','green',['setStaffTab','badgereq'],Array.isArray(S._bdrRows));
+  if(ok('store'))add('stoord',(S._stoPaid||[]).map(o=>({id:o.id,txt:t('ntiStoOrd').replace('{0}','MM-'+o.no+' · '+(o.name||'')),at:o.paid_at})),'stoWaitBadge','green',['setStaffTab','store'],Array.isArray(S._stoPaid));
+  if(ok('payments'))add('refowed',(S._payDue||[]).map(r=>({id:r.id,txt:t('ntiRefOwed').replace('{0}',_money(r.amount,_NOISO)),at:r.created_at})),'payOwedBadge','warn',['_on_goPayRefunds'],Array.isArray(S._payDue));
+  if(ok('community'))add('flags',(S._flags||[]).filter(x=>x&&x.status==='pending').map(x=>({id:x.id,txt:t('ntiFlags').replace('{0}',nm(x.customer_id)),at:x.flagged_at})),'ntFlags','warn',['_on_goCommunity','flagged'],Array.isArray(S._flags));
+}
+function _on_goPayRefunds(){S.payView='refunds';setStaffTab('payments');}
+// Applications before their list is read: one line while the count probe (_appsProbe) holds more than it first counted.
+function _ntCnt(k,key){const n=S['_'+k+'WaitN'],b=S['_'+k+'WaitB'];return n>b?[{id:'+'+n,txt:t(key).replace('{0}',n)}]:[];}
+// The applications waiting, counted (s10, item 33): one head request each, as the Store's numbers are, every five minutes
+// with the section polls, so the bell and the Dashboard learn of a new one before People or the bell has read the lists.
+async function _appsProbe(){
+  if(!sb||S._apBusy||Array.isArray(S._caApps)&&Array.isArray(S._laApps))return;S._apBusy=1;
+  const c=tb=>sb.from(tb).select('id',{count:'exact',head:true}).eq('status','pending').is('hidden_at',null);
+  let a,b;try{[a,b]=await Promise.all([c('community_applications'),c('learn_applications')]);}catch(_){}
+  S._apBusy=0;
+  [['ca',a],['la',b]].forEach(([k,r])=>{if(r&&!r.error&&r.count!=null){S['_'+k+'WaitN']=+r.count;if(S['_'+k+'WaitB']==null)S['_'+k+'WaitB']=+r.count;}});
+  try{_ntSync();}catch(_){}
+}
 function _ntOff(){return Array.isArray(S._ntOff)?S._ntOff:[];}
 // The Dashboard's Alerts card: what needs attention now, one line per kind with its count.
 function _ntRows(kinds){return(kinds||_ntKinds()).filter(x=>x.ids.length).map(x=>({...x,n:x.ids.length,txt:t(x.key).replace('{0}',x.ids.length)}));}
@@ -22661,6 +22776,7 @@ async function _payOwedLoad(force){
 function _payRepaint(){if(S.view==='staff'&&S.staffTab==='payments')renderPayments();}
 function renderPayments(){
   const el=document.getElementById('tab-payments');if(!el)return;
+  _draftReg('payset','payments',()=>{const W=_pay();return !!W.set&&JSON.stringify(W.set)!==JSON.stringify(_paySetVals());},()=>{_pay().set=null;}); // its settings, typed and not saved (s10, item 40)
   const adm=isAdmin(),v=S.payView==='refunds'?'refunds':S.payView==='settings'&&adm?'settings':'all';
   if(v==='all')_payLoad();else if(v==='refunds')_payOwedLoad();else _paySetLoad();
   const a=document.activeElement,fid=a&&a.id&&el.contains(a)?a.id:'',sel=fid&&typeof a.selectionStart==='number'?a.selectionStart:null;
@@ -25546,13 +25662,16 @@ function renderDashboard(){
     .sort((a,b)=>b.ts-a.ts).filter(i=>{const k=`${i.label}|${i.by}|${Math.round(i.ts/1000)}`;if(seen.has(k))return false;seen.add(k);return true;}).slice(0,8);
   const hhmm=ts=>{try{return new Date(ts).toLocaleTimeString(_locale(),{hour:'2-digit',minute:'2-digit',timeZone:KSA_TZ});}catch(_){return'';}};
   const feedHtml=feed.length?feed.map(i=>`<div class="dash-feed-row"><span><strong>${esc(i.by||'')}</strong> — ${esc(i.label||'')}</span><small>${esc(hhmm(i.ts))}</small></div>`).join(''):_emptyState(t('dashNoActivity'));
+  // A figure this account cannot open gives its place to one of its own (s10, item 34), and without Bookings or Sessions the
+  // main figure is its own too: a mechanic sees the workshop's queue and the bikes due, not three greyed tiles.
+  const kps=[[t('dashCollected'),_money(collected),colSub,['setStaffTab','cashier']],[t('dashAvailBikes'),avail,fleet?esc(t('dashOfFleet').replace('{0}',fleet)):'',['_on_goInventoryBikes']],
+    [t('dashOpenSessions'),openSess,nxAt?esc(t('dashNextAt').replace('{0}',nxAt)):'',['setStaffTab','sessions']]].filter(x=>_n6tDashOk(x[3])),own=_dashRole();
+  let top=hero;
+  if(!heroGo&&!okSs&&own.length){const[l,v,sub,go]=own.shift();top=`<button type="button" class="dash-hero" data-on-click="${_on(...go)}"><span class="dash-hero-k">${esc(l)}</span><span class="dash-hero-n"><strong>${v}</strong></span>${sub?`<span class="dash-leg">${sub}</span>`:''}</button>`;}
+  while(kps.length<3&&own.length)kps.push(own.shift());
   el.innerHTML=`<h1 class="page-title">${t('dashTitle')}</h1><div class="page-sub">${t('dashSub')}</div>
-    <div class="dash-top">${hero}<div class="dash-kpis">
-      ${kpi(t('dashCollected'),_money(collected),colSub,['setStaffTab','cashier'])}
-      ${kpi(t('dashAvailBikes'),avail,fleet?esc(t('dashOfFleet').replace('{0}',fleet)):'',['_on_goInventoryBikes'])}
-      ${kpi(t('dashOpenSessions'),openSess,nxAt?esc(t('dashNextAt').replace('{0}',nxAt)):'',['setStaffTab','sessions'])}
-    </div></div>
-    ${_kpiCard()}
+    <div class="dash-top">${top}<div class="dash-kpis">${kps.map(x=>kpi(...x)).join('')}</div></div>
+    ${_dashWeek()}${_kpiCard()}
     <div class="dash-grid">
       <div class="form-section dash-card"><h2 class="form-title">${t('dashSessionsToday')}</h2>${sessHtml}</div>
       <div class="form-section dash-card"><h2 class="form-title">${t('dashAlerts')}</h2>${alertHtml}</div>
@@ -25569,7 +25688,7 @@ function renderDashboard(){
   _figFit(el);
 }
 // The Dashboard's alert marks, one per bell kind (_ntKindsNow); the bell's own mark for any other.
-const DASH_AL_IC={long:'clock',coopen:'flag',kiosk:'walk',ws:'wrench',apps:'people',learn:'person',bday:'cake',msgs:'note',attn:'bike',lowrate:'star',stock:'box',vlate:'cup',natnew:'globe',closeout:'print',remind:'bell',wlfree:'ticket',sneeds:'info',sfull:'chart',vsign:'hand',vopen:'hand',gonogo:'warn'};
+const DASH_AL_IC={bdr:'medal',stoord:'bag',refowed:'wallet',flags:'flag',long:'clock',coopen:'flag',kiosk:'walk',ws:'wrench',apps:'people',learn:'person',bday:'cake',msgs:'note',attn:'bike',lowrate:'star',stock:'box',vlate:'cup',natnew:'globe',closeout:'print',remind:'bell',wlfree:'ticket',sneeds:'info',sfull:'chart',vsign:'hand',vopen:'hand',gonogo:'warn'};
 // ── The fuller Today page (2026-11-06, ST10) ──
 // Each of today's sessions carries its own ways on: its Bookings, its card in Sessions and its Volunteers, each only
 // for an account that can open that section. Then three cards: today's volunteers, the people waiting on staff
@@ -25589,6 +25708,29 @@ function _n6uJumps(x){
 // A shift's state, as the Volunteers page reads it (_vdState lives in that part).
 function _n6uVolState(x){return x.clock_in&&!x.clock_out?'in':(x.clock_in||x.status==='done')?'out':x.status==='accepted'?'wait':x.status==='interested'?'asked':'off';}
 function _n6uDashRow(txt,n,go){return`<button type="button" class="dash-row" data-on-click="${_on(...go)}"><span class="dash-row-main">${esc(txt)}</span>${n!=null?`<em>${esc(String(n))}</em>`:'<span class="dash-go" aria-hidden="true">›</span>'}</button>`;}
+// Workshop jobs not done or cancelled, for the office card and a mechanic's figures (s10, item 34).
+function _dashWsOpen(){return((S._ws&&S._ws.jobs)||[]).filter(j=>j.status!=='completed'&&j.status!=='cancelled').length;}
+// The next seven nights (s10, item 34): each day of the coming week that has a session, its places booked against its
+// places, from the sessions and bookings this device holds. A night opens its Bookings, or its card in Sessions.
+function _dashWeek(){
+  const okQ=_deskTabOk('queue');if(!okQ&&!_deskTabOk('sessions'))return'';
+  const td=todayStr(),end=_ksaYmd(Date.now()+6*864e5),by={};
+  allSessions().forEach(x=>{const d=String(x.session_date||x.id).slice(0,10);if(x.status!=='deleted'&&x.status!=='cancelled'&&d>=td&&d<=end)(by[d]=by[d]||[]).push(x);});
+  const days=Object.keys(by).sort();if(!days.length)return'';
+  return`<div class="form-section dash-card dash-wk" data-dash="week"><h2 class="form-title">${esc(t('dashWeek'))}</h2><div class="dash-week">${days.map(d=>{
+    const ss=by[d],n=ss.reduce((a,x)=>a+_placesTaken(x),0),c=ss.reduce((a,x)=>a+_placesCap(x),0),p=c?Math.min(100,Math.round(n/c*100)):0,id=ss[0].id;
+    return`<button type="button" class="dash-night${p>=100?' full':''}" data-on-click="${okQ?_on('_n6tToRide',id):_on('_n6uToSess',id)}"><span>${esc(_coXDay(d))}</span><strong>${n}<small>/${c}</small></strong><i class="dash-fill" data-cssv="${_cssv({'--w':p+'%'})}"></i></button>`;}).join('')}</div></div>`;
+}
+// A role without Bookings, Sessions or Sales (a mechanic, say) sees its own figures in their places (s10, item 34): the
+// workshop's queue, the bikes due for service, badge requests and store orders where it has them.
+function _dashRole(){
+  const ok=_deskTabOk,W=S._ws,out=[],f=(sec,l,v,sub,go)=>{if(ok(sec)&&v!=null)out.push([l,v,sub,go]);};
+  f('workshop',t('dashWsQueue'),W&&W.jobs?_dashWsOpen():null,W&&W.jobs?esc(t('ntWs').replace('{0}',_wsNew().length)):'',['setStaffTab','workshop']);
+  f('inventory',t('ntkAttn'),_ntLoaded().year?_bkAttnRows(getBikes()).length:null,'',['_on_goInventoryBikes']);
+  f('badgereq',t('ntkBdr'),Array.isArray(S._bdrRows)?S._bdrRows.filter(x=>x.status==='pending').length:null,'',['setStaffTab','badgereq']);
+  if(S._storeReady)f('store',t('ntkStoOrd'),S._stoWaitN,'',['setStaffTab','store']);
+  return out;
+}
 function _n6uDashCards(ids){
   const card=(id,title,body)=>`<div class="form-section dash-card" data-dash="${id}"><h2 class="form-title">${esc(title)}</h2>${body}</div>`;
   let out='';
@@ -25604,16 +25746,23 @@ function _n6uDashCards(ids){
     }
     out+=card('vol',t('dashVolToday'),body);
   }
-  if(_deskTabOk('community')){
-    // The applications are not read for this card (every page of them, on every manager's first screen): their count
-    // shows once People or the bell has read them, and until then the card offers the way to them.
-    const rows=[];
-    if(Array.isArray(S._caApps)){const n=_caPending().length;if(n)rows.push(_n6uDashRow(t('ntApps').replace('{0}',n),null,['_on_goCommunity','applications']));}
-    else rows.push(_n6uDashRow(t('dashPplApps'),null,['_on_goCommunity','applications']));
-    if(Array.isArray(S._laApps)){const n=_laPending().length;if(n)rows.push(_n6uDashRow(t('ntLearn').replace('{0}',n),null,['_on_goCommunity','learning']));}
-    if(_ntLoaded().riders){const n=_bdTodayOpen().length;if(n)rows.push(_n6uDashRow(t('ntBday').replace('{0}',n),null,['_on_goCommunity','birthdays']));}
-    {const n=_pplWaitN();if(n)rows.push(_n6uDashRow(t('pplWaitBadge').replace('{0}',n),null,['setStaffTab','community']));}
-    out+=card('ppl',t('dashPplWait'),rows.join('')||_emptyState(t('dashPplNone')));
+  // Waiting on the office (staff round s10, item 34; it was People waiting): every queue waiting for staff, each a count that
+  // opens its list, for the sections this account has. Nothing is read for it: the applications are counted by their probe
+  // (_appsProbe) until People or the bell has read them, and until then the card offers the way to them.
+  {
+    const ok=_deskTabOk,rows=[],r=(key,n,go)=>{if(n)rows.push(_n6uDashRow(t(key).replace('{0}',n),null,go));};
+    if(ok('community')){
+      const ca=Array.isArray(S._caApps)?_caPending().length:S._caWaitN;
+      if(ca==null)rows.push(_n6uDashRow(t('dashPplApps'),null,['_on_goCommunity','applications']));else r('ntApps',ca,['_on_goCommunity','applications']);
+      r('ntLearn',Array.isArray(S._laApps)?_laPending().length:S._laWaitN,['_on_goCommunity','learning']);
+      if(_ntLoaded().riders)r('ntBday',_bdTodayOpen().length,['_on_goCommunity','birthdays']);
+      r('ntFlags',_pplWaitN(),['_on_goCommunity','flagged']);
+    }
+    if(ok('badgereq'))r('ntBdr',(S._bdrRows||[]).filter(x=>x.status==='pending').length,['setStaffTab','badgereq']);
+    if(S._storeReady&&ok('store'))r('stoWaitBadge',S._stoWaitN,['setStaffTab','store']);
+    if(S._storeReady&&ok('payments'))r('payOwedBadge',S._payOwedN,['_on_goPayRefunds']);
+    if(ok('workshop'))r('dashWsOpen',_dashWsOpen(),['setStaffTab','workshop']);
+    if(['community','badgereq','store','payments','workshop'].some(ok))out+=card('office',t('dashOffice'),rows.join('')||_emptyState(t('dashPplNone')));
   }
   if(_deskTabOk('queue')){
     const td=todayStr(),ed=_editOk('queue'),adm=isAdmin();
@@ -32656,7 +32805,7 @@ async function deleteCustomerAccount(id){
     title:t('naDelTitle'),
     body:`<strong>${esc(c.name||'')}</strong>${c.email?`<br><span class="cmy-c-muted">${esc(c.email)}</span>`:''}
       <br><br>${esc(t('naDelBodyFinal').replace('{0}',String(past.length)))}`,
-    confirmLabel:t('naDelBtn'),
+    confirmLabel:t('naDelBtn'),confirmClass:'btn-red',
     onConfirm:async()=>{
       if(S._cfBusy)return;S._cfBusy=true;
       try{
@@ -36300,7 +36449,7 @@ async function closeOutSession(sid){
   // not (the owner: no bar after an action) and an undo most accounts do not have.
   const undoTxt=t(!_can('undo')?'coXUndoNo':_deskTabOk('history')?'coXUndoLog':'coXUndoTop');
   confirmDialog({
-    title:t('closeOutTitle'),
+    title:t('closeOutTitle'),confirmClass:'btn-red',
     body:`<div class="co-x-body"><span id="co-x-sum">${esc(_coXSum())}</span>`
       +(owed.length?` <strong>${t('closeOutOwed').replace('{0}',String(owed.length)).replace('{1}',_money(owedSar,_NOISO))}</strong>`:'')
       +(early?`<div class="co-x-early" role="note">${esc(t('coXEndsAt').replace('{0}',fmt12h(_coXEnd(sess)))+(toNoshow.length?' '+t('coXMayArrive').replace('{0}',String(toNoshow.length)):''))}</div>`:'')
@@ -36428,7 +36577,7 @@ async function publishCommResults(){
   confirmDialog({
     title:t('publishConfirmTitle'),
     body:t('publishConfirmBody').replace('{0}',String(nApproved)),
-    confirmLabel:t('publishBtn'),
+    confirmLabel:t('publishBtn'),confirmClass:'btn-primary',
     onConfirm:async()=>{
       const res=await sb.from('sessions').update({hide_queue:false}).eq('id',sid);
       if(_writeErr(res,'publish results'))return;
@@ -36705,7 +36854,7 @@ function _satcLinkSet(on){
     paint();
   };
   paint();
-  if(on)confirmDialog({title:t('satcSwitch'),body:esc(t('satcSwitchAsk')),confirmLabel:t('amCodeOn'),onConfirm:go});else go();
+  if(on)confirmDialog({title:t('satcSwitch'),body:esc(t('satcSwitchAsk')),confirmLabel:t('amCodeOn'),confirmClass:'btn-primary',onConfirm:go});else go();
 }
 // The dialog keeps what staff typed in S._satcd (the list as it will be, this ride's own settings, the codes added), so a
 // redraw - a view switched, a row added - loses nothing; Save writes the difference.
@@ -36890,7 +37039,7 @@ function sfSelectAllShown(){S.sfSelected=[...new Set([...S.sfSelected,..._sfSele
 async function bulkSfNoShow(){
   const ids=S.sfSelected.filter(id=>{const e=_qGet(id);return e&&e.status==='waiting'&&!_dkYUnappr(e);});if(!ids.length)return; // never a request not approved yet
   const es=ids.map(id=>_qGet(id)),soon=es.some(e=>!_coXStarted(e)),noUndo=!_can('undo');
-  if((soon||noUndo)&&!await askConfirm({title:t('partyNoShowTitle').replace('{0}',String(es.length)),confirmLabel:t('noShowBtn'),
+  if((soon||noUndo)&&!await askConfirm({title:t('partyNoShowTitle').replace('{0}',String(es.length)),confirmLabel:t('noShowBtn'),confirmClass:'btn-red',
     body:`<div class="co-x-body">${es.map(e=>`<bdi>#${esc(String(e.queueNum??''))} ${esc(e.name||'')}</bdi>${e.paid&&!_freeSessIds.has(e.sessionId)?` · <b>${esc(t('paidLabel'))}</b>`:''}`).join('<br>')}`
       +(soon?`<div class="co-x-early" role="note">${esc(t('coXNotStarted'))}</div>`:'')+(noUndo?`<div class="uc-note co-x-undo">${esc(t('capNoUndo'))}</div>`:'')+'</div>'}))return;
   S.sfSelected=S.sfSelected.filter(id=>!ids.includes(id));
@@ -38153,7 +38302,7 @@ function renderSettings(){
   const st=_set(),adm=isAdmin(),off=_ntOff();
   if(st.email===null){st.email='';try{sb.auth.getSession().then(({data})=>{st.email=(data&&data.session&&data.session.user&&data.session.user.email)||'';const v=document.getElementById('set-email-now');if(v)v.textContent=st.email;},()=>{});}catch(_){}}
   const name=S._meName||_opName()||'',ph=S._mePhoto;
-  const kinds=NT_KINDS.filter(([,,sec])=>_deskTabOk(sec));
+  const kinds=[...NT_KINDS,...NT_KINDS_OFF].filter(([,,sec])=>_deskTabOk(sec)),inG=NT_GROUPS.map(g=>g[1]).join(' ').split(' ');
   el.innerHTML=`<h1 class="page-title">${t('tabSettings')}</h1><div class="page-sub">${t('setSub')}</div>${_setTabs('account')}
     <div class="set-grid">
       <section class="form-section set-card" aria-labelledby="set-h-prof"><h2 class="form-title" id="set-h-prof">${t('setProfile')}</h2>
@@ -38184,7 +38333,7 @@ function renderSettings(){
       </section>
       <section class="form-section set-card" aria-labelledby="set-h-nt"><h2 class="form-title" id="set-h-nt">${t('setNotif')}</h2>
         <div class="ca-sub">${t('setNotifSub')}</div>
-        <div class="set-togs">${kinds.map(([k,l])=>`<label class="set-tog"><input type="checkbox" data-nt-kind="${k}"${off.includes(k)?'':' checked'} data-on-change="${_on('_setNtToggle',k,_P('checked'))}"><span>${t(l)}</span></label>`).join('')}</div>
+        ${NT_GROUPS.map(([g,secs])=>{const ks=kinds.filter(x=>secs?secs.split(' ').includes(x[2]):!inG.includes(x[2]));return ks.length?`<div class="set-togs set-ntg" role="group" aria-label="${esc(t(g))}"><div class="set-ntg-h" aria-hidden="true">${esc(t(g))}</div>${ks.map(([k,l])=>`<label class="set-tog"><input type="checkbox" data-nt-kind="${k}"${off.includes(k)?'':' checked'} data-on-change="${_on('_setNtToggle',k,_P('checked'))}"><span>${t(l)}</span></label>`).join('')}</div>`:'';}).join('')}
       </section>
       <section class="form-section set-card" aria-labelledby="set-h-dev"><h2 class="form-title" id="set-h-dev">${t('setDevice')}</h2>
         <div class="ca-sub">${t('setDeviceSub')}</div>
@@ -38703,6 +38852,7 @@ async function _tmLoad(){
 function _on_renderTeam_1(event,el){if(event.key==='Enter')_tmAdd()}
 function renderTeam(){
   const el=document.getElementById('tab-team');if(!el)return;
+  _draftReg('team','team',()=>Object.keys(_tm().edit).length>0,()=>{_tm().edit={};}); // an account's access changed and not saved (s10, item 40)
   if(S.view==='staff'&&S.staffTab==='team')_pushNav(); // the address follows the view (/team, /team/part-timers)
   const pv=S.teamView==='parttimers';
   const pills=`<div class="filter-row tm-views">
@@ -39181,6 +39331,7 @@ function _ptDelShift(id){
 function _ptcFor(s){return !!s&&isAdmin()&&['jcc','petromin'].includes(_rideKind(s));}
 async function _ptcOpen(sid){
   const s=_sessGet(sid);if(!_ptcFor(s)||!sb)return;
+  _draftReg('ptc','',_ptcDirty,_ptcClose); // the hours typed over any section (s10, item 40)
   const[a,k,h]=await Promise.all([sb.from('part_timers').select('user_id,name,active').order('name'),
     sb.from('part_timer_kinds').select('id,name,rate,active').order('name'),
     sb.from('part_timer_shifts').select(_PT_SHIFT_COLS).eq('session_id',sid)]);
@@ -40609,7 +40760,7 @@ async function staffToWaitlist(id){
 async function staffFromWaitlist(id,force){
   const e=_qGet(id);if(!e||e.status!=='waitlist')return;
   if(!force&&_holdsSpot({...e,status:'waiting'},_sessDisp(e.sessionId))&&!_hasRoom(e.sessionId))
-    return confirmDialog({title:t('mainListFullTitle'),body:`#${e.queueNum} - ${esc(e.name)}`,confirmLabel:t('menuToMainList'),onConfirm:()=>staffFromWaitlist(id,true)});
+    return confirmDialog({title:t('mainListFullTitle'),body:`#${e.queueNum} - ${esc(e.name)}`,confirmLabel:t('menuToMainList'),confirmClass:'btn-primary',onConfirm:()=>staffFromWaitlist(id,true)});
   const m=await _deskMove(e,'waitlist',{status:'waiting'},'menuToMainList'); // painted first, kept offline (round s10)
   if(!m)return;
   toast(t('toastToMainList'),'success');
@@ -42334,6 +42485,8 @@ function _on_confirmDialog_2(event,el){el.style.color='var(--text)'}
 function _on_confirmDialog_3(event,el){el.style.color='var(--muted)'}
 // The buttons name what they do (round two, 2026-11-08, s_dialog_speed): confirmLabel is the action ("Delete
 // session", "Cancel booking"), cancelLabel the way out where "Cancel" would be read as the action ("Keep booking").
+// confirmClass is the confirm button's style and every call names it (scripts/check-confirm-class.mjs fails the build
+// otherwise): 'btn-red' for a destructive ask only, 'btn-primary' for any other; left out it is the neutral btn-primary (s10).
 function confirmDialog({title,body,confirmLabel,confirmClass,onConfirm,cancelLabel}){
   _confirmCb=onConfirm;
   const m=document.getElementById('confirm-modal');
@@ -42347,13 +42500,32 @@ function confirmDialog({title,body,confirmLabel,confirmClass,onConfirm,cancelLab
       ${body?`<div class="chrome-dbody">${body}</div>`:''}
       <div class="chrome-dact">
         <button class="btn-secondary" data-on-click="${_on("closeConfirm")}">${cancelLabel?esc(cancelLabel):t('cancelBtn')}</button>
-        <button class="${confirmClass||'btn-red'} chrome-mw100" data-on-click="${_on("_doConfirm")}">${confirmLabel}</button>
+        <button class="${confirmClass||'btn-primary'} chrome-mw100" data-on-click="${_on("_doConfirm")}">${confirmLabel}</button>
       </div>
     </div>
   </div>`;
 }
 function _doConfirm(){closeConfirm();if(_confirmCb){const cb=_confirmCb;_confirmCb=null;cb();}}
 function closeConfirm(){const m=document.getElementById('confirm-modal');if(m){m.style.display='none';m.innerHTML='';}const f=S._afterConfirm;if(f){S._afterConfirm=null;setTimeout(f,0);}} // what waited for this dialog (_ptOpen)
+// ── Drafts a page holds unsaved (staff round s10, item 40) ──
+// A page with typing not yet saved registers it: the section it lives in ('' for a dialog over any section), how to tell
+// it is unsaved and how to drop it. Leaving that section (the rail, a G-chord, Ctrl K, a Dashboard link, Back) asks first
+// in the centred pop-up, Keep editing or Leave without saving, and while any draft is unsaved a reload or a closed tab
+// gets the browser's own question. The Website editor, the catalogue's model editor, Team's access drafts, Payments'
+// settings and the part-timers' hours register (each in its own part, as it draws).
+const _DRAFTS={};
+function _draftReg(k,tab,dirty,drop){
+  if(!Object.keys(_DRAFTS).length)window.addEventListener('beforeunload',e=>{if(_draftsOn().length){e.preventDefault();e.returnValue='';}});
+  _DRAFTS[k]={tab,dirty,drop};
+}
+function _draftsOn(tab){return Object.keys(_DRAFTS).filter(k=>{const d=_DRAFTS[k];if(tab&&d.tab&&d.tab!==tab)return false;try{return !!d.dirty();}catch(_){return false;}});}
+// Asks before go() while the section tab holds an unsaved draft; true when it asked (the caller stops there).
+function _draftAsk(tab,go){
+  const ks=_draftsOn(tab);if(!ks.length)return false;
+  confirmDialog({title:t('lvTitle'),body:esc(t('lvBody')),confirmLabel:t('leaveNoSaveBtn'),confirmClass:'btn-red',cancelLabel:t('accKeepEditing'),
+    onConfirm:()=>{ks.forEach(k=>{try{_DRAFTS[k].drop();}catch(_){}});go();}});
+  return true;
+}
 
 // ── In-app prompt / confirm ───────────────────────────────────────────────
 // Replaces window.prompt()/confirm(). The native dialogs block the event loop, ignore
@@ -54154,7 +54326,7 @@ async function _vendorDecide(id,act){
   let note='';
   if(act==='confirm'){
     const others=_vendorOnDay(b.day).filter(x=>x.status==='pending'&&x.id!==b.id).length;
-    const ok=await askConfirm({title:t('vndConfirmQ').replace('{0}',nm).replace('{1}',day),body:esc(t('vndConfirmBody').replace('{0}',nm))+(others?'<br><br>'+esc(t('vndConfirmOthers').replace('{0}',others)):''),confirmLabel:t('vndConfirm')});
+    const ok=await askConfirm({title:t('vndConfirmQ').replace('{0}',nm).replace('{1}',day),body:esc(t('vndConfirmBody').replace('{0}',nm))+(others?'<br><br>'+esc(t('vndConfirmOthers').replace('{0}',others)):''),confirmLabel:t('vndConfirm'),confirmClass:'btn-primary'});
     if(!ok){_vendorReopen();return;}
   }else{
     const r=await promptDialog({title:t(act==='decline'?'vndDeclineQ':'vndCancelQ').replace('{0}',nm).replace('{1}',day),body:t('vndNoteHint'),value:'',confirmLabel:t(act==='decline'?'vndDecline':'vndCancelBk')});
@@ -55083,6 +55255,7 @@ function _on_renderWebsite_1(event,el){_web().loaded=false;renderWebsite()}
 function renderWebsite(){
   _pushNav(); // the address follows the view (the page being edited)
   const el=document.getElementById('tab-website');if(!el)return;
+  _draftReg('web','website',()=>_webDirty()||Object.keys(_webEd().edits).length>0,()=>{_web().draft={};_webEd().edits={};}); // its texts and sections typed, not saved (s10, item 40)
   const W=_web();
   if(!W.loaded&&!W.busy)_webLoad();
   const head=`<div class="section-header"><div><h1 class="page-title">micromobility.sa</h1><div class="page-sub">${t('webSub')}</div></div>
@@ -55411,7 +55584,7 @@ async function _catSave(){
 }
 function _catDelete(id){
   const C=_cat(),m=C.models.find(x=>x.id===id);if(!m)return;
-  confirmDialog({title:t('catDeleteModelTitle'),body:esc(t('catDeleteModelBody')),confirmLabel:t('deleteBtn'),onConfirm:async()=>{
+  confirmDialog({title:t('catDeleteModelTitle'),body:esc(t('catDeleteModelBody')),confirmLabel:t('deleteBtn'),confirmClass:'btn-red',onConfirm:async()=>{
     try{
       const files=C.photos.filter(p=>p.model_id===id).map(p=>p.url).concat(m.spec_sheet?[m.spec_sheet]:[]);
       const r=await sb.from('catalog_models').delete().eq('id',id);
@@ -55489,7 +55662,7 @@ async function _catCatSave(){
 function _catCatDelete(id){
   const C=_cat(),c=_catById(id);if(!c)return;
   if(_catSubs(id).length||_catModelsIn(id).length){toast(t('catCatInUse'),'error');return;}
-  confirmDialog({title:t('catDeleteCatTitle'),body:esc(t('catDeleteCatBody')),confirmLabel:t('deleteBtn'),onConfirm:async()=>{
+  confirmDialog({title:t('catDeleteCatTitle'),body:esc(t('catDeleteCatBody')),confirmLabel:t('deleteBtn'),confirmClass:'btn-red',onConfirm:async()=>{
     try{
       const r=await sb.from('catalog_categories').delete().eq('id',id);
       if(r.error&&_catErrText(r.error)){toast(_catErrText(r.error),'error');return;} // still in use
@@ -55542,7 +55715,7 @@ async function _catFldSave(){
 }
 function _catFldDelete(key){
   const C=_cat();if(!C.fields.some(f=>f.key===key))return;
-  confirmDialog({title:t('catDeleteFieldTitle'),body:esc(t('catDeleteFieldBody')),confirmLabel:t('deleteBtn'),onConfirm:async()=>{
+  confirmDialog({title:t('catDeleteFieldTitle'),body:esc(t('catDeleteFieldBody')),confirmLabel:t('deleteBtn'),confirmClass:'btn-red',onConfirm:async()=>{
     try{if(await _wr(sb.from('catalog_spec_fields').delete().eq('key',key),'catalog field delete'))return;toast(t('catDeleted'),'success');C.loaded=false;renderCatalog();await _catLoad();}
     catch(e){toast(t('catSaveErr'),'error');try{_logError('catalog field delete: '+((e&&e.message)||e),'catalog',true);}catch(_){}}
   }});
@@ -55721,6 +55894,7 @@ function _on_renderCatalog_2(event,el,a0){_cat().view=a0;renderCatalog()}
 function renderCatalog(){
   _pushNav(); // the address follows the view (Models / Categories / Fields)
   const el=document.getElementById('tab-catalog');if(!el)return;
+  _draftReg('cat','catalog',()=>!!(_cat().ed&&_cat().ed.dirty),()=>{_cat().ed=null;}); // a model's edits not saved (s10, item 40)
   const C=_cat();
   if(!C.loaded&&!C.busy&&!C.err)_catLoad();
   const head=`<div class="section-header"><div><h1 class="page-title">${t('tabCatalog')}</h1><div class="page-sub">${t('catSub')}</div></div>
@@ -62787,7 +62961,7 @@ function _n6qMissKeys(c){return _n6qPctParts(c).filter(x=>!x[1]).map(x=>x[0]);}
 async function _n6qAskComplete(){
   const cs=[...(S.amSel||[])].map(id=>_custById(id)).filter(Boolean).map(c=>({c,miss:_n6qMissKeys(c)})).filter(x=>x.miss.length);
   if(!cs.length){toast(t('n6qAskNone'),'info');return;}
-  if(!await askConfirm({title:t('n6qAskBtn'),body:esc(t('n6qAskQ').replace('{0}',String(cs.length))),confirmLabel:t('n6qAskGo')}))return;
+  if(!await askConfirm({title:t('n6qAskBtn'),body:esc(t('n6qAskQ').replace('{0}',String(cs.length))),confirmLabel:t('n6qAskGo'),confirmClass:'btn-primary'}))return;
   let done=0,bad=null;
   for(let i=0;i<cs.length;i+=4){
     await Promise.all(cs.slice(i,i+4).map(async({c,miss})=>{
@@ -67306,6 +67480,7 @@ function _secPolls(full){
   if(_deskTabOk('ambassadors'))_ambPoll(whole);
   if(_deskTabOk('vendors'))_vendorPoll(whole);
   if(_deskTabOk('store')||_deskTabOk('payments'))_stoCounts(); // orders to prepare and refunds owed, on the rail (2026-11-10)
+  if(_deskTabOk('community')){const f=globalThis['_apps'+'Probe'];if(typeof f==='function')f();} // the applications waiting, counted (s10, item 33): staff-half code, by name
 }
 // ── The online store and its payments (2026-11-10, migration 20261110150000) ─────────────────────
 // The website takes the money (Moyasar); the staff page fulfils orders, edits the products and decides refunds.
@@ -67328,10 +67503,11 @@ async function _stoProbe(){
 async function _stoCounts(force){
   if(!sb||S._storeReady!==true||S._stoCountBusy||(!force&&S._stoCountAt&&Date.now()-S._stoCountAt<6e4))return;
   S._stoCountBusy=true;S._stoCountAt=Date.now();
-  let a,b;try{[a,b]=await Promise.all([sb.from('store_orders').select('id',{count:'exact',head:true}).eq('status','paid'),sb.from('payment_refunds').select('id',{count:'exact',head:true}).in('status',['due','failed'])]);}catch(e){a={error:e};}
+  // the waiting rows' ids too, a few small columns of at most 50 (s10, item 33): the bell lists each order and refund
+  let a,b;try{[a,b]=await Promise.all([sb.from('store_orders').select('id,no,name,paid_at',{count:'exact'}).eq('status','paid').order('paid_at',{ascending:false}).limit(50),sb.from('payment_refunds').select('id,amount,created_at',{count:'exact'}).in('status',['due','failed']).order('created_at',{ascending:false}).limit(50)]);}catch(e){a={error:e};}
   S._stoCountBusy=false;
-  if(a&&!a.error&&a.count!=null)S._stoWaitN=Number(a.count)||0; // no count (a header the answer did not show): the lists' own numbers stand
-  if(b&&!b.error&&b.count!=null)S._payOwedN=Number(b.count)||0;
+  if(a&&!a.error){if(a.count!=null)S._stoWaitN=Number(a.count)||0;if(Array.isArray(a.data))S._stoPaid=a.data;} // no count (a header the answer did not show): the lists' own numbers stand
+  if(b&&!b.error){if(b.count!=null)S._payOwedN=Number(b.count)||0;if(Array.isArray(b.data))S._payDue=b.data;}
   _stoTabLabelSync();try{_ntSync();}catch(_){}
 }
 function _stoTabLabel(k){const n=k==='store'?S._stoWaitN||0:S._payOwedN||0,w=t(k==='store'?'stoWaitBadge':'payOwedBadge').replace('{0}',n);return esc(t(k==='store'?'tabStore':'tabPayments'))+(n?` <span class="tab-badge" title="${esc(w)}" aria-label="${esc(w)}">${n}</span>`:'');}

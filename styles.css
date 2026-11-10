@@ -13339,3 +13339,21 @@ body.view-staff .ppl-sub{margin:0 0 6px;}
 body.view-staff .lg-undone{margin-inline-start:auto;}
 /* the simple phone view keeps none of a list's office tools: the Filters Clear, Select and Export go with the Filters button */
 @media (max-width:767px){html[data-staff-simple] body.view-staff #view-staff .tab-panel :is(.f-clr,.lt-sel-btn,.lt-csv){display:none!important;}}
+
+/* ── Staff round s10: the shell (2026-11-10) ───────────────────────────────────────────────────
+   Ctrl K's shortcuts, the Dashboard's paired cards at their own heights, its next seven nights, and
+   Settings' bell switches grouped by section. */
+#gs-panel .gs-kbd{flex:none;margin-inline-start:auto;padding:2px 7px;border:1px solid var(--sf-line,var(--border));border-radius:6px;background:var(--sf-sunken,var(--s2));color:var(--muted);font-family:inherit;font-size:11px;font-weight:600;line-height:1.4;white-space:nowrap;}
+body.view-staff #tab-dashboard .dash-grid{align-items:start;}
+body.view-staff #tab-dashboard .dash-wk{margin:0 0 16px;}
+body.view-staff .dash-week{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;}
+body.view-staff .dash-night{display:flex;flex-direction:column;gap:4px;min-height:44px;padding:8px 10px;border:1px solid var(--sf-line,var(--border));border-radius:var(--sf-r-ctl,10px);background:var(--sf-card,var(--card));font:inherit;color:var(--text);text-align:start;cursor:pointer;}
+body.view-staff .dash-night>span{font-size:var(--staff-fs-sm,12px);color:var(--muted);}
+body.view-staff .dash-night>strong{font-size:18px;font-variant-numeric:tabular-nums;}
+body.view-staff .dash-night>strong small{font-size:12px;font-weight:500;color:var(--muted);}
+body.view-staff .dash-fill{display:block;height:6px;border-radius:var(--sf-r-pill,999px);background:var(--sf-sunken,var(--s2));box-shadow:inset 0 0 0 1px var(--sf-line,var(--border));overflow:hidden;position:relative;}
+body.view-staff .dash-fill::after{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:var(--w,0);background:var(--green);}
+body.view-staff .dash-night.full .dash-fill::after{background:var(--orange);}
+html[data-staff-theme="booth"] body.view-staff .dash-night{border-width:2px;}
+#tab-settings .set-ntg+.set-ntg{margin-top:12px;}
+#tab-settings .set-ntg-h{margin:0 0 4px;font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--muted);}

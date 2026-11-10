@@ -2986,3 +2986,51 @@ owner's D1). Spec: `tests/s10-lists.spec.ts`.
   probe (`_wsPoll` / `_smPoll` / `_ambPoll`, at most once a minute, `W.pAt`), which reads the list only when something changed.
 - Migration 20261111110000: `staff_actions.client_id` (text, at most 60), a unique partial index on it. No new table, policy
   or function: the table keeps its `is_staff()` insert/read policies.
+
+## Staff round s10: the shell (2026-11-10)
+
+The rail, Ctrl K, the bell, the Dashboard, unsaved-work guards and confirm buttons (items 26, 29, 33, 34, 36, 40, 41, D7).
+
+- **The rail has six groups** (owner, D7): Today (Dashboard, Bookings, Waitlist, Sessions, Lockers, Volunteers), Fleet
+  (Inventory, Workshop, Bikes catalog), Money (Sales, Payments, Store), People (People, Badge requests), Partners & web
+  (Vendors, Ambassadors, micromobility.sa, Messages), Admin (Analytics, History, Team, Settings). Markup only: the
+  section ids, paths, G-chords and ROLE_TABS did not change. Group keys `snavToday/Fleet/Money/People/Partners/Admin`;
+  the old `snavRides/Commerce/Insights/System/Website` (and `dashPplWait`) are unreferenced now and can be pruned.
+  `_railShow()` (called by `renderStaffTabs`) scrolls the rail so the open section is in view, once per section and rail
+  height, so a rail the staffer scrolled is not pulled back by later repaints.
+- **Ctrl K and the Dashboard left the desk's core**: `_gsOpen` and `renderDashboard` start Settings' staff part (every
+  account fetches it; a part of their own cost ~0.75 KB gzipped each in lost compression). Commands carry `sc` (their shortcut, drawn as `<kbd class="gs-kbd">` unless the device
+  turned shortcuts off) and `a` (aliases matched with the name: the Arabic name from `GS_AKA`, the English name from
+  `LANG.en`). Every `SUB_PATHS` view named in `GS_SUBS` is a "Section › View" command (`sub:1`, typed
+  for only, not in the empty list), offered where `_gsSubOk` allows (admins' views, History's money views by role).
+  A new sub-view: add `key:labelKey` to `GS_SUBS`, and its rule to `_gsSubOk` if not everyone may open it.
+- **Office records in Ctrl K** (`_gsOffHits`): badge requests, venues, ambassadors, tags, titles, team accounts, website
+  messages, catalogue models, store orders, payments and locker rentals, ONLY from lists already on the device. A list
+  not read yet is never read for the search: its section's Go to is listed under "Look in" instead. Records open through
+  `_gsGoOff`, calling section code by split names (`'_sto'+'Open'`) so the palette part does not pull it into the core.
+  A volunteer hit opens their account window; the volunteer record dialog has an Account button (`_vmAcct`).
+- **The bell's office queues** (`NT_KINDS_OFF`, `_ntOffice`): `bdr` (badge requests waiting, `S._bdrRows`), `stoord`
+  (store orders paid, `S._stoPaid`), `refowed` (refunds due or failed, `S._payDue`), `flags` (accounts asked to fix their
+  details, `S._flags`). `_stoCounts` now reads the waiting orders' and refunds' ids (`id,no,name,paid_at` /
+  `id,amount,created_at`, at most 50, with the count) in place of its two head requests. **Applications** are counted
+  live by `_appsProbe` (two head requests in `_secPolls`, only while the lists are unread): `S._caWaitN/_laWaitN`; until
+  the lists are read the bell shows one count line (`_ntCnt`) when the count rose above the page's first count. Settings
+  groups the switches by `NT_GROUPS` (Desk, People, Fleet, Volunteers, Office for any other section). A new kind's
+  section decides its group; add its section to `NT_GROUPS` only for a new group.
+- **Dashboard**: "Waiting on the office" (`data-dash="office"`, was People waiting) counts applications (list or probe),
+  learn sign-ups, birthdays, flagged accounts, badge requests, store orders, refunds owed and open workshop jobs, each a
+  link. `_dashWeek()` draws the next seven days that have sessions (booked/places, a fill bar, opens that night's
+  Bookings or its Sessions card). A figure the account cannot open gives its place to `_dashRole()` (workshop queue,
+  bikes due for service, badge requests, store orders), and without Bookings and Sessions the
+  hero is the first of those: a mechanic sees no greyed tiles. Paired cards keep their own height (`align-items:start`).
+- **Unsaved work** (`_draftReg(key, tab, dirty, drop)`, `_draftsOn(tab)`, `_draftAsk(tab, go)`): a page with typing not
+  yet saved registers itself as it draws (Website texts and sections, the catalogue model editor, Team access drafts,
+  Payments settings; the part-timers' hours dialog with tab `''`, i.e. over any section). `setStaffTab` (unless
+  `o.lv`) and `_applyNav` (Back/Forward: the address comes back, Leave goes back again) ask in the centred pop-up "Leave
+  without saving?" (Keep editing / Leave without saving, red), which drops the drafts. The first registration adds a
+  `beforeunload` that asks while any draft is dirty. Volunteer settings save each field on change, so they hold no
+  draft. **Rule:** a new staff form with its own Save and a Discard registers with `_draftReg` where it draws.
+- **Confirm buttons**: `confirmDialog`'s confirm button is `btn-primary` unless the call says otherwise, and every
+  `confirmDialog`/`askConfirm` call must pass `confirmClass` (`scripts/check-confirm-class.mjs`, run by the build):
+  `'btn-red'` only for a destructive ask (delete, remove, cancel, no-show, close-out, leave without saving).
+- `tests/s10-shell.spec.ts`.

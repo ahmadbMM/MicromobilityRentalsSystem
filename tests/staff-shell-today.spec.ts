@@ -49,7 +49,7 @@ test.describe('@staff:shell the staff shell (2026-11-06)', () => {
     const jumps = el.locator('.dash-jumps').first();
     await expect(jumps.locator('button')).toHaveText(['Bookings', 'Session', 'Volunteers']);
     await expect(el.locator('[data-dash="vol"]')).toContainText("See today's volunteers");
-    await expect(el.locator('[data-dash="ppl"]')).toContainText('See membership applications');
+    await expect(el.locator('[data-dash="office"]')).toContainText('See membership applications'); // Waiting on the office since s10
     const open = el.locator('[data-dash="open"]');
     await expect(open).toContainText('Nights left open');
     await expect(open.locator('.dash-row')).toHaveCount(1);
