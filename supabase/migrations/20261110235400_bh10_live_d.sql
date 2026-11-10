@@ -41,6 +41,9 @@
 --    version, so a visitor's row could carry the donor's wording or the other way round. The visitor's version
 --    (blood-2026-11-v2) now stamps only visitor rows, the donor's (blood-2026-11-v1) only the others; any other
 --    version stamps as before.
+-- 12. _vol_sess_name: an untitled Petromin night was "Petromin's Wednesdays" (wrong on a Monday); the portal and the
+--    booking app say "Petromin night" since the user's pick of 2026-11-10, and with 5 the database names the
+--    portal's certificates, so it says the same now.
 --
 -- Not changed: web01-1's optional refusal of a portal re-issue after staff withdrew the certificate: it needs an
 -- error code the portal does not know yet (its Worker would answer it as a server fault).
@@ -387,6 +390,18 @@ end $do$;
 
 -- checks: every changed function kept SECURITY DEFINER and its search_path and carries this file's change; one
 -- rider_edit, the new one, open to the forms; volunteer_me still STABLE; the trigger, the kind and the column are there
+-- 12 _vol_sess_name ---------------------------------------------------------------------------------
+do $do$
+declare d text; a text := $a$when 'petromin' then 'Petromin''s Wednesdays'$a$;
+begin
+  select pg_get_functiondef('public._vol_sess_name(text)'::regprocedure) into d;
+  if position('(20261110235400)' in d) > 0 then return; end if;
+  if (length(d) - length(replace(d, a, ''))) / length(a) <> 1 then
+    raise exception '_vol_sess_name: anchor not found exactly once: rebuild this step from the live definition';
+  end if;
+  execute replace(d, a, $b$when 'petromin' then 'Petromin night' /* the user's pick, 2026-11-10 (20261110235400) */$b$);
+end $do$;
+
 do $chk$
 declare f text;
 begin
@@ -423,6 +438,9 @@ begin
   if position('''cancelled''' in (select pg_get_constraintdef(c.oid) from pg_constraint c
                                     where c.conrelid = 'public.volunteer_updates'::regclass and c.conname = 'volunteer_updates_kind_check')) = 0 then
     raise exception 'volunteer_updates_kind_check does not take cancelled';
+  end if;
+  if position('Petromin night' in (select p.prosrc from pg_proc p where p.oid = 'public._vol_sess_name(text)'::regprocedure)) = 0 then
+    raise exception '_vol_sess_name still names an untitled Petromin night otherwise';
   end if;
   if not exists (select 1 from information_schema.columns
                   where table_schema = 'public' and table_name = 'rider_registrations' and column_name = 'added_by_desk') then
