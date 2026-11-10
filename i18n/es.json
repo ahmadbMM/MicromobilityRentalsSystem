@@ -5290,6 +5290,7 @@
   "dqRetryAll": "Reintentar todo",
   "dqDiscard": "Descartar",
   "dqDiscardQ": "¿Descartar {0}? Nunca llegó al servidor.",
+  "dqDiscardLate": "{0}: el cambio ya había llegado al servidor, así que no se descartó.",
   "dqSavedToast": "Guardado en este dispositivo, se sincroniza al conectarse",
   "dqSyncedToast": "{0} cambios sin conexión sincronizados",
   "dqAttnToast": "{0} cambios sin conexión requieren atención",

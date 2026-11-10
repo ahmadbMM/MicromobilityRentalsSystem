@@ -5290,6 +5290,7 @@
   "dqRetryAll": "Tout réessayer",
   "dqDiscard": "Abandonner",
   "dqDiscardQ": "Abandonner {0} ? Cette modification n’a jamais atteint le serveur.",
+  "dqDiscardLate": "{0} : la modification avait déjà atteint le serveur, elle n’a donc pas été abandonnée.",
   "dqSavedToast": "Enregistré sur cet appareil, synchronisé une fois en ligne",
   "dqSyncedToast": "{0} modifications hors ligne synchronisées",
   "dqAttnToast": "{0} modifications hors ligne à vérifier",

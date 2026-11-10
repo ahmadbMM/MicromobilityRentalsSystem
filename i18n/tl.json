@@ -5290,6 +5290,7 @@
   "dqRetryAll": "Subukang muli lahat",
   "dqDiscard": "Itapon",
   "dqDiscardQ": "Itapon ang {0}? Hindi ito nakarating sa server.",
+  "dqDiscardLate": "{0}: nakarating na sa server ang pagbabagong ito, kaya hindi ito naitapon.",
   "dqSavedToast": "Naka-save sa device na ito, magsi-sync kapag online",
   "dqSyncedToast": "Naka-sync ang {0} offline na pagbabago",
   "dqAttnToast": "{0} offline na pagbabago ang kailangang asikasuhin",

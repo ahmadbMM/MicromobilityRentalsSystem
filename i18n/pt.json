@@ -5290,6 +5290,7 @@
   "dqRetryAll": "Tentar tudo de novo",
   "dqDiscard": "Descartar",
   "dqDiscardQ": "Descartar {0}? Nunca chegou ao servidor.",
+  "dqDiscardLate": "{0}: a alteração já tinha chegado ao servidor, por isso não foi descartada.",
   "dqSavedToast": "Salvo neste aparelho, sincroniza quando estiver online",
   "dqSyncedToast": "{0} alterações offline sincronizadas",
   "dqAttnToast": "{0} alterações offline precisam de atenção",
