@@ -12813,3 +12813,21 @@ html[data-staff-theme="dark"] body.view-staff .dash-st.st-open{color:#25d184;}
    the status sits first on the details line, in its colour, so the name keeps the row's width */
 body.view-staff #tab-sessions .sess-list-scroll>:is(.sess-lc,.ss-grp-h){flex:none;}
 body.view-staff #tab-sessions .sess-ag-main>.ssx-row :is(.badge-open,.badge-closed,.badge-full,[class^="badge-"]){padding:0 6px;font-size:11px;line-height:18px;}
+/* ══ Open in green and closed in grey on the calendar too, and full counted as open (2026-11-10, the user: "fix them all"):
+   a calendar cell's edge and wash say the status (its kind is its mark now); a full session is green like an open one -
+   it still takes the waitlist - in every session list. ══ */
+body.view-staff .cal-sess:is(.st-open,.st-full){border-inline-start-color:var(--sf-green-ink,var(--green));background:color-mix(in srgb,var(--sf-green-ink,var(--green)) 9%,transparent);}
+body.view-staff .cal-sess.st-closed{border-inline-start-color:var(--muted-l,#9aa29c);background:rgba(var(--tint-rgb),.05);opacity:.75;}
+body.view-staff .cal-sess .smk{width:16px;height:16px;border-radius:4px;}
+body.view-staff #tab-sessions .sess-lc.sess-ag.st-full{border-inline-start-color:var(--sf-green-ink,var(--green));}
+body.view-staff #tab-sessions .ss-tbl tr.ss-tr.st-full>td:first-child{box-shadow:inset 3px 0 0 var(--sf-green-ink,var(--green));}
+html[dir="rtl"] body.view-staff #tab-sessions .ss-tbl tr.ss-tr.st-full>td:first-child{box-shadow:inset -3px 0 0 var(--sf-green-ink,var(--green));}
+body.view-staff .dash-st.st-full{color:var(--sf-green-ink,var(--green));}
+html[data-staff-theme="dark"] body.view-staff .dash-st.st-full{color:#25d184;}
+body.view-staff :is(.ssx-row,#spk-pop .spk-r-sub) .badge-full{color:var(--sf-green-ink,var(--green));}
+html[data-staff-theme="dark"] body.view-staff :is(.ssx-row,#spk-pop .spk-r-sub) .badge-full{color:#25d184;}
+/* the rider's Move booking: the night's times beside its date, quieter */
+#reschedule-modal .dk-rs-time{font-weight:400;}
+/* the picker's rows and headings keep their height in its scrolling list (a flex column shrank them below their words once
+   the list ran long, seen in Safari's engine at iPhone size) */
+#spk-pop .spk-list>*{flex:none;}

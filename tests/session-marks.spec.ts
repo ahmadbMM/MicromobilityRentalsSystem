@@ -226,6 +226,12 @@ test.describe('@staff:sessions sessions in order and in colour', () => {
     await expect(today.locator('.dash-st.st-open')).toHaveCount(1);
     await expect(page.locator('#tab-dashboard')).toContainText('Next: Circuit · Today · 9 PM');
     await expect(page.locator('#tab-dashboard .dash-row', { hasText: /Sun 1 Mar|1 Mar/ })).toContainText('Jeddah Corniche Circuit');
+    // the calendar: each cell's edge says open or closed, its mark says the kind
+    await page.evaluate(`setStaffTab('sessions');S.sessView='cal';renderSessions()`);
+    await expect(page.locator('.cal-sess.st-open .smk.ev-jcc').first()).toBeVisible();
+    await expect(page.locator('.cal-sess.st-closed')).not.toHaveCount(0);
+    const calEdge = (sel: string) => page.locator(sel).first().evaluate((e) => getComputedStyle(e).borderInlineStartColor);
+    expect(await calEdge('.cal-sess.st-open')).not.toBe(await calEdge('.cal-sess.st-closed'));
     // the scanner's "this ticket is for another day" names the session by its short name, its date and its times
     // (the message says how far off it is itself)
     expect(await page.evaluate(`_scanSessLabel(_sessDisp('2099-03-04'))`)).toMatch(/^Circuit · Wed 4 Mar( 2099)? · 9 PM - 11 PM$/);

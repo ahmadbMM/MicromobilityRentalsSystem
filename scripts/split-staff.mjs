@@ -55,6 +55,7 @@ export const STAFF_ENTRY = [
   // handler (riders list -> scanner -> check-in, return, cashier, hand-over), the N shortcut (check-in
   // and the riders report), the operator gate's keypad, and the add-on picker's way into the price editor.
   '_lkRt', '_onRidersRt', '_kbCheckInNext', '_opgKey', 'showEditPriceModal',
+  '_opGateRender', // the operator keypad's drawing (2026-11-10): only a staff device opens the keypad, and by then staff.js is in; 1.3 KB gzipped off every rider's page
   '_idleStaff', // the idle clock (2026-10-04): started by the operator gate's check, which showView runs
   'lockStaff', // the top bar's lock (drawn by customer-half code): its sign-out settles the outboxes and asks first
   '_vendorLatePoll', // the bell's late cancels by venues (2026-10-04): the vendor poll and the bell's opening fetch them

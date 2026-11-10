@@ -24663,7 +24663,7 @@ function _n6rCalMode(v){S._n6rCalMode=v;renderSessions();}
 function _n6rCalModeHtml(){const w=_n6rCalWk(),b=(v,k)=>`<button type="button" class="btn-sm ${(v==='week')===w?'btn-green':'btn-muted'}" aria-pressed="${(v==='week')===w}" data-on-click="${_on('_n6rCalMode',v)}">${t(k)}</button>`;return`<span class="n6r-calmode" role="group" aria-label="${esc(t('ssLayout'))}">${b('month','n6rCalMonth')}${b('week','n6rCalWeek')}</span>`;}
 function _n6rCalEntry(x){
   const n=_placesTaken(x),cap=_placesCap(x),pct=cap?Math.round(n/cap*100):0,mv=_editOk('sessions')&&_ssDay(x)>=todayStr();
-  return`<button type="button" class="cal-sess ev-${_evOf(x)} st-${esc(x.status||'')} n6r-f-${pct>=100?'full':pct>=80?'high':pct>0?'ok':'none'}"${mv?` draggable="true" data-on-dragstart="${_on('_n6rDragStart',_EV,x.id)}"`:''} data-on-click="${_on('_n6rCalPop',x.id)}" title="${esc(_evName(x)+_sgDot(x))} · ${n}/${cap}"><span class="cal-time">${esc(_sessStart(x))}</span><span class="cal-name">${esc(_sessShortG(x))}</span><em>${n}/${cap}</em><i class="n6r-cbar" aria-hidden="true" data-cssv="${_cssv({'--n6r-w':Math.min(100,pct)+'%'})}"></i></button>`;
+  return`<button type="button" class="cal-sess ev-${_evOf(x)} st-${esc(x.status||'')} n6r-f-${pct>=100?'full':pct>=80?'high':pct>0?'ok':'none'}"${mv?` draggable="true" data-on-dragstart="${_on('_n6rDragStart',_EV,x.id)}"`:''} data-on-click="${_on('_n6rCalPop',x.id)}" title="${esc(_evName(x)+_sgDot(x))} · ${n}/${cap}">${_sessMk(x,12)}<span class="cal-time">${esc(_sessStart(x))}</span><span class="cal-name">${esc(_sessShortG(x))}</span><em>${n}/${cap}</em><i class="n6r-cbar" aria-hidden="true" data-cssv="${_cssv({'--n6r-w':Math.min(100,pct)+'%'})}"></i></button>`;
 }
 function _n6rCalDrop(iso,today){return iso>=today&&_editOk('sessions')?` data-on-dragover="${_on('_n6rDragOver',_EV)}" data-on-drop="${_on('_n6rDrop',_EV,iso)}"`:'';}
 function _n6rCalAdd(iso,today){return iso>=today?`<button type="button" class="cal-add" aria-label="${esc(t('calNewOn').replace('{0}',shortDate(iso)))}" data-on-click="${_on('_calNew',iso)}">+</button>`:'';}
@@ -36923,7 +36923,7 @@ function _ptCalHtml(month,hrs){
   for(let d=1;d<=days;d++){
     const iso=`${P.ym}-${String(d).padStart(2,'0')}`,ss=byDay[iso]||[];
     cells+=`<div class="cal-cell${iso===today?' today':''}${iso<today?' past':''}" data-day="${iso}"><div class="cal-dnum">${d}</div>
-      ${ss.map(s=>{const on=P.sel.has(s.id),h=hrs[s.id];return`<button type="button" class="cal-sess pt-pick ev-${_evOf(s)}${on?' on':''}${h?'':' pt-none'}" aria-pressed="${on}" data-sid="${esc(s.id)}" title="${esc(_ptSessLabel(s))}" data-on-click="${_on('_ptPick',s.id)}"><span class="cal-time">${esc(_sessStart(s))}</span><span class="cal-name">${esc(_sessShortG(s))}</span>${h?`<em>${esc(_ptH(h))}</em>`:''}</button>`;}).join('')}
+      ${ss.map(s=>{const on=P.sel.has(s.id),h=hrs[s.id];return`<button type="button" class="cal-sess pt-pick ev-${_evOf(s)} st-${esc(s.status||'')}${on?' on':''}${h?'':' pt-none'}" aria-pressed="${on}" data-sid="${esc(s.id)}" title="${esc(_ptSessLabel(s))}" data-on-click="${_on('_ptPick',s.id)}"><span class="cal-time">${esc(_sessStart(s))}</span><span class="cal-name">${esc(_sessShortG(s))}</span>${h?`<em>${esc(_ptH(h))}</em>`:''}</button>`;}).join('')}
     </div>`;
   }
   return`<div class="cal-grid">${cells}</div>`;
@@ -37344,7 +37344,7 @@ function showRescheduleModal(fromSessionId){
   const list=opts.length?opts.map(s=>{
     const full=spotsLeft(s.id)<moving.length; // same yardstick as booking + rescheduleBooking
     return`<button ${full?'disabled':''} data-on-click="${_on("rescheduleBooking",fromSessionId,s.id)}" class="${full?'dk-rs-opt-full':'dk-rs-opt'}">
-      <span class="dk-rs-day">${dayLabel(s.day)} · ${shortDate(s.session_date||s.id)}</span>
+      <span class="dk-rs-day">${dayLabel(s.day)} · ${shortDate(s.session_date||s.id)}<span class="dk-rs-time"> · <bdi>${esc(sessionTime(s))}</bdi>${esc(_sgDot(s))}</span></span>
       <span class="${full?'dk-rs-st-full':'dk-rs-st'}">${full?t('statusFull'):t('availLabel')}</span>
     </button>`;
   }).join(''):_emptyState(t('rescheduleNoSessions'));

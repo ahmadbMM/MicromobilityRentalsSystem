@@ -24,5 +24,6 @@ test('customer reschedule never offers a community session as a target', async (
 
   const modal = page.locator('#reschedule-modal');
   await expect(modal.getByText('Friday')).toBeVisible(); // the other JCC session is offered
+  await expect(modal.locator('.dk-rs-opt', { hasText: 'Friday' })).toContainText('9 AM - 11 AM'); // with its times (2026-11-10)
   await expect(modal.getByText('Saturday')).toHaveCount(0); // the community ride never is
 });
