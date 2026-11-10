@@ -2859,6 +2859,7 @@
   "acctEdit": "Puede cambiar",
   "acctSaved": "Acceso guardado para {0}",
   "logCsvExport": "{0} exportado en CSV ({1} filas)",
+  "csvNewestOnly": "El archivo solo contiene las {0} líneas más recientes. Elige un intervalo de fechas más corto para el resto.",
   "unsentTitle": "{0} cambios aún sin enviar",
   "unsentBody": "Estas ventas o reservas siguen solo en este dispositivo. Cerrar sesión las borra para siempre. Cancela, vuelve a conectarte y espera a que se envíen.",
   "unsentDropBtn": "Cerrar sesión de todos modos",

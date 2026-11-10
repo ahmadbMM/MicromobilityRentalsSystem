@@ -2859,6 +2859,7 @@
   "acctEdit": "Peut modifier",
   "acctSaved": "Accès enregistré pour {0}",
   "logCsvExport": "{0} exporté en CSV ({1} lignes)",
+  "csvNewestOnly": "Le fichier ne contient que les {0} lignes les plus récentes. Choisissez une période plus courte pour le reste.",
   "unsentTitle": "{0} modifications pas encore envoyées",
   "unsentBody": "Ces ventes ou réservations ne sont encore que sur cet appareil. Se déconnecter les supprime définitivement. Annulez, reconnectez-vous et attendez leur envoi.",
   "unsentDropBtn": "Se déconnecter quand même",

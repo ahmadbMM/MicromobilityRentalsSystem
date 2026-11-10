@@ -2859,6 +2859,7 @@
   "acctEdit": "Mababago",
   "acctSaved": "Na-save ang access para kay {0}",
   "logCsvExport": "Na-export ang {0} bilang CSV ({1} hanay)",
+  "csvNewestOnly": "Ang pinakabagong {0} linya lang ang nasa file. Pumili ng mas maikling hanay ng petsa para sa iba.",
   "unsentTitle": "{0} pagbabago ang hindi pa naipapadala",
   "unsentBody": "Nasa device na ito lang ang mga benta o booking na ito. Kapag nag-sign out, mabubura ang mga ito nang tuluyan. Kanselahin, kumonekta muli at hintaying maipadala ang mga ito.",
   "unsentDropBtn": "Mag-sign out pa rin",
