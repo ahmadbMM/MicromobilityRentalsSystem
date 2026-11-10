@@ -118,7 +118,7 @@ test.describe('cashier tab', () => {
         { id: 'p1', receipt_id: 'rp', session_id: 's1', name: 'Gel', category: 'EnergyGels', qty: 1, price: 12, pay: 'pending', created_at: '2099-01-09T11:00:00Z' },
         { id: 'e1', receipt_id: 're', session_id: 's1', name: 'Cap', category: 'Apparel', qty: 1, price: 30, pay: 'paid', created_at: '2099-01-09T11:00:00Z' },
       ];
-      _ctMarkReceiptPaid('rp');
+      _ctMarkReceiptPaid('rp'); _paidHowGo('cash'); // Mark paid asks how it was paid (bug hunt 2026-11-10, app39-3)
       showReceiptEdit('re'); S._reEdit[0].price = '25';
     })()`);
     await page.evaluate('saveReceiptEdit()'); // a lower price asks the operator's PIN first (none here), 2026-10-05
@@ -147,10 +147,17 @@ test.describe('cashier tab', () => {
       S._reEdit.find(l => l.id === 'g1').pay = 'house';
       await saveReceiptEdit(); // On the house asks the operator's PIN first (none here), 2026-10-05
       const rows = S.cashSales.filter(r => r.receipt_id === 'r1');
-      return { total: _rcTotal(rows), collected: _salesTotals(_cashSessionLines('s1')).collected, disc: rows.filter(r => r.category === '__discount__').map(r => r.price) };
+      const first = { total: _rcTotal(rows), collected: _salesTotals(_cashSessionLines('s1')).collected, disc: rows.filter(r => r.category === '__discount__').map(r => [r.qty, r.price]) };
+      // the slip corrected: the gel paid again gets its share of the discount back (bug hunt 2026-11-10, app39-5)
+      showReceiptEdit('r1');
+      S._reEdit.find(l => l.id === 'g1').pay = 'paid';
+      const saved = saveReceiptEdit(); _paidHowGo('cash'); await saved; // the 40 taken again asks how (app39-3)
+      const rows2 = S.cashSales.filter(r => r.receipt_id === 'r1');
+      return { first, total: _rcTotal(rows2), disc: rows2.filter(r => r.category === '__discount__').map(r => [r.qty, r.price]) };
     })()`);
     // 30 off could only ever come off what is still charged: the 20 cap. Was -10 on the receipt and in Collected.
-    expect(after).toEqual({ total: 0, collected: 0, disc: [-20] });
+    // The 10 the cap left over waits on a spare row at quantity 0, which no total counts.
+    expect(after).toEqual({ first: { total: 0, collected: 0, disc: [[1, -20], [0, -10]] }, total: 40, disc: [[1, -30], [0, 0]] });
   });
 
   test('an emptied amount box in the receipt editor is refused, not saved as free', async ({ page }) => {

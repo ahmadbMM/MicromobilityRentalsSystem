@@ -52,7 +52,8 @@ test.describe('@staff:sales receipts', () => {
         {id:'d1',receipt_id:'r1',session_id:'${S1}',name:'Discount',item_id:null,category:'__discount__',qty:1,price:-30,pay:'paid',created_at:'2099-01-09T11:00:00Z'},
         {id:'d2',receipt_id:'r1',session_id:'${S1}',name:'Discount',item_id:null,category:'__discount__',qty:1,price:-10,pay:'pending',created_at:'2099-01-09T11:00:00Z'}];
       showReceiptEdit('r1');S._reEdit.find(l=>l.id==='c1').pay='paid';
-      await saveReceiptEdit();
+      const saved=saveReceiptEdit();_paidHowGo('cash'); // the 10 taken now asks how it came in (bug hunt 2026-11-10, app39-3)
+      await saved;
       return _outbox().map(o=>o.kind+':'+o.id+':'+JSON.stringify(o.data)).sort();
     })()`) as string[];
     // Both discounts now come off the paid lines: d1 carries all 40, d2 is set to nothing (not deleted).
@@ -72,12 +73,32 @@ test.describe('@staff:sales receipts', () => {
   test('Mark paid sends only the pay column, on a row still standing', async ({ page }) => {
     await boot(page);
     const sent = writes(page, 'cashier_sales');
-    await page.evaluate(`(()=>{S.cashSales=[{id:'p1',receipt_id:'rp',session_id:'${S1}',name:'Gel',category:'EnergyGels',qty:1,price:12,pay:'pending',voided_at:null,refunded_at:null,created_at:'2099-01-09T11:00:00Z'}];_ctMarkReceiptPaid('rp');})()`);
+    await page.evaluate(`(()=>{S.cashSales=[{id:'p1',receipt_id:'rp',session_id:'${S1}',name:'Gel',category:'EnergyGels',qty:1,price:12,pay:'pending',voided_at:null,refunded_at:null,created_at:'2099-01-09T11:00:00Z'}];_ctMarkReceiptPaid('rp');_paidHowGo('cash');})()`);
     await expect.poll(() => sent.length).toBe(1);
     expect(sent[0].m).toBe('PATCH');
     expect(sent[0].body).toEqual({ pay: 'paid' });
     expect(sent[0].url).toContain('id=eq.p1');
     expect(sent[0].url).toContain('voided_at=is.null');
+  });
+
+  test('Mark paid asks Card or Cash, and card puts the money on the receipt\'s card line, not in the drawer', async ({ page }) => {
+    await boot(page);
+    const r = await page.evaluate(`(async()=>{
+      S.cashSales=[
+        {id:'p1',receipt_id:'rp',session_id:'${S1}',name:'Gel',category:'EnergyGels',qty:2,price:15,pay:'pending',voided_at:null,refunded_at:null,created_at:'2099-01-09T11:00:00Z'},
+        {id:'q1',receipt_id:'rq',session_id:'${S1}',name:'Cap',category:'Apparel',qty:1,price:40,pay:'paid',voided_at:null,refunded_at:null,created_at:'2099-01-09T11:00:00Z'},
+        {id:'q2',receipt_id:'rq',session_id:'${S1}',name:'Bar',category:'Other',qty:1,price:10,pay:'pending',voided_at:null,refunded_at:null,created_at:'2099-01-09T11:00:00Z'},
+        {id:'qc',receipt_id:'rq',session_id:'${S1}',name:'Card',category:'__cardmeta__',qty:0,price:40,pay:'paid',voided_at:null,refunded_at:null,created_at:'2099-01-09T11:00:00Z'}];
+      const asked=_ctMarkReceiptPaid('rp');
+      const box=document.querySelector('#mny-modal .mny-box').textContent;
+      _paidHowGo('card');await asked;
+      const a=_ctMarkReceiptPaid('rq');_paidHowGo('card');await a;
+      return {box, cc:_salesCC(S.cashSales), cards:S.cashSales.filter(x=>x.category==='__cardmeta__').map(x=>x.receipt_id+':'+x.qty+':'+x.price).sort()};
+    })()`) as { box: string; cc: unknown; cards: string[] };
+    expect(r.box).toContain('SAR 30');
+    // a new card line on the receipt that had none; the one that had a card line has it raised, never a second
+    expect(r.cards).toEqual(['rp:0:30', 'rq:0:50']);
+    expect(r.cc).toEqual({ card: 80, cash: 0, wallet: 0 });
   });
 
   test('a change to a sale still waiting to be sent is folded into its insert, never replaces it', async ({ page }) => {

@@ -31415,7 +31415,7 @@ function _purchLoad(cust){
 function _purchList(cust){
   const p=S._purch,mine=p&&p.id===cust.id&&p.rows;
   const rows=(mine||(S.cashSales||[]).filter(r=>r.customer_id===cust.id&&r.pay!=='refunded').map(r=>({...r,at:r.created_at}))
-    .sort((a,b)=>new Date(b.at||0)-new Date(a.at||0))).filter(r=>r.category!=='__cardmeta__');
+    .sort((a,b)=>new Date(b.at||0)-new Date(a.at||0))).filter(r=>r.category!=='__cardmeta__'&&!(r.category==='__discount__'&&!(Number(r.qty)||0))); // nor a receipt's spare quantity-0 discount row (saveReceiptEdit)
   if(!mine&&!rows.length)return null;
   const amt=r=>r.pay==='house'?0:(Number(r.qty)||0)*(Number(r.price)||0),off=r=>r.voided||r.refunded||r.pay==='refunded'; // on the house keeps its list price, and costs the rider nothing (2026-10-05)
   const tot=Math.round(rows.reduce((sm,r)=>sm+(off(r)?0:amt(r)),0)*100)/100;
@@ -55621,11 +55621,14 @@ function _purchaseIdx(arr,line){const i=arr.indexOf(line);return i>=0?i:arr.find
 async function _rentalSaleDelete(entryId,pidx){
   const e0=_qGet(entryId);if(!e0)return;
   const line=entryPurchases(e0)[pidx];if(!line)return;
+  // A void takes the line's money out of the takings like a refund: the account's refund cap and the manager limit, as a
+  // receipt's void (_salesVoid); it asked only the operator's own PIN (bug hunt 2026-11-10, app39-1).
+  if(!_can('refund')){toast(t('capNoRefund'),'error');return;}
   const why=await _askMoneyReason('void',esc(line.name));
   if(!why)return;
   {
-    // Money going back: the operator's PIN, as for a receipt's void (2026-10-05).
-    if(!await _pinApprove(t('cashVoid'))){renderCashier();return;}
+    // Money going back: the operator's PIN, as for a receipt's void (2026-10-05), or an approver's over the limit.
+    if(!await _pinApprove(t('cashVoid'),{kind:'refund',amount:_lineCharge(line)})){renderCashier();return;}
     // The booking as it stands NOW. The one read when the question opened can be a reload old, and
     // writing its list back dropped a sale another desk had rung up on it meanwhile (2026-10-05).
     const e=_qGet(entryId);if(!e){renderCashier();return;}
@@ -55692,10 +55695,11 @@ async function _cashAddLine(){
 async function _cashVoid(i){
   const e0=_qGet(S._cashEntry);if(!e0)return;
   const arr=entryPurchases(e0);const line=arr[i];if(!line)return;
+  if(!_can('refund')){toast(t('capNoRefund'),'error');return;} // the refund cap, as a receipt's void (_rentalSaleDelete)
   const why=await _askMoneyReason('void',esc(line.name));
   if(!why){if(S._cashEntry)renderCashierModal();return;}
-  // Money going back: the operator's PIN, as for a receipt's void (2026-10-05).
-  if(!await _pinApprove(t('cashVoid'))){if(S._cashEntry)renderCashierModal();return;}
+  // Money going back: the operator's PIN, as for a receipt's void (2026-10-05), or an approver's over the manager limit.
+  if(!await _pinApprove(t('cashVoid'),{kind:'refund',amount:_lineCharge(line)})){if(S._cashEntry)renderCashierModal();return;}
   // The booking as it stands NOW, not as it was when the question opened (see _rentalSaleDelete).
   const e=_qGet(e0.id);if(!e){if(S._cashEntry)renderCashierModal();return;}
   const cur=entryPurchases(e),at=_purchaseIdx(cur,line);
@@ -55837,7 +55841,9 @@ function _ctTile(id){
   if(it.price==null||(S._ctPay==='team'&&!(S._ctTeam||'').trim()))return;
   _ctCartAdd();
 }
-function _ctCartRemove(i){S._ctCart=(S._ctCart||[]).filter((_,idx)=>idx!==i);renderCashier();}
+// A line of the receipt the wallet is paying for right now stays (bug hunt 2026-11-10, app39-7): taken out meanwhile, it was
+// still recorded and charged to the wallet. Lines added meanwhile are the next receipt's (_ctRecord).
+function _ctCartRemove(i){const l=(S._ctCart||[])[i];if(l&&S._ctPaying&&S._ctPaying.includes(l))return;S._ctCart=(S._ctCart||[]).filter((_,idx)=>idx!==i);renderCashier();}
 // ── Offline-safe sales: queue cashier_sales writes in localStorage, flush when the connection returns ──
 // Voided sale ids (kept locally so a voided purchase can never reappear, even if the DB DELETE was blocked/no-op)
 function _voidedIds(){try{return JSON.parse(localStorage.getItem('cq_sales_voided')||'[]');}catch(_){return[];}}
@@ -55890,7 +55896,8 @@ function _outboxEnqueueMany(ops){
       const i=o.findIndex(op=>op.id===x.id&&(op.kind==='upsert'||op.kind==='update'));
       if(i>=0){const w=o.splice(i,1)[0];o.push({oid:uid(),kind:w.kind,id:w.id,data:{...(w.data||{}),...(x.data||{})}});return;}
     }else if(x.kind!=='stock'){for(let i=o.length-1;i>=0;i--)if(o[i].id===x.id&&o[i].kind!=='stock')o.splice(i,1);}
-    o.push({oid:uid(),kind:x.kind,id:x.id,data:x.data||null,...(x.rows?{rows:x.rows}:{})});
+    // amt: a void's or refund's money, so the approval asked again later is a manager's when it is over the limit (_outboxApprove)
+    o.push({oid:uid(),kind:x.kind,id:x.id,data:x.data||null,...(x.rows?{rows:x.rows}:{}),...(x.amt!=null?{amt:x.amt}:{})});
   });
   const ok=_outboxSave(o);_outboxFlush();return ok;
 }
@@ -55924,7 +55931,7 @@ function _rcRestockOf(kind,data){
 async function _outboxFlushRun(){
   if(_outboxBusy)return;
   _outboxBusy=true;
-  const snapshot=_outbox();const doneIds=[];const stuck=new Set();const needPin=[];
+  const snapshot=_outbox();const doneIds=[];const stuck=new Set();const needPin=[],needMgr=[];
   // A sale row that could not be sent holds back its receipt's void or refund too (queued under the
   // receipt key): NOT_FOUND from the server means the rows have not landed, and settling it let them
   // land later as a live, unvoided sale (bug hunt 2026-10-28).
@@ -55959,7 +55966,11 @@ async function _outboxFlushRun(){
         const ex=await _roFree(()=>sb.from('cashier_sales').select('id').eq('id',op.id).limit(1));
         if(ex.error||(Array.isArray(ex.data)&&ex.data.some(r=>String(r.id)===String(op.id))))settled=false;
       }
-      if(!settled&&(op.kind==='void'||op.kind==='refund')&&/PIN_REQUIRED/.test(String((res.error&&res.error.message)||'')))needPin.push(op.oid);
+      // A manager the server asks for (MANAGER_REQUIRED: the approval it was queued with has lapsed and the operator has no PIN,
+      // or it was never one) waits the same way, marked so the one asked is an approver (bug hunt 2026-11-10, app39-4): it was
+      // sent again as it was, refused for ever, until the void was discarded.
+      const _em=String((res&&res.error&&res.error.message)||'');
+      if(!settled&&(op.kind==='void'||op.kind==='refund')&&/PIN_REQUIRED|MANAGER_REQUIRED/.test(_em)){needPin.push(op.oid);if(/MANAGER_REQUIRED/.test(_em))needMgr.push(op.oid);}
       if(settled){
         doneIds.push(op.oid);
         // The shelf follows what the server changed (_rcRestockOf); a movement the network drops waits here.
@@ -55970,7 +55981,7 @@ async function _outboxFlushRun(){
   }
   // Re-read the live outbox (ops may have been queued during the awaits) and drop only the ones we actually completed
   const cur=_outbox().filter(op=>doneIds.indexOf(op.oid)<0);
-  let pinNow=false;cur.forEach(op=>{if(needPin.indexOf(op.oid)>=0&&!op.needPin){op.needPin=true;pinNow=true;}});
+  let pinNow=false;cur.forEach(op=>{if(needPin.indexOf(op.oid)>=0&&!op.needPin){op.needPin=true;pinNow=true;}if(needMgr.indexOf(op.oid)>=0)op.mgr=true;});
   _outboxSave(cur);
   _outboxBusy=false;
   if(pinNow)toast(t('syncNeedPin'),'warning'); // once, when an op first waits for the PIN
@@ -55983,14 +55994,25 @@ async function _outboxFlushRun(){
 async function _outboxApprove(){
   for(const op0 of _outbox().filter(op=>op.needPin)){
     const what=t(op0.kind==='refund'?'cashRefund':'cashVoid');
-    if(!await _pinApprove(what))return; // the keypad was closed: they all wait
-    await _mmLock(async()=>{
-      const op=_outbox().find(o=>o.oid===op0.oid);if(!op)return; // sent meanwhile
-      let res;try{res=await _rpcOp(op.kind==='refund'?'staff_refund_receipt':'staff_void_receipt',{...op.data,..._pinArgs()},true);}catch(e){res={error:e};}
-      if(res&&res.error&&!/NOT_FOUND/.test(String(res.error.message||''))){if(!_isNetErr(res.error))_writeErr(res,'sync sale');return;} // still waiting: said, unless it is only the network
-      _outboxSave(_outbox().filter(o=>o.oid!==op.oid));
-      if(res&&!res.error)await _addonStockBatch(_rcRestockOf(op.kind,res.data),1);
-    });
+    // Its money decides who approves, as when it was made (_salesVoid, _salesRefund): over the manager limit, or once the server
+    // has asked for a manager (op.mgr), an approver's PIN. It asked the operator's own and stopped at MANAGER_REQUIRED, so the
+    // void could only be discarded (bug hunt 2026-11-10, app39-4).
+    for(let n=0;n<2;n++){
+      const o0=_outbox().find(o=>o.oid===op0.oid);if(!o0)break; // sent meanwhile
+      const mo={kind:'refund',amount:Number(o0.amt)||0,force:!!o0.mgr}; // and sent under that approver (_pinArgs)
+      if(!await _pinApprove(what,mo))return; // the keypad was closed: they all wait
+      let mgr=false;
+      await _mmLock(async()=>{
+        const op=_outbox().find(o=>o.oid===op0.oid);if(!op)return; // sent meanwhile
+        let res;try{res=await _rpcOp(op.kind==='refund'?'staff_refund_receipt':'staff_void_receipt',{...op.data,..._pinArgs(mo)},true);}catch(e){res={error:e};}
+        // the server wants a manager where the operator's PIN was asked: once more, of an approver, as _gatedRpc does
+        if(res&&res.error&&/MANAGER_REQUIRED/.test(String(res.error.message||''))&&!op.mgr){_pinOk={name:'',at:0,token:null};_outboxSave(_outbox().map(o=>o.oid===op.oid?{...o,mgr:true}:o));mgr=true;return;}
+        if(res&&res.error&&!/NOT_FOUND/.test(String(res.error.message||''))){if(!_isNetErr(res.error))_writeErr(res,'sync sale');return;} // still waiting: said, unless it is only the network
+        _outboxSave(_outbox().filter(o=>o.oid!==op.oid));
+        if(res&&!res.error)await _addonStockBatch(_rcRestockOf(op.kind,res.data),1);
+      });
+      if(!mgr)break;
+    }
   }
 }
 // Giving up on what is stuck. A void or delete in it never reached the server, so its rows come off
@@ -56067,7 +56089,7 @@ async function _salesVoid(key,rows,what,reason){
   const had=(S.cashSales||[]).slice();
   S.cashSales=had.filter(x=>ids.indexOf(x.id)<0);
   if(r.error&&_errKind(r.error)==='net'){
-    if(!_outboxEnqueueMany([{kind:'void',id:key,data:{p_receipt_id:key,p_reason:reason,..._pinArgs(mo),p_op_id:opId},rows:ids}])){S.cashSales=had;return false;}
+    if(!_outboxEnqueueMany([{kind:'void',id:key,data:{p_receipt_id:key,p_reason:reason,..._pinArgs(mo),p_op_id:opId},rows:ids,amt}])){S.cashSales=had;return false;}
     ids.forEach(_voidedAdd);return{restock:[]};
   }
   if(r.error){S.cashSales=had;toast(_errMessage(r.error),'error');return false;}
@@ -56084,7 +56106,7 @@ async function _salesRefund(key,rows,what,reason){
   const now=new Date().toISOString(),had=(S.cashSales||[]).slice();
   S.cashSales=had.map(x=>(x.receipt_id||x.id)===key&&x.pay!=='refunded'?{...x,pay:'refunded',refunded_at:now}:x);
   if(r.error&&_errKind(r.error)==='net'){
-    if(!_outboxEnqueueMany([{kind:'refund',id:key,data:{p_receipt_id:key,p_reason:reason,..._pinArgs(mo),p_op_id:opId}}])){S.cashSales=had;return false;}
+    if(!_outboxEnqueueMany([{kind:'refund',id:key,data:{p_receipt_id:key,p_reason:reason,..._pinArgs(mo),p_op_id:opId},amt}])){S.cashSales=had;return false;}
     return{restock:[]};
   }
   if(r.error){S.cashSales=had;toast(_errMessage(r.error),'error');return false;}
@@ -56288,12 +56310,15 @@ async function _ctRecord(){
   const sessId=_ctx===SHOP_CTX?null:_ctx; // a shop sale belongs to no ride
   if(!(S._ctCart||[]).length){toast(t('cashCartEmpty'),'error');return;}
   if(_roNow()){_roRefusal();return;} // a view-only Sales records nothing (the outbox would send it)
+  // The lines this receipt records, as they are at the tap (bug hunt 2026-11-10, app39-7): the cart stays live while the wallet's
+  // call is out, so an item tapped meanwhile is the next receipt's, and a line of this one cannot be taken out (_ctCartRemove).
+  const cart=S._ctCart;
   const rid=uid(),cust=(S._ctCust||'').trim()||null,at=new Date().toISOString();
-  const rows=S._ctCart.map(l=>({id:uid(),receipt_id:rid,session_id:sessId,customer_name:l.pay==='team'?null:cust,item_id:l.item_id||null,name:l.name,category:l.cat,qty:l.qty,price:l.price,pay:l.pay,team_name:l.team||null,created_at:at})); // MM Team lines belong to the team member, not a customer
+  const rows=cart.map(l=>({id:uid(),receipt_id:rid,session_id:sessId,customer_name:l.pay==='team'?null:cust,item_id:l.item_id||null,name:l.name,category:l.cat,qty:l.qty,price:l.price,pay:l.pay,team_name:l.team||null,created_at:at})); // MM Team lines belong to the team member, not a customer
   // Per-receipt discount as a negative 'paid' line (no schema change needed)
-  const discSAR=_ctDiscountSAR(_ctChargeableTotal(S._ctCart));
+  const discSAR=_ctDiscountSAR(_ctChargeableTotal(cart));
   if(discSAR>0){
-    const _ds=_ctDiscountSplit(S._ctCart,discSAR);
+    const _ds=_ctDiscountSplit(cart,discSAR);
     const _dRow=(amt,pay)=>({id:uid(),receipt_id:rid,session_id:sessId,customer_name:cust,item_id:null,name:t('cashDiscount'),category:'__discount__',qty:1,price:-amt,pay,team_name:null,created_at:at});
     if(_ds.onPaid>0)rows.push(_dRow(_ds.onPaid,'paid'));
     if(_ds.onPending>0)rows.push(_dRow(_ds.onPending,'pending'));
@@ -56306,9 +56331,9 @@ async function _ctRecord(){
   let walTake=0,walRow=null;
   if(_ctWalletOn()&&paidTotal>0){
     if(_isOffline()){toast(t('cwErrOffline'),'error');return;}
-    S._ctBusy=true;
+    S._ctBusy=true;S._ctPaying=cart;
     let wr;try{wr=await _roFree(()=>sb.rpc('staff_wallet_pay_sale',{p_receipt_id:rid,p_customer:S._ctCustId,p_session:sessId,p_amount:Math.round(paidTotal*100)/100,p_name:cust,p_at:at,p_op:_opName()||null}));}catch(e){wr={error:e};}
-    S._ctBusy=false;
+    S._ctBusy=false;S._ctPaying=null;
     if(wr.error){if(!wr.error.said)wr.error.said=_rpcSay(wr.error);toast(_cwSay(wr.error),'error');_cwLoad(true).catch(()=>{});renderCashier();return;}
     walTake=Number(wr.data&&wr.data.taken)||0;walRow=wr.data&&wr.data.row||null;
   }
@@ -56331,14 +56356,16 @@ async function _ctRecord(){
   if(walRow){S.cashSales=[...(S.cashSales||[]).filter(r=>r.id!==walRow.id),walRow];_cwLoad(true).catch(()=>{});}
   // The receipt is booked: its cart leaves the screen now, before the stock write, so a second tap
   // or a redraw meanwhile cannot record it again, and items added meanwhile start the next one.
-  const nLines=S._ctCart.length;
+  const nLines=cart.length;
   // The locker lines name their rentals (2026-11-10): told to the database once the receipt is booked, so a refund or a change
   // of the locker finds what was paid for it (staff_locker_paid). Only lines taken now; one left unlinked is refunded at the till.
-  const _lkLinks=S._ctCart.map((l,i)=>l&&l.lk&&l.pay==='paid'&&rows[i]?{r:l.lk,l:rows[i].id}:null).filter(Boolean);
+  const _lkLinks=cart.map((l,i)=>l&&l.lk&&l.pay==='paid'&&rows[i]?{r:l.lk,l:rows[i].id}:null).filter(Boolean);
   // The next receipt is the next customer's. The name and the linked account used to stay in the
   // box, so the following walk-up's purchase went onto the previous rider's account unless
   // someone remembered to clear it. Payment and team choice stay, as they do between items.
-  S._ctCart=[];S._ctDisc='';S._ctCard='';S._ctCust='';S._ctCustId='';S._ctWallet='';
+  // Only the lines recorded leave the cart: one added while the wallet's call was out used to be wiped, neither on this
+  // receipt nor the next, its stock never taken (app39-7).
+  S._ctCart=(S._ctCart||[]).filter(l=>!cart.includes(l));S._ctDisc='';S._ctCard='';S._ctCust='';S._ctCustId='';S._ctWallet='';
   _ctHeldNext(); // a locker fee held for another rider is the next sale
   S._ctBusy=true;renderCashier();
   try{await _addonStockBatch(rows,-1);} // decrement stock for stocked items (summed per item — no concurrent-write race)
@@ -56383,15 +56410,47 @@ async function _ctRefundReceipt(key){
   toast(t('cashRefundedToast'));renderCashier();
 }
 function _ctReprint(key){const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(rows.length)_ctPrintReceipt(rows,(rows.find(r=>r.customer_name)||{}).customer_name,rows[0].created_at);} // the customer from any line (see _rcLog)
-// Quick action: customer paid -> flip a receipt's pending lines to paid
+// How money taken after a receipt was rung up came in (bug hunt 2026-11-10, app39-3): Card or Cash, as the Cashier pop-up asks
+// for a sale on a booking. The receipt's card line was sized when it was rung up, so money paid later read as drawer cash
+// whichever way it came, and the drawer came up short at the close. Resolves 'card' | 'cash', or null when closed.
+function _askPaidHow(amount){
+  return new Promise(res=>{
+    if(S._mnyRes){const r=S._mnyRes;S._mnyRes=null;r(null);}
+    _mnyOpen(_mnyFrame('mny-ph-t',esc(t('cashMarkPaid')),`<div class="mny-sub">${_money(amount)}</div>`,
+      `<button type="button" class="btn-secondary" data-on-click="${_on("_mnyClose")}">${t('cancelBtn')}</button>
+       <button type="button" class="btn-primary mny-go" data-on-click="${_on("_paidHowGo","cash")}">${t('cashCash')}</button>
+       <button type="button" class="btn-primary mny-go" data-on-click="${_on("_paidHowGo","card")}">${t('cashCard')}</button>`),'.mny-go');
+    S._mnyRes=res;
+  });
+}
+function _paidHowGo(k){const res=S._mnyRes;S._mnyRes=null;_mnyClose();if(res)res(k==='card'?'card':'cash');}
+// Money a receipt took later by card onto its card line (app39-3): the line it has (qty 0, never a sale), raised, or a new one.
+// Never a second: _salesCC reads one card line a receipt. ups / upds: the new rows and the changes _salesApply sends.
+function _rcCardAdd(key,amt,ups,upds){
+  amt=Math.round((Number(amt)||0)*100)/100;if(!(amt>0))return;
+  const all=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded');
+  const cm=all.find(r=>r.category==='__cardmeta__'&&r.pay!=='wallet');
+  if(cm){upds.push({id:cm.id,cols:{price:Math.round(((Number(cm.price)||0)+amt)*100)/100}});return;}
+  const b=all.find(r=>r.category!=='__cardmeta__');if(!b)return;
+  const row={id:uid(),receipt_id:key,session_id:b.session_id??null,customer_name:(all.find(r=>r.customer_name)||{}).customer_name||null,item_id:null,name:t('cashCard'),category:'__cardmeta__',qty:0,price:amt,pay:'paid',team_name:null,created_at:b.created_at};
+  if(b.sold_by_name&&S.hasCsSeller!==false)row.sold_by_name=b.sold_by_name;
+  ups.push(row);
+}
+// Quick action: customer paid -> flip a receipt's pending lines to paid, asking how (card raises its card line)
 async function _ctMarkReceiptPaid(key){
-  const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay==='pending');
+  const pend=()=>(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay==='pending');
+  const amtOf=l=>Math.round(l.reduce((s,r)=>s+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
+  let rows=pend();
   if(!rows.length)return;
+  let how='cash';
+  if(amtOf(rows)>0){how=await _askPaidHow(amtOf(rows));if(!how)return;rows=pend();if(!rows.length)return;} // the receipt as it stands after the question
+  const ups=[],upds=rows.map(r=>({id:r.id,cols:{pay:'paid'}}));
+  if(how==='card')_rcCardAdd(key,amtOf(rows),ups,upds);
   // The one column that changes, as an update on a row still standing (2026-10-05): the whole row it
   // used to send carried voided_at / refunded_at as this device last saw them, undoing a void or
   // refund another desk made meanwhile.
-  if(!_salesApply([],[],rows.map(r=>({id:r.id,cols:{pay:'paid'}})))){renderCashier();return;}
-  _rcLog(t('cashMarkPaid'),rows,'','pay',key);
+  if(!_salesApply(ups,[],upds)){renderCashier();return;}
+  _rcLog(t('cashMarkPaid'),rows,amtOf(rows)>0?` · ${t(how==='card'?'cashCard':'cashCash')}`:'','pay',key);
   toast(t('cashSavedToast'));renderCashier();
 }
 // Edit a recorded receipt: change each line's payment / amount / team member
@@ -56415,6 +56474,8 @@ function _reSet(i,k,v){
 }
 async function saveReceiptEdit(){
   const lines=S._reEdit||[],key=S._reKey,upd=[];
+  // the receipt's customer, off a line that is not an MM Team one (app39-6, below)
+  const rcOf=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='team'),rcName=(rcOf.find(r=>r.customer_name)||{}).customer_name||null,rcId=(rcOf.find(r=>r.customer_id)||{}).customer_id||null;
   for(const l of lines){
     let price=parseFloat(l.price);
     if(isNaN(price)||price<0){toast(t('cashAmtRequired'),'error');return;} // an emptied box is a slip, not "free": it used to save as 0
@@ -56429,11 +56490,26 @@ async function saveReceiptEdit(){
     if(l.pay!==row.pay)cols.pay=l.pay;
     if(price!==Number(row.price))cols.price=price;
     if(team!==(row.team_name||null))cols.team_name=team;
+    // An MM Team line is the team member's, never the rider's (bug hunt 2026-11-10, app39-6): made one, it leaves the receipt's
+    // customer, as the till records it (_ctRecord), where it showed in the rider's purchases; made a sale again, it takes them back.
+    if(cols.pay==='team'){if(row.customer_name)cols.customer_name=null;if(row.customer_id&&S.hasCsCust!==false)cols.customer_id=null;}
+    else if(cols.pay&&row.pay==='team'){if(rcName&&!row.customer_name)cols.customer_name=rcName;if(rcId&&!row.customer_id&&S.hasCsCust!==false)cols.customer_id=rcId;}
     if(Object.keys(cols).length)upd.push({id:row.id,cols,row});
   }
   // Money not taken: a line made On the house, or charged less, asks the operator's PIN, as a void
-  // does (2026-10-05).
-  if(upd.some(u=>(u.cols.pay==='house'&&u.row.pay!=='house')||(u.cols.price!==undefined&&u.cols.price<Number(u.row.price)))&&!await _pinApprove(t('receiptEditTitle')))return;
+  // does (2026-10-05) - over the manager limit (Settings > Business) an approver's, as the same give-away rung up at the till
+  // (kind 'house', _ctCartAdd) or a booking's price cut (kind 'price') asks. It asked only the operator's own, so a line rung up
+  // Paid and then edited to On the house or a price of 1 got past the manager (bug hunt 2026-11-10, app39-2).
+  if(upd.some(u=>(u.cols.pay==='house'&&u.row.pay!=='house')||(u.cols.price!==undefined&&u.cols.price<Number(u.row.price)))){
+    const chg=p=>p==='paid'||p==='pending';let houseAmt=0,cutAmt=0;
+    upd.forEach(u=>{
+      if(!chg(u.row.pay))return; // a line that charged nothing gives nothing more away
+      const q=Number(u.row.qty)||0,was=Number(u.row.price)||0,np=u.cols.pay!==undefined?u.cols.pay:u.row.pay,pr=u.cols.price!==undefined?u.cols.price:was;
+      if(np==='house')houseAmt+=q*was;else if(chg(np)&&pr<was)cutAmt+=q*(was-pr);
+    });
+    const asks=[{kind:'house',amount:Math.round(houseAmt*100)/100},{kind:'price',amount:Math.round(cutAmt*100)/100}].filter(o=>o.amount>0);
+    if(!await _pinApprove(t('receiptEditTitle'),asks.find(_mgrNeeded)||asks[0]))return;
+  }
   const before=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded');
   const after=before.map(r=>{const u=upd.find(x=>x.id===r.id);return u?{...r,...u.cols}:r;});
   // The receipt's discount was sized from what was chargeable when it was rung up, and it is not
@@ -56448,19 +56524,30 @@ async function saveReceiptEdit(){
   if(discRows.length){
     const goods=after.filter(r=>r.category!=='__discount__'&&r.category!=='__cardmeta__').map(r=>({qty:r.qty,price:r.price,pay:r.pay}));
     const had=Math.round(discRows.reduce((s,r)=>s-(Number(r.qty)||1)*(Number(r.price)||0),0)*100)/100;
-    const ds=_ctDiscountSplit(goods,Math.min(Math.max(0,had),_ctChargeableTotal(goods)));
+    const cap=Math.min(Math.max(0,had),_ctChargeableTotal(goods));
+    const ds=_ctDiscountSplit(goods,cap);
     const want={paid:ds.onPaid,pending:ds.onPending},pool=discRows.slice(),got={};
     const put=(r,cols)=>{const ch={};Object.keys(cols).forEach(k=>{if(String(r[k])!==String(cols[k]))ch[k]=cols[k];});if(Object.keys(ch).length)upd.push({id:r.id,cols:ch,row:r});};
+    const mk=(qty,price,pay)=>{const s=discRows[0];ins.push({id:uid(),receipt_id:s.receipt_id||key,session_id:s.session_id,customer_name:s.customer_name||null,item_id:null,name:s.name||t('cashDiscount'),category:'__discount__',qty,price,pay,team_name:null,created_at:s.created_at,...(s.customer_id?{customer_id:s.customer_id}:{})});};
     ['paid','pending'].forEach(p=>{if(want[p]>0){const i=pool.findIndex(r=>r.pay===p);if(i>=0)got[p]=pool.splice(i,1)[0];}});
     ['paid','pending'].forEach(p=>{if(want[p]>0&&!got[p]&&pool.length)got[p]=pool.shift();});
     ['paid','pending'].forEach(p=>{
       if(!(want[p]>0))return;
       if(got[p]){put(got[p],{qty:1,price:-want[p],pay:p});return;}
-      const s=discRows[0];
-      ins.push({id:uid(),receipt_id:s.receipt_id||key,session_id:s.session_id,customer_name:s.customer_name||null,item_id:null,name:s.name||t('cashDiscount'),category:'__discount__',qty:1,price:-want[p],pay:p,team_name:null,created_at:s.created_at,...(s.customer_id?{customer_id:s.customer_id}:{})});
+      mk(1,-want[p],p);
     });
-    pool.forEach(r=>put(r,{qty:0,price:0}));
+    // What the cap leaves over stays on a spare row at quantity 0 (bug hunt 2026-11-10, app39-5): every total multiplies by
+    // the quantity, so it takes nothing off now, while `had` reads it back, so an edit that makes the lines chargeable again
+    // gives the discount back. Zeroed, a mistaken edit and its correction lost it for good (100 with 10 off read 100).
+    const spare=Math.round((Math.max(0,had)-cap)*100)/100;
+    pool.forEach((r,i)=>put(r,spare>0&&i===0?{qty:0,price:-spare}:{qty:0,price:0}));
+    if(spare>0&&!pool.length)mk(0,-spare,discRows[0].pay||'paid');
   }
+  // Money taken now (a pending line made paid, say): how it came in, as Mark paid asks (app39-3), or a card payment read as
+  // drawer cash. The paid total after the edit against before it; a card answer raises the receipt's card line.
+  const paidOf=list=>list.reduce((s,r)=>s+(r.category!=='__cardmeta__'&&r.pay==='paid'?(Number(r.qty)||0)*(Number(r.price)||0):0),0);
+  const gain=Math.round((paidOf(before.map(r=>upd.reduce((x,u)=>u.id===r.id?{...x,...u.cols}:x,r)).concat(ins))-paidOf(before))*100)/100;
+  if(gain>0){const how=await _askPaidHow(gain);if(!how)return;if(how==='card')_rcCardAdd(key,gain,ins,upd);}
   if(!_salesApply(ins,[],upd.map(u=>({id:u.id,cols:u.cols})))){renderReceiptEdit();return;} // not stored: the form stays open with the changes
   const now=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded');
   if(before.some(b=>{const n=now.find(x=>x.id===b.id);return !n||n.pay!==b.pay||Number(n.price)!==Number(b.price)||(n.team_name||'')!==(b.team_name||'');})||now.length!==before.length)_rcLog(t('receiptEditTitle'),now,` (${_rcTotal(before)} → ${_rcTotal(now)})`,'edit',key);
@@ -56667,6 +56754,9 @@ function _mnyOpen(html,focusSel){
 }
 function _mnyClose(){
   const m=document.getElementById('mny-modal');if(m){m.style.display='none';m.innerHTML='';}
+  // The till and the Changes panel closed are closed (bug hunt 2026-11-10, app40-8): a read still out when they were closed
+  // drew them again, over whatever the host showed by then (a void's reason, whose answer was lost).
+  S._till=null;S._auP=null;
   const b=S._mnyBack;S._mnyBack=null;if(S._mnyRes){const r=S._mnyRes;S._mnyRes=null;r(null);}
   if(b&&document.contains(b))try{b.focus();}catch(_){}
 }
@@ -56789,16 +56879,16 @@ async function _auQuery(f,older){
 // AU_PAGE at a time.
 async function openAuditPanel(tbl,ids,title){
   ids=[].concat(ids||[]).map(String).filter(Boolean);if(!tbl||!ids.length)return;
-  S._auP={tbl,ids,title:title||'',rows:[],end:false,busy:true,err:null};
+  const P={tbl,ids,title:title||'',rows:[],end:false,busy:true,err:null};S._auP=P;
   _auPanelDraw();
-  _staffPeopleLoad().then(()=>{if(S._auP)_auPanelDraw();});
+  _staffPeopleLoad().then(()=>{if(S._auP===P&&!S._mnyRes)_auPanelDraw();}); // this panel, still open (app40-8, _mnyClose)
   await _auPanelLoad(false);
 }
 async function _auPanelLoad(more){
   const P=S._auP;if(!P)return;
   P.busy=true;if(more)_auPanelDraw();
   let r;try{r=await _auQuery({tbl:P.tbl,ids:P.ids},more&&P.rows.length?P.rows[P.rows.length-1].id:null);}catch(e){r={error:e};}
-  if(S._auP!==P)return;
+  if(S._auP!==P||S._mnyRes)return;
   P.busy=false;
   if(r.error){P.err=_absent(r.error)?t('auNoDb'):_errMessage(r.error);}
   else{P.rows=P.rows.concat(r.data||[]);P.end=(r.data||[]).length<AU_PAGE;}
@@ -57022,9 +57112,15 @@ async function _exLoad(){
   const E=_rangeFix(_exS(),6);const key=E.from+'~'+E.to;E.key=key;E.busy=true;E.err=null;_exDraw(true);
   const from=_ksaStartIso(E.from),to=_ksaEndIso(E.to);
   const cols='id,receipt_id,session_id,customer_name,name,category,qty,price,pay,created_at,team_name,voided_at,voided_by,void_reason,refunded_at,refunded_by,refund_reason'+(S.hasCsSeller===false?'':',sold_by_name');
-  const salesQ=c=>sb.from('cashier_sales').select(c).gte('created_at',from).lt('created_at',to).or('voided_at.not.is.null,refunded_at.not.is.null,pay.eq.house,pay.eq.team,category.eq.__discount__');
+  // A void or refund is read by when it was made, as the deposits kept and the price changes are (bug hunt 2026-11-10, app40-1):
+  // read by the sale's date, a refund made this week of an older sale was missing, and one made later of a sale in the range
+  // showed up dated outside it. A row voided is a void (its void's time), else a refund; the rest by the sale's own time.
+  const salesQs=[c=>sb.from('cashier_sales').select(c).gte('voided_at',from).lt('voided_at',to),
+    c=>sb.from('cashier_sales').select(c).is('voided_at',null).gte('refunded_at',from).lt('refunded_at',to),
+    c=>sb.from('cashier_sales').select(c).is('voided_at',null).is('refunded_at',null).gte('created_at',from).lt('created_at',to).or('pay.eq.house,pay.eq.team,category.eq.__discount__')];
   // paged by id (bug hunt 2026-10-28): one .limit(3000) request came back with 1000 rows at most; the items are sorted below
-  let rs;try{rs=await _pagedCap(()=>salesQ(cols),'id',false,30);if(rs.error&&/sold_by_name/.test(String(rs.error.message||'')))rs=await _pagedCap(()=>salesQ(cols.replace(',sold_by_name','')),'id',false,30);}catch(e){rs={error:e};}
+  const salesRead=async c=>{const rr=await Promise.all(salesQs.map(q=>_pagedCap(()=>q(c),'id',false,30)));const bad=rr.find(x=>x.error);return bad?{data:null,error:bad.error,cut:false}:{data:rr.flatMap(x=>x.data||[]),error:null,cut:rr.some(x=>x.cut)};};
+  let rs;try{rs=await salesRead(cols);if(rs.error&&/sold_by_name/.test(String(rs.error.message||'')))rs=await salesRead(cols.replace(',sold_by_name',''));}catch(e){rs={error:e};}
   let rd=null;if(_depOn()||(S._deps||[]).length){try{rd=await sb.from('deposits').select(DEP_COLS).gt('kept_amount',0).gte('returned_at',from).lt('returned_at',to).order('returned_at',{ascending:false}).limit(1000);}catch(e){rd={error:e};}} // kept deposits (2026-10-09)
   let ra;try{ra=await _pagedCap(()=>sb.from('audit_log').select('id,at,actor,actor_email,row_id,changed').eq('tbl','queue_entries').not('changed->price','is',null).gte('at',from).lt('at',to),'id',true,30);}catch(e){ra={error:e};}
   await _staffPeopleLoad();
@@ -57051,7 +57147,9 @@ async function _exLoad(){
     Object.values(byR).forEach(x=>{x.amt=Math.round(x.amt*100)/100;items.push(x);});
   }
   if(!ra.error)(ra.data||[]).forEach(r=>{
-    const c=(r.changed||{}).price||{},o=Number(c.old),n=Number(c.new);
+    // A price of null is the booking's default (price ?? DEFAULT_PRICE everywhere): read as 0, a change from it showed
+    // "SAR 0 →" with the whole new price as the amount, and one to 0 was never an on-the-house ride (bug hunt 2026-11-10, app40-7)
+    const c=(r.changed||{}).price||{},num=v=>v==null||v===''?DEFAULT_PRICE:Number(v),o=num(c.old),n=num(c.new);
     if(!Number.isFinite(n))return;
     const e=_qGet(r.row_id);
     items.push({type:n===0&&o>0?'house_ride':'price',at:r.at,what:[`${e?'#'+e.queueNum+' '+e.name:String(r.row_id).slice(0,8)}: ${Number.isFinite(o)?_money(o,_NOISO):'—'} → ${_money(n,_NOISO)}`],amt:Math.round(((Number.isFinite(o)?o:0)-n)*100)/100,op:_auWho(r),reason:'',ref:r.row_id,booking:true,cust:e?e.name:''});
@@ -57226,27 +57324,37 @@ async function _eonCount(){S._ctSession=S._eonSid;await recordDrawerCount(S._eon
 // A ride's till is its night's; the shop's is the newest still open, whatever its day (the staff review,
 // 2026-10-28, js23-3): one opened before midnight was looked for under the new day, so it could never be
 // counted or closed and a second one opened beside it.
+// A ride's till is its DAY's, whichever ride of the day opened it (bug hunt 2026-11-10, app40-4): it counts the day's other
+// rides in (_tillTake), so a second ride the same day looked for its own, found none, and opened a second till that expected
+// the whole day's cash again.
 async function _tillOpenRow(c){
   let q=sb.from('till_sessions').select('*').is('closed_at',null);
-  q=c.sid?q.eq('day',c.day).eq('session_id',c.sid):q.is('session_id',null);
+  q=c.sid?q.eq('day',c.day).not('session_id','is',null):q.is('session_id',null);
   return q.order('opened_at',{ascending:false}).limit(1);
 }
 async function recordDrawerCount(sid){
   if(sid&&typeof sid!=='string')sid=null; // called from a handler with an event
   const c=_tillCtx(sid);
-  S._till={c,row:null,counts:[],busy:true,err:null,mode:'',last:null};
+  // Its own state, checked after every wait (bug hunt 2026-11-10, app40-8): the dialog closed while it loads stays closed
+  // (_mnyClose drops S._till), and two calls for two rides never put one ride's till in the other's dialog. Nor is it drawn
+  // over a question waiting in the same host (S._mnyRes).
+  const T={c,row:null,counts:[],busy:true,err:null,mode:'',last:null};S._till=T;
+  const gone=()=>S._till!==T||!!S._mnyRes;
   _tillDraw();
   if(_depOn())await _depLoad(true).catch(()=>{}); // cash deposits held are in the drawer
+  if(gone())return;
   let r;try{r=await _tillOpenRow(c);}catch(e){r={error:e};}
+  if(gone())return;
   if(r.error&&_absent(r.error)){S._till=null;_mnyClose();return _drawerCountLegacy(c);}
-  const T=S._till;if(!T)return;
   T.busy=false;
   if(r.error){T.err=_errMessage(r.error);_tillDraw();return;}
   T.row=(r.data||[])[0]||null;
   if(T.row&&c.shop&&T.row.day&&T.row.day!==c.day)T.c={...c,day:T.row.day,label:`${t('tillShopCtx')} · ${shortDate(T.row.day)}`}; // an older shop till counts its own day's takings
+  else if(T.row&&!c.shop&&T.row.session_id&&T.row.session_id!==c.sid)T.c={...c,sid:T.row.session_id}; // the day's till another ride opened
   if(T.row){try{const k=await sb.from('till_counts').select('id,at,counted_by_name,counted_cash,expected_cash,note').eq('till_id',T.row.id).order('at');if(!k.error)T.counts=k.data||[];}catch(_){}}
+  if(gone())return;
   await _cwLoad(true);
-  if(S._till!==T)return; // closed, or another till opened, while the counts were read
+  if(gone())return; // closed, or another till opened, while the counts were read
   _tillDraw();
 }
 // Before the till tables: what the drawer held, into the action log (2026-09).
@@ -57299,6 +57407,11 @@ async function _tillOpenGo(){
   const T=S._till;if(!T||T.row||T.busy)return;
   const fl=_tillNum('mny-till-float',true);if(fl==null)return;
   T.busy=true;
+  // One till a ride day (app40-4, _tillOpenRow): one another ride of the day opened since this dialog was drawn is this one.
+  // The database's one-open-till rule is per ride, so it would have taken a second.
+  let ex=null;try{ex=await _tillOpenRow(T.c);}catch(_){}
+  if(S._till!==T)return;
+  if(ex&&!ex.error&&(ex.data||[]).length){T.busy=false;toast(t('tillAlreadyOpen'),'warning');return recordDrawerCount(T.c.sid||SHOP_CTX);}
   const r=await sb.from('till_sessions').insert({id:_opId(),day:T.c.day,session_id:T.c.sid,float:fl,opened_by_name:(_opName()||'').slice(0,60)||null}).select('*');
   T.busy=false;
   if(r.error&&_errKind(r.error)==='dup'){toast(t('tillAlreadyOpen'),'warning');return recordDrawerCount(T.c.sid||SHOP_CTX);}
@@ -57324,18 +57437,23 @@ async function _tillCountGo(){
 }
 async function _tillCloseGo(){
   const T=S._till;if(!T||!T.row||T.busy)return;
-  await _cwLoad(true); // another desk's wallet money is in this drawer too
+  // What was typed, read at the tap; then busy before the first wait (bug hunt 2026-11-10, app40-9): a second tap while the
+  // wallets were read sent a second close, which found the till closed, said it was gone and threw away this close's summary.
   const cash=_tillNum('mny-till-cash',true);if(cash==null)return;
   const card=_tillNum('mny-till-card',false);if(card===null)return;
   const notes=String((document.getElementById('mny-till-notes')||{}).value||'').slice(0,500);
+  T.busy=true;
+  try{await _cwLoad(true);}catch(_){} // another desk's wallet money is in this drawer too
+  if(S._till!==T||!T.row){T.busy=false;return;}
   const take=_tillTake(T.c),exp=Math.round(((Number(T.row.float)||0)+take.cash+(take.dep||0))*100)/100;
   const patch={closed_at:new Date().toISOString(),closed_by_name:(_opName()||'').slice(0,60)||null,expected_cash:exp,counted_cash:cash,card_expected:take.card,card_terminal_total:card===undefined?null:card,notes};
-  T.busy=true;
   const r=await sb.from('till_sessions').update(patch).eq('id',T.row.id).is('closed_at',null).select('*');
   T.busy=false;
   if(_writeErr(r,'close till')){_tillDraw();return;}
-  if(!(r.data||[]).length){toast(t('tillGone'),'warning');return recordDrawerCount(T.c.sid||SHOP_CTX);}
+  if(!(r.data||[]).length){if(T.last){_tillDraw();return;}toast(t('tillGone'),'warning');return recordDrawerCount(T.c.sid||SHOP_CTX);}
   T.last={...T.row,...r.data[0]};T.row=null;
+  // History > Till's copy of this till, closed now (app40-2): it read open, and the Z-report printed from it
+  {const H=S._tillH;if(H&&Array.isArray(H.rows)){const i=H.rows.findIndex(x=>x.id===T.last.id);if(i>=0)H.rows[i]=T.last;}}
   const diff=Math.round((cash-exp)*100)/100;
   logAction(`${t('tillClose')} · ${T.c.label} · ${t('drawerExpected')} ${exp} · ${t('drawerCounted')} ${cash} · ${diff>=0?'+':''}${diff}`,{k:'till_close',e:'till',id:T.last.id,amt:diff});
   toast(diff===0?t('drawerExactToast'):t('drawerDiffToast').replace('{0}',(diff>0?'+':'')+diff),diff===0?undefined:'warning');
@@ -57345,7 +57463,7 @@ async function _tillCloseGo(){
 // History > Till: every till of the range, the over/short per person and per night, a Z-report each.
 function _tillH(){return S._tillH||(S._tillH={from:fmtDate(new Date(Date.now()-29*864e5)),to:todayStr(),rows:null,busy:false,err:null,key:''});}
 async function _tillHistLoad(){
-  const H=_tillH(),key=H.from+'~'+H.to;H.key=key;H.busy=true;_tillHistDraw(true);
+  const H=_rangeFix(_tillH(),29),key=H.from+'~'+H.to;H.key=key;H.busy=true;_tillHistDraw(true); // a cleared date box takes the default, not day=gte. (app40-10)
   let r;try{r=await sb.from('till_sessions').select('*').gte('day',H.from).lte('day',H.to).order('day',{ascending:false}).order('opened_at',{ascending:false}).limit(500);}catch(e){r={error:e};}
   await _staffPeopleLoad();
   if(H.key!==key)return;
@@ -57383,17 +57501,24 @@ function _tillHistDraw(noLoad){
 // The Z-report: one till's day on paper - float, takings by payment, the counts and the close.
 async function _tillZ(id){
   const w=window.open('','_blank','width=1000,height=760'); // on the tap: a window opened after the reads below is blocked
-  let row=((_tillH().rows)||[]).find(r=>r.id===id)||(S._till&&S._till.last&&S._till.last.id===id?S._till.last:null);
+  // The till as it is now (bug hunt 2026-11-10, app40-2): the one this device just closed, else the database's row; History >
+  // Till's copy only when that cannot be read. That copy, loaded while the till was open, printed a closed till as open.
+  let row=S._till&&S._till.last&&S._till.last.id===id?S._till.last:null;
   let counts=[];
   try{
-    if(!row){const r=await sb.from('till_sessions').select('*').eq('id',id).maybeSingle();if(!r.error)row=r.data;}
+    if(!row){const r=await sb.from('till_sessions').select('*').eq('id',id).maybeSingle();if(!r.error&&r.data)row=r.data;}
     const k=await sb.from('till_counts').select('at,counted_by_name,counted_cash,expected_cash,note').eq('till_id',id).order('at');if(!k.error)counts=k.data||[];
   }catch(_){}
+  if(!row)row=((_tillH().rows)||[]).find(r=>r.id===id)||null;
   if(!row){if(w)w.close();toast(t('errSomethingWrong'),'error');return;}
   // A ride deleted since keeps its own day: _tillCtx fell back to today's shop takings for it.
   const c=!row.session_id?{shop:true,sid:null,day:row.day,label:t('tillShopCtx')}:_sessDisp(row.session_id)?_tillCtx(row.session_id):{shop:false,sid:row.session_id,day:row.day,label:shortDate(row.day)};
   // the day's deposits, read for that day (S._deps holds only the last three days)
   let deps=null;if(!c.shop&&(_depOn()||(S._deps||[]).length)){try{const r=await sb.from('deposits').select(DEP_COLS).eq('day',c.day).order('taken_at');if(!r.error)deps=r.data||[];}catch(_){}}
+  // A closed till's deposits as they stood at its close (bug hunt 2026-11-10, app40-5): one taken after it is not in, one held
+  // then is held on its paper, though returned since. Read as they are now, a deposit held at the close and given back the next
+  // day came off the deposits and onto Cash taken, which is worked back from the stored expected cash below.
+  if(deps&&row.closed_at){const cl=Date.parse(row.closed_at);if(Number.isFinite(cl))deps=deps.filter(d=>!d.taken_at||!(Date.parse(d.taken_at)>cl)).map(d=>d.returned_at&&Date.parse(d.returned_at)>cl?{...d,returned_at:null}:d);}
   const take=_tillTake(c);
   if(deps)take.dep=_tillDep(c,new Set(allSessions().filter(s=>(s.session_date||s.id)===c.day).map(s=>s.id)),deps);
   // A closed till prints what was stored at its close (the staff review, 2026-10-28, js23-5): the cash taken is
@@ -57751,11 +57876,13 @@ function _invOptCancel(id){
   renderInventory();
 }
 // Share the reorder list (low / out-of-stock items with suggested amounts) via WhatsApp so staff can send it straight to a supplier.
-function _shareReorderList(){
+// sec: the section whose reorder card was tapped, so the supplements supplier is not sent the helmets (bug hunt 2026-11-10,
+// app40-11), in the card's order; none: every section, as before.
+function _shareReorderList(sec){
   const sold=(typeof _itemSoldUnits==='function')?_itemSoldUnits():{};
-  const ro=(S.inventory||[]).filter(i=>{const q=Number(i.qty)||0,lo=Number(i.low_threshold)||0;return q<=0||(lo>0&&q<=lo);})
-    .map(i=>{const q=Number(i.qty)||0,lo=Number(i.low_threshold)||0,s=sold[i.id]||0;const need=_reorderNeed(q,lo,s);return{i,q,need};})
-    .sort((a,b)=>b.need-a.need);
+  const ro=(S.inventory||[]).filter(i=>!sec||_isSuppCat(i.category)===(sec==='supplements')).filter(i=>{const q=Number(i.qty)||0,lo=Number(i.low_threshold)||0;return q<=0||(lo>0&&q<=lo);})
+    .map(i=>{const q=Number(i.qty)||0,lo=Number(i.low_threshold)||0,s=sold[i.id]||0;const need=_reorderNeed(q,lo,s);return{i,q,s,need};})
+    .sort((a,b)=>sec?(b.s-a.s||a.q-b.q):(b.need-a.need));
   if(!ro.length){toast(t('reorderNone'),'info');return;}
   const lines=ro.map(({i,q,need})=>`- ${i.name}${i.brand?' ('+i.brand+')':''}: ${t('invQty')} ${q} → +${need}`);
   const txt=t('reorderShareTitle')+'\n\n'+lines.join('\n');
@@ -57954,6 +58081,10 @@ function renderInventory(){
   const _sold2=_itemSoldUnits();
   const _invQ=(S.invSearch||'').trim().toLowerCase();
   const _invStockOf=it=>{const q=Number(it.qty)||0,lo=Number(it.low_threshold)||0;return q<=0?'out':(lo>0&&q<=lo)?'low':'in';};
+  // The brand filter offers this section's brands only: one chosen in the other section (or gone since) reads All, so it is All
+  // (bug hunt 2026-11-10, app40-6). Kept, the select showed All, the Filters button no count, and the list stayed empty.
+  const _secItems=sec==='supplements'?suppItems:equipItems,_invBrands=[...new Set(_secItems.map(it=>String(it.brand||'').trim()).filter(Boolean))];
+  if(S.invBrand&&S.invBrand!=='all'&&_secItems.length&&!_invBrands.includes(S.invBrand))S.invBrand='all';
   const _invStock=S.invStock||'all',_invBrand=S.invBrand||'all';
   const _invMatch=it=>(_invStock==='all'||_invStockOf(it)===_invStock)&&(_invBrand==='all'||String(it.brand||'').trim()===_invBrand)
     &&(!_invQ||(it.name||'').toLowerCase().includes(_invQ)||(it.brand||'').toLowerCase().includes(_invQ)||((it.flavour&&!_badFlav(it.flavour))?String(it.flavour).toLowerCase().includes(_invQ):false));
@@ -57975,7 +58106,7 @@ function renderInventory(){
       <select class="filter-select" aria-label="${esc(t('sortBy'))}" data-on-change="${_on("_on_renderInventory_16",_EV,_EL)}">${[['cat',t('invSortCat')],['name',t('sortName')],['stock',t('invSortStock')],['sales',t('invSortSales')]].map(([v,l])=>`<option value="${v}"${(S.invSort||'cat')===v?' selected':''}>${l}</option>`).join('')}</select>
       <button class="btn-secondary ${S.invCount?'iv-stbtn-on':'iv-stbtn'}" data-on-click="${_on("toggleStockTake")}">${S.invCount?t('stCancelBtn'):t('stStartBtn')}</button>
     ${_fPanel('inv',_fField(t('colStatus'),`<select class="filter-select" aria-label="${esc(t('colStatus'))}" data-on-change="${_on("_on_renderInventory_17",_EV,_EL)}">${[['all',t('filterAll')],['in',t('invInStock')],['low',t('invLowStock')],['out',t('invOutStock')]].map(([v,l])=>`<option value="${v}"${_invStock===v?' selected':''}>${l}</option>`).join('')}</select>`)
-      +_fField(t('invBrand'),`<select class="filter-select" aria-label="${esc(t('invBrand'))}" data-on-change="${_on("_on_renderInventory_18",_EV,_EL)}">${['all',...new Set((sec==='supplements'?suppItems:equipItems).map(it=>String(it.brand||'').trim()).filter(Boolean))].sort((a,b)=>a==='all'?-1:b==='all'?1:a.localeCompare(b)).map(v=>`<option value="${esc(v)}"${_invBrand===v?' selected':''}>${v==='all'?t('filterAll'):esc(v)}</option>`).join('')}</select>`))}
+      +_fField(t('invBrand'),`<select class="filter-select" aria-label="${esc(t('invBrand'))}" data-on-change="${_on("_on_renderInventory_18",_EV,_EL)}">${['all',..._invBrands].sort((a,b)=>a==='all'?-1:b==='all'?1:a.localeCompare(b)).map(v=>`<option value="${esc(v)}"${_invBrand===v?' selected':''}>${v==='all'?t('filterAll'):esc(v)}</option>`).join('')}</select>`))}
     </div>
     ${S.invCount?`<div class="iv-stbar">
       <span class="iv-sthint">${t('stHint')}</span>
@@ -57993,7 +58124,7 @@ function renderInventory(){
     return`<div class="card iv-ro">
       <div class="iv-ro-head">
         <div class="iv-ro-title">${t('reorderTitle')}</div>
-        <button class="btn-sm btn-muted iv-ro-share" data-on-click="${_on("_shareReorderList")}">${_artIcon('share',12)} ${t('reorderShareBtn')}</button>
+        <button class="btn-sm btn-muted iv-ro-share" data-on-click="${_on("_shareReorderList",sec)}">${_artIcon('share',12)} ${t('reorderShareBtn')}</button>
       </div>
       ${ro.map(({i,q,s,need})=>`<div class="iv-ro-row">
         ${_itemThumb(i.id,32)}
@@ -58021,7 +58152,7 @@ function renderInventory(){
   if(sec==='bikes')renderBikes();
   if(_invHadFocus){const inp=document.getElementById('inv-search');if(inp){inp.focus();const v=inp.value;inp.value='';inp.value=v;}}
 }
-function setInvSection(v){S.invSection=v;S.showAddInv=false;S.editInvId=null;renderInventory();}
+function setInvSection(v){S.invSection=v;S.showAddInv=false;S.editInvId=null;S.invBrand='all';renderInventory();} // a brand is one section's (app40-6)
 function setInvView(v){S.invView=(v==='table'?'table':'grid');try{localStorage.setItem('cq_inv_view',S.invView);}catch(e){}renderInventory();}
 function toggleAddInv(){S.showAddInv=true;S.editInvId=null;S._invName='';S._invCat=(S.invSection==='supplements'?'ProteinSnacks':'Helmet');S._invSubtype=(S.invSection==='supplements'?_defaultSubtype():'');S._invSubtypeAdd=false;S._invQty='';S._invLow='';S._invPrice='';S._invFree=false;S._invCost='';S._invSup='';S._invSup0='';S._invBrand='';S._invPhoto='';S._invCatAdd=false;S._invBrandAdd=false;S._invFlav='';S._invFlavAdd=false;S._invMl='';S._invNutri={};S._invNutriOpen=false;renderInventory();}
 function cancelInvForm(){S.showAddInv=false;S.editInvId=null;S._invCatAdd=false;S._invBrandAdd=false;renderInventory();}
