@@ -765,7 +765,7 @@ test.describe('@staff:security the push sender', () => {
       request: new Request('https://site.test/api/push-send', { method: 'POST', body: JSON.stringify({ drain: true }) }),
       env: { VAPID_PUBLIC_KEY: pub, VAPID_PRIVATE_KEY: priv, SUPABASE_SERVICE_KEY: 'svc', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' },
     });
-    expect(await res.json()).toMatchObject({ ok: true, drained: 3, sent: 1 });
+    expect(await res.json()).toMatchObject({ ok: true, drained: 2, sent: 1 }); // the rows this drain handled: the one claimed elsewhere is not counted (2026-11-10)
     expect(pushed).toEqual(['https://fcm.googleapis.com/fcm/send/abc']); // the fresh one only; the old one and the one claimed elsewhere are not sent
     expect(patches.filter((p) => p.body.result !== 'sending')).toEqual([{ id: '1', body: { result: 'sent 1/1' } }, { id: '2', body: { result: 'stale' } }]);
     // not configured: nothing is read or sent

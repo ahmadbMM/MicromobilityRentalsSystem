@@ -45,6 +45,10 @@ async function _hubFetch(force) {
   S._hubBusy = true;
   let r; try { r = await sb.rpc('hub_overview', _hTok(c)); } catch (e) { r = { error: e }; }
   S._hubBusy = false;
+  // Signed out, or another account signed in, while it was asked: the answer is not theirs (a shared phone).
+  // The page asks again for whoever is signed in now.
+  const now = _hCust();
+  if (!now || now.id !== c.id) { if (S.custTab === 'members') _hubRender(); return; }
   const d = r && !r.error && r.data && r.data.ok === true ? r.data : null;
   S._hub = { forId: c.id, at: Date.now(), d };
   if (S.custTab === 'members') _hubRender();
@@ -57,8 +61,13 @@ function _hubTab(k) {
 function _hubRender() {
   const nav = document.getElementById('hub-nav'), body = document.getElementById('hub-body');
   if (!nav || !body) return;
+  // Only the signed-in account's own overview shows: another member's, left from earlier on this phone, is
+  // dropped and read again (bug hunt 2026-11-10). One older than two minutes is read again too; a failed
+  // read waits for Try again, so a failure never asks in a loop.
+  const c = _hCust();
+  if (S._hub && (!c || S._hub.forId !== c.id)) S._hub = null;
   const h = S._hub, d = h && h.d;
-  if (!h) _hubFetch();
+  if (!h || (d && Date.now() - h.at >= 12e4)) _hubFetch();
   const tabs = _HUB_TABS.filter((k) => k !== 'year' || (d && d.year && Number(d.year.rides) > 0)), tab = tabs.includes(S._hubTab) ? S._hubTab : 'goals';
   nav.innerHTML = tabs.map((k) => `<button type="button" class="hub-tab${k === tab ? ' on' : ''}" aria-pressed="${k === tab}" data-on-click="${_on('_hubTab', k)}">${_hT('tab' + k[0].toUpperCase() + k.slice(1))}</button>`).join('');
   if (!d) {
@@ -96,4 +105,4 @@ function _yrHtml(d) {
     ${y.first ? `<div class="am-meta">${_hF('yrFirst', _hDate(y.first))}</div>` : ''}
     <button type="button" class="btn-primary hub-wide" data-on-click="${_on('_yrShare')}">${_hT('yrShare')}</button></div>`;
 }
-function _yrShare() { const y = S._hub && S._hub.d && S._hub.d.year; if (y) _hShare(_hF('yrShareMsg', y.year, Number(y.rides) || 0, Number(y.saturdays) || 0, Number(y.kudos) || 0)); }
+function _yrShare() { const h = S._hub, c = _hCust(), y = h && c && h.forId === c.id && h.d && h.d.year; if (y) _hShare(_hF('yrShareMsg', y.year, Number(y.rides) || 0, Number(y.saturdays) || 0, Number(y.kudos) || 0)); }

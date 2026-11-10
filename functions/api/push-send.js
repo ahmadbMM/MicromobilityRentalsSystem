@@ -127,44 +127,64 @@ export async function onRequestPost(context) {
 // Sends what push_outbox holds, oldest first, a batch per call. Each row is claimed (sent_at set while still empty)
 // before it goes, so two drains at once send it once; one older than three days is marked stale and not sent; the
 // outcome is written back. Gone endpoints are dropped as in a staff send.
-const DRAIN_MAX = 40;
+// Cloudflare's free plan allows 50 subrequests per call (ig-followers.js): the list is one, a row costs its claim,
+// its browsers' read and its outcome, plus a send and at most a removal per browser. A row cut off half way kept
+// sent_at and 'sending' for good and was never sent (bug hunt 2026-11-10), so a row is only claimed while there is
+// room for it, and one that cannot go after all is given back (sent_at empty again) for the next drain.
+const DRAIN_MAX = 15;          // 1 + 15 x 3 = 46: a batch of riders without browsers fits one call
+const DRAIN_SUBREQ_MAX = 48;
 const STALE_MS = 3 * 864e5;
 async function drain(request, env, PUB, PRIV, SERVICE) {
   const SUPA = env.SUPABASE_URL || 'https://qpffkzmsfyilicwcsszz.supabase.co';
   const H = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
-  const listRes = await fetch(`${SUPA}/rest/v1/push_outbox?sent_at=is.null&order=id.asc&limit=${DRAIN_MAX}&select=id,customer_id,tag,title,body,url,created_at`, { headers: H });
+  let sub = 0; // the subrequests this call has made (DRAIN_SUBREQ_MAX)
+  const call = (url, init) => { sub++; return fetch(url, init); };
+  const listRes = await call(`${SUPA}/rest/v1/push_outbox?sent_at=is.null&order=id.asc&limit=${DRAIN_MAX}&select=id,customer_id,tag,title,body,url,created_at`, { headers: H });
   if (!listRes.ok) return json({ ok: false, error: 'lookup failed' }, 502);
   const rows = await listRes.json().catch(() => []);
   const origin = new URL(request.url).origin;
-  const mark = (id, patch, only) => fetch(`${SUPA}/rest/v1/push_outbox?id=eq.${encodeURIComponent(id)}${only ? '&sent_at=is.null' : ''}`, {
+  const mark = (id, patch, only) => call(`${SUPA}/rest/v1/push_outbox?id=eq.${encodeURIComponent(id)}${only ? '&sent_at=is.null' : ''}`, {
     method: 'PATCH', headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(patch),
   });
-  let sent = 0;
+  const release = (id) => mark(id, { sent_at: null, result: null }).catch(() => {});
+  let sent = 0, done = 0;
   for (const m of Array.isArray(rows) ? rows : []) {
+    if (sub + 3 > DRAIN_SUBREQ_MAX) break; // no room for its claim, read and outcome: it waits for the next drain
     const claim = await mark(m.id, { sent_at: new Date().toISOString(), result: 'sending' }, true).catch(() => null);
     const got = claim && claim.ok ? await claim.json().catch(() => []) : [];
     if (!Array.isArray(got) || !got.length) continue; // another drain has it
     let result = 'stale';
     if (Date.now() - Date.parse(m.created_at) <= STALE_MS) {
-      const subsRes = await fetch(`${SUPA}/rest/v1/push_subscriptions?customer_id=eq.${encodeURIComponent(m.customer_id)}&select=*`, { headers: H });
-      const subs = subsRes.ok ? await subsRes.json().catch(() => []) : [];
-      if (!Array.isArray(subs) || !subs.length) result = 'no subscriptions';
+      // A read that fails or throws (the network, or Cloudflare refusing one more) ends the pass: the row goes back.
+      let subs = null;
+      try {
+        const subsRes = await call(`${SUPA}/rest/v1/push_subscriptions?customer_id=eq.${encodeURIComponent(m.customer_id)}&select=*`, { headers: H });
+        if (subsRes.ok) subs = await subsRes.json().catch(() => null);
+      } catch { subs = null; }
+      if (!Array.isArray(subs)) { await release(m.id); break; }
+      const room = DRAIN_SUBREQ_MAX - sub - 1; // what is left once the outcome is written
+      if (subs.length > room && done) { await release(m.id); break; } // the next drain starts with it, with the whole budget
+      if (!subs.length) result = 'no subscriptions';
       else {
+        const to = subs.slice(0, room); // first in a call it always fits: customer_push_subscribe keeps 21 browsers at most
         const payload = JSON.stringify({
           title: String(m.title || '').slice(0, 120), body: String(m.body || '').slice(0, 300), url: safeUrl(m.url, origin),
           tag: String(m.tag || 'mm-general').replace(/[^\w.:-]/g, '').slice(0, 64) || 'mm-general',
         });
-        const results = await Promise.all(subs.map((s) => sendOne(s, payload, PUB, PRIV, env)));
+        sub += to.length; // sendOne makes at most one request per browser
+        const results = await Promise.all(to.map((s) => sendOne(s, payload, PUB, PRIV, env)));
         const ok = results.filter((r) => r.ok).length;
         sent += ok;
-        result = `sent ${ok}/${subs.length}`;
-        const dead = results.filter((r) => r.gone).map((r) => r.endpoint);
-        await Promise.all(dead.map((ep) => fetch(`${SUPA}/rest/v1/push_subscriptions?endpoint=eq.${encodeURIComponent(ep)}`, { method: 'DELETE', headers: H }).catch(() => {})));
+        result = `sent ${ok}/${to.length}`;
+        // Gone endpoints beyond what is left are dropped by a later send.
+        const dead = results.filter((r) => r.gone).map((r) => r.endpoint).slice(0, Math.max(0, DRAIN_SUBREQ_MAX - sub - 1));
+        await Promise.all(dead.map((ep) => call(`${SUPA}/rest/v1/push_subscriptions?endpoint=eq.${encodeURIComponent(ep)}`, { method: 'DELETE', headers: H }).catch(() => {})));
       }
     }
     await mark(m.id, { result }).catch(() => {});
+    done++;
   }
-  return json({ ok: true, drained: Array.isArray(rows) ? rows.length : 0, sent });
+  return json({ ok: true, drained: done, sent });
 }
 
 // Where a notification may lead: an address on this site only, at most 500 characters - the

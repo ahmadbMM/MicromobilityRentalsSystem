@@ -14,7 +14,8 @@ STAGING.md has the steps). It copies production's structure, migration history, 
 the website's content (pages, catalogue, prices, badges, tags, shop items), then fills it with made-up
 people from this repo's `scripts/seed-staging.mjs` (`--riders 500 --weeks 8 --seed 7` via SEED_ARGS).
 No real customer data is copied. The seed refuses to run where staff accounts on the company domain
-exist, so a slip onto production fails at its first statement.
+exist: its check comes straight after `begin;`, so a slip onto production stops there and nothing is committed.
+It lays its calendar around today in Riyadh; `--today YYYY-MM-DD` pins it.
 
 Staff accounts: in the staging project's Auth, add each staffer's email with a password, then
 `insert into public.staff (user_id, role) select id, 'admin' from auth.users where email = '<email>';`
