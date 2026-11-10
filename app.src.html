@@ -7127,11 +7127,12 @@ function _normPhone(raw,cc){
   const ccd=cc.replace(/\D/g,''); // e.g. "966"
   let s=_asciiDigits(String(raw==null?'':raw)).trim().replace(/[\s()\-]/g,'');
   if(!s)return '';
-  if(s[0]==='+'){let d=s.slice(1).replace(/\D/g,'');if(ccd&&d.indexOf(ccd+'0')===0)d=ccd+d.slice(ccd.length+1);return '+'+d;} // explicit +, but drop a stray trunk 0 after the country code ("+9660…")
+  const intl=d=>'+'+(ccd&&d.indexOf(ccd+'0')===0?ccd+d.slice(ccd.length+1):d); // a stray trunk 0 after the country code is dropped ("9660…")
+  if(s[0]==='+')return intl(s.slice(1).replace(/\D/g,''));   // explicit +
   s=s.replace(/\D/g,'');
   if(!s)return '';
-  if(s.slice(0,2)==='00')return '+'+s.slice(2);                // 00 international prefix
-  if(_ccIncluded(s,ccd))return '+'+s;                          // already includes the country code
+  if(s.slice(0,2)==='00')return intl(s.slice(2));              // 00 international prefix
+  if(_ccIncluded(s,ccd))return intl(s);                        // already includes the country code
   if(s[0]==='0')return cc+s.slice(1);                          // strip national trunk 0
   return cc+s;                                                 // bare local number
 }
@@ -18558,6 +18559,7 @@ async function submitModifyBooking(){
   }
   const calls=[];
   let _addedRes=null; // rows the booking RPC returns for riders added during this edit
+  const _ownSw=[]; // the calls that switch an own bike to one of ours (sql03-1, below)
 
 
   for(let i=0;i<Math.min(newQty,existing.length);i++){
@@ -18585,7 +18587,7 @@ async function submitModifyBooking(){
         patch.price=priceForType(newType);
       }
     }
-    if(Object.keys(patch).length)calls.push(_ownEntryUpdate(entry.id,patch));
+    if(Object.keys(patch).length){if(entry.typePreference==='Own'&&newType!=='Own')_ownSw.push(calls.length);calls.push(_ownEntryUpdate(entry.id,patch));}
   }
 
 
@@ -18631,7 +18633,11 @@ async function submitModifyBooking(){
     // Refused for owed details the device did not know of: the request opens, and saving it runs this edit
     // again, so the button is free for that even if the reload here has not finished.
     if(fail){
+      // An own bike switched to one of ours when our bikes are all taken for members, or none working is left: the
+      // server answers a bare false (customer_booking_update, bug hunt 2026-11-10), said here in the rider's words.
+      const _fi=res.indexOf(fail);
       if(await _fixRefused(fail.error,()=>submitModifyBooking()))S.regSubmitting=false;
+      else if(_ownSw.includes(_fi)&&fail.error&&fail.error.message==='denied'&&!fail.error.code)toast(t('mbFullMsg'),'error');
       else _bookRefused(fail.error,sess);
       await loadDataLight();renderRegister();return;
     }
@@ -19397,8 +19403,8 @@ function renderWaiverGate(){
   // The booking as the ticket shows it: every live rider of this ride on the account, in number order. The wording is the
   // unsigned row's that acceptWaiverGate stamps (_wgRow), and numbers are hidden where the ticket hides them: an approval
   // ride's until its list is out, an Arena place until it is paid (bug hunt 2026-11-10: the gate showed them).
-  const rows=_wgRows(g.sid,me);
-  const r0=_wgRow(rows),w=_waiverCopy(s,r0),noNum=(_isApprovalRide(s)&&!_satNumOk(s,rows))||_arHold(s,rows),ev=_evName(s),ven=_venueName(s);
+  const rows=_wgRows(g.sid,me),vs=_wgVers(s,rows);
+  const r0=vs.length?vs[0].e:_wgRow(rows),w=_waiverCopy(s,r0),noNum=(_isApprovalRide(s)&&!_satNumOk(s,rows))||_arHold(s,rows),ev=_evName(s),ven=_venueName(s);
   const box=m.querySelector('.auth-backdrop'),top=box?box.scrollTop:0;
   document.body.classList.add('fix-open');
   m.style.display='block';
@@ -19411,10 +19417,11 @@ function renderWaiverGate(){
       <div class="wg-ln">${_cuIc('cal',15)}<span>${esc(dayLabel(s.day||r0.sessionDay))} · ${esc(shortDate(r0.sessionDate||s.session_date||g.sid))}</span></div>
       <div class="wg-ln">${_cuIc('clock',15)}<bdi>${esc(sessionTime(s))}</bdi></div>
       ${ven&&ven!==ev?`<div class="wg-ln">${_cuIc('pin',15)}<span>${esc(ven)}</span></div>`:''}
-      <div class="wg-sec">${_isBlood(s)?esc(_bldWho(r0)):t(_needsBike(s)?'reviewRidersLabel':'reviewPartLabel')}</div>
+      <div class="wg-sec">${_isBlood(s)?esc(vs.length>1?vs.map(x=>_bldWho(x.e)).join(' · '):_bldWho(r0)):t(_needsBike(s)?'reviewRidersLabel':'reviewPartLabel')}</div>
       <ul class="wg-riders">${rows.map(e=>`<li>${noNum||e.queueNum==null?'':`<bdi class="wg-num">#${e.queueNum}</bdi>`}<span>${esc(e.name||'')}</span></li>`).join('')}</ul>
     </div>
     <div class="wg-text" tabindex="0" role="region" aria-label="${esc(w.title)}">${esc(w.body)}</div>
+    ${vs.slice(1).map(x=>{const c=_waiverCopy(s,x.e);return`<div class="wg-sec" role="heading" aria-level="3">${esc(c.title)}</div><div class="wg-text" tabindex="0" role="region" aria-label="${esc(c.title)}">${esc(c.body)}</div>`;}).join('')}
     <label class="wg-agree${g.ok?' on':''}"><input type="checkbox" class="wg-cb"${g.ok?' checked':''}${g.saving?' disabled':''} data-on-change="${_on("_wgTick",_P("checked"))}"><span>${w.agree}</span></label>
     ${g.net?`<div class="pg-net" role="alert">${t('pgErrNet')}</div>`:''}
     <button type="button" class="pg-btn"${g.ok&&!g.saving?'':' disabled'} data-on-click="${_on("acceptWaiverGate")}">${g.saving?`<span class="pg-spin" aria-hidden="true"></span>${t('pgSaving')}`:t('wgBtn')}</button>
@@ -19427,12 +19434,25 @@ function renderWaiverGate(){
 // event's donor and visitor read different words). It took any row of the session, a cancelled one included.
 function _wgRows(sid,me){return getQueue().filter(e=>e.sessionId===sid&&e.customerId===me&&['waiting','waitlist','active','done'].includes(e.status)).sort((a,b)=>(a.queueNum||0)-(b.queueNum||0));}
 function _wgRow(rows){return rows.find(e=>e.waiverVersion===null)||rows[0]||{};}
+// Each wording the unsigned rows need, once, in number order: one on most rides; a blood event's donor and visitor rows on one
+// account read different words and are stamped each with its own version (bug hunt 2026-11-10). {v: version, e: its first row}.
+function _wgVers(s,rows){
+  const u=rows.filter(e=>e.waiverVersion===null),out=[];
+  (u.length?u:[_wgRow(rows)]).forEach(e=>{const v=_waiverVersionFor(s,e);if(v&&!out.some(x=>x.v===v))out.push({v,e});});
+  return out;
+}
 async function acceptWaiverGate(){
   const g=S._wg;if(!g||!g.ok||g.saving)return;
-  const c=S.loggedIn||getSession(),s=_sessDisp(g.sid),ver=s&&c&&_waiverVersionFor(s,_wgRow(_wgRows(g.sid,c.id)));
-  if(!c||!c.session_token||!ver){g.net=true;renderWaiverGate();return;}
+  const c=S.loggedIn||getSession(),s=_sessDisp(g.sid),vers=s&&c?_wgVers(s,_wgRows(g.sid,c.id)).map(x=>x.v):[];
+  if(!c||!c.session_token||!vers.length){g.net=true;renderWaiverGate();return;}
   g.saving=true;g.net=false;renderWaiverGate();
-  let res;try{res=await sb.rpc('customer_accept_waiver',{p_id:c.id,p_token:c.session_token,p_session_id:g.sid,p_version:ver});}catch(e){res={error:e};}
+  // One call per wording: customer_accept_waiver stamps the rows of that version's role. A database before that stamps every
+  // unsigned row on the first call, and the second then finds none (0), which is no error.
+  let res=null;
+  for(const ver of vers){
+    try{res=await sb.rpc('customer_accept_waiver',{p_id:c.id,p_token:c.session_token,p_session_id:g.sid,p_version:ver});}catch(e){res={error:e};}
+    if(!res||res.error||typeof res.data!=='number'||res.data<0)break;
+  }
   if(S._wg!==g)return; // signed out meanwhile
   // A database without the function cannot record the answer, and must not keep the rider out of the site.
   if(res&&res.error&&_rpcAbsent(res.error)){S._wgOff=true;S._wg=null;renderWaiverGate();_forceRatingPrompt();return;}
@@ -19442,7 +19462,7 @@ async function acceptWaiverGate(){
   if(res&&res.error&&_waiverOutdatedErr(res.error)){toast(t('wgOutdatedMsg'),'error');setTimeout(()=>{try{location.reload();}catch(_){}},2500);return;}
   if(!res||res.error||typeof res.data!=='number'||res.data<0){g.saving=false;g.net=true;renderWaiverGate();return;}
   const at=new Date().toISOString().replace(/\.\d+Z$/,'Z');
-  getQueue().forEach(e=>{if(e.sessionId===g.sid&&e.customerId===c.id&&e.waiverVersion===null){e.waiverVersion=ver;e.waiverAt=at;}});
+  getQueue().forEach(e=>{if(e.sessionId===g.sid&&e.customerId===c.id&&e.waiverVersion===null){e.waiverVersion=_waiverVersionFor(s,e)||vers[0];e.waiverAt=at;}});
   try{_cacheSave();}catch(_){}
   S._wg=null;renderWaiverGate();
   _forceRatingPrompt(); // the next ride's waiver, if there is one, then any rating
@@ -19736,7 +19756,9 @@ function _bdgRuns(dates){
   for(let w=W.size?Math.min(...W):now+1;w<=now;w++){
     if(W.has(w)){run++;best=Math.max(best,run);if(start==null)start=w;last=w;bestS=Math.max(bestS,last-start+1);continue;}
     run=0;if(w===now)break;
-    if(start!=null&&(miss==null||w-miss>=4))miss=w;else start=miss=null;
+    if(start!=null&&(miss==null||w-miss>=4))miss=w;
+    else if(start!=null&&miss!=null&&w-miss>1){start=miss+1;miss=w;} // a second quiet week too soon: the run starts again after the first, with this one forgiven
+    else start=miss=null;
   }
   return{best,bestS,curS:start!=null?last-start+1:0};
 }
@@ -20581,7 +20603,9 @@ async function _cwTicket(ids,on){
   S._cwBusy=true;_cwSwitchesPaint();
   let r;try{r=await sb.rpc(on?'customer_wallet_pay':'customer_wallet_release',{p_id:cur.id,p_token:cur.session_token,p_booking_ids:String(ids).split(',').filter(Boolean)});}catch(e){r={error:e};}
   S._cwBusy=false;
-  if(r.error){toast(_cwRiderSay(r.error),'error');_cwSwitchesPaint();_cwMineLoad(cur,true);return;}
+  // A wallet payment is not taken back once the ride is over (WALLET_NOT_OPEN, customer_wallet_release, bug hunt 2026-11-10).
+  const _over=!on&&/WALLET_NOT_OPEN/.test(String((r.error&&r.error.message)||''))&&String(ids).split(',').some(id=>{const e=_qGet(id);return !!e&&_sessEnded(_sessDisp(e.sessionId));});
+  if(r.error){toast(_over?t('errSessionClosed'):_cwRiderSay(r.error),'error');_cwSwitchesPaint();_cwMineLoad(cur,true);return;}
   haptic();_cwRowsApply(r.data&&r.data.rows);
   if(S._cwMine&&r.data&&r.data.balance!=null)S._cwMine.bal=Number(r.data.balance)||0;
   if(S.custTab==='myrides')renderMyRides();else setCustTab('myrides');
@@ -20661,7 +20685,7 @@ async function _lkPicksFresh(sess){
   const n=_lkRegPicks().length,day=_lkSessDay(sess),b=_lkBoard(day),on=!!S.regLocker&&_lkPeriodsOf(_lkKind(sess)).includes(S.regLocker);
   // A time that ended while the review was open is dropped and said; a time ticked with no door picked on the cabinet stops
   // the booking there (bug hunt 2026-11-10: both booked with no locker, or an ended one at full price, and said nothing).
-  if(on&&_lkEnded(day,S.regLocker)){_lkRegReset();toast(t('lkErrEnded'),'error');renderRegister();return false;}
+  if(on&&_lkOver(_lkOffer(sess&&sess.id),day,S.regLocker)){_lkRegReset();toast(t('lkErrEnded'),'error');renderRegister();return false;}
   if(on&&!n&&b&&b.kind){toast(t('lkPickDoor'),'error');try{document.getElementById('reg-lk')?.scrollIntoView({behavior:_sb(),block:'center'});}catch(_){}return false;}
   if(!S.regLocker||!n||!b)return true;
   await _lkBoardLoad(day,true);
@@ -20682,13 +20706,16 @@ function _lkCabHtml(b,p,picked,max,fn,lbl){
   }
   return`<div class="lk-cab" dir="ltr" role="group" aria-label="${esc(lbl)}">${h}</div>`; // left to right in Arabic and Urdu too: 1 stays top left, as on the cabinet
 }
+// A time that is over tonight: the offer's own word when it has one (customer_locker_offer's 'ended', bug hunt 2026-11-10, read on
+// the server's clock), else this device's clock (_lkEnded).
+function _lkOver(o,day,p){return (!!o&&!!o.ended&&typeof o.ended==='object'&&o.ended[p]===true)||_lkEnded(day,p);}
 // The review's Locker block: the periods with their prices (tap again to drop it), then the cabinet to pick the doors, one per rider.
 function _lkReviewHtml(sess){
   const k=_lkKind(sess);if(!k)return'';
   const o=_lkOffer(sess.id);
   if(!o){setTimeout(()=>_lkOfferLoad(sess.id),0);return'';}
   if(o.kind!==k)return'';
-  const day=_lkSessDay(sess),ps=_lkPeriodsOf(k).filter(q=>!_lkEnded(day,q)); // tonight's times already over are not offered (as micromobility.sa/lockers)
+  const day=_lkSessDay(sess),ps=_lkPeriodsOf(k).filter(q=>!_lkOver(o,day,q)); // tonight's times already over are not offered (as micromobility.sa/lockers)
   if(!ps.includes(S.regLocker))S.regLocker='';
   if(!ps.length)return'';
   const p=S.regLocker,b=p?_lkBoard(day):null;
@@ -20751,7 +20778,7 @@ function _lkRegDoor(c){
 // What the picked lockers add to the review's total.
 function _lkRegFee(sess){
   const k=_lkKind(sess),o=k&&_lkOffer(sess.id),p=S.regLocker;
-  if(!o||o.kind!==k||!_lkPeriodsOf(k).includes(p)||_lkEnded(_lkSessDay(sess),p))return 0;
+  if(!o||o.kind!==k||!_lkPeriodsOf(k).includes(p)||_lkOver(o,_lkSessDay(sess),p))return 0;
   return Math.round((p==='both'?o.both:o.one)*_lkRegN(sess)*100)/100;
 }
 function _lkRegReset(){S.regLocker='';S.regLockerCodes=[];}
@@ -21564,7 +21591,7 @@ const PAY_ST={initiated:'payStInit',paid:'payStPaid',expired:'payStExpired',canc
 const PAY_RF_ST={due:'payRfDue',pending:'payRfPending',done:'payRfDone',failed:'payRfFailed',declined:'payRfDeclined'};
 const PAY_DEST={card:'payToCard',wallet:'payToWallet',none:'payDestNone'};
 // The website's answers (the database's codes, passed on), in the desk's words.
-const PAY_RF_ERR={PAY_TOO_MUCH:'payErrTooMuch',PAY_NOT_PAID:'payErrNotPaid',WALLET_NO_ACCOUNT:'payErrNoAcc',PAY_REFUND_STATE:'payErrState',PAY_AMOUNT:'payErrAmount',PAY_DEST:'payErrAmount',SIGNED_OUT:'paySignedOut',NETWORK:'errNoInternet'};
+const PAY_RF_ERR={PAY_TOO_MUCH:'payErrTooMuch',PAY_NOT_PAID:'payErrNotPaid',WALLET_NO_ACCOUNT:'payErrNoAcc',PAY_REFUND_STATE:'payErrState',PAY_AMOUNT:'payErrAmount',PAY_DEST:'payErrAmount',WALLET_SHORT:'cwErrShort',SIGNED_OUT:'paySignedOut',NETWORK:'errNoInternet'};
 function _sto(){return S._sto||(S._sto={orders:null,pend:null,err:false,perr:false,gone:false,at:0,pat:0,busy:false,pbusy:false,f:'open',q:'',prods:null,vars:null,prErr:false,prAt:0,prBusy:false});}
 function _stoMissing(e){const c=String((e&&e.code)||''),m=String((e&&e.message)||'');return _rpcAbsent(e)||c==='PGRST205'||c==='42P01'||(/store_|payment/.test(m)&&/does not exist|schema cache/.test(m));}
 // A field of a dialog just drawn, a moment later - unless the staffer is already in one of its fields (a caret pulled away
@@ -22108,6 +22135,12 @@ async function _payRefundCall(body){
   let res;try{res=await fetch(PAY_WEB+'/api/pay/refund',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+tok},body:JSON.stringify(body)});}catch(_){return{error:{message:'NETWORK'}};}
   let d=null;try{d=await res.json();}catch(_){}
   if(d&&d.ok===true)return{data:d};
+  // The website answers 'gateway' both for a refusal and for a refund it left pending, whose outcome Moyasar did not say
+  // (web17-4): the refund's row tells them apart. One left pending was sent and is waiting for the gateway, not failed.
+  if(d&&d.error==='gateway'&&d.id){
+    let s=null;try{const q=await sb.from('payment_refunds').select('status').eq('id',d.id).maybeSingle();s=q&&!q.error&&q.data?q.data.status:null;}catch(_){}
+    if(s==='pending')return{data:{...d,ok:true,status:'pending',error:undefined}};
+  }
   return{error:{message:String((d&&d.error)||('HTTP '+res.status)).slice(0,200)}};
 }
 async function _payRfGo(){
@@ -22179,7 +22212,7 @@ async function _payOwedLoad(force){
   if(r&&!r.error){
     const rows=r.data||[],pids=[...new Set(rows.map(x=>x.payment_id).filter(Boolean))],oids=[...new Set(rows.map(x=>x.order_id).filter(Boolean))];
     let a=null,b=null;
-    try{[a,b]=await Promise.all([pids.length?sb.from('payments').select('id,kind,ref,refs,customer_id,amount,refunded,status,method,brand,last4,description,paid_at').in('id',pids):{data:[]},
+    try{[a,b]=await Promise.all([pids.length?sb.from('payments').select('id,kind,ref,refs,customer_id,amount,refunded,status,method,brand,last4,description,paid_at,provider_id').in('id',pids):{data:[]},
       oids.length?sb.from('store_orders').select('id,no,name,customer_id').in('id',oids):{data:[]}]);}catch(e){a={error:e};}
     if(a&&!a.error)W.opays=Object.fromEntries((a.data||[]).map(p=>[p.id,p]));
     if(b&&!b.error)W.oorders=Object.fromEntries((b.data||[]).map(o=>[o.id,o]));
@@ -22258,7 +22291,7 @@ function _payLinkHtml(p){
 function _payRefundOf(pid){
   const p=(_pay().rows||[]).find(x=>x.id===pid);if(!p)return;
   const due=(p.refunds||[]).find(r=>r.status==='due'||r.status==='failed'),room=_payRoom(p,p.refunds),owe=due?_payOwed(due,p,p.refunds):room;
-  _payRfOpen({payment:p.id,refund:due?due.id:null,amount:owe,max:owe,wallet:!!p.customer_id,title:p.description||'',
+  _payRfOpen({payment:p.id,refund:due?due.id:null,amount:owe,max:owe,wallet:!!p.customer_id&&p.kind!=='topup',title:p.description||'',
     order:p.kind==='order'?p.ref:null,booking:p.kind==='booking'&&(p.refs||[]).length===1?p.refs[0]:null});
 }
 function _payGoOrder(id){S.stoView='orders';setStaffTab('store');if(_stoOrder(id)){_stoOpen(id);return;}S._stoOpenAfter=id;_stoLoad(true);} // opened once the list holds it
@@ -22285,7 +22318,7 @@ function _payOwedHtml(){
   return`<div class="pay-list">${W.owed.map(r=>{
     const p=W.opays[r.payment_id]||null,cid=_payOwedCid(r),c=cid&&_custById(cid),why=/^locker /.test(String(r.reason||''))?'':r.reason;
     const acts=r.status==='pending'||!ed?'':`${adm?`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_payOwedDo",r.id,'card')}">${esc(t(r.status==='failed'?'payRetryCard':'payToCard'))}</button>
-        <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_payOwedDo",r.id,'wallet')}"${cid?'':' disabled'}>${esc(t('payToWallet'))}</button>`:''}
+        <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_payOwedDo",r.id,'wallet')}"${cid&&!_payTopOwn(r,p)?'':' disabled'}>${esc(t('payToWallet'))}</button>`:''}
         <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_payDecOpen",r.id)}">${esc(t('payDecline'))}</button>`;
     return`<div class="pay-row pay-rf-${esc(r.status)}">
       <div class="pay-r-when">${esc(_stoWhen(r.created_at))}<span class="sto-muted">${esc(t(PAY_RF_ST[r.status]||'payRfDue'))}</span></div>
@@ -22295,10 +22328,13 @@ function _payOwedHtml(){
       <div class="pay-r-acts">${acts}</div>
     </div>`;}).join('')}</div>`;
 }
+// A wallet top-up's own money goes back to the card only (staff_pay_refund_begin answers PAY_DEST for the wallet, bug hunt
+// 2026-11-10): a refund owed on that same Moyasar payment. One owed on another payment (paid twice) may go to the wallet.
+function _payTopOwn(r,p){return !!p&&p.kind==='topup'&&((r&&r.provider_id)||p.provider_id)===p.provider_id;}
 function _payOwedDo(id,dest){
   const r=_payOwedRow(id);if(!r)return;
   const cid=_payOwedCid(r);
-  _payRfOpen({refund:id,amount:Number(r.amount),max:Number(r.amount),dest,wallet:!!cid,title:_payRfWhat(r),order:r.order_id||null,booking:r.booking_id||null});
+  _payRfOpen({refund:id,amount:Number(r.amount),max:Number(r.amount),dest,wallet:!!cid&&!_payTopOwn(r,_pay().opays[r.payment_id]),title:_payRfWhat(r),order:r.order_id||null,booking:r.booking_id||null});
 }
 function _payDecOpen(id){const r=_payOwedRow(id);if(!r)return;_payRfOpen({refund:id,amount:Number(r.amount),title:_payRfWhat(r),decline:true});}
 
@@ -24347,7 +24383,7 @@ function renderAddonPicker(){
   const id=S._addonPickerEntry;if(!id)return;
   const e=_qGet(id);if(!e){closeAddonPicker();return;}
   const sess=_sessDisp(e.sessionId);
-  const cur=entryAddons(e);
+  const cur=entryAddons(e),_lock=_adPaidLock(e); // _lock: a rider's own paid booking takes no more priced add-ons (bug hunt 2026-11-10)
   const _q=aid=>cur.filter(x=>x.id===aid).reduce((n,x)=>n+x.qty,0); // every line of it (one per price sold at)
   // A booking that is over (done, cancelled, no-show) shows what it had and changes none of it; its locker still can, above.
   const ro=!['waiting','active','waitlist'].includes(e.status),offered=sessionAddonItems(sess);
@@ -24369,7 +24405,7 @@ function renderAddonPicker(){
     <div class="dk-sub12">${e.status==='waitlist'?t('waitlistLabel'):'#'+e.queueNum} ${esc(e.name)}</div>
     ${lk}
     ${items.length?`<div class="dk-ap-grid">
-      ${items.map(it=>{const qn=_q(it.id);const stock=Number(it.qty)||0;const out=stock<=0;const low=stock>0&&stock<=5;const noAdd=out||ro||(it._off&&(it._gone||_asCustomer()));return`<div class="${qn>0?'dk-ap-card-on':out?'dk-ap-card-out':'dk-ap-card'}">
+      ${items.map(it=>{const qn=_q(it.id);const stock=Number(it.qty)||0;const out=stock<=0;const low=stock>0&&stock<=5;const noAdd=out||ro||(it._off&&(it._gone||_asCustomer()))||(_lock&&Number(it.price)>0);return`<div class="${qn>0?'dk-ap-card-on':out?'dk-ap-card-out':'dk-ap-card'}">
         ${_macroBadge(it,38)}
         ${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="${esc(it.name)}" class="dk-ap-img">`:`<div class="dk-ap-noimg">${esc(it.name)}</div>`}
         <div class="dk-ap-body">
@@ -24392,6 +24428,9 @@ function renderAddonPicker(){
   </div>`;
   if(lk)_lkAdFill();
 }
+// A rider's own booking paid at the desk, by card or online takes no more of a priced add-on: it stays paid, so nobody would
+// collect it, and customer_booking_update refuses it (bug hunt 2026-11-10). Paid from the wallet or on the house, it still may.
+function _adPaidLock(e){return _asCustomer()&&!!e&&!!e.paid&&e.pay_method!=='wallet'&&!((Number(e.price)||0)===0&&!e.promoCode);}
 // Core: add (+1) or remove (−1) one unit of an add-on on a booking; updates stock + DB. No render.
 async function _entryAddonMutate(id,addonId,delta){
   const e=_qGet(id);if(!e)return false;
@@ -24405,6 +24444,7 @@ async function _entryAddonMutate(id,addonId,delta){
   const now=it&&it.price!=null?Number(it.price):null,lines=cur.filter(x=>x.id===addonId);
   if(delta>0){
     if(stock<=0)return false;
+    if(Number(it.price)>0&&_adPaidLock(e))return false;
     if(lines.reduce((n,x)=>n+x.qty,0)>=20&&_asCustomer())return false; // a rider's own: 20 of one at most (the server's cap)
     const a=lines.find(x=>x.p===undefined||x.p===now);
     if(a)a.qty+=1;else cur.push({id:addonId,qty:1});
@@ -25777,7 +25817,7 @@ function _ssBulk(st){
 }
 async function _ssBulkDo(ids,st){
   const prev=ids.map(id=>[id,(_sessGet(id)||{}).status||'closed']);
-  if(_writeErr(await sb.from('sessions').update({status:st}).in('id',ids),'session status'))return;
+  if(_writeErr(await sb.from('sessions').update(st==='closed'?{status:st}:{status:st,cancelled_at:null}).in('id',ids),'session status'))return; // opened again: no longer called off (Cancel night)
   await _sessReload(ids);
   toast(t('ssBDone').replace('{0}',ids.length),'success');
   pushUndo(t('ssBUndo').replace('{0}',ids.length).replace('{1}',t(SESS_STATUS_KEY[st])),async()=>{
@@ -27387,6 +27427,7 @@ async function _saveSessionEdit(){
     // left the ride half saved (new places, the old breakfast spot) with an error bar for each, and sent every other desk a row
     // event for each. Offered add-ons go always, so removals stick. What is said about a change is said once it has landed.
     const _patch={day:newDay,session_date:newDate,capacity:total,status:newStatus,bike_slots:JSON.stringify(slots),addons:JSON.stringify(S.editSessAddons||[])},_after=[];
+    if(newStatus!=='closed'&&sess.cancelled_at)_patch.cancelled_at=null; // a night called off (Cancel night) and opened again here
     if(!!S.editSessLockers!==(sess.lockers===true))_patch.lockers=!!S.editSessLockers; // Lockers offered (2026-11-09), sent only when it changed
     // The date's own words (an event's description; a line in any other date's Details), as the box says them
     {const _d=String(document.getElementById('es-desc')?.value??S.editSessDesc??'').trim().slice(0,2000)||null;
@@ -27714,7 +27755,8 @@ async function toggleSession(id,newStatus){
     const prevStatus=prev?prev.status:'closed';
     // PostgREST resolves with {error} on a denial rather than throwing, so the catch below
     // never saw it and the success toast fired on a write that never happened.
-    if(_writeErr(await sb.from('sessions').update({status:newStatus}).eq('id',id),'session status',()=>toggleSession(id,newStatus)))return;
+    // A night called off (Cancel night's cancelled_at) and opened again is not called off any more.
+    if(_writeErr(await sb.from('sessions').update({status:newStatus,...(newStatus!=='closed'&&prev&&prev.cancelled_at?{cancelled_at:null}:{})}).eq('id',id),'session status',()=>toggleSession(id,newStatus)))return;
     // Closing a session only changes its status (the owner, 2026-10-09: "dont mark all bookings no
     // show or completed unless the close out button is clicked"). Settling the riders - free rides
     // included - is the Close out button's job (closeOutSession), never a side effect of closing.
@@ -35390,7 +35432,7 @@ async function execCancelNight(){
 }
 async function _execCancelNight(){
   const sid=S._cnSid;const rows=_cnLiveRows(sid);if(!rows.length){closeCancelNight();return;}
-  const sess=_sessDisp(sid)||{};const prevSess=sess.status||'open';
+  const sess=_sessDisp(sid)||{};const prevSess=sess.status||'open',prevCa=sess.cancelled_at||null;
   const was=new Map(rows.map(e=>[e.id,{status:e.status,assigned:e.assignedBikeId??null,bikes:getAssignedBikeIds(e),entry:e}]));
   const r=await sb.from('queue_entries').update({status:'cancelled',cancelled_by:'staff',assigned_bike_id:null})
     .in('id',rows.map(e=>e.id)).in('status',['waiting','waitlist','active']).select('id');
@@ -35400,7 +35442,10 @@ async function _execCancelNight(){
   // off the rack, and setting it 'available' could free it from under whoever holds it now.
   const bikes=landed.filter(id=>was.get(id).status==='active').flatMap(id=>was.get(id).bikes);
   if(bikes.length)await _releaseBikes(bikes,'cancel night');
-  await _wr(sb.from('sessions').update({status:'closed'}).eq('id',sid),'close session');
+  // The night is called off, not only closed (sessions.cancelled_at, bug hunt 2026-11-10): its volunteers are told and stop being
+  // offered it, its waitlist offers and claims stop, the Saturday codes and badge weeks leave it out. Its bookings, report,
+  // close-out and refunds read nothing of it. A night opened again by hand (toggleSession, _ssBulkDo, the editor) loses it.
+  await _wr(sb.from('sessions').update({status:'closed',cancelled_at:prevCa||new Date().toISOString()}).eq('id',sid),'close session');
   // A cancelled booking hands its add-ons back, exactly as a single cancel does (a waitlist row never held any).
   await _addonStockRows(landed.filter(id=>was.get(id).status!=='waitlist').map(id=>was.get(id).entry),1);
   logAction(`${t('cnTitle')} · ${sid} · ${landed.length}`);
@@ -35425,7 +35470,7 @@ async function _execCancelNight(){
       else if(claimed.length)await _releaseBikes(claimed,'cancel night');
     }));
     await _addonStockRows(back.filter(id=>was.get(id).status!=='waitlist').map(id=>was.get(id).entry),-1);
-    if(back.length)await _wr(sb.from('sessions').update({status:prevSess}).eq('id',sid).eq('status','closed'),'undo cancel night');
+    if(back.length)await _wr(sb.from('sessions').update({status:prevSess,cancelled_at:prevCa}).eq('id',sid).eq('status','closed'),'undo cancel night');
     if(short)toast(t('errBikeUnavailable'),'warning');
     await loadDataLight();renderStaffQueue();
     if(_writeErr(res,'undo cancel night'))return false;
@@ -36205,7 +36250,8 @@ async function _checkinMany(idList){
   const res=await Promise.all(ids.map(async id=>{
     const e=_qGet(id);
     const args={p_booking_id:id,p_bike_id:null,p_op_id:_opId()},loc=locs.get(id)||{status:'active'};
-    const q=await _dqTry(id,()=>_rpcOp('staff_checkin',args),{kind:'checkin',args,label:e?_dqLabel(e):'',sid:e&&e.sessionId,wasWl:!!wasWl.get(id),local:loc,bikes:bikesOf.get(id)||null});
+    const q=await _dqTry(id,()=>_rpcOp('staff_checkin',args),{kind:'checkin',args,label:e?_dqLabel(e):'',sid:e&&e.sessionId,wasWl:!!wasWl.get(id),local:loc,
+      prev:Object.fromEntries(Object.keys(loc).map(k=>{const w=was.get(id)||{};return[k,w[k]===undefined?null:w[k]];})),bikes:bikesOf.get(id)||null}); // what a Discard puts back: the row before the paint (bug hunt 2026-11-10)
     if(q.queued){queued.push(id);return{};}
     const r=q.r;
     if(r&&r.error&&/^BAD_BOOKING_STATE/.test(String(r.error.message||'')))return{lost:true};
@@ -39015,6 +39061,9 @@ async function cancelBooking(id,reason,why){
     if(_queued.length===group.length){toast(t('toastBookingCancelled'));renderMyRides();return;}
   }
   const live=group.filter(e=>!_boIds.has(e.id));
+  // A paid ride that is over is settled at close-out, not cancelled by the rider: the server refuses it (customer_booking_update,
+  // bug hunt 2026-11-10), said in words before anything is sent rather than as a failed write.
+  if(_asCustomer()&&live.some(e=>e.paid||Number(e.walletPaid)>0)&&_sessEnded(_sessDisp(entry.sessionId))){toast(t('errSessionClosed'),'error');return;}
   const savedQNum=entry.queueNum;
   const saved=live.map(e=>({id:e.id,status:e.status,queueNum:e.queueNum,bikeIds:getAssignedBikeIds(e)}));
   // The reason rides on the cancel itself, for every rider of the booking.
@@ -59028,9 +59077,22 @@ function _tgSet(k,v){if(!S._tg)return;S._tg[k]=v;renderTagGrantModal();}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderTagGrantModal_1(event,el){if(event.target===el){S._tg=null;closeConfirm();}}
 function _on_renderTagGrantModal_2(event,el){S._tg=null;closeConfirm()}
-function _on_renderTagGrantModal_3(event,el){S._tg.dur=el.value}
-function _on_renderTagGrantModal_4(event,el){S._tg.start=el.value}
-function _on_renderTagGrantModal_5(event,el){S._tg.end=el.value}
+function _on_renderTagGrantModal_3(event,el){_tgRivalFlip(st=>{st.dur=el.value;});}
+function _on_renderTagGrantModal_4(event,el){_tgRivalFlip(st=>{st.start=el.value;});}
+function _on_renderTagGrantModal_5(event,el){_tgRivalFlip(st=>{st.end=el.value;});}
+// The days a temporary grant lasts, by its duration pill.
+const TG_DAYS={'1d':1,'3d':3,'1w':7,'2w':14,'1m':30,'3m':90,'6m':180,'1y':365};
+// The new grant's window as saveTagGrant writes it (ms; none for a permanent one), for the rival check: a Community grant and
+// a Petromin or Victory Lap one may follow each other, never overlap (_tag_one_of_two, bug hunt 2026-11-10).
+function _tgWin(st){
+  if(!st||st.kind!=='temp')return null;
+  const now=Date.now();
+  if(st.mode==='dur')return{starts_at:now,expires_at:now+(TG_DAYS[st.dur]||7)*864e5};
+  const s=st.today?now:Date.parse(String(st.start)+'T00:00:00+03:00'),e=st.end?Date.parse(String(st.end)+'T23:59:59.999+03:00'):NaN;
+  return{starts_at:isNaN(s)?now:s,expires_at:isNaN(e)?null:e};
+}
+// A date or a duration changed: the dialog is drawn again only when that turns the rival warning on or off.
+function _tgRivalFlip(fn){const st=S._tg;if(!st)return;const was=!!_tagRivalHeld(st.cid,st.tid,_tgWin(st));fn(st);if(was!==!!_tagRivalHeld(st.cid,st.tid,_tgWin(st)))renderTagGrantModal();}
 function _on_renderTagGrantModal_6(event,el){S._tg=null;closeConfirm()}
 function renderTagGrantModal(){
   const st=S._tg;if(!st)return;
@@ -59051,7 +59113,7 @@ function renderTagGrantModal(){
         <span class="cmy-tg-name">${esc(cust.name||'')}</span>
       </div>
       ${st.tid===TAG_COMMUNITY&&_isBlacklisted(st.cid)?_tagBanWarn():''}
-      ${_tagRivalHeld(st.cid,st.tid)?_tagOneOfTwoWarn(st.cid,st.tid):''}
+      ${_tagRivalHeld(st.cid,st.tid,_tgWin(st))?_tagOneOfTwoWarn(st.cid,st.tid,_tgWin(st)):''}
       ${st.tid===TAG_BLACKLIST&&_hasTagNow(st.cid,TAG_COMMUNITY)?`<label class="tag-ban-opt"><input type="checkbox"${st.dropComm?' checked':''} data-on-change="${_on("_tgSet","dropComm",_P("checked"))}">${esc(t('tagBlacklistDropComm'))}</label>`:''}
       <div class="cmy-tg-toggles">
         <button type="button" class="toggle-btn${!temp?' active':''} cmy-f1" aria-pressed="${(!temp)?'true':'false'}" data-on-click="${_on("_tgSet","kind","perm")}">${t('tagPermLabel')}</button>
@@ -59080,7 +59142,7 @@ function renderTagGrantModal(){
       </div>`}`:''}
       <div class="chrome-dact">
         <button class="btn-secondary" data-on-click="${_on("_on_renderTagGrantModal_6",_EV,_EL)}">${t('cancelBtn')}</button>
-        <button class="btn-primary chrome-mw100" data-on-click="${_on("saveTagGrant")}"${_tagRivalHeld(st.cid,st.tid)?' disabled':''}>${t('tagAddTitle')}</button>
+        <button class="btn-primary chrome-mw100" data-on-click="${_on("saveTagGrant")}"${_tagRivalHeld(st.cid,st.tid,_tgWin(st))?' disabled':''}>${t('tagAddTitle')}</button>
       </div>
     </div>
   </div>`;
@@ -59089,12 +59151,10 @@ async function saveTagGrant(){
   const st=S._tg;if(!st||st.busy)return; // a second tap while the first is on its way inserted the row twice: the second was refused (duplicate key) and said so in red (2026-10-07)
   // Temporary grants fill the starts_at / expires_at window; a permanent one writes it empty, as the row goes in on
   // the table's key and takes the place of one of the same tag this device has not heard of (2026-11-10).
-  if(_tagRivalHeld(st.cid,st.tid)){toast(t(_tagOneOfTwoKey(st.tid,_tagRivalHeld(st.cid,st.tid))),'error');return;} // Community or Petromin / Victory Lap, never both (2026-10-12, 2026-10-17)
   const row={customer_id:st.cid,tag_id:st.tid,added_by:(_opName()||'staff').slice(0,60),added_at:Date.now()}; // who gave it: the operator (the staff review, 2026-10-28, S07-community2-01)
   if(st.kind==='temp'){
     if(st.mode==='dur'){
-      const DAYS={'1d':1,'3d':3,'1w':7,'2w':14,'1m':30,'3m':90,'6m':180,'1y':365};
-      row.starts_at=Date.now();row.expires_at=row.starts_at+(DAYS[st.dur]||7)*864e5;
+      row.starts_at=Date.now();row.expires_at=row.starts_at+(TG_DAYS[st.dur]||7)*864e5;
     }else{
       // The days are Riyadh's, the clock the chip prints them on and the one the rides run on.
       // Read on the device's clock, a grant made from a desk set to another timezone opened and
@@ -59107,6 +59167,9 @@ async function saveTagGrant(){
       row.starts_at=start;row.expires_at=end;
     }
   }
+  // Community or Petromin / Victory Lap, never both at once (2026-10-12, 2026-10-17): a rival grant is refused only when its
+  // window and this one's share a moment from now on, as the database's _tag_one_of_two does (bug hunt 2026-11-10).
+  if(_tagRivalHeld(st.cid,st.tid,row)){toast(t(_tagOneOfTwoKey(st.tid,_tagRivalHeld(st.cid,st.tid,row))),'error');return;}
   st.busy=true;
   try{
     const _wasVip=_isVip({id:st.cid});
@@ -59159,10 +59222,17 @@ const TAG_COMMUNITY='tag_saturday',TAG_BLACKLIST='tag_blacklist',TAG_VIP='tag_vi
 // _tagRivals: the tags that cannot sit beside tid; _tagRivalHeld: the first of them the account holds, else null.
 function _tagRivals(tid){return tid===TAG_COMMUNITY?[TAG_PETROMIN,TAG_VLAP]:(tid===TAG_PETROMIN||tid===TAG_VLAP)?[TAG_COMMUNITY]:[];}
 function _tagRival(tid){return _tagRivals(tid)[0]||null;}
-function _tagRivalHeld(cid,tid){if(!cid)return null;return _tagRivals(tid).find(r=>(S.customerTags||[]).some(ct=>ct.customer_id===cid&&ct.tag_id===r&&!_tagLapsed(ct)))||null;}
+// win: the new grant's {starts_at, expires_at} (ms); none is a permanent grant from now. A rival counts when its window and
+// this one share a moment from now on (_tag_one_of_two): a switch dated ahead, one ending before the other starts, is not both.
+function _tagRivalHeld(cid,tid,win){
+  if(!cid)return null;
+  const now=Date.now(),e=win&&win.expires_at!=null?Number(win.expires_at):null,lo=Math.max(win&&win.starts_at!=null?Number(win.starts_at):now,now);
+  if(e!=null&&e<=lo)return null;
+  return _tagRivals(tid).find(r=>(S.customerTags||[]).some(ct=>ct.customer_id===cid&&ct.tag_id===r&&(ct.expires_at==null||Number(ct.expires_at)>lo)&&(e==null||ct.starts_at==null||Number(ct.starts_at)<e)))||null;
+}
 // The warning names the pair at stake: Community and Victory Lap say so; Community and Petromin keep their words.
 function _tagOneOfTwoKey(a,b){return (a===TAG_VLAP||b===TAG_VLAP)?'tagOneOfTwoVl':'tagOneOfTwo';}
-function _tagOneOfTwoWarn(cid,tid){return `<div class="tag-ban-warn tag-rival-warn" role="alert"><span>${esc(t(_tagOneOfTwoKey(tid,_tagRivalHeld(cid,tid))))}</span></div>`;}
+function _tagOneOfTwoWarn(cid,tid,win){return `<div class="tag-ban-warn tag-rival-warn" role="alert"><span>${esc(t(_tagOneOfTwoKey(tid,_tagRivalHeld(cid,tid,win))))}</span></div>`;}
 function _hasTagNow(cid,tid){return _ctRowsFor(cid).some(ct=>ct.tag_id===tid&&_tagActive(ct));} // the account's rows, not all 4k (2026-10-31)
 function _isBlacklisted(cid){return _hasTagNow(cid,TAG_BLACKLIST);}
 function _tagBanWarn(){const tg=(S.tags||[]).find(x=>x.id===TAG_BLACKLIST);return `<div class="tag-ban-warn" role="alert">${tg?_tagLogo(tg):''}<span>${esc(t('tagBlacklistWarn'))}</span></div>`;}
