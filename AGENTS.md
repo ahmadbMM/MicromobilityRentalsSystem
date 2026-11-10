@@ -856,7 +856,7 @@ From reports/Reserve page design and function.md (git-excluded) and the owner's 
 Q5 no, Q6 yes, Q7 yes). The flow names the outcome in the button or the heading, never in a hint line:
 - `_regWlNow(s,qty)` is submitReg's own waitlist test (full, or fewer places than riders who need one). It puts the
   "Waitlist" chip in the step-1 bar summary and on the review's ride line, and Confirm reads **Join waitlist**.
-- An entry that asked for a place carries `seat_only:true` to `customer_create_booking`. Migration 20261111030000
+- An entry that asked for a place carries `seat_only:true` to `customer_create_booking`. Migration 20261111050000
   refuses such a call with **PLACE_GONE** when a row would land on the waitlist (another device took the last place).
   `_placeGone` asks in a centred pop-up: Join waitlist (`S._wlJoin`, booked again without the key) or Choose another
   ride; the riders' choices stay. An older database ignores the key.

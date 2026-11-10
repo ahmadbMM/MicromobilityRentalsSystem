@@ -18500,7 +18500,7 @@ async function _submitReg(){
       ...(_isBlood(sess)?{bloodRole:S.regBldRole==='visitor'?'visitor':'donor',bloodClub:S.regBldClubNone?'':String(S.regBldClub||'').trim().replace(/\s+/g,' ').slice(0,80)}:{}), // the Blood Donation event's questions (20261105140000, 20261105150000)
       shareOk:(_rideKind(sess)==='runher'||_isRace(sess)||_isBlood(sess))&&_shareAgreed(), // customer_create_booking stamps data_share_at (20261006180000, 20261017210000)
       // Booking a place, not knowingly joining the waitlist: a place another device took meanwhile is refused (PLACE_GONE,
-      // 20261111030000) and the rider is asked, instead of being waitlisted unasked. Join waitlist from that question says yes.
+      // 20261111050000) and the rider is asked, instead of being waitlisted unasked. Join waitlist from that question says yes.
       seatOnly:bookingStatus==='waiting'&&S._wlJoin!==S.selSession
     },i===0));
     _applyPromoToEntries(entries);
@@ -18549,7 +18549,7 @@ async function _submitReg(){
               continue;
             }
             if(await _fixRefused(err,()=>submitReg()))return;
-            // The last place went between this page's count and the tap (PLACE_GONE, 20261111030000): asked, choices kept.
+            // The last place went between this page's count and the tap (PLACE_GONE, 20261111050000): asked, choices kept.
             if(/PLACE_GONE/.test(_msg+' '+((err&&err.message)||''))){_placeGone(sess);return;}
             // Any is staff's to give (20261002160000): a type left as Any goes back to be chosen
             if(/PICK_TYPE/.test(_msg+' '+((err&&err.message)||''))){
@@ -64666,7 +64666,7 @@ function _anModelKey(){
     todayStr(),S.staffRole||'',document.documentElement.getAttribute('data-theme')||'',S._anSrvV||0].join('\u0001');
 }
 // The Reserve funnel (the Reserve research, 2026-11-10, row 20): how many booking attempts of the last 30 days reached each
-// step, from the app and the website (reserve_funnel, 20261111030000). Fetched once a visit; nothing before the database has it.
+// step, from the app and the website (reserve_funnel, 20261111050000). Fetched once a visit; nothing before the database has it.
 // The card fills its own box when the counts come (never a repaint of Analytics under the reader).
 function _rsFnlCard(){
   if(S._rsFnl===undefined){S._rsFnl=null;

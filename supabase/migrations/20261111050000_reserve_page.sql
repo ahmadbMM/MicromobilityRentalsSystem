@@ -44,7 +44,7 @@ begin
   v := pg_temp._once(v,
     $a$  perform set_config('mm.promo_code', '', true);$a$,
     $b$  -- A rider who asked for a place and would land on the waitlist (another device took the last place) is asked
-  -- first: the whole call is refused and nothing is kept (20261111030000).
+  -- first: the whole call is refused and nothing is kept (20261111050000).
   if exists (select 1 from jsonb_array_elements(p_entries) x where x->>'seat_only' = 'true')
      and exists (select 1 from queue_entries q where q.id = any(_ids) and q.status = 'waitlist') then
     raise exception 'PLACE_GONE' using errcode = 'P0001';
@@ -63,7 +63,7 @@ create table if not exists public.reserve_funnel (
   d     text
 );
 comment on table public.reserve_funnel is
-  'The Reserve funnel (20261111030000): one row per step a booking attempt reached; no account, a random id per attempt.';
+  'The Reserve funnel (20261111050000): one row per step a booking attempt reached; no account, a random id per attempt.';
 create index if not exists reserve_funnel_at on public.reserve_funnel (at);
 create unique index if not exists reserve_funnel_once on public.reserve_funnel (visit, ev);
 alter table public.reserve_funnel enable row level security;
@@ -135,7 +135,7 @@ begin
 end $chk$;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261111030000', 'reserve_page')
+values ('20261111050000', 'reserve_page')
 on conflict (version) do nothing;
 
 commit;
