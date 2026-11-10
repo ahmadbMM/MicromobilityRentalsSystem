@@ -6,7 +6,9 @@ import { stubSupabase, unlockStaff, loginCustomer, waitForSb } from './helpers/s
 // their own card on the account page, and an Android rider gets Add to Google Wallet.
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
 const sessions = [{ id: 's0', day: 'Friday', session_date: today, capacity: 12, status: 'open', created_at: 1, bike_slots: '{"_time":"21:00 - 23:00","_total":12}' }];
-const routes = [{ key: 'routes.routes.items', value: [{ name: { en: 'The Corniche', ar: 'الكورنيش' }, km: 12 }, { slug: 'obhur-coast', name: { en: 'Obhur coast', ar: 'ساحل أبحر' }, km: 30 }] }];
+// The slugs as the Website editor saves them ({en,ar}, a mono text field); a route left without one is not offered,
+// as the website ties nothing to it.
+const routes = [{ key: 'routes.routes.items', value: [{ slug: { en: 'the-corniche', ar: 'the-corniche' }, name: { en: 'The Corniche', ar: 'الكورنيش' }, km: 12 }, { slug: { en: 'obhur-coast', ar: 'obhur-coast' }, name: { en: 'Obhur coast', ar: 'ساحل أبحر' }, km: 30 }, { slug: { en: '', ar: '' }, name: { en: 'Al-Balad', ar: 'البلد' }, km: 8 }] }];
 
 test.describe('routes on a ride', () => {
   test('the picker lists the website\'s routes with a slug each, and the slug is written with the ride', async ({ page }) => {
@@ -15,7 +17,7 @@ test.describe('routes on a ride', () => {
     await page.goto('/');
     await waitForSb(page);
     await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;renderSessions()`);
-    await page.waitForFunction(`Array.isArray(S._routes)&&S._routes.length===2`);
+    await page.waitForFunction(`Array.isArray(S._routes)&&S._routes.length===3`);
     await page.evaluate(`renderSessions()`);
     const sel = page.locator('#ns-route');
     await expect(sel.locator('option')).toHaveCount(3);

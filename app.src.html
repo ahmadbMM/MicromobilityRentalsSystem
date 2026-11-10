@@ -18481,7 +18481,7 @@ function _rideRoute(sess){
   if(!sess||!_needsBike(sess)||_spotHeld(sess))return null; // where it goes is told with the breakfast spot
   if(sess.route_slug){
     if(S._routes===undefined)_routesLoad();
-    const r=_routeOf(sess),raw=(Array.isArray(S._routes)?S._routes:[]).find(x=>(x.slug||_routeSlug(_routeName(x)))===r.slug)||{};
+    const r=_routeOf(sess),raw=(Array.isArray(S._routes)?S._routes:[]).find(x=>_routeSlugOf(x)===r.slug)||{};
     const L=v=>String((v&&typeof v==='object')?(v[S.lang]||v.en||''):(v||''));
     return{name:r.name,km:+r.km||0,note:[L(raw.level),L(raw.surface)].filter(Boolean).join(' · '),href:_safeUrl(raw.href&&typeof raw.href==='object'?raw.href.href:raw.href)};
   }
@@ -21793,7 +21793,7 @@ function _payRfOpen(o){
   _payRfDraw();
   _stoFocusLater('pay-rf',S._payRf.decline?'pay-rf-why':'pay-rf-amt');
 }
-function _payRfClose(){const P=S._payRf;S._payRf=null;_payRfDraw();if(P&&P.ret&&P.ret.focus)try{P.ret.focus();}catch(_){}}
+function _payRfClose(){const P=S._payRf;if(P&&P.busy)return;S._payRf=null;_payRfDraw();if(P&&P.ret&&P.ret.focus)try{P.ret.focus();}catch(_){}} // a refund on its way keeps its dialog: closed, it went through unseen and a second one followed
 function _on__payRfBg(event,el){if(event.target===el)_payRfClose();}
 function _payRfGoTxt(P){return P.decline?t('payDeclineBtn'):t('payRefundGo').replace('{0}',_money(Number(P.amt)||0,_NOISO));}
 function _payRfDraw(){
@@ -21810,11 +21810,11 @@ function _payRfDraw(){
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on__payRfBg',_EV,_EL)}"><div class="confirm-box pay-rf-box" role="dialog" aria-modal="true" aria-labelledby="pay-rf-t">
     <div class="chrome-dh10"><div class="chrome-dt" id="pay-rf-t">${esc(t(P.decline?'payDeclineTitle':'payRefundTitle').replace('{0}',P.title))}</div>
-      <button type="button" data-on-click="${_on('_payRfClose')}" aria-label="${esc(t('closeBtn'))}" class="chrome-xt">&times;</button></div>
+      <button type="button" data-on-click="${_on('_payRfClose')}" aria-label="${esc(t('closeBtn'))}" class="chrome-xt"${P.busy?' disabled':''}>&times;</button></div>
     <div class="chrome-dbody">${body}
       <div class="form-group"><label for="pay-rf-why">${esc(t('payReason'))}</label><textarea id="pay-rf-why" rows="2" maxlength="200" data-on-input="${_on("_payRfIn","why",_P("value"))}">${esc(P.why)}</textarea></div>
       ${P.err?`<div class="sto-err" role="alert">${esc(P.err)}</div>`:''}</div>
-    <div class="chrome-dact"><button type="button" class="btn-secondary" data-on-click="${_on('_payRfClose')}">${esc(t('cancelBtn'))}</button>
+    <div class="chrome-dact"><button type="button" class="btn-secondary" data-on-click="${_on('_payRfClose')}"${P.busy?' disabled':''}>${esc(t('cancelBtn'))}</button>
       <button type="button" class="${P.decline?'btn-red':'btn-primary'}" id="pay-rf-go" data-on-click="${_on(P.decline?'_payDecGo':'_payRfGo')}"${P.busy?' disabled aria-busy="true"':''}>${esc(_payRfGoTxt(P))}</button></div>
   </div></div>`;
 }
@@ -21852,15 +21852,15 @@ async function _payRfGo(){
   P.busy=true;P.err='';_payRfDraw();
   const body={amount:amt,dest:P.dest,reason:why.slice(0,200)};
   if(P.refund)body.refund=P.refund;else body.payment=P.payment;
-  const r=await _gatedRpc(t('payRefundBtn'),a=>_payRefundCall({...body,op:a.p_op,approval:a.p_approval}),{kind:'refund',amount:amt});
-  if(S._payRf!==P)return;
+  let r;try{r=await _gatedRpc(t('payRefundBtn'),a=>_payRefundCall({...body,op:a.p_op,approval:a.p_approval}),{kind:'refund',amount:amt});}catch(e){r={error:e};} // busy always ends: it holds the dialog open
+  const here=S._payRf===P; // the dialog is gone: the outcome is still said, logged and read again, only not drawn
   P.busy=false;
-  if(r===null){_payRfDraw();return;}
-  if(r.error){P.err=_payRfSay(r.error);_payRfDraw();_payAfter(P);return;}
+  if(r===null){if(here)_payRfDraw();return;}
+  if(r.error){if(here){P.err=_payRfSay(r.error);_payRfDraw();}else toast(_payRfSay(r.error),'error');_payAfter(P);return;}
   const d=r.data||{},toWal=d.dest==='wallet'||P.dest==='wallet';
   haptic();toast(t(toWal?'payRefundedWal':d.status==='done'?'payRefundedCard':'payRefundSent').replace('{0}',_money(d.amount||amt,_NOISO)));
   logAction(`${t('payRefundBtn')} ${P.title}: ${_money(amt,_NOISO)} · ${t(toWal?'payToWallet':'payToCard')} · ${why}`,{k:'refund',e:P.order?'store_order':P.booking?'booking':'payment',id:P.order||P.booking||P.payment||P.refund,amt});
-  S._payRf=null;_payRfDraw();
+  if(here){S._payRf=null;_payRfDraw();}
   _payAfter(P);
 }
 async function _payDecGo(){
@@ -21870,12 +21870,12 @@ async function _payDecGo(){
   if(!why){P.err=t('payWhyNeed');_payRfDraw();return;}
   P.busy=true;P.err='';_payRfDraw();
   let r;try{r=await sb.rpc('staff_pay_refund_decline',{p_refund:P.refund,p_reason:why.slice(0,200)});}catch(e){r={error:e};}
-  if(S._payRf!==P)return;
+  const here=S._payRf===P; // as _payRfGo: said and logged even with the dialog gone
   P.busy=false;
-  if(r.error){P.err=_payRfSay(r.error);_payRfDraw();return;}
+  if(r.error){if(here){P.err=_payRfSay(r.error);_payRfDraw();}else toast(_payRfSay(r.error),'error');return;}
   toast(t('payDeclined'));
   logAction(`${t('payDecline')} ${P.title}: ${why}`,{k:'refund',e:'payment_refund',id:P.refund});
-  S._payRf=null;_payRfDraw();
+  if(here){S._payRf=null;_payRfDraw();}
   _payAfter(P);
 }
 // After a refund or a decline (or a refusal, which may still have written a failed refund): what shows it is read again.
@@ -21888,9 +21888,10 @@ function _payAfter(P){
 
 // ── Payments: every online payment, the refunds owed, the settings ──
 function _payDayBack(n){return _ksaDay(Date.now()-n*864e5);}
-function _pay(){return S._pay||(S._pay={rows:null,err:false,gone:false,at:0,busy:false,from:_payDayBack(30),to:todayStr(),kind:'',st:'',q:'',owed:null,opays:{},oorders:{},oerr:false,oat:0,obusy:false,set:null});}
+function _pay(){return S._pay||(S._pay={rows:null,err:false,gone:false,at:0,busy:false,from:_payDayBack(30),to:todayStr(),toAuto:true,kind:'',st:'',q:'',owed:null,opays:{},oorders:{},oerr:false,oat:0,obusy:false,set:null});}
 async function _payLoad(force){
   const W=_pay();if(!sb||W.busy||(!force&&W.at&&Date.now()-W.at<3e4))return;
+  if(W.toAuto)W.to=todayStr(); // "To" as it opened is today, whichever day that now is: a page left open past midnight lists the new day's payments
   W.busy=true;W.at=Date.now();
   const key=W.from+'|'+W.to+'|'+W.kind;
   let r;try{r=await sb.rpc('staff_payments',{p_from:W.from||null,p_to:W.to||null,p_kind:W.kind||null});}catch(e){r={error:e};}
@@ -21932,7 +21933,7 @@ function renderPayments(){
   if(k){try{k.focus({preventScroll:true});if(sel!=null&&k.setSelectionRange)k.setSelectionRange(sel,sel);}catch(_){}}
 }
 function _payView(k){S.payView=PAY_VIEWS.includes(k)?k:'all';_pushNav();renderPayments();}
-function _paySet(k,v){const W=_pay();W[k]=String(v||'');if(k==='from'||k==='to'||k==='kind'){W.rows=null;W.at=0;}renderPayments();}
+function _paySet(k,v){const W=_pay();W[k]=String(v||'');if(k==='to')W.toAuto=false;if(k==='from'||k==='to'||k==='kind'){W.rows=null;W.at=0;}renderPayments();}
 function _payQ(v){_pay().q=String(v||'');const h=document.getElementById('pay-list');if(h)h.innerHTML=_payListHtml();}
 function _payAllHtml(){
   const W=_pay();
@@ -22106,7 +22107,9 @@ async function _paySetSave(){
         ksa:{on:!!D.kOn,fee:_paySetInt(D.kFee,0,1000,'paySetKFee'),days:days(D.kDays)},freeOver:free}};
   }catch(e){toast(String((e&&e.message)||e),'error');return;}
   const R=_web().rows,cur=k=>R[k]&&R[k].value!==undefined?R[k].value:null;
-  const ch=Object.keys(next).filter(k=>JSON.stringify(next[k])!==JSON.stringify(cur(k)));
+  // jsonb hands an object's keys back in its own order (store.delivery's ksa before pickup): compared with the keys sorted, an unchanged value is no change
+  const js=v=>JSON.stringify(v,(_k,x)=>x&&typeof x==='object'&&!Array.isArray(x)?Object.fromEntries(Object.keys(x).sort().map(y=>[y,x[y]])):x);
+  const ch=Object.keys(next).filter(k=>js(next[k])!==js(cur(k)));
   if(!ch.length){toast(t('paySetNothing'),'info');return;}
   const prev=ch.map(k=>({key:k,value:cur(k)}));
   const b=document.getElementById('ps-save');if(b)b.disabled=true;
@@ -22344,7 +22347,7 @@ function _lkResHtml(day){
 function _lkResRow(r,day){
   const code=_lkCodeOf(r),od=_lkOverdue(r),giving=S._lkGiveRow===r.id;
   const st=r.status==='cancelled'?t('lkCancelled'):r.status==='returned'?t('lkReturned'):od?t('lkOverdue'):_lkKeyDue(r)?t('lkKeyNot'):code?t('lkInUse'):t('lkWaiting');
-  const acts=giving?`<input id="lk-give-in" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="${esc(t('lkNumPh'))}" placeholder="${esc(t('lkNumPh'))}" data-on-keydown="${_on("_lkGiveKey",_EV,_EL)}">
+  const acts=giving?`<input id="lk-give-in" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="${esc(t('lkNumPh'))}" placeholder="${esc(t('lkNumPh'))}" value="${esc(S._lkGiveTxt||'')}" data-on-input="${_on("_lkGiveIn",_P("value"))}" data-on-keydown="${_on("_lkGiveKey",_EV,_EL)}">
       <button type="button" class="btn-sm btn-primary" data-on-click="${_on("_lkGiveGo")}">${t(code?'lkMove':'lkGive')}</button>
       <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_lkResGive",'')}">${t('cancelBtn')}</button>`
     :_lkLive(r)?`${_lkKeyDue(r)?`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_lkGive",r.id,code,day)}">${t('lkGiveKey')}</button>`:code?`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_lkHandBack",r.id,day)}">${t('lkHandBack')}</button>`:''}
@@ -22400,13 +22403,16 @@ function _lkItemMsg(code,day,until){
     +`MicroMobility: تركت أغراضاً في الخزانة ${code} بتاريخ ${day}. نحتفظ بها حتى ${until}. ردّ هنا لترتيب استلامها.`;
 }
 function _lkItemOpen(rid,day){
-  S._lkIt={rid,day:String(day||''),note:'',state:'kept',photo:null,newPhoto:null,until:'',busy:false,loaded:false,ret:document.activeElement};
+  S._lkIt={rid,day:String(day||''),note:'',state:'kept',photo:null,newPhoto:null,until:'',busy:false,loaded:false,err:false,ret:document.activeElement};
   _lkItemDraw();_lkItemFetch(rid);
 }
 async function _lkItemFetch(rid){
+  const P0=S._lkIt;if(P0&&P0.rid===rid&&P0.err){P0.err=false;_lkItemDraw();} // Retry: the wheel while it reads again
   let r;try{r=await sb.from('locker_items').select('rental_id,note,state,keep_until,photo').eq('rental_id',rid).limit(1);}catch(e){r={error:e};}
   const P=S._lkIt;if(!P||P.rid!==rid)return;
-  const x=r&&!r.error&&Array.isArray(r.data)?r.data.find(y=>y.rental_id===rid):null;
+  // A read that failed is not "nothing kept": shown empty and saved, it wrote over the note and set a collected item back to kept
+  if(!r||r.error||!Array.isArray(r.data)){P.err=true;_lkItemDraw();return;}
+  const x=r.data.find(y=>y.rental_id===rid);
   if(x){P.note=x.note||'';P.state=x.state||'kept';P.until=x.keep_until||'';P.photo=x.photo||null;}
   P.loaded=true;_lkItemDraw();
 }
@@ -22429,7 +22435,7 @@ function _lkItemDraw(){
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on__lkItemBg',_EV,_EL)}"><div class="confirm-box lk-box" role="dialog" aria-modal="true" aria-labelledby="lk-it-t">
     <div class="chrome-dh10"><div class="chrome-dt" id="lk-it-t">${esc(t('lkItems'))}${code?' · '+esc(t('lkSheetTitle').replace('{0}',code)):''}</div>
       <button type="button" data-on-click="${_on('_lkItemClose')}" aria-label="${esc(t('closeBtn'))}" class="chrome-xt">&times;</button></div>
-    <div class="chrome-dbody lk-sh-body">${!P.loaded?skeletonList():`
+    <div class="chrome-dbody lk-sh-body">${!P.loaded?(P.err?_loadErr(t('errConnection'),_on("_lkItemFetch",P.rid)):skeletonList()):`
       <div class="lk-muted"><b>${esc(r.name||'')}</b>${day?' · '+esc(shortDate(day)):''}${until?' · '+esc(t('lkItUntil').replace('{0}',shortDate(until))):''}</div>
       <div class="form-group"><label for="lk-it-note">${t('lkItNote')}</label><textarea id="lk-it-note" maxlength="500" rows="3" data-on-input="${_on("_lkItemNote",_P("value"))}">${esc(P.note)}</textarea></div>
       <div class="form-group"><div class="lk-ci-lbl">${t('lkItPhoto')}</div>${img?`<img class="lk-it-img" src="${esc(img)}" alt="${esc(t('lkItPhoto'))}">`:''}
@@ -22470,7 +22476,7 @@ async function _lkItemSave(){
 // ── The report (the owner, 2026-11-09): per evening, the rentals, the lockers used and how full, the money, the not collected ──
 function _lkRpState(){return S._lkRp||(S._lkRp={days:30,rows:null,at:0,busy:false,err:false,for:0});}
 async function _lkRpLoad(force){
-  const R=_lkRpState();if(R.busy||(!force&&R.rows&&R.for===R.days&&Date.now()-R.at<60000))return;
+  const R=_lkRpState();if(R.busy||(!force&&R.at&&R.for===R.days&&Date.now()-R.at<(R.rows?60000:8000)))return; // a failed read is tried again after a pause (or by Retry), never on every paint: its own repaint asked again at once, endlessly
   R.busy=true;const n=R.days;
   let r;try{r=await sb.from('locker_rentals').select('day,period,locker_id,price,status,receipt_id,cancel_reason,returned_by').gte('day',_ksaYmd(Date.now()-(n-1)*864e5)).lte('day',todayStr()).limit(5000);}catch(e){r={error:e};}
   R.busy=false;R.at=Date.now();R.for=n;
@@ -22539,10 +22545,15 @@ async function _lkOutGo(){
   const l=_lkById(P.id);
   if(await _wr(sb.from('lockers').update({status:'out',note:why}).eq('id',P.id),'locker status'))return;
   logAction(`${l?l.code:''}: ${t('lkOutSvc')} · ${why}`,{k:'locker',e:'locker',id:P.id});
-  _lkOutClose();if(S._lkUE)delete S._lkUE[P.id];await _lkLoad(true,S.lkDay||todayStr());
+  _lkOutClose();if(S._lkUE)delete S._lkUE[P.id];if(S._lkUH===P.id)_lkUnitHistFetch(P.id);await _lkLoad(true,S.lkDay||todayStr());
 }
 async function _lkUnitHist(id){
   S._lkUH=S._lkUH===id?null:id;renderLockers();if(!S._lkUH)return;
+  await _lkUnitHistFetch(id);
+}
+// A unit's events, read when its History opens and again when its status changes with History open (left
+// unread, the open panel showed the loading wheel until it was closed and opened again)
+async function _lkUnitHistFetch(id){
   let r;try{r=await sb.from('locker_events').select('at,by_name,kind,reason').eq('locker_id',id).order('at',{ascending:false}).limit(50);}catch(e){r={error:e};}
   S._lkUE=S._lkUE||{};S._lkUE[id]=r&&!r.error?(r.data||[]):[];renderLockers();
 }
@@ -22552,13 +22563,16 @@ function _lkUnitHistHtml(id){
   const lab={added:'lkEvAdded',out:'lkOutSvc',back:'lkBackInSvc',retired:'lkRetired',note:'lkEvNote'};
   return`<ul class="lk-ev">${ev.map(e=>`<li><b>${esc(t(lab[e.kind]||'lkEvNote'))}</b>${e.reason?' · '+esc(e.reason):''}<span class="lk-muted"> · ${esc(e.by_name||'')} · ${esc(shortDate(_ksaYmd(+new Date(e.at))))}</span></li>`).join('')}</ul>`;
 }
-function _lkResGive(id){S._lkGiveRow=id||null;renderLockers();if(id)setTimeout(()=>{const i=document.getElementById('lk-give-in');if(i)i.focus();},40);}
+function _lkResGive(id){S._lkGiveRow=id||null;S._lkGiveTxt='';renderLockers();if(id)setTimeout(()=>{const i=document.getElementById('lk-give-in');if(i)i.focus();},40);}
+// The number being typed is kept: a repaint (realtime, the evening read again) rebuilt the box empty, and the digits
+// typed after it made another locker's number (the 2 of a 12)
+function _lkGiveIn(v){S._lkGiveTxt=String(v??'');}
 function _lkGiveKey(ev,el){if(ev.key==='Enter'){ev.preventDefault();_lkGiveGo(el.value);}else if(ev.key==='Escape'){ev.preventDefault();_lkResGive('');}}
 async function _lkGiveGo(v){
   const id=S._lkGiveRow;if(!id)return;
   if(v==null){const i=document.getElementById('lk-give-in');v=i?i.value:'';}
   if(!String(v||'').trim())return;
-  if(await _lkGive(id,v,S.lkDay||todayStr())){S._lkGiveRow=null;renderLockers();}
+  if(await _lkGive(id,v,S.lkDay||todayStr())){S._lkGiveRow=null;S._lkGiveTxt='';renderLockers();}
 }
 async function _lkUndoBack(id,day){
   if(!await _lkCall('staff_locker_cancel',{p_rental:id,p_reason:'',p_undo:true},day))return;
@@ -22607,7 +22621,7 @@ function _lkUnitSet(id,st){
   const go=async()=>{
     if(_roNow()){_roRefusal();return;}
     if(await _wr(sb.from('lockers').update(st==='available'?{status:st,note:''}:{status:st}).eq('id',id),'locker status'))return;
-    if(S._lkUE)delete S._lkUE[id];
+    if(S._lkUE)delete S._lkUE[id];if(S._lkUH===id)_lkUnitHistFetch(id);
     logAction(`${l.code}: ${t(st==='available'?'lkInSvc':st==='out'?'lkOutSvc':'lkRetired')}`,{k:'locker',e:'locker',id});
     await _lkLoad(true,S.lkDay||todayStr());
   };
@@ -24134,7 +24148,13 @@ async function _entryAddonMutate(id,addonId,delta){
   // Through the same door as every customer row write (token RPC in secure mode), and CHECKED:
   // a row that never saved must not keep its stock decrement or keep showing on the ticket.
   const res=await _ownEntryUpdate(id,{addons:JSON.stringify(cur)});
-  if(res&&res.error){try{e.addons=JSON.parse(_before);}catch(_){e.addons=[];}toast(res.error.message||t('errConnection'),'error');return false;}
+  if(res&&res.error){
+    try{e.addons=JSON.parse(_before);}catch(_){e.addons=[];}
+    // In words a person can act on, not the raw PostgREST text ("JWT expired", the RLS sentence, a bare "denied"); on a
+    // staff device as every refused write is: the bar, the offline mark and the error log
+    if(_asCustomer())toast(_errMessage(res.error)||t('errConnection'),'error');else _writeErr(res,'add-on change');
+    return false;
+  }
   // Waitlist rows hold NO stock (the invariant everywhere): their add-ons are consumed at
   // promotion (_consumeAddonsOnEnter covers the whole row) — moving stock here would
   // double-consume on promote and never restock on a waitlist cancel.
@@ -24344,9 +24364,13 @@ function noShowFlag(e){
 // ── Routes on a ride (2026-09-28) ─────────────────────────────────────────────────────────────
 // The Routes page's list (site_content routes.routes.items, edited in Website) names the routes; a
 // ride may name one (sessions.route_slug), and the card, the pass and the website say which.
-function _routeSlug(v){return String(v||'').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60);}
+// A route's slug as the website reads it (content-core.ts, a mono text field): the Website editor saves it {en,ar}, so
+// its English, else its Arabic. Taken as the object, every option's value was "[object Object]" and no ride kept its
+// route. A route with no slug has nothing to tie a ride by, here as on the website (one made from the name followed
+// the staff member's language, so a ride named its route in English and showed the bare slug in Arabic).
+function _routeSlugOf(x){const v=x&&x.slug;return(v&&typeof v==='object')?(String(v.en||'').trim()||String(v.ar||'').trim()):String(v||'').trim();}
 function _routeName(x){if(!x)return'';const n=x.name;if(n&&typeof n==='object')return String(n[S.lang]||n.en||Object.values(n)[0]||'');return String(n||'');}
-function _routes(){return Array.isArray(S._routes)?S._routes.map(x=>({slug:x.slug||_routeSlug(_routeName(x)),name:_routeName(x),km:x.km})).filter(r=>r.slug&&r.name):[];}
+function _routes(){return Array.isArray(S._routes)?S._routes.map(x=>({slug:_routeSlugOf(x),name:_routeName(x),km:x.km})).filter(r=>r.slug&&r.name):[];}
 async function _routesLoad(){
   if(!sb||S._routes!==undefined||S._routesBusy)return;S._routesBusy=true;
   try{const r=await sb.from('site_content').select('value').eq('key','routes.routes.items').maybeSingle();S._routes=(r&&!r.error&&Array.isArray(r.data&&r.data.value))?r.data.value:[];}
