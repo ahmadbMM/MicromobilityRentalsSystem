@@ -11209,6 +11209,8 @@ html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) .q-l
 html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) .q-live-count .q-lc-waiting::before{background:#1b2027;box-shadow:inset 0 0 0 1px #7f8890;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .q-live-count .stat-strip{margin:0;flex-wrap:wrap;gap:6px;padding-inline-start:8px;border-inline-start:1px solid var(--sf-line);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .q-live-count .stat-chip{min-height:32px;padding:0 10px;border-radius:var(--sf-r-ctl);}
+/* While the live channel is down: when this device's copy was last read (staff round s10, item 8). Small text, never a bar. */
+body.view-staff :is(#tab-queue,#tab-waitlist) .q-live-count .q-lc-upd{font-size:12px;color:var(--muted);white-space:nowrap;padding-inline:4px;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .q-live-count .overdue-banner{margin:0;margin-inline-start:auto;padding:0 4px 0 10px;min-height:38px;gap:10px;border-radius:var(--sf-r-ctl);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .q-live-count .overdue-banner .btn-sm{min-height:30px;}
 /* an approval ride's funnel has no live three: it stands alone, the same height */
@@ -12361,7 +12363,6 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table .rq-mng{white-space:n
 body.view-staff :is(#tab-queue,#tab-waitlist) .actions-cell.rq-acts{display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-end;gap:6px;min-width:0;max-width:none;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-acts .rq-act{flex:0 0 auto;min-width:96px;padding-inline:10px;white-space:nowrap;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-acts .rq-more{flex:0 0 32px;width:32px;min-width:32px;padding:0;border:1px solid var(--sf-line,var(--border));background:var(--sf-card,var(--s1));color:var(--text);font-size:16px;letter-spacing:0;}
-body.view-staff :is(#tab-queue,#tab-waitlist) .rq-acts .rq-undo{border:1px solid var(--sf-line2,var(--border));background:var(--sf-card,var(--s1));color:var(--text);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-pact{white-space:nowrap;}
 @media (pointer:coarse){
   body.view-staff :is(#tab-queue,#tab-waitlist) .rq-acts .rq-more{flex-basis:44px;width:44px;min-width:44px;}
@@ -12369,7 +12370,6 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .rq-pact{white-space:nowrap;}
   body.view-staff :is(#tab-queue,#tab-waitlist) .rq-chki,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-selall{width:22px;height:22px;}
 }
 html[data-staff-theme="booth"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-acts .rq-more,
-html[data-staff-theme="booth"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-acts .rq-undo{border:2px solid #000;}
 html[data-staff-theme="booth"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-acts .rq-act{min-width:112px;}
 /* a write still out: a dashed edge on the status pill; a refusal: why, on the row, under its action */
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-pend .status-badge{outline:1px dashed currentColor;outline-offset:2px;}

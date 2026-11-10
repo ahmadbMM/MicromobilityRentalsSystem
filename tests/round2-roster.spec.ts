@@ -1,11 +1,12 @@
-import { test, expect, type Page, type Request } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb, staffReady, type FailWrite } from './helpers/supabase';
 
 // The Bookings roster, round two (the user's picks on the round-two page, 2026-11-08: s_bookings, s_dialog_speed,
 // d_bulk = in place, d_undo = row). One action per row and a ⋯ menu; the select box in a column of its own; two lines
 // a booking; the event's mark beside the number; the number the desk acts on first; the selection's actions in the
-// filter row's place, never a bar at the foot; Undo on the row for 10 s after a check-in, for every staff member; a
-// row that answers at once and, refused, goes back and says why on itself rather than on a bar.
+// filter row's place, never a bar at the foot; a row that answers at once and, refused, goes back and says why on itself
+// rather than on a bar. (The row's 10-second Undo after a check-in was removed on 2026-11-10, the owner's D1: an admin
+// undoes a check-in from History > Log; tests/s10-paint.spec.ts.)
 
 const NOW = Date.parse('2026-09-24T17:30:00Z'); // Thursday 24 September 2026, 20:30 in Riyadh
 const TODAY = '2026-09-24', RUN = '2026-09-26';
@@ -45,13 +46,6 @@ async function open(page: Page, o: { width?: number; fail?: FailWrite; rpc?: Rec
   await expect(page.locator('#q-results [data-id="w1"]').first()).toBeVisible();
 }
 const row = (page: Page, id: string) => page.locator(`#q-results .queue-table tbody tr[data-id="${id}"]`);
-const patches = (page: Page, id: string) => {
-  const out: Record<string, unknown>[] = [];
-  page.on('request', (r: Request) => {
-    if (r.method() === 'PATCH' && r.url().includes('/rest/v1/queue_entries') && r.url().includes(`id=eq.${id}`)) out.push(r.postDataJSON() as Record<string, unknown>);
-  });
-  return out;
-};
 
 test.describe('@staff:bookings round two roster', () => {
   test('one action per row for its state, ⋯ for the rest, each named with its booking; the select box has a column of its own', async ({ page }) => {
@@ -152,31 +146,17 @@ test.describe('@staff:bookings round two roster', () => {
     await expect(page.locator('#tab-queue .filter-bar #sf-search-input')).toBeVisible();
   });
 
-  test('a check-in leaves Undo on its row for 10 s, for any staff member, and Undo puts the booking back as it was', async ({ page }) => {
+  test('a check-in puts its state\'s own action in the row\'s slot at once: no row Undo (the owner, 2026-11-10, D1)', async ({ page }) => {
     await open(page);
-    const sent = patches(page, 'w1');
     await page.evaluate(`showCheckinModal('w1')`);
     await page.locator('#ci-confirm').click();
     const slot = row(page, 'w1').locator('td.rq-mng');
-    await expect(slot.locator('.rq-undo')).toBeVisible();
-    await expect(slot.locator('.rq-undo')).toHaveAttribute('aria-label', /^Undo Check-in · #1 Wafa Waiting/);
-    expect(await page.evaluate(`S.view==='staff'&&_ruMap.get('w1').until-Date.now()`)).toBeGreaterThan(9000);
-    expect(await page.evaluate('RU_MS')).toBe(10000);
-    await slot.locator('.rq-undo').click();
+    await expect(slot.locator('.rq-act')).toHaveText('Return Bike');
     await expect(slot.locator('.rq-undo')).toHaveCount(0);
-    // back to waiting with no bike, no arrival, and the payment the check-in recorded taken back (the stub keeps no PATCH,
-    // so what was sent is the proof; a re-read answers the stub's check-in again)
-    await expect.poll(() => sent.find((b) => b.status === 'waiting')).toMatchObject({ status: 'waiting', assigned_bike_id: null, paid: false });
-    await expect.poll(() => sent.some((b) => 'checked_in_at' in b && b.checked_in_at === null)).toBe(true);
-    // the check-in's line in the log is spent: the topbar's Undo cannot take it back a second time
-    await expect.poll(() => page.evaluate(`S.actionLog.filter(l=>/^Check In: #1 /.test(l.label)).every(l=>l.undone)`)).toBe(true);
-    // another check-in's Undo goes after 10 s: its slot holds Return Bike again
-    const slot2 = row(page, 'w2').locator('td.rq-mng');
-    await page.evaluate(`showCheckinModal('w2')`);
-    await page.locator('#ci-confirm').click();
-    await expect(slot2.locator('.rq-undo')).toBeVisible();
-    await page.evaluate(`_ruMap.forEach(v=>{v.until=Date.now()-1});_rowTimer()`);
-    await expect(slot2.locator('.rq-act')).toHaveText('Return Bike');
+    expect(await page.evaluate(`[typeof _ruRun,typeof _ruMark,typeof RU_MS]`)).toEqual(['undefined', 'undefined', 'undefined']);
+    // the topbar's Undo still holds the check-in (an admin's), and its Log line names the booking
+    await expect.poll(() => page.evaluate(`S.actionLog.some(l=>/^Check In: #1 /.test(l.label)&&!l.undone)`)).toBe(true);
+    expect(await page.evaluate(`S.fullLog.filter(l=>/^Check In: #1 /.test(l.label)).map(l=>l.m)`)).toEqual([expect.objectContaining({ kind: 'checkin', entity: 'booking', entity_id: 'w1' })]);
   });
 
   test('a desk tap paints its row at once; refused, the row goes back and says why on itself, not on a bar', async ({ page }) => {

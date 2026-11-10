@@ -54,11 +54,11 @@ test.describe('@staff:bookings s1009 desk: no-show', () => {
     const p = patches(page);
     await page.evaluate(`S.sfSelected=['a'];renderStaffQueue()`);
     const all = page.locator('#bulk-selall');
-    await expect(all).toContainText('Select all shown (3)'); // a, b expected; c on a bike
+    await expect(all).toContainText('Select all shown (4)'); // a, b expected; c on a bike; w waitlisted (selectable since staff round s10)
     await all.click();
-    expect(await page.evaluate('S.sfSelected.slice().sort().join()')).toBe('a,b,c');
+    expect(await page.evaluate('S.sfSelected.slice().sort().join()')).toBe('a,b,c,w');
     const ns = page.locator('#bulk-noshow');
-    await expect(ns).toContainText(/No-show \(2\)/i);
+    await expect(ns).toContainText(/No-show \(2\)/i); // the waitlisted rider is not expected tonight: no No-show for them
     await ns.click();
     // this ride (2099) has not started: asked first, the two named (the staff review, 2026-10-28: S03-core3-06);
     // b1-a-closeout.spec.ts holds the one tap on a ride that has begun
@@ -70,7 +70,7 @@ test.describe('@staff:bookings s1009 desk: no-show', () => {
     await ask.getByRole('button', { name: 'No-Show' }).click();
     await expect.poll(() => p.filter((x) => x.body.status === 'noshow').length).toBe(2);
     await page.waitForFunction(`S.undoStack.some(u=>/No-show · 2/i.test(u.label))`);
-    expect(await page.evaluate('S.sfSelected.join()')).toBe('c'); // the rider on a bike stays selected
+    expect(await page.evaluate('S.sfSelected.slice().sort().join()')).toBe('c,w'); // the rider on a bike and the waitlisted one stay selected
   });
 });
 
