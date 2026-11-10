@@ -3108,3 +3108,17 @@ Items 48-50 of `reports/Staff website design and function.md` (builder "features
   `_sntBell`, the Dashboard's `_sntDash`, the account window's `_incAhSec`); keep new code there. Language keys for
   booking incidents start with `incd` (a `'b'+` prefix in the People part names every key starting with "b"; `inc*`
   keys are the fleet's bike incidents). `tests/s10-notes-incidents.spec.ts`.
+
+## Staff round s10: the merge (2026-11-11)
+- **People's nav is one row of groups.** `PPL_GROUPS` starts with an Overview group whose second row is Overview and
+  Summary (`/people/summary`, the figures); Summary is in the nav once, and every old sub-path still opens.
+- **Every check-in line in the Log has a client id.** `_logCid()` makes one; `logAction` and `_ciLogEach` (bulk, party
+  and Check in all paid lines, one insert) both use it, so the Log's merge and an admin's Undo (`_logUndoCi`, the
+  undone mark 'u:<cid>') work for each rider. A new writer of `staff_actions` lines gives each line one the same way.
+- **Two side panels at 1280px and up** (the docked check-in, D4, and the account window, D5) share the inline-end edge:
+  the one opened last is on top (`body.ci-top` lifts the check-in when it opens over the account window), and the page
+  keeps the account window's wider room (`body.ah-side` outranks `body.ci-dock`).
+- Budgets after the merge: customer 323.8 / 326, staff half 943.7 / 947 (raised from 931, the round's 51 items), desk
+  core 338.8 / 346 (not raised). The `community` part (132 KB) was not split: the core is inside its budget and a split
+  does not change the staff half; People's sub-views are drawn synchronously by `renderCommunity`, so a part of their
+  own needs their callers made async first.

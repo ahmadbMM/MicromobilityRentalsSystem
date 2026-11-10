@@ -7767,6 +7767,9 @@ body.view-staff .web-ed-list-foot{display:flex;gap:10px;align-items:center;margi
   body.view-staff #checkin-modal .ci-drawer-bg>.modal-box{pointer-events:auto;width:var(--ci-dock-w);height:calc(100dvh - var(--topbar-h,56px));max-height:calc(100dvh - var(--topbar-h,56px));
     border-end-start-radius:0;box-shadow:var(--sf-sh-2,0 8px 24px rgba(16,19,18,.14));}
   body.view-staff.ci-dock #view-staff .view-main{padding-inline-end:calc(var(--ci-dock-w) + 16px);}
+  /* both side panels open (the account window's, D5, is on the same edge): the one opened last is on top; the page keeps
+     the account window's wider room (body.ah-side), which serves either */
+  body.view-staff.ci-top #checkin-modal .modal-backdrop{z-index:201;}
 }
 @keyframes ciDrawerIn{from{transform:translateX(24px);opacity:.6}to{transform:none;opacity:1}}
 @keyframes ciDrawerInRtl{from{transform:translateX(-24px);opacity:.6}to{transform:none;opacity:1}}

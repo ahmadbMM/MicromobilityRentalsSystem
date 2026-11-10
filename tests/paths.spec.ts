@@ -221,6 +221,10 @@ test.describe('staff', () => {
     await page.waitForFunction(`S.staffTab==='community'&&S.communityTab==='summary'`);
     expect(at(page)).toBe('/people/summary');
     await expect(page.locator('#tab-community .dash-kpi').first()).toBeVisible();
+    // History > Incidents (staff round s10) has its own address too
+    await staff(page, '/history/incidents');
+    await page.waitForFunction(`S.staffTab==='history'&&S.histView==='incidents'`);
+    expect(at(page)).toBe('/history/incidents');
   });
 
   test('the old Bookings > Sessions addresses open the Sessions section (2026-11-06)', async ({ page }) => {
