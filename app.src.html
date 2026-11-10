@@ -25213,11 +25213,21 @@ async function _n6sInsertAll(rows,ctx){
 }
 // Copy a week (SS07): the selection copied 1, 2 or 4 weeks on, or to a chosen week, closed (a Draft where the
 // database has the mark), clash-checked, one summary and one Undo. A copy starts with every bike type open, with no
-// invitation of its own and its announce time moved by as many days.
-const N6S_COPY_KEEP=['capacity','bike_slots','addons','title','spots','price','meet_url','breakfast_name','breakfast_url','event_kind','needs_approval','ride_kind','paid_ride','open_to_all','required_tag_id','description','gender_only','member_cap','location','template_id','route_slug','hide_queue'];
+// invitation of its own and its announce time moved by as many days. Its Lockers switch comes too (bug hunt 2026-11-10:
+// the column defaults to off, so every copied JCC and Petromin night offered no lockers).
+const N6S_COPY_KEEP=['capacity','bike_slots','addons','title','spots','price','meet_url','breakfast_name','breakfast_url','event_kind','needs_approval','ride_kind','paid_ride','open_to_all','required_tag_id','description','gender_only','member_cap','location','template_id','route_slug','hide_queue','lockers'];
 function _n6sCopyRow(s,days){
   const o={};N6S_COPY_KEEP.forEach(k=>{if(k in s)o[k]=s[k];});
   const d=_ssPlus(_ssDay(s),days),sl=parseSlots(s.bike_slots)||{};delete sl._inv;
+  // Picked bikes the fleet no longer puts out (retired, missing) stay behind, as on a clone (_nsCopy; bug hunt 2026-11-10):
+  // copied, they were places customers could book with no bike behind them, which the picker cannot show to untick. Their
+  // type counts go down with them, and the places when they were the bike count. A night left with none keeps its list,
+  // for the editor to drop on open: no places would read as 12 (_placesCap).
+  if(Array.isArray(sl._bikes)){const live=_liveFleetIds(sl._bikes,false);
+    if(live.length&&live.length<sl._bikes.length){const keep=new Set(live);
+      sl._bikes.forEach(id=>{const b=!keep.has(id)&&bikeById(id);if(b&&typeof sl[b.type]==='number'){sl[b.type]--;if(sl[b.type]<=0)delete sl[b.type];}});
+      if(Number(s.capacity)===sl._bikes.length)o.capacity=live.length;
+      sl._bikes=live;}}
   Object.assign(o,{id:d+_sessIdSuffix(_rideKind(s)),session_date:d,day:DAY_NAMES[new Date(d+'T12:00:00Z').getUTCDay()],status:'closed',created_at:new Date().toISOString(),bike_slots:JSON.stringify(sl)});
   if(s.reveal_at){const ms=Date.parse(s.reveal_at);if(isFinite(ms))o.reveal_at=new Date(ms+days*864e5).toISOString();}
   if(_n6sCol('draft'))o.draft=true;
@@ -25308,7 +25318,11 @@ async function _n6sEditApply(){
   for(const s of list){
     const sl=parseSlots(s.bike_slots)||{},p={};let slc=false,miss=false;
     if(st||en){const m=String(sl._time||'').match(/(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/),a=st||(m?m[1]:'09:00'),b=en||(m?m[2]:a);sl._time=`${a} - ${b}`;slc=true;}
-    if(co){if(_twoTimesSess(s))miss=true;else{sl._collect=co;slc=true;}}
+    // The bike collection is never after the start, as the editor refuses (errCollectLate; bug hunt 2026-11-10): a typed time
+    // this session starts before is not given to it, and its own time that a new start now comes before goes back to the
+    // automatic one before the start (sessionCollectTime). A Petromin night's stored 18:45 used to outlive a move to 18:30.
+    if(co){if(_twoTimesSess(s)||_collectLate(co,(String(sl._time||'').match(/(\d{1,2}:\d{2})/)||[])[1]))miss=true;else{sl._collect=co;slc=true;}}
+    else if(st&&sl._collect&&!_twoTimesSess(s)&&_collectLate(sl._collect,st)){delete sl._collect;slc=true;}
     if(wl!==''){const n=parseInt(wl,10);if(n>0)sl._wl={m:'count',v:Math.min(500,n)};else delete sl._wl;slc=true;}
     if(cap!==''){const n=Math.max(1,Math.min(500,parseInt(cap,10)||1));
       if(_editSeats(s)){p.capacity=n;p.spots=n;}
@@ -25391,12 +25405,17 @@ async function _n6sFollowApply(sess,slots,total,patch){
   for(const f of list){
     const sl=parseSlots(f.bike_slots)||{},p={};
     sl._time=slots._time;
+    // A night's own collection time that the new start now comes before goes back to the automatic one before the start
+    // (sessionCollectTime), as the editor refuses a collection after the start (errCollectLate; bug hunt 2026-11-10).
     if(slots._collect&&!_twoTimesSess(f))sl._collect=slots._collect;
+    else if(sl._collect&&!_twoTimesSess(f)&&_collectLate(sl._collect,String(slots._time||'').split('-')[0].trim()))delete sl._collect;
     if(slots._wl)sl._wl=slots._wl;else delete sl._wl;
     if(_editSeats(f)&&_editSeats(sess)){p.capacity=total;if('spots' in patch)p.spots=patch.spots;}
     else if(typeof slots._total==='number'&&typeof sl._total==='number'){sl._total=total;p.capacity=total;}
     if('description' in patch)p.description=patch.description;
-    if('price' in patch&&_rideKind(f)===_rideKind(sess))p.price=patch.price;
+    // An event's paid_ride follows its price, as the editor and the bulk edit write it (bug hunt 2026-11-10): the database
+    // prices a booking by paid_ride, so a free series made paid stayed free on every following night.
+    if('price' in patch&&_rideKind(f)===_rideKind(sess)){p.price=patch.price;if(_rideKind(f)==='event')p.paid_ride=Number(patch.price)>0;}
     p.bike_slots=JSON.stringify(sl);
     plan.push([f,p]);
   }
@@ -25740,21 +25759,32 @@ function _n6rDrop(ev,iso){try{ev.preventDefault();}catch(_){}const id=S._n6rDrag
 function _n6rMove(id,iso){
   const s=_sessGet(id);if(!s||iso<todayStr()||_ssDay(s)===iso)return;
   const n=(_qBySession().get(id)||[]).filter(e=>e.status!=='cancelled'&&e.status!=='removed').length;
+  // The clashes the editor's date move asks about (SS06) are named here too (bug hunt 2026-11-10): a drag onto a date with a
+  // night of the same kind made a second one with -2 on its id unsaid, and bikes another session that day holds went twice.
+  const why=_n6sClashOf({...s,session_date:iso},id);
+  const body=[n?esc(t('n6rMoveRiders').replace('{0}',String(n))):'',why.length?`<strong>${esc(t('n6sClashTitle'))}</strong><ul class="n6s-clash">${why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>`:''].filter(Boolean).join('<br>');
   confirmDialog({title:t('n6rMoveAsk').replace('{0}',_evName(s)).replace('{1}',shortDate(_ssDay(s))).replace('{2}',shortDate(iso)),
-    body:n?esc(t('n6rMoveRiders').replace('{0}',String(n))):'',confirmLabel:t('n6rMoveGo'),confirmClass:'btn-primary',onConfirm:()=>_busyRun('n6rMove',()=>_n6rMoveDo(id,iso))});
+    body,confirmLabel:t(why.length?'n6sAnywayOne':'n6rMoveGo'),confirmClass:'btn-primary',onConfirm:()=>_busyRun('n6rMove',()=>_n6rMoveDo(id,iso))});
 }
 async function _n6rMoveDo(id,iso){
   const s=_sessGet(id);if(!s)return;
   const from=_ssDay(s),name=_evName(s);
+  // The ride's own moments go with it, as many days on or back at the same Riyadh time (_revealMove), as the editor's date
+  // move takes its announce time (bug hunt 2026-11-10): its announce time, its timed opening and its go/no-go decision time.
+  // Left on the old date, a Saturday ride dragged earlier never showed riders its breakfast spot, and a timed opening
+  // after the new night never opened it. Undo puts them back.
+  const tm={};['reveal_at','opens_at','go_decide_at'].forEach(k=>{if(s[k]){const v=_revealMove(s[k],from,iso);if(v)tm[k]=v;}});
   let r;try{r=await sb.rpc('staff_move_session',{p_from:id,p_to_id:iso+_sessIdSuffix(_rideKind(s)),p_date:iso,p_exact:false});}catch(e){r={error:e};}
   if(r&&r.error&&_rpcAbsent(r.error)){toast(t('dbPending'),'error');return;}
   if(_writeErr(r,'move session'))return;
   const nid=(r&&r.data&&r.data.id)||iso+_sessIdSuffix(_rideKind(s));
+  if(Object.keys(tm).length)_writeErr(await _sessPatch(nid,tm),'move session'); // the move stands; a refusal here is said
   _sessMoveLocal(id,nid);_n6rRotaMove(id,nid);await loadData();renderSessions();
   toast(t('n6rMoved').replace('{0}',shortDate(iso)),'success');
   pushUndo(t('n6rMoveUndo').replace('{0}',name).replace('{1}',shortDate(iso)),async()=>{
     const u=await sb.rpc('staff_move_session',{p_from:nid,p_to_id:id,p_date:from,p_exact:true});
     if(_writeErr(u,'undo move session')){await loadData();renderSessions();return false;}
+    if(Object.keys(tm).length){const b={};Object.keys(tm).forEach(k=>{b[k]=s[k];});_writeErr(await _sessPatch(id,b),'undo move session');}
     _sessMoveLocal(nid,id);_n6rRotaMove(nid,id);await loadData();renderSessions();
   });
 }
@@ -26771,19 +26801,23 @@ function editPromo(id){
   if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return;}
   const c=(S.promoCodes||[]).find(x=>x.id===id);if(!c)return;
   const cu=c.customer_id?(S.customers||[]).find(x=>String(x.id)===String(c.customer_id)):null;
+  // A code bound to an account this device does not hold (a deleted rider, the list still loading) says so in the box, as the
+  // table does, and stays bound unless the box is changed (bug hunt 2026-11-10): the box was left empty, and Save wrote anyone.
+  const _cl=cu?_pcCustLabel(cu):c.customer_id?t('promoOneCustomer'):'';
   Object.assign(S,{_pcEditId:id,_pcCode:c.code,_pcKind:c.kind||'percent',_pcValue:String(c.value??''),_pcType:c.applies_to||'',
-    _pcExpires:c.expires_at?String(c.expires_at).slice(0,10):'',_pcMax:c.max_uses!=null?String(c.max_uses):'',_pcCust:cu?_pcCustLabel(cu):'',_pcSess:c.session_id||'',_pcRk:c.ride_kind||''});
+    _pcExpires:c.expires_at?String(c.expires_at).slice(0,10):'',_pcMax:c.max_uses!=null?String(c.max_uses):'',_pcCust:_cl,_pcCustWas:_cl,_pcSess:c.session_id||'',_pcRk:c.ride_kind||''});
   renderSessions();
   document.getElementById('pc-value')?.focus();
 }
-function _pcClear(){S._pcEditId=null;S._pcCode='';S._pcKind='percent';S._pcValue='';S._pcType='';S._pcExpires='';S._pcMax='';S._pcCust='';S._pcSess='';S._pcRk='';}
+function _pcClear(){S._pcEditId=null;S._pcCode='';S._pcKind='percent';S._pcValue='';S._pcType='';S._pcExpires='';S._pcMax='';S._pcCust='';S._pcCustWas='';S._pcSess='';S._pcRk='';}
 function cancelPromoEdit(){_pcClear();renderSessions();}
 async function _savePromoEdit(){
   const c=(S.promoCodes||[]).find(x=>x.id===S._pcEditId);
   if(!c){cancelPromoEdit();return;}
   const value=parseFloat(document.getElementById('pc-value')?.value||S._pcValue||'')||0;
   if(value<=0||((S._pcKind||'percent')==='percent'&&value>100)){toast(t('promoInvalidMsg'),'error');return;} // more than 100% off is no discount anyone meant
-  const cust=_pcCustId();if(cust===null)return;
+  // The box as editPromo filled it keeps the account the code is bound to (also two accounts with one name and phone).
+  const cust=(c.customer_id&&String(S._pcCust||'').trim()===String(S._pcCustWas||'').trim())?c.customer_id:_pcCustId();if(cust===null)return;
   const n=parseInt(S._pcMax,10);
   // Every field is written, so clearing one (no end date, no limit, anyone) takes the limit off.
   // The use count is the server's and is left alone.
@@ -26863,7 +26897,8 @@ function _sessRowSnap(id){const r=_sessGet(id);if(!r)return null;const o={...r};
 // The date's own words are one of them since the editor got its Description box (2026-10-07: Undo left
 // the new text on the ride). hide_queue is not: a publish clears it.
 // Who can book (gender_only, 2026-10-27) too; a row read before 20261027150000 has no such key, so its Undo names none.
-const SESS_EDIT_COLS=['day','session_date','capacity','status','bike_slots','addons','title','spots','price','meet_url','breakfast_name','breakfast_url','event_kind','needs_approval','ride_kind','paid_ride','open_to_all','required_tag_id','reveal_at','description','gender_only','member_cap'];
+// Lockers offered as well (bug hunt 2026-11-10): the edit writes it, and Undo said done while it stayed as edited.
+const SESS_EDIT_COLS=['day','session_date','capacity','status','bike_slots','addons','title','spots','price','meet_url','breakfast_name','breakfast_url','event_kind','needs_approval','ride_kind','paid_ride','open_to_all','required_tag_id','reveal_at','description','gender_only','member_cap','lockers'];
 // The members limit too (bug hunt 2026-10-28): the edit writes it, and Undo left a mistyped limit in place.
 // The rides the editor sizes by places, not by bikes: the approval rides, and a ticketed event
 // (seats, no fleet). An event opened as a bike session read "add bikes" on every save.
@@ -26903,6 +26938,10 @@ async function _sessMoveRefs(from,to,ctx){
   if(!gone(ca,/invited_session|community_applications/)&&!_writeErr(ca,ctx))(S._caApps||[]).forEach(a=>{if(a.invited_session===from)a.invited_session=to;});
   let cb;try{cb=await sb.from('customer_badges').update({session_id:to}).eq('session_id',from);}catch(e){cb={error:e};}
   if(!gone(cb,/customer_badges/)&&!_writeErr(cb,ctx))(S.custBadges||[]).forEach(x=>{if(x.session_id===from)x.session_id=to;});
+  // A code for this one ride (promo_codes.session_id, SS18) follows it the same way (bug hunt 2026-11-10): left on the old id
+  // it was refused on the moved ride, and its next edit put the bookings carrying it back to full fare. Admin rows (RLS).
+  let pc;try{pc=await sb.from('promo_codes').update({session_id:to}).eq('session_id',from);}catch(e){pc={error:e};}
+  if(!gone(pc,/promo_codes|session_id/)&&!_writeErr(pc,ctx))(S.promoCodes||[]).forEach(c=>{if(c.session_id===from)c.session_id=to;});
   // The rows with a real foreign key to the ride move too, and gate the old row's delete (bug hunt 2026-10-28):
   // a partner's places (session_partners, ON DELETE CASCADE; its codes follow by ON UPDATE CASCADE) were wiped
   // by it and the app cannot make them again, and a part-timer's shift and a till (ON DELETE SET NULL) lost
@@ -26915,6 +26954,11 @@ async function _sessMoveRefs(from,to,ctx){
   if(!gone(ps,/part_timer_shifts/)&&_writeErr(ps,ctx))ok=false;
   try{ts=await sb.from('till_sessions').update({session_id:to}).eq('session_id',from);}catch(e){ts={error:e};}
   if(!gone(ts,/till_sessions/)&&_writeErr(ts,ctx))ok=false;
+  // A volunteer's free ride for working this event (promo_codes.volunteer_session_id, ON DELETE SET NULL, 20261109120000)
+  // as well: the old row's delete emptied it, the event's VL- rides left the volunteer views and a second one could be made.
+  let pv;try{pv=await sb.from('promo_codes').update({volunteer_session_id:to}).eq('volunteer_session_id',from);}catch(e){pv={error:e};}
+  if(!gone(pv,/promo_codes|volunteer_session_id/)&&_writeErr(pv,ctx))ok=false;
+  else if(!pv.error)(S.promoCodes||[]).forEach(c=>{if(c.volunteer_session_id===from)c.volunteer_session_id=to;});
   return ok;
 }
 // One write to a ride. A database without a newer column names it (42703, PGRST204): each field then goes by itself, so that
@@ -26926,6 +26970,7 @@ function _sessMoveLocal(from,to){
   (S.riders||[]).forEach(r=>{if(r.session_id===from)r.session_id=to;});
   (S._caApps||[]).forEach(a=>{if(a.invited_session===from)a.invited_session=to;});
   (S.custBadges||[]).forEach(x=>{if(x.session_id===from)x.session_id=to;});
+  (S.promoCodes||[]).forEach(c=>{if(c.session_id===from)c.session_id=to;if(c.volunteer_session_id===from)c.volunteer_session_id=to;}); // its one-ride and volunteer codes (staff_move_session)
 }
 async function _sessPatch(id,patch){
   const miss=e=>/42703|PGRST204/.test(String((e&&e.code)||'')+' '+String((e&&e.message)||''));
