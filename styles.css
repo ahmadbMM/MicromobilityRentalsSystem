@@ -7468,6 +7468,7 @@ html[data-staff-theme="dark"] #checkin-modal .ci-out.active{background:color-mix
 #checkin-modal .bkm-fg80{margin:8px 0 0;}
 #checkin-modal#checkin-modal .bkm-flex1{flex:1;}
 #checkin-modal .bkm-cix{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+#checkin-modal .ci-allpaid{width:100%;min-height:40px;margin-top:8px;} /* Check in all paid (N): the party's paid riders at once (s10, D2) */
 #checkin-modal .bkm-cierr{color:var(--red);font-size:12.5px;font-weight:600;min-height:0;margin-top:8px;}
 #checkin-modal .bkm-cmuted,#scan-modal .bkm-cmuted,#bike-modal .bkm-cmuted{color:var(--muted);}
 #checkin-modal .bkm-cmutedl{color:var(--muted-l);}
@@ -7735,6 +7736,16 @@ body.view-staff .web-ed-list-foot{display:flex;gap:10px;align-items:center;margi
   body.view-staff #checkin-modal .ci-drawer-bg>.modal-box{max-width:none!important;width:min(480px,100vw);height:100vh;max-height:100vh;height:100dvh;max-height:100dvh; /* dvh: on an iPad the toolbar covered the foot (bug hunt 2026-10-28) */
     margin:0;border-radius:0;border-start-start-radius:var(--sf-r-pop);border-end-start-radius:var(--sf-r-pop);border-width:0;border-inline-start:1px solid var(--sf-line2);animation:ciDrawerIn .22s cubic-bezier(.2,.8,.2,1) both;}
   html[dir="rtl"] body.view-staff #checkin-modal .ci-drawer-bg>.modal-box{animation-name:ciDrawerInRtl;}
+}
+/* Docked at 1280px and up (staff round s10, D4; the owner, 2026-11-10): no scrim, under the top bar, and the roster stays in use
+   beside it - the backdrop lets every tap through and only the panel takes them; body.ci-dock (set while a check-in is open,
+   _ciPaint / closeCheckinModal) makes the page room for it. Narrower screens keep the drawer over its light scrim, phones the sheet. */
+@media(min-width:1280px){
+  body.view-staff{--ci-dock-w:clamp(400px,32vw,480px);}
+  body.view-staff.view-staff #checkin-modal .modal-backdrop.ci-drawer-bg{top:var(--topbar-h,56px);background:transparent;pointer-events:none;animation:none;}
+  body.view-staff #checkin-modal .ci-drawer-bg>.modal-box{pointer-events:auto;width:var(--ci-dock-w);height:calc(100dvh - var(--topbar-h,56px));max-height:calc(100dvh - var(--topbar-h,56px));
+    border-end-start-radius:0;box-shadow:var(--sf-sh-2,0 8px 24px rgba(16,19,18,.14));}
+  body.view-staff.ci-dock #view-staff .view-main{padding-inline-end:calc(var(--ci-dock-w) + 16px);}
 }
 @keyframes ciDrawerIn{from{transform:translateX(24px);opacity:.6}to{transform:none;opacity:1}}
 @keyframes ciDrawerInRtl{from{transform:translateX(-24px);opacity:.6}to{transform:none;opacity:1}}
@@ -12756,6 +12767,11 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
 .lk-tk .lk-tk-x+.lk-tk-x{margin-inline-start:6px;}
 .lk-hd-code{flex:none;min-width:40px;font-size:20px;font-weight:700;color:var(--text);}
 .lk-hd-in{width:110px;}
+.lk-hd-pay{display:flex;flex-direction:column;gap:6px;padding-top:10px;border-top:1px solid var(--sf-line2,var(--border));font-weight:600;} /* a desk fee taken in the sheet: cash or card (s10, item 10) */
+.lk-hd-opts{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.lk-hd-opts .toggle-btn{min-height:42px;width:100%;}
+.lk-hd-err{color:var(--red);font-size:13px;font-weight:600;}
+.lk-hd-err:empty{display:none;}
 .lk-co .co-out-h{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .lk-it-img{display:block;max-width:100%;max-height:240px;margin-bottom:8px;border-radius:var(--sf-r-card,10px);object-fit:contain;background:var(--s2);}
 .lk-it-pick{position:relative;cursor:pointer;display:inline-flex;}
