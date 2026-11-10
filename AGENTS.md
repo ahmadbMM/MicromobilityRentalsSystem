@@ -2694,3 +2694,49 @@ appears on customers account add it to the 3 dots list on each booking".
   policy refuses. Share (where the browser shares files), Save to device and Copy picture; each is logged.
 - `tests/booking-card.spec.ts` (with a run under the real CSP, and a check that the frame's card computes the same look
   as the rider's own My Bookings).
+
+## Staff round s10: the desk's writes (2026-11-10, migration 20261111100000)
+
+- **No bulk write fans out.** A desk action that writes one row per rider goes through ONE server call that answers per
+  row, or through `_saveLane(xs, fn)` (at most `SAVE_LANE` = 3 on the wire), never `Promise.all` over the rows: the web
+  layer has ten connections for every device, and a select-all at the rush sent 40 writes at once.
+  - `staff_bulk_checkin(p_ids, p_ops, p_at)`, `staff_bulk_return(p_rows, p_at)` and `staff_close_out(p_session_id,
+    p_returns, p_done, p_noshow)` run the single-row function for each row (staff_checkin, staff_return through
+    `_desk_return_one`, which also writes the return's payment and ride minutes) in its own savepoint and answer
+    `[{id, ok, r | code, message}]` (the close-out's rows carry `k`: return / done / noshow, and `lost` for a row another
+    desk moved). A guard added to staff_checkin or staff_return therefore covers the bulk calls too: never copy their
+    bodies into the bulk functions.
+  - Client: `_bwMany(fn, args, ids)` turns the answer into a Map id -> `{data}` / `{error}`, handed to each row's own
+    path as a ready answer (`_dqTry(id, ()=>answer, op)`), so a network error keeps that row in the desk outbox with the
+    op id it was sent with (a lost answer replays from its receipt). A database without the function (PGRST202) sets
+    `S._bwOff` and the rows go one by one in the lane. `_returnWrite(id, markPaid, cond, notes, photo, x)`: `x.prev` the
+    row before the caller's paint (what a Discard puts back), `x.op` the op id, `x.pre` a bulk call's answer (the
+    payment and minutes were in it, so no second write).
+  - The close-out is one `staff_close_out` (one transaction); every rider it could not settle is named in one error bar
+    (`coNotSettled`), not only the first. `closeOutSession` and `confirmNoShow` now live in the `desk` staff part.
+  - `tests/helpers/supabase.ts` answers the three functions as absent unless a spec stubs them (`tests/s10-writes.spec.ts`).
+- **Waitlist numbers are the server's.** `_wl_num_assign` (a BEFORE trigger since 20260922122000) takes max+1 per
+  session under an advisory lock and bumps a number another waitlisted row holds. A rider going to the END of the line
+  is sent `waitlist_num: null`; send a number only when staff mean that place (the one a row kept, an Undo's).
+  `nextWlNum` is a paint-time guess, never sent in an update. Prod held no duplicate (session_id, waitlist_num) among
+  waitlisted rows on 2026-11-10; no unique index exists because `_wlApplyOrder` renumbers the line one update per row
+  (a reorder RPC would have to come first).
+- **One-row actions read one row again.** `_reloadRows(ids, dw)` (dw: also the Staff List rows linked to those
+  bookings) after walk-in, To waitlist, Move to main list, park a request, Customer showed, No-show (the rider and the
+  one it promoted), payment, approve / unapprove / reject, restore a cancel and Edit price. `loadDataLight` (two months
+  of sales on every call) stays for actions that move other rows.
+- **Status moves paint first and wait offline**: `_deskMove(e, was, patch, lk, direct)` paints the row, sends the write
+  guarded on the status it left (or queues it: outbox kind `move`, its words in `op.lk`), puts the row back and says
+  why on it when refused, and resolves 'sent' / 'kept' / null. What the move does after it lands (stock, Staff List
+  rows, the log) runs in the caller when sent and in `_dqAfter` when kept. `direct` is for the outbox's own way back
+  from a no-show (`_n6bDqBack`): queued behind the check-in it rescues, it would deadlock.
+- **A walk-in waits in the outbox too** (kind `walkin`: `op.ids`, `op.rows` as inserted, `op.ents` as painted). Its
+  riders stay on the roster through any reload (`_dqOverlay` adds them back), `_dqHas` / `_dqMark` / `_dqRun` treat every
+  id of it as the op's, and a second send that hits its own ids (23505) counts as landed.
+- **A walk-in for one rider is one dialog**: the form shows Payment (Not paid / Paid / On the house, Paid first) and
+  Check In (`saveWalkinOne` -> `_wiCiOne`, which runs the drawer's own `_confirmCheckinRun` without drawing it). What still
+  needs asking (a deposit, a refusal) opens the drawer on that rider. Two or more riders keep Add & check in.
+- The walk-in's stock hint is empty when the fleet holds no bike of the type (the fleet was emptied in September).
+- No-show from the menu asks (a centred confirm, `n6cNsAsk` plus `nsAskWl` / `nsAskLk`) only when it moves the next
+  rider up from the waitlist (auto mode, a place freed) or frees a reserved locker; otherwise it is one tap. The X key
+  always asks (`confirmNoShow(id, true)`).

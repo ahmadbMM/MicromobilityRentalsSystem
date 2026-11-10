@@ -45,7 +45,7 @@ test('Move to waitlist puts the booking at the end of the line, guarded on waiti
   const w = writes.find((x) => /"status":"waitlist"/.test(x))!;
   expect(w).toContain('id=eq.e1');
   expect(w).toContain('status=eq.waiting');
-  expect(w).toContain('"waitlist_num":2'); // behind the rider already on W1
+  expect(w).toContain('"waitlist_num":null'); // the end of the line: the server gives the number, behind W1 (staff round s10, item 2)
   expect(w).not.toContain('approval');
 });
 

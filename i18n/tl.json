@@ -8026,5 +8026,9 @@
   "paySetNothing": "Walang nagbago",
   "paySetSaved": "Na-save ang mga setting",
   "paySetSavedLog": "Mga setting ng bayad: {0}",
-  "paySetHist": "Mga kamakailang pagbabago"
+  "paySetHist": "Mga kamakailang pagbabago",
+  "nsAskWl": "Aakyat si {0} mula sa waitlist.",
+  "nsAskLk": "Mapapalaya ang locker {0}.",
+  "nsAskLkAny": "Mapapalaya ang locker na nakareserba para sa kanila.",
+  "coNotSettled": "Hindi na-close out ang {0}:"
 }

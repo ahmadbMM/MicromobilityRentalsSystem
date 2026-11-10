@@ -497,7 +497,9 @@ export const STAFF_PARTS = {
   // (with the Action Log, which shares the account names and the record links with them)
   money: ['renderMoneyView', 'openAuditPanel', 'recordDrawerCount', 'renderTeamReport', '_askMoneyReason', 'renderLogs'],
   // 2026-10-09 (round 2): the desk note's editor, My shift, joining and leaving a party
-  desk: ['_deskNoteEdit', '_myShiftOpen', '_partyJoin', '_partyLeave', '_n6cPrepOpen', '_n6cFtOpen', '_tcOpen'], // 2026-11-07: the bike prep sheet and the first-timers to follow up; 2026-11-10: Booking card (a booking's ticket as its rider sees it, and its picture)
+// 2026-11-10 (staff round s10): the night's Close out (its dialog and its one-call write, staff_close_out) and the menu's
+// No-show question, out of the desk's core, which the round's bulk writes had taken to its budget
+  desk: ['_deskNoteEdit', '_myShiftOpen', '_partyJoin', '_partyLeave', '_n6cPrepOpen', '_n6cFtOpen', '_tcOpen', 'closeOutSession', 'confirmNoShow'], // 2026-11-07: the bike prep sheet and the first-timers to follow up; 2026-11-10: Booking card (a booking's ticket as its rider sees it, and its picture)
   // 2026-10-10: the desk outbox's store (IndexedDB), its replay and the unsynced list (the list, the overlay and the chip stay in the core)
   deskq: ['_dqEnqueue', '_dqFlush', '_dqBoot', '_dqOpen'],
   // 2026-10-09: the self-service kiosk (a desk tablet in kiosk mode), and the deposit ledger's writes and settle dialog

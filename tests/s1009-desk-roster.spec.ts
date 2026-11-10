@@ -41,12 +41,24 @@ function patches(page: Page) {
 
 test.describe('@staff:bookings s1009 desk: no-show', () => {
   test('D6: a row\'s No-show is one tap, with an Undo', async ({ page }) => {
-    await boot(page);
+    await boot(page, ROWS.filter((r) => r.id !== 'w'));                 // nobody on the waitlist: no side effect to name
     const p = patches(page);
     await page.evaluate(`confirmNoShow('a')`);
     await expect.poll(() => p.some((x) => x.body.status === 'noshow' && x.url.includes('id=eq.a'))).toBe(true);
-    await expect(page.locator('#confirm-modal .confirm-box').filter({ hasText: 'Mark as No-Show' })).toHaveCount(0);
+    await expect(page.locator('#confirm-modal .confirm-box')).toHaveCount(0);
     await page.waitForFunction(`S.undoStack.some(u=>/No-show #1/i.test(u.label))`);
+  });
+
+  // staff round s10, item 13: it asks first only when it moves the next rider up from the waitlist (or frees a locker)
+  test('a No-show that moves a waitlisted rider up asks first, naming them', async ({ page }) => {
+    await boot(page);
+    const p = patches(page);
+    await page.evaluate(`confirmNoShow('a');0`);
+    const box = page.locator('#confirm-modal .confirm-box');
+    await expect(box).toContainText('Waiting Wafa moves up from the waitlist.');
+    expect(p.length).toBe(0);
+    await box.locator('.chrome-dact button').last().click();
+    await expect.poll(() => p.some((x) => x.body.status === 'noshow' && x.url.includes('id=eq.a'))).toBe(true);
   });
 
   test('D6: the selection bar has No-show (n) and Select all shown, and the bulk no-show is one Undo', async ({ page }) => {

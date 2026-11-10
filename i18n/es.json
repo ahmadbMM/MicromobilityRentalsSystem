@@ -8026,5 +8026,9 @@
   "paySetNothing": "No ha cambiado nada",
   "paySetSaved": "Ajustes guardados",
   "paySetSavedLog": "Ajustes de pago: {0}",
-  "paySetHist": "Cambios recientes"
+  "paySetHist": "Cambios recientes",
+  "nsAskWl": "{0} sube desde la lista de espera.",
+  "nsAskLk": "Se libera la taquilla {0}.",
+  "nsAskLkAny": "Se libera la taquilla reservada para esta persona.",
+  "coNotSettled": "No se pudo cerrar a {0}:"
 }

@@ -8026,5 +8026,9 @@
   "paySetNothing": "Nada mudou",
   "paySetSaved": "Configurações salvas",
   "paySetSavedLog": "Configurações de pagamento: {0}",
-  "paySetHist": "Alterações recentes"
+  "paySetHist": "Alterações recentes",
+  "nsAskWl": "{0} sobe da lista de espera.",
+  "nsAskLk": "O cacifo {0} fica livre.",
+  "nsAskLkAny": "O cacifo reservado para esta pessoa fica livre.",
+  "coNotSettled": "Não foi possível fechar {0}:"
 }

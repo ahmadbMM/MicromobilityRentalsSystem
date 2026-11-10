@@ -8026,5 +8026,9 @@
   "paySetNothing": "Rien n’a changé",
   "paySetSaved": "Paramètres enregistrés",
   "paySetSavedLog": "Paramètres de paiement : {0}",
-  "paySetHist": "Modifications récentes"
+  "paySetHist": "Modifications récentes",
+  "nsAskWl": "{0} quitte la liste d’attente et prend la place.",
+  "nsAskLk": "Le casier {0} est libéré.",
+  "nsAskLkAny": "Le casier réservé pour cette personne est libéré.",
+  "coNotSettled": "{0} n’ont pas pu être clôturés :"
 }
