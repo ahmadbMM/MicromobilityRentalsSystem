@@ -281,7 +281,8 @@ test.describe('Community > Birthdays', () => {
   test('@staff:community Print a week: a Saturday picked, the Community birthdays Sunday to Saturday on paper', async ({ page }) => {
     const jcc = { id: 'tag_jcc', slug: 'jcc', name: 'Jeddah Corniche Circuit', color: '#2f63ad' };
     await staff(page, {
-      customers: customers.map(c => c.id === 'm1' ? { ...c, email: 'amal@example.com' } : c),
+      customers: customers.map(c => c.id === 'm1' ? { ...c, email: 'amal@example.com', socials: { instagram: '@amal.today', linkedin: 'https://sa.linkedin.com/in/amal-today/' } }
+        : c.id === 'm2' ? { ...c, socials: { instagram: 'not a handle!' } } : c),
       tags: [...tags, jcc], customer_tags: [...customer_tags, { customer_id: 'n1', tag_id: 'tag_jcc', added_at: 1 }],
     });
     await page.evaluate(`setCommTab('birthdays')`);
@@ -305,11 +306,15 @@ test.describe('Community > Birthdays', () => {
     await expect(page.locator('#bd-wk-sat')).toHaveCount(0);                               // the pop-up goes with the sheet
     await expect(pop.locator('.mm-doc strong')).toHaveText('Community birthdays');
     await expect(pop.locator('.mm-title strong')).toContainText(/4 Oct.*10 Oct 2026/);
-    await expect(pop.locator('table thead th')).toHaveText(['Day', 'Name', 'Birth date', 'Age', 'Email', 'Phone']);
+    await expect(pop.locator('table thead th')).toHaveText(['Day', 'Name', 'Birth date', 'Age', 'Email', 'Phone', 'Instagram', 'LinkedIn']);
     const cells = await pop.locator('table tbody tr').evaluateAll(rs => rs.map(r => [...(r as HTMLTableRowElement).cells].map(c => (c.textContent || '').trim())));
     expect(cells).toHaveLength(2);                                                          // the expired tag and the other tag's member stay out
-    expect(cells[0]).toEqual([expect.stringMatching(/Sun.*4 Oct/), 'Amal Today', '4 Oct 1995', '31', 'amal@example.com', '0551112222']);
-    expect(cells[1]).toEqual([expect.stringMatching(/Mon.*5 Oct/), 'Badr Tomorrow', '5 Oct 2008', '18', '—', '0553334444']);
+    expect(cells[0]).toEqual([expect.stringMatching(/Sun.*4 Oct/), 'Amal Today', '4 Oct 1995', '31', 'amal@example.com', '0551112222', '@amal.today', 'amal-today']);
+    expect(cells[1]).toEqual([expect.stringMatching(/Mon.*5 Oct/), 'Badr Tomorrow', '5 Oct 2008', '18', '—', '0553334444', 'not a handle!', '—']);
+    // Instagram and LinkedIn link to the profiles, in a new tab; a handle the network would not take stays unlinked
+    const links = pop.locator('table tbody a.rp-link');
+    expect(await links.evaluateAll(as => as.map(a => [(a as HTMLAnchorElement).href, a.getAttribute('target')]))).toEqual([
+      ['https://www.instagram.com/amal.today', '_blank'], ['https://www.linkedin.com/in/amal-today', '_blank']]);
     // A week across New Year, and a leap-day birthday on 28 February when there is no 29th.
     expect(await page.evaluate(`(()=>{S.customers=S.customers.map(c=>c.id==='m6'?{...c,birth_date:'1980-12-31'}:c.id==='m4'?{...c,birth_date:'1990-01-02'}:c);
       return [_bdWkRows('2027-01-02').rows.map(r=>[r.c.name,r.date,r.age]),_bdWkRows('2027-03-06').rows.map(r=>[r.c.name,r.date,r.age])];})()`))
