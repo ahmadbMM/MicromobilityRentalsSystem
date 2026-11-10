@@ -66,7 +66,7 @@ test.describe('Blood Donation free ride code', () => {
     await expect(box.locator('.fr-go')).toHaveCount(0);
   });
 
-  // the user, 2026-11-10: a ride free anyway never spends the code (the database gives it back, 20261110235500)
+  // the user, 2026-11-10: a ride free anyway never spends the code (the database gives it back, 20261110235950)
   test('not offered when rider 1 brings an own bike', async ({ page }) => {
     await boot(page, [OPEN]);
     await expect.poll(() => page.evaluate('(S._bldR||[]).length')).toBe(1);

@@ -28,6 +28,10 @@
 --    still on it. The other nine bookings with a free-ride or referral code were paid by the code. A cancelled
 --    booking already gave its use back; every code's count matched its live bookings.
 --
+-- Numbered 20261110235500 when it was first applied (prod and staging, 2026-11-10); that number was already a bug hunt
+-- migration's on main (bh10_payments_b, staging's ledger holds it), so this file moved to 20261110235950 and its
+-- ledger row with it. The function's own comment keeps the first number, as the live text does.
+--
 -- Idempotent. Run supabase/checks/security-attributes.sql after.
 -- ============================================================================
 
@@ -139,8 +143,10 @@ begin
   end if;
 end $chk$;
 
+update supabase_migrations.schema_migrations set version = '20261110235950'
+ where version = '20261110235500' and name = 'free_ride_keeps_code';
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261110235500', 'free_ride_keeps_code')
+values ('20261110235950', 'free_ride_keeps_code')
 on conflict (version) do nothing;
 
 commit;

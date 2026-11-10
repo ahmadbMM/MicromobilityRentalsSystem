@@ -2463,7 +2463,7 @@ The owner: "referring a friend that completes a paid ride gets a free ride".
     each row that carries a code and `customer_create_booking` inserts row by row, so a second row with it is priced in
     full and the code dropped; a cancel gives the use back (`_promo_count`).
   - *Free anyway (the user, 2026-11-10).* A booking that costs nothing without its code never spends one, any code:
-    `_promo_free_drop` (BEFORE INSERT OR UPDATE, migration 20261110235500) takes it off an own bike, a ride whose
+    `_promo_free_drop` (BEFORE INSERT OR UPDATE, migration 20261110235950) takes it off an own bike, a ride whose
     `_fare_now` is 0 (a free ride), and a row paid at 0 by the rider's own terms (`_house_earned` and not
     `_house_taken`) or paid at 0 when the code alone would leave a price (staff put it on the house); the use comes back
     (`trg_promo_count_upd` now `WHEN` status or promo_code changed). A row the code itself made free keeps it. The
@@ -2471,7 +2471,7 @@ The owner: "referring a friend that completes a paid ride gets a free ride".
   - *Where.* `_ref_code_guard` (now also on `session_id`) holds RW-, RF- and RB- codes to a JCC ride or a Petromin night:
     a new booking elsewhere goes without the code (no use counted), a move or a code put on elsewhere is refused
     (REF_CODE_SESSION; written when `_promo_count` followed an update only when it names promo_code or status; since
-    20261110235500 it follows every real change of either), Carbon is refused (REF_CODE_CARBON) - the bonus too since this migration. Their `ride_kind` is
+    20261110235950 it follows every real change of either), Carbon is refused (REF_CODE_CARBON) - the bonus too since this migration. Their `ride_kind` is
     null (old RF/RB codes cleared), so the scope guard leaves them to it. The referrer's free ride now follows the friend's
     first paid, finished JCC ride or Petromin night (`_ref_ride_done`, both staff functions). `_refCodeSessOk` mirrors it.
   - *On the page.* The event picker's card (`.fr-welcome`, first in `_frLandInner`), the Invite card's line (`.ref-w`),
