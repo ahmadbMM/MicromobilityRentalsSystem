@@ -12831,3 +12831,17 @@ html[data-staff-theme="dark"] body.view-staff :is(.ssx-row,#spk-pop .spk-r-sub) 
 /* the picker's rows and headings keep their height in its scrolling list (a flex column shrank them below their words once
    the list ran long, seen in Safari's engine at iPhone size) */
 #spk-pop .spk-list>*{flex:none;}
+/* ══ A locker reservation, edited by staff (2026-11-10): the evening, the time, the doors free for them, the name, the
+   account; On the house, the refunds (admins), WhatsApp and Cancel under them. ══ */
+#lk-ed .lk-ed-box{width:min(var(--sf-dlg-m,480px),calc(100vw - 32px));}
+#lk-ed .lk-ed-sum{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:var(--sf-r-ctl,8px);background:var(--sf-sunken,var(--s2));}
+#lk-ed .lk-ed-doors{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;}
+#lk-ed .lk-ed-door{min-height:40px;border:1px solid var(--sf-line,var(--border));border-radius:var(--sf-r-ctl,8px);background:var(--sf-card,var(--s1));color:var(--text);font:600 14px/1 var(--sf-font,inherit);font-variant-numeric:tabular-nums;cursor:pointer;}
+#lk-ed .lk-ed-door:hover:not(:disabled){border-color:var(--sf-ctl-h,var(--border));}
+#lk-ed .lk-ed-door:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+#lk-ed .lk-ed-door.on{background:var(--sf-green-ink,var(--green));border-color:transparent;color:var(--sf-card,#fff);}
+#lk-ed .lk-ed-door:disabled{opacity:.4;cursor:not-allowed;text-decoration:line-through;}
+#lk-ed .lk-ed-none{margin-top:4px;font-size:12px;}
+#lk-ed .lk-ed-more{display:flex;flex-wrap:wrap;gap:8px;padding-top:12px;border-top:1px solid var(--sf-line,var(--border));}
+#lk-ed .lk-ed-wa{display:inline-flex;align-items:center;text-decoration:none;}
+@media(max-width:420px){#lk-ed .lk-ed-doors{grid-template-columns:repeat(4,minmax(0,1fr));}}

@@ -2207,6 +2207,22 @@ tables `lockers` and `locker_rentals`.
   opened, kept 14 days after the evening by trigger, Kept / Collected / Donated or disposed of, a WhatsApp message in
   English and Arabic) and Lockers > Report (per evening: rentals, lockers used, occupancy, revenue, not collected; CSV);
   Take out of service asks why and Units > History lists `locker_events` (a trigger on lockers).
+- **Staff edit a reservation (the user, 2026-11-10; migration 20261110200000).** Edit on a reservation's row and on the locker's
+  sheet opens `_lkEdOpen` (a `lockers` part entry, so the core's sheet calls it through its stand-in): the evening (any day
+  from today whose ride offers lockers), the time, the door (those taken for the time greyed), the name and, for a locker
+  with no ride booking, the account (`staff_locker_edit`; a ride's locker stays its rider's, LOCKER_ON_BOOKING). The owner's
+  answers: anything may change at any time, the key given or not (a locker moved to another evening waits for its key there);
+  a change that costs more or less is settled the way it was paid - a wallet payment is re-taken at the new fee (a Petromin
+  night or a short wallet: paid at the desk instead), unpaid the price follows (a ride's bill changes), paid otherwise the
+  price paid stays and the difference is settled apart: more is `due` and goes into the Sales cart linked to the rental, less
+  is given back to the wallet by an admin in the same call (ADMIN_REFUND for anyone else), a card in Payments. Refunds go to
+  the wallet, admins only, PIN and manager limit (`staff_locker_refund`, keep = stays free, else cancelled); On the house is
+  `staff_locker_house` (operator PIN; a paid one is refunded with keep); WhatsApp the rider is a ready message in English and
+  Arabic. `_lk_paid` is what was taken and not given back (a paid ride's bill, its own wallet or card receipt, its till lines).
+  **The till links its locker lines**: `_lkTill` items carry `lk` (the rental), and `_ctRecord` sends them to
+  `staff_locker_paid` once the receipt is booked, so `locker_rentals.till_lines` lets a refund or a change find them; lines
+  rung up before 2026-11-10 are not linked (refunded at the till as before). Money toasts are `info` (seen, not only heard).
+  The page reads `house`/`refunded` (`LK_COLS_X`) and reads without them on a database before the migration. `tests/locker-edit.spec.ts`.
 
 ## Sessions is a section of its own (2026-11-06)
 
