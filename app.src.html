@@ -29568,9 +29568,10 @@ function _bdIcs(){
 }
 // ── A week of birthdays on paper (the user, 2026-11-11: "add a print button in birthdays section that makes me choose a
 // saturday then it prints all the names that have their birthdays from the sunday before that saturday until the
-// saturday"). Their picks: always the Community's members (BD_TAG), whatever the Tag filter shows; the age that
-// birthday brings; a pop-up listing Saturdays, the coming one first picked; one table, Sunday to Saturday, then by
-// name, with the birth date, age, name, email and phone. A leap-day birthday falls on 28 February in a year without a
+// saturday"). Their picks: always the Community's members (BD_TAG), whatever the Tag filter shows; a pop-up listing
+// Saturdays, the coming one first picked; one table, Sunday to Saturday, then by name. The sheet holds the day, the name
+// and the mobile number only (the user, the same day: "in birthday report only include day name mobile number only";
+// birth date, age, email, Instagram and LinkedIn came off it). A leap-day birthday falls on 28 February in a year without a
 // 29th, as on the tab (_bdOn).
 function _bdWkDow(iso){return new Date(Date.parse(iso+'T00:00:00Z')).getUTCDay();}
 // The coming Saturday, today when today is one (KSA days).
@@ -29602,26 +29603,17 @@ function _bdWkPick(v){
   const i=document.getElementById('bd-wk-info');if(i)i.innerHTML=_bdWkInfo(v);
   const b=document.getElementById('bd-wk-go');if(b)b.disabled=!_bdWkRows(v).rows.length;
 }
-// A member's Instagram or LinkedIn on the sheet, as a link to the profile (the user, 2026-11-11: "add their instagram and
-// linkedin accounts as a hyperlink"). A handle the network would not take stays as written, with no link.
-function _bdWkSoc(c,net){
-  const raw=String((c.socials&&typeof c.socials==='object'&&c.socials[net])||'').trim();if(!raw)return'—';
-  const h=_socNorm(raw),n=SOCIAL_NETS.find(x=>x[0]===net);
-  if(!h||!n||!n[3].test(h))return`<bdi dir="ltr">${esc(raw)}</bdi>`;
-  let shown=h;try{shown=decodeURIComponent(h);}catch(e){}
-  return`<a class="rp-link" href="${esc(_socUrl(net,h))}" target="_blank" rel="noopener noreferrer"><bdi dir="ltr">${net==='instagram'?'@':''}${esc(shown)}</bdi></a>`;
-}
 function _bdWkPrint(){
   const W=_bdWkRows(S._bdWk||_bdWkSat());
   if(!W.rows.length){toast(t('bdWkNone'),'info');return;}
   const range=_bdWkRange(W.sun,W.sat);
   const body=`<div class="totals"><div class="total-item"><span class="total-num">${W.rows.length}</span><span class="total-lbl">${esc(t('commTabBirthdays'))}</span></div></div>
-    <table><thead><tr><th>${t('colDay')}</th><th>${t('nameLabel')}</th><th>${t('birthDateLabel')}</th><th>${t('bdColAge')}</th><th>${t('repColEmail')}</th><th>${t('repColPhone')}</th><th>${t('socInstagram')}</th><th>${t('socLinkedin')}</th></tr></thead>
-    <tbody>${W.rows.map(r=>`<tr><td>${esc(_bdDate(r.date,{weekday:'short',day:'numeric',month:'short'}))}</td><td class="rp-name">${esc(r.c.name||'')}</td><td>${esc(_bdDate(String(r.c.birth_date).slice(0,10),{day:'numeric',month:'short',year:'numeric'}))}</td><td>${r.age}</td><td><bdi dir="ltr">${esc(r.c.email||'—')}</bdi></td><td><bdi dir="ltr">${esc(r.c.phone?fmtPhone(r.c.phone):'—')}</bdi></td><td>${_bdWkSoc(r.c,'instagram')}</td><td>${_bdWkSoc(r.c,'linkedin')}</td></tr>`).join('')}</tbody></table>`;
-  const win=_openReport(_reportShell({kind:esc(t('bdWkKind')),title:esc(range),docTitle:t('bdWkKind')+' '+W.sun+' – '+W.sat,body,maxWidth:'1180px'}));
+    <table><thead><tr><th>${t('colDay')}</th><th>${t('nameLabel')}</th><th>${t('vlShPhone')}</th></tr></thead>
+    <tbody>${W.rows.map(r=>`<tr><td>${esc(_bdDate(r.date,{weekday:'short',day:'numeric',month:'short'}))}</td><td class="rp-name">${esc(r.c.name||'')}</td><td><bdi dir="ltr">${esc(r.c.phone?fmtPhone(r.c.phone):'—')}</bdi></td></tr>`).join('')}</tbody></table>`;
+  const win=_openReport(_reportShell({kind:esc(t('bdWkKind')),title:esc(range),docTitle:t('bdWkKind')+' '+W.sun+' – '+W.sat,body,maxWidth:'720px'}));
   if(!win){toast(t('repPopupBlocked'),'warning');return;}
   closeConfirm();
-  _piiExport(t('bdWkKind')+' '+W.sun+' – '+W.sat,W.rows.length,['birth_date','email','phone'],'print');
+  _piiExport(t('bdWkKind')+' '+W.sun+' – '+W.sat,W.rows.length,['phone'],'print');
 }
 // ── Community applications ─────────────────────────────────────────────────────
 // Riders ask to join the community on micromobility.sa/community/registration (mm-platform
