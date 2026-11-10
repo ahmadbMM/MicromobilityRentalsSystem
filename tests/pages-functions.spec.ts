@@ -389,6 +389,84 @@ test.describe('the Apple Wallet pass', () => {
     }
   });
 
+  // The Petromin form (micromobility.sa/petromin, 2026-11-11): a registration with no account, read through
+  // rider_lookup by its number and mobile. Petromin pays, so no price; companions only on the back.
+  test('a Petromin registration gets a pass from rider_lookup: its MMP- code, the night, no price, companions on the back only', async () => {
+    const P = await import('../scripts/wallet/pass-images.js' as string);
+    const found = {
+      ok: true, booking_no: 'p-007', company: 'Petrolube', badge: 'A-77', name: 'Lead Rider', phone: '+966500000007', height: 175, type: 'Road', checked_in: false,
+      session: { id: '2099-11-12-pm', title: "Petromin's Wednesdays", start: '2099-11-12T19:00:00+03:00', end: '2099-11-12T22:00:00+03:00', collect: '18:45', place: null },
+      riders: [{ name: 'Mate Hidden', height: 160, type: 'Hybrid' }, { name: 'Kid Hidden', height: 120, type: 'Kids' }],
+    };
+    const env = { APPLE_PASS_P12_BASE64: p12b64, APPLE_PASS_P12_PASSWORD: PW, APPLE_PASS_TYPE_ID: 'pass.test', APPLE_TEAM_ID: 'TEAM', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' };
+    const asked: Record<string, unknown>[] = [];
+    const run = async (answer: unknown, petromin: Record<string, unknown> = { bookingNo: 'P-007', phone: '0500000007', sessionId: '2099-11-12-pm', lang: 'ar' }, e: Record<string, string> = env) => {
+      globalThis.fetch = (async (u: string | URL | Request, init?: RequestInit) => {
+        const url = String(u);
+        if (url === 'https://db.test/rest/v1/rpc/rider_lookup') { asked.push(JSON.parse(String(init?.body))); return new Response(JSON.stringify(answer)); }
+        if (url.includes('apple.com')) return new Response(wwdrDer);
+        return new Response('', { status: 404 }); // nothing else is read: no my_bookings, no session list, no shop
+      }) as typeof fetch;
+      const post = await load('functions/api/wallet-pass.js', 'onRequestPost');
+      return post({ request: new Request('https://site.test/api/wallet-pass', { method: 'POST', body: JSON.stringify({ petromin }) }), env: e });
+    };
+    const res = await run(found);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('application/vnd.apple.pkpass');
+    expect(res.headers.get('content-disposition')).toContain('petromin-P-007.pkpass');
+    expect(asked[0]).toEqual({ p_booking_no: 'P-007', p_phone: '0500000007', p_session_id: '2099-11-12-pm' });
+    const files = unzipSync(new Uint8Array(await res.arrayBuffer()));
+    const j = JSON.parse(strFromU8(files['pass.json']));
+    type F = { key: string; label: string; value: string };
+    const t = j.eventTicket as Record<string, F[]>;
+    const f = (sect: string, k: string) => t[sect].find((x) => x.key === k);
+    // the code the desk scanner reads for these bookings, upper-cased
+    expect(j.barcodes[0].message).toBe('MMP-P-007');
+    expect(j.barcode.message).toBe('MMP-P-007');
+    // Petromin's red and its art
+    expect(j.backgroundColor).toBe('rgb(163,59,46)');
+    expect(Buffer.from(files['strip@2x.png']).toString('base64')).toBe(P.RIDE_IMAGES.petromin['strip@2x.png']);
+    // the number, the night, the hand-out time, the count, the company and the lead
+    expect(f('primaryFields', 'booking')!.value).toBe('P-007');
+    expect(f('primaryFields', 'riders')).toMatchObject({ label: 'RIDERS', value: '3 riders' });
+    expect(f('headerFields', 'date')!.value).toBe('Thu 12 Nov');
+    expect(f('secondaryFields', 'collect')).toMatchObject({ label: 'BIKES FROM', value: '6:45 PM' });
+    expect(f('secondaryFields', 'hours')!.value).toBe('7:00 PM - 10:00 PM');
+    expect(f('auxiliaryFields', 'company')!.value).toBe('Petrolube');
+    expect(f('auxiliaryFields', 'lead')!.value).toBe('Lead Rider');
+    expect(f('backFields', 'venue')!.value).toBe('Jeddah Corniche Circuit');
+    expect(j.locations[0]).toMatchObject({ latitude: 21.6266, longitude: 39.1099 });
+    // surfaces when bikes go out on the night, leaves when it ends
+    expect(j.relevantDate).toBe('2099-11-12T18:45:00+03:00');
+    expect(j.expirationDate).toBe('2099-11-12T22:00:00+03:00');
+    // no price anywhere; the helmet comes with the bike
+    const all = JSON.stringify(j);
+    expect(all).not.toMatch(/\bSAR\b|TOTAL|pay at|price|rent a/i); // (MicroMobility Rentals, the organisation, may stay)
+    expect(f('backFields', 'help')!.value).toContain('A helmet comes free with every bike.');
+    // companions on the back alone: not on the front, the description, the semantics or the lock-screen text
+    const front = JSON.stringify([t.headerFields, t.primaryFields, t.secondaryFields, t.auxiliaryFields, j.description, j.semantics, j.locations]);
+    expect(front).not.toMatch(/Mate Hidden|Kid Hidden/);
+    expect(f('backFields', 'riders_list')!.value).toBe('Lead Rider - Road\nMate Hidden - Hybrid\nKid Hidden - Kids');
+    // one rider: their name, no count, no "booked by"
+    const solo = JSON.parse(strFromU8(unzipSync(new Uint8Array(await (await run({ ...found, riders: [] })).arrayBuffer()))['pass.json']));
+    expect(solo.eventTicket.primaryFields.find((x: F) => x.key === 'riders')).toMatchObject({ label: 'RIDER', value: 'Lead Rider' });
+    expect(solo.eventTicket.auxiliaryFields.find((x: F) => x.key === 'lead')).toBeUndefined();
+    // a night with no hand-out time surfaces at its start
+    const noCollect = JSON.parse(strFromU8(unzipSync(new Uint8Array(await (await run({ ...found, session: { ...found.session, collect: null } })).arrayBuffer()))['pass.json']));
+    expect(noCollect.relevantDate).toBe('2099-11-12T19:00:00+03:00');
+    expect(noCollect.eventTicket.secondaryFields.find((x: F) => x.key === 'collect')).toBeUndefined();
+    // a miss, a lock and a bad body; an unconfigured site says so before reading anything
+    for (const miss of [{ ok: false, error: 'notfound' }, { ok: false, error: 'throttled' }]) {
+      const r = await run(miss);
+      expect(r.status).toBe(404);
+      expect(await r.json()).toEqual({ ok: false, error: 'not found' });
+    }
+    expect((await run(found, { bookingNo: 'P-007' })).status).toBe(400);
+    const n = asked.length;
+    expect((await run(found, undefined, { SUPABASE_ANON_KEY: 'anon' })).status).toBe(501);
+    expect(asked.length).toBe(n);
+  });
+
   test('a signing failure tells the rider nothing about the certificate', async () => {
     const res = await pass(booking, circuit, 'wrong password');
     expect(res.status).toBe(500);

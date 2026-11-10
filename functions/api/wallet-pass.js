@@ -1343,6 +1343,7 @@ async function onRequestPost(context) {
   } catch {
     return json({ ok: false, error: "bad body" }, 400);
   }
+  if (body && body.petromin && typeof body.petromin === "object") return petrominPass(request, body.petromin, env, passTypeId, teamId);
   const { customerId, token, bookingId } = body || {};
   if (!customerId || !token || !bookingId) return json({ ok: false, error: "missing fields" }, 400);
   const groupIds = Array.isArray(body && body.groupIds) ? body.groupIds.filter((x2) => typeof x2 === "string").slice(0, 50) : [];
@@ -1554,16 +1555,161 @@ async function buildPkpass(b, cfg) {
       ]
     }
   };
+  return _seal(pass, { ...PASS_IMAGES, ...RIDE_IMAGES[bloodVis ? "blood_visitor" : ride] || {} }, cfg.signer);
+}
+async function _seal(pass, art, signer) {
   const files = {};
   files["pass.json"] = strBytes(JSON.stringify(pass));
-  const art = { ...PASS_IMAGES, ...RIDE_IMAGES[bloodVis ? "blood_visitor" : ride] || {} };
   for (const [name, b64] of Object.entries(art)) files[name] = b64Bytes(b64);
   const manifest = {};
   for (const [name, bytes] of Object.entries(files)) manifest[name] = await sha1hex(bytes);
   const manifestStr = JSON.stringify(manifest);
   files["manifest.json"] = strBytes(manifestStr);
-  files["signature"] = await signDetached(cfg.signer, strBytes(manifestStr), [await getWWDR()]);
+  files["signature"] = await signDetached(signer, strBytes(manifestStr), [await getWWDR()]);
   return zipSync(files, { level: 6 });
+}
+var PM_MISS_MAX = 10;
+var PM_MISS_WINDOW_MS = 10 * 6e4;
+var _pmMisses = /* @__PURE__ */ new Map();
+function _pmMissCount(ip, add) {
+  const now = Date.now();
+  let m = _pmMisses.get(ip);
+  if (m && now - m.at > PM_MISS_WINDOW_MS) {
+    _pmMisses.delete(ip);
+    m = null;
+  }
+  if (add) {
+    if (!m) _pmMisses.set(ip, m = { at: now, n: 0 });
+    m.n++;
+    if (_pmMisses.size > 1e3) _pmMisses.delete(_pmMisses.keys().next().value);
+  }
+  return m ? m.n : 0;
+}
+async function petrominPass(request, q, env, passTypeId, teamId) {
+  const no = typeof q.bookingNo === "string" ? q.bookingNo.trim() : "";
+  const phone = typeof q.phone === "string" ? q.phone.trim() : "";
+  const sid = typeof q.sessionId === "string" && q.sessionId.trim() ? q.sessionId.trim() : null;
+  if (!no || no.length > 20 || !phone || phone.length > 30 || sid && sid.length > 64) return json({ ok: false, error: "missing fields" }, 400);
+  const SUPA = env.SUPABASE_URL || SUPA_DEFAULT;
+  const ANON = env.SUPABASE_ANON_KEY;
+  if (!ANON) return json({ ok: false, error: "no anon key" }, 500);
+  const ip = request.headers.get("cf-connecting-ip") || "?";
+  if (_pmMissCount(ip) >= PM_MISS_MAX) return json({ ok: false, error: "rate limited" }, 429);
+  let r;
+  try {
+    const rpc = await fetch(`${SUPA}/rest/v1/rpc/rider_lookup`, {
+      method: "POST",
+      headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_booking_no: no, p_phone: phone, p_session_id: sid })
+    });
+    if (!rpc.ok) return json({ ok: false, error: "lookup failed" }, 502);
+    r = await rpc.json();
+  } catch (e) {
+    return json({ ok: false, error: "lookup failed" }, 502);
+  }
+  if (!r || r.ok !== true || !r.booking_no || !r.session || typeof r.session !== "object") {
+    _pmMissCount(ip, true);
+    return json({ ok: false, error: "not found" }, 404);
+  }
+  try {
+    const pkpass = await buildPetrominPkpass(r, { signer: await getSigner(env), passTypeId, teamId });
+    const file = String(r.booking_no).toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 20);
+    return new Response(pkpass, {
+      headers: {
+        "Content-Type": "application/vnd.apple.pkpass",
+        "Content-Disposition": `attachment; filename="petromin-${file}.pkpass"`,
+        "Cache-Control": "no-store"
+      }
+    });
+  } catch (e) {
+    console.error("wallet-pass: sign failed", e && e.stack || e);
+    return json({ ok: false, error: "sign failed" }, 500);
+  }
+}
+var _pmText = (v, max = 60) => String(v == null ? "" : v).replace(/\s+/g, " ").trim().slice(0, max);
+var _pmIso = (v) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+03:00$/.test(String(v || "")) ? String(v) : "";
+var _pmMin = (hhmm) => {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(String(hhmm || ""));
+  return m && +m[1] < 24 && +m[2] < 60 ? +m[1] * 60 + +m[2] : null;
+};
+var WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+async function buildPetrominPkpass(r, cfg) {
+  const skin = RIDES.petromin;
+  const s = r.session;
+  const no = String(r.booking_no).toUpperCase();
+  const code = `MMP-${no}`;
+  const riders = Array.isArray(r.riders) ? r.riders.filter((x) => x && typeof x === "object") : [];
+  const count = 1 + riders.length;
+  const name = _pmText(r.name), company = _pmText(r.company);
+  const rideName = _pmText(s.title) || skin.venue;
+  const start = _pmIso(s.start), end = _pmIso(s.end);
+  const day = start ? start.slice(0, 10) : "";
+  const dow = day ? WEEKDAYS[(/* @__PURE__ */ new Date(`${day}T12:00:00Z`)).getUTCDay()] : "";
+  const startMin = start ? _pmMin(start.slice(11, 16)) : null, endMin = end ? _pmMin(end.slice(11, 16)) : null;
+  const startStr = _hhmm(startMin);
+  const hours = startStr && endMin != null ? `${startStr} - ${_hhmm(endMin)}` : startStr;
+  const collectMin = _pmMin(s.collect);
+  const collectStr = _hhmm(collectMin);
+  const collectAt = collectMin != null && day ? `${day}T${String(s.collect).padStart(5, "0")}:00+03:00` : "";
+  const placeRaw = _pmText(s.place, 80);
+  const atCircuit = !placeRaw || placeRaw.toUpperCase() === "JCC";
+  const venue = atCircuit ? "Jeddah Corniche Circuit" : { JYC: "Jeddah Yacht Club" }[placeRaw.toUpperCase()] || placeRaw;
+  const ridersList = [{ name: r.name, type: r.type }, ...riders].map((x) => {
+    const bike = _bikeLabel(x.type);
+    return `${_pmText(x.name)}${bike && bike !== "None" && bike !== "Any" ? " - " + bike : ""}`;
+  }).join("\n");
+  const pass = {
+    formatVersion: 1,
+    passTypeIdentifier: cfg.passTypeId,
+    teamIdentifier: cfg.teamId,
+    // Numbers start again every night (P-001 each Wednesday), so the night is part of what makes the pass its own.
+    serialNumber: `petromin-${_pmText(s.id, 64) || day}-${no}`,
+    organizationName: "MicroMobility Rentals",
+    description: `Booking ${no} - ${rideName}`,
+    foregroundColor: skin.fg || "rgb(242,245,242)",
+    backgroundColor: skin.bg,
+    labelColor: skin.label,
+    sharingProhibited: true,
+    ...start ? { relevantDate: collectAt || start } : {},
+    ...end ? { expirationDate: end } : {},
+    barcodes: [{ format: "PKBarcodeFormatQR", message: code, messageEncoding: "iso-8859-1", altText: no }],
+    barcode: { format: "PKBarcodeFormatQR", message: code, messageEncoding: "iso-8859-1", altText: no },
+    ...atCircuit ? { locations: [{ latitude: CIRCUIT.lat, longitude: CIRCUIT.lng, relevantText: CIRCUIT.text }] } : {},
+    semantics: {
+      eventName: rideName,
+      venueName: venue,
+      ...atCircuit ? { venueLocation: { latitude: CIRCUIT.lat, longitude: CIRCUIT.lng } } : {},
+      eventType: "PKEventTypeGeneric",
+      ...start && end ? { eventStartDate: start, eventEndDate: end } : {}
+    },
+    eventTicket: {
+      headerFields: [{ key: "date", label: "SESSION", value: _shortWhen(dow, day) || "Petromin" }],
+      // The lead by name, a party by its count: no companion's name on the front.
+      primaryFields: [
+        { key: "booking", label: "BOOKING NO.", value: no },
+        { key: "riders", label: count > 1 ? "RIDERS" : "RIDER", value: count > 1 ? `${count} riders` : name }
+      ],
+      secondaryFields: [
+        ...collectStr ? [{ key: "collect", label: "BIKES FROM", value: collectStr }] : [],
+        ...hours ? [{ key: "hours", label: "TIME", value: hours }] : []
+      ],
+      auxiliaryFields: [
+        ...company ? [{ key: "company", label: "COMPANY", value: company }] : [],
+        ...count > 1 && name ? [{ key: "lead", label: "BOOKED BY", value: name }] : []
+      ],
+      backFields: [
+        { key: "when", label: "Session", value: `${dow} ${day}${hours ? " \xB7 " + hours : ""}`.trim() },
+        ...collectStr ? [{ key: "collect_b", label: "Collect your bike", value: `From ${collectStr}${startStr ? ` \xB7 the ride leaves at ${startStr}` : ""}` }] : [],
+        { key: "venue", label: "Venue", value: venue },
+        ...atCircuit ? [{ key: "directions", label: "Directions", value: DIRECTIONS, attributedValue: `<a href="${_attr(DIRECTIONS)}">Open in Maps</a>` }] : [],
+        ...company ? [{ key: "company_b", label: "Company", value: company }] : [],
+        ...count > 1 ? [{ key: "riders_list", label: "Riders", value: ridersList }] : [],
+        { key: "help", label: "Good to know", value: "Show this pass at the desk when you arrive. Bikes are assigned first come, first served, so arrive a little early to get the type you picked. A helmet comes free with every bike." },
+        { key: "ref", label: "Reference", value: code }
+      ]
+    }
+  };
+  return _seal(pass, { ...PASS_IMAGES, ...RIDE_IMAGES.petromin }, cfg.signer);
 }
 function _numsDisplay(nums) {
   if (!nums || !nums.length) return "";

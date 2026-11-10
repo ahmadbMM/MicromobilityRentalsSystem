@@ -2159,6 +2159,22 @@
     #rider-report-modal .rp-noco-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
     #rider-report-modal .rp-scope{display:flex;align-items:center;gap:8px;margin:6px 0 2px;font-size:13px;font-weight:600;color:var(--muted);} /* the period: a night, all, a month (2026-10-28) */
     #rider-report-modal .rp-scope .filter-select{flex:1;min-width:0;}
+    /* Form steps beside it (2026-11-11, _pfsDraw in #pm-steps-modal): how far riders get on the Petromin form, as
+       plain bars - the funnel green, the fields that stopped a Continue amber, the server's refusals red. */
+    #pm-steps-modal .pfs-box{max-width:480px;}
+    #pm-steps-modal .pfs-scope{display:flex;align-items:center;gap:8px;margin:6px 0 2px;font-size:13px;font-weight:600;color:var(--muted);}
+    #pm-steps-modal .pfs-scope .filter-select{flex:1;min-width:0;}
+    #pm-steps-modal .pfs-h{font-size:13px;font-weight:700;margin:16px 0 8px;}
+    #pm-steps-modal .pfs-lbl{min-width:120px;max-width:46%;overflow-wrap:anywhere;}
+    #pm-steps-modal .analytics-bar-value{min-width:72px;}
+    #pm-steps-modal .pfs-fill{width:var(--pfs-w);background:var(--green);}
+    #pm-steps-modal .pfs-fill-err{background:var(--orange);}
+    #pm-steps-modal .pfs-fill-fail{background:var(--red);}
+    #pm-steps-modal .pfs-none{font-size:13px;color:var(--muted);}
+    #pm-steps-modal .pfs-kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:16px 0 0;}
+    #pm-steps-modal .pfs-kv>div{padding:10px 12px;border:1px solid var(--border);border-radius:6px;}
+    #pm-steps-modal .pfs-kv dt{font-size:12px;color:var(--muted);}
+    #pm-steps-modal .pfs-kv dd{margin:2px 0 0;font-size:18px;font-weight:700;}
     #upd-bar .rp-upd-t{font-size:13px;font-weight:700;}
     #upd-bar .rp-upd-b{background:var(--green,#03ff89);color:#000;border:none;border-radius:4px;padding:7px 14px;font-weight:900;font-size:12px;cursor:pointer;font-family:inherit;}
     /* On the staff side the same ink as the party numbers: white on the light and booth greens, black on the dark desk's bright green. */
@@ -11639,6 +11655,7 @@ body.view-staff #pm-host .filter-pill>.iv-o7{margin-inline-start:.35em;}
 @media (max-width:767px){
   body.view-staff #pm-host .iv-pm-btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:100%;}
   body.view-staff #pm-host .iv-pm-btns.pm-n3{grid-template-columns:repeat(3,minmax(0,1fr));}
+  body.view-staff #pm-host .iv-pm-btns.pm-n5>.btn-sm:last-child{grid-column:1/-1;} /* five (an admin's, with Form steps): the last a whole row, not half of one */
   body.view-staff #pm-host .iv-pm-btns>.btn-sm{width:100%;min-width:0;margin:0;padding-inline:6px;white-space:normal;line-height:1.15;text-align:center;justify-content:center;}
 }
 /* The Arena Heros race: you must have a partner (the owner, 2026-11-02): said loud on the card, the athlete step and the review */
