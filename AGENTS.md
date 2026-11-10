@@ -2610,3 +2610,27 @@ the staff page fulfils, edits and refunds. Both sections live in the staff part 
   variable `STAFF_STAGING == 'on'`), deploying to the Pages project `micromobility-staff-staging`; see STAGING.md
   section 2. A copy whose `STAFF_ORIGIN` is its own address sends nothing on to it (`LIVE_HOSTS` in the app, the guard in
   the middleware).
+
+## Booking card: a booking's ticket as its rider sees it (2026-11-10)
+
+The user: "add an option on bookings to make staff able to preview it or share as a booking card the same way it
+appears on customers account add it to the 3 dots list on each booking".
+- **Booking card** is a tile under Booking in every booking's ⋯ menu (every state, and the party row's and party card's
+  menus; `RS_ITEM._tcOpen`). `_tcOpen` (in the `desk` part) draws the ticket My Bookings shows for that account:
+  `_tcGroup` takes the account's bookings on that night (`_wlKey`, as `_myRideGroups` does; a walk-in party by its
+  `_partyKey`), the rides ahead or the rides done, or the booking alone when it is neither (cancelled, a no-show).
+- The rider's look is written for a page without `view-staff` (`body:not(.view-staff)`, `#tab-myrides`), so the card is
+  drawn in a frame of its own (`_tcDoc`: the panel's own stylesheets, the language and direction on screen, a rider page's
+  boxes, `html.tc-still` so nothing moves). The frame is the preview. The page's observers don't reach into it, so
+  `_tcReady` paints the code's canvas (`_qrPaint`) and the `data-cssv` values itself.
+- `renderBookingTicket(g, {card: true, lk})` leaves out what a rider presses (calendar, directions, Wallet buttons, edit
+  and cancel, rate and book again, the wallet pay switch) and the signed-in account's own blood type; `lk` are the
+  locker rows staff read (`_tcLockers`, with `lockers(code)`) in place of the rider's `customer_lockers`.
+- **The picture** (`_tcShot`): the card's boxes copied with their computed styles (only those a bare page would not give
+  them and their parent does not pass down, compared in a blank `.tc-sandbox` frame), `::before`/`::after` as rules,
+  pictures and the needed `@font-face` files as `data:` addresses, the code's canvas as a picture, into an svg
+  `foreignObject` drawn on a canvas at 3x (less for a very tall card: iOS stops at ~16.7 M pixels). The svg must go
+  as a `data:` address: a `blob:` one taints the canvas in both Chrome and WebKit. No library, nothing the page's
+  policy refuses. Share (where the browser shares files), Save to device and Copy picture; each is logged.
+- `tests/booking-card.spec.ts` (with a run under the real CSP, and a check that the frame's card computes the same look
+  as the rider's own My Bookings).

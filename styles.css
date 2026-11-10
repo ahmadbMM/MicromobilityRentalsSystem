@@ -3352,6 +3352,21 @@
     .rs-dlg .rs-prev img{width:100%;height:auto;display:block;border:1px solid var(--border);border-radius:var(--sf-r-ctl,8px);background:#fff;}
     .rs-dlg .rs-wait{padding:36px 10px;text-align:center;color:var(--muted);font-size:13px;}
     .rs-dlg .rs-hint{font-size:12px;color:var(--muted);margin-bottom:4px;}
+    /* Booking card (_tcOpen, 2026-11-10): the rider's ticket in a frame of its own, at a phone's width, then its buttons */
+    .tc-dlg{max-width:520px;width:min(94vw,520px);max-height:92vh;overflow-y:auto;}
+    .tc-dlg .tc-sub{font-size:12px;color:var(--muted);margin:-8px 0 12px;}
+    .tc-dlg .tc-view{max-height:64vh;overflow-y:auto;border:1px solid var(--border);border-radius:var(--sf-r-ctl,8px);background:var(--s2);}
+    .tc-dlg .tc-frame{display:block;width:100%;max-width:420px;height:360px;margin:0 auto;border:0;background:transparent;}
+    .tc-dlg .tc-state{font-size:12px;color:var(--muted);margin-top:10px;min-height:16px;}
+    .tc-dlg .bdg-foot{flex-wrap:wrap;margin-top:8px;}
+    .tc-dlg .bdg-foot button{display:inline-flex;align-items:center;gap:6px;}
+    .tc-sandbox{position:fixed;left:-10000px;top:0;width:8px;height:8px;border:0;visibility:hidden;}
+    /* inside the frame: a rider's page with nothing around the card and nothing moving (a picture is taken of it) */
+    html.tc-still *,html.tc-still *::before,html.tc-still *::after{animation:none!important;transition:none!important;}
+    html.tc-still,html.tc-still body.tc-body{margin:0!important;padding:0!important;min-height:0!important;overflow:hidden!important;}
+    html.tc-still #view-customer,html.tc-still .view-main,html.tc-still #tab-myrides{margin:0!important;padding:0!important;max-width:none!important;min-height:0!important;}
+    html.tc-still .tc-pad{padding:16px 14px 18px;background:var(--paper,var(--bg));}
+    html.tc-still .tc-pad>.ticket-card{margin:0;}
     #tab-analytics .an-row-between{display:flex;align-items:center;justify-content:space-between;gap:10px;}
     #tab-analytics .an-rate-meta{font-size:var(--staff-fs-sm,12px);color:var(--muted);}
     #tab-analytics .an-rate-scores{display:flex;gap:14px;flex-shrink:0;}
@@ -12514,7 +12529,7 @@ body.view-staff #optlist-modal .flt-obox,body.view-staff #rider-report-modal .rp
 body.view-staff #dep-modal .dep-box,body.view-staff #return-pay-modal .dk-rp-box,body.view-staff .sv-box,body.view-staff .tm-pwd-box,
 body.view-staff .ws-dlg,body.view-staff .cm-box{max-width:min(var(--sf-dlg-m),calc(100vw - 32px));}
 body.view-staff #bike-profile-modal .flt-pbox,body.view-staff #print-opts-modal .rpt-w520,body.view-staff #receipt-modal .hist-rc-box,
-body.view-staff .rs-dlg,body.view-staff .br-box,body.view-staff .ah-box,body.view-staff .fl-box,body.view-staff #cancel-night-modal .dk-cn-box,
+body.view-staff .rs-dlg,body.view-staff .tc-dlg,body.view-staff .br-box,body.view-staff .ah-box,body.view-staff .fl-box,body.view-staff #cancel-night-modal .dk-cn-box,
 body.view-staff #dq-modal .dq-box,body.view-staff .ca-msg-box,body.view-staff #confirm-modal .n6r-dlg,body.view-staff .vt-rc-box,
 body.view-staff #jcc-group-modal .cmy-mw540,body.view-staff #group-edit-modal .cmy-mw540,
 body.view-staff .vendor-dlg.vendor-ven-dlg,body.view-staff .vendor-dlg.vendor-day-dlg{max-width:min(var(--sf-dlg-l),calc(100vw - 32px));}
