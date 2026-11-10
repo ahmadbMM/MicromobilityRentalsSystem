@@ -240,8 +240,12 @@ test.describe('@staff:bookings Run for Her', () => {
   test('Finished ends a free run at once: no payment question for a runner who owes nothing', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await staffBoot(page, [row('r1', 5, { status: 'active', checked_in_at: '2099-10-17T03:00:00Z' })]);
+    // The return itself is what to wait for. The row reads done the moment Finished is pressed, but the reload
+    // after the write gets the stub's unchanged row back ("active"), so polling the status raced that reload and
+    // failed whenever the page was slow (2026-11-10: 3 of 3 attempts on CI, 34 of 40 locally under a trace).
+    const ret = page.waitForRequest((r) => r.method() === 'POST' && /\/rpc\/staff_return$/.test(r.url()));
     await page.locator('#tab-queue tr[data-id="r1"]').getByRole('button', { name: 'Finished' }).click();
-    await expect.poll(() => page.evaluate(`(getQueue().find(e=>e.id==='r1')||{}).status`)).toBe('done');
+    expect((await ret).postDataJSON()).toMatchObject({ p_booking_id: 'r1', p_return_condition: 'ok' });
     await expect(page.locator('#return-pay-modal')).toBeHidden();
   });
 
