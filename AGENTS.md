@@ -1995,6 +1995,15 @@ most once a minute (`_scEnsure`), indexed by `_scOf(kind,id)`; `_scOpen` is the 
 roster's mark (in `statusCellHtml`), `_scMenuItem` the ⋯ menu's row on every booking status, `_scCardHtml` the line on
 each application card. Until the table exists `S._scMissing` and the thread says "Waiting for the database update".
 `tests/staff-comments.spec.ts`.
+- **Applications with comments (2026-11-10;** the user: "add a way to show comments on applications on the phone website
+  screen and add a way to filter and show only applications that contain a comment"). A card lists its newest three
+  comments (`SC_CARD_N`, `.sc-card-list`), then "Comments (N)" for the whole thread. Under 767px a card holding any
+  (`.sc-card-has`) shows them right under its name, before the answers: the row turns a flex column and the block
+  takes `order:-1` (styles.css, scoped to `#ca-list`/`#la-list`), so a turned phone needs no repaint. The Filters
+  panel's first main filter on both lists is Staff comments (`_apDefs` key `cmt`: With comments / No comments), which
+  narrows the pill counts and goes into saved views like any other. The account window's community part
+  (`_ahCommHtml`, all the simple phone view reaches of an applicant) shows the application's comments too; its
+  repaint signature (`_n6pAhSig`) carries their count.
 
 ## Staff panel tidy (2026-10-27)
 

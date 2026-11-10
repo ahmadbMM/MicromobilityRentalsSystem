@@ -11108,6 +11108,16 @@ html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).t
 .sc-chip .sc-chip-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-weight:500;}
 .sc-card{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;}
 .sc-card-last{flex:1 1 220px;min-width:0;font-size:13px;overflow-wrap:anywhere;}
+/* An application card's newest three comments (2026-11-10), above the button to the whole thread. */
+.sc-card-list{flex:1 1 100%;min-width:0;list-style:none;margin:0;padding:0;padding-inline-start:10px;border-inline-start:3px solid var(--sf-line,var(--border));display:flex;flex-direction:column;gap:6px;}
+.sc-card-c{font-size:13px;overflow-wrap:anywhere;}
+.sc-card-b{white-space:pre-wrap;}
+/* A phone shows an application's comments under its name, not below its fifteen answers (the user, 2026-11-10). */
+@media(max-width:767px){
+  :is(#ca-list,#la-list)>.ca-row{display:flex;flex-direction:column;}
+  :is(#ca-list,#la-list)>.ca-row>.ca-head{order:-2;}
+  :is(#ca-list,#la-list)>.ca-row>.sc-card-has{order:-1;}
+}
 .sc-meta{color:var(--muted);font-size:12px;font-weight:600;}
 #sc-sheet .sc-sheet{width:min(92vw,520px);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;}
 #sc-sheet .sc-hint{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px;}

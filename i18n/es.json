@@ -4605,6 +4605,8 @@
   "apFixWait": "Esperando respuesta",
   "apFixDone": "Respondida",
   "apFixNever": "Nunca pedido",
+  "apCmtYes": "Con comentarios",
+  "apCmtNo": "Sin comentarios",
   "apTwice": "Enviada más de una vez",
   "apWaOther": "Otro número",
   "apGiven": "Indicado",

@@ -4605,6 +4605,8 @@
   "apFixWait": "Naghihintay ng sagot",
   "apFixDone": "Nasagot na",
   "apFixNever": "Hindi pa hiningi",
+  "apCmtYes": "May komento",
+  "apCmtNo": "Walang komento",
   "apTwice": "Ipinadala nang higit sa isang beses",
   "apWaOther": "Ibang numero",
   "apGiven": "Ibinigay",

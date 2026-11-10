@@ -4605,6 +4605,8 @@
   "apFixWait": "En attente de réponse",
   "apFixDone": "Répondu",
   "apFixNever": "Jamais demandé",
+  "apCmtYes": "Avec commentaires",
+  "apCmtNo": "Sans commentaires",
   "apTwice": "Envoyée plusieurs fois",
   "apWaOther": "Un autre numéro",
   "apGiven": "Renseigné",

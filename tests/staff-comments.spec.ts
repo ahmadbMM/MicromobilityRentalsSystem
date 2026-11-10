@@ -112,3 +112,95 @@ test.describe('@staff:community staff comments on applications', () => {
     await expect(page.locator('#sc-sheet [role="dialog"]')).toContainText('Zaid Applicant');
   });
 });
+
+// The user, 2026-11-10: "add a way to show comments on applications on the phone website screen and add a way to
+// filter and show only applications that contain a comment". Invented applicants only.
+test.describe('@staff:community applications with comments: the filter, the card on a phone, the account window', () => {
+  const app = (id: string, name: string, extra: Record<string, unknown> = {}) => ({
+    id, name, email: `${id}@example.test`, phone: '+966552468011', status: 'pending', submissions: 1,
+    created_at: '2026-10-20T08:00:00Z', updated_at: '2026-10-20T08:00:00Z', lang: 'en', customer_id: null, existing_account: null, ...extra,
+  });
+  const learner = (id: string, name: string) => ({
+    id, name, email: `${id}@example.test`, phone: '+966552468012', status: 'pending', submissions: 1, created_at: '2026-10-20T08:00:00Z',
+    updated_at: '2026-10-20T08:00:00Z', lang: 'en', customer_id: null, existing_account: null, for_whom: 'self', learner_name: null,
+    learner_gender: 'female', level: 'never', notes: '', lesson_at: null, priority: null,
+  });
+  const cmt = (id: number, kind: string, target: string, body: string, day: number) => ({
+    id, created_at: `2026-10-${String(day).padStart(2, '0')}T09:00:00Z`, kind, target_id: target, body, author_id: 'u2', author_name: 'Omar',
+  });
+  async function boot(page: Page) {
+    await stubSupabase(page, {
+      sessions: [], queue_entries: [], bikes: [], tags: [], customer_tags: [],
+      customers: [{ id: 'c1', name: 'Zaid Talked', email: 'ca1@example.test', phone: '+966552468011', created_at: '2026-01-05T10:00:00Z' }],
+      community_applications: [app('ca1', 'Zaid Talked', { customer_id: 'c1' }), app('ca2', 'Quiet Applicant'), app('ca3', 'Rana Discussed')],
+      learn_applications: [learner('la1', 'Lina Noted'), learner('la2', 'Maha Quiet')],
+      staff_comments: [
+        cmt(1, 'community_app', 'ca1', 'Knows Huda from the club', 21),
+        cmt(2, 'community_app', 'ca3', 'First of four', 10), cmt(3, 'community_app', 'ca3', 'Second of four', 11),
+        cmt(4, 'community_app', 'ca3', 'Third of four', 12), cmt(5, 'community_app', 'ca3', 'Fourth of four', 13),
+        cmt(6, 'learn_app', 'la1', 'Wants a weekend lesson', 14),
+      ],
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('community');setCommTab('applications')`);
+    await expect(page.locator('.ca-row[data-app-id="ca1"] .sc-card-list')).toContainText('Knows Huda from the club');
+  }
+  const ids = (page: Page, sel: string, attr: string) => page.locator(sel).evaluateAll((els, a) => els.map((e) => e.getAttribute(a as string)), attr);
+
+  test('the Filters panel shows only the applications with comments, or only those without, on both lists', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 1000 });
+    await boot(page);
+    expect(await ids(page, '.ca-row', 'data-app-id')).toHaveLength(3);
+    await page.locator('[aria-controls="fm-caap"]').click();
+    const pick = page.locator('#fm-caap').getByLabel('Staff comments', { exact: true });
+    await expect(pick).toBeVisible(); // a main filter, not under Advanced
+    await pick.selectOption('yes');
+    expect((await ids(page, '.ca-row', 'data-app-id')).sort()).toEqual(['ca1', 'ca3']);
+    await expect(page.locator('.filter-pill[data-ca-filter="pending"]')).toHaveText('Pending (2)');
+    await expect(page.locator('[aria-controls="fm-caap"]')).toContainText('(1)');
+    await page.locator('#fm-caap').getByLabel('Staff comments', { exact: true }).selectOption('no');
+    expect(await ids(page, '.ca-row', 'data-app-id')).toEqual(['ca2']);
+    await expect(page.locator('.filter-pill[data-ca-filter="pending"]')).toHaveText('Pending (1)');
+
+    await page.evaluate(`S.communityTab='learning';renderCommunity()`);
+    await expect(page.locator('.la-row')).toHaveCount(2);
+    await page.locator('[aria-controls="fm-laap"]').click();
+    await page.locator('#fm-laap').getByLabel('Staff comments', { exact: true }).selectOption('yes');
+    expect(await ids(page, '.la-row', 'data-learn-id')).toEqual(['la1']);
+    await expect(page.locator('.la-row .sc-card-list')).toContainText('Wants a weekend lesson');
+  });
+
+  test('a card shows its newest three comments; a phone shows them under the name, before the answers', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await boot(page);
+    const three = page.locator('.ca-row[data-app-id="ca3"]');
+    await expect(three.locator('.sc-card-c')).toHaveCount(3);
+    await expect(three.locator('.sc-card-list')).not.toContainText('First of four');
+    await expect(three.locator('.sc-card-c').last()).toContainText('Fourth of four'); // in the order written
+    await expect(three.getByRole('button', { name: 'Comments (4)' })).toBeVisible();
+    const top = (sel: string) => three.locator(sel).evaluate((el) => el.getBoundingClientRect().top);
+    expect(await top('.sc-card')).toBeLessThan(await top('.ca-grid'));
+    expect(await top('.ca-head')).toBeLessThan(await top('.sc-card'));
+    // A card without comments keeps its Add comment button by the actions.
+    const quiet = page.locator('.ca-row[data-app-id="ca2"]');
+    const qTop = (sel: string) => quiet.locator(sel).evaluate((el) => el.getBoundingClientRect().top);
+    expect(await qTop('.sc-card')).toBeGreaterThan(await qTop('.ca-grid'));
+    await three.getByRole('button', { name: 'Comments (4)' }).click();
+    await expect(page.locator('#sc-sheet .sc-item')).toHaveCount(4);
+    await expect(page.locator('#sc-sheet [role="dialog"]')).toBeInViewport();
+    // A wide screen keeps the comments where they were, below the answers.
+    await page.locator('#sc-sheet .x-close').click();
+    await page.setViewportSize({ width: 1280, height: 1000 });
+    expect(await top('.sc-card')).toBeGreaterThan(await top('.ca-grid'));
+  });
+
+  test("the account window shows the comments on the person's application", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await boot(page);
+    const html = String(await page.evaluate(`_ahCommHtml(_custById('c1'))`));
+    expect(html).toContain('Knows Huda from the club');
+    expect(html).toContain('Comments (1)');
+  });
+});
