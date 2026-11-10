@@ -465,7 +465,10 @@ with expected(fname, want_definer, note) as (values
   ('_sport_clean',                 true,  'a yes answer''s codes in the list''s order; no client execute (20261110233000)'),
   ('_sport_answer_check',          true,  'trigger: refuses a sport code outside the lists, whoever writes, and stamps sport_answered_at (20261110233000)'),
   ('_sport_feds',                  false, 'pure: the user''s 74 federation codes (20261110233000)'),
-  ('_sport_other_clean',           false, 'pure: what a rider wrote under Other, tidied (20261110233000)')
+  ('_sport_other_clean',           false, 'pure: what a rider wrote under Other, tidied (20261110233000)'),
+  ('_staff_role_mods',             false, 'pure: a role''s sections, the page''s ROLE_TABS (20261111120000)'),
+  ('_staff_opt_ok',                true,  'staff_options write rule per key; calls is_admin / _staff_mod (20261111120000)'),
+  ('_staff_views_guard',           true,  'trigger: the shared saved views, each needs change on its section (20261111120000)')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

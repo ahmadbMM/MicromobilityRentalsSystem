@@ -113,6 +113,40 @@ test('the Team page sets PINs and what another account can open and change, neve
   await expect.poll(() => accessCalls).toEqual([{ p_user: DESK, p_role: 'frontdesk', p_view: ['queue', 'workshop'], p_edit: ['queue'] }]);
 });
 
+// Staff round s10, item 42: the database reads a NULL list as the role's sections (migration 20261111120000), and a Save
+// never writes NULL for a role other than admin: "every section the role allows" goes out as the role's own list.
+test('a Save writes the sections out for every role but admin, never "everything"', async ({ page }) => {
+  await boot(page);
+  const accessCalls = await rpcSequence(page, 'staff_set_access', [true, true, true, true]);
+  await page.evaluate(`setStaffTab('team')`);
+  const desk = page.locator(`#tab-team .tm-acct[data-acct="${DESK}"]`);
+  const save = async (n: number) => {
+    await desk.getByRole('button', { name: 'Save' }).click();
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => accessCalls.length).toBe(n);
+    // the Save is done (its draft dropped) and the accounts read again before the next pick
+    await expect(desk.getByRole('button', { name: 'Save' })).toBeDisabled();
+    await expect(desk.locator('.tm-role')).toHaveValue('frontdesk');
+  };
+  // a mechanic, nothing ticked: Inventory and Workshop, to open and to change
+  await desk.locator('.tm-role').selectOption('mechanic');
+  await save(1);
+  expect(accessCalls[0]).toEqual({ p_user: DESK, p_role: 'mechanic', p_view: ['inventory', 'workshop'], p_edit: ['inventory', 'workshop'] });
+  // a ride leader: Bookings (its Waitlist and Lockers come with it, off the wire)
+  await desk.locator('.tm-role').selectOption('leader');
+  await save(2);
+  expect(accessCalls[1]).toEqual({ p_user: DESK, p_role: 'leader', p_view: ['queue'], p_edit: ['queue'] });
+  // the Owner only looks: its edit list is empty
+  await desk.locator('.tm-role').selectOption('owner');
+  await save(3);
+  expect((accessCalls[2] as { p_edit: unknown }).p_edit).toEqual([]);
+  expect((accessCalls[2] as { p_view: string[] }).p_view).toContain('team');
+  // an admin keeps null: every section
+  await desk.locator('.tm-role').selectOption('admin');
+  await save(4);
+  expect(accessCalls[3]).toEqual({ p_user: DESK, p_role: 'admin', p_view: null, p_edit: null });
+});
+
 test('an account sees only its sections, and a section it may not change is read-only', async ({ page }) => {
   await boot(page);
   await page.evaluate(`_accessSet({modules_view:['queue','cashier','community'],modules_edit:['cashier']},'u1')`);

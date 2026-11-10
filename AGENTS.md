@@ -3034,3 +3034,43 @@ The rail, Ctrl K, the bell, the Dashboard, unsaved-work guards and confirm butto
   `confirmDialog`/`askConfirm` call must pass `confirmClass` (`scripts/check-confirm-class.mjs`, run by the build):
   `'btn-red'` only for a destructive ask (delete, remove, cancel, no-show, close-out, leave without saving).
 - `tests/s10-shell.spec.ts`.
+
+## Staff round s10: trust (permissions, accessibility, targets, Arabic) (2026-11-10)
+- **Section rights at the database** (migration `20261111120000_section_checks.sql`). `_staff_mod(mod, edit)` no longer
+  passes every section for a NULL list: a NULL view list is the role's sections (`_staff_role_mods(role)`, the page's
+  `ROLE_TABS` in the database's ids, derived sections as their parent), a NULL edit list is the view list (or the role's
+  map). Ids are read with their aliases (`customers`=`community`=`badgereq`, `vendors`=`fnb`, `sessions`/`lockers`/
+  `waitlist`=`queue`, `store`/`payments`=`cashier`). Admins pass, the Owner never edits, disabled/Volunteer fail: unchanged.
+  **When you add a section to `ROLE_TABS`, add its id to `_staff_role_mods` in a migration** (tests/s10-trust.spec.ts
+  compares the two). Accounts saved since this round hold explicit lists, so a new section also has to be ticked for them
+  on the Team page (or given by a migration).
+- **Team's Save writes explicit lists** for every role but admin and volunteer (`_tmLists`): the draft's null ("every
+  section the role allows") goes out as the role's sections, a null edit list as the view list, the Owner's as `[]`.
+  `_modSend` still strips the derived ids (prod `staff_set_access` refuses them).
+- **Writes checked by section**: `workshop_jobs` insert = Workshop change, update = Workshop or Sales change (a till void
+  takes the payment off its job, `_wsUnpay`); `site_messages` read/update = Messages or the website section;
+  `staff_options` insert/update/delete go through `_staff_opt_ok(key)` (biz, dup_ok, acc_report_default,
+  community.app_rules, community.wa_group, service_every(_days) admin; session_templates Bookings; birthday_wishes and
+  accounts_look_fine People; bike_* lists Inventory or Workshop; inventory lists Inventory; any other key is_staff()).
+  **A new shared `staff_options` key gets its section in `_staff_opt_ok`.** The shared saved views (`views`) are checked
+  per view by the trigger `staff_options_views_guard`: a view added, changed or removed needs change on its section
+  (`sessions`->queue, `logs`->history, `accounts`->community; a section the database does not know is left to is_staff).
+  `_devOptSync` (old per-device lists) runs only for an account that may change Inventory.
+- **Accessibility gate** (`tests/a11y.spec.ts`, any violation fails): 23 staff tabs in EN and AR (Waitlist, Sessions,
+  Lockers, Badge requests, Volunteers, Store, Payments added), `officeFixtures()` with ~20 rows per office list, and the
+  account window, Team access card, palette (with results) and bell as dialogs. Contrast fixed: the picked session card's
+  green and muted inks, the Sessions layout button, the Inventory out-of-service line, the out-of-service locker's line.
+- **24px hit areas** (WCAG 2.5.8): grow a small text button's hit area with padding and give the room back with the same
+  negative margin (inline boxes: padding alone), so nothing moves: `.q-sort-btn`, `.ss-th-btn`, `.ss-link`,
+  `.bk-attn-link`, `.bdr-who`, `.ca-link`, `.hist-name`. Table checkboxes (16-22px) are left to the spacing exception.
+- **Focus not hidden** (WCAG 2.4.11): `_lcStick` writes `--q-stack` on `<html>` (figures bar + selection actions + the
+  table's sticky header, 0 when Bookings is hidden; written only when it changes) and the page's `scroll-padding-top`
+  adds it to the top bar.
+- **Pending rows are said** (WCAG 4.1.3): `_rowPending` says "Sending: #n Name" and, 400 ms after the answer, "Saved:
+  ..." for rows not refused, through `_srSay` (the `#toast-live` status region; nothing drawn).
+- **Arabic**: the rail names Lockers and Volunteers (they had no line in the label loop; Store and Payments are named by
+  `_stoTabLabelSync`); the Store's spec placeholders are translated; `_bdiRuns(text)` = `esc` plus `<bdi>` around phone
+  numbers, booking codes and amounts, used for History log lines and workshop prices (roster phones, money via `_money`,
+  the account window and the bell were already isolated). Arabic letter-spacing is already 0 for every element
+  (`:is(html[lang="ar"],...) *{letter-spacing:0!important}`). Physical properties converted: `.color-del`,
+  `.sess-list-scroll`; the rest are symmetric, safe-area, centred or have a `[dir=rtl]` override. Clock formats unchanged (D8).
