@@ -2331,6 +2331,7 @@
   "caViewNamePh": "Pangalanan ang view na ito",
   "caViewSave": "I-save ang view",
   "caViewSaved": "Na-save ang view: {0}",
+  "caViewsFull": "Hanggang 12 view lang ang puwedeng i-save. Magbura ng isa para ma-save ito.",
   "caViewsLbl": "Mga naka-save na view",
   "caBulkApproveQ": "Aprubahan ang {0} aplikasyon?",
   "caBulkRejectQ": "Tanggihan ang {0} aplikasyon?",

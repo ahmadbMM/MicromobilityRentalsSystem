@@ -2331,6 +2331,7 @@
   "caViewNamePh": "Nommez cette vue",
   "caViewSave": "Enregistrer la vue",
   "caViewSaved": "Vue enregistrée : {0}",
+  "caViewsFull": "Vous pouvez enregistrer 12 vues au maximum. Supprimez-en une pour enregistrer celle-ci.",
   "caViewsLbl": "Vues enregistrées",
   "caBulkApproveQ": "Approuver {0} candidatures ?",
   "caBulkRejectQ": "Refuser {0} candidatures ?",

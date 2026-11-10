@@ -2331,6 +2331,7 @@
   "caViewNamePh": "Nombra esta vista",
   "caViewSave": "Guardar vista",
   "caViewSaved": "Vista guardada: {0}",
+  "caViewsFull": "Puedes guardar hasta 12 vistas. Elimina una para guardar esta.",
   "caViewsLbl": "Vistas guardadas",
   "caBulkApproveQ": "¿Aprobar {0} solicitudes?",
   "caBulkRejectQ": "¿Rechazar {0} solicitudes?",
