@@ -663,6 +663,12 @@ Check-in and bike handling at the booth (the owner's first pain). Client only; `
   that keeps the camera up (a rider already in or returned, Express, a Petromin ticket under Express) lists bike type, height and
   size in `#scan-details`, the scanned rider first and then their party (`_scanDetailsOf`, `_scanDetailsOfRider`); every `say`
   clears it. A scan that opens the check-in or the Petromin pop-up shows them there.
+- **Flashlight** (2026-11-10): `#scan-torch-btn` in the top corner of the camera view (`.bkm-svw`), so it is there for
+  tickets and for a bike's sticker from an open check-in alike. Hidden until the camera's track lists `torch` in
+  `getCapabilities()` (`_scanTorchReady` looks again 700 ms later for phones that list it late); a browser that does not
+  let a page use the torch gets no button. `toggleScanTorch` sets it with `applyConstraints({advanced:[{torch}]})`;
+  `_scanTorch` lasts the page's life (not stored), so Keep scanning and a later open come back lit. The torch goes out
+  with the track. Spec: tests/scan-torch.spec.ts (a canvas stream with a stubbed torch).
 - **Open the next rider** (`cq_ci_next`, the toggle under the check-in's Previous/Next): after a single
   rider's Confirm, `_ciAfterConfirm` opens the next rider still expected on the roster as shown, after this
   one or else from the top. Parties, scanned groups and a camera that is coming back are left as they were.

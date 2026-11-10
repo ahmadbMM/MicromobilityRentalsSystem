@@ -2923,6 +2923,8 @@
   "scanBnWarn": "Verificar",
   "scanBnErr": "Parar",
   "scanSoundBtn": "Som",
+  "scanTorchBtn": "Lanterna",
+  "scanTorchFail": "A lanterna não acendeu",
   "scanDetailsBtn": "Detalhes da reserva",
   "scanAlreadyIn": "#{0} {1} já fez check-in",
   "scanInAt": "desde {0}",

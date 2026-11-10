@@ -2923,6 +2923,8 @@
   "scanBnWarn": "जाँचें",
   "scanBnErr": "रुकें",
   "scanSoundBtn": "आवाज़",
+  "scanTorchBtn": "टॉर्च",
+  "scanTorchFail": "टॉर्च चालू नहीं हुई",
   "scanDetailsBtn": "बुकिंग का विवरण",
   "scanAlreadyIn": "#{0} {1} पहले से चेक-इन है",
   "scanInAt": "{0} से",

@@ -2923,6 +2923,8 @@
   "scanBnWarn": "Suriin",
   "scanBnErr": "Hinto",
   "scanSoundBtn": "Tunog",
+  "scanTorchBtn": "Flashlight",
+  "scanTorchFail": "Hindi bumukas ang flashlight",
   "scanDetailsBtn": "Detalye ng booking",
   "scanAlreadyIn": "Naka-check in na si #{0} {1}",
   "scanInAt": "mula {0}",

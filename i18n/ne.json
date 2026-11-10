@@ -2923,6 +2923,8 @@
   "scanBnWarn": "जाँच्नुहोस्",
   "scanBnErr": "रोक्नुहोस्",
   "scanSoundBtn": "आवाज",
+  "scanTorchBtn": "टर्च",
+  "scanTorchFail": "टर्च बलेन",
   "scanDetailsBtn": "बुकिङ विवरण",
   "scanAlreadyIn": "#{0} {1} पहिले नै चेक-इन भइसके",
   "scanInAt": "{0} देखि",
