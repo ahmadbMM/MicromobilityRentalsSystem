@@ -20470,22 +20470,64 @@ function _lkUnassignAsk(rentalId,day){
 function _lkAdAsk(k,rentalId,day){(k==='x'?_lkCancelAsk:_lkUnassignAsk)(rentalId,day);const b=document.querySelector('#confirm-modal .modal-backdrop');if(b)b.style.zIndex='9600';}
 function _lkAdFill(){const s=document.getElementById('lk-ad-slot'),e=s&&_qGet(S._addonPickerEntry);if(s&&e)s.innerHTML=_lkAdHtml(e);}
 // The booking's locker in its Add-ons dialog (the user, 2026-11-10: "i want the locker to be shown on add ons in each booking if
-// it was added"): the number, the time, how it is paid and the fee, with Unassign while it has a number and Cancel locker
-// (_lkCancelAsk: its fee comes off the booking) until it is handed back. The fee line counts in the row's Add-ons chip.
+// it was added"): the number, the time, how it is paid and the fee. The fee line counts in the row's Add-ons chip.
+// Edited from here as well (the user, 2026-11-10: "allow the staff to edit add ons of a customer such as lockers"): the next
+// step of the evening (Give a number, Give key, Hand back), Edit (the reservation's dialog: evening, time, number, name,
+// account, on the house, refund, WhatsApp), Unassign while it has a number, Cancel locker until it is handed back; a booking
+// with none on a night that offers lockers gets Add a locker (Assign a locker picks the time and the door).
 function _lkAdHtml(e){
-  const L=_lkState(),fee=_lkFeeOf(e);if(L.gone&&!(fee>0))return'';
+  const L=_lkState(),fee=_lkFeeOf(e),k=_lkKind(_sessDisp(e.sessionId)),canAdd=!!k&&['waiting','waitlist','active'].includes(e.status);
+  if(!(fee>0)&&(L.gone||!k))return''; // no locker on its bill and none to be had on this ride: nothing to read
   const day=_lkDayOf(e),ready=!L.gone&&!!L.days[day]&&!!L.lockers;
   if(!ready&&!L.gone)setTimeout(()=>_lkLoad(false,day),0);
-  const r=ready?_lkOfBooking(e):null;if(ready&&!r&&!(fee>0))return'';
+  const r=ready?_lkOfBooking(e):null;
+  if(!r&&!(fee>0)){
+    if(!ready||!canAdd)return'';
+    return`<div class="lk-ad lk-ad-none" role="group" aria-labelledby="lk-ad-t"><div class="lk-ad-top"><span class="lk-ad-ic">${_artIcon('lock',20)}</span>
+      <div class="lk-ad-who"><div class="dk-ap-name" id="lk-ad-t">${esc(t('lkTitle'))}</div></div>
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_lkAdGo",'as','',day)}">${esc(t('lkAddOne'))}</button></div></div>`;
+  }
   const code=r?_lkCodeOf(r):'',done=!!r&&r.status==='returned';
   const st=!r?'':done?t('lkReturned'):_lkOverdue(r)?t('lkOverdue'):r.status==='in_use'?t('lkKeyGiven'):code?t('lkKeyNot'):t('lkNoLocker');
+  const b=(k2,lbl,cls)=>`<button type="button" class="btn-sm ${cls||'btn-secondary'}" data-on-click="${_on("_lkAdGo",k2,r.id,day)}">${esc(t(lbl))}</button>`;
+  const acts=!r?'':[
+    done?'':!code?b('as','lkGive','btn-green'):_lkKeyDue(r)?b('key','lkGiveKey','btn-green'):r.status==='in_use'?b('back','lkHandBack'):'',
+    b('ed','lkEdit'),
+    !done&&code?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_lkAdAsk",'u',r.id,day)}">${t('lkUnassign')}</button>`:'',
+    done?'':`<button type="button" class="btn-sm btn-muted" data-on-click="${_on("_lkAdAsk",'x',r.id,day)}">${t('lkCancel')}</button>`,
+  ].join('');
   return`<div class="lk-ad${r&&_lkOverdue(r)?' lk-over':''}" role="group" aria-labelledby="lk-ad-t">
     <div class="lk-ad-top"><span class="lk-ad-ic">${_artIcon('lock',20)}</span>
       <div class="lk-ad-who"><div class="dk-ap-name" id="lk-ad-t">${esc(code?t('lkSheetTitle').replace('{0}',code):t('lkTitle'))}</div>
         ${r?`<div class="lk-muted"><bdi>${esc(_lkPeriodTxt(r.period))}</bdi>${r.on_bill?'':' · '+esc(_lkPayTxt(r))} · <span class="lk-ad-st">${esc(st)}</span></div>`:''}</div>
       <bdi class="dk-ap-price">${esc(_money(fee||(r&&Number(r.price))||0,_NOISO))}</bdi></div>
-    ${r&&!done?`<div class="lk-sh-acts">${code?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_lkAdAsk",'u',r.id,day)}">${t('lkUnassign')}</button>`:''}<button type="button" class="btn-sm btn-muted" data-on-click="${_on("_lkAdAsk",'x',r.id,day)}">${t('lkCancel')}</button></div>`:''}
+    ${acts?`<div class="lk-sh-acts">${acts}</div>`:''}
   </div>`;
+}
+// A step from the locker card. Give key and Hand back happen here; Assign a locker and the reservation's edit dialog sit under
+// the Add-ons dialog (z-index 200 against its inline 9500), so it steps aside while they are open and comes back when they
+// close (_lkAdBackGo), with the Edit price dialog it came from, if any, still behind it.
+async function _lkAdGo(k,rid,day){
+  const id=S._addonPickerEntry,e=id&&_qGet(id);if(!e)return;
+  if(k==='key'||k==='back'){
+    const r=_lkRows(day).find(x=>x.id===rid);if(!r)return;
+    return _busyRun('lkad:'+rid,()=>k==='key'?_lkGive(rid,_lkCodeOf(r),day):_lkHandBack(rid,day));
+  }
+  S._lkAdBack={id,ep:S._epReturnId||null};
+  S._epReturnId=null;S._addonPickerEntry=null;
+  const m=document.getElementById('addon-picker-backdrop');if(m)m.remove();
+  if(k==='ed')_lkEdOpen(rid,day);else _lkAssignOpen(id);
+  if(!S._lkAs&&!S._lkEd)_lkAdBackGo(); // it did not open (no evening to rent for, a reservation gone): straight back
+}
+// The Add-ons dialog again once the locker dialogs are closed; on the next tick, so Edit opened from Assign a locker (which
+// closes the one and opens the other) keeps it away. A question asked as one closed (Cancel locker) stays on top of it.
+function _lkAdBackGo(){
+  setTimeout(()=>{
+    const b=S._lkAdBack;if(!b||S._lkAs||S._lkEd)return;
+    S._lkAdBack=null;if(!_qGet(b.id))return;
+    S._epReturnId=b.ep;showAddonPicker(b.id);
+    const c=document.querySelector('#confirm-modal .modal-backdrop');if(c)c.style.zIndex='9600';
+  },0);
 }
 // A locker for a booking: on its bill while it is not paid, else rung up at Sales. quiet: the caller says it.
 async function _lkAddTo(e,p,quiet){
@@ -20563,7 +20605,7 @@ function _lkAsRental(e,day,rid){
   const mine=_lkRows(day).filter(r=>r.status!=='cancelled'&&(r.booking_id===e.id||(!r.booking_id&&!!e.customerId&&r.customer_id===e.customerId)||(!!rid&&r.id===rid)));
   return mine.find(_lkLive)||mine[mine.length-1]||null;
 }
-function _lkAssignClose(){const P=S._lkAs;S._lkAs=null;_lkAssignDraw();if(P&&P.ret&&P.ret.focus&&document.body.contains(P.ret))try{P.ret.focus({preventScroll:true});}catch(_){}}
+function _lkAssignClose(){const P=S._lkAs;S._lkAs=null;_lkAssignDraw();if(P&&P.ret&&P.ret.focus&&document.body.contains(P.ret))try{P.ret.focus({preventScroll:true});}catch(_){}_lkAdBackGo();} // opened from a booking's Add-ons: back to it
 function _on__lkAssignBg(event,el){if(event.target===el)_lkAssignClose();}
 function _lkAsReload(){const P=S._lkAs;if(P)_lkLoad(true,P.day);}
 // Lockers left for a time that evening: the units in service less the live rentals taking any of its slots (the server's _lk_left).
@@ -21854,7 +21896,7 @@ function _lkEdOpen(id,day){
   S._lkEd={id,day0:day,day,p:r.period,code:_lkCodeOf(r)||'',name:r.name||'',custId:r.customer_id||'',custName:c?(c.name||''):'',acctName:c?(c.name||''):(r.name||''),q:'',busy:false,ret:document.activeElement};
   _lkEdDraw();
 }
-function _lkEdClose(){const P=S._lkEd;S._lkEd=null;_lkEdDraw();if(P&&P.ret&&P.ret.focus&&document.body.contains(P.ret))try{P.ret.focus();}catch(_){}}
+function _lkEdClose(){const P=S._lkEd;S._lkEd=null;_lkEdDraw();if(P&&P.ret&&P.ret.focus&&document.body.contains(P.ret))try{P.ret.focus();}catch(_){}_lkAdBackGo();} // opened from a booking's Add-ons: back to it
 function _on__lkEdBg(event,el){if(event.target===el)_lkEdClose();}
 // The evenings a locker can go to: every day from today on whose ride offers lockers, and the one it is on.
 function _lkEdDays(cur){
@@ -21888,7 +21930,7 @@ function _lkEdDraw(){
   if(!P){if(m){m.style.display='none';m.innerHTML='';}return;}
   if(!m){m=document.createElement('div');m.id='lk-ed';document.body.appendChild(m);}
   const r=_lkEdRental();
-  if(!r){m.style.display='none';m.innerHTML='';S._lkEd=null;return;}
+  if(!r){m.style.display='none';m.innerHTML='';S._lkEd=null;_lkAdBackGo();return;}
   if(!_lkState().days[P.day])_lkLoad(false,P.day);
   const days=_lkEdDays(P.day0),ev=days.find(x=>x.d===P.day)||{k:r.period==='pm'?'pm':'jcc'},ps=_lkPeriodsOf(ev.k),o=_lkOfferPrices();
   if(!ps.includes(P.p))P.p=ps[0]||P.p;
@@ -23759,11 +23801,18 @@ function renderAddonPicker(){
   const id=S._addonPickerEntry;if(!id)return;
   const e=_qGet(id);if(!e){closeAddonPicker();return;}
   const sess=_sessDisp(e.sessionId);
-  const items=sessionAddonItems(sess);
   const cur=entryAddons(e);
   const _q=aid=>cur.filter(x=>x.id===aid).reduce((n,x)=>n+x.qty,0); // every line of it (one per price sold at)
-  // Staff see the booking's locker on top, with Unassign and Cancel locker: _lkAdFill (staff half) fills the slot once drawn.
-  const total=addonsCost(cur),lk=S.view==='staff'?'<div id="lk-ad-slot"></div>':'',lkFee=!!lk&&_lkFeeOf(e)>0;
+  // A booking that is over (done, cancelled, no-show) shows what it had and changes none of it; its locker still can, above.
+  const ro=!['waiting','active','waitlist'].includes(e.status),offered=sessionAddonItems(sess);
+  // What the booking holds that its session no longer offers (taken off the session, or the product deleted) is listed too, so
+  // it can come off (the user, 2026-11-10: "allow the staff to edit add ons of a customer"); more of it only by staff, in stock.
+  const lines=addonLineItems(cur),held=[...new Set(cur.map(x=>x.id))].filter(aid=>aid!==LK_LINE&&!offered.some(it=>it.id===aid))
+    .map(aid=>{const it=(S.inventory||[]).find(x=>x.id===aid);if(it)return{...it,_off:true};const li=lines.find(a=>a.id===aid)||{};return{id:aid,name:li.name||aid,price:li.price,qty:0,_off:true,_gone:true};});
+  const items=(ro?offered.filter(it=>_q(it.id)>0):offered).concat(held);
+  // Staff see the booking's locker on top (its next step, Edit, Unassign, Cancel locker, or Add a locker on a night with
+  // lockers): _lkAdFill (staff half) fills the slot once drawn.
+  const total=addonsCost(cur),lk=S.view==='staff'?'<div id="lk-ad-slot"></div>':'',lkFee=!!lk&&(_lkFeeOf(e)>0||(!ro&&!!_lkKind(sess)));
   let m=document.getElementById('addon-picker-backdrop');
   if(!m){m=document.createElement('div');m.id='addon-picker-backdrop';m.className='modal-backdrop';m.style.cssText='position:fixed;inset:0;z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.6)';m.onclick=ev=>{if(ev.target===m)closeAddonPicker();};document.body.appendChild(m);}
   m.innerHTML=`<div class="modal-box dk-ap-box" role="dialog" aria-modal="true" aria-labelledby="dlgt-addonEditTitle">
@@ -23774,7 +23823,7 @@ function renderAddonPicker(){
     <div class="dk-sub12">${e.status==='waitlist'?t('waitlistLabel'):'#'+e.queueNum} ${esc(e.name)}</div>
     ${lk}
     ${items.length?`<div class="dk-ap-grid">
-      ${items.map(it=>{const qn=_q(it.id);const stock=Number(it.qty)||0;const out=stock<=0;const low=stock>0&&stock<=5;return`<div class="${qn>0?'dk-ap-card-on':out?'dk-ap-card-out':'dk-ap-card'}">
+      ${items.map(it=>{const qn=_q(it.id);const stock=Number(it.qty)||0;const out=stock<=0;const low=stock>0&&stock<=5;const noAdd=out||ro||(it._off&&(it._gone||_asCustomer()));return`<div class="${qn>0?'dk-ap-card-on':out?'dk-ap-card-out':'dk-ap-card'}">
         ${_macroBadge(it,38)}
         ${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="${esc(it.name)}" class="dk-ap-img">`:`<div class="dk-ap-noimg">${esc(it.name)}</div>`}
         <div class="dk-ap-body">
@@ -23784,9 +23833,9 @@ function renderAddonPicker(){
           <div class="dk-ap-row">
             <span class="dk-ap-price">${_priceLabel(it.price)}</span>
             <div class="dk-ap-step">
-              <button type="button" data-on-click="${_on("_addonPickerStep",it.id,-1)}" ${qn<=0?'disabled':''} aria-label="${esc(t('invQtyDec').replace('{0}',it.name||''))}" class="${qn<=0?'dk-ap-minus-off':'dk-ap-minus'}">−</button>
+              <button type="button" data-on-click="${_on("_addonPickerStep",it.id,-1)}" ${qn<=0||ro?'disabled':''} aria-label="${esc(t('invQtyDec').replace('{0}',it.name||''))}" class="${qn<=0||ro?'dk-ap-minus-off':'dk-ap-minus'}">−</button>
               <span class="dk-ap-qty">${qn}</span>
-              <button type="button" data-on-click="${_on("_addonPickerStep",it.id,1)}" ${out?'disabled':''} aria-label="${esc(t('invQtyInc').replace('{0}',it.name||''))}" class="${out?'dk-ap-plus-off':'dk-ap-plus'}">+</button>
+              <button type="button" data-on-click="${_on("_addonPickerStep",it.id,1)}" ${noAdd?'disabled':''} aria-label="${esc(t('invQtyInc').replace('{0}',it.name||''))}" class="${noAdd?'dk-ap-plus-off':'dk-ap-plus'}">+</button>
             </div>
           </div>
         </div>
@@ -23800,14 +23849,14 @@ function renderAddonPicker(){
 // Core: add (+1) or remove (−1) one unit of an add-on on a booking; updates stock + DB. No render.
 async function _entryAddonMutate(id,addonId,delta){
   const e=_qGet(id);if(!e)return false;
-  const it=(S.inventory||[]).find(x=>x.id===addonId);if(!it)return false;
-  const stock=Number(it.qty)||0;
+  const it=(S.inventory||[]).find(x=>x.id===addonId);if(!it&&delta>0)return false; // a deleted product's line can only come off
+  const stock=it?Number(it.qty)||0:0;
   let cur=entryAddons(e);
   // A line carries the price it was sold at (p, stamped by the database). A unit added after a price
   // change goes on a line at today's price - one with none yet (an older row) or a new one - never on
   // the old line, which charged it at the old price (2026-10-05). A unit taken off comes off the last
   // line, the one added most recently, and only that line goes when it empties.
-  const now=it.price!=null?Number(it.price):null,lines=cur.filter(x=>x.id===addonId);
+  const now=it&&it.price!=null?Number(it.price):null,lines=cur.filter(x=>x.id===addonId);
   if(delta>0){
     if(stock<=0)return false;
     if(lines.reduce((n,x)=>n+x.qty,0)>=20&&_asCustomer())return false; // a rider's own: 20 of one at most (the server's cap)
@@ -23828,7 +23877,7 @@ async function _entryAddonMutate(id,addonId,delta){
   // Waitlist rows hold NO stock (the invariant everywhere): their add-ons are consumed at
   // promotion (_consumeAddonsOnEnter covers the whole row) — moving stock here would
   // double-consume on promote and never restock on a waitlist cancel.
-  if(e.status!=='waitlist')await _addonStockQ([{id:addonId,qty:1}],delta>0?-1:1);   // consume on +, restock on - (per rider)
+  if(it&&e.status!=='waitlist')await _addonStockQ([{id:addonId,qty:1}],delta>0?-1:1);   // consume on +, restock on - (per rider); a deleted product has no stock
   return true;
 }
 // One step per row at a time: two quick taps sent two whole-list writes that could land out of order
@@ -33717,7 +33766,8 @@ function renderStaffQueue(_resultsOnly){
   const _adChips=e=>{
     if(_freeSessIds.has(e.sessionId))return''; // free community rides have no add-ons
     const ad=addonLineItems(entryAddons(e));
-    const canEdit=['waiting','active','waitlist'].includes(e.status);
+    // a finished ride with a locker on it still opens its Add-ons: the locker is handed back, edited or refunded there (2026-11-10)
+    const canEdit=['waiting','active','waitlist'].includes(e.status)||(e.status==='done'&&ad.some(a=>a.id===LK_LINE));
     if(!ad.length&&!canEdit)return'';
     const list=ad.map(a=>`${a.name}${a.qty>1?` ×${a.qty}`:''} · ${_money(a.lineTotal,_NOISO)}`).join(', '),n=ad.reduce((s,a)=>s+(a.qty||1),0);
     const lbl=ad.length?`${t('addonsLabel')} ${n}`:`+ ${t('addonAddBtn')}`;
@@ -34033,11 +34083,12 @@ function renderQRow(e){
         const canEdit=group.some(e=>['waiting','active','waitlist'].includes(e.status))&&!_simpleOn(); // the simple phone view lists add-ons, it adds none
         return group.map(e=>{
           const ad=addonLineItems(entryAddons(e));
-          if(_isBlood(_rowSess(e))||(!ad.length&&!canEdit))return'';
+          const ce=canEdit||(e.status==='done'&&!_simpleOn()&&ad.some(a=>a.id===LK_LINE)); // a finished ride's locker (as the row's chip)
+          if(_isBlood(_rowSess(e))||(!ad.length&&!ce))return'';
           return`<div class="rq-cad">
             <div class="rq-sb8">
               <span class="rq-cadl">${n>1?esc(e.name)+' · ':''}${t('addonsLabel')}</span>
-              ${canEdit?`<button type="button" data-on-click="${_on("_on_renderStaffQueue_9",_EV,_EL,e.id)}" class="rq-cadbtn">+ ${t('addonAddBtn')}</button>`:''}
+              ${ce?`<button type="button" data-on-click="${_on("_on_renderStaffQueue_9",_EV,_EL,e.id)}" class="rq-cadbtn">+ ${t('addonAddBtn')}</button>`:''}
             </div>
             ${ad.map(a=>`<div class="rq-cadi"><span class="rq-cadn">${esc(a.name)}${a.qty>1?` ×${a.qty}`:''}</span><bdi class="rq-b800">${_money(a.lineTotal,_NOISO)}</bdi></div>`).join('')}
           </div>`;

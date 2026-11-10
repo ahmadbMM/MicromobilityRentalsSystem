@@ -95,6 +95,73 @@ test.describe('@staff:lockers a booking\'s locker in its add-ons', () => {
     await expect.poll(() => page.evaluate(`_lkFeeOf(_qGet('q2'))`)).toBe(0); // the line the server dropped, drawn without a reload
   });
 
+  // Edited from the Add-ons dialog as well (the user, 2026-11-10: "allow the staff to edit add ons of a customer such as lockers").
+  test('the card hands the key back, and Edit opens the reservation over it and brings the Add-ons back on close', async ({ page }) => {
+    const seen = calls(page);
+    await staff(page, { 'rpc:staff_locker_return': { ok: true } });
+    await page.evaluate(`showAddonPicker('q1')`);
+    const card = addons(page).locator('.lk-ad');
+    await card.getByRole('button', { name: 'Hand back' }).click();
+    await expect.poll(() => sent(seen, 'staff_locker_return')).toEqual({ p_rental: 'R1' });
+    await card.getByRole('button', { name: 'Edit' }).click();
+    const ed = page.getByRole('dialog', { name: 'Locker reservation' });
+    await expect(ed).toBeVisible();
+    await expect(addons(page)).toHaveCount(0); // it steps aside: the locker dialogs sit under its z-index
+    await page.locator('#lk-ed .chrome-dact').getByRole('button', { name: 'Close' }).click();
+    await expect(ed).toHaveCount(0);
+    await expect(addons(page).locator('.lk-ad')).toContainText('Locker 1');
+  });
+
+  test('a number picked but its key not given: Give key on the card gives that locker', async ({ page }) => {
+    const seen = calls(page);
+    const keyDue = [rentals[0], { ...rentals[1], locker_id: 'L2' }];
+    await staff(page, { locker_rentals: keyDue, 'rpc:staff_locker_assign': { ok: true, code: '2' } });
+    await page.evaluate(`showAddonPicker('q2')`);
+    const card = addons(page).locator('.lk-ad');
+    await expect(card).toContainText('Key not given');
+    await card.getByRole('button', { name: 'Give key' }).click();
+    await expect.poll(() => sent(seen, 'staff_locker_assign')).toEqual({ p_rental: 'R2', p_code: '2' });
+  });
+
+  test('a booking with no locker on a locker night: Add a locker opens Assign a locker, and closing it comes back', async ({ page }) => {
+    await staff(page, { queue_entries: [...queue, bk('q3', 3, { name: 'Sara Spare', customer_id: null, addons: [] })] });
+    await page.evaluate(`showAddonPicker('q3')`);
+    const card = addons(page).locator('.lk-ad');
+    await expect(card).toHaveClass(/lk-ad-none/);
+    await expect(addons(page)).not.toContainText('No add-ons available'); // a locker is on offer
+    await card.getByRole('button', { name: 'Add a locker' }).click();
+    const as = page.getByRole('dialog', { name: /Assign a locker #3 Sara Spare/ });
+    await expect(as).toBeVisible();
+    await expect(addons(page)).toHaveCount(0);
+    await as.getByRole('button', { name: 'Close' }).first().click();
+    await expect(as).toHaveCount(0);
+    await expect(addons(page).locator('.lk-ad-none')).toBeVisible();
+  });
+
+  test('an add-on the session no longer offers is listed and comes off; a finished ride shows its add-ons and changes none', async ({ page }) => {
+    const inventory = [{ id: 'w1', name: 'Spec Water', category: 'Drinks', qty: 9, price: 5, low_threshold: 0, updated_at: '2026-11-01T00:00:00Z' }];
+    const water = [...LINE, { id: 'w1', qty: 1, p: 5 }];
+    const rows = [bk('q1', 1, { addons: water }), bk('q2', 2, { name: 'Omar Other', customer_id: 'c2', status: 'done', addons: water })];
+    await staff(page, { inventory, queue_entries: rows });
+    await page.evaluate(`showAddonPicker('q1')`);
+    const d = addons(page);
+    const w = d.locator('[class^="dk-ap-card"]').filter({ hasText: 'Spec Water' });
+    await expect(w.locator('.dk-ap-qty')).toHaveText('1');
+    await w.getByRole('button', { name: /Spec Water/ }).first().click(); // the − (its label names the product)
+    await expect.poll(() => page.evaluate(`entryAddons(_qGet('q1')).some(x=>x.id==='w1')`)).toBe(false);
+    await expect.poll(() => page.evaluate(`_lkFeeOf(_qGet('q1'))`)).toBe(10); // the locker line stays
+    await page.evaluate(`closeAddonPicker()`);
+    if (test.info().project.name !== 'mobile') { // a done ride with a locker opens its Add-ons (the roster lists done rides under their filter)
+      await page.evaluate(`S.sfStatus='done';renderStaffQueue()`);
+      await expect(page.locator('#tab-queue tr[data-id="q2"] button.rq-adbtn')).toHaveText('Add-ons 2');
+    }
+    await page.evaluate(`showAddonPicker('q2')`);
+    const w2 = addons(page).locator('[class^="dk-ap-card"]').filter({ hasText: 'Spec Water' });
+    await expect(w2.locator('.dk-ap-qty')).toHaveText('1');
+    for (const b of await w2.locator('.dk-ap-step button').all()) await expect(b).toBeDisabled();
+    await expect(addons(page).locator('.lk-ad').getByRole('button', { name: 'Edit' })).toBeVisible();
+  });
+
   test('Assign a locker offers Unassign beside Hand back once the booking has a number', async ({ page }) => {
     await staff(page);
     await page.evaluate(`_lkAssignOpen('q1')`);

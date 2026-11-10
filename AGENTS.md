@@ -2302,6 +2302,17 @@ tables `lockers` and `locker_rentals`.
   picker is in the customer half, so it draws an empty `#lk-ad-slot` and calls `_lkAdFill` (a STAFF_ENTRY); the questions are
   lifted above the picker (`_lkAdAsk`: the confirm sits at z-index 300, the picker at 9500). Assign a locker offers Unassign too.
   No database change. `tests/locker-addons.spec.ts`.
+- **Staff edit a booking's add-ons there, the locker too (the user, 2026-11-10: "allow the staff to edit add ons of a customer
+  such as lockers").** The Locker card carries the evening's next step (Give a number -> Assign a locker, Give key `_lkGive`,
+  Hand back `_lkHandBack`), **Edit** (`_lkEdOpen`: evening, time, number, name, account, on the house, refund, WhatsApp),
+  Unassign and Cancel locker; a booking with none on a night that offers lockers gets **Add a locker** (a dashed card). Assign a
+  locker and the edit dialog sit at z-index 200 under the picker, so `_lkAdGo` takes the picker away (`S._lkAdBack` keeps the
+  booking and the Edit price dialog it came from) and `_lkAssignClose` / `_lkEdClose` bring it back through `_lkAdBackGo` on the
+  next tick (Edit opened from Assign a locker keeps it away; a confirm asked as they close is lifted above it). The picker also
+  lists add-ons the booking holds that its session no longer offers (taken off the session, or the product deleted:
+  `_entryAddonMutate` takes such a line off with no stock to move), more of them only by staff and in stock. A booking that is
+  over shows its add-ons with the steppers off; a done ride with a locker line opens its Add-ons from the roster (chip and
+  phone card) so the locker is handed back or edited there. No database change, no new words.
 
 ## Sessions is a section of its own (2026-11-06)
 

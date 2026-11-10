@@ -6024,12 +6024,13 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
 #addon-picker-backdrop .dk-p24{padding:24px;}
 #addon-picker-backdrop .dk-ap-tot{display:flex;justify-content:space-between;align-items:center;border-top:2px solid var(--border);margin-top:14px;padding-top:10px;font-weight:900;}
 #addon-picker-backdrop .dk-w100-mt12{width:100%;margin-top:12px;}
-/* the booking's locker on top of its add-ons (_lkAdHtml): number, time, state and fee, then Unassign and Cancel locker */
+/* the booking's locker on top of its add-ons (_lkAdHtml): number, time, state and fee, then its next step, Edit, Unassign and Cancel locker */
 #addon-picker-backdrop .lk-ad{border:1.5px solid var(--green);border-radius:7px;background:var(--s1);padding:10px 12px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px;}
 #addon-picker-backdrop .lk-ad-top{display:flex;align-items:center;gap:10px;}
 #addon-picker-backdrop .lk-ad-ic{flex:none;display:inline-flex;color:var(--green);}
 #addon-picker-backdrop .lk-ad-who{flex:1 1 auto;min-width:0;}
 #addon-picker-backdrop .lk-ad.lk-over .lk-ad-st{color:var(--red);font-weight:600;}
+#addon-picker-backdrop .lk-ad.lk-ad-none{border-style:dashed;border-color:var(--border);} /* none yet: Add a locker */
 /* the reset-a-password result (Bookings' key tool) and the waitlist promotion nudge */
 #staff-reset-result .dk-sr-err{color:var(--red);font-size:13px;font-weight:600;}
 #staff-reset-result .dk-sr-ok{background:rgba(var(--green-rgb),.07);border:1px solid rgba(var(--green-rgb),.25);border-radius:6px;padding:16px 20px;}
