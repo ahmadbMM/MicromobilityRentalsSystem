@@ -2695,7 +2695,7 @@ appears on customers account add it to the 3 dots list on each booking".
 - `tests/booking-card.spec.ts` (with a run under the real CSP, and a check that the frame's card computes the same look
   as the rider's own My Bookings).
 
-## Staff round s10: section headers (2026-11-10)
+## Staff round s10: headers (2026-11-10)
 
 Report "Staff website design and function", items 14-17, 28, D5 and D9. `tests/s10-headers.spec.ts`.
 - **One section header** (`_shTools(id,o)` beside `_rowMenu` in the core): `o.pri` at most ONE solid primary (and what
