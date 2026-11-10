@@ -414,7 +414,7 @@ const pageRentals = [
 ];
 
 test.describe('@staff:lockers round two', () => {
-  test('a rider\'s show-at-desk QR: the scanner reads it, the dialog lists their lockers, Give all keys, then the till opens with the fees', async ({ page }) => {
+  test('a rider\'s show-at-desk QR: the scanner reads it, the dialog lists their lockers, Give all keys asks cash or card and takes the fees there', async ({ page }) => {
     const seen = calls(page);
     await staff(page, { locker_rentals: [rentals[1], ...pageRentals], 'rpc:staff_locker_assign': { ok: true, code: '2' } });
     expect(await page.evaluate(`JSON.stringify(_scanLockerUrl('https://micromobility.sa/lockers/r/${RID}'))`)).toBe(JSON.stringify(['', 'r:' + RID]));
@@ -422,13 +422,41 @@ test.describe('@staff:lockers round two', () => {
     const dlg = page.getByRole('dialog', { name: /Hand the keys · Omar Other/ });
     await expect(dlg.locator('.lk-sh-row')).toHaveCount(3); // the two picked on the page, and his booking's locker waiting for a number
     await expect(dlg.locator('.lk-hd-in')).toHaveCount(1);
+    // Staff round s10 (item 10): the desk fee is taken in the sheet. Not picked, Give says so and gives nothing
+    await expect(dlg.locator('#lk-hd-pl')).toHaveText('Payment · SAR 20');
+    await dlg.getByRole('button', { name: 'Give all keys' }).click();
+    await expect(dlg.getByRole('alert')).toHaveText('Pick cash or card');
+    expect(seen.filter((c) => c.name === 'staff_locker_assign').length).toBe(0);
+    await dlg.getByRole('radio', { name: 'Card' }).click();
+    await expect(dlg.getByRole('radio', { name: 'Card' })).toHaveAttribute('aria-checked', 'true');
     await dlg.getByRole('button', { name: 'Give all keys' }).click();
     await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_assign').length).toBe(2);
     expect(seen.filter((c) => c.name === 'staff_locker_assign').map((c) => c.body.p_rental).sort()).toEqual([RID, RID2].sort());
-    await dlg.getByRole('button', { name: 'Close' }).first().click(); // one still waits for a number: the till opens as the dialog closes
-    await page.waitForFunction(`S.staffTab==='cashier'`);
-    expect(await page.evaluate(`(S._ctCart||[]).length`)).toBe(2);
-    expect(await page.evaluate('S._ctCustId')).toBe('c2');
+    // one receipt of the account through the till's own write: both lines, the card line, the lines named to their rentals
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_paid').length).toBe(1);
+    const sale = JSON.parse(await page.evaluate(`JSON.stringify((S.cashSales||[]).filter(r=>r.customer_name==='Omar Other').map(r=>[r.name,r.price,r.pay,r.category,r.customer_id||null,r.session_id]))`)) as unknown[][];
+    expect(sale.sort()).toEqual([['Card', 20, 'paid', '__cardmeta__', null, 's1'], ['Locker 1 · 6 PM - 8 PM', 10, 'paid', 'Other', 'c2', 's1'], ['Locker 2 · 6 PM - 8 PM', 10, 'paid', 'Other', 'c2', 's1']].sort());
+    expect(await page.evaluate(`new Set((S.cashSales||[]).filter(r=>r.customer_name==='Omar Other').map(r=>r.receipt_id)).size`)).toBe(1);
+    const links = seen.find((c) => c.name === 'staff_locker_paid')!.body.p_links as { r: string }[];
+    expect(links.map((l) => l.r).sort()).toEqual([RID, RID2].sort());
+    expect(await page.evaluate(`(S._ctCart||[]).length`)).toBe(0); // nothing waits in the Sales cart
+    await dlg.getByRole('button', { name: 'Close' }).first().click();
+    await expect(dlg).toHaveCount(0);
+    expect(await page.evaluate('S.staffTab')).not.toBe('cashier');  // the desk stays where it was
+  });
+
+  test('one key handed with its fee by cash: a receipt with no card line', async ({ page }) => {
+    const seen = calls(page);
+    await staff(page, { locker_rentals: [pageRentals[0]], 'rpc:staff_locker_assign': { ok: true, code: '2' } });
+    await page.evaluate(`_lockerArrived('r:${RID}')`);
+    const dlg = page.getByRole('dialog', { name: /Hand the keys/ });
+    await dlg.getByRole('radio', { name: 'Cash' }).click();
+    await dlg.getByRole('button', { name: 'Give key' }).click();
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_paid').length).toBe(1);
+    const sale = JSON.parse(await page.evaluate(`JSON.stringify((S.cashSales||[]).filter(r=>r.customer_name==='Omar Other').map(r=>[r.name,r.price,r.category]))`));
+    expect(sale).toEqual([['Locker 2 · 6 PM - 8 PM', 10, 'Other']]);
+    expect(await page.evaluate(`(S._ctCart||[]).length`)).toBe(0);
+    expect(await page.evaluate('S.staffTab')).not.toBe('cashier');
   });
 
   test('a tag param ?lkr= on a staff phone opens the same dialog', async ({ page }) => {

@@ -51,5 +51,8 @@ test('on a desktop the check-in is a panel at the side, the roster still in view
   expect(box).not.toBeNull();
   expect(Math.round(box!.x + box!.width)).toBeGreaterThanOrEqual(1360);
   expect(box!.width).toBeLessThanOrEqual(481);
-  expect(box!.height).toBeGreaterThanOrEqual(880);
+  // docked under the top bar since staff round s10 (D4): the rest of the height, to the foot
+  const top = await page.evaluate(`document.getElementById('topbar').offsetHeight`) as number;
+  expect(Math.round(box!.y)).toBeLessThanOrEqual(top + 1);
+  expect(Math.round(box!.y + box!.height)).toBeGreaterThanOrEqual(898);
 });

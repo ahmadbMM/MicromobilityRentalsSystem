@@ -2848,3 +2848,48 @@ appears on customers account add it to the 3 dots list on each booking".
   (`kbShiftRange`); `kbOpenRow`, `n6cKbReturn`, `n6cKbNsRow` and `kbNoShow` are gone.
 - `tests/s10-paint.spec.ts`. A throttled-desktop proxy of a phone (Chromium, CPU 4x, 390x844, 40 riders) measured
   Confirm to painted row, a tick and a filter change before and after (numbers in the round's report).
+
+## Staff round s10: desk flows (2026-11-10)
+
+Builder "flows" of the s10 round (items 6, 10, D2, D4 of `reports/Staff website design and function.md`).
+
+- **Saturday check-in (item 6):** Check in and Waiting in `_ciSatRender` are never greyed out for a missing group (the
+  staff rule "a Submit is never greyed out in advance"); `_ciConfirmBlocked` no longer looks at the group. Tapped without
+  one, `_confirmCheckinRun` says `errPickGroup` in the dialog's `#ci-error`; the first paint focuses the first group
+  button when none is picked. The rider side keeps its own choice (Confirm greyed until the waiver tick).
+  The Saturday Confirm carries `aria-busy` while its run is out, like the full drawer's, so `_ciRun` repaints after a
+  refusal (without it the drawer stayed on "Sending..." with Waiting greyed).
+- **A locker paid at the desk (item 10):** the Hand the keys sheet (a rider's show-at-desk QR) takes the fee itself.
+  It shows `Payment · SAR n` and a Cash / Card radiogroup when a row is `_lkTillDue`. Nothing is preselected; a Give
+  without a pick says `lkPickPay` in the sheet and gives nothing. The keys go through `_lkGive(..., quiet, taken)`
+  (`taken`: the fee is not put in the Sales cart). Their fees become ONE receipt of the account through the till's
+  own write: `_ctBook(cart, o)` + `_ctBooked(b)` in the cashier part, which `_ctRecord` uses too. That write covers the
+  rows, the discount line, the wallet first, the `__cardmeta__` card line, customer_id and the seller, then
+  `_salesApply`, stock, the log and `staff_locker_paid`. The session is the rental's ride, else the till's own
+  (`_ctCtxNow`, also renderCashier's default now). The desk stays on Bookings. The sheet closes once the last key is
+  handed with its fee taken. A refused sale (read-only, storage full) falls back to the old path: the fee goes into the
+  Sales cart, `lkGivenTill` warns, and closing the sheet opens the till. The Lockers section's own Give key still puts
+  the fee in the cart.
+  - The sheet moved out of the core into the **lockers part** (`_lkHandOpen`, `_lkHandDraw` are entries; the core keeps
+    stand-ins for the QR read and `_lkRepaint`). `_ctBook`/`_ctBooked` are **cashier** entries. Locker line building is
+    `_lkLines(items, pay)` / `_lkLineOf(r)` in the core (`_lkTill` uses them). Call the till's write through
+    `_ctBook`. Never write `cashier_sales` rows by hand for a sale.
+- **Check in all paid (N) (D2, owner yes):** `_ciAllPaidHtml` under the party steps of the check-in drawer, counting
+  `_ciPaidReady(e)`: the party's (or Scan several list's) riders still expected with `paid`. It leaves out a request
+  not approved, the waitlist, a deposit to take, a free or ride-group ride, a rider in `_ciBusy`, and a rider whose
+  drawer or draft holds a change (type, bike, Pending). It shows for 2 or more, or for 1 who is not the rider open.
+  `_ciAllPaid` (desk part) runs Express's one-rider write `_expressCheckinOne` for each, inside `_ciRun`. Each landed
+  check-in gets its own `pushUndo('Check In: #n Name', …, {k:'checkin',e:'booking',id})`, as a single check-in does,
+  so History > Log can undo it. Riders who owe keep their own drawer: the drawer stays on them, or, when the open
+  rider went in, `_ciCloseForNext` + `_ciAfterConfirm` open the party's next rider. Paid stays preselected (D3,
+  unchanged).
+- **Docked check-in (D4, owner yes):** at `min-width:1280px` the check-in drawer sits under the top bar with no scrim.
+  The backdrop is `pointer-events:none` and the panel `auto`, so the roster beside it takes taps. `body.ci-dock`
+  (set in `_ciPaint`, cleared in `closeCheckinModal`) gives `#staff-main` an end padding of `--ci-dock-w`. `_ciDock()`
+  makes the dialog `aria-modal="false"`, and the global Tab handler does not trap it. The focus manager still moves
+  focus in, Escape still closes (backdrop `.click()`), and Enter still confirms. Below 1280px nothing changed: the
+  drawer over its light scrim (1024+), the sheet on phones.
+  - A check-in spec at the default Desktop Chrome size (1280x720) now runs DOCKED: nothing catches a click on the
+    backdrop. To test "click outside closes", use a narrower viewport.
+- Specs: `tests/s10-flows.spec.ts` (D2, D4), `tests/lockers.spec.ts` (the sheet's payment), `tests/ride-groups.spec.ts`
+  (item 6), `tests/checkin-chain.spec.ts` (the panel's height under the top bar).

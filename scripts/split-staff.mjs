@@ -477,14 +477,16 @@ export function gateHover(css) {
 // section since 2026-11-08) gives and reads the badges with Community's badge code, so it is in that part too. _bdgStrips (2026-10-09):
 // an account's badges in the history window and the editor, which are core, drawn by the badges code Community holds.
 export const STAFF_PARTS = {
-  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers', '_ahActShow', '_bdgStrips', '_bqLoad', '_n6qTlShow', '_n6pAhLoad', 'renderBadgeRequests'], bikes: ['renderBikes'], cashier: ['renderCashier', '_eonOpen'],
+  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers', '_ahActShow', '_bdgStrips', '_bqLoad', '_n6qTlShow', '_n6pAhLoad', 'renderBadgeRequests'], bikes: ['renderBikes'], cashier: ['renderCashier', '_eonOpen', '_ctBook', '_ctBooked'],
   catalog: ['renderCatalog', '_catUploadImage', '_catStorageRemove', '_catUploadToast'], inventory: ['renderInventory', '_invMove', '_invSetCount'], website: ['renderWebsite', '_webLoad', '_webRestore'], history: ['renderHistory'],
   wallet: ['_cwOpen', '_cwDeskPay', '_cwDeskRefund'], // 2026-11-02: an account's wallet, and the desk paying from it or refunding into it
   workshop: ['renderWorkshop'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   volunteers: ['renderVolunteers', '_vsfMount', '_vsfSave', '_cfVolMount'], // 2026-11-05: the section, the switch in the session form, the hours in the account editor
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
   sessions: ['renderSessions'], // 2026-11-06: the Sessions section (its own since then), admins only; its forms, figures, table and Customize
-  lockers: ['renderLockers', '_lkEdOpen', '_lkAssignOpen', '_lkAsRepaint', '_lkAsTag'], // 2026-11-09: the Lockers section (the board, reservations, units, history); the sheet, the check-in line and tag taps stay in the core; 2026-11-10: a reservation's edit dialog (refund, on the house, WhatsApp), which the core's sheet opens; 2026-11-10: Assign a locker (a booking's menu), with what the core tells it - a read landed, a tag tapped while it is open
+  // 2026-11-10 (s10, item 10): cashier's _ctBook/_ctBooked, the till's receipt write, which the lockers part's Hand the keys sheet
+  // (moved out of the core then, a stand-in left for a QR read and _lkRepaint) books a desk-paid locker through
+  lockers: ['renderLockers', '_lkEdOpen', '_lkAssignOpen', '_lkAsRepaint', '_lkAsTag', '_lkHandOpen', '_lkHandDraw'], // 2026-11-09: the Lockers section (the board, reservations, units, history); the sheet, the check-in line and tag taps stay in the core; 2026-11-10: a reservation's edit dialog (refund, on the house, WhatsApp), which the core's sheet opens; 2026-11-10: Assign a locker (a booking's menu), with what the core tells it - a read landed, a tag tapped while it is open
   store: ['renderStore', 'renderPayments', '_payRfOpen'], // 2026-11-10: the Store (orders, products) and Payments (online payments, refunds owed, settings) sections, and the refund dialog a booking's pay menu opens; the rail's probe and counts stay in the core
   sela: ['printSelaReport', 'exportSelaXlsx'], // 2026-10-08: Run for Her's report for Sela (print + .xlsx), read at each tap
   vlap: ['_vlStaffOpen', '_vlAthleteEdit', '_vlPairOpen', '_vlCfgOpen', 'printKaminReport', 'exportKaminXlsx', '_vrbOpen', '_prbOpen', 'printVlReceipts'], // 2026-10-17: Victory Lap - athletes and teams, an athlete's race, pairing, the race's settings, the report for Kamin Sports; 2026-10-23: the report builder, and the partner (Defe) report builder beside it, which shares its workbook writer
@@ -496,10 +498,10 @@ export const STAFF_PARTS = {
   // 2026-10-09: the audit trail, void/refund reasons, the till, the exceptions and Team reports
   // (with the Action Log, which shares the account names and the record links with them)
   money: ['renderMoneyView', 'openAuditPanel', 'recordDrawerCount', 'renderTeamReport', '_askMoneyReason', 'renderLogs'],
-  // 2026-10-09 (round 2): the desk note's editor, My shift, joining and leaving a party
+  // 2026-10-09 (round 2): the desk note's editor, My shift, joining and leaving a party; 2026-11-10 (s10, D2): Check in all paid
 // 2026-11-10 (staff round s10): the night's Close out (its dialog and its one-call write, staff_close_out) and the menu's
 // No-show question, out of the desk's core, which the round's bulk writes had taken to its budget
-  desk: ['_deskNoteEdit', '_myShiftOpen', '_partyJoin', '_partyLeave', '_n6cPrepOpen', '_n6cFtOpen', '_tcOpen', 'closeOutSession', 'confirmNoShow'], // 2026-11-07: the bike prep sheet and the first-timers to follow up; 2026-11-10: Booking card (a booking's ticket as its rider sees it, and its picture)
+  desk: ['_deskNoteEdit', '_myShiftOpen', '_partyJoin', '_partyLeave', '_n6cPrepOpen', '_n6cFtOpen', '_tcOpen', 'closeOutSession', 'confirmNoShow', '_ciAllPaid'], // 2026-11-07: the bike prep sheet and the first-timers to follow up; 2026-11-10: Booking card (a booking's ticket as its rider sees it, and its picture)
   // 2026-10-10: the desk outbox's store (IndexedDB), its replay and the unsynced list (the list, the overlay and the chip stay in the core)
   deskq: ['_dqEnqueue', '_dqFlush', '_dqBoot', '_dqOpen'],
   // 2026-10-09: the self-service kiosk (a desk tablet in kiosk mode), and the deposit ledger's writes and settle dialog
