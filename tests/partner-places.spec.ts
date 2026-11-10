@@ -66,6 +66,38 @@ test.describe('@customer:partner partner places', () => {
     expect(page.url()).not.toContain('signin');
   });
 
+  // Anyone can make a code for their own account (bug hunt 2026-11-10): sent to somebody signed in, it put them on the
+  // sender's account without a word. A rider signed in here is asked first.
+  const other = async (page: import('@playwright/test').Page) => {
+    await stubSupabase(page, {
+      sessions: [satur()], bikes: [], queue_entries: [],
+      'rpc:customer_handoff_redeem': [{ id: 'c2', name: 'Other Rider', session_token: 'tok-other' }],
+      'rpc:customer_profile': [{ id: 'c2', name: 'Other Rider', email: 'other@example.com', phone: '0550000002', height: 170 }],
+      'rpc:customer_token_ok': true,
+    });
+    await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
+    await page.goto(`/?signin=${'c'.repeat(48)}&tab=bookings`);
+    await waitForSb(page);
+    const box = page.locator('#confirm-modal .confirm-box');
+    await expect(box).toContainText('You are signed in as Spec Rider. Sign in as Other Rider instead?');
+    expect(await page.evaluate(`(S.loggedIn||getSession()).id`)).toBe('c1'); // nothing changes before the answer
+    return box;
+  };
+  test('?signin= for another account than the one signed in: Switch signs the link\'s account in and opens Bookings', async ({ page }) => {
+    const box = await other(page);
+    await box.getByRole('button', { name: 'Switch' }).click();
+    await expect.poll(() => page.evaluate(`(S.loggedIn||{}).id`)).toBe('c2');
+    expect(await page.evaluate(`JSON.parse(localStorage.getItem('cq_session')).session_token`)).toBe('tok-other');
+    await expect.poll(() => page.evaluate(`S.custTab`)).toBe('myrides');
+  });
+  test('?signin= for another account than the one signed in: Cancel keeps the rider here, and the link\'s page goes', async ({ page }) => {
+    const box = await other(page);
+    await box.getByRole('button', { name: 'Cancel' }).click();
+    await expect(page.locator('#confirm-modal .confirm-box')).toHaveCount(0);
+    expect(await page.evaluate(`(S.loggedIn||getSession()).id`)).toBe('c1');
+    expect(await page.evaluate(`sessionStorage.getItem('cq_open_tab')`)).toBeNull();
+  });
+
   test('our bikes all taken: only Own is offered, picked, with the notice', async ({ page }) => {
     await stubSupabase(page, { sessions: [satur()], bikes: [], queue_entries: [], 'rpc:community_member': true, 'rpc:member_bikes_open': false });
     await loginCustomer(page, { id: 'c1', name: 'Spec Rider', height: 175 });

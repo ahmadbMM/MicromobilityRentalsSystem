@@ -305,6 +305,38 @@ test.describe('with customer_set_birth_nat on the server', () => {
     expect(calls.map((c) => c.name)).toEqual(['customer_set_birth_nat']);
   });
 
+  // Both are written, so the one the page did not ask goes back as the account holds it now: the copy this device kept
+  // can be days old, and its empty birth date erased the one staff or the website had filled in (bug hunt 2026-11-10).
+  test('the answer the page did not ask goes back as the account holds it now, never as the copy kept here', async ({ page }) => {
+    await boot(page, [row(0, 'waiting')], { nationality: null, birth_date: null }, { 'rpc:customer_set_birth_nat': true });
+    await expect(page.locator('#profile-gate .pg-box')).toBeVisible(); // one booking: the nationality alone
+    await page.route(/\/rest\/v1\/rpc\/customer_profile/, (route) => route.request().method() === 'OPTIONS' ? route.fallback() : route.fulfill({
+      status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
+      body: JSON.stringify([{ id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', nationality: null, birth_date: '1990-05-05' }]),
+    })); // the birth date reached the account since
+    await page.selectOption('#pg-nat', 'Egypt');
+    const calls = watch(page);
+    await page.click('#pg-save');
+    await expect(page.locator('#profile-gate .pg-box')).toBeHidden();
+    const save = calls.find((c) => c.name === 'customer_set_birth_nat');
+    expect(JSON.parse(save ? save.body : '{}')).toEqual({ p_id: 'c1', p_token: 'tok-spec', p_birth_date: '1990-05-05', p_nationality: 'Egypt' });
+    expect(await page.evaluate('[S.loggedIn.nationality,S.loggedIn.birth_date]')).toEqual(['Egypt', '1990-05-05']);
+  });
+
+  test('a copy kept here that says something is missing is checked first: filled in since, no page', async ({ page }) => {
+    await stubSupabase(page, {
+      sessions, queue_entries: [row(0, 'waiting')], 'rpc:my_bookings': [row(0, 'waiting')], 'rpc:customer_set_birth_nat': true,
+      'rpc:customer_profile': [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', nationality: 'Egypt', birth_date: '1990-05-05' }],
+    });
+    await loginCustomer(page, { id: 'c1', nationality: null, birth_date: null, default_pay: 'cash' }); // read before they were filled in
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);
+    await expect.poll(() => page.evaluate('S.selEvent')).toBe('jcc');
+    await expect(page.locator('#profile-gate .pg-box')).toHaveCount(0);
+    expect(await page.evaluate('[S.loggedIn.nationality,S.loggedIn.birth_date]')).toEqual(['Egypt', '1990-05-05']);
+  });
+
   test('a database without it: tried once, then the fresh read and the whole-profile save', async ({ page }) => {
     await boot(page, eight, { nationality: null, birth_date: null });
     await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);

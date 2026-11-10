@@ -356,6 +356,26 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
     await page.waitForFunction('_DQ.length===0');
   });
 
+  // Many at once offline sent nothing, kept nothing and said Saved (bug hunt 2026-11-10): each waits in the outbox now.
+  test('offline, a check-in for many waits in the desk outbox, one change each', async ({ page, context }) => {
+    const many = rpcs(page, 'staff_volunteer_shift_times_many'), one = rpcs(page, 'staff_volunteer_shift_times');
+    await staff(page, { 'rpc:staff_volunteer_shift_times_many': { ok: true, n: 2, failed: [] }, 'rpc:staff_volunteer_shift_times': { ok: true } });
+    await page.locator('#vd-bar').getByRole('button', { name: 'Select' }).click();
+    await page.locator('#vd-sel-bar').getByRole('button', { name: 'Select all' }).click();
+    await context.setOffline(true);
+    await page.locator('#vd-sel-bar').getByRole('button', { name: 'Check in' }).click();
+    await page.waitForFunction(`_DQ.length===2&&_DQ.every(o=>o.kind==='vtimes')`);
+    await expect(page.locator('#toast-live')).toContainText('Saved on this device');
+    await expect(row(page, 'c1')).toContainText('Not sent yet');
+    await expect(row(page, 'c2')).toContainText('Not sent yet');
+    expect(many.length + one.length).toBe(0);
+    await context.setOffline(false);
+    await page.evaluate('_dqFlush()');
+    await expect.poll(() => one.length).toBe(2);
+    expect(one.map((x) => x.p_customer).sort()).toEqual(['c1', 'c2']);
+    await page.waitForFunction('_DQ.length===0');
+  });
+
   test('the view goes with the account and into saved views', async ({ page }) => {
     await staff(page);
     await expect(page.locator('#tab-volunteers .sv-bar[data-sv="volunteers"]').first()).toBeAttached();
