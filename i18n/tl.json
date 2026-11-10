@@ -5132,6 +5132,7 @@
   "rimPick": "Pumili ng CSV file",
   "rimSum": "{0} bago · {1} update · {2} inulit · {3} mali",
   "rimReplace": "Palitan ang listahan: ang wala sa file na ito ay umalis na sa {0}",
+  "rimReplaceErr": "Mga row na may mali sa pangalan: {0}. Kapag pinalitan ang listahan, mamarkahan ang mga empleyadong ito na umalis na sa {1}. Ayusin ang kanilang mga row, o mag-import nang hindi pinapalitan ang listahan.",
   "rimGo": "I-import ang {0}",
   "rimErrCsv": "I-download ang mga hanay na may mali",
   "rimDone": "Na-import ang listahan ng {0}: {1} naidagdag, {2} na-update, {3} minarkahang umalis",

@@ -59,6 +59,25 @@ test.describe('@staff:bookings employee lists', () => {
     await expect(page.locator('#confirm-modal .rim-dlg')).toHaveCount(0);
   });
 
+  test('with "replace", an employee whose row has a name error would be marked as left: the import waits until it is fixed or replace is off', async ({ page }) => {
+    // Bug hunt 2026-11-10: an error row is never sent, so "replace" deactivated an employee who is in the file.
+    const sent: string[] = [];
+    page.on('request', (r) => { if (r.url().includes('/rpc/staff_roster_import')) sent.push(r.postData() || ''); });
+    await boot(page, { corporate_roster, rider_registrations, 'rpc:staff_roster_import': { added: 1, updated: 0, deactivated: 0, skipped: 0 } });
+    await page.evaluate(`setStaffTab('queue');S.queueView='petromin';renderStaffQueue();renderRiders();openRosterImport()`);
+    const csv = ['Employee ID,Name,Mobile,Company', 'P100,,0551234567,Petromin', 'P600,Fahad Noor,,Petromin'].join('\n');
+    await page.locator('#confirm-modal input[type=file]').setInputFiles({ name: 'petromin.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+    await expect(page.locator('#confirm-modal .rim-sum')).toHaveText('1 new · 0 updates · 0 repeated · 1 errors');
+    await page.locator('#confirm-modal .rim-rep input').click(); // replace on: P100 (on the list) would be marked as left
+    await expect(page.locator('#rim-risk')).toContainText('Rows with a name error: 1');
+    await expect(page.locator('#confirm-modal button', { hasText: 'Import 1' })).toBeDisabled();
+    await page.locator('#confirm-modal .rim-rep input').click(); // replace off: nobody is marked as left
+    await expect(page.locator('#rim-risk')).toHaveCount(0);
+    await page.locator('#confirm-modal button', { hasText: 'Import 1' }).click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(JSON.parse(sent[0]).p_replace).toBe(false);
+  });
+
   test('without the function the import says the database update is pending', async ({ page }) => {
     await boot(page, { corporate_roster, rider_registrations });
     await page.evaluate(`setStaffTab('queue');S.queueView='petromin';renderStaffQueue();renderRiders();openRosterImport()`);

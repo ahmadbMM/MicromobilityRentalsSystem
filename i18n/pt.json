@@ -5132,6 +5132,7 @@
   "rimPick": "Escolher arquivo CSV",
   "rimSum": "{0} novos · {1} atualizações · {2} repetidos · {3} erros",
   "rimReplace": "Substituir a lista: quem não estiver neste arquivo saiu da {0}",
+  "rimReplaceErr": "Linhas com erro no nome: {0}. Substituir a lista marcaria esses funcionários como tendo saído da {1}. Corrija as linhas deles ou importe sem substituir a lista.",
   "rimGo": "Importar {0}",
   "rimErrCsv": "Baixar as linhas com erro",
   "rimDone": "Lista da {0} importada: {1} adicionados, {2} atualizados, {3} marcados como desligados",

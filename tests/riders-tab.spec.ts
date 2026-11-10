@@ -188,6 +188,10 @@ test('the list never shows a price; the billing report CSV carries per-ride pric
 });
 
 test.describe('walk-in at the desk', () => {
+  // "Check in now" is offered on tonight's night only (bug hunt 2026-11-10): the desk's clock is held on the fixture's
+  // night, before its 19:00 - 21:00 window, as a walk-in stands at the desk on the night they are added to.
+  test.beforeEach(async ({ page }) => { await page.clock.setFixedTime(new Date(`${D}T17:00:00+03:00`)); });
+
   test('the form draws its boxes, its tick box and its buttons like every other dialog', async ({ page }) => {
     // Badge and Full name had no type, so no input rule reached them (bare browser boxes); "Check
     // in now" had no box to see (inputs are appearance:none); the footer's buttons had no padding.
@@ -323,6 +327,40 @@ test.describe('walk-in at the desk', () => {
     await page.waitForTimeout(300);
     expect(regPatches[0].checked_in_at).toBeUndefined();
     expect(bkPatches.filter((p) => p.status === 'active')).toEqual([]);
+  });
+
+  test('a walk-in for a later night is booked but not checked in, and the form offers no "Check in now"', async ({ page }) => {
+    // Bug hunt 2026-11-10: the box was ticked for any night, and a Monday walk-in for Thursday went Active, its bike
+    // out of the pool for three days.
+    await page.clock.setFixedTime(new Date('2099-02-06T17:00:00+03:00')); // two days before the fixture's night
+    await stubSupabase(page, {
+      sessions, queue_entries, rider_registrations,
+      'rpc:rider_register': { ok: true, id: 9, match: 'none', resubmitted: false, booking_no: 'P-004' },
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('riders')`);
+    const booked = await captureBookingRows(page);
+    const regPatches: Record<string, unknown>[] = [];
+    let checkins = 0;
+    page.on('request', (r) => {
+      if (r.method() === 'PATCH' && /rest\/v1\/rider_registrations/.test(r.url())) regPatches.push(JSON.parse(r.postData() || '{}'));
+      if (/rest\/v1\/rpc\/staff_checkin/.test(r.url())) checkins++;
+    });
+    await page.locator('#pm-host button', { hasText: 'Walk-in' }).click();
+    await expect(page.locator('#rw-session')).toHaveValue(SESS);
+    await expect(page.locator('#rw-checkin')).toHaveCount(0);
+    await page.fill('#rw-badge', 'D-78');
+    await page.fill('#rw-name', 'Dana Walkin');
+    await page.fill('#rw-height', '172');
+    await page.locator('#rider-walkin-modal .toggle-btn', { hasText: 'Hybrid' }).click();
+    await page.click('#rw-submit');
+    await expect.poll(() => booked.length).toBe(1);
+    await expect.poll(() => regPatches.length).toBe(1);
+    await page.waitForTimeout(300);
+    expect(regPatches[0].checked_in_at).toBeUndefined();
+    expect(checkins).toBe(0);
   });
 
   test('a walk-in with two companions: one party call, one grouped booking of three, the employee linked and checked in', async ({ page }) => {

@@ -87,7 +87,7 @@ test.describe('@staff:bookings Petromin walk-in again', () => {
     await page.locator('#rider-walkin-modal .toggle-btn', { hasText: 'Hybrid' }).click();
     await page.click('#rw-add-rider');
     await page.fill('#rw-r-name-0', 'Amal Friend');
-    await page.click('#rw-checkin'); // not checked in now
+    await expect(page.locator('#rw-checkin')).toHaveCount(0); // the fixture's night is not today: nobody is checked in now (bug hunt 2026-11-10)
     await page.click('#rw-submit');
     await expect(page.locator('#rider-walkin-modal .modal-box')).toHaveCount(0);
     await expect.poll(() => w.some((x) => x.m === 'PATCH' && x.url.includes('queue_entries') && x.url.includes('id=eq.e5'))).toBe(true);
