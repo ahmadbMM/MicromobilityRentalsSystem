@@ -2383,6 +2383,36 @@ come with that part's language packs, so a spec that switches language and acts 
   The selection bar's Edit (`_n6sEditOpen`) writes only filled fields, one write a session, one Undo. Every new column
   is read off the rows (`_n6sCol`), so the page works before the migration. `tests/sessions-review.spec.ts`.
 
+## Cancel session: the money and the codes go back (2026-11-10, migration 20261111010000)
+
+The user: "allow staff to cancel a session even if it had bookings in it, return all money to customers and return all
+codes used and free rides used to them". Picks: money taken at the desk goes back the way it was paid unless the rider
+picks the wallet (the Terms' wording of 2026-11-04), chosen rider by rider; a one-person code that has ended, or ends
+within 14 days, gets 14 more days.
+- **Where.** The session's Cancel session button (was Cancel the night; `_cnCanCancel`): any session not deleted, not
+  called off already (`cancelled_at`), dated today or ahead, open, full or CLOSED, for staff who edit Sessions, while it
+  has live bookings or money held on one cancelled before. A night already past is Close out's. Delete on a session
+  with live bookings opens it instead of refusing. The sheet (`showCancelNight`, `#cancel-night-modal`) lists every paid
+  booking (`_cnOwed`: live, or cancelled before and still paid; not one paid online, to a race's organiser or by the
+  wallet) with a Back how paid / Wallet switch (`_cnPick`; the wallet is an admin's, needs an account, never a race,
+  `_cnWalOk`), the wallet parts and online payments that look after themselves, the codes going back, a reason, the
+  message and the WhatsApp links.
+- **The server does it all** (`staff_cancel_session(p_id, p_reason, p_wallet, p_op, p_approval)`): the session closed,
+  `cancelled_at` stamped, `cancel_reason`, `opens_at` cleared (mm-sessions-tick would open it again), FIRST so the fill
+  rule promotes nobody; what the desk took (`_wallet_amount` less the wallet's part, read off the ledger for a row
+  cancelled before) into the wallet for the ids in `p_wallet` (ledger note `not_given: <reason>`), every owed row marked
+  unpaid; live bookings cancelled `staff` / `session_cancelled` / the reason as `cancel_note`; each code's use back by
+  `_promo_count`, personal codes extended; bikes still in-use freed. Checks: Bookings edit right, PIN, the refund right
+  and the manager limit on the total when money goes back, admin for any wallet. It answers `by_hand` (name, phone,
+  amount, method, card part), `wallet`, `wallet_back`, `online`, `organiser`, `codes`, `extended`, `rows`, `bikes`.
+- **After.** The page restocks add-ons, logs one Action Log line per refund (`k:'refund'`), and `_cnResult` lists what
+  staff give back by hand (Copy list) with a line for each thing done by itself. No Undo once money moved; with none,
+  Undo (`_cnUndo`) puts bookings, bikes, add-ons and the session's status, reason and timed opening back. A database
+  without the function (`_rpcAbsent`) takes the old page-side cancel (`_execCancelNightOld`), money untouched.
+- A booking's reason reads "Session cancelled" (`CANCEL_SYS`, with the staffer's words); the session's badge reads
+  Cancelled. SQL tried on a local Postgres with the live triggers (`_wallet_follow`, `_promo_count`, `_queue_stamps`):
+  45 checks. `tests/cancel-night.spec.ts`.
+
 
 ## Bookings from the 2026-11-06 staff review (BK01-BK09, migration 20261107100000)
 

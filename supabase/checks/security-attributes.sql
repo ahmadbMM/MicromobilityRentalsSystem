@@ -27,6 +27,7 @@ with expected(fname, want_definer, note) as (values
   ('staff_wallet_change', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('staff_wallet_pay_booking', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('staff_wallet_refund_booking', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
+  ('staff_cancel_session', true, 'cancels a session: refunds into wallets, frees bikes, extends codes (20261111010000)'),
   ('staff_wallet_refund_receipt', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('customer_wallet', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('customer_wallet_release', true, 'the wallet: reaches tables nobody can read (20261103140000)'),

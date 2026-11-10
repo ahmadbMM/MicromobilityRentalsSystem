@@ -5964,6 +5964,23 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
 #cancel-night-modal .dk-cn-who{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 #cancel-night-modal .dk-c-muted{color:var(--muted);}
 #cancel-night-modal .dk-cn-wa{text-decoration:none;white-space:nowrap;}
+/* cancelling a session: the money that goes back, rider by rider (2026-11-10) */
+#cancel-night-modal .dk-cn-mh{font-size:var(--fs-xs);font-weight:700;color:var(--muted);margin:0 0 6px;}
+#cancel-night-modal :is(.dk-cn-mrow,.dk-cn-irow){flex-wrap:wrap;}
+#cancel-night-modal :is(.dk-cn-mrow,.dk-cn-irow) .dk-cn-who{flex:1 1 180px;white-space:normal;}
+#cancel-night-modal .dk-cn-inf{font-size:12px;text-align:end;}
+#cancel-night-modal .dk-cn-seg{display:inline-flex;gap:4px;flex:0 0 auto;}
+#cancel-night-modal .dk-cn-seg .toggle-btn{padding:6px 10px;min-height:40px;font-size:12px;}
+#cancel-night-modal .dk-cn-sum{font-size:13px;font-weight:600;margin:-4px 0 12px;}
+#mny-modal .cn-res-lines{margin:0 0 4px;padding-inline-start:18px;font-size:var(--fs-sm);line-height:1.5;}
+#mny-modal .cn-res-sub{font-size:var(--fs-xs);color:var(--muted);margin:-2px 0 8px;}
+#mny-modal .cn-res-hand{list-style:none;margin:0 0 8px;padding:0;border:1px solid var(--border);border-radius:var(--r-sm,6px);}
+#mny-modal .cn-res-hand li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 10px;padding:8px 10px;border-bottom:1px solid var(--border);font-size:var(--fs-sm);}
+#mny-modal .cn-res-hand li:last-child{border-bottom:0;}
+#mny-modal .cn-res-who{min-width:0;}
+#mny-modal .cn-res-mut{color:var(--muted);font-size:var(--fs-xs);}
+#mny-modal .cn-res-amt{font-weight:700;white-space:nowrap;}
+.badge-closed.ss-cancelled{color:var(--red);}
 /* the rider's cancel reason and reschedule */
 #cancel-reason-modal .dk-cr-other{display:none;margin-top:2px;}
 #cancel-reason-modal .dk-cr-ta{width:100%;padding:10px 14px;background:rgba(var(--tint-rgb),.05);border:1.5px solid rgba(var(--tint-rgb),.1);border-radius:4px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:600;resize:vertical;min-height:80px;outline:medium none;}
