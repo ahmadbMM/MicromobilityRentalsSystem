@@ -92,5 +92,6 @@ test('tonight\'s session offers Close out too', async ({ page }) => {
   await page.waitForFunction(`getQueue().length>0`);
   await page.evaluate(`setStaffTab('sessions');selectSessionDetail('${today}')`);
   await page.waitForTimeout(250);
-  await expect(page.locator('#tab-sessions')).toContainText('Close out (2)');
+  await page.locator('#tab-sessions .sess-detail-actions .sh-more').click(); // a tile in the detail's More (staff round s10)
+  await expect(page.locator('.row-sheet')).toContainText('Close out (2)');
 });

@@ -34,7 +34,8 @@ test.describe('@staff:bookings ride reminders', () => {
   test('the Reminders button opens a sheet of the riders holding a place, each in their language', async ({ page }) => {
     await open(page);
     await page.evaluate(`setStaffTab('queue');S.queueView='bookings';setSfSession('s1')`);
-    await page.locator('.rem-open').click();
+    await page.locator('#tab-queue .sh-more').click(); // Reminders is a tile in the header's More (staff round s10)
+    await page.getByRole('menuitem', { name: 'Reminders' }).click();
     const dlg = page.locator('[role="dialog"][aria-labelledby="rem-title"]');
     await expect(dlg).toBeVisible();
     await expect(dlg.locator('.rem-row')).toHaveCount(3); // the waitlisted and the cancelled rider get no reminder

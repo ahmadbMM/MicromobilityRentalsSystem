@@ -8073,5 +8073,16 @@
   "nsAskWl": "{0} वेटलिस्ट से आगे आ जाएगा।",
   "nsAskLk": "लॉकर {0} खाली हो जाएगा।",
   "nsAskLkAny": "उनके लिए रखा लॉकर खाली हो जाएगा।",
-  "coNotSettled": "{0} को बंद नहीं किया जा सका:"
+  "coNotSettled": "{0} को बंद नहीं किया जा सका:",
+  "shDeskTools": "डेस्क टूल",
+  "shGrpSession": "सेशन",
+  "shGrpAdd": "जोड़ें",
+  "shGrpPeople": "लोग",
+  "shGrpReports": "रिपोर्ट",
+  "shGrpYou": "आपकी शिफ़्ट",
+  "shGrpView": "व्यू",
+  "shGrpShare": "शेयर करें",
+  "shGrpRecord": "लिंक और बदलाव",
+  "shGrpImport": "आयात",
+  "shSummary": "सारांश"
 }

@@ -2893,3 +2893,47 @@ Builder "flows" of the s10 round (items 6, 10, D2, D4 of `reports/Staff website 
     backdrop. To test "click outside closes", use a narrower viewport.
 - Specs: `tests/s10-flows.spec.ts` (D2, D4), `tests/lockers.spec.ts` (the sheet's payment), `tests/ride-groups.spec.ts`
   (item 6), `tests/checkin-chain.spec.ts` (the panel's height under the top bar).
+
+## Staff round s10: headers (2026-11-10)
+
+Report "Staff website design and function", items 14-17, 28, D5 and D9. `tests/s10-headers.spec.ts`.
+- **One section header** (`_shTools(id,o)` beside `_rowMenu` in the core): `o.pri` at most ONE solid primary (and what
+  must stay in sight, like a running location share), `o.vis` up to four outline buttons staff use every night, `o.grp`
+  `[[heading key, markup], ...]` for More actions (⋯). More opens the booking menu's grouped tiles (`_shOpen` ->
+  `showRowMenu`/`_rsBody`, which now takes `items._heads`); the dangerous ones (`btn-red`, `ss-c-red`, `sh-danger`) sit
+  at the sheet's foot, a `disabled` button is a disabled tile. The tiles are made from the buttons' OWN markup when More
+  opens (`_shItems`), and a tile runs its button by clicking a hidden copy (`_shRun`), so the dispatcher, the handler and
+  its arguments are the button's: a new action is just a button in a group's markup, no registry. Rare actions go last in
+  their heading's markup. A button whose handler needs to stay on the page (a file field's change) keeps that field on the
+  page and the tile clicks it (`#bk-csv-in`, `_bkCsvOpen`).
+- **Where**: Bookings (`sh:queue`: + Walk-in solid; Session settings, the Saturday messages, waitlist offers and Close out
+  in sight; Add group, Add rider, Reminders, Reset password, Print report / Day sheet, Bike prep, First-timers, My shift,
+  Share my location as leader or sweeper (`_liveAs`), Comfortable / Compact in More; the second and third rows are gone,
+  a running share stays in the header with its Stop), Sessions detail (`sh:sess`: Edit solid, Open in Bookings), the
+  account window (`sh:acct`, in `_n6pAhBar`: Call, WhatsApp, Edit, the wallet, a correction already asked for; Tags,
+  Badges, New booking, Ask to correct, Merge, Copy link, Changes in More; `.ah-actions` is only its stand-in until
+  People's part is in), a sales receipt (`rc:<id>`: Mark paid while pending, Print; Edit, Share, Changes, Refund, Void),
+  Inventory (`sh:inv`) and Analytics (`sh:an`). A new busy header uses `_shTools`, not a wall of equal buttons.
+- **Phones (<=767px)**: `o.fold` (a section's header: Bookings, Inventory, Analytics) folds the outline ones into ONE
+  "Desk tools" button whose sheet starts with them under `o.visH`; a button with `hide-mobile` stays off a phone's sheet.
+  Bookings' title and Desk tools share a row. Bookings' and Sessions' search is a full-width field (`_srchCls` gives
+  `srch-wide` for 'q' and 'sess'; the others still fold to an icon). The figures bar puts Owing right after Not arrived
+  (CSS `order`, the dots hidden) and fades its scrolling edge. `#tab-queue` ends a floating pair's height above the foot
+  (`--fab-h`). Full view stays the default; the floating pair stays.
+- **D9**: `_fabKbInit` (from `renderStaffQueue`): `body.fab-kb` hides the floating pair while a search field
+  (`input.search-input`, `input[type=search]`) has focus on a phone; it comes back on blur, or when the visual viewport
+  grows back to its height while the field keeps focus (the keyboard closed without a blur).
+- **Summary sub-views (item 16)**: People's figures and stage tiles are `/people/summary` (`S.communityTab='summary'`,
+  `_pplOverview(1)`); the overview opens on the find box and the lists of people. Sessions' figures are
+  `/sessions/summary` (`S.sessView='sum'`, a fourth layout; a figure opens the list it names). Both are in `SUB_PATHS`;
+  the four route lists are per section, so they needed nothing. A repaint that served "the overview counts" also serves
+  'summary'.
+- **Account address (item 28)**: `_navSearch` WRITES `?acct=<id>` while the account window is open on People and removes
+  it otherwise; `openAccountHistory` and `closeCustomerProfile` call `_pushNav()` on People (a replace, no history
+  entry). Copy link copies `/people?acct=<id>`; `/people/a/<id>` still opens.
+- **D5**: from 1280px the account window is a side panel under the top bar with no scrim (`#cust-modal>.modal-backdrop`
+  narrowed to the end edge), and `body.ah-side` moves the page over so the list stays in view; below 1280 it is the
+  centred dialog. `ah-side` is set by `_ahRender` and cleared by `closeCustomerProfile`.
+- **Fold budgets at 390x844** (`tests/s10-headers.spec.ts`): Bookings' first roster card at y <= 400 (385-391 measured;
+  582 before; 250 would need the search, the saved views or the figures off the first screen), People's first person row
+  and Sessions' first session above the tab bar (<= 768; 553 and 513-516 measured). A change that pushes them down fails.

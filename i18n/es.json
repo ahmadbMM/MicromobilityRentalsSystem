@@ -8073,5 +8073,16 @@
   "nsAskWl": "{0} sube desde la lista de espera.",
   "nsAskLk": "Se libera la taquilla {0}.",
   "nsAskLkAny": "Se libera la taquilla reservada para esta persona.",
-  "coNotSettled": "No se pudo cerrar a {0}:"
+  "coNotSettled": "No se pudo cerrar a {0}:",
+  "shDeskTools": "Herramientas del mostrador",
+  "shGrpSession": "Sesión",
+  "shGrpAdd": "Añadir",
+  "shGrpPeople": "Personas",
+  "shGrpReports": "Informes",
+  "shGrpYou": "Tu turno",
+  "shGrpView": "Vista",
+  "shGrpShare": "Compartir",
+  "shGrpRecord": "Enlace y cambios",
+  "shGrpImport": "Importar",
+  "shSummary": "Resumen"
 }

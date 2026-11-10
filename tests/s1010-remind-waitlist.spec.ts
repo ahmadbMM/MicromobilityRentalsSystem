@@ -73,7 +73,8 @@ test.describe('@staff:bookings waitlist offers', () => {
     await expect(page.locator('.wl-open')).toContainText('1 free');
     const items = await page.evaluate(`(()=>{const out=[];_r7Bell((k,items)=>out.push([k,items.map(i=>i.id)]),{queue:true});return out;})()`);
     expect((items as unknown[])[1]).toEqual(['wlfree', ['wl:s1:1']]);
-    await page.locator('.wl-open').click();
+    if (await page.locator('.wl-open').isVisible()) await page.locator('.wl-open').click();
+    else { await page.locator('#tab-queue .sh-more').click(); await page.getByRole('menuitem', { name: /free/ }).click(); } // a phone's Desk tools (staff round s10)
     await expect(page.locator('#wlo-title')).toBeVisible();
   });
 

@@ -8073,5 +8073,16 @@
   "nsAskWl": "{0} sobe da lista de espera.",
   "nsAskLk": "O cacifo {0} fica livre.",
   "nsAskLkAny": "O cacifo reservado para esta pessoa fica livre.",
-  "coNotSettled": "Não foi possível fechar {0}:"
+  "coNotSettled": "Não foi possível fechar {0}:",
+  "shDeskTools": "Ferramentas do balcão",
+  "shGrpSession": "Sessão",
+  "shGrpAdd": "Adicionar",
+  "shGrpPeople": "Pessoas",
+  "shGrpReports": "Relatórios",
+  "shGrpYou": "O seu turno",
+  "shGrpView": "Vista",
+  "shGrpShare": "Partilhar",
+  "shGrpRecord": "Ligação e alterações",
+  "shGrpImport": "Importar",
+  "shSummary": "Resumo"
 }

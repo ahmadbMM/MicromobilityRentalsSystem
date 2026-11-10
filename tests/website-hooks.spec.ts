@@ -10,6 +10,12 @@ const sessions = [{ id: 's0', day: 'Friday', session_date: today, capacity: 12, 
 // as the website ties nothing to it.
 const routes = [{ key: 'routes.routes.items', value: [{ slug: { en: 'the-corniche', ar: 'the-corniche' }, name: { en: 'The Corniche', ar: 'الكورنيش' }, km: 12 }, { slug: { en: 'obhur-coast', ar: 'obhur-coast' }, name: { en: 'Obhur coast', ar: 'ساحل أبحر' }, km: 30 }, { slug: { en: '', ar: '' }, name: { en: 'Al-Balad', ar: 'البلد' }, km: 8 }] }];
 
+// Share my location is a tile in the Bookings header's More (staff round s10): as the ride leader, the role the select had first.
+async function shareFromMore(page: import('@playwright/test').Page) {
+  await page.locator('#tab-queue .sh-more').click();
+  await page.getByRole('menuitem', { name: 'Share my location · Ride leader' }).click();
+}
+
 test.describe('routes on a ride', () => {
   test('the picker lists the website\'s routes with a slug each, and the slug is written with the ride', async ({ page }) => {
     await stubSupabase(page, { sessions, queue_entries: [], bikes: [], site_content: routes });
@@ -50,14 +56,14 @@ test.describe('live location', () => {
     await page.goto('/');
     await waitForSb(page);
     await page.evaluate(`setStaffTab('handover')`);
-    await page.locator('#live-share-btn').click();
+    await shareFromMore(page);
     await expect(page.locator('#live-share-btn')).toHaveText('Stop sharing');
     await page.evaluate(`window.__geoErr(3)`); // TIMEOUT
     await page.evaluate(`window.__geoErr(2)`); // POSITION_UNAVAILABLE
     await expect(page.locator('#live-share-btn')).toHaveText('Stop sharing');
     expect(await page.evaluate(`!!window.__cleared`)).toBe(false);
     await page.evaluate(`window.__geoErr(1)`); // PERMISSION_DENIED
-    await expect(page.locator('#live-share-btn')).toHaveText('Share my location');
+    await expect(page.locator('#live-share-btn')).toHaveCount(0); // stopped: the share is a tile in More again (staff round s10)
     expect(await page.evaluate(`window.__cleared`)).toBe(true);
   });
 
@@ -74,15 +80,15 @@ test.describe('live location', () => {
     const calls: Array<{ fn: string; body: Record<string, unknown> }> = [];
     page.on('request', (r) => { const m = r.url().match(/\/rest\/v1\/rpc\/(staff_live_\w+)/); if (m) { try { calls.push({ fn: m[1], body: r.postDataJSON() || {} }); } catch { calls.push({ fn: m[1], body: {} }); } } });
     await page.evaluate(`setStaffTab('handover')`);
-    await expect(page.locator('#live-share-btn')).toHaveText('Share my location');
-    await page.locator('#live-share-btn').click();
+    await expect(page.locator('#live-share-btn')).toHaveCount(0); // not sharing: Share my location is a tile in the header's More (staff round s10)
+    await shareFromMore(page);
     await expect.poll(() => calls.filter((c) => c.fn === 'staff_live_position').length).toBe(1);
     expect(calls[0].body).toMatchObject({ p_session_id: 's0', p_role: 'leader', p_lat: 21.5, p_lng: 39.1, p_heading: 90, p_speed: 4.2 });
     await expect(page.locator('#live-share-btn')).toHaveText('Stop sharing');
     await page.locator('#live-share-btn').click();
     await expect.poll(() => calls.filter((c) => c.fn === 'staff_live_stop').length).toBe(1);
     expect(await page.evaluate(`window.__cleared`)).toBe(true);
-    await expect(page.locator('#live-share-btn')).toHaveText('Share my location');
+    await expect(page.locator('#live-share-btn')).toHaveCount(0);
   });
 });
 

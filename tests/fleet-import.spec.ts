@@ -106,8 +106,11 @@ test.describe('CSV import', () => {
   test('the preview says what will go in, the import writes the good rows in one insert, and Undo deletes them', async ({ page }) => {
     await boot(page);
     const posts = watchWrites(page, 'bikes', 'POST'), dels = watchWrites(page, 'bikes', 'DELETE');
-    await expect(page.locator('#tab-bikes label', { hasText: 'Import CSV' })).toBeVisible();
-    await expect(page.locator('#tab-bikes button', { hasText: 'CSV template' })).toBeVisible();
+    await page.locator('#tab-bikes .sh-more').click(); // Import CSV and the template are tiles in the header's More (staff round s10)
+    await expect(page.locator('.row-sheet').getByRole('menuitem', { name: 'Import CSV' })).toBeVisible();
+    await expect(page.locator('.row-sheet').getByRole('menuitem', { name: 'CSV template' })).toBeVisible();
+    await page.locator('.row-sheet-close').click();
+    await expect(page.locator('#bk-csv-in')).toBeAttached(); // the file field stays on the page, so its change is heard
     await page.evaluate(`_bkCsvPreview('number,type,size\\n42,Hybrid,M\\n43,Road,S\\n1,Road,S\\n')`);
     const m = page.locator('#confirm-modal');
     await expect(m).toContainText('Import bikes');

@@ -8073,5 +8073,16 @@
   "nsAskWl": "{0} অপেক্ষা তালিকা থেকে উঠে আসবেন।",
   "nsAskLk": "লকার {0} খালি হবে।",
   "nsAskLkAny": "তাদের জন্য রাখা লকার খালি হবে।",
-  "coNotSettled": "{0} জনকে বন্ধ করা যায়নি:"
+  "coNotSettled": "{0} জনকে বন্ধ করা যায়নি:",
+  "shDeskTools": "ডেস্ক টুল",
+  "shGrpSession": "সেশন",
+  "shGrpAdd": "যোগ করুন",
+  "shGrpPeople": "মানুষ",
+  "shGrpReports": "রিপোর্ট",
+  "shGrpYou": "আপনার শিফট",
+  "shGrpView": "ভিউ",
+  "shGrpShare": "শেয়ার করুন",
+  "shGrpRecord": "লিংক ও পরিবর্তন",
+  "shGrpImport": "ইমপোর্ট",
+  "shSummary": "সারাংশ"
 }

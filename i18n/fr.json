@@ -8073,5 +8073,16 @@
   "nsAskWl": "{0} quitte la liste d’attente et prend la place.",
   "nsAskLk": "Le casier {0} est libéré.",
   "nsAskLkAny": "Le casier réservé pour cette personne est libéré.",
-  "coNotSettled": "{0} n’ont pas pu être clôturés :"
+  "coNotSettled": "{0} n’ont pas pu être clôturés :",
+  "shDeskTools": "Outils de l’accueil",
+  "shGrpSession": "Séance",
+  "shGrpAdd": "Ajouter",
+  "shGrpPeople": "Personnes",
+  "shGrpReports": "Rapports",
+  "shGrpYou": "Votre service",
+  "shGrpView": "Affichage",
+  "shGrpShare": "Partager",
+  "shGrpRecord": "Lien et modifications",
+  "shGrpImport": "Importer",
+  "shSummary": "Résumé"
 }

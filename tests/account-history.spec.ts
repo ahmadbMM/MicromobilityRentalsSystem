@@ -97,7 +97,8 @@ test('Edit opens the booking over the history, and Escape closes one window at a
   await expect(box(page, 'booking-edit-modal')).toBeHidden();
   await expect(box(page, 'cust-modal')).toBeVisible();
   // The flag dialog sits over the history too, and Escape closes it first.
-  await modal(page).locator('.fl-open').click();
+  await modal(page).locator('.n6p-bar .sh-more').click(); // Ask to correct is a tile in the window's More (staff round s10)
+  await page.locator('.row-sheet').getByRole('menuitem', { name: 'Ask to correct' }).click();
   await expect(page.locator('#confirm-modal .fl-row').first()).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.locator('#confirm-modal .fl-row').first()).toBeHidden();
@@ -130,7 +131,7 @@ test('from the account editor, the history steps in front and hands the editor b
   await expect(page.locator('#cf-first')).toHaveValue('Leena');
   // Edit customer from the history goes back to that same editor, not a fresh one.
   await page.locator('#new-acct-modal .cf-head-btns button', { hasText: 'Bookings & history' }).click();
-  await modal(page).locator('.ah-actions button', { hasText: 'Edit customer' }).click();
+  await modal(page).locator('.n6p-bar button', { hasText: 'Edit customer' }).click(); // the action bar's (staff round s10)
   await expect(box(page, 'cust-modal')).toBeHidden();
   await expect(page.locator('#cf-first')).toHaveValue('Leena');
 });

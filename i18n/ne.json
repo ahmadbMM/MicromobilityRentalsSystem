@@ -8073,5 +8073,16 @@
   "nsAskWl": "{0} प्रतीक्षा सूचीबाट माथि आउँछन्।",
   "nsAskLk": "लकर {0} खाली हुन्छ।",
   "nsAskLkAny": "उनका लागि राखिएको लकर खाली हुन्छ।",
-  "coNotSettled": "{0} लाई बन्द गर्न सकिएन:"
+  "coNotSettled": "{0} लाई बन्द गर्न सकिएन:",
+  "shDeskTools": "डेस्क उपकरण",
+  "shGrpSession": "सेसन",
+  "shGrpAdd": "थप्नुहोस्",
+  "shGrpPeople": "मानिसहरू",
+  "shGrpReports": "रिपोर्टहरू",
+  "shGrpYou": "तपाईंको सिफ्ट",
+  "shGrpView": "दृश्य",
+  "shGrpShare": "सेयर गर्नुहोस्",
+  "shGrpRecord": "लिङ्क र परिवर्तनहरू",
+  "shGrpImport": "आयात",
+  "shSummary": "सारांश"
 }

@@ -42,7 +42,7 @@ test.describe('@staff:sessions the Sessions review', () => {
   });
 
   test('past nights still open have a figure that closes them in one write, and bulk Open skips past dates', async ({ page }) => {
-    await open(page, '/sessions/table');
+    await open(page, '/sessions/summary'); // the figures are Sessions' Summary view (staff round s10)
     const patches = writes(page, 'PATCH');
     const fig = page.locator('#tab-sessions .ss-figs .dash-kpi', { hasText: 'Past, still open' });
     await expect(fig).toContainText('1');
@@ -53,7 +53,7 @@ test.describe('@staff:sessions the Sessions review', () => {
     expect(patches[0]).toContain('"status":"closed"');
     // Bulk Open: a past night in the selection is left closed
     await page.waitForFunction(`!_busyKeys.has('ssBulk')`);
-    await page.evaluate(`S.sessions=S.sessions.map(s=>({...s,status:'closed'}));S.sessSel=['2020-01-07','2099-03-03'];renderSessions()`);
+    await page.evaluate(`S.sessions=S.sessions.map(s=>({...s,status:'closed'}));S.sessSel=['2020-01-07','2099-03-03'];S.sessView='table';renderSessions()`);
     await page.locator('#tab-sessions .ss-bulk').getByRole('button', { name: 'Open', exact: true }).click();
     await expect(page.locator('#confirm-modal')).toContainText('Change 1 sessions');
     await expect(page.locator('#confirm-modal')).toContainText('1 past sessions left closed');

@@ -73,7 +73,7 @@ const figureRows = (page: Page) => page.evaluate(() => [...document.querySelecto
 for (const [tab, width] of [['community', 820], ['community', 1180], ['dashboard', 1024], ['dashboard', 390], ['inventory', 390]] as const) {
   test(`@staff the ${tab} figures leave none alone on a row at ${width}px`, async ({ page }) => {
     await staffAt(page, width, 900);
-    await page.evaluate(`setStaffTab(${JSON.stringify(tab)})`);
+    await page.evaluate(`setStaffTab(${JSON.stringify(tab)})${tab === 'community' ? ";setCommTab('summary')" : ''}`); // People's figures are its Summary (staff round s10)
     await expect(page.locator(`#tab-${tab} :is(.dash-kpis,.stats-row)`).first()).toBeVisible();
     await expect(page.locator(`#tab-${tab} :is(.dash-kpis,.stats-row).fig-fit`).first()).toBeVisible();
     const grids = await figureRows(page);
@@ -87,7 +87,7 @@ for (const [tab, width] of [['community', 820], ['community', 1180], ['dashboard
 
 test('@staff the figures lay out again when the room changes', async ({ page }) => {
   await staffAt(page, 1280, 900);
-  await page.evaluate(`setStaffTab('customers')`);
+  await page.evaluate(`setStaffTab('customers');setCommTab('summary')`); // People's figures are its Summary (staff round s10)
   await expect(page.locator('#tab-community .dash-kpis.fig-fit').first()).toBeVisible(); // the overview's figures; the stage tiles below them are a second row (2026-11-06, PP08)
   const wide = (await figureRows(page))[0].rows.length; // People's fifteen figures: two rows on a laptop
   expect((await figureRows(page))[0].rows).not.toContain(1);
