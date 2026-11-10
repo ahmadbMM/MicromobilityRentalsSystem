@@ -2202,6 +2202,8 @@
   "addCustomBrandLabel": "Magdagdag ng brand...",
   "invProteinType": "Uri",
   "addCustomTypeLabel": "Magdagdag ng uri...",
+  "invNoType": "Walang uri",
+  "invTypeLatin": "Isulat ang uri sa mga titik na Ingles.",
   "invFlavour": "Lasa",
   "invNoFlavour": "Walang lasa",
   "addCustomFlavLabel": "Magdagdag ng lasa...",

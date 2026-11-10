@@ -2202,6 +2202,8 @@
   "addCustomBrandLabel": "Ajouter une marque...",
   "invProteinType": "Type",
   "addCustomTypeLabel": "Ajouter un type...",
+  "invNoType": "Sans type",
+  "invTypeLatin": "Écrivez le type en lettres latines.",
   "invFlavour": "Parfum",
   "invNoFlavour": "Sans parfum",
   "addCustomFlavLabel": "Ajouter un parfum...",

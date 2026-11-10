@@ -2202,6 +2202,8 @@
   "addCustomBrandLabel": "ब्रान्ड थप्नुहोस्...",
   "invProteinType": "प्रकार",
   "addCustomTypeLabel": "प्रकार थप्नुहोस्...",
+  "invNoType": "कुनै प्रकार छैन",
+  "invTypeLatin": "प्रकार अङ्ग्रेजी अक्षरमा लेख्नुहोस्।",
   "invFlavour": "स्वाद",
   "invNoFlavour": "स्वाद छैन",
   "addCustomFlavLabel": "स्वाद थप्नुहोस्...",

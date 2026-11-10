@@ -2294,6 +2294,8 @@
   "addCustomBrandLabel": "ব্র্যান্ড যোগ করুন...",
   "invProteinType": "ধরন",
   "addCustomTypeLabel": "ধরন যোগ করুন...",
+  "invNoType": "কোনো ধরন নেই",
+  "invTypeLatin": "ধরনটি ইংরেজি অক্ষরে লিখুন।",
   "invFlavour": "ফ্লেভার",
   "invNoFlavour": "কোনো ফ্লেভার নেই",
   "addCustomFlavLabel": "ফ্লেভার যোগ করুন...",

@@ -2202,6 +2202,8 @@
   "addCustomBrandLabel": "برانڈ شامل کریں...",
   "invProteinType": "قسم",
   "addCustomTypeLabel": "قسم شامل کریں...",
+  "invNoType": "کوئی قسم نہیں",
+  "invTypeLatin": "قسم انگریزی حروف میں لکھیں۔",
   "invFlavour": "ذائقہ",
   "invNoFlavour": "کوئی ذائقہ نہیں",
   "addCustomFlavLabel": "ذائقہ شامل کریں...",
