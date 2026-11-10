@@ -239,7 +239,7 @@ test.describe('@staff:analytics b2-f numbers safe to decide on', () => {
     await expect(table.locator('tr[data-kind="pm"] td').nth(8)).toHaveText('SAR 115'); // and per session held
     await page.evaluate(`_anYKindSet('sat')`);
     await expect(tab(page).locator('.an-range-bar .result-count')).toHaveText('1 sessions held · 3 rides');
-    expect(await page.evaluate(`[...document.querySelectorAll('#tab-analytics .an-range-bar select:not(.an-kind-sel) option')].map(o=>o.value)`)).toEqual(['all', 's']);
+    expect(await page.evaluate(`[...document.querySelectorAll('#tab-analytics .an-range-bar select#an-sess-sel option')].map(o=>o.value)`)).toEqual(['all', 's']);
     await expect(table.locator('tbody tr')).toHaveCount(6); // By product still sets every product side by side
     await expect(tab(page).locator('table.an-prod tr.an-prod-on')).toHaveAttribute('data-kind', 'sat');
     expect(await page.evaluate(`S._anCsvRows.map(r=>r.product+':'+r.riders+':'+r.occupancy_pct)`)).toEqual(['Saturday ride:3:40']);

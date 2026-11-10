@@ -58,7 +58,7 @@ test('cancelled bookings are still left out — the cap was the bug, not the fil
 test('no "Show more" is left dangling once the session lists in full', async ({ page }) => {
   await open(page, S1);
   const more = await page.evaluate(
-    `Array.from(document.querySelectorAll('#tab-queue button')).filter(b=>/more/i.test(b.textContent||'')).length`);
+    `Array.from(document.querySelectorAll('#tab-queue button:not(.sh-more)')).filter(b=>/more/i.test(b.textContent||'')).length`);
   expect(more).toBe(0);
 });
 
@@ -67,7 +67,7 @@ test('the all-sessions view keeps its cap, and says how many are held back', asy
   const shown = await shownNums(page, 'Rider', 189);
   expect(shown.length).toBeLessThan(189 - CANCELLED.length);   // still capped
   const label = await page.evaluate(
-    `(Array.from(document.querySelectorAll('#tab-queue button')).find(b=>/more/i.test(b.textContent||''))||{}).textContent||''`) as string;
+    `(Array.from(document.querySelectorAll('#tab-queue button:not(.sh-more)')).find(b=>/more/i.test(b.textContent||''))||{}).textContent||''`) as string;
   expect(label).toMatch(/\d+/);                                 // names a number, not just "more"
 });
 

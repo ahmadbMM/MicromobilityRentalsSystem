@@ -54,7 +54,7 @@ test('a family on one number is not a pair; the same first name on it, however s
   await page.evaluate(`S.customers.push({id:'c-hoda',name:'Hoda Saleh',email:'hoda@y.sa',phone:'${FAM}',created_at:'2026-05-01T10:00:00Z',birth_date:null})`);
   expect(await page.evaluate(`_dupGroups().filter(g=>g.why==='phone').map(g=>g.accts.map(c=>c.id).sort().join(','))`)).toEqual(['c-amal-1,c-amal-2', 'c-hoda,c-huda']);
   await page.evaluate(`setStaffTab('customers');setCustomersTab('duplicates')`);
-  await expect(page.locator('#tab-community .filter-pill.active')).toContainText('Duplicates (3)');
+  await expect(page.locator('#tab-community .ppl-sub .filter-pill.active')).toContainText('Duplicates (3)');
   await expect(page.locator('#tab-community .mg-group', { hasText: 'Sara Al Saleh' })).toHaveCount(0);
 });
 
@@ -64,7 +64,7 @@ test('the tab has its own address, lists the pairs, opens the merge dialog with 
   await page.evaluate(`setStaffTab('customers');setCustomersTab('duplicates')`);
   expect(await page.evaluate(`location.pathname`)).toBe('/people/duplicates');
   const tab = page.locator('#tab-community');
-  await expect(tab.locator('.filter-pill.active')).toContainText('Duplicates (2)');
+  await expect(tab.locator('.ppl-sub .filter-pill.active')).toContainText('Duplicates (2)');
   await expect(tab.locator('.mg-group')).toHaveCount(2);
   await expect(tab.locator('.mg-group').first()).toContainText('Same phone');
   await expect(tab.locator('.mg-group').first().locator('.mg-acct').first()).toContainText('2 bookings');

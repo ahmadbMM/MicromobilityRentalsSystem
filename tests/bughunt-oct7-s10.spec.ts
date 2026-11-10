@@ -78,7 +78,7 @@ test.describe('@staff:bookings bug hunt 2026-10-07 (s10)', () => {
     await undoTop(page);
     expect(q[0].status).toBe('waiting');                          // the one free place
     expect(q[1].status).toBe('waitlist');                         // not a third rider on a two-place night
-    expect(q[1].waitlist_num).toBeTruthy();
+    expect(q[1]).toHaveProperty('waitlist_num', null);           // sent with none: the server gives the end of the line (_wl_num_assign, staff round s10)
   });
 
   test('re-opening a finished ride clears its check-out stamp, and the undo puts it back', async ({ page }) => {

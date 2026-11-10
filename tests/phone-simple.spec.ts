@@ -69,7 +69,7 @@ test.describe('@staff:settings simple phone view', () => {
     // the bar and the menu keep the night's sections, and the menu ends with the way back
     expect(await tabbar(page)).toEqual(['queue', 'sessions', 'community', 'cashier']);
     await page.locator('#staff-tabbar .tb-more').click();
-    expect(await menu(page)).toEqual(['queue', 'sessions', 'cashier', 'workshop', 'community', 'volunteers', 'settings']);
+    expect(await menu(page)).toEqual(['queue', 'sessions', 'volunteers', 'workshop', 'cashier', 'community', 'settings']); // the rail's groups since staff round s10 (D7): Today, Fleet, Money, People, Admin
     await expect(page.locator('#snav-full')).toHaveText('Show the full view');
     await page.locator('#snav-full').click();
     expect(await page.evaluate(`localStorage.getItem('cq_phone_simple')`)).toBeNull();

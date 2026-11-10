@@ -34,7 +34,8 @@ test('staff: filter selects and plain selects carry their chevron', async ({ pag
   await waitForSb(page);
   await staffReady(page);
   await page.evaluate(`setStaffTab('queue')`);
-  const filter = page.locator('#tab-queue select.filter-select').filter({ visible: true }).first();
+  // a [data-spk] select is the session picker's hidden stand-in (1px, see-through): the picker button is what shows
+  const filter = page.locator('#tab-queue select.filter-select:not([data-spk])').filter({ visible: true }).first();
   await expect(filter).toBeVisible();
   const f = await filter.evaluate(look);
   expect(f.image).toContain('data:image/svg');

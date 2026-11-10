@@ -104,7 +104,7 @@ test('return without payment leaves the unpaid rider unpaid', async ({ page }) =
 test('the party menu undoes the check-in of everyone riding, and marks the rest no-show', async ({ page }) => {
   await queue(page);
   const writes = patches(page);
-  const menuBtn = vis(page, '#tab-queue [aria-haspopup="menu"]').first();
+  const menuBtn = vis(page, '#tab-queue .rq-more[aria-haspopup="menu"]').first();
   await menuBtn.click();
   await page.getByRole('menuitem', { name: 'Undo Check-in (2)' }).click();
   await expect(page.locator('#confirm-modal')).toContainText('Party One');
@@ -112,7 +112,7 @@ test('the party menu undoes the check-in of everyone riding, and marks the rest 
   await page.locator('#confirm-modal button', { hasText: 'Undo Check-in' }).click();
   await expect.poll(() => writes.filter(w => w.body.status === 'waiting').map(w => w.id).sort()).toEqual(['p1', 'p2']);
 
-  await vis(page, '#tab-queue [aria-haspopup="menu"]').first().click();
+  await vis(page, '#tab-queue .rq-more[aria-haspopup="menu"]').first().click();
   await page.getByRole('menuitem', { name: 'No-Show (1)' }).click();         // only the rider still waiting
   await expect(page.locator('#confirm-modal')).toContainText('Party Three');
   await page.locator('#confirm-modal button', { hasText: 'No-Show' }).click();

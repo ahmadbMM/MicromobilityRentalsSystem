@@ -51,17 +51,20 @@ test('the staff bar searches bookings, accounts, bikes and items, phones in any 
   const box = page.locator('#gs-panel .gs-box');
   await expect(box).toBeVisible();
   await expect(box).toContainText('Actions and sections'); // empty, the bar lists the actions and sections (ST06, 2026-11-06)
+  // the hits; after them (staff round s10) "Look in" offers the sections whose lists this device has not read yet
+  const hits = box.locator('.gs-item').filter({ hasNotText: 'Go to' });
   await page.locator('#gs-input').fill('+966 55 123 4567');
-  await expect(box.locator('.gs-item')).toHaveCount(2);
-  await expect(box.locator('.gs-item').nth(0)).toContainText('Booking');
-  await expect(box.locator('.gs-item').nth(0)).toContainText('#1 Amal Saad');
-  await expect(box.locator('.gs-item').nth(1)).toContainText('Account');
+  await expect(hits).toHaveCount(2);
+  await expect(hits.nth(0)).toContainText('Booking');
+  await expect(hits.nth(0)).toContainText('#1 Amal Saad');
+  await expect(hits.nth(1)).toContainText('Account');
   await page.locator('#gs-input').fill('9001');
-  await expect(box.locator('.gs-item')).toHaveText([/Bike\s*Road 9001/]);
+  await expect(hits).toHaveText([/Bike\s*Road 9001/]);
   await page.locator('#gs-input').fill('helmet');
-  await expect(box.locator('.gs-item')).toHaveText([/Item\s*Medium helmet/]);
+  await expect(hits).toHaveText([/Item\s*Medium helmet/]);
   await page.locator('#gs-input').fill('zzzz');
-  await expect(box).toContainText('Nothing found.');
+  await expect(hits).toHaveCount(0); // nothing found here; the sections not read yet are offered to look in (s10)
+  await expect(box).toContainText(/Look in|Nothing found\./);
   // Enter opens the booking where it lives: the roster, on its night, found by its number (ST04, 2026-11-06)
   await page.locator('#gs-input').fill('dana');
   await page.locator('#gs-input').press('Enter');
@@ -103,7 +106,7 @@ test('Front Desk searches only what its own sections hold', async ({ page }) => 
   await staff(page);
   await page.evaluate(`S.staffRole='frontdesk';renderTopbarRight();_gsOpen()`);
   await page.locator('#gs-input').fill('amal');
-  await expect(page.locator('#gs-panel .gs-item')).toHaveText([/Booking\s*#1 Amal Saad/]);
+  await expect(page.locator('#gs-panel .gs-item').filter({ hasNotText: 'Go to' })).toHaveText([/Booking\s*#1 Amal Saad/]); // and Look in: Lockers (s10)
 });
 
 // The bell tells what is NEW, one line per thing (the owner, 2026-10-02: "dont show applications: 32

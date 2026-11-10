@@ -13,8 +13,9 @@ test('JCC group modal books multiple walk-in riders under one group name', async
   await page.goto('/');
   await waitForSb(page);
 
-  // the header button, on the phone as on the desktop
-  await page.getByRole('button', { name: 'Add group' }).click();
+  // the header's tile, on the phone (Desk tools) as on the desktop (More actions) since staff round s10
+  await page.locator('#tab-queue .sh-more').first().click();
+  await page.locator('.row-sheet').getByRole('menuitem', { name: 'Add group' }).click();
   const modal = page.locator('#jcc-group-modal');
   await page.waitForTimeout(120); // let the modal's autofocus timer settle before filling
   await modal.locator('#jg-name').fill('Tamer Group');

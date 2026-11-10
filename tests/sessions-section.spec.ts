@@ -32,7 +32,7 @@ test.describe('@staff:sessions the Sessions section', () => {
   test('has its own rail entry and address, and is no longer a view of Bookings', async ({ page }) => {
     await open(page);
     await page.waitForFunction(`S.dataLoaded&&S.staffTab==='queue'`);
-    await expect(page.locator('#tab-queue .q-views')).not.toContainText('Sessions');
+    await expect(page.locator('#tab-queue .q-views', { hasText: 'Sessions' })).toHaveCount(0); // the row is left out when empty (staff round s10)
     if (await page.locator('#snav-burger').isVisible()) await page.locator('#snav-burger').click(); // a phone: the rail is a menu
     await page.locator('#staff-tab-nav .tab-btn[data-stab="sessions"]').click();
     await expect(page.locator('#tab-sessions .page-title').first()).toHaveText('Sessions');

@@ -11605,6 +11605,7 @@ body.view-staff #tab-bikes .flt-svc-row .bk-svc-every input{height:32px;min-heig
   body.view-staff #tab-history .filter-row.hist-tabs>*{width:100%;min-width:0;margin:0;min-height:44px;white-space:normal;line-height:1.15;text-align:center;justify-content:center;}
   body.view-staff #pm-host .filter-bar>.filter-row>:is(.search-wrap.open,.filter-sess),
   body.view-staff #tab-workshop .filter-bar>.filter-row>.sv-bar,
+  body.view-staff #tab-ambassadors .filter-bar>.filter-row>.sv-bar,
   body.view-staff #tab-ambassadors .filter-bar>.filter-row>.search-wrap.open,
   body.view-staff #tab-workshop .filter-bar>.filter-row>.search-wrap.open,
   body.view-staff #tab-messages .filter-bar>.filter-row>.search-wrap.open,
@@ -11612,8 +11613,10 @@ body.view-staff #tab-bikes .flt-svc-row .bk-svc-every input{height:32px;min-heig
   body.view-staff #tab-messages .filter-bar>.filter-row>.filter-more{grid-column:1/-1;}
   body.view-staff #tab-messages .filter-bar>.filter-row>.filter-more{text-align:start;justify-content:stretch;}
   body.view-staff #tab-workshop .filter-bar>.filter-row>.sv-bar .sv-lbl,
+  body.view-staff #tab-ambassadors .filter-bar>.filter-row>.sv-bar .sv-lbl,
   body.view-staff #tab-messages .filter-bar>.filter-row>.sv-bar .sv-lbl{flex:1 1 auto;min-width:0;}
   body.view-staff #tab-workshop .filter-bar>.filter-row>.sv-bar .sv-pick,
+  body.view-staff #tab-ambassadors .filter-bar>.filter-row>.sv-bar .sv-pick,
   body.view-staff #tab-messages .filter-bar>.filter-row>.sv-bar .sv-pick{max-width:none;width:100%;}
 }
 
@@ -12555,7 +12558,7 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .rq-pact{white-space:nowrap;}
   body.view-staff :is(#tab-queue,#tab-waitlist) .rq-chk{min-width:44px;min-height:44px;}
   body.view-staff :is(#tab-queue,#tab-waitlist) .rq-chki,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-selall{width:22px;height:22px;}
 }
-html[data-staff-theme="booth"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-acts .rq-more,
+html[data-staff-theme="booth"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-acts .rq-more{border:2px solid #000;} /* the row undo it shared this with is gone (s10); the menu keeps its edge, not the action's width */
 html[data-staff-theme="booth"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-acts .rq-act{min-width:112px;}
 /* a write still out: a dashed edge on the status pill; a refusal: why, on the row, under its action */
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-pend .status-badge{outline:1px dashed currentColor;outline-offset:2px;}

@@ -139,7 +139,8 @@ test.describe('Community > Birthdays', () => {
 
   test('lists the members soonest first, with how far off, the age they turn and who rides that week', async ({ page }) => {
     await staff(page);
-    const pill = page.locator('#tab-community .filter-pill', { hasText: 'Birthdays' });
+    await page.locator('#tab-community [data-ppl-grp="membership"]').click(); // People in groups since staff round s10: Birthdays is Membership's
+    const pill = page.locator('#tab-community .ppl-sub .filter-pill', { hasText: 'Birthdays' });
     await expect(pill).toHaveText('Birthdays 1');
     await pill.click();
     const tab = page.locator('#tab-community');

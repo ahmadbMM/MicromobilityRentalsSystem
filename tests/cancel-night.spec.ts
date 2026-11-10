@@ -14,6 +14,9 @@ const e = (id: string, st: string, x: Record<string, unknown> = {}) => ({
   phone: '05500000' + id.length, type_preference: 'Road', size: 'M', status: st, paid: false,
   price: 75, registered_at: '2099-01-01T10:00:00Z', ...x });
 
+// Since staff round s10 the session's actions (Close out, Cancel session, Delete...) are tiles in its header's More actions
+// (_shTools 'sh:sess'): the words the header and its menu carry.
+const sessTools = (page: import('@playwright/test').Page) => page.evaluate(`(()=>{const o=(S._shMenus||{})['sh:sess']||{},tp=document.createElement('template');tp.innerHTML=(o.pri||'')+(o.vis||'')+(o.grp||[]).map(g=>g[1]||'').join(' ');return tp.content.textContent;})()`) as Promise<string>;
 async function boot(page: import('@playwright/test').Page, rows: Record<string, unknown>[]) {
   await stubSupabase(page, { sessions, queue_entries: rows, bikes: [] });
   await unlockStaff(page);
@@ -26,7 +29,7 @@ async function boot(page: import('@playwright/test').Page, rows: Record<string, 
 
 test('@staff:sessions the button offers on a live future night, with the count', async ({ page }) => {
   await boot(page, [e('a', 'waiting'), e('b', 'waitlist', { queue_num: 2, waitlist_num: 1 }), e('c', 'done', { queue_num: 3 })]);
-  await expect(page.locator('#tab-sessions')).toContainText('Cancel session (2)');   // done is already history
+  await expect.poll(() => sessTools(page)).toContain('Cancel session (2)');   // done is already history
 });
 
 test('the modal carries the message, the links and the roll', async ({ page }) => {
@@ -72,7 +75,7 @@ test('a night already over offers Close out, not Cancel session', async ({ page 
   await page.waitForFunction(`getQueue().length>0`);
   await page.evaluate(`setStaffTab('sessions');selectSessionDetail('${OLD}')`);
   await page.waitForTimeout(250);
-  const txt = await page.evaluate(`document.getElementById('tab-sessions').innerText`) as string;
+  const txt = (await page.evaluate(`document.getElementById('tab-sessions').innerText`) as string) + (await sessTools(page));
   expect(txt).toContain('Close out');
   expect(txt).not.toContain('Cancel session');
 });
@@ -151,7 +154,7 @@ test('@staff:sessions a closed session still ahead can be cancelled; Delete with
   await page.waitForFunction(`getQueue().length>0`);
   await page.evaluate(`isAdmin=()=>true;setStaffTab('sessions');selectSessionDetail('${FUT}')`);
   await page.waitForTimeout(250);
-  await expect(page.locator('#tab-sessions')).toContainText('Cancel session (1)');
+  await expect.poll(() => sessTools(page)).toContain('Cancel session (1)');
   await page.evaluate(`deleteSession('${FUT}')`);
   await expect(page.locator('#cancel-night-modal')).toBeVisible();
   await expect(page.locator('#cancel-night-modal')).toContainText('Cancel session');
@@ -168,4 +171,5 @@ test('@staff:sessions a session called off shows Cancelled, and offers no second
   await page.waitForTimeout(250);
   await expect(page.locator('#tab-sessions .ss-cancelled').first()).toContainText('Cancelled');
   await expect(page.locator('#tab-sessions')).not.toContainText('Cancel session');
+  expect(await sessTools(page)).not.toContain('Cancel session');
 });

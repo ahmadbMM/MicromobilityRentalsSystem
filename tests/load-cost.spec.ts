@@ -128,9 +128,13 @@ test('a poll that changed nothing does not rebuild the screen', async ({ page })
   await page.evaluate(`_autoRefresh(false)`);      // first pass records the fingerprint
   await page.evaluate(`_autoRefresh(false)`);
   await page.evaluate(`_autoRefresh(false)`);
+  // a poll's repaint is one paint in the next frame since staff round s10 (_qPaintSoon)
+  const frame = () => page.evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(()=>r(0))))');
+  await frame();
   expect(await page.evaluate('window.__renders')).toBe(1);
   // but a real change still paints
   await page.evaluate(`S.queue=[...(S.queue||[]),{id:'x1',status:'waiting',queueNum:99,sessionId:'${S1}'}];_autoRefresh(false)`);
+  await frame();
   expect(await page.evaluate('window.__renders')).toBe(2);
 });
 

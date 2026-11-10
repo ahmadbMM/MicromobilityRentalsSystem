@@ -313,7 +313,8 @@ test.describe('@staff:bookings b2-d the walk-up waitlist books Pending, then ask
 });
 
 test.describe('@staff:bookings b2-d the customer password reset (P15)', () => {
-  const keyBtn = (page: Page) => page.locator('#tab-queue .sf-icon-btn[title="Reset Customer Password"]');
+  // Since staff round s10 the key is a tile in the Bookings header's More actions (People): how many the menu would show.
+  const keyN = (page: Page) => page.evaluate(`(((S._shMenus||{})['sh:queue']||{}).grp||[]).filter(g=>/toggleResetTool/.test(g[1]||'')).length`);
   const roster = async (page: Page, js = '') => {
     await page.evaluate(`${js}setStaffTab('queue');S.queueView='bookings';renderStaffQueue()`);
     await expect(page.locator('#tab-queue .page-title').first()).toBeVisible();
@@ -322,15 +323,15 @@ test.describe('@staff:bookings b2-d the customer password reset (P15)', () => {
   test('the key is there for an admin and front desk, not for a ride leader, the Owner role or an account that cannot change Bookings', async ({ page }) => {
     await boot(page);
     await roster(page);
-    await expect(keyBtn(page)).toHaveCount(1);
+    await expect.poll(() => keyN(page)).toBe(1);
     await roster(page, `setStaffRole('frontdesk');`);
-    await expect(keyBtn(page)).toHaveCount(1);
+    await expect.poll(() => keyN(page)).toBe(1);
     await roster(page, `setStaffRole('leader');`);
-    await expect(keyBtn(page)).toHaveCount(0);
+    await expect.poll(() => keyN(page)).toBe(0);
     await roster(page, `setStaffRole('owner');S._myEdit=[];`);
-    await expect(keyBtn(page)).toHaveCount(0);
+    await expect.poll(() => keyN(page)).toBe(0);
     await roster(page, `setStaffRole('frontdesk');S._myEdit=['cashier'];`);
-    await expect(keyBtn(page)).toHaveCount(0);
+    await expect.poll(() => keyN(page)).toBe(0);
     await page.evaluate(`S.showResetTool=true;renderStaffQueue()`);
     await expect(page.locator('#staff-reset-email')).toHaveCount(0); // the tool itself stays shut too
   });

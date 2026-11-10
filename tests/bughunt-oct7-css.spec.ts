@@ -88,5 +88,6 @@ test('tablet: the roster of one ride has no blank Session column', async ({ page
   await expect(page.locator('#tab-queue .queue-table tbody tr').first()).toBeVisible();
   const shown = await page.locator('#tab-queue .queue-table .rq-none').evaluateAll((els) => els.filter((e) => getComputedStyle(e).display !== 'none').length);
   expect(shown).toBe(0);
-  expect(await page.locator('#tab-queue .density-toggle').evaluate((el) => getComputedStyle(el).display)).toBe('flex');
+  // the density switch is a tile in the header's More actions (View) since staff round s10, offered on a tablet
+  expect(await page.evaluate(`(((S._shMenus||{})['sh:queue']||{}).grp||[]).some(g=>/setQueueDensity/.test(g[1]||''))`)).toBe(true);
 });

@@ -37,7 +37,7 @@ test('a single-session focus from another range drops back to all sessions', asy
   });
   await page.evaluate("setAnRange('month')");
   expect(await page.evaluate('S.anSession')).toBe('all');
-  expect(await page.locator('#tab-analytics select.filter-select:not(.an-kind-sel)').inputValue()).toBe('all'); // the product picker sits beside it (2026-10-29)
+  expect(await page.locator('#an-sess-sel').inputValue()).toBe('all'); // the product picker and (staff round s10) the saved views sit beside it
   const done = await page.evaluate("document.querySelector('#tab-analytics .result-count').textContent");
   expect(done).toMatch(/·\s*1\s/); // this month's one ride, not the zero of a session out of range
 });

@@ -21,20 +21,22 @@ async function boot(page: Page) {
   await waitForSb(page);
 }
 const show = (page: Page, sid: string) => page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession=${JSON.stringify(sid)};renderStaffQueue()`);
-const head = (page: Page, name: string) => page.locator('#tab-queue .section-header button', { hasText: name });
+// Since staff round s10 the Bookings header keeps Walk-in in sight and Add group / Add rider as tiles in More actions
+// (_shTools 'sh:queue'): how many of a name the header and its menu offer.
+const headN = (page: Page, name: string) => page.evaluate(`(()=>{const n=${JSON.stringify(name)},o=(S._shMenus||{})['sh:queue']||{},tp=document.createElement('template');tp.innerHTML=(o.pri||'')+(o.vis||'')+(o.grp||[]).map(g=>g[1]||'').join('');return[...tp.content.querySelectorAll('button')].filter(b=>(b.textContent||'').includes(n)).length;})()`) as Promise<number>;
 
 test('Walk-in: not on the pool session, a Saturday ride or Run for Her; Add rider: not on Petromin or a circuit night', async ({ page }, info) => {
   await boot(page);
   for (const [sid, walkin, addRider] of [[NIGHT, 1, 0], [SAT, 0, 1], [RUN, 0, 1], [POOL, 0, 1], [PW, 1, 0], [EV, 1, 1]] as [string, number, number][]) {
     await show(page, sid);
-    await expect(head(page, 'Walk-in'), sid).toHaveCount(walkin);
-    await expect(head(page, 'Add rider'), sid).toHaveCount(addRider);
+    await expect.poll(() => headN(page, 'Walk-in'), sid).toBe(walkin);
+    await expect.poll(() => headN(page, 'Add rider'), sid).toBe(addRider);
     if (info.project.name === 'mobile') await expect(page.locator('#tab-queue .walkin-fab'), sid).toHaveCount(walkin);
   }
   // all sessions: both buttons, and each dialog lists only the rides it may add to
   await show(page, 'all');
-  await expect(head(page, 'Walk-in')).toHaveCount(1);
-  await expect(head(page, 'Add rider')).toHaveCount(1);
+  await expect.poll(() => headN(page, 'Walk-in')).toBe(1);
+  await expect.poll(() => headN(page, 'Add rider')).toBe(1);
   await page.evaluate(`showWalkinModal()`);
   const wi = await page.locator('#wi-sess option').evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
   expect(wi.sort()).toEqual([NIGHT, PW, EV].sort());

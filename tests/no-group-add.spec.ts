@@ -32,21 +32,23 @@ async function boot(page: Page, queue_entries: Record<string, unknown>[] = []) {
 }
 const show = (page: Page, sid: string) =>
   page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession=${JSON.stringify(sid)};renderStaffQueue()`);
-const addGroup = (page: Page) => page.locator('#tab-queue .section-header button', { hasText: 'Add group' });
+// Since staff round s10 the Bookings header keeps Walk-in in sight and Add group / Add rider as tiles in More actions
+// (_shTools 'sh:queue'): how many of a name the header and its menu offer.
+const headN = (page: Page, name: string) => page.evaluate(`(()=>{const n=${JSON.stringify(name)},o=(S._shMenus||{})['sh:queue']||{},tp=document.createElement('template');tp.innerHTML=(o.pri||'')+(o.vis||'')+(o.grp||[]).map(g=>g[1]||'').join('');return[...tp.content.querySelectorAll('button')].filter(b=>(b.textContent||'').includes(n)).length;})()`) as Promise<number>;
 
 test.describe('@staff:bookings no group add on a Saturday ride, Run for Her or the pool session', () => {
   test('the roster offers Add group on a circuit night and on all sessions, not on a Saturday ride, Run for Her or the pool session', async ({ page }) => {
     await boot(page);
     await show(page, NIGHT);
-    await expect(addGroup(page)).toHaveCount(1);
+    await expect.poll(() => headN(page, 'Add group')).toBe(1);
     await show(page, SAT);
-    await expect(addGroup(page)).toHaveCount(0);
+    await expect.poll(() => headN(page, 'Add group')).toBe(0);
     await show(page, RUN);
-    await expect(addGroup(page)).toHaveCount(0);
+    await expect.poll(() => headN(page, 'Add group')).toBe(0);
     await show(page, POOL);
-    await expect(addGroup(page)).toHaveCount(0);
+    await expect.poll(() => headN(page, 'Add group')).toBe(0);
     await show(page, 'all');
-    await expect(addGroup(page)).toHaveCount(1);
+    await expect.poll(() => headN(page, 'Add group')).toBe(1);
   });
 
   test('the group dialog lists none of them', async ({ page }) => {

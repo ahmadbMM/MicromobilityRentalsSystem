@@ -109,7 +109,13 @@ test.describe('@staff:bikes maintenance log', () => {
   test('the maintenance report sums cost and downtime per bike', async ({ page }) => {
     await open(page, { bike_service_log: LOG });
     await page.evaluate("setStaffTab('inventory');setInvSection('bikes')");
-    await page.getByRole('button', { name: 'Maintenance report' }).click();
+    // in the header on a desk; on a phone the header is one Desk tools button since staff round s10, the report a tile in it
+    const btn = page.getByRole('button', { name: 'Maintenance report' });
+    if (await btn.isVisible()) await btn.click();
+    else {
+      await page.locator('#tab-inventory .sh-more').first().click();
+      await page.locator('.row-sheet').getByRole('menuitem', { name: 'Maintenance report' }).click();
+    }
     const d = page.locator('#confirm-modal .ws-dlg');
     await expect(d.locator('tbody tr')).toHaveCount(1);
     await expect(d.locator('tbody tr')).toContainText('Road 012');
