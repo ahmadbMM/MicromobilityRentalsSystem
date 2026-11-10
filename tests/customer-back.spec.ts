@@ -24,8 +24,10 @@ test('fresh signed-in visit lands on the event picker; Back returns there from t
   // entering an event shows the customer page with its Back button
   await page.locator('#land-events .landing-event-card.ev-jcc').click();
   await page.waitForFunction(`S.view==='customer'`);
-  await expect(page.locator('#cust-back-btn')).toBeVisible();
-  await page.locator('#cust-back-btn').click();
+  // Back sits in the step-1 bar (2026-11-10, row 12); the page's Back steps aside while a bar shows
+  await expect(page.locator('#tab-register .reg-foot1 .reg-foot-back')).toBeVisible();
+  await expect(page.locator('#cust-back-btn')).toBeHidden();
+  await page.locator('#tab-register .reg-foot1 .reg-foot-back').click();
   await page.waitForFunction(`S.view==='landing'`);
   await expect(page.locator('#land-events .landing-event-card:not(.ev-snd96)')).toHaveCount(2);
 });
@@ -78,7 +80,7 @@ test('Back walks the Reserve wizard steps (button and browser alike)', async ({ 
   await page.locator('#tab-register .mm-reg-foot button', { hasText: 'Back' }).click();
   await page.waitForFunction('S.regStep===1');
   expect(await page.evaluate('S.view')).toBe('customer');
-  await expect(page.locator('#cust-back-btn')).toBeVisible(); // step one leads back to the event picker
+  await expect(page.locator('#tab-register .reg-foot1 .reg-foot-back')).toBeVisible(); // step one leads back to the event picker, from its bar
 });
 
 // The event cards sit low on the picker, so a rider has scrolled to reach one, and the list opened at that same

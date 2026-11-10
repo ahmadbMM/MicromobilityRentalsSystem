@@ -101,8 +101,9 @@ test.describe('@customer:reserve a closed bike type', () => {
     expect(await page.evaluate(`_regRange({closed_types:['Road']},'Road Carbon')`)).toEqual([250, 250]); // a picked type is its own price
     // and on the screen
     await page.evaluate(atRiders(SHUT));
-    await expect(page.locator('#price-preview-wrap .price-preview-total')).toContainText('57.5');
-    await expect(page.locator('#price-preview-wrap .price-preview-total')).not.toContainText('75');
+    await expect(page.locator('#reg-foot-tot')).toBeEmpty(); // no range before a pick (2026-11-10, row 9): the pills carry the prices
+    await page.evaluate(`setBikeType(0,'Hybrid')`);
+    await expect(page.locator('#reg-foot-tot')).toContainText('57.50');
   });
 
   test('a booking is sent with the open type picked', async ({ page }) => {

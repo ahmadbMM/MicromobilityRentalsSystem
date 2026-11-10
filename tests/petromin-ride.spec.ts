@@ -73,8 +73,8 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     await pickRide(page, 'ev-petromin', '2099-01-13-pw');
     await page.evaluate(`S.regStep=2;renderRegister();setBikeType(0,'Road')`); // riders step: stepper + fare
     await expect(page.locator('.qty-stepper')).toBeVisible();
-    await expect(page.locator('#price-preview-wrap')).toContainText(await page.evaluate('_sar(75)') as string);
-    await expect(page.locator('#price-preview-wrap')).not.toContainText('Free');
+    await expect(page.locator('#reg-foot-tot')).toContainText('75'); // the bar's total (2026-11-10, row 9)
+    await expect(page.locator('#reg-foot-tot')).not.toContainText('Free');
   });
 
   test('the Saturday ride shows no stepper and no fare', async ({ page }) => {
@@ -82,7 +82,8 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     await pickRide(page, 'ev-saturday', '2099-01-10');
     await page.evaluate(`S.regStep=2;renderRegister();setBikeType(0,'Road')`);
     await expect(page.locator('.qty-stepper')).toHaveCount(0);
-    await expect(page.locator('#price-preview-wrap')).toContainText('Free');
+    await expect(page.locator('#reg-foot-tot')).toBeEmpty(); // a free ride carries no total in the bar
+    await expect(page.locator('#reg-type-wrap-0 .tp-price')).toHaveCount(0); // and no fare on its pills
   });
 
   test('the Saturday ride still books one rider at a time', async ({ page }) => {
@@ -214,8 +215,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     await pickRide(page, 'ev-petromin', '2099-01-13-pw');
     await page.evaluate(`S.regStep=2;renderRegister()`);
     for (let i = 0; i < 8; i++) await page.evaluate('changeRegQty(1)');
-    expect(await page.evaluate('S.regQty')).toBe(2);
-    await expect(page.locator('.reg-row').first()).toContainText(/up to 2 riders/i);
+    expect(await page.evaluate('S.regQty')).toBe(2); // the cap's hint line went (the owner, 2026-11-10, Q2)
   });
 
   test('a third rider is refused at submit, not quietly trimmed', async ({ page }) => {

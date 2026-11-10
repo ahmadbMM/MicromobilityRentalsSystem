@@ -850,6 +850,41 @@ The owner's picks on the round-two page; the rules sit in the `ROUND TWO` part a
 - **The colour check** also refuses raw `oklch()`, `oklab()`, `lab()`, `lch()`, `hwb()` and `color()` in the customer
   system (tokens may hold them; `color-mix()` of tokens is fine).
 
+## The Reserve research, built (2026-11-10)
+
+From reports/Reserve page design and function.md (git-excluded) and the owner's answers (Q1 yes, Q2 yes, Q3 yes, Q4 no,
+Q5 no, Q6 yes, Q7 yes). The flow names the outcome in the button or the heading, never in a hint line:
+- `_regWlNow(s,qty)` is submitReg's own waitlist test (full, or fewer places than riders who need one). It puts the
+  "Waitlist" chip in the step-1 bar summary and on the review's ride line, and Confirm reads **Join waitlist**.
+- An entry that asked for a place carries `seat_only:true` to `customer_create_booking`. Migration 20261111030000
+  refuses such a call with **PLACE_GONE** when a row would land on the waitlist (another device took the last place).
+  `_placeGone` asks in a centred pop-up: Join waitlist (`S._wlJoin`, booked again without the key) or Choose another
+  ride; the riders' choices stay. An older database ignores the key.
+- A booking queued offline (`_tkPending`: its id is still in the outbox) shows **Not sent yet**: no number, no QR, no
+  buzz. When the outbox delivers it, `_bookOutboxFlushRun` reloads and the booked moment becomes true.
+- `_bwOpensText` is 12-hour and, inside a day of opening, "Booking opens in 2 h 10 min"; `[data-bw]` texts are
+  refreshed every 30 s by `_bwTick`, and the list repaints when a window opens.
+- Session rows and bike pills are **radio groups** (`role=radio`, `aria-checked`, one tab stop, `_rgKey` arrows).
+  Specs select them by `aria-checked`, not `aria-pressed`.
+- The review has **Change** per part (`_regChange`, `S.regReturn`): Continue comes back to the review when the ride is
+  unchanged. The step-2 bar carries the total (`_regFootTot`); the pre-pick price box is gone. The promo field opens
+  from a link (`S._promoOpen`). Back sits in every step's bar (step 1's is `.reg-foot1 .reg-foot-back`), and the
+  top Back hides while it shows. On phones the bar is fixed; `scroll-padding-bottom` keeps focus above it.
+- `S._regPatch=[ids]` before `renderRegister()` swaps only those parts (`_regPatchIn`): an add-on's quantity patches
+  `reg-ad-body`, `reg-ad-tog`, `reg-rv-ad`, `reg-sum`. A part that came or went falls back to the whole step.
+- Step changes animate the new step with the Web Animations API (`_regVT`), never View Transitions: that API updates
+  the DOM a frame later and broke the synchronous focus and test paths. The bar is never animated (a moving parent
+  unpins `position:fixed`).
+- The height is a text field with `inputmode=numeric`, read through `_asciiDigits`. A height of `KIDS_MAX_CM` or under
+  picks Kids when no bike is picked (`S._kidsAuto`); a Kids bike for a taller rider is refused at the field.
+- Prices: `_sar` prints 57.50, never 57.5; `_sarA` hides the riyal sign from screen readers and reads `sarWord`.
+- `_evTitle(s)`: the circuit's night is "Open Sports Day" (landJccCardTitle) on the booked moment; the circuit stays the
+  place (the ticket's Where).
+- The funnel: `_fnl(ev)` records list, pick, step2, step3, waiver, confirm, booked, waitlisted, refused, place_gone,
+  once per attempt, through `reserve_funnel_add` (no account, a random id). Staff see it in Analytics > Reserve steps
+  (`_rsFnlCard`, `staff_reserve_funnel`). The website sends `p_src:'site'`.
+- The signed-out landing's availability strip is gone (the auth page always hid it).
+
 ## Accounts and Members as a list (2026-10-10)
 
 The owner: "make the accounts and members pages look like a list instead and make it very aligned and organized and

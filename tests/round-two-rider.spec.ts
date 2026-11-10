@@ -64,7 +64,7 @@ test.describe('@customer:round-two choose a ride', () => {
     await expect(page.locator('#tab-register .sess-day-list')).toHaveCount(1); // the day's rides in one list
     await page.locator('#tab-register .sess-card').first().click();
     await expect(page.locator('#tab-register .sess-card.sess-selected .sess-tick')).toBeVisible();
-    await expect(page.locator('#tab-register .sess-card.sess-selected')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#tab-register .sess-card.sess-selected')).toHaveAttribute('aria-checked', 'true'); // a radio in the list's group (2026-11-10)
   });
 });
 

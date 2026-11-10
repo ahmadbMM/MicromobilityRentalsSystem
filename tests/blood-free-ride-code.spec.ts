@@ -98,6 +98,7 @@ test.describe('Blood Donation free ride code', () => {
   test("someone else's code is refused by the server's answer", async ({ page }) => {
     await boot(page, [], { 'rpc:promo_lookup': { ok: false, reason: 'not_yours' } });
     await step2(page, 1, ['Hybrid']);
+    await page.evaluate('S._promoOpen=true;renderRegister()'); // the field opens from its link (row 10)
     await page.locator('#reg-promo-step2').fill('BD-1A2B3C4D');
     await page.locator('#reg-promo-btn-step2').click();
     await expect.poll(() => page.evaluate('S._promoMsg')).toContain('another account');
@@ -136,6 +137,7 @@ test.describe('@customer:reserve the volunteer free ride code', () => {
     await expect(box.locator('.fr-t')).toHaveText('You have a volunteer free ride');
     await expect(box).toContainText('Carbon');
     await expect(box.locator('.fr-go')).toHaveCount(0);
+    await page.evaluate('S._promoOpen=true;renderRegister()'); // the field opens from its link (row 10)
     await page.locator('#reg-promo-step2').fill('VL-7F3A92C1');
     await page.locator('#reg-promo-btn-step2').click();
     await expect.poll(() => page.evaluate('S._promoMsg')).toContain('Carbon');

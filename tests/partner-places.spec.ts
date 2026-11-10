@@ -108,7 +108,7 @@ test.describe('@customer:partner partner places', () => {
     await expect(note).toHaveText('Our bikes are taken for this ride. You can still join with your own bike.');
     const own = page.locator('#reg-type-wrap-0 button[data-type="Own"]');
     await expect(own).toBeEnabled();
-    await expect(own).toHaveAttribute('aria-pressed', 'true');
+    await expect(own).toHaveAttribute('aria-checked', 'true'); // a radio in its group (2026-11-10)
     await expect(page.locator('#reg-type-wrap-0 button[data-type="Hybrid"]')).toBeDisabled();
     expect(await page.evaluate(`S.regBikeTypes[0]`)).toBe('Own');
   });
@@ -156,7 +156,7 @@ test.describe('@customer:partner partner places', () => {
     expect(await page.evaluate('S.regStep')).toBe(2);
     await expect(page.locator('.toast').filter({ hasText: 'Our bikes are taken' }).first()).toBeVisible();
     await expect(page.locator('#reg-type-wrap-0 button[data-type="Hybrid"]')).toBeDisabled();
-    await expect(page.locator('#reg-type-wrap-0 button[data-type="Own"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#reg-type-wrap-0 button[data-type="Own"]')).toHaveAttribute('aria-checked', 'true');
     // staff read the same refusal with the limit
     expect(await page.evaluate(`S.view='staff';S.sfSession='${SAT}';const m=_errMessage({code:'P0001',message:'x',details:'MEMBER_BIKES_FULL'});S.view='customer';m`))
       .toBe("Members' bikes are all taken on this ride (limit 70). Add them with their own bike.");

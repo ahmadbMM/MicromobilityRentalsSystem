@@ -12,9 +12,7 @@ test('landing page renders with the customer app name', async ({ page }) => {
   await expect(page.locator('#land-sub')).toHaveText('Bicycle rentals & community rides in Jeddah');
 });
 
-test('shows the no-sessions message when nothing is bookable', async ({ page }) => {
-  await expect(page.locator('#land-avail-strip')).toContainText('No sessions are currently open');
-});
+// The signed-out availability strip went on 2026-11-10 (the auth page always hid it; the owner kept sign-in first, Q4).
 
 // Ten languages: the header control is a native dropdown that lists each one by its own
 // name and shows the one you are reading (the rest is in languages.spec.ts).

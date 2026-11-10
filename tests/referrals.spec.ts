@@ -476,6 +476,7 @@ test.describe('@customer:reserve the friend\'s referral discount', () => {
     const calls = rpcs(page);
     await rider(page, { sessions: [jcc, sat, pm], 'rpc:customer_referral': card({ can_enter: true, joined: 0, rode: 0, earned: 0 }), 'rpc:customer_blood_rewards': [], 'rpc:promo_lookup': { ok: false, reason: 'invalid' } }, '/', false);
     await step2(page, 's0', ['Hybrid']);
+    await page.evaluate('S._promoOpen=true;renderRegister()'); // the field opens from its link (row 10)
     await page.locator('#reg-promo-step2').fill('k7mq2x');
     await page.locator('#reg-promo-btn-step2').click();
     await expect(page.locator('.cu-promo-err')).toContainText('Invalid or inactive code');
@@ -488,12 +489,14 @@ test.describe('@customer:reserve the friend\'s referral discount', () => {
     const paidSat = { ...sat, id: 's3', session_date: '2099-02-14', paid_ride: true };
     await friend(page, { sessions: [jcc, sat, pm, paidSat], 'rpc:promo_lookup': { ok: false, reason: 'invalid' } });
     await step2(page, 's0', ['Road Carbon']);
+    await page.evaluate('S._promoOpen=true;renderRegister()'); // the field opens from its link (row 10)
     await page.locator('#reg-promo-step2').fill('k7mq2x');
     await page.locator('#reg-promo-btn-step2').click();
     await expect(page.locator('.cu-promo-err')).toContainText(await page.evaluate(`t('errRefCodeCarbon')`) as string);
     expect(await page.evaluate('S.promoApplied')).toBeNull();
     await step2(page, 's3', ['Hybrid']);
     expect(await page.evaluate('S.promoApplied')).toBeNull();
+    await page.evaluate('S._promoOpen=true;renderRegister()'); // the field opens from its link (row 10)
     await page.locator('#reg-promo-step2').fill('SUMMER');
     await page.locator('#reg-promo-btn-step2').click();
     await expect(page.locator('.cu-promo-err')).toContainText(await page.evaluate(`t('errRefCodeSession')`) as string);
@@ -502,6 +505,7 @@ test.describe('@customer:reserve the friend\'s referral discount', () => {
     await page.evaluate(`S._rwOff='s0'`);
     await step2(page, 's0', ['Hybrid']);
     expect(await page.evaluate('S.promoApplied')).toBeNull();
+    await page.evaluate('S._promoOpen=true;renderRegister()'); // the field opens from its link (row 10)
     await page.locator('#reg-promo-step2').fill('k7mq2x');
     await page.locator('#reg-promo-btn-step2').click();
     await expect.poll(() => page.evaluate('S.promoApplied&&[S.promoApplied.code,S.promoApplied.one]')).toEqual(['RW-K7MQ2X-4FZ', true]);

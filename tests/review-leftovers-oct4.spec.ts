@@ -41,14 +41,13 @@ test.describe('@customer:reserve event seats', () => {
     expect(await page.evaluate('S.regStep')).toBe(2);
     const panel = page.locator('#tab-register');
     await expect(panel).toContainText('Participants');
-    await expect(panel).toContainText('up to 5 participants');
     for (let i = 0; i < 7; i++) await page.evaluate('changeRegQty(1)');
     expect(await page.evaluate('S.regQty')).toBe(5); // the server's cap for an event (_group_ride_cap)
     for (let i = 0; i < 3; i++) await page.evaluate('changeRegQty(-1)');
     expect(await page.evaluate('S.regQty')).toBe(2);
     await expect(page.locator('#reg-rider-name-0')).toHaveValue('Spec Rider');
     await expect(page.locator('#reg-rider-name-1')).toHaveValue('');
-    await expect(panel.locator('.price-preview')).toContainText('80'); // 2 x 40, the seat, not a bike
+    await expect(page.locator('#reg-foot-tot')).toContainText('80'); // 2 x 40, the seat, not a bike: the bar's total (2026-11-10)
     // the second seat needs a name before the review
     await page.evaluate('regNextToReview()');
     expect(await page.evaluate('S.regStep')).toBe(2);

@@ -159,6 +159,7 @@ test.describe('promo codes', () => {
   test('a code typed with Arabic-Indic digits is the same code', async ({ page }) => {
     await boot(page, { promo_codes: [{ id: 'p1', code: 'RIDE20', kind: 'pct', value: 20, active: true }] });
     await page.evaluate(`S.selEvent='jcc';goCustomer('register');S.selSession='${S1}';S.regQty=1;S.regBikeHeights=['175'];S.regBikeTypes=['Road'];S.regStep=2;renderRegister()`);
+    await page.evaluate('S._promoOpen=true;renderRegister()'); // the field opens from its link (row 10)
     await page.locator('#reg-promo-step2').fill('RIDE٢٠');
     await page.evaluate(`applyPromoCode()`);
     expect(await page.evaluate('S.promoApplied&&S.promoApplied.code')).toBe('RIDE20');

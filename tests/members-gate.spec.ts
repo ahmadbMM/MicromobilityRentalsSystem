@@ -140,7 +140,7 @@ test('signed-in landing shows only the three event cards; Reserve lists only the
 
   await expect(page.locator('#land-events .landing-event-card:not(.ev-snd96)')).toHaveCount(2);
   await expect(page.locator('.landing-hero-grid')).toBeHidden();     // hero removed for signed-in
-  await expect(page.locator('#land-avail-strip')).toBeEmpty();       // availability strip removed
+  await expect(page.locator('#land-avail-strip')).toHaveCount(0);   // availability strip removed (2026-11-10)
 
   // the Staff Access entry is back and asks for credentials on a locked device
   await expect(page.locator('#land-staff-btn')).toBeVisible();

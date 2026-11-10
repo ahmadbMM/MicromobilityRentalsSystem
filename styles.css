@@ -9165,6 +9165,8 @@ body:not(.view-staff) .lq-skel-lec{margin-top:30px;}
 body:not(.view-staff) .lq-skel-lec i{height:150px;}
 body:not(.view-staff) .lq-skel-tk{margin-top:24px;max-width:760px;}
 body:not(.view-staff) .lq-skel-tk i{height:300px;}
+body:not(.view-staff) .lq-skel-sess{margin-top:8px;}
+body:not(.view-staff) .lq-skel-sess i{height:92px;border-radius:var(--r-card);} /* Reserve before the rides come (row 4) */
 @keyframes lqSkIn{to{opacity:1;}}
 @keyframes lqSkPulse{to{opacity:.55;}}
 
@@ -9355,6 +9357,51 @@ body:not(.view-staff) #tab-account .acc-save{width:100%;margin-top:4px;}
 body:not(.view-staff) .err-bar{background:var(--night);border:0;border-radius:var(--r-ctl);box-shadow:var(--lq-3);}
 body:not(.view-staff) .err-bar .undo-bar-text{color:var(--night-ink);font-weight:600;}
 body:not(.view-staff) .err-bar .err-bar-detail{color:var(--night-ink-2);}
+/* ── Reserve, the 2026-11-10 research (rows 1-19) ───────────────────────────────────────────────── */
+/* Details as the 44px "i" on a row (row 17) */
+body:not(.view-staff) .sess-wrap .sess-about.sess-i{width:44px;height:44px;justify-content:center;padding:0;inset-inline-start:4px;text-decoration:none;color:var(--ink-2);border-radius:50%;}
+body:not(.view-staff) .sess-wrap .sess-about.sess-i:hover{color:var(--ink);}
+body:not(.view-staff) .sess-about.sess-i:focus-visible{outline-offset:-4px;border-radius:50%;}
+/* the not-yet-open row carries a clock, not grey alone (row 3) */
+body:not(.view-staff) .spots-soon{display:inline-flex;align-items:center;gap:5px;}
+/* the waitlist said in the bar and on the review before Confirm (row 1) */
+body:not(.view-staff) .cu-wl-chip{display:inline-flex;align-items:center;min-height:20px;padding:0 8px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--red-line);color:var(--red);font-size:var(--fs-12);font-weight:600;vertical-align:1px;}
+/* step 1's bar holds Back too (row 12); the top Back steps aside while it shows */
+body:not(.view-staff) .mm-reg-foot.reg-foot1{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+body:not(.view-staff) .reg-foot1 .cu-w100{flex:1;width:auto;}
+body:not(.view-staff) .reg-foot-back{flex:none;width:44px;min-width:44px;height:44px;padding:0;display:inline-grid;place-items:center;border-radius:50%;}
+body:not(.view-staff):has(#tab-register.active .reg-foot1) #cust-back-btn{display:none;}
+/* the step-2 bar's total (row 9) */
+body:not(.view-staff) .reg-foot-tot{align-self:center;font-size:var(--fs-17);font-weight:700;color:var(--ink);white-space:nowrap;}
+body:not(.view-staff) .reg-foot-tot:empty{display:none;}
+/* the height with its unit inside the field (owner Q2, row 6) */
+body:not(.view-staff) .cu-unit-row{position:relative;display:flex;align-items:center;}
+body:not(.view-staff) .cu-unit-row input{flex:1;padding-inline-end:52px;}
+body:not(.view-staff) .cu-unit{position:absolute;inset-inline-end:16px;color:var(--ink-3);font-size:var(--fs-15);pointer-events:none;}
+/* Change on the review (row 8), the promo link (row 10) */
+body:not(.view-staff) :is(.cu-rv-chg,.cu-promo-link){display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 2px;background:none;border:0;color:var(--go);font:inherit;font-weight:600;cursor:pointer;}
+body:not(.view-staff) .cu-rv-chg{text-decoration:underline;text-underline-offset:3px;}
+body:not(.view-staff) .cu-rv-sec-chg{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+/* a tap anywhere on an add-on's row (row 14) */
+body:not(.view-staff) .cu-ad-tap{cursor:pointer;}
+/* "Book my usual" as a chip, not a full-width bar (row 12) */
+body:not(.view-staff) #tab-register .cu-usual{width:auto;display:inline-flex;min-height:44px;padding:0 18px;border-radius:999px;font-size:var(--fs-15);margin-bottom:14px;}
+/* one way to show a pick: the green wash and the green mark, on a ride and on a bike (row 17) */
+body:not(.view-staff) #tab-register .type-grid .toggle-btn.active{background:var(--go-wash);border-color:var(--go);color:var(--ink);}
+body:not(.view-staff) #tab-register .type-grid .toggle-btn.active>.tp-txt::before{background:var(--go);}
+body:not(.view-staff) #tab-register .type-pick:has(.toggle-btn.active)>.type-info-btn{background:var(--go-wash);border-color:var(--go);color:var(--ink);}
+/* a booking not sent yet: a clock in a quiet disc, no tick (row 2) */
+body:not(.view-staff) .bk-pend .bk-ok-disc{display:grid;place-items:center;background:var(--card-3);color:var(--ink-2);}
+/* the place gone question (row 13) */
+body:not(.view-staff) .pg-dlg .modal-footer{flex-wrap:wrap;}
+/* the bar stays put on a phone, and nothing focused hides under it (rows 7, 12) */
+@media(max-width:720px){
+  body:not(.view-staff).view-customer:has(#tab-register.active .mm-reg-foot) .mm-reg-foot{position:fixed;inset-inline:12px;bottom:max(12px,env(safe-area-inset-bottom));margin:0;}
+  body:not(.view-staff).view-customer:has(#tab-register.active .mm-reg-foot) #view-customer .view-main{padding-bottom:calc(112px + env(safe-area-inset-bottom));}
+  html.kb-open body:not(.view-staff).view-customer #tab-register .mm-reg-foot{position:static;}
+}
+html:has(body:not(.view-staff) #tab-register.active .mm-reg-foot){scroll-padding-bottom:calc(120px + env(safe-area-inset-bottom));}
+
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).
