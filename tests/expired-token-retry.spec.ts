@@ -64,7 +64,7 @@ test('a sign-in token the server refuses is renewed once and the sessions load',
 test('a sessions read that failed says so and offers a retry, not "no sessions available"', async ({ page }) => {
   let fail = true;
   await stubSupabase(page, fixtures);
-  await page.route('**://*.supabase.co/rest/v1/rpc/list_sessions', (route) => fail
+  await page.route(/\/rest\/v1\/rpc\/list_sessions/, (route) => fail // a pattern: the read is paged, so its URL carries order, offset and limit
     ? route.fulfill({
       status: 500,
       headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },

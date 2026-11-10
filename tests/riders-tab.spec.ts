@@ -653,16 +653,19 @@ test.describe('walk-in at the desk', () => {
     await page.goto('/');
     await waitForSb(page);
     const today = await page.evaluate(`new Date().toLocaleDateString('en-CA',{timeZone:KSA_TZ})`);
-    const now = await page.evaluate(`new Intl.DateTimeFormat('en-GB',{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date())`);
-    // An end written before its start is over, the way _session_window() reads it - it does
-    // not run past midnight into tomorrow.
-    expect(await page.evaluate(`_sessEnded({session_date:'${today}',bike_slots:JSON.stringify({_time:'23:59 - 00:30'})})`)).toBe(true);
+    const now = await page.evaluate(`new Date(Date.now()+108e5).toISOString().slice(11,16)`); // Riyadh's HH:MM as the app reads it (00:05, never 24:05)
+    const yesterday = await page.evaluate(`_ksaYmd(Date.now()-864e5)`);
+    // An end written before its start is on the next day, the way _session_window() reads it: on its
+    // own date the night is still on, and it is over from that end on the day after.
+    expect(await page.evaluate(`_sessEnded({session_date:'${today}',bike_slots:JSON.stringify({_time:'23:59 - 00:30'})})`)).toBe(false);
+    expect(await page.evaluate(`_sessEnded({session_date:'${yesterday}',bike_slots:JSON.stringify({_time:'23:59 - 00:30'})})`)).toBe(String(now) >= '00:30');
     // And no readable window at all is the server's 09:00 - 11:00 default, not "never ends".
     expect(await page.evaluate(`_sessEnded({session_date:'${today}',bike_slots:'{}'})`)).toBe(String(now) >= '11:00');
-    const listed = await page.evaluate(
-      `(()=>{S.sessions=[{id:'${today}-pw',day:'Wednesday',session_date:'${today}',capacity:35,status:'open',event_kind:'community',ride_kind:'petromin',paid_ride:true,bike_slots:JSON.stringify({_time:'23:59 - 00:30'})}];return _walkinSessions().length;})()`,
+    const listed = (time: string) => page.evaluate(
+      `(()=>{S.sessions=[{id:'${today}-pw',day:'Wednesday',session_date:'${today}',capacity:35,status:'open',event_kind:'community',ride_kind:'petromin',paid_ride:true,bike_slots:JSON.stringify({_time:'${time}'})}];return _walkinSessions().length;})()`,
     );
-    expect(listed).toBe(0);
+    expect(await listed('23:59 - 00:30')).toBe(1); // tonight's night that runs past midnight is offered all evening
+    expect(await listed('00:00 - 00:01')).toBe(String(now) >= '00:01' ? 0 : 1); // one over earlier today is not
   });
 
   test('a pasted number with its own country code is kept, not prefixed with +966', async ({ page }) => {

@@ -648,7 +648,18 @@ function _keyClick(event,el){
   if(event.target!==el||(event.key!=='Enter'&&event.key!==' '))return;
   event.preventDefault();el.click();
 }
-// A backdrop closes only when the click started on it, not on the box inside.
+// A backdrop closes only when the click started on it, not on the box inside. A press that began in the box
+// and was let go over the dimmed backdrop (a drag-select in a field, a grip pulled too far) makes the browser
+// send the click to the backdrop, the nearest element holding both ends, and every backdrop's own
+// `event.target===el` read it as a click on itself: the dialog closed and what was typed in it was lost
+// (bug hunt 2026-11-10). That click stops here, before any backdrop hears it. A click made in code is no press.
+const _BACKDROP_SEL='.modal-backdrop,.pin-backdrop,.badge-pop,#staff-pwd-modal';
+let _pressAt=null;
+document.addEventListener('pointerdown',e=>{_pressAt=e.target;},true);
+document.addEventListener('click',e=>{
+  const p=_pressAt,tg=e.target;_pressAt=null;
+  if(e.isTrusted&&p&&p!==tg&&tg&&tg.nodeType===1&&tg.matches(_BACKDROP_SEL)&&tg.contains(p))e.stopImmediatePropagation();
+},true);
 function _on_backdropOnly(event,el,fn){if(event.target===el)window[fn]();}
 function _onDispatch(ev){
   const attr='data-on-'+ev.type,own=_ON_OWN[ev.type];
@@ -2865,7 +2876,9 @@ const SOCIAL_NETS=[
 ];
 function _socNorm(raw){
   let v=String(raw||'').trim();
-  v=v.replace(/^(?:https?:\/\/)?(?:www\.|m\.|mobile\.)?(?:instagram\.com|x\.com|twitter\.com|tiktok\.com|linkedin\.com)\/(?:in\/)?/i,'');
+  // LinkedIn also hands out country links (sa.linkedin.com/in/...), as the community form takes them; the other
+  // networks keep their short list, so a vm.tiktok.com/<code> short link does not pass for a handle.
+  v=v.replace(/^(?:https?:\/\/)?(?:(?:www\.|m\.|mobile\.)?(?:instagram\.com|x\.com|twitter\.com|tiktok\.com)|(?:[a-z]{2,3}\.|www\.|m\.|mobile\.)?linkedin\.com)\/(?:in\/)?/i,'');
   v=v.replace(/[?#].*$/,'').replace(/^[@\/\s]+|[\/\s]+$/g,'');
   return v.slice(0,100);
 }
@@ -3592,7 +3605,7 @@ function _refNeeded(){return _refDirty||!_refAt||(!!S._staffAuthed&&!_refByStaff
 // fix_fields (correction requests) and apple_email (the Apple relay address kept beside a real
 // email) came later than the rest. Until a migration has run its column does not exist, and
 // asking for it would fail the whole list, so the missing one is dropped and the list asked again.
-const _CUST_OPT_COLS=['fix_fields','apple_email','ride_news_at','ride_news','deletion_requested_at','merged_into','heard_from','profession','workplace']; // ride_news_at before ride_news: the error names the longer one, and a substring match would drop the wrong column
+const _CUST_OPT_COLS=['fix_fields','apple_email','ride_news_at','ride_news','deletion_requested_at','merged_into','heard_from','profession','workplace','whatsapp_same','whatsapp']; // ride_news_at before ride_news, whatsapp_same before whatsapp: the error names the longer one, and a substring match would drop the wrong column
 async function _custListFetch(){
   const get=cols=>_pagedAll(()=>sb.from('customers').select(cols).order('created_at').order('id')).catch(e=>({data:null,error:e}));
   let opt=_CUST_OPT_COLS.slice();
@@ -4114,8 +4127,10 @@ async function _sessionsFetch(since){
     // Only a database without the function falls through. Any other failure is a failed load:
     // the plain select cannot see a member's private rides, so falling back on a dropped
     // request quietly took their community ride off the page and their ticket lost its session.
+    // Paged as the staff read below (bug hunt 2026-11-10): the function returns every session ever made, oldest
+    // first, and the server's 1000-row cap would cut the newest - the nights still to book - with no error at all.
     let r;
-    try{r=await sb.rpc('list_sessions',{p_id:(cust&&cust.id)||null,p_token:(cust&&cust.session_token)||null});}
+    try{r=await _pagedAll(()=>sb.rpc('list_sessions',{p_id:(cust&&cust.id)||null,p_token:(cust&&cust.session_token)||null}).order('session_date').order('id'));}
     catch(e){return{data:null,error:e};}
     if(!r.error&&Array.isArray(r.data))return{data:r.data,error:null};
     if(!r.error||!_rpcAbsent(r.error))return{data:null,error:r.error||{message:'list_sessions: no rows array'}};
@@ -4309,7 +4324,13 @@ function _cacheSave(){try{
   // already ('mm-sync-2', _syncLoad), and serialising two months of them into localStorage blocked the page
   // on every load. The boot reads them from there (qIdb).
   const idb=!!(_sync.q&&!_sync.q.fill&&_sync.q.rows&&_sync.q.rows.size&&!_syncOff); // a copy still being read whole would paint a random part of tonight
-  const put=(q,cs)=>localStorage.setItem('cq_snapshot',JSON.stringify(idb?{qIdb:1,ses:S.sessions,bk:strip(S.bikes),inv:strip(S.inventory),cs}:{q,ses:S.sessions,bk:strip(S.bikes),inv:strip(S.inventory),cs}));
+  // A rider's own bookings arrive whole (name, phone, email: my_bookings), their members' rides with them. Signed in
+  // without Remember me, the session ends with the tab, which signs nobody out, and the snapshot outlives it: it keeps
+  // what a sign-out leaves (doLogout), only what anybody may see (bug hunt 2026-11-10).
+  let pub=false;
+  if(!_rtStaffDevice()&&(S.loggedIn||getSession())){try{pub=!localStorage.getItem('cq_session');}catch(e){pub=true;}}
+  const ses=pub?(S.sessions||[]).filter(s=>!_isCommunity(s)):S.sessions;
+  const put=(q,cs)=>localStorage.setItem('cq_snapshot',JSON.stringify(idb?{qIdb:1,ses,bk:strip(S.bikes),inv:strip(S.inventory),cs}:{q,ses,bk:strip(S.bikes),inv:strip(S.inventory),cs}));
   // The snapshot is the first paint, and the first paint shows the boot window: the nights of
   // the last two months and their sales. It used to hold the year (a megabyte and more,
   // serialised on every load, every poll and every event); the year lives in the sync copy.
@@ -4319,7 +4340,7 @@ function _cacheSave(){try{
   const fp=_staffFingerprint()+'#'+(S.sessions||[]).length;
   if(fp===_cacheFp)return;
   const cut=_qWindowCut(QUEUE_BOOT_DAYS);
-  try{put(idb?null:(S.queue||[]).filter(e=>String(e.sessionDate||e.sessionId||'')>=cut),(S.cashSales||[]).filter(r=>String(r.created_at||'')>=cut));_cacheFp=fp;return;}catch(e){/* over quota: drop it */}
+  try{put(idb?null:(S.queue||[]).filter(e=>String(e.sessionDate||e.sessionId||'')>=cut).map(e=>pub&&e&&e.customerId?_publicOnly(e):e),(S.cashSales||[]).filter(r=>String(r.created_at||'')>=cut));_cacheFp=fp;return;}catch(e){/* over quota: drop it */}
   _cacheFp=null;
   localStorage.removeItem('cq_snapshot');
 }catch(e){}}
@@ -6069,8 +6090,10 @@ function _bookingRefId(q){
 function _matchesRef(e,q){
   const ref=_bookingRefId(q);
   if(ref)return String(e.id).toLowerCase().startsWith(ref);
-  // a bare id prefix, long enough not to collide with a name fragment
-  return q.length>=4&&/^[0-9a-f-]+$/.test(q)&&String(e.id).toLowerCase().startsWith(q);
+  // a bare id prefix, long enough not to collide with a name fragment: from 4 characters for a hex one (the
+  // server's ids), from 6 - the ticket's code - for the app's own base36 ids (uid()), whose letters run to z
+  const s=String(q||'').toLowerCase();
+  return (s.length>=4&&/^[0-9a-f-]+$/.test(s)||s.length>=6&&/^[0-9a-z-]+$/.test(s))&&String(e.id).toLowerCase().startsWith(s);
 }
 // One fold for the staff search boxes (the staff review, 2026-10-28, S14-best-practice-01, S01-core1-04): Arabic-Indic
 // and Persian digits as ASCII, lower case, the Arabic marks (U+064B-U+0655, U+0670) and tatweel gone, أ إ آ ٱ as ا,
@@ -6105,7 +6128,8 @@ function _searchIsNum(q){const n=_searchNum(q);return n.length>0&&/^\d+$/.test(n
 /** The number this row answers to for `q`: its W position when the query asks for one. */
 function _rowNum(e,q){
   const wantsWl=/^w/i.test(String(q||'').trim());
-  return String((wantsWl||e.status==='waitlist')&&e.waitlistNum?e.waitlistNum:e.queueNum||'');
+  if(wantsWl)return String(e.waitlistNum||''); // a row never on the waitlist has no W number: W3 is not booking #3
+  return String(e.status==='waitlist'&&e.waitlistNum?e.waitlistNum:e.queueNum||'');
 }
 /** True when this row matches the query. Exactness is a separate question — see _searchExact. */
 // The bike is searchable too: "who has R-07?" was a column-scan before. Assigned bikes
@@ -7171,7 +7195,7 @@ async function doSignup(){
       }
       // A friend's referral link opened on this device: who sent this account, said once it exists (20261108160000).
       if(tok){const rc=_refParked();if(rc){try{await _refSend({id:newId,session_token:tok},rc,'link');}catch(e){}}}
-      S.suEm2=false;
+      S.suEm2=false;S.signupGender=null;S.signupAck=false;S.signupRideNews=false; // the account holds them now; the next form starts empty
       S.rememberMe=true; // a brand-new account shouldn't evaporate when the browser closes
       S.loggedIn=safeCustomer;setSession(safeCustomer);
       await loadData();
@@ -7238,6 +7262,9 @@ function doLogout(silent){
   // The next person on this device starts clean: a code, add-ons or a booking being changed
   // belonged to the account that just left (a promo can be tied to one customer).
   S.promoApplied=null;S._promoMsg='';S.regAddons=[];S.modifyEntryId=null;
+  // Nor the sign-up answers (bug hunt 2026-11-10): the signed-out page draws the form still in 'signup', and the next
+  // person's account took the last one's gender, privacy tick and ride-news consent. Ride news starts empty.
+  S.signupGender=null;S.signupAck=false;S.signupRideNews=false;S.suEm2=false;S.authMode='login';
   S.selEvent='jcc';
   S.sessions=(S.sessions||[]).filter(s=>!_isCommunity(s)); // drop private events from memory the moment they sign out
   // Their own bookings arrived whole (name, email, phone, from my_bookings) and stayed in memory
@@ -7758,7 +7785,7 @@ function _evChip(s){return _evNamed(s)?`<span class="ev-chip ${_evClass(s)}">${e
 const SOLE_SESSION_EVENTS=['snd96','runher','vlap','arena','blood'];
 function _soleSessionFor(ev){
   if(!SOLE_SESSION_EVENTS.includes(ev))return null;
-  const open=allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&_evMatch(s,ev));
+  const open=allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&!_sessEnded(s)&&_evMatch(s,ev)); // not one over earlier today: the Reserve list drops it, and Confirm was refused after every step
   return (open.length===1&&!_wasRejectedFor(open[0].id))?open[0]:null;
 }
 // What a rider is booking, shown in place of a picker when there is only one of it: the
@@ -7830,7 +7857,7 @@ function _sessFirstLive(list){return list.find(s=>_sessLive(s)&&!_sessPastDay(s)
 // desk offers a night the RPC then rejects with "pick a session that is still on", which reads
 // as nonsense next to a list that just offered it. So it mirrors _session_window(): a window
 // that cannot be read at all is 09:00 - 11:00, an end that cannot be read is the start, and
-// the window ends on its own date - a night written to end before it starts has already ended.
+// an end written before its start is on the next day ("22:00 - 00:30" ends at half past midnight).
 // Is the session's DAY already past, on the KSA clock? Deliberately date-only and separate
 // from _sessEnded: nothing closes a session automatically, so a night left 'open' stayed in
 // the customer picker for ever, and a close-out that marks riders no-show even gives its
@@ -7842,16 +7869,20 @@ function _sessPastDay(s){
 function _sessEnded(s){
   const d=String((s&&(s.session_date||s.id))||'').slice(0,10);if(!d)return false;
   const today=todayStr();
-  if(d<today)return true;if(d>today)return false;
+  if(d>today)return false;
+  const ms=Date.parse(d+'T12:00:00Z'),next=isFinite(ms)?new Date(ms+864e5).toISOString().slice(0,10):d;
+  if(next<today)return true; // over by yesterday whatever its window: only yesterday's and today's are read
   const raw=String((parseSlots(s.bike_slots)||{})._time||'').trim()||'09:00 - 11:00';
   const hhmm=x=>/^\d{1,2}:\d{2}$/.test(x)?(x.length<5?'0'+x:x):'';
   const parts=raw.split('-');
   const start=hhmm(String(parts[0]||'').trim())||'09:00';
   const end=hhmm(String(parts[1]||'').trim())||start;
-  // An end written before its start is over: a window does not run past midnight into tomorrow.
-  // Read from the clock alone this was wrong between midnight and that end (a 23:59 - 00:30
-  // night still counted as running at 00:05), which is when the desk is packing up.
-  if(end<start)return true;
+  // An end written before its start is on the next day, as _session_window() has read it since 20260922123000: on
+  // its own date the night is still to come or running, and it is over from that end on the day after. Read as over
+  // from the moment it was written, a 21:00 - 00:00 night left the customer picker, the desk's lists and the move
+  // targets for its whole date while the server still took bookings for it (bug hunt 2026-11-10).
+  const endDay=end<start?next:d;
+  if(endDay<today)return true;if(endDay>today)return false;
   const now=new Date(Date.now()+108e5).toISOString().slice(11,16); // Riyadh's HH:MM, as _ksaYmd
   return now>=end;
 }
