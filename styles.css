@@ -183,10 +183,7 @@
     :is(html[lang="ar"],html[lang="ur"]) .landing-event-card{font-family:'IBM Plex Sans Arabic',sans-serif;}
     :is(html[lang="ar"],html[lang="ur"]) .lec-title{font-family:'IBM Plex Sans Arabic',sans-serif;font-style:normal;font-size:19px;}
     /* Signed-in landing = ONLY the event picker: hero, ghost, stripes and strip hide. */
-    #landing-body.events-only .landing-hero-grid,
-    #landing-body.events-only .landing-ghost,
-    #landing-body.events-only .sector-stripes,
-    #landing-body.events-only .landing-avail-rows{display:none;}
+    #landing-body.events-only .landing-hero-grid,#landing-body.events-only .landing-ghost,#landing-body.events-only .sector-stripes{display:none;}
     #landing-body.events-only .landing-events-title{margin-top:10px;}
     /* v2 event cards: a poster — the mark in a band across the top, the name and meta under it.
        The three cards are read as one set, so what is shared is the geometry: the same padding,
@@ -215,23 +212,6 @@
       .lec2 .lec-title{font-size:20px;}
       .lec2-logo{height:54px;}
     }
-    .landing-avail-rows{width:100%;margin-top:56px;border-top:1px solid var(--line2);}
-    .landing-avail-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding:16px 4px;border:none;border-bottom:1px solid var(--border);background:none;
-      font-family:var(--font-body);color:var(--text);cursor:pointer;transition:background .15s;text-align:start;}
-    .landing-avail-row:hover{background:var(--s2);}
-    .landing-avail-row.full{opacity:.45;cursor:not-allowed;}
-    .landing-avail-info{display:flex;align-items:center;gap:12px;min-width:0;flex:1;}
-    .landing-avail-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;background:var(--green);}
-    .landing-avail-dot.full{background:var(--s2);}
-    .landing-avail-date{font-size:15px;font-weight:600;letter-spacing:-.2px;white-space:nowrap;}
-    .landing-avail-time{font-size:12px;color:var(--muted-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;direction:ltr;unicode-bidi:isolate;}
-    .landing-avail-spots{font-size:12.5px;font-weight:700;color:var(--green-d);white-space:nowrap;flex-shrink:0;}
-    .landing-avail-spots.full{color:var(--muted-l);}
-    .landing-avail-spots.low{color:var(--orange);}
-    .landing-avail-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-    .landing-avail-empty{padding:24px 4px;color:var(--muted);font-size:14px;font-weight:600;}
-
     .spots-low{color:var(--orange);}
 
     @keyframes modalFadeIn{from{opacity:0}to{opacity:1}}
@@ -409,9 +389,7 @@
     /* Auth-first: for signed-out visitors the sign in / sign up screen IS the first page,
        separate from the event picker behind it. The landing hides its content and the auth
        box presents as a page (no dismiss button; the backdrop is the page background). */
-    #landing-body.auth-gate .landing-hero-grid,#landing-body.auth-gate .sector-stripes,
-    #landing-body.auth-gate #land-events,#landing-body.auth-gate #land-avail-strip,
-    #landing-body.auth-gate .landing-footer{display:none;}
+    #landing-body.auth-gate .landing-hero-grid,#landing-body.auth-gate .sector-stripes,#landing-body.auth-gate #land-events,#landing-body.auth-gate .landing-footer{display:none;}
     /* Below the topbar (z-100) so language switching and the logo stay usable on the auth page. */
     /* As a page the box sits on the plain page ground, below the header, with nothing of the
        landing or the footer showing through. --topbar-h is measured when the page opens. */
@@ -734,7 +712,6 @@
     html[dir="rtl"] .landing-hero-grid{direction:rtl;}
     html[dir="rtl"] .landing-hero-copy{text-align:right;align-items:flex-end;}
     html[dir="rtl"] .landing-subtitle{text-align:right;}
-    html[dir="rtl"] .landing-avail-row{text-align:right;}
     html[dir="rtl"] .stat-card{direction:rtl;}
     html[dir="rtl"] .analytics-kpi-card{direction:rtl;}
     html[dir="rtl"] .analytics-highlight-card{direction:rtl;}
@@ -2658,7 +2635,6 @@
       .landing-hero-card{border-radius:6px;}
       .landing-hero-card img{height:220px;}
       .landing-hero-cta-btn{width:42px;height:42px;font-size:18px;}
-      .landing-avail-rows{margin-top:32px;}
       .landing-footer{margin-top:20px;}
 
       .form-section{padding:16px;border-radius:7px;}
@@ -3563,17 +3539,14 @@
        green start-light edge; full sessions lose the light. The picker's own grid spaces
        its cards (1fr rows, one 10px gap), so only the landing strip still carries a
        margin of its own - a margin on a grid item would double the gap. */
-    .sess-card,.landing-avail-row{
+    .sess-card{
       background:var(--s1);border:1px solid var(--border);border-inline-start:3px solid var(--green);
       border-radius:0;
     }
-    .landing-avail-row{margin-bottom:10px;}
-    .landing-avail-row.full{border-inline-start-color:var(--border);}
     .sess-card.sess-selected{background:var(--acsoft);border-color:var(--accent2);border-inline-start-color:var(--green);}
-    .landing-avail-rows{border-top:none;}
     /* Status lamps glow like start lights */
-    .sess-card-dot.on,.landing-avail-dot:not(.full){box-shadow:0 0 8px rgba(var(--green-rgb),.9);}
-    .sess-card-date,.landing-avail-date{font-weight:700;}
+    .sess-card-dot.on{box-shadow:0 0 8px rgba(var(--green-rgb),.9);}
+    .sess-card-date{font-weight:700;}
 
     /* Ticket: timing-green top strip */
     .ticket-card{position:relative;overflow:hidden;}
@@ -3643,7 +3616,7 @@
     /* Ghost display text behind the hero (decorative, Latin display face - hidden in AR) */
     #landing-body{position:relative;overflow:hidden;}
     .landing-ghost{position:absolute;top:-6px;inset-inline-end:-24px;white-space:nowrap;font-family:var(--font-display);font-weight:800;font-style:italic;font-size:clamp(96px,15vw,200px);line-height:1;color:transparent;-webkit-text-stroke:1px var(--border);text-transform:uppercase;pointer-events:none;user-select:none;z-index:0;}
-    .landing-hero-grid,.landing-avail-rows,.landing-footer{position:relative;z-index:1;}
+    .landing-hero-grid,.landing-footer{position:relative;z-index:1;}
     :is(html[lang="ar"],html[lang="ur"]) .landing-ghost{display:none;}
 
     /* Speed stripes: green fading divider */
@@ -3652,11 +3625,6 @@
     .sector-stripes i:nth-child(1){background:var(--green);}
     .sector-stripes i:nth-child(2){background:rgba(var(--green-rgb),.45);}
     .sector-stripes i:nth-child(3){background:rgba(var(--green-rgb),.18);}
-
-    /* Start-line dashed strip above the landing session board */
-    .landing-avail-rows{padding-top:26px;}
-    .landing-avail-rows::before{content:'';position:absolute;top:8px;left:0;right:0;height:8px;background:repeating-linear-gradient(90deg,var(--border) 0 12px,transparent 12px 24px);}
-
     /* Footer carries the green strip on top */
     #app-footer{position:relative;}
     #app-footer::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--green);}
@@ -3705,7 +3673,7 @@
     .analytics-kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--green);}
 
     /* Session rows light up on hover */
-    .sess-card:hover:not(.sess-full),.landing-avail-row:hover:not(.full){border-color:rgba(var(--green-rgb),.4);box-shadow:0 0 14px rgba(var(--green-rgb),.12);}
+    .sess-card:hover:not(.sess-full){border-color:rgba(var(--green-rgb),.4);box-shadow:0 0 14px rgba(var(--green-rgb),.12);}
 
     /* Booking stepper: the active step glows like a start light, digits in race numerals */
     .reg-stepper [aria-current]{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
@@ -4033,7 +4001,7 @@
     body .section-label{font-family:var(--font-body);letter-spacing:0;font-weight:600;font-size:11px;text-transform:none;color:#4f565c;}
     :is(html[lang="ar"],html[lang="ur"]) body .section-label{letter-spacing:0;text-transform:none;font-size:13px;}
     /* Session rows: white 10px slot cards, no start-light edge */
-    body .sess-card,body .landing-avail-row{
+    body .sess-card{
       background:#ffffff;border:1px solid rgba(26,25,25,.14);border-inline-start:1px solid rgba(26,25,25,.14);border-radius:10px;}
     /* Ticket: queue number in ink (design: 76px+/700, -2px tracking, never green) */
     body .ticket-num{color:var(--text);letter-spacing:-2px;}
@@ -9392,6 +9360,11 @@ body:not(.view-staff) #tab-register .type-grid .toggle-btn.active>.tp-txt::befor
 body:not(.view-staff) #tab-register .type-pick:has(.toggle-btn.active)>.type-info-btn{background:var(--go-wash);border-color:var(--go);color:var(--ink);}
 /* a booking not sent yet: a clock in a quiet disc, no tick (row 2) */
 body:not(.view-staff) .bk-pend .bk-ok-disc{display:grid;place-items:center;background:var(--card-3);color:var(--ink-2);}
+/* a field with an error keeps its red ring while it is being fixed, not the green one (2026-11-11) */
+body:not(.view-staff) :is(input,select,textarea).field-invalid:focus{border-color:var(--red);box-shadow:inset 0 0 0 1px var(--red);}
+body:not(.view-staff) :is(input,select,textarea).field-invalid:focus-visible{outline-color:var(--red);}
+/* the one ticket under the booked moment: its code alone at the top (the number is the moment's) */
+body:not(.view-staff) #tab-register .ticket-top.tk-top-qr{justify-content:center;}
 /* the place gone question (row 13) */
 body:not(.view-staff) .pg-dlg .modal-footer{flex-wrap:wrap;}
 /* the bar stays put on a phone, and nothing focused hides under it (rows 7, 12) */
