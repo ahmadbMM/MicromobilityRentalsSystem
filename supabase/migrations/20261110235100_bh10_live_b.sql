@@ -50,114 +50,44 @@
 begin;
 set local lock_timeout = '5s';
 
--- 1 _purge_old ------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public._purge_old(p_dry boolean)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public'
-AS $function$
-declare
-  c_sa timestamptz := _ret_cut('staff_actions', 'm', 24);
-  c_ca timestamptz := _ret_cut('customer_activity', 'm', 24);
-  c_al timestamptz := _ret_cut('audit_log', 'm', 24);
-  c_sh timestamptz := _ret_cut('site_content_history', 'm', 24);
-  c_el timestamptz := _ret_cut('error_log', 'd', 90);
-  yrs int := coalesce((select case when jsonb_typeof(o.items -> 'retention' -> 'anon_years') = 'number'
-                                    and (o.items -> 'retention' ->> 'anon_years')::numeric between 1 and 20
-                                   then (o.items -> 'retention' ->> 'anon_years')::numeric::int end
-                         from staff_options o where o.key = 'biz'), 0);
-  n_sa int; n_ca int; n_al int; n_sh int; n_el int; n_an int := 0; ids text[];
+-- Every function replaced below must still be the live text this file was built from (md5 of the body, read on
+-- prod and staging 2026-11-10), or already this file's (a re-run): else stop, rather than undo a change made since.
+do $pre$
+declare f record; m text;
 begin
-  if p_dry then
-    select count(*) into n_sa from staff_actions
-     where coalesce(at_server, case when at ~ '^\d{4}-\d{2}-\d{2}' then left(at, 10)::date::timestamptz end) < c_sa;
-    select count(*) into n_ca from customer_activity where at < c_ca;
-    select count(*) into n_al from audit_log where at < c_al;
-    select count(*) into n_sh from site_content_history where changed_at < c_sh;
-    select count(*) into n_el from error_log where case when at ~ '^\d{4}-\d{2}-\d{2}' then left(at, 10)::date::timestamptz end < c_el;
-  else
-    delete from staff_actions
-     where coalesce(at_server, case when at ~ '^\d{4}-\d{2}-\d{2}' then left(at, 10)::date::timestamptz end) < c_sa;
-    get diagnostics n_sa = row_count;
-    delete from customer_activity where at < c_ca;              get diagnostics n_ca = row_count;
-    delete from audit_log where at < c_al;                      get diagnostics n_al = row_count;
-    delete from site_content_history where changed_at < c_sh;   get diagnostics n_sh = row_count;
-    delete from error_log where case when at ~ '^\d{4}-\d{2}-\d{2}' then left(at, 10)::date::timestamptz end < c_el;
-    get diagnostics n_el = row_count;
-  end if;
-
-  if yrs >= 1 then
-    select array_agg(c.id) into ids
-      from customers c
-     where c.merged_into is null
-       and c.created_at ~ '^\d{4}-\d{2}-\d{2}' and left(c.created_at, 10)::date < (now() - make_interval(years => yrs))::date
-       and not (c.name = 'Former Rider' and c.email is null and c.phone is null)
-       and not exists (select 1 from queue_entries q where q.customer_id = c.id
-                        and (q.status in ('waiting', 'waitlist', 'active')
-                             or (q.session_date ~ '^\d{4}-\d{2}-\d{2}' and left(q.session_date, 10)::date > (now() - make_interval(years => yrs))::date)))
-       and not exists (select 1 from cashier_sales s where s.customer_id = c.id
-                        and (s.created_at !~ '^\d{4}-\d{2}-\d{2}' or left(s.created_at, 10)::date > (now() - make_interval(years => yrs))::date))
-       and not exists (select 1 from customer_activity a where a.customer_id = c.id and a.at > now() - make_interval(years => yrs));
-    n_an := coalesce(array_length(ids, 1), 0);
-    if not p_dry and n_an > 0 then
-      update customers set name = 'Former Rider', email = null, phone = null, whatsapp = null, whatsapp_same = null,
-             photo = null, birth_date = null, emergency_name = null, emergency_phone = null, emergency_relation = null,
-             emergency2_name = null, emergency2_phone = null, emergency2_relation = null, blood_type = null /* (20261014180000) */, socials = null,
-             workplace = null, profession = null, apple_email = null, session_token = null,
-             name_ar = null /* the name in Arabic (20261108220000), missed here before (bh10) */,
-             password_hash = 'anonymised'
-       where id = any(ids);
-      update queue_entries set name = 'Former Rider', phone = null, email = null,
-             group_contact = null, group_phone = null, desk_note = null   -- (bug hunt 2026-10-28)
-       where customer_id = any(ids);
-      -- The rest of what names or reaches the person (bug hunt 2026-10-28). customers_to_applications
-      -- copies only non-blank values, so the applications kept the old email, phone, birth date and
-      -- handles under 'Former Rider'; the NOT NULL columns take ''.
-      update community_applications
-         set name = 'Former Rider', email = '', phone = '', instagram = '', linkedin = '', birth_date = null,
-             whatsapp = null, whatsapp_same = null, workplace = null, profession = null, fix_prev = null, acct_before = null
-       where customer_id = any(ids);
-      update learn_applications
-         set name = 'Former Rider', email = '', phone = '', learner_name = null, notes = '', birth_date = null,
-             instagram = null, linkedin = null, whatsapp = null, whatsapp_same = null, workplace = null, profession = null,
-             fix_prev = null,
-             learners = coalesce((select jsonb_agg(case when jsonb_typeof(e.v) = 'object' then e.v - 'name' else e.v end order by e.n)
-                                    from jsonb_array_elements(learners) with ordinality e(v, n)), '[]'::jsonb)
-       where customer_id = any(ids);
-      update rider_registrations set name = 'Former Rider', phone = null where matched_customer_id = any(ids);
-      update desk_waitlist set name = 'Former Rider', phone = null
-       where booking_id in (select q.id from queue_entries q where q.customer_id = any(ids));
-      update cashier_sales set customer_name = 'Former Rider'
-       where customer_id = any(ids) and customer_name is distinct from 'Former Rider';
-      delete from audit_log where tbl = 'cashier_sales' and at >= now()   -- the lines that update just wrote
-         and row_id in (select s.id from cashier_sales s where s.customer_id = any(ids));
-      update customer_tags set note = null where customer_id = any(ids) and note is not null;
-      delete from customer_notes where customer_id = any(ids);
-      delete from volunteers where customer_id = any(ids);
-      update volunteer_hours set note = null where customer_id = any(ids) and note is not null;
-      update volunteer_shifts set note = null, message = null, pref_role = null where customer_id = any(ids);
-      delete from push_subscriptions where customer_id = any(ids);
-      -- The update above wrote the old name, email and phone into audit_log (customers_audit_upd),
-      -- and the activity log holds them too: an anonymised account keeps neither (bh14, 2026-10-14).
-      delete from audit_log where tbl = 'customers' and row_id = any(ids);
-      update customer_activity
-         set who = 'Former Rider',
-             detail = coalesce(detail, '{}'::jsonb) - array['email', 'phone', 'rider', 'from_rider', 'text', 'feedback', 'note', 'ch']
-       where customer_id = any(ids);
+  for f in select * from (values
+    ('public._staff_cap(text)', 'ec152bcd217ee6f78f3b8d1b6e78d3c9', '38748ed4781548f800fc533b99b5ab93'),
+    ('public._tag_one_of_two()', 'f56cf91ecf3dc44a80d056dae28b0a19', '0d07444fa8ba11d305049adf121ac4d1'),
+    ('public.ambassador_apply(jsonb)', '0f9691af965b203568157d256bc41dad', '286a59c1414a3e8ebb29257b0217f865'),
+    ('public.badge_weeks()', '7e50c7ed8cf61ce205fcc626054ee256', '412b7fb168385e315c4fb3b075b250de'),
+    ('public.learn_apply(jsonb)', '84a6f7c8faea4a05b4c529452741c8dd', '0320a650f80b17ba7ec23b3e059f902c'),
+    ('public.staff_merge_customers(text,text,text,text,text)', 'fd8d329e4a68fa57b7f463544ced8c71', '6bf8a5ba4a929b035d38faa52dc44748'),
+    ('public.staff_unmerge_customers(bigint)', 'bf96b2c65728a4d010c8d55fd65b87e1', '407bc9981ee04df979518dafeb46fbed'),
+    ('public.staff_volunteer_checkin(text,boolean)', '64ec3ce52b5d336ac74e3fce89495a5f', '5aeb031db5df09683fd41416d628fa65'),
+    ('public.vendor_login(text,text)', '931b0031a8c5636986e7929a744a4732', '546e1462206a6ec15a58c749bbb3932e'),
+    ('public.vendor_set_password(bigint,text,text,text)', 'f0c5aa252dba3e5eb33bf4390bd12169', '434e67be1faa3449c4c481d519fc9013'),
+    ('public.vl_team_peek(text,text,text,text)', 'ea5d9a14a9cf72a2a3e33a5b83a0330d', '28ae3f0ecc5b6f7d1c3a5f8ab0bbe268')
+  ) v(fn, was, now_) loop
+    select md5(p.prosrc) into m from pg_proc p where p.oid = f.fn::regprocedure;
+    if m is distinct from f.was and m is distinct from f.now_ then
+      raise exception '% changed since 2026-11-10 (md5 %): rebuild this file from the live definition', f.fn, m;
     end if;
-  end if;
+  end loop;
+end $pre$;
 
-  if not p_dry then
-    insert into staff_actions (at, action, who, device, view, user_id)
-      values (to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
-              format('Retention purge: actions %s, customer activity %s, audit %s, website history %s, errors %s, anonymised %s',
-                     n_sa, n_ca, n_al, n_sh, n_el, n_an),
-              'server', 'server', 'settings', auth.uid());
+-- 1 _purge_old ------------------------------------------------------------
+-- Patched in place, as the sport question's migration (20261110233000) patched it the same day: the live text
+-- keeps every line it has (the sport answer's included) and gains name_ar. Skipped on a re-run.
+do $do$
+declare d text; a text := 'apple_email = null, session_token = null,';
+begin
+  select pg_get_functiondef('public._purge_old(boolean)'::regprocedure) into d;
+  if position('(bh10, 20261110235100)' in d) > 0 then return; end if;
+  if (length(d) - length(replace(d, a, ''))) / length(a) <> 1 then
+    raise exception '_purge_old: anchor not found exactly once: rebuild this step from the live definition';
   end if;
-  return jsonb_build_object('staff_actions', n_sa, 'customer_activity', n_ca, 'audit_log', n_al,
-                            'site_content_history', n_sh, 'error_log', n_el, 'anon', n_an);
-end $function$;
+  execute replace(d, a, a || chr(10) || '             name_ar = null /* the name in Arabic (20261108220000), missed here before (bh10, 20261110235100) */,');
+end $do$;
 
 -- 2 _staff_cap ------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public._staff_cap(p_cap text)
