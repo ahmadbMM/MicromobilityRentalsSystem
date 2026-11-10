@@ -8060,5 +8060,12 @@
   "paySetNothing": "কিছুই বদলায়নি",
   "paySetSaved": "সেটিংস সংরক্ষিত",
   "paySetSavedLog": "পেমেন্ট সেটিংস: {0}",
-  "paySetHist": "সাম্প্রতিক পরিবর্তন"
+  "paySetHist": "সাম্প্রতিক পরিবর্তন",
+  "mrCxByYou": "আপনি বাতিল করেছেন",
+  "mrCxByUs": "আমরা বাতিল করেছি",
+  "liveMapBtn": "লাইভ ম্যাপ",
+  "leaveWlBtn": "ওয়েটিং লিস্ট ছেড়ে দিন",
+  "mapsApple": "Apple Maps",
+  "mapsGoogle": "Google Maps",
+  "offlineActTitle": "আপনি অফলাইনে আছেন। এই বুকিং বদলাতে ইন্টারনেটে যুক্ত হন।"
 }

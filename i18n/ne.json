@@ -8060,5 +8060,12 @@
   "paySetNothing": "केही परिवर्तन भएन",
   "paySetSaved": "सेटिङहरू सेभ भए",
   "paySetSavedLog": "भुक्तानी सेटिङहरू: {0}",
-  "paySetHist": "हालका परिवर्तनहरू"
+  "paySetHist": "हालका परिवर्तनहरू",
+  "mrCxByYou": "तपाईंले रद्द गर्नुभयो",
+  "mrCxByUs": "हामीले रद्द गर्‍यौं",
+  "liveMapBtn": "लाइभ नक्सा",
+  "leaveWlBtn": "प्रतीक्षा सूची छोड्नुहोस्",
+  "mapsApple": "Apple Maps",
+  "mapsGoogle": "Google Maps",
+  "offlineActTitle": "तपाईं अफलाइन हुनुहुन्छ। यो बुकिङ बदल्न इन्टरनेटमा जोड्नुहोस्।"
 }

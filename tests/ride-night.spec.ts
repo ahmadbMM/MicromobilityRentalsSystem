@@ -71,6 +71,8 @@ test.describe('@customer:bookings the ride night on the ticket', () => {
     await open(page, [bk({ id: 'b1', session_id: DAY, session_date: DAY, status: 'active', assigned_bike_id: 'k1', checked_in_at: '2099-02-01T14:20:00Z' })], 'ar');
     const card = page.locator('#tab-myrides .ticket-card');
     await expect(card.locator('.tk-stages li')).toHaveCount(4);
+    await card.locator('.tk-more-btn').click(); // the route is behind Details (2026-11-10): measured open
+    await expect(card.locator('.tk-route')).toBeVisible();
     const out = await card.evaluate((c) => {
       const b = c.getBoundingClientRect();
       return [...c.querySelectorAll('.tk-stages li, .tk-route, .tk-cd')].filter((e) => { const r = e.getBoundingClientRect(); return r.left < b.left - 0.5 || r.right > b.right + 0.5; }).length;

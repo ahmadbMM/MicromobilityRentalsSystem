@@ -81,7 +81,9 @@ test.describe('@bh14 stylesheet', () => {
     expect(out).toBe(0);
   });
 
-  test('Arabic ticket: the date column’s words sit on its end edge', async ({ page }) => {
+  // The date was a right-aligned column beside the code; since 2026-11-10 it is one line under the number that reads
+  // from the start edge, which in Arabic is the right.
+  test('Arabic ticket: the date line reads from its start edge, the right', async ({ page }) => {
     await page.addInitScript(() => { localStorage.setItem('cq_lang', 'ar'); localStorage.setItem('cq_lang_pick', '1'); });
     await page.setViewportSize({ width: 400, height: 1000 });
     const bookings = [B('j1', '2099-10-21')];
@@ -92,6 +94,8 @@ test.describe('@bh14 stylesheet', () => {
     await page.evaluate(`goCustomer('myrides')`);
     const when = page.locator('#tab-myrides .cu-tk-when').first();
     await expect(when).toBeVisible();
-    expect(await when.evaluate((el) => getComputedStyle(el).textAlign)).toBe('end');
+    expect(await when.evaluate((el) => [getComputedStyle(el).textAlign, getComputedStyle(el).direction])).toEqual(['start', 'rtl']);
+    const [w, c] = await Promise.all([when.locator('.tk-when-d').boundingBox(), page.locator('#tab-myrides .ticket-card').first().boundingBox()]);
+    expect(c!.x + c!.width - (w!.x + w!.width)).toBeLessThan(40); // the line starts at the card's right edge
   });
 });

@@ -8060,5 +8060,12 @@
   "paySetNothing": "Walang nagbago",
   "paySetSaved": "Na-save ang mga setting",
   "paySetSavedLog": "Mga setting ng bayad: {0}",
-  "paySetHist": "Mga kamakailang pagbabago"
+  "paySetHist": "Mga kamakailang pagbabago",
+  "mrCxByYou": "Kinansela mo",
+  "mrCxByUs": "Kinansela namin",
+  "liveMapBtn": "Live na mapa",
+  "leaveWlBtn": "Umalis sa waitlist",
+  "mapsApple": "Apple Maps",
+  "mapsGoogle": "Google Maps",
+  "offlineActTitle": "Offline ka. Kumonekta sa internet para baguhin ang booking na ito."
 }

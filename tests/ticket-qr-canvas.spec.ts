@@ -47,7 +47,7 @@ test.describe('@customer:ticket the ticket code on a canvas', () => {
     const cv = box.locator('canvas.qr-cv');
     await expect(cv).toBeVisible();
     await expect(cv).toHaveAttribute('role', 'img');
-    await expect(cv).toHaveAttribute('aria-label', 'Booking QR code');
+    await expect(cv).toHaveAttribute('aria-label', /^Booking QR code MMC-/); // named with what it says, for the desk (2026-11-10)
     await expect(box.locator('svg:not(.qr-live)')).toBeHidden(); // the fallback steps aside
     await expect(box.locator('svg.qr-live')).toBeVisible(); // the live line still runs round it
     const n = await page.evaluate(`QR.encode(document.querySelector('#tab-myrides .cu-qr-box').getAttribute('data-qr')).size`) as number;

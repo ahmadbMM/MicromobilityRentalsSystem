@@ -8060,5 +8060,12 @@
   "paySetNothing": "کچھ نہیں بدلا",
   "paySetSaved": "ترتیبات محفوظ ہو گئیں",
   "paySetSavedLog": "ادائیگی کی ترتیبات: {0}",
-  "paySetHist": "حالیہ تبدیلیاں"
+  "paySetHist": "حالیہ تبدیلیاں",
+  "mrCxByYou": "آپ نے منسوخ کی",
+  "mrCxByUs": "ہم نے منسوخ کی",
+  "liveMapBtn": "لائیو نقشہ",
+  "leaveWlBtn": "ویٹ لسٹ چھوڑیں",
+  "mapsApple": "ایپل میپس",
+  "mapsGoogle": "گوگل میپس",
+  "offlineActTitle": "آپ آف لائن ہیں۔ یہ بکنگ بدلنے کے لیے انٹرنیٹ سے جڑیں۔"
 }

@@ -767,6 +767,48 @@ sorted the same way apple pass sorts bookings and cards".
 - The stack's CSS sits after "TICKETS IN THEIR EVENT'S COLOURS", whose cards set their own padding with the same
   weight. The website lists no past rides (only tonight's), so it has no stack. `tests/my-bookings-stack.spec.ts`.
 
+## My Bookings after the research round (2026-11-10)
+
+From reports/Rider Bookings page enhancements.md (git-excluded); the user: "do everything" except the owner's four
+open decisions, which stay as they were: upcoming bookings stay whole tickets (no compact rows), the rating gate still
+opens whenever, the cancel dialog says nothing about where money goes, and no-shows stay off the page.
+- **The record.** With no email or SMS the page is the rider's only record. `_myRideGroups` returns `cancelled` too:
+  a booking cancelled (by the rider or by staff, Cancel session included) shows as one quiet `_mrCxRow` under the
+  bookings ahead ("Cancelled by you" / "Cancelled by us", `mrCxByYou`/`mrCxByUs`) until its day has gone
+  (`_mrCancelled`); no code, no money, nothing to press. A rider turned down for an approval ride (`approval
+  'rejected'`) is never told by this row. A ride `done` but not yet marked paid is in Past (it used to vanish until
+  the desk marked it paid); `_rideCompleted` is unchanged for its other readers.
+- **Order.** The lockers block (`_lkOwnHtml`) comes after Upcoming: tonight's ticket is the first code on the page.
+- **The ticket.** The date is one start-aligned line under the header (`.tk-when-d`: Today · weekday date · time) and
+  the place one more (`.tk-when-p`: venue · collect time · gender chip); the class `cu-tk-when` stays for the themes'
+  colours. On the ride's day (waiting, active or waitlist) the code is drawn at 224px under the number
+  (`.tk-qr-big`, `_bigQr`); other days keep the 132px corner code. A ticket's code canvas is named with its payload
+  ("Booking QR code MMC-12-ab12cd"). The route and the add-ons fold behind one Details row (`_tkMore`, open state per
+  ticket in `S._tkMore`, `infoDetails`); the staff Booking card (`opts.card`) shows them open with no fold.
+- **Buttons.** Calendar and Directions side by side, Share a 48px square at the end of their row, today's bike ride
+  a whole-row Live map (`SITE_URL/live?session=`, the website's own link). Directions (`_dirBtnHtml`): a meeting
+  point's link as before; the circuit at the booth pin (`_BOOTH_PINS.JCC`, src/js/ticket-calendar.js) as a Google
+  Maps directions link, or on an iPhone/iPad a centred choice of Apple Maps / Google Maps (`_dirPick`; the dialog
+  closes a tick after the link is followed, `_dirPicked`); any other named place searched by name (it used to open
+  the circuit). Share (`_tkShare`) sends words and a link, never a picture of the code or a name; members-only,
+  Petromin and blood rides link the front page. A waitlist's Cancel says Leave waitlist, and so does its dialog.
+- **Calendar.** `downloadBookingICS(sessionId,bookingId)` writes one event per booking: `UID:booking-<id>@micromobility.sa`,
+  `SEQUENCE` = seconds now, `URL` back to /my-bookings (`_icsBody`). On an iPhone/iPad, online, the file comes from
+  `/api/ics` (functions/api/ics.js): a hidden form POSTs the rider's id and token (never in an address) with the
+  event's words into a new tab; the function checks with `my_bookings` that the booking is the rider's, still
+  standing and on the event's day, then answers `text/calendar`. Everything else saves the page's own file. Google
+  Calendar's add link was left out on Android: it has no UID, so each tap would copy the event again.
+- **The desk.** `_wakeWant` keeps a rider's screen on while My Bookings shows a `.tk-qr-big` (staff rules unchanged);
+  `setCustTab` lets it go on any other tab. Offline, Edit, Reschedule and Cancel answer a centred dialog with Try
+  again (`_offlineStop`, `offlineActTitle`) before anything is asked. Painted from the boot copy (`S._cacheOnly`),
+  the title carries a drawn saved-copy mark, no sentence. The countdown is `role="timer"`.
+- **Look.** Rider-row chips at 12px (were 10 and 11), the type badge and the JCC waitlist pill as pills (were 6px),
+  tabular figures on numbers, money and times. A strip coming out of the stack morphs into its ticket with a View
+  Transition (`view-transition-name: mr-pass`, skipped under reduced motion; the grid-row grow stays the fallback).
+- Already in place before this round, so not built: the refresh when the app comes back into view (RT_CUST_GAP_MS)
+  and explicit Gregorian calendar and Latin digits for Arabic (`LANGS[].locale`).
+- `tests/my-bookings-research.spec.ts`.
+
 ## Less like a template, second pass (2026-10-10)
 
 The owner asked again for the rider app to look less AI-made. A re-audit found the features added after the

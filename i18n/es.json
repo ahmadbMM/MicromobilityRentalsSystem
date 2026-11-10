@@ -8060,5 +8060,12 @@
   "paySetNothing": "No ha cambiado nada",
   "paySetSaved": "Ajustes guardados",
   "paySetSavedLog": "Ajustes de pago: {0}",
-  "paySetHist": "Cambios recientes"
+  "paySetHist": "Cambios recientes",
+  "mrCxByYou": "Cancelada por ti",
+  "mrCxByUs": "Cancelada por nosotros",
+  "liveMapBtn": "Mapa en vivo",
+  "leaveWlBtn": "Salir de la lista de espera",
+  "mapsApple": "Mapas de Apple",
+  "mapsGoogle": "Google Maps",
+  "offlineActTitle": "No tienes conexión. Conéctate a internet para cambiar esta reserva."
 }
