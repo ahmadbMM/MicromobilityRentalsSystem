@@ -12189,6 +12189,23 @@ html[data-staff-theme="booth"] body.view-staff #tab-volunteers .rq-more{border-w
 .vm-acct{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
 .vr-hours{width:100%;box-sizing:border-box;min-height:36px;}
 .vd-res-acts{display:flex;flex-wrap:wrap;gap:6px;}
+/* the volunteer enhancements (2026-11-11, migration 20261111140000): why a row is not coming, how long an offer or an
+   application has waited (a red chip after 48 hours), when they plan to leave, who may join, the thank-you sent, and the
+   feedback window's average and stars */
+.vx-why,.vx-mot,.vx-leave{font-size:12px;color:var(--muted);}
+.vx-wait{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);}
+.vx-chip.vx-wait.vx-late{color:var(--vx-r-ink);}
+.vx-stars{display:inline-flex;align-items:center;gap:1px;vertical-align:middle;}
+.vx-star{display:inline-flex;color:var(--sf-line2,#d6dad7);}
+.vx-star.on{color:#b07d00;}
+html[data-staff-theme="dark"] body.view-staff .vx-star.on{color:#fcd34d;}
+.vx-fb-sum{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin-bottom:8px;}
+.vx-fb-avg{display:flex;align-items:center;gap:8px;}
+.vx-fb-avg .num{font-size:28px;font-weight:600;line-height:1;color:var(--text);}
+.vx-fb-who{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;}
+.vx-fb-who .vx-msg{flex-basis:100%;}
+.vsf-det .vsf-err{font-size:12px;font-weight:500;color:var(--vx-r-ink,#991b1b);}
+.vsf-det [aria-invalid="true"]{border-color:var(--vx-e-ns,#dc2626);}
 /* a phone: the figures scroll sideways, each row is a card */
 @media (max-width:767px){
   #tab-volunteers .vx-figs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;}

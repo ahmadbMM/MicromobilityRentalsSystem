@@ -23,7 +23,13 @@ const fill = (tpl: string, v: Record<string, string>) =>
      .replace(/\{\{(\w+)\}\}/g, (_m, k: string) => esc(v[k]));
 
 type Sample = { volunteer_name: string; volunteer_name_ar: string; gender: string; initiative_name: string; event_date: string;
-  certificate_no: string; hours?: string; check_code?: string };
+  certificate_no: string; hours?: string; check_code?: string;
+  role?: string; skills?: string; skills_ar?: string; partner?: string; partner_ar?: string; issued?: string };
+// {{qr}} is a PNG data URL the caller draws on a canvas (QR.paint); any PNG stands in for it here.
+const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+// Amendment 7's fields, as a sample carries them (the reference renders the same).
+const extra = (s: Sample) => ({ role: s.role ?? '', skills: s.skills ?? '', skills_ar: s.skills_ar ?? '', partner: s.partner ?? '',
+  partner_ar: s.partner_ar ?? '', issued: s.issued ?? '', qr: s.check_code ? PNG : '' });
 const samples = JSON.parse(read('certificate/sample-data.json')) as Sample[];
 
 // What the apps do to the window once its fonts are in: _vcFit in app.src.html, fitCert in the portal.
@@ -34,7 +40,10 @@ const FIT = `(() => {
   el.style.fontSize = px + 'px';
   while (el.scrollWidth > el.clientWidth && px > 32) { px -= 1; el.style.fontSize = px + 'px'; }
   if (el.scrollWidth > el.clientWidth) el.classList.add('wrap');
-  return { px, wrapped: el.classList.contains('wrap') };
+  const body = document.querySelector('.body'), foot = document.querySelector('.footer'), sk = [...document.querySelectorAll('.skills')];
+  let fs = 14;
+  while (sk.length && foot.getBoundingClientRect().top - body.getBoundingClientRect().bottom < 16 && fs > 11) { fs -= 0.5; sk.forEach((e) => { e.style.fontSize = fs + 'px'; }); }
+  return { px, wrapped: el.classList.contains('wrap'), fs };
 })()`;
 
 test('certificate.css and assets/certificate.html are what certificate/ builds', () => {
@@ -92,7 +101,7 @@ test.describe('the three approved samples', () => {
         lead: WORDS[s.gender].lead, recognition: WORDS[s.gender].recognition, arabic_line: WORDS[s.gender].arabic_line,
         initiative_name: s.initiative_name, event_date: s.event_date, certificate_no: s.certificate_no,
         // What the sample carries, so this and certificate/reference/ show the same sheet.
-        hours: s.hours ?? '', check_code: s.check_code ?? '',
+        hours: s.hours ?? '', check_code: s.check_code ?? '', ...extra(s),
       });
       expect(html).not.toContain('{{');
       await page.route('**/__certificate-under-test', (r) => r.fulfill({ contentType: 'text/html; charset=utf-8', body: html }));
@@ -128,11 +137,33 @@ test.describe('the three approved samples', () => {
       const clash = await page.evaluate(() => {
         const g = document.querySelector('.supergraphic')!.getBoundingClientRect();
         const hit = (r: DOMRect) => r.right > g.left && r.left < g.right && r.bottom > g.top && r.top < g.bottom;
-        return [...document.querySelectorAll('.content .lead, .content .name, .content .name-ar, .content .recognition, .content .initiative, .content .thanks-ar, .content .hours-n, .content .hours-label, .content .title-ar, .content .title-en, .meta-item, .meta-sub, .signer-name, .signer-role span')]
+        return [...document.querySelectorAll('.content .lead, .content .name, .content .name-ar, .content .recognition, .content .initiative, .content .thanks-ar, .content .hours-n, .content .hours-label, .content .title-ar, .content .title-en, .meta-item, .meta-sub, .signer-name, .signer-role span, .fact-label, .role-v, .skills-v, .cohost-line, .check-label, .check-value, .qr')]
           .filter((el) => { const r = document.createRange(); r.selectNodeContents(el); return hit(r.getBoundingClientRect()); })
           .map((el) => el.className || el.tagName);
       });
       expect(clash, 'text under the corner graphic').toEqual([]);
+      // Amendment 7 (2026-11-11): every new field is optional and an empty one leaves no line; the partner hangs
+      // under the title and the check block (QR, issue date) in the right-hand column, both clear of the name;
+      // the skills never push the footer off its place, even at the longest the database allows (sample 3).
+      expect(await page.locator('.role').count()).toBe(s.role ? 1 : 0);
+      expect(await page.locator('.skills').count()).toBe((s.skills ? 1 : 0) + (s.skills_ar ? 1 : 0));
+      expect(await page.locator('.cohost-line').count()).toBe((s.partner ? 1 : 0) + (s.partner_ar ? 1 : 0));
+      expect(await page.locator('.qr').count()).toBe(s.check_code ? 1 : 0);
+      expect(await page.locator('.check-value').count()).toBe(s.issued ? 1 : 0);
+      if (s.role) await expect(page.locator('.role-v')).toHaveText(s.role);
+      if (s.partner_ar) await expect(page.locator('.cohost-line.ar')).toHaveAttribute('dir', 'rtl');
+      if (s.skills_ar) await expect(page.locator('.skills.ar')).toHaveAttribute('dir', 'rtl');
+      const place = await page.evaluate(() => {
+        const box = (sel: string) => { const el = document.querySelector(sel); if (!el) return null; const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect(); };
+        const name = box('.name')!, over = (a: DOMRect | null, b: DOMRect) => !!a && a.right > b.left && a.left < b.right && a.bottom > b.top && a.top < b.bottom;
+        const foot = document.querySelector('.footer')!.getBoundingClientRect(), body = document.querySelector('.body')!.getBoundingClientRect();
+        const top = document.querySelector('.page')!.getBoundingClientRect().top;
+        return { cohost: over(box('.cohost'), name), check: over(box('.check'), name), footBottom: Math.round(foot.bottom - top), gap: Math.round(foot.top - body.bottom) };
+      });
+      expect(place.cohost, 'the partner touches the name').toBe(false);
+      expect(place.check, 'the QR code touches the name').toBe(false);
+      expect(place.gap, 'the body runs into the footer').toBeGreaterThanOrEqual(0);
+      expect(place.footBottom, 'the footer was pushed off its place').toBeLessThanOrEqual(794 - 52 + 1);
       // The brand's three colours, and no other (SPEC.md, "Brand rules").
       expect(await page.locator('.initiative').evaluate((el) => getComputedStyle(el).backgroundColor)).toBe('rgb(3, 255, 137)');
       expect(await page.locator('body').evaluate((el) => getComputedStyle(el).backgroundColor)).toBe('rgb(251, 249, 244)');

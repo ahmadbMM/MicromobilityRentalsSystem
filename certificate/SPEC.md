@@ -2,7 +2,7 @@
 
 This kit contains the approved design for the certificate MicroMobility gives volunteers after its events. It is ready to implement in any stack. `template.html` is the source of truth for the layout. `render.js` is a tested reference implementation that turns a JSON list of volunteers into print-ready PDFs.
 
-> **Read "Amendments" at the foot of this file first.** The text below is the design as it was signed off on 2026-11-08 and is left as it was written; six things have changed since, and where they disagree the amendments win.
+> **Read "Amendments" at the foot of this file first.** The text below is the design as it was signed off on 2026-11-08 and is left as it was written; seven things have changed since, and where they disagree the amendments win.
 
 ## What's in the kit
 
@@ -90,7 +90,7 @@ template, plus the amendments below.
 
 ## Amendments
 
-Everything above is the design as signed off. These six changes came after it, and they win where
+Everything above is the design as signed off. These seven changes came after it, and they win where
 they disagree. `certificate/README.md` says how each reaches the two apps.
 
 **1. The slogan row is gone** (the owner, 2026-11-08). "Power your path", `micromobility.com.sa`
@@ -124,3 +124,30 @@ the footer's label style, `VOLUNTEER HOURS · ساعات التطوع`. A label 
 needs no plural that changes with the count. The line is not there when no hours are known. It
 replaces the small second line under Date that amendment 5 added; that column holds the date alone
 again, and the check code under No. is unchanged.
+
+**7. The Saudi field set** (2026-11-11, the volunteer enhancements, migration `20261111140000`). A
+volunteering certificate in the Kingdom names the kind and length of the service, the hours, the
+role, the skills or experience gained, the issuer and any partner co-issuing it, the certificate's
+number and its issue date, in both languages. Seven placeholders carry what the page lacked, each
+optional, and an empty one takes its whole line with it:
+
+| Field | Where | Notes |
+|---|---|---|
+| `role` | beside the hours, `ROLE · الدور` then the role at 20px | from the volunteer's shift; on a line of its own when the two do not fit (up to 40 characters) |
+| `skills` | under the hours: `SKILLS GAINED` then the text | the session's, stamped at issue; up to 200 characters |
+| `skills_ar` | its own line under it, right to left: `المهارات المكتسبة` then the text | |
+| `partner` | under the title, right-aligned: `IN PARTNERSHIP WITH` then the name | MicroMobility stays the issuer (the logo and the signatory); up to 120 characters |
+| `partner_ar` | its own line under it: `بالشراكة مع` then the name | |
+| `qr` | the right-hand column, 84px | a PNG data URL the caller draws on a canvas in the brand's black on its off-white, encoding `https://volunteer.micromobility.sa/#check/<code>` |
+| `issued` | under the QR code: `ISSUED · تاريخ الإصدار` then the date | empty when it is the footer's date (a certificate for a period) |
+
+Each label sits in its own language on its own line, so no line needs a field that is "either
+language". The partner and the check block hang out of the flow (the right-hand column between the
+name and the corner graphic is empty in the signed-off design, and the check block stays above the
+graphic's own box); the role shares the hours' line; only the skills add lines to the body, which
+then closes up by 38px (`.body:has(.skills)`) so the footer keeps its place. The opener's fit pass
+gains one step: after the name, the skills' type goes down half a pixel at a time, to 11px, until the
+body ends 16px above the footer (`_vcFit` in the booking app, `fitCert` in the portal). Nothing that
+was on the page moved, and a certificate without these fields is drawn exactly as before. The
+first and third samples in `sample-data.json` carry every field, the third at the longest the
+database allows.

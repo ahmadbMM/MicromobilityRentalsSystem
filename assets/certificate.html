@@ -23,6 +23,25 @@
       </div>
     </div>
 
+    <div class="cohost">
+      {{#partner}}
+      <div class="cohost-line"><span class="cohost-label">In partnership with</span> <span class="cohost-name">{{partner}}</span></div>
+      {{/partner}}
+      {{#partner_ar}}
+      <div class="cohost-line ar" dir="rtl" lang="ar"><span class="cohost-label">بالشراكة مع</span> <span class="cohost-name">{{partner_ar}}</span></div>
+      {{/partner_ar}}
+    </div>
+
+    <div class="check">
+      {{#qr}}
+      <img class="qr" src="{{qr}}" alt="QR code to check this certificate">
+      {{/qr}}
+      {{#issued}}
+      <span class="check-label">Issued <span class="ar" lang="ar">· تاريخ الإصدار</span></span>
+      <span class="check-value">{{issued}}</span>
+      {{/issued}}
+    </div>
+
     <div class="body">
       <div class="lead">{{lead}}</div>
       <div class="name">{{volunteer_name}}</div>
@@ -33,9 +52,20 @@
       <div class="recognition">{{recognition}}</div>
       <div class="initiative">{{initiative_name}}</div>
       <div class="thanks-ar ar" dir="rtl" lang="ar">{{arabic_line}}</div>
-      {{#hours}}
-      <div class="hours"><span class="hours-n">{{hours}}</span><span class="hours-label">Volunteer hours <span class="ar" lang="ar">· ساعات التطوع</span></span></div>
-      {{/hours}}
+      <div class="facts">
+        {{#hours}}
+        <div class="hours"><span class="hours-n">{{hours}}</span><span class="hours-label">Volunteer hours <span class="ar" lang="ar">· ساعات التطوع</span></span></div>
+        {{/hours}}
+        {{#role}}
+        <div class="role"><span class="fact-label">Role <span class="ar" lang="ar">· الدور</span></span><span class="role-v">{{role}}</span></div>
+        {{/role}}
+      </div>
+      {{#skills}}
+      <div class="skills"><span class="fact-label">Skills gained</span> <span class="skills-v">{{skills}}</span></div>
+      {{/skills}}
+      {{#skills_ar}}
+      <div class="skills ar" dir="rtl" lang="ar"><span class="fact-label">المهارات المكتسبة</span> <span class="skills-v">{{skills_ar}}</span></div>
+      {{/skills_ar}}
     </div>
 
     <div class="footer">

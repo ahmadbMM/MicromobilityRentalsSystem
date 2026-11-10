@@ -88,6 +88,55 @@ html, body { margin: 0; padding: 0; background: var(--mm-offwhite); }
    2026-11-10; they are in the body now, .hours above.) */
 .meta-sub { font-size: 11px; font-weight: 500; letter-spacing: .5px; }
 
+/* ── the Saudi field set (2026-11-11, SPEC.md amendment 7) ──
+   A volunteering certificate in the Kingdom names the kind and length of the service, the hours, the
+   role, the skills or experience gained, who issues it and with which partner, its number and the day
+   it was issued. Every one of them is optional and takes its line with it when empty. None moves what
+   the design already places: the partner hangs under the title and the check block in the right-hand
+   column above the corner graphic (both out of the flow), the role shares the hours' line, and only
+   the skills add lines to the body, which then closes up a little (:has, below) so the footer keeps
+   its place. Labels are the footer's: 12px, tracked capitals in English, plain in Arabic. */
+.fact-label, .cohost-label, .check-label { font-size: 12px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; }
+:is(.fact-label, .cohost-label, .check-label).ar, .ar :is(.fact-label, .cohost-label), .check-label .ar { letter-spacing: 0; text-transform: none; }
+
+/* The partner who co-issues it: one line a language, each with its own label, right-aligned under the
+   title and clear of the name below (which may run the full 979px). */
+.cohost { position: absolute; top: 128px; right: 72px; max-width: 520px; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; text-align: right; }
+.cohost-line { font-size: 15px; line-height: 1.35; }
+.cohost-name { font-weight: 700; margin-left: 6px; }
+.cohost-line.ar .cohost-name { margin-left: 0; margin-right: 6px; font-weight: 500; }
+
+/* The check block: the QR code anyone can scan to check the certificate (drawn by the caller in the
+   brand's black on off-white), then the issue date. The right-hand column between the name and the
+   corner graphic is empty in the signed-off design; this stays above the graphic's own box. */
+.check { position: absolute; top: 286px; right: 72px; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; text-align: right; }
+.qr { display: block; width: 84px; height: 84px; margin-bottom: 4px; }
+.check-value { font-size: 15px; font-weight: 700; }
+
+/* The role shares the hours' line; on its own when there are no hours. */
+.facts { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 28px; max-width: 620px; }
+.role { margin-top: 18px; display: flex; align-items: baseline; gap: 10px; }
+.role-v { font-size: 20px; font-weight: 700; line-height: 1.1; }
+
+/* Skills or experience gained, in each language (the Arabic its own line, right to left). 620px keeps
+   a long line off the corner graphic. The opener's fit pass makes the type smaller, down to 11px,
+   when a long list would push the footer (_vcFit, fitCert). */
+.skills { margin-top: 12px; max-width: 620px; font-size: 14px; line-height: 1.45; text-align: left; }
+.skills + .skills { margin-top: 2px; }
+.skills .fact-label { margin-right: 8px; }
+.skills.ar .fact-label { margin-right: 0; margin-left: 8px; }
+.skills.ar { line-height: 1.6; }
+
+/* With the skills there, the body closes up by 38px so the footer keeps its place: the longest the
+   database allows (sample 3: a 40-character role on a line of its own, 200 characters of skills in
+   each language at the fit's 11px) then just reaches it. */
+.body:has(.skills) { margin-top: 24px; }
+.body:has(.skills) .divider { margin-top: 16px; }
+.body:has(.skills) .recognition { margin-top: 14px; }
+.body:has(.skills) :is(.initiative, .thanks-ar) { margin-top: 8px; }
+.body:has(.skills) :is(.hours, .role) { margin-top: 12px; }
+.body:has(.skills) .facts + .skills { margin-top: 10px; }
+
 /* The Print button belongs to the window, not to the certificate: it is the only thing
    on the page that is not printed. Its look is report.css's .rep-print. */
 .rep-print { display: block; margin: 22px auto; padding: 9px 26px; background: #0c7a3d; color: #fff; border: none;

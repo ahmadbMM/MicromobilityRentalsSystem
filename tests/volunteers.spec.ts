@@ -91,6 +91,8 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     await expect(one).toHaveCount(0); // answered here at once, nothing read again (2026-11-06 review)
     await expect(row(page, 'c2')).toContainText('Not here yet'); // on the team now
     await pend(page, 'c3').getByRole('button', { name: 'Decline' }).click();
+    // an optional reason first (2026-11-11, D9): none chosen, the decline alone
+    await page.locator('#confirm-modal .vm-dlg').getByRole('button', { name: 'Decline', exact: true }).click();
     await expect.poll(() => sent.length).toBe(2);
     expect(sent[1]).toMatchObject({ p_customers: ['c3'], p_status: 'declined' });
     await expect(page.locator('#vd-list .vx-pend')).toHaveCount(0);

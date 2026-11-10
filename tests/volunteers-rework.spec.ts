@@ -90,6 +90,8 @@ test.describe('@staff:volunteers Volunteers, the rework of 2026-11-09', () => {
     await expect(app(page, 'c3')).toHaveCount(0);
     await expect(tab(page, /Applications/)).toHaveText('Applications 1');
     await app(page, 'c5').getByRole('button', { name: /^Decline/ }).click();
+    // an optional reason first (2026-11-11, D9): none chosen, the decline alone
+    await page.locator('#confirm-modal .vm-dlg').getByRole('button', { name: 'Decline', exact: true }).click();
     await expect.poll(() => save.length).toBe(2);
     expect(save[1]).toEqual({ p_customer: 'c5', p_status: 'removed' });
   });
