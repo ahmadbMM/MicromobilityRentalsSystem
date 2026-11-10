@@ -86,6 +86,8 @@ test.describe('@staff:inventory stock movements', () => {
 
   test('Expiring soon lists what is past or near its date, and takes expired stock off as a movement', async ({ page }) => {
     const calls = await open(page, { 'rpc:staff_inventory_extras': EXTRAS, 'rpc:staff_inventory_move': { ok: true, qty: 0, move_id: 8 } });
+    // The take-off reads the shelf's own count before asking and again after (bug hunt 2026-11-10), so a stale count never goes below zero.
+    await page.route(/\/rest\/v1\/inventory\?select=qty&id=eq\.gel/, (r) => r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify([{ qty: 10 }]) }));
     const card = page.locator('.flx-exp');
     await expect(card).toContainText('Energy gel');
     await expect(card).toContainText('Expired');

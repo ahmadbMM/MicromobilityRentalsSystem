@@ -7077,7 +7077,7 @@
   "n6qFeeWaive": "Ibalik",
   "n6qFeeWaived": "Naibalik ang {0} sa wallet",
   "n6qFees": "Mga bayad",
-  "n6qInvMsg": "Hello {first_name}, imbitado ka sa aming {0} sa {1}, {2}. Mag-book dito: {3}",
+  "n6qInvMsg": "Hello {first_name}, imbitado ka sa aming {0} sa {1}, {2}. Mag-book dito: {3}\n\nNatanggap mo ito dahil pinili mong makatanggap ng aming balita. Mag-reply ng STOP at hindi ka na namin padadalhan ng mensahe.",
   "n6qKFee": "Bayad",
   "n6qKFeeBack": "Ibinalik na bayad",
   "n6qLateCancel": "Huling pagkansela",

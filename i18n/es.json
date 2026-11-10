@@ -7077,7 +7077,7 @@
   "n6qFeeWaive": "Devolver",
   "n6qFeeWaived": "{0} devueltos al monedero",
   "n6qFees": "Cargos",
-  "n6qInvMsg": "Hola {first_name}, te invitamos a nuestra {0} el {1}, {2}. Reserva tu plaza aquí: {3}",
+  "n6qInvMsg": "Hola {first_name}, te invitamos a nuestra {0} el {1}, {2}. Reserva tu plaza aquí: {3}\n\nRecibes este mensaje porque elegiste recibir nuestras novedades. Responde STOP y no te volveremos a escribir.",
   "n6qKFee": "Cargo",
   "n6qKFeeBack": "Cargo devuelto",
   "n6qLateCancel": "Cancelación tardía",

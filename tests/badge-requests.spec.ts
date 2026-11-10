@@ -254,7 +254,7 @@ test.describe('@staff:community badge requests', () => {
     await row(page, 1).getByLabel('Note for the rider').fill('Thanks for sweeping');
     await row(page, 1).getByRole('button', { name: 'Give badge' }).click();
     await expect(page.locator('.toast').last()).toContainText('Badge given: Senior Marshal to Lina Haddad');
-    // Claimed first (still waiting) with the proof cleared, then given: the level and the one under it, the note with both.
+    // Given (the level and the one under it, the note with both), then claimed (still waiting) with the proof cleared.
     expect(answered).toHaveLength(1);
     const q = new URL(answered[0].url()).searchParams;
     expect([q.get('id'), q.get('status')]).toEqual(['eq.1', 'eq.pending']);
@@ -298,13 +298,25 @@ test.describe('@staff:community badge requests', () => {
     await expect(page.locator('.toast').last()).toContainText('Request declined: T100 Finisher for Omar Saleh');
     expect(answered[0].postDataJSON()).toMatchObject({ status: 'declined', reply: 'Send the official result', proof: null });
 
-    // Another desk answered the first one meanwhile: the claim comes back empty, nothing is given.
+    // Another desk answered the first one meanwhile: it reads answered before anything is written, nothing is given.
+    const json = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
+    let reads = 0, raced = false; // raced: still waiting when read, answered by the time the claim goes
+    await page.route(/\/rest\/v1\/badge_requests\?select=status&id=eq\.1/, (r) => r.fulfill({ status: 200, headers: json, body: JSON.stringify([{ status: raced && !reads++ ? 'pending' : 'declined' }]) }));
     await page.route(/\/rest\/v1\/badge_requests\?id=eq\.1/, (r) => r.request().method() === 'PATCH'
-      ? r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: '[]' }) : r.fallback());
+      ? r.fulfill({ status: 200, headers: json, body: '[]' }) : r.fallback());
     const given = calls(page, /\/rest\/v1\/customer_badges$/);
     await row(page, 1).getByRole('button', { name: 'Give badge' }).click();
     await expect(page.locator('.toast').last()).toContainText('Another staff member already answered this request.');
     expect(given).toHaveLength(0);
+
+    // Answered while this tap's badge went in (the badge goes in before the claim, 2026-11-10): the claim comes back
+    // empty and the badge is taken back, so a declined request leaves no badge.
+    raced = true;
+    await page.evaluate(`S._bdrRows=S._bdrRows.map(r=>r.id===1?{...r,status:'pending'}:r);renderBadgeRequests()`);
+    await row(page, 1).getByRole('button', { name: 'Give badge' }).click();
+    await expect.poll(() => given.map((q) => q.method())).toEqual(['POST', 'DELETE', 'DELETE']); // the level and the one it brought
+    expect(given.slice(1).map((q) => new URL(q.url()).searchParams.get('customer_id'))).toEqual(['in.(c1)', 'in.(c1)']);
+    await expect.poll(() => page.evaluate(`(S.custBadges||[]).some(x=>x.customer_id==='c1')`)).toBe(false);
   });
 
   test('a search, the badge, the proof and the order narrow the list; a badge earned by riding can be given', async ({ page }) => {

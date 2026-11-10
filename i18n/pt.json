@@ -7077,7 +7077,7 @@
   "n6qFeeWaive": "Devolver",
   "n6qFeeWaived": "{0} devolvidos à carteira",
   "n6qFees": "Taxas",
-  "n6qInvMsg": "Olá {first_name}, você está convidado para o nosso {0} em {1}, {2}. Reserve o seu lugar aqui: {3}",
+  "n6qInvMsg": "Olá {first_name}, você está convidado para o nosso {0} em {1}, {2}. Reserve o seu lugar aqui: {3}\n\nVocê recebe esta mensagem porque escolheu receber as nossas novidades. Responda STOP e não lhe enviaremos mais mensagens.",
   "n6qKFee": "Taxa",
   "n6qKFeeBack": "Taxa devolvida",
   "n6qLateCancel": "Cancelamento tardio",

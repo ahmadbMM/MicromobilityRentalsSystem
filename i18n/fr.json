@@ -7077,7 +7077,7 @@
   "n6qFeeWaive": "Rendre",
   "n6qFeeWaived": "{0} rendus au portefeuille",
   "n6qFees": "Frais",
-  "n6qInvMsg": "Bonjour {first_name}, vous êtes invité à notre {0} le {1}, {2}. Réservez votre place ici : {3}",
+  "n6qInvMsg": "Bonjour {first_name}, vous êtes invité à notre {0} le {1}, {2}. Réservez votre place ici : {3}\n\nVous recevez ce message parce que vous avez choisi de suivre nos actualités. Répondez STOP et nous ne vous écrirons plus.",
   "n6qKFee": "Frais",
   "n6qKFeeBack": "Frais rendus",
   "n6qLateCancel": "Annulation tardive",
