@@ -28,7 +28,6 @@ async function fillRest(page: Page) {
   await page.evaluate('setSignupGender("male");S.signupHeard="invited"');
   await page.fill('#a-email', 'faisal@example.com');
   await page.fill('#a-pwd', 'Zq8xTselah');
-  await page.fill('#a-pwd2', 'Zq8xTselah');
   await page.fill('#a-height', '175');
   await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
 }

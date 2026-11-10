@@ -30,7 +30,6 @@ test.describe('@customer:auth the emergency contact on Create account', () => {
     await page.fill('#a-email', 'faisal.haddad@example.com');
     await page.fill('#a-phone', '0508566560');
     await page.fill('#a-pwd', 'Zq8xTselah');
-    await page.fill('#a-pwd2', 'Zq8xTselah');
     await page.fill('#a-height', '175');
   }
   const submit = (page: Page) => page.evaluate('S.signupAck=true;doSignup()');

@@ -9,7 +9,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/s
 // Staff can switch ride news OFF (a rider's STOP), never on.
 
 const JSON_HDR = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
-const VERSION = '2026-11-11'; // for volunteers: what a team lead sees, the public certificate check page, staff-only ratings and motive; nobody is asked again
+const VERSION = '2026-11-11'; // for volunteers: what a team lead sees, the public certificate check page, staff-only ratings and motive; an under-18 community applicant's parent or guardian, the form's anonymous counts, ride news by WhatsApp only, no Apple or Google sign-in; nobody is asked again
 
 /** Answers an RPC and records every body sent to it. */
 async function captureRpc(page: Page, fn: string, answer: (body: Record<string, unknown>) => unknown) {
@@ -43,6 +43,14 @@ test.describe('the Privacy Notice', () => {
     await expect(box.locator('#pv-title')).toHaveText('Privacy Notice');
     await expect(box).toContainText('What we collect, and whether you must give it');
     await expect(box).toContainText('Frankfurt, Germany');
+    // 2026-11-11: no Apple or Google sign-in (ended 2026-11-09), ride news by WhatsApp only, an under-18 applicant's
+    // parent or guardian, and the community form's anonymous counts.
+    await expect(box).not.toContainText('Apple');
+    await expect(box).not.toContainText('Google');
+    await expect(box).not.toContainText('unsubscribe link');
+    await expect(box).toContainText('We send ride news (new rides, schedules, offers and community news) by WhatsApp');
+    await expect(box.locator('tr', { hasText: 'parent or legal guardian' })).toContainText('their confirmation of this notice');
+    await expect(box).toContainText('anonymous counts of which of its screens were reached and where people left it');
     await expect(box).toContainText('We will reply within 30 days');
     // Nationality from the first booking, birth date from the fourth, and before any booking for community members
     const nat = box.locator('tr', { hasText: 'Nationality' }).first();
@@ -93,7 +101,6 @@ test.describe('sign-up: the confirmation is required, ride news is not', () => {
     await page.fill('#a-email', 'faisal@example.com');
     await page.fill('#a-phone', '0508566560');
     await page.fill('#a-pwd', 'Zq8xTselah');
-    await page.fill('#a-pwd2', 'Zq8xTselah');
     await page.fill('#a-height', '175');
     await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
   }

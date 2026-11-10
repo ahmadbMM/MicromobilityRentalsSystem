@@ -80,7 +80,7 @@ test.describe('@staff:community one number on several accounts', () => {
     await page.locator('#cf-email').fill('lina.saleh@gmail.com');
     await page.locator('#cf-phone').fill('551239876');
     await expect(note(page)).toHaveText('Also on: Huda Al Saleh. Signing in with this number opens Huda Al Saleh’s account; this account signs in with its email.');
-    await page.locator('#cf-pwd').fill('Welcome123');
+    await page.locator('#cf-pwd').fill('Corniche123');
     await page.locator('#cf-height').fill('150');
     await page.locator('#new-acct-modal .toggle-btn', { hasText: 'Female' }).click();
     await page.locator('#new-acct-modal .btn-primary').click();

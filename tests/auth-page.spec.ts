@@ -70,7 +70,6 @@ test.describe('signup', () => {
     await page.fill('#a-email', 'faisal@example.com');
     await page.fill('#a-phone', '0508566560');
     await page.fill('#a-pwd', 'Zq8xTselah');
-    await page.fill('#a-pwd2', 'Zq8xTselah');
     await page.fill('#a-height', '175');
     await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
     await page.locator('#su-ack-box').click(); // the Privacy Notice confirmation is required
@@ -93,10 +92,36 @@ test.describe('signup', () => {
     await page.fill('#a-email', 'faisal@example.com');
     expect(await errAfter()).toBeTruthy();                       // phone
     await page.fill('#a-phone', '0508566560');
-    expect(await errAfter()).toBeTruthy();                       // weak password
-    await page.fill('#a-pwd', 'Zq8xTselah');
-    await page.fill('#a-pwd2', 'Zq8xOther');
-    expect(await errAfter()).toBeTruthy();                       // mismatch
+    expect(await errAfter()).toContain('Use at least 8 characters.'); // password
+    // The rider password rule (2026-11-11): 8 or more characters and not a common one, no upper-case letter
+    // or digit asked, and one box with show/hide (no second box to type it again).
+    await expect(page.locator('#a-pwd2')).toHaveCount(0);
+    await page.fill('#a-pwd', 'Password1');
+    expect(await errAfter()).toContain('This password is too easy to guess. Choose another.'); // common, whatever its capitals
+    await page.fill('#a-pwd', 'aaaaaaaaaa');
+    expect(await errAfter()).toContain('too easy to guess');      // one character over and over
+    await page.fill('#a-pwd', 'corniche ride');
+    expect(await errAfter()).not.toMatch(/password|characters/i); // on to the emergency contact
+    const eye = page.locator('.auth-field .pw-wrap .pw-eye');
+    await eye.click();
+    await expect(page.locator('#a-pwd')).toHaveAttribute('type', 'text');
+    await eye.click();
+    await expect(page.locator('#a-pwd')).toHaveAttribute('type', 'password');
+  });
+
+  test('a password the server still refuses says why', async ({ page }) => {
+    // A database without 20261111130000 keeps the old rule (an upper-case letter and a digit); one with it
+    // refuses a common password the app does not know of. Either answers WEAK_PASSWORD.
+    await boot(page);
+    await page.route(/\/rest\/v1\/rpc\/customer_signup/, (route) => route.fulfill({ status: 400, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
+      body: JSON.stringify({ code: '22023', message: 'WEAK_PASSWORD', details: null, hint: null }) }));
+    await fillSignup(page);
+    await page.fill('#a-pwd', 'corniche ride');
+    await page.locator('.auth-submit').click();
+    await expect(page.locator('#auth-err')).toContainText('Use at least 8 characters, with an upper-case letter and a number.');
+    await page.fill('#a-pwd', 'Corniche ride 9');
+    await page.locator('.auth-submit').click();
+    await expect(page.locator('#auth-err')).toContainText('This password is too easy to guess. Choose another.');
   });
 
   test('successful signup sends a normalized phone and keeps the session token', async ({ page }) => {
@@ -219,7 +244,6 @@ test.describe('remaining hardening', () => {
     await page.fill('#a-email', 'new@example.com');
     await page.fill('#a-phone', '0508566560');
     await page.fill('#a-pwd', 'Zq8xTselah');
-    await page.fill('#a-pwd2', 'Zq8xTselah');
     await page.fill('#a-height', '175');
     await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
     await page.evaluate('S.signupAck=true;doSignup()');
@@ -238,7 +262,6 @@ test.describe('remaining hardening', () => {
     await page.fill('#a-email', 'new@example.com');
     await page.fill('#a-phone', '0508566560');
     await page.fill('#a-pwd', 'Zq8xTselah');
-    await page.fill('#a-pwd2', 'Zq8xTselah');
     await page.fill('#a-height', '175');
     await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
     await page.evaluate('S.signupAck=true;doSignup()');
@@ -344,7 +367,6 @@ test.describe('round 4: invisible characters & post-login flow', () => {
     await page.evaluate(`document.getElementById('a-email').value='Faisal\u200F@Example.com\u200E'`);
     await page.fill('#a-phone', '0508566560');
     await page.fill('#a-pwd', 'Zq8xTselah');
-    await page.fill('#a-pwd2', 'Zq8xTselah');
     await page.fill('#a-height', '175');
     await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
     await page.evaluate('S.signupAck=true;doSignup()');
