@@ -157,7 +157,8 @@ test.describe('analytics growth', () => {
         { item_id: 'i1', qty: 2, price: 10, pay: 'paid', cat: 'Drinks' }, // rev 20, cogs 8
         { item_id: 'i2', qty: 1, price: 12, pay: 'paid', cat: 'Bars' },     // rev 12, cogs 6
         { item_id: 'i1', qty: 1, price: 10, pay: 'refunded', cat: 'Drinks' }, // refunded → ignored
-        { item_id: null, qty: 1, price: -5, cat: '__discount__' },           // discount → ignored
+        { item_id: null, qty: 1, price: -5, pay: 'paid', cat: '__discount__' }, // discount → rev -5, as the till counts it
+        { item_id: 'i1', qty: 1, price: 10, pay: 'team', cat: 'Drinks' },     // MM Team account → no rev, cogs 4
       ];
       // @ts-expect-error app globals
       const m = _anMargin(lines, cost);
@@ -165,10 +166,10 @@ test.describe('analytics growth', () => {
       const none = _anMargin([{ item_id: 'x', qty: 1, price: 10, cat: 'Drinks' }], {});
       return { m, noCost: none.haveCost };
     });
-    expect(out.m.rev).toBe(32);
-    expect(out.m.cogs).toBe(14);
-    expect(out.m.profit).toBe(18);
-    expect(out.m.marginPct).toBe(56); // 18/32 ≈ 56%
+    expect(out.m.rev).toBe(27); // 20 + 12 - 5
+    expect(out.m.cogs).toBe(18); // 8 + 6 + 4
+    expect(out.m.profit).toBe(9);
+    expect(out.m.marginPct).toBe(33); // 9/27 ≈ 33%
     expect(out.m.haveCost).toBe(true);
     expect(out.noCost).toBe(false); // no cost mapped → card stays hidden
   });

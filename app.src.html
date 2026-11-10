@@ -55475,6 +55475,8 @@ function _anYHeld(s){
 // Places used on a session (S08-analytics-10): its rides (_isRide, S08-analytics-18) that took a place - an own bike
 // only where it takes one, as _holdsSpot - capped at _placesCap. rows: the session's bookings, else the device's.
 function _anYUsed(s,rows){const own=_ownTakesPlace(s);return Math.min(_placesCap(s),(rows||_qBySession().get(s.id)||[]).filter(e=>_isRide(e)&&(own||!_isOwnBike(e))).length);}
+// One session's occupancy in %: 0 when it offered no place (out-of-service bikes up to its capacity), not NaN.
+function _anYOccOne(s,rows){const c=_placesCap(s);return c?Math.round(_anYUsed(s,rows)/c*100):0;}
 // Occupancy, one definition for the Dashboard and Analytics (S08-analytics-10): places used over places offered,
 // on the sessions held that ran (somebody rode or did not come; a night cancelled at the desk, or one nobody booked,
 // offered nothing). Four screens counted it four ways. n: the sessions counted. rowsOf(id): a session's bookings.
@@ -62169,9 +62171,15 @@ async function _acCrown(id,cid,name){
   x.winner_id=cid;x.winner_name=name;
   if(x.title_id){
     const[y,m]=String(x.closes_on).split('-').map(Number),end=new Date(Date.UTC(y,m+1,0)).toISOString().slice(0,10);
-    const row={customer_id:cid,title_id:x.title_id,expires_on:end,given_by:(_opName()||'Staff').slice(0,60),given_at:new Date().toISOString()};
-    const g=await sb.from('customer_titles').upsert(row,{onConflict:'customer_id,title_id'});if(_writeErr(g,'give title')){renderCommunity();return;}
-    S.custTitles=[...(S.custTitles||[]).filter(ct=>!(ct.customer_id===cid&&ct.title_id===x.title_id)),row];
+    // The title held already for ever, or to a later day, stays as it is: the upsert wrote the round's end over it
+    // and cut it short. One that ends sooner, or has ended, runs to the round's end.
+    let had;try{had=await sb.from('customer_titles').select('expires_on').eq('customer_id',cid).eq('title_id',x.title_id).maybeSingle();}catch(e){had={error:e||{message:'failed'}};}
+    if(_writeErr(had,'give title')){renderCommunity();return;}
+    if(!(had.data&&(!had.data.expires_on||String(had.data.expires_on).slice(0,10)>=end))){
+      const row={customer_id:cid,title_id:x.title_id,expires_on:end,given_by:(_opName()||'Staff').slice(0,60),given_at:new Date().toISOString()};
+      const g=await sb.from('customer_titles').upsert(row,{onConflict:'customer_id,title_id'});if(_writeErr(g,'give title')){renderCommunity();return;}
+      S.custTitles=[...(S.custTitles||[]).filter(ct=>!(ct.customer_id===cid&&ct.title_id===x.title_id)),row];
+    }
   }
   logAction(t('acWinner').replace('{0}',name));renderCommunity();
 }
@@ -62288,15 +62296,19 @@ function _acPhotosHtml(){
   return`<div class="tg-sub">${t('acWaiting')} (${wait.length})</div>${wait.map(card).join('')||_emptyState(t('acNone'))}<div class="tg-sub">${t('acOnWall')} (${live.length})</div>${live.map(card).join('')||_emptyState(t('acNone'))}`;
 }
 async function _acImgs(){
-  if(S._acImgBusy)return;S._acImgBusy=true;S._acImg=S._acImg||{};
+  S._acImg=S._acImg||{};
+  // A repaint draws the tiles again with no picture: the ones already read go back on at once, and a pass still
+  // reading runs once more when it ends, for the tiles it did not see (they stayed blank until the next repaint).
+  for(const el of document.querySelectorAll('img[data-acph]')){const v=S._acImg[el.getAttribute('data-acph')];if(v&&/^data:image\/jpeg;/.test(v)&&!el.getAttribute('src'))el.src=v;}
+  if(S._acImgBusy){S._acImgAgain=true;return;}S._acImgBusy=true;
   try{
     for(const el of [...document.querySelectorAll('img[data-acph]')]){
       const id=el.getAttribute('data-acph');
-      if(!(id in S._acImg)){let r;try{r=await sb.from('hub_photos').select('img').eq('id',id).maybeSingle();}catch(e){r=null;}S._acImg[id]=r&&!r.error&&r.data&&r.data.img||'';}
+      if(!(id in S._acImg)){let r;try{r=await sb.from('hub_photos').select('img').eq('id',id).maybeSingle();}catch(e){r=null;}if(r&&!r.error)S._acImg[id]=(r.data&&r.data.img)||'';} // a failed read is not kept: the next pass asks again
       const now=document.querySelector(`img[data-acph="${CSS.escape(id)}"]`);
       if(now&&S._acImg[id]&&/^data:image\/jpeg;/.test(S._acImg[id]))now.src=S._acImg[id];
     }
-  }finally{S._acImgBusy=false;}
+  }finally{S._acImgBusy=false;if(S._acImgAgain){S._acImgAgain=false;setTimeout(_acImgs,0);}}
 }
 async function _acPhotoOk(id){
   const r=await sb.from('hub_photos').update({status:'approved',reported_at:null,report_reason:null,decided_by:(_opName()||'Staff').slice(0,60),decided_at:new Date().toISOString()}).eq('id',id);
@@ -62639,6 +62651,17 @@ function _rsPickPaint(b,on){b.setAttribute('aria-pressed',on?'true':'false');b.i
 function _rsShown(){const c=document.querySelector('#tab-analytics .rs-card');return c?[..._rsSet()].filter(id=>c.querySelector(`[data-rs-pick="${CSS.escape(String(id))}"]`)):[];}
 function _rsBarPaint(){const n=_rsShown().length,el=document.querySelector('#tab-analytics .rs-n'),go=document.querySelector('#tab-analytics .rs-go');if(el)el.textContent=t('rsSelN').replace('{0}',n);if(go)go.disabled=!n;}
 function _rsShareSel(){const ids=_rsShown().filter(id=>getQueue().some(e=>e.id===id));if(ids.length)_rsOpen(ids);}
+// Show more on All ratings: the ratings view is drawn again, from the bookings of the range it was built for (the
+// lazy part _anCache keeps), and only its All ratings card is swapped in, so the rest of the page stays as it is.
+const AN_RATE_PAGE=100;
+function _anRateMore(){
+  S._anRateShow=Math.max(AN_RATE_PAGE,+S._anRateShow||0)+AN_RATE_PAGE;
+  const c=_anCache,old=document.querySelector('#tab-analytics .rs-card');
+  if(!c||!c.lazy||!c.lazy.ratings||!old){if(c)c.key=null;renderAnalytics();return;}
+  const tp=document.createElement('template');tp.innerHTML=c.lazyHtml.ratings=_cashScope(c.lazy.ratings);
+  const nu=tp.content.querySelector('.rs-card');if(!nu)return;
+  old.replaceWith(nu);_cssvApply(nu);_rsBarPaint();
+}
 // Ratings summary + per-bike health (avg ratings, usage, service age -> "needs attention")
 // rows: the bookings of the range and session picked above it, as every other view reads them
 // (2026-10-05: this one read every booking, whatever the range bar said). Without them, every booking.
@@ -62692,8 +62715,12 @@ function bikeHealthSection(rows){
               </div>
             </div>`).join('')}</div>`
         : _emptyState(t('anNoAttention')));
-  // Full list of every rated ride: rider, bike + experience scores, and the reason/feedback text, newest first.
-  const _rsN=[..._rsSet()].filter(id=>rated.some(e=>e.id===id)).length;
+  // Full list of every rated ride: rider, bike + experience scores, and the reason/feedback text, newest first,
+  // AN_RATE_PAGE cards at a time (Show more adds the next ones): every rated ride of a long range in one paint
+  // froze a phone. The count of picks is the cards drawn, as _rsShown counts them.
+  const ratedSorted=rated.slice().sort((a,b)=>_ratedWhen(b).ms-_ratedWhen(a).ms);
+  const rateShown=ratedSorted.slice(0,Math.max(AN_RATE_PAGE,+S._anRateShow||0)),rateRest=ratedSorted.length-rateShown.length;
+  const _rsN=[..._rsSet()].filter(id=>rateShown.some(e=>e.id===id)).length;
   const allRatingsCard=rated.length?`<div class="chart-card an-mt14 rs-card${S._rsSelOn?' rs-on':''}">
     <div class="rs-head">
       <div class="an-minw0"><div class="chart-card-title">${t('anAllRatings')}</div>
@@ -62706,7 +62733,7 @@ function bikeHealthSection(rows){
       </div>
     </div>
     <div class="an-rate-list">
-      ${rated.slice().sort((a,b)=>_ratedWhen(b).ms-_ratedWhen(a).ms).map(e=>{
+      ${rateShown.map(e=>{
         const rw=_ratedWhen(e);
         const bk=getAssignedBikes(e).map(b=>b.name).join(', ');
         const cell=(lbl,v)=>`<div class="an-tc"><div class="an-rate-lbl">${lbl}</div><div class="an-b900 an-fg" data-cssv="${_cssv({'--an-fg':v?_ratingColor(v):'var(--muted)'})}">${v?v+t('anOutOf10'):'—'}</div></div>`;
@@ -62726,6 +62753,7 @@ function bikeHealthSection(rows){
         </div>`;
       }).join('')}
     </div>
+    ${rateRest>0?`<div class="cmy-more"><button type="button" class="btn-secondary an-rate-more" data-on-click="${_on('_anRateMore')}">${t('amShowMore').replace('{0}',String(Math.min(rateRest,AN_RATE_PAGE)))}</button></div>`:''}
   </div>`:'';
   // What riders mention (2026-09-28): the quick tags, counted once per rating; and the ratings by ride night.
   const tagN={};rated.forEach(e=>(Array.isArray(e.ratingTags)?e.ratingTags:[]).forEach(k=>{tagN[k]=(tagN[k]||0)+1;}));
@@ -63326,7 +63354,7 @@ function _anMonthForecast(allSess,allQ,now){
   const held=new Set(md.filter(e=>!upIds.has(e.sessionId)).map(e=>e.sessionId)).size;
   const wd=md.filter(e=>e.walkIn&&!upIds.has(e.sessionId)),wo=wd.filter(_anYOurs);
   const walkins=held?Math.round(wd.length/held*up.length):0;
-  const walkRev=wo.length?Math.round(_amountOf(wo)/wo.length*walkins):0;
+  const walkRev=held?Math.round(_amountOf(wo)/held*up.length):0; // our walk-in money a ride held, times the rides to come: the organiser's walk-ins are counted in walkins, not at our fare
   const byS=new Map();mq.forEach(e=>{if(upIds.has(e.sessionId)){let a=byS.get(e.sessionId);if(!a)byS.set(e.sessionId,a=[]);a.push(e);}});
   const upCap=up.reduce((a,s)=>a+_placesCap(s),0),upTaken=up.reduce((a,s)=>a+_placesTaken(s,byS.get(s.id)||[]),0);
   const upBooked=booked.length;
@@ -63341,11 +63369,15 @@ function _anMonthForecast(allSess,allQ,now){
 // (S._anSrv); a new answer repaints Analytics (S._anSrvV is in _anModelKey). With no function yet, or one that
 // refuses, the page reads as before: the twelve months this device holds, and no year-on-year pills.
 const AN_EPOCH='2024-01-01'; // before the first ride on record
+const AN_SRV_FRESH=300000; // five minutes: a window that runs to today is asked again once its answer is this old
 function _anSrv(from,to){
   if(S._anSrvOff||!sb||!from||!to||to<from)return null;
-  const m=S._anSrv||(S._anSrv=new Map()),k=from+'|'+to;
-  if(m.has(k))return m.get(k);
-  m.set(k,null);
+  const m=S._anSrv||(S._anSrv=new Map()),k=from+'|'+to,old=m.get(k);
+  // A window that runs to today keeps moving all day: its answer stays on screen while a fresh one is read behind
+  // it (it was kept until the page was reloaded, so the All strip, Months and the y/y pills fell behind the live
+  // cards beside them). A failed refresh keeps the answer and tries again five minutes later.
+  if(m.has(k)&&!(old&&!old.busy&&to>=todayStr()&&Date.now()-old.at>AN_SRV_FRESH))return old;
+  if(old)old.busy=true;else m.set(k,null);
   // A failed read is forgotten after thirty seconds, so a later paint asks again (a network blip at the
   // first paint left Months on "Loading" until the page was reloaded); nothing repaints on a failure,
   // so this is no loop.
@@ -63353,16 +63385,16 @@ function _anSrv(from,to){
   // "Loading" until staff left the view and came back (bug hunt 2026-10-28). That repaint reads the null
   // still held for k, so it asks nothing again: no read-repaint loop.
   const moPaint=()=>{if(S.view==='staff'&&S.staffTab==='analytics'&&S.anView==='months')_anXPaint('months');};
-  const retry=()=>{S._anSrvErr=k;moPaint();setTimeout(()=>{if(m.get(k)===null){m.delete(k);if(S._anSrvErr===k)S._anSrvErr=null;}},30000);};
+  const retry=()=>{if(old){old.busy=false;old.at=Date.now();return;}S._anSrvErr=k;moPaint();setTimeout(()=>{if(m.get(k)===null){m.delete(k);if(S._anSrvErr===k)S._anSrvErr=null;}},30000);};
   Promise.resolve(sb.rpc('staff_monthly_totals',{p_from:from,p_to:to})).then(r=>{
     if(!r||r.error){if(r&&_rpcAbsent(r.error)){S._anSrvOff=true;S._anSrvV=(S._anSrvV||0)+1;moPaint();}else retry();return;} // a refusal stays unanswered: no read-repaint loop
     if(S._anSrvErr===k)S._anSrvErr=null;
     const rows=(Array.isArray(r.data)?r.data:[]).map(x=>{const o={month:String(x.month||'')};Object.keys(x).forEach(c=>{if(c!=='month')o[c]=Number(x[c])||0;});return o;});
-    m.set(k,{rows:rows.filter(x=>x.month!=='total'),total:rows.find(x=>x.month==='total')||null});
+    m.set(k,{at:Date.now(),rows:rows.filter(x=>x.month!=='total'),total:rows.find(x=>x.month==='total')||null});
     S._anSrvV=(S._anSrvV||0)+1;if(rows.some(x=>x.month==='total'))S._anSrvHas=true;
     if(S.view==='staff'&&S.staffTab==='analytics')renderAnalytics();
   },retry);
-  return null;
+  return old||null;
 }
 // One window's totals in the KPI tiles' terms (_anMetricsFor's keys).
 function _anSrvMetrics(r){
@@ -63510,17 +63542,18 @@ function _rpiDays(x){return(x.kind==='weekly_kpi'&&Array.isArray((x.data||{}).by
 function _rpiDayMoney(days){return days.some(d=>d&&d.fares!==undefined);}
 function _rpiDayTot(d){return _rpiN(d,'fares')+_rpiN(d,'sales');}
 function _rpiDayName(iso){try{return new Date(iso+'T12:00:00Z').toLocaleDateString(_locale(),{timeZone:'UTC',weekday:'short',day:'numeric',month:'short'});}catch(_){return iso;}}
+// The days name the fares with no method as the totals line does: with the wallet on, wallet money is in them too.
 function _rpiText(x){
   const L=[`MicroMobility - ${_rpiTitle(x)}`,..._rpiLines(x).map(([l,v])=>`• ${l}: ${v}`)];
   _rpiSessLines(x).forEach(r=>L.push(`- ${r.title||''}${r.time?' '+r.time:''}: ${_rpiN(r,'rides')}/${_rpiN(r,'capacity')} · ${t('statusNoshow')} ${_rpiN(r,'noshows')}`));
   const dd=_rpiDays(x),dm=_rpiDayMoney(dd);
-  dd.forEach(d=>{const u=_mnyUnk(d,'fares','fares_card','fares_cash');L.push(`- ${_rpiDayName(d.date)}: ${t('anTotalRides')} ${_rpiN(d,'rides')}${dm?` · ${_money(_rpiDayTot(d),_NOISO)} (${t('repCard')} ${_money(_rpiN(d,'fares_card')+_rpiN(d,'sales_card'),_NOISO)}, ${t('repCash')} ${_money(_rpiN(d,'fares_cash')+_rpiN(d,'sales_cash'),_NOISO)}${u>0?`, ${t('mnyUnknown')} ${_money(u,_NOISO)}`:''})`:''}`);});
+  dd.forEach(d=>{const u=_mnyUnk(d,'fares','fares_card','fares_cash');L.push(`- ${_rpiDayName(d.date)}: ${t('anTotalRides')} ${_rpiN(d,'rides')}${dm?` · ${_money(_rpiDayTot(d),_NOISO)} (${t('repCard')} ${_money(_rpiN(d,'fares_card')+_rpiN(d,'sales_card'),_NOISO)}, ${t('repCash')} ${_money(_rpiN(d,'fares_cash')+_rpiN(d,'sales_cash'),_NOISO)}${u>0?`, ${t(_cwOk()?'cwMnyUnknown':'mnyUnknown')} ${_money(u,_NOISO)}`:''})`:''}`);});
   return L.join('\n');
 }
 function _rpiDaysHtml(x){
   const dd=_rpiDays(x);if(!dd.length)return'';
   const dm=_rpiDayMoney(dd),m=v=>`<bdi>${esc(_money(v,_NOISO))}</bdi>`,u=d=>_mnyUnk(d,'fares','fares_card','fares_cash'),du=dm&&dd.some(d=>u(d)>0); // a column for fares with no method, when a day has some
-  const head=`<th>${t('repDay')}</th><th>${t('anTotalRides')}</th>`+(dm?`<th>${t('repFares')}</th><th>${t('anMoTill')}</th><th>${t('repCard')}</th><th>${t('repCash')}</th>${du?`<th class="rpi-warn">${t('mnyUnknown')}</th>`:''}<th>${t('repDayTotal')}</th>`:'');
+  const head=`<th>${t('repDay')}</th><th>${t('anTotalRides')}</th>`+(dm?`<th>${t('repFares')}</th><th>${t('anMoTill')}</th><th>${t('repCard')}</th><th>${t('repCash')}</th>${du?`<th class="rpi-warn">${t(_cwOk()?'cwMnyUnknown':'mnyUnknown')}</th>`:''}<th>${t('repDayTotal')}</th>`:'');
   const row=d=>`<tr><td><bdi>${esc(_rpiDayName(d.date))}</bdi></td><td>${_rpiN(d,'rides')}</td>`+(dm?`<td>${m(_rpiN(d,'fares'))}</td><td>${m(_rpiN(d,'sales'))}</td><td>${m(_rpiN(d,'fares_card')+_rpiN(d,'sales_card'))}</td><td>${m(_rpiN(d,'fares_cash')+_rpiN(d,'sales_cash'))}</td>${du?`<td class="rpi-warn">${m(u(d))}</td>`:''}<td><b>${m(_rpiDayTot(d))}</b></td>`:'')+`</tr>`;
   return`<div class="rpi-days-h">${t('repByDay')}</div><table class="analytics-trend-table an-w100 rpi-days" data-nosort><thead><tr>${head}</tr></thead><tbody>${dd.map(row).join('')}</tbody></table>`;
 }
@@ -63632,10 +63665,14 @@ function _anSparkline(values,color,w,h){
   const pts=v.map((val,i)=>((i/(v.length-1))*w).toFixed(1)+','+y(val).toFixed(1)).join(' ');
   return`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" class="an-block"><polyline points="${pts}" fill="none" stroke="${color||'var(--green)'}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${w}" cy="${y(v[v.length-1]).toFixed(1)}" r="2.4" fill="${color||'var(--green)'}"/></svg>`;
 }
-// Gross margin: product revenue minus cost-of-goods for sold lines that map to an item cost.
+// Gross margin: product revenue minus cost-of-goods for sold lines that map to an item cost. Revenue is the till's
+// (_salesTotals): a discount line (negative) takes off it, and goods taken on the MM Team account, like those on the
+// house, bring no revenue though their cost counts (they were sales, and discounts were left out).
 function _anMargin(lines,costById){
   let rev=0,cogs=0,haveCost=false;
-  (lines||[]).forEach(l=>{if(l.cat==='__discount__'||l.cat==='__cardmeta__'||l.pay==='refunded')return;const q=Number(l.qty)||0;if(q<=0)return;if(l.pay!=='house')rev+=q*(Number(l.price)||0);if(l.item_id!=null&&costById[l.item_id]!=null){cogs+=q*costById[l.item_id];haveCost=true;}}); // on the house: its cost, no revenue
+  (lines||[]).forEach(l=>{if(l.cat==='__cardmeta__'||l.pay==='refunded')return;const q=Number(l.qty)||0;
+    if(l.cat==='__discount__'){rev+=q*(Number(l.price)||0);return;} // the discount given (its price is negative)
+    if(q<=0)return;if(l.pay!=='house'&&l.pay!=='team')rev+=q*(Number(l.price)||0);if(l.item_id!=null&&costById[l.item_id]!=null){cogs+=q*costById[l.item_id];haveCost=true;}}); // on the house or the team's: its cost, no revenue
   rev=Math.round(rev);cogs=Math.round(cogs);
   return{rev,cogs,profit:rev-cogs,marginPct:rev>0?Math.round((rev-cogs)/rev*100):0,haveCost};
 }
@@ -63682,8 +63719,13 @@ function _anShareDigest(){
 }
 // The ride fares target a month (Growth's card, Analytics' Collected): the team's (kpi_targets.revenue), else this
 // device's own (S.anRevTarget, Set target before the database had the settings).
-function _anYFaresTgt(){const k=_biz('kpi_targets',null),v=k&&typeof k==='object'?Number(k.revenue)||0:0;return v||Number(S.anRevTarget)||0;}
+function _anTeamTgt(){const k=_biz('kpi_targets',null);return k&&typeof k==='object'?Number(k.revenue)||0:0;}
+function _anYFaresTgt(){return _anTeamTgt()||Number(S.anRevTarget)||0;}
+// Only an admin changes the team's target; anyone else sets this device's only while the team has none (with one,
+// theirs was kept and never read, and nothing said so).
+function _anCanSetTgt(){return isAdmin()||!_anTeamTgt();}
 async function _anSetTarget(){
+  if(!_anCanSetTgt()){toast(t('adminOnlyMsg'),'error');return;}
   const cur=_anYFaresTgt();
   const v=await promptDialog({title:t('anTargetPrompt'),value:cur||'',numeric:true});
   if(v===null)return;
@@ -64159,19 +64201,22 @@ function _renderAnalyticsNow(){
     :{s:null,r:0};
 
   
-  const ridesWithDur=done.filter(e=>e.rideDuration&&e.rideDuration>0);
-  const avgDurOverall=ridesWithDur.length?Math.round(ridesWithDur.reduce((s,e)=>s+e.rideDuration,0)/ridesWithDur.length):0;
-  const maxDurEntry=ridesWithDur.length?ridesWithDur.reduce((best,e)=>e.rideDuration>best.rideDuration?e:best,ridesWithDur[0]):null;
-  const minDurEntry=ridesWithDur.length?ridesWithDur.reduce((best,e)=>e.rideDuration<best.rideDuration?e:best,ridesWithDur[0]):null;
+  // The minutes ridden by the Ride minutes tile's rule (_rideMinutes): the server's check-in and check-out first, and
+  // nothing of a day or more (a rider closed out two nights later read "Longest ride 48 h" and lifted every average).
+  const _durM=new Map();done.forEach(e=>{const d=_rideMinutes(e);if(d>0)_durM.set(e,d);});const _dm=e=>_durM.get(e)||0;
+  const ridesWithDur=done.filter(e=>_durM.has(e));
+  const avgDurOverall=ridesWithDur.length?Math.round(ridesWithDur.reduce((s,e)=>s+_dm(e),0)/ridesWithDur.length):0;
+  const maxDurEntry=ridesWithDur.length?ridesWithDur.reduce((best,e)=>_dm(e)>_dm(best)?e:best,ridesWithDur[0]):null;
+  const minDurEntry=ridesWithDur.length?ridesWithDur.reduce((best,e)=>_dm(e)<_dm(best)?e:best,ridesWithDur[0]):null;
   const durBuckets={'<15 min':0,'15-30 min':0,'30-60 min':0,'1h+':0};
-  ridesWithDur.forEach(e=>{
-    if(e.rideDuration<15)durBuckets['<15 min']++;
-    else if(e.rideDuration<30)durBuckets['15-30 min']++;
-    else if(e.rideDuration<60)durBuckets['30-60 min']++;
+  ridesWithDur.forEach(e=>{const d=_dm(e);
+    if(d<15)durBuckets['<15 min']++;
+    else if(d<30)durBuckets['15-30 min']++;
+    else if(d<60)durBuckets['30-60 min']++;
     else durBuckets['1h+']++;
   });
   const durBySession={};
-  ridesWithDur.forEach(e=>{if(!durBySession[e.sessionId])durBySession[e.sessionId]={sum:0,cnt:0};durBySession[e.sessionId].sum+=e.rideDuration;durBySession[e.sessionId].cnt++;});
+  ridesWithDur.forEach(e=>{if(!durBySession[e.sessionId])durBySession[e.sessionId]={sum:0,cnt:0};durBySession[e.sessionId].sum+=_dm(e);durBySession[e.sessionId].cnt++;});
   // By session, not by its label (2026-10-05): two rides on one day share the weekday and the date, and
   // their durations were merged into one bar. The label carries the start time to tell them apart.
   const avgDurBySession={};
@@ -64180,13 +64225,13 @@ function _renderAnalyticsNow(){
     avgDurBySession[sid]={label:`${dayLabel(s.day)} ${shortDate(s.session_date||s.id)}${st?' · '+fmt12h(_timeText(st)):''}`,avg:Math.round(sum/cnt)};});
   const avgDurSessMax=Math.max(1,...Object.values(avgDurBySession).map(x=>x.avg));
   const durSumByType={},durCntByType={};
-  ridesWithDur.forEach(e=>{const ty=resolvedType(e);durSumByType[ty]=(durSumByType[ty]||0)+e.rideDuration;durCntByType[ty]=(durCntByType[ty]||0)+1;});
+  ridesWithDur.forEach(e=>{const ty=resolvedType(e);durSumByType[ty]=(durSumByType[ty]||0)+_dm(e);durCntByType[ty]=(durCntByType[ty]||0)+1;});
   const avgDurByType={};Object.keys(durSumByType).forEach(k=>{avgDurByType[k]=Math.round(durSumByType[k]/durCntByType[k]);});
   const durSumByModel={},durCntByModel={};
 
   
   const allBikes=getBikes();
-  ridesWithDur.forEach(e=>{getAssignedBikeIds(e).forEach(bId=>{const bk=bikeById(bId);if(!bk)return;const mk=bk.brand&&bk.model?`${bk.brand} - ${bk.model}`:bk.name;durSumByModel[mk]=(durSumByModel[mk]||0)+e.rideDuration;durCntByModel[mk]=(durCntByModel[mk]||0)+1;});});
+  ridesWithDur.forEach(e=>{getAssignedBikeIds(e).forEach(bId=>{const bk=bikeById(bId);if(!bk)return;const mk=bk.brand&&bk.model?`${bk.brand} - ${bk.model}`:bk.name;durSumByModel[mk]=(durSumByModel[mk]||0)+_dm(e);durCntByModel[mk]=(durCntByModel[mk]||0)+1;});});
   const avgDurByModel={};Object.keys(durSumByModel).forEach(k=>{avgDurByModel[k]=Math.round(durSumByModel[k]/durCntByModel[k]);});
   const brandRentals={};
   const modelRentals={};
@@ -64245,7 +64290,7 @@ function _renderAnalyticsNow(){
       const cap  =_placesCap(s);
       const rev  =_revenueOf(_qs(s.id));
       const pend =_dueOf(sDone.filter(e=>!e.paid&&_anYOurs(e)&&!_anYBilled(e)));
-      const occ  =Math.round(_anYUsed(s,_qs(s.id))/cap*100);
+      const occ  =_anYOccOne(s,_qs(s.id));
       const types={};sDone.forEach(e=>{const rt=resolvedType(e);types[rt]=(types[rt]||0)+1;});
       const topT =Object.keys(types).sort((a,b)=>types[b]-types[a])[0]||'—';
       const lbl  =shortDate(s.session_date||s.id).replace(/,.*$/,'');
@@ -64415,8 +64460,9 @@ function _renderAnalyticsNow(){
   // The account holder by name and number, not whoever rode last on the account (2026-10-05): a party's
   // rows carry each companion's name, and the newest row named the lapsed rider, the top customer and the
   // WhatsApp chips after a companion, with the companion's number. The rows answer only for an account
-  // this device does not hold.
-  const _anWho=(id,name,phone)=>{const a=_custById(id);return a?{name:a.name||name||'',phone:a.phone||''}:{name:name||'',phone:phone||''};};
+  // this device does not hold. The number is the one for WhatsApp (_waNum: the separate one a rider gave, else the
+  // mobile), since it only feeds the wa.me links of the lapsed riders and the RFM chips.
+  const _anWho=(id,name,phone)=>{const a=_custById(id);return a?{name:a.name||name||'',phone:_waNum(a)||''}:{name:name||'',phone:phone||''};};
   // ── Retention (all-time, independent of range) ──
   // A rider's count is VISITS (distinct sessions), as in the in-range numbers above: a party of
   // three on one booking is one visit by its booker, not three rides that made them a repeat rider.
@@ -64567,7 +64613,7 @@ function _renderAnalyticsNow(){
     const chron=heldRan.slice().sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
     const sRev=chron.map(s=>Math.round(_revenueOf(_qs(s.id))));
     const sRides=chron.map(s=>_dn(s.id).length);
-    const sOcc=chron.map(s=>Math.round(_anYUsed(s,_qs(s.id))/_placesCap(s)*100));
+    const sOcc=chron.map(s=>_anYOccOne(s,_qs(s.id)));
     const _spark=(label,series,fmt,color)=>`<div class="an-spark"><div class="an-spark-lbl">${label}</div><div class="an-spark-val">${series.length?fmt(series[series.length-1]):'—'}</div>${_anSparkline(series,color)}</div>`;
     const trends=chron.length>=2?`<div class="chart-card"><div class="chart-card-title">${t('anTrendsTitle')}</div><div class="chart-card-sub">${t('anTrendsSub')}</div><div class="an-spark-row">${_spark(t('anRevCollected'),sRev,v=>_money(v),'var(--green)')}${_spark(t('anRidership'),sRides,v=>String(v),'var(--blue)')}${_spark(t('anAvgOccupancy'),sOcc,v=>v+'%','var(--orange)')}</div></div>`:'';
     // Retail attach + this-month forecast
@@ -64586,7 +64632,7 @@ function _renderAnalyticsNow(){
     // Monthly ride fares target & pace: the team's (kpi_targets.revenue) or this device's (S08-analytics-01); the whole
     // business's, so not drawn with a product picked
     const tgt=_anYFaresTgt();
-    const targetCard=_anYKindOn()?'':`<div class="chart-card"><div class="an-target-head"><div class="an-minw0"><div class="chart-card-title">${t('anTargetTitle')}</div><div class="chart-card-sub">${tgt?`${t('anTargetProjEnd').replace('{0}',fc.projRev)} · ${fc.projRev>=tgt?`<b class="an-c-green">${t('anTargetOnPace')}</b>`:`<b class="an-c-orange">${t('anTargetBehind')}</b>`}`:t('anTargetNone')}</div></div><button class="btn-secondary an-btn-sm-fixed" data-on-click="${_on("_anSetTarget")}">${t('anTargetSet')}</button></div>${tgt?`<div class="an-mt10"><div class="an-target-nums"><span>${_money(fc.rev)}</span><span class="an-c-muted">${_money(tgt)}</span></div><div class="an-target-track"><div class="an-pfill" data-cssv="${_cssv({'--an-w':Math.min(100,Math.round(fc.rev/tgt*100))+'%','--an-bg':fc.rev>=tgt?'var(--green)':'var(--blue)'})}"></div></div></div>`:''}</div>`;
+    const targetCard=_anYKindOn()?'':`<div class="chart-card"><div class="an-target-head"><div class="an-minw0"><div class="chart-card-title">${t('anTargetTitle')}</div><div class="chart-card-sub">${tgt?`${t('anTargetProjEnd').replace('{0}',fc.projRev)} · ${fc.projRev>=tgt?`<b class="an-c-green">${t('anTargetOnPace')}</b>`:`<b class="an-c-orange">${t('anTargetBehind')}</b>`}`:t('anTargetNone')}</div></div>${_anCanSetTgt()?`<button class="btn-secondary an-btn-sm-fixed" data-on-click="${_on("_anSetTarget")}">${t('anTargetSet')}</button>`:''}</div>${tgt?`<div class="an-mt10"><div class="an-target-nums"><span>${_money(fc.rev)}</span><span class="an-c-muted">${_money(tgt)}</span></div><div class="an-target-track"><div class="an-pfill" data-cssv="${_cssv({'--an-w':Math.min(100,Math.round(fc.rev/tgt*100))+'%','--an-bg':fc.rev>=tgt?'var(--green)':'var(--blue)'})}"></div></div></div>`:''}</div>`;
     // RFM segments (all-time recency/frequency/money)
     const cust={};
     // rides by the one definition (S08-analytics-18)
@@ -64633,7 +64679,7 @@ function _renderAnalyticsNow(){
 
   // Rows behind the "Export CSV" button (per-session summary for the current range).
   // The product picked narrows it (S08-analytics-05); occupancy by the one definition, for a session held (-10, -04).
-  S._anCsvRows=sessions.map(s=>{const sd=_dn(s.id);const rev=_revenueOf(_qs(s.id));return{date:s.session_date||s.id,day:s.day||'',product:t(_anYKinds.find(k=>k[0]===_anYKind(s))[1]),riders:sd.length,no_shows:_qs(s.id).filter(e=>e.status==='noshow').length,revenue_sar:Math.round(rev),occupancy_pct:_anYHeld(s)?Math.round(_anYUsed(s,_qs(s.id))/_placesCap(s)*100):''};});
+  S._anCsvRows=sessions.map(s=>{const sd=_dn(s.id);const rev=_revenueOf(_qs(s.id));return{date:s.session_date||s.id,day:s.day||'',product:t(_anYKinds.find(k=>k[0]===_anYKind(s))[1]),riders:sd.length,no_shows:_qs(s.id).filter(e=>e.status==='noshow').length,revenue_sar:Math.round(rev),occupancy_pct:_anYHeld(s)?_anYOccOne(s,_qs(s.id)):''};});
   // Text behind the "Share digest" button (WhatsApp-friendly summary of the current range).
   S._anDigestText=`MicroMobility — ${t('tabAnalytics')}${_anYKindOn()?' · '+t(_anYKinds.find(k=>k[0]===S.anKind)[1]):''}\n• ${t('anCntRides')}: ${done.length}\n• ${t('anRevCollected')}: ${_money(Math.round(revCollected),_NOISO)}${revPending>0?` (+${_money(Math.round(revPending),_NOISO)} ${t('printPending').toLowerCase()})`:''}${revBilled>0?`\n• ${t('anBilledCo')}: ${_money(Math.round(revBilled),_NOISO)}`:''}\n• ${t('anAvgOccupancy')}: ${avgOccupancy}%${anTopItems.length?`\n• ${t('anTopSellers')}: ${anTopItems[0].name}`:''}${noshow.length?`\n• ${t('anNoShowRate')}: ${noShowRate}% (${noshow.length})`:''}`;
   const _anHtml=`
@@ -64962,12 +65008,12 @@ function _renderAnalyticsNow(){
         <div class="analytics-kpi-sub">${ridesWithDur.length} ${t('anDurRidesTracked')}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value an-c-green">${fmtDur(maxDurEntry?.rideDuration)}</div>
+        <div class="analytics-kpi-value an-c-green">${fmtDur(maxDurEntry?_dm(maxDurEntry):0)}</div>
         <div class="analytics-kpi-label">${t('anLongestRide')}</div>
         <div class="analytics-kpi-sub">${maxDurEntry?esc(maxDurEntry.name):''}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value an-c-mutedl">${fmtDur(minDurEntry?.rideDuration)}</div>
+        <div class="analytics-kpi-value an-c-mutedl">${fmtDur(minDurEntry?_dm(minDurEntry):0)}</div>
         <div class="analytics-kpi-label">${t('anShortestRide')}</div>
         <div class="analytics-kpi-sub">${minDurEntry?esc(minDurEntry.name):''}</div>
       </div>
