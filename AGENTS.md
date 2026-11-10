@@ -2387,6 +2387,19 @@ come with that part's language packs, so a spec that switches language and acts 
 ## Referrals (2026-11-08, migration 20261108160000)
 
 The owner: "referring a friend that completes a paid ride gets a free ride".
+- **No rewards since 2026-11-10** (the user: "remove that a referral gives a discount or free ride"; picks: keep invites
+  without rewards, honour the codes already given until they expire; migration 20261111001000). `_ref_reward` only writes
+  the friend's first paid JCC ride or Petromin night on the referral (`rode_at`, for "Friends who rode", the Recruiter
+  badges and People > Referrals): no RF- free ride, no RB- bonus, no push, no yearly limit. `_ref_welcome` makes no RW-
+  code and brings none back; it answers the friend's code already given while it is on. Codes given before keep working
+  to their `expires_at`, so everything below that shows, applies or guards RW/RF/RB codes stays. The rider's card has no
+  reward sentence (`refHow` gone), no "Free rides earned", and the share message, Create account note and `refEnterOk`
+  promise nothing; a friend's six-character code typed in the promo box only puts on an RW- code the account already
+  holds (`_refPromoTry` no longer links: the Invite card's box does). Settings > Business > Referrals keeps the switch
+  only (`ref_pct`, `ref_days`, `ref_cap` boxes gone; saved values are ignored for new codes, as none are made). Staff's
+  account window says "First paid ride {date}" (`refAhRodeOnly`) for a friend who rode without a code. The Privacy
+  Notice's referral row still names "the rewards referrals earn you" (the codes given are still held). Website: the
+  same card (mm-platform ReferralCard, Referral.words.ts) and the Recruiter 5 badge words.
 - **The rider's card.** My Account's Invite friends card (`#ref-mine`, `_refLoad` / `_refPaint`) shows the account's own code
   (`referral_codes`: six characters, no 0/O/1/I/L, made the first time the card asks, `customer_referral` with `p_make`),
   Share (the share sheet, else WhatsApp) and Copy link (`/signup?ref=CODE`, `_refLink`), and counts only: friends joined,

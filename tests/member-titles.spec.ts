@@ -94,7 +94,7 @@ test.describe('@customer:account member titles', () => {
 });
 
 test.describe('@customer:account friend invite', () => {
-  test('the invite sits on the Account part, under Invite friends, ride free, not in the titles card (the user, 2026-11-09)', async ({ page }) => {
+  test('the invite sits on the Account part, under Invite friends, not in the titles card (the user, 2026-11-09)', async ({ page }) => {
     await rider(page, { 'rpc:member_invite_code': { ok: true, code: 'abcdef0123456789' } });
     await account(page); // the Badges part: the titles card, no invite in it
     await expect(page.locator('#tt-mine .tt-invite')).toHaveCount(0);

@@ -406,8 +406,8 @@ with expected(fname, want_definer, note) as (values
   ('_ref_norm',                 false, 'referrals: tidies a typed code; reads no table'),
   ('_ref_new',                  true,  'referrals: reads customers and queue_entries for an account that may be referred'),
   ('_ref_make_code',            true,  'referrals: writes referral_codes, which nobody writes directly'),
-  ('_ref_reward',               true,  'referrals: writes referrals and promo_codes for the free ride'),
-  ('_ref_ride_done',            true,  'trigger: reads referrals and gives the free ride when a referred friend''s paid JCC ride is done'),
+  ('_ref_reward',               true,  'referrals: writes referrals, a referred friend''s first paid ride (no code since 20261111001000)'),
+  ('_ref_ride_done',            true,  'trigger: reads referrals and marks a referred friend''s first paid JCC ride or Petromin night'),
   ('_ref_code_guard',           true,  'trigger: reads promo_codes (staff-only) to refuse a referral free ride on Carbon'),
   ('customer_referral',         true,  'referrals: the rider''s own code, counts and free rides; token-checked'),
   ('customer_set_referrer',     true,  'referrals: links a new account to a code''s owner; token-checked, rate-limited'),
@@ -419,7 +419,7 @@ with expected(fname, want_definer, note) as (values
   ('_push_drain_call',          true,  'pg_cron: reads push_outbox and asks /api/push-send to send it (pg_net)'),
   -- Referrals, the friend's half (20261108200000)
   ('_ref_pct',                  true,  'referrals: reads staff_options, which riders cannot'),
-  ('_ref_welcome',              true,  'referrals: writes promo_codes, the friend''s own code'),
+  ('_ref_welcome',              true,  'referrals: reads promo_codes (staff-only), the friend''s code already given (makes none since 20261111001000)'),
   ('_ref_welcome_off',          true,  'referrals: puts a friend''s unused code away in promo_codes'),
   -- Badge requests (20261108210000)
   ('customer_badge_request',     true,  'badge requests: writes badge_requests, which riders cannot; token-checked'),
