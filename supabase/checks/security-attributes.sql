@@ -450,7 +450,16 @@ with expected(fname, want_definer, note) as (values
   ('_vol_brief_reset',             true,  'trigger: clears every "I have read it" when the briefing changes'),
   ('_vol_today',                   false, 'pure: today in Riyadh'),
   ('customer_set_whatsapp',        true,  'writes the caller''s own WhatsApp answer, clears its flag; token-checked'),
-  ('_fix_changed',                 false, 'reads one customers row; called only from definer functions, no client execute (20261109200000)')
+  ('_fix_changed',                 false, 'reads one customers row; called only from definer functions, no client execute (20261109200000)'),
+  ('customer_sport',               true,  'reads the caller''s own sport answer and whether it is asked; token-checked (20261110233000)'),
+  ('customer_set_sport',           true,  'writes the caller''s own sport answer; token-checked (20261110233000)'),
+  ('sport_option_list',            true,  'the sports staff added to the list, for every picker (20261110233000)'),
+  ('staff_sport_option_add',       true,  'adds a sport to the list and moves the accounts that wrote it under Other; is_staff() (20261110233000)'),
+  ('_sport_codes',                 true,  'every code an answer may hold, sport_options included; no client execute (20261110233000)'),
+  ('_sport_clean',                 true,  'a yes answer''s codes in the list''s order; no client execute (20261110233000)'),
+  ('_sport_answer_check',          true,  'trigger: refuses a sport code outside the lists, whoever writes, and stamps sport_answered_at (20261110233000)'),
+  ('_sport_feds',                  false, 'pure: the user''s 74 federation codes (20261110233000)'),
+  ('_sport_other_clean',           false, 'pure: what a rider wrote under Other, tidied (20261110233000)')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

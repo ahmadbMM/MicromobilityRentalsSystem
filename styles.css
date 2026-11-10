@@ -5482,6 +5482,42 @@ body.fix-open{overflow:hidden;}
 .fx-wa-box .fx-opt{height:52px;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
 .fx-wa-box .fx-wa-lbl{display:block;margin-top:16px;}
 .fx-wa-box .pg-btn[hidden]{display:none;}
+/* Competing in a sport (2026-11-10): Yes / No, and after a yes the federations picked as chips (each with its remove
+   button) and a list that adds one more; in the check-up, its own pop-up, My Account and the staff account editor */
+.sp-feds{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+.sp-feds-lbl{font-weight:600;font-size:14px;line-height:1.4;color:var(--ink);}
+.sp-chips{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;}
+.sp-chip{display:inline-flex;align-items:center;gap:2px;max-width:100%;min-height:40px;box-sizing:border-box;padding-block:2px;padding-inline:12px 2px;border-radius:999px;border:1px solid var(--go);background:var(--go-wash);color:var(--go-2);font-weight:600;font-size:13.5px;line-height:1.3;}
+.sp-chip>span{overflow-wrap:anywhere;}
+.sp-x{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:0;padding:0;background:none;color:inherit;cursor:pointer;}
+.sp-x:hover{background:var(--go-wash);}
+.sp-x:disabled{opacity:.5;cursor:default;}
+.sp-add{width:100%;}
+.fx-sp-box .sp-feds{margin-top:16px;}
+.cf-sp-lbl{font-weight:600;font-size:13px;margin-bottom:4px;}
+.cf-sp .fx-q{font-weight:500;margin-bottom:6px;}
+/* Analytics > Sports we have (2026-11-10) */
+.sp-an-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;}
+.sp-an-btns{display:flex;flex-wrap:wrap;gap:6px;}
+.sp-an-filters{display:flex;flex-wrap:wrap;gap:8px 16px;margin:4px 0 14px;}
+.sp-an-fg{display:flex;flex-wrap:wrap;gap:6px;}
+.sp-an-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px;align-items:start;}
+.sp-an-grid .chart-card{margin:0;}
+.sp-an-card{margin-top:14px;}
+.sp-an-lbl{min-width:110px;max-width:46%;overflow-wrap:anywhere;}
+.sp-an-row .analytics-bar-value{min-width:72px;}
+.sp-an-fed{border-top:1px solid var(--line);}
+.sp-an-fed:first-of-type{border-top:0;}
+.sp-an-fed-btn{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:6px 0;border:0;background:none;color:inherit;font:inherit;text-align:start;cursor:pointer;}
+.sp-an-fed-btn:hover .analytics-bar-label{text-decoration:underline;}
+.sp-an-fed-btn .analytics-bar-label{display:flex;flex-direction:column;gap:2px;flex:0 0 38%;max-width:38%;}
+.sp-an-fed-btn .analytics-bar-track,.sp-an-fed-btn .analytics-bar-fill{display:block;}
+.sp-an-grp{font-weight:500;font-size:11px;color:var(--ink-3);}
+.sp-an-fed-btn .analytics-bar-value{min-width:120px;}
+.sp-an-names{list-style:none;margin:0 0 10px;padding:0 0 0 4px;display:flex;flex-wrap:wrap;gap:6px 14px;}
+.sp-an-nm{border:0;background:none;padding:4px 0;font:inherit;font-size:13px;font-weight:600;color:var(--go-2,var(--green));cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
+.sp-an-tag{font-size:11px;color:var(--ink-3);}
+.sp-an-dlg{max-width:440px;}
 .fx-photo{display:flex;align-items:center;gap:12px;}
 .fx-ph{width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--line);box-sizing:border-box;}
 .fx-ph.new{border-color:var(--go);}

@@ -1904,6 +1904,47 @@ The owner: "create a field for the accounts ... and allow people to add their bl
 - Privacy notice 2026-10-14 has a blood type row (en + ar); `PRIVACY_ASK_FROM` unchanged (no re-ask).
 - `BLOOD_TYPES` / `_btLabel` sit beside `EM_RELS`. Tests: `tests/blood-type.spec.ts`.
 
+## Competing in a sport (2026-11-10, migration 20261110233000)
+
+The user: "add a question and keep as a field in all accounts and force it on community members the next time they
+open or sign in the website, Do you compete in a professional/amateur capacity in a sport? yes or no and the answers
+if yes be" the 74 Saudi sports federations and committees (in ten groups).
+
+- **Database**: `customers.sport_competes` (null = not answered) and `customers.sport_federations` (codes, one or more,
+  only with a yes; check `customers_sport_answer`). `_sport_feds()` is the one list of codes (a code is never renamed:
+  answers keep it); `_sport_clean(text[])` keeps a yes's codes once each in the list's order, null when one is unknown.
+  Staff read and edit both under RLS (select + update to authenticated). `customer_sport(p_id, p_token)` -> (competes,
+  federations, asked) and `customer_set_sport(p_id, p_token, p_competes, p_federations)` (BAD_INPUT `sport` /
+  `sport_feds`). `_customer_asks` asks `'sport'` of every live Community member (tag_saturday) with no answer, so the
+  check-up opens at sign-in and `customer_create_booking` refuses their bookings (FIX_FIRST); `customer_fix_save` takes
+  `{"sport": {"competes": true, "federations": [...]}}` or `{"sport": {"competes": false}}`. `_purge_old` clears both.
+- **App**: `SPORT_GROUPS` ([English, Arabic, [[code, English, Arabic], ...]]) beside `BLOOD_TYPES`; names are English
+  and Arabic only (the other languages show the English, like city names). One question block `_spQHtml(scope, …)`
+  (Yes / No, then chips with remove buttons and a grouped select that adds one) for three scopes: `fx` (the check-up,
+  `S._fix.v.sp`), `acc` (My Account, `S._spAcc`) and `cf` (the staff account editor, `S._cf.sp`); `_spSet`, `_spAdd`,
+  `_spDrop` redraw only `#<scope>-sp-q`. In the check-up `'sport'` is a `staff:false` FIX_FIELDS entry (never a staff
+  flag) and in FIX_EXTRA; alone it is its own pop-up (`_fixSpHtml`, `g.spOnly`: No saves at once, Yes opens the
+  federations and Save), with other asks it is one item of the list. My Account's card (`_accSpHtml`, `saveSport`) is
+  every account's, hidden before the migration. The staff editor reads it with the row (`_cfSpHtml`, `_cfSpVal`) and
+  writes it only once read and answered. Privacy Notice 2026-11-10 has a row (no re-ask). `tests/sport-question.spec.ts`.
+- **Other and the sports staff add** (the user, same day: "add an option called other that opens a text field ... and
+  add this choice later on to the list"): the code `'other'` with `customers.sport_other` (2-60 characters, there exactly
+  when `'other'` is a code; `_sport_other_clean`); the box opens under the chips (`#<scope>-sp-other`, `_spOtherIn`,
+  `_spOtherVal`). `sport_options` (codes `x_...`, English and Arabic names) are the sports staff added; everyone reads
+  them through `sport_option_list()` (`_spOptsLoad`, `S._spOpts`, offered under "More sports" after the user's groups,
+  then Other). Valid codes are `_sport_codes()` (the 74, the added ones, `'other'`), checked by the trigger
+  `customers_sport_answer` (`_sport_answer_check`), which also stamps `customers.sport_answered_at` (not when
+  `staff_sport_option_add` moves written answers: `mm.sport_move`). `_spClean` keeps an `x_` code it has not read yet.
+- **Analytics > Sports we have** (`anView` `'sports'`, host `#an-sp-host`, `_spAnLoad` / `_spAnData` / `_spAnPaint`; the
+  user: "add to reports as an option called sports we have and graphs and stats on it", "add as much analytics options
+  as you can for it"): its own read of the answered rows (ten minutes), against `S.customers`, their tags and their
+  rides. Filters all / Community members / not members and everyone / male / female (`S.spAnF`); eight figures; Yes-No,
+  by group, sports per athlete, by gender (with each gender's Yes rate), age, nationality and preferred bike, answers by
+  week (`sport_answered_at`); athletes' riding against everyone else's; by federation with the names behind each (opens
+  the account); what was written under Other with Add to the list (`_spAnAddDlg` -> `staff_sport_option_add(p_name_en,
+  p_name_ar, p_from)`: the sport joins the list and the accounts that wrote it, in any case, move onto it); two CSVs.
+- **Website** (mm-platform): the same pop-up in the account area's chain of gates and a card on the account page.
+
 ## No ID or Iqama numbers (2026-10-23)
 
 Owner rule (2026-10-23): "dont save customers ids numbers in our system". We never ask for, keep or show a
