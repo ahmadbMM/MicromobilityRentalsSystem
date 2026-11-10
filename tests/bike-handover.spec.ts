@@ -78,7 +78,8 @@ test.describe('the bike picker', () => {
 
   test('a Petromin employee handed a Hybrid is priced at the employee fare, not 57.50', async ({ page }) => {
     await boot(page, {
-      queue_entries: [entry('e1', 1, 'waiting', { session_id: 'pm', price: 50 })],
+      // booked on a Road bike (the standard 75 for employees too), so the Hybrid handed over sets the fare
+      queue_entries: [entry('e1', 1, 'waiting', { session_id: 'pm', price: 75, type_preference: 'Road' })],
       bikes: [bike('h1', 1, 'Hybrid')],
       rider_registrations: [{ id: 'r1', name: 'Rider e1', booking_no: 'A-1001', source: 'petromin', matched_entry_id: 'e1', updated_at: '2099-01-01T10:00:00Z' }],
     });
@@ -86,6 +87,63 @@ test.describe('the bike picker', () => {
     await page.evaluate(`openModal('e1');S.modalBikes=['h1'];confirmAssign()`);
     await expect.poll(() => checkins.filter((c) => c.id === 'e1').length).toBe(1);
     expect(checkins[0].price).toBe(50);
+  });
+
+  // The bug hunt, 2026-11-10: the check-in modal's rule, an edited price stands unless the type changes.
+  test('a price set on a booking stands when it is handed a bike of its own type', async ({ page }) => {
+    await boot(page, {
+      queue_entries: [entry('e1', 1, 'waiting', { price: 40 })],
+      bikes: [bike('h1', 1, 'Hybrid')],
+    });
+    const checkins = watchCheckins(page);
+    await page.evaluate(`openModal('e1');S.modalBikes=['h1'];confirmAssign()`);
+    await expect.poll(() => checkins.filter((c) => c.id === 'e1').length).toBe(1);
+    expect(checkins[0]).toMatchObject({ assigned_bike_id: 'h1' });
+    expect('price' in checkins[0]).toBe(false);
+  });
+
+  test('a bike reserved for a booking on another night is free tonight, and that reservation stays', async ({ page }) => {
+    const SAT = { id: 's1', day: 'Saturday', session_date: '2099-03-14', capacity: 12, status: 'open', created_at: 3 };
+    await boot(page, {
+      sessions: [SESSION, PM, SAT],
+      queue_entries: [entry('e1', 1, 'waiting'), entry('e2', 1, 'waiting', { session_id: 's1', session_day: 'Saturday', session_date: '2099-03-14', assigned_bike_id: 'h1' })],
+      bikes: [bike('h1', 1, 'Hybrid')],
+    });
+    const patches = watch(page, 'queue_entries');
+    const checkins = watchCheckins(page);
+    await page.evaluate(`openModal('e1')`);
+    await expect(page.locator('#bike-modal .bkm-brsv')).toHaveCount(0);
+    await page.evaluate(`S.modalBikes=['h1'];confirmAssign()`);
+    await expect.poll(() => checkins.filter((c) => c.id === 'e1').length).toBe(1);
+    await page.waitForTimeout(300);
+    expect(patches.filter((p) => p.url.includes('id=eq.e2'))).toEqual([]);
+  });
+
+  test('Undo after "assign anyway" gives the other rider their reservation back', async ({ page }) => {
+    await boot(page, {
+      queue_entries: [entry('e1', 1, 'waiting'), entry('e2', 2, 'waiting', { assigned_bike_id: 'h1' })],
+      bikes: [bike('h1', 1, 'Hybrid')],
+    });
+    const patches = watch(page, 'queue_entries');
+    const done = page.evaluate(`openModal('e1');S.modalBikes=['h1'];reserveBike()`);
+    await expect(page.locator('#confirm-modal .confirm-box')).toBeVisible();
+    await page.evaluate(`_doConfirm()`);
+    await done;
+    await expect.poll(() => patches.filter((p) => p.url.includes('id=eq.e2')).length).toBe(1);
+    await page.evaluate(`doUndo()`);
+    await expect.poll(() => patches.filter((p) => p.url.includes('id=eq.e2')).length).toBe(2);
+    const back = patches.filter((p) => p.url.includes('id=eq.e2'))[1];
+    expect(JSON.parse(back.body)).toEqual({ assigned_bike_id: 'h1' });
+    expect(back.url).toMatch(/assigned_bike_id=is\.null/); // only while e2 is still as the move left it
+    expect(await page.evaluate(`_qGet('e2').assignedBikeId`)).toBe('h1');
+  });
+
+  test('Reserve bike records the payment chosen at check-in, as Confirm does', async ({ page }) => {
+    await boot(page, { queue_entries: [entry('e1', 1, 'waiting')], bikes: [bike('h1', 1, 'Hybrid')] });
+    const patches = watch(page, 'queue_entries');
+    await page.evaluate(`openModal('e1');S._ciPayCarry={id:'e1',mode:'card'};S.modalBikes=['h1'];reserveBike()`);
+    await expect.poll(() => patches.find((p) => p.url.includes('id=eq.e1') && /"paid":true/.test(p.body))?.body || '').toContain('"pay_method":"card"');
+    expect(await page.evaluate(`S._ciPayCarry`)).toBeNull();
   });
 
   test('reserving a bike held for another rider moves the reservation instead of sharing it', async ({ page }) => {

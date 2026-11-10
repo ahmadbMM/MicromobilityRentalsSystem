@@ -89,8 +89,13 @@ test('lists the bikes that need a mechanic, and only those', async ({ page }) =>
 test('Mark serviced on a bike in maintenance stamps it, puts it back in the pool, and undoes', async ({ page }) => {
   await openBikes(page);
   const patches = bikePatches(page);
+  const urls: string[] = [];
+  page.on('request', (r) => { if (r.method() === 'PATCH' && r.url().includes('/rest/v1/bikes')) urls.push(decodeURIComponent(r.url())); });
   await row(page, 'b-maint').getByRole('button', { name: 'Mark serviced' }).click();
-  await expect.poll(() => patches.find((b) => b.includes('last_serviced_at')) || '').toContain('"status":"available"');
+  // the stamp, then the bike back in the pool only while it is still in maintenance (the bug hunt, 2026-11-10)
+  await expect.poll(() => patches.find((b) => b.includes('last_serviced_at')) || '').not.toBe('');
+  await expect.poll(() => patches.find((b) => b.includes('"status":"available"')) || '').not.toBe('');
+  expect(urls.find((u) => u.includes('id=eq.b-maint') && u.includes('status=eq.maintenance'))).toBeTruthy();
   await expect(row(page, 'b-maint')).toHaveCount(0);
   await page.locator('#topbar-right .undo-btn').click();
   await expect.poll(() => patches.some((b) => b.includes('"status":"maintenance"'))).toBe(true);

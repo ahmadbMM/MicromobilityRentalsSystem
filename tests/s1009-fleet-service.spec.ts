@@ -63,8 +63,31 @@ test.describe('@staff:bikes maintenance log', () => {
     expect(row).toMatchObject({ bike_id: 'b1', kind: 'service', work: 'Two new tubes, trued the rear wheel', parts_cost: 23, labour_cost: 35, mechanic: 'Omar Al Saud' });
     expect(row.parts).toEqual([{ id: 'tube', name: 'Inner tube 700c', qty: 2, cost: 11.5 }]);
     await expect.poll(() => calls.find((c) => c.name === 'staff_inventory_move')?.body).toMatchObject({ p_item: 'tube', p_delta: -2, p_reason: 'maintenance_part' });
-    await expect.poll(() => calls.find((c) => c.name === 'bikes')?.body).toMatchObject({ status: 'available', retired_date: null });
-    expect((calls.find((c) => c.name === 'bikes')!.body as Record<string, unknown>).last_serviced_at).toBeTruthy();
+    // back in service only while the bike is still in maintenance, and the stamp in its own write that only moves it
+    // forward (the bug hunt, 2026-11-10)
+    const has = (c: Call, k: string) => !Array.isArray(c.body) && k in c.body;
+    await expect.poll(() => calls.find((c) => c.name === 'bikes' && has(c, 'status'))?.body).toMatchObject({ status: 'available', retired_date: null });
+    expect(calls.find((c) => c.name === 'bikes' && has(c, 'status'))!.url).toContain('status=eq.maintenance');
+    const stamp = calls.find((c) => c.name === 'bikes' && has(c, 'last_serviced_at'))!;
+    expect((stamp.body as Record<string, unknown>).last_serviced_at).toBeTruthy();
+    expect(stamp.url).toContain('last_serviced_at.is.null');
+  });
+
+  test('an older service logged after a newer one leaves the stamp alone, and a date to come is refused', async ({ page }) => {
+    const calls = await open(page, { bikes: [{ ...BIKE, status: 'available', retired_date: null, last_serviced_at: '2026-11-09T09:00:00Z' }] });
+    await page.evaluate("openBikeProfile('b1')");
+    await page.locator('#bp-fleet').getByRole('button', { name: /Add entry/ }).click();
+    const d = page.locator('#confirm-modal .ws-dlg');
+    await d.locator('#svc-work').fill('Chain cleaned and oiled');
+    await d.locator('#svc-at').fill('2099-01-01T10:00');
+    await d.getByRole('button', { name: 'Save' }).click();
+    await expect(page.locator('#ws-dlg-err')).toContainText('future');
+    expect(calls.filter((c) => c.name === 'bike_service_log')).toEqual([]);
+    await d.locator('#svc-at').fill('2026-10-01T10:00');
+    await d.getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => calls.find((c) => c.name === 'bike_service_log')?.body).toMatchObject({ kind: 'service', at: '2026-10-01T10:00:00+03:00' });
+    await page.waitForTimeout(300);
+    expect(calls.filter((c) => c.name === 'bikes')).toEqual([]);
   });
 
   test('nothing done and no part is refused in the dialog', async ({ page }) => {
