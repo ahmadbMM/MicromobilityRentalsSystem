@@ -57,6 +57,14 @@ html, body { margin: 0; padding: 0; background: var(--mm-offwhite); }
 .recognition { margin-top: 20px; font-size: 17px; font-weight: 300; line-height: 1.55; }
 .initiative { margin-top: 10px; align-self: flex-start; font-size: 28px; font-weight: 700; background: var(--mm-green); padding: 5px 16px; }
 .thanks-ar { margin-top: 12px; font-size: 17px; font-weight: 400; line-height: 1.7; text-align: left; }
+/* The hours volunteered, a line of their own under the thank-you (the owner, 2026-11-10: "mention the
+   number of hours on certificates"). They were a small second line under Date; the number is now as
+   heavy as the green box's line and the label is the footer's, so it reads "6  VOLUNTEER HOURS".
+   A label and a number, so the Arabic needs no plural that changes with the count. */
+.hours { margin-top: 18px; display: flex; align-items: baseline; gap: 12px; }
+.hours-n { font-size: 28px; font-weight: 700; line-height: 1; }
+.hours-label { font-size: 12px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; }
+.hours-label .ar { letter-spacing: 0; }
 
 .footer { margin-top: auto; display: flex; gap: 48px; align-items: flex-end; }
 /* 270px in the kit. The signature is 250px wide and hangs 8px left, so the block never needed more
@@ -75,9 +83,10 @@ html, body { margin: 0; padding: 0; background: var(--mm-offwhite); }
 .meta-value { font-size: 16px; font-weight: 700; }
 
 /* ── additions (SPEC.md: "put it in the footer area without moving existing elements") ──
-   The hours and the check code are a second line under Date and under No., never meta items
-   of their own: the two the design has already end 30px short of the corner graphic, and a
-   third pushed text under it. A second line grows the footer upwards, where there is room. */
+   The check code is a second line under No., never a meta item of its own: the two the design
+   has already end 30px short of the corner graphic, and a third pushed text under it. A second
+   line grows the footer upwards, where there is room. (The hours were one under Date until
+   2026-11-10; they are in the body now, .hours above.) */
 .meta-sub { font-size: 11px; font-weight: 500; letter-spacing: .5px; }
 
 /* The Print button belongs to the window, not to the certificate: it is the only thing

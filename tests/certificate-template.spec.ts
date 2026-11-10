@@ -111,6 +111,13 @@ test.describe('the three approved samples', () => {
       expect(name.w).toBeLessThanOrEqual(name.max);
       // An empty Arabic name leaves no gap: the line itself is gone.
       expect(await page.locator('.name-ar').count()).toBe(s.volunteer_name_ar ? 1 : 0);
+      // The hours are a line of their own under the thank-you, and only when there are some (the owner,
+      // 2026-11-10); the date's column holds the date alone.
+      if (s.hours) {
+        await expect(page.locator('.hours-n')).toHaveText(s.hours);
+        await expect(page.locator('.hours-label')).toHaveText('Volunteer hours · ساعات التطوع');
+      } else expect(await page.locator('.hours').count()).toBe(0);
+      expect(await page.locator('.meta-item').first().locator('.meta-sub').count()).toBe(0);
       // Both languages follow the gender (the owner, 2026-11-08).
       await expect(page.locator('.thanks-ar')).toHaveText(WORDS[s.gender].arabic_line);
       await expect(page.locator('.recognition')).toHaveText(WORDS[s.gender].recognition);
@@ -121,7 +128,7 @@ test.describe('the three approved samples', () => {
       const clash = await page.evaluate(() => {
         const g = document.querySelector('.supergraphic')!.getBoundingClientRect();
         const hit = (r: DOMRect) => r.right > g.left && r.left < g.right && r.bottom > g.top && r.top < g.bottom;
-        return [...document.querySelectorAll('.content .lead, .content .name, .content .name-ar, .content .recognition, .content .initiative, .content .thanks-ar, .content .title-ar, .content .title-en, .meta-item, .meta-sub, .signer-name, .signer-role span')]
+        return [...document.querySelectorAll('.content .lead, .content .name, .content .name-ar, .content .recognition, .content .initiative, .content .thanks-ar, .content .hours-n, .content .hours-label, .content .title-ar, .content .title-en, .meta-item, .meta-sub, .signer-name, .signer-role span')]
           .filter((el) => { const r = document.createRange(); r.selectNodeContents(el); return hit(r.getBoundingClientRect()); })
           .map((el) => el.className || el.tagName);
       });
@@ -223,7 +230,7 @@ test('a certificate staff write themselves is a certificate like any other', () 
 
 test('the widest footer there can be still clears the corner graphic', async ({ page, baseURL }) => {
   // The serial is always MMV-YYYY-NNNNN and the check code always twelve characters, so this is as
-  // wide as the No. column ever gets; the hours put a second line under the date as well.
+  // wide as the No. column ever gets (the hours are in the body since 2026-11-10, no longer under the date).
   const html = fill(read('assets/certificate.html'), {
     css: `${baseURL}/certificate.css`, fonts: `${baseURL}/fonts/fonts.css`, doc_title: 'C', print_label: 'Print',
     volunteer_name: 'Sara Abdulrahman Al-Qahtani', volunteer_name_ar: 'سارة عبدالرحمن القحطاني',

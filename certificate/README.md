@@ -34,6 +34,12 @@ section at its foot, including the two the code never matched: a certificate's n
 `MMV-YYYY-NNNNN` (the serial `volunteer_certs` has given since 20261107131000), not `MM-VOL-NNNN`,
 and the recognition line names the gender rather than always reading *their*.
 
+**2026-11-10.** The hours are said plainly (the owner: "mention the number of hours on
+certificates"): a line of their own under the Arabic thank-you, the number large and
+`VOLUNTEER HOURS · ساعات التطوع` beside it, instead of the small "6 hours" under the date. No
+line when no hours are known. Both apps already pass `{{hours}}`; nothing in either changed but
+the file they print. `SPEC.md`, amendment 6.
+
 ## The wording is said by gender, and stored
 
 The three lines in the body — the one above the name, the one above the green box and the Arabic

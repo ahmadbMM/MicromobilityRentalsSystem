@@ -33,6 +33,9 @@
       <div class="recognition">{{recognition}}</div>
       <div class="initiative">{{initiative_name}}</div>
       <div class="thanks-ar ar" dir="rtl" lang="ar">{{arabic_line}}</div>
+      {{#hours}}
+      <div class="hours"><span class="hours-n">{{hours}}</span><span class="hours-label">Volunteer hours <span class="ar" lang="ar">· ساعات التطوع</span></span></div>
+      {{/hours}}
     </div>
 
     <div class="footer">
@@ -45,7 +48,6 @@
         <div class="meta-item">
           <span class="meta-label">Date <span class="ar" lang="ar">· التاريخ</span></span>
           <span class="meta-value">{{event_date}}</span>
-          {{#hours}}<span class="meta-sub">{{hours}} hours <span class="ar" lang="ar">· ساعة</span></span>{{/hours}}
         </div>
         <div class="meta-item">
           <span class="meta-label">No. <span class="ar" lang="ar">· رقم الشهادة</span></span>

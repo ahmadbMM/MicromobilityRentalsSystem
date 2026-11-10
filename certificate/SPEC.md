@@ -2,7 +2,7 @@
 
 This kit contains the approved design for the certificate MicroMobility gives volunteers after its events. It is ready to implement in any stack. `template.html` is the source of truth for the layout. `render.js` is a tested reference implementation that turns a JSON list of volunteers into print-ready PDFs.
 
-> **Read "Amendments" at the foot of this file first.** The text below is the design as it was signed off on 2026-11-08 and is left as it was written; five things have changed since, and where they disagree the amendments win.
+> **Read "Amendments" at the foot of this file first.** The text below is the design as it was signed off on 2026-11-08 and is left as it was written; six things have changed since, and where they disagree the amendments win.
 
 ## What's in the kit
 
@@ -90,7 +90,7 @@ template, plus the amendments below.
 
 ## Amendments
 
-Everything above is the design as signed off. These five changes came after it, and they win where
+Everything above is the design as signed off. These six changes came after it, and they win where
 they disagree. `certificate/README.md` says how each reaches the two apps.
 
 **1. The slogan row is gone** (the owner, 2026-11-08). "Power your path", `micromobility.com.sa`
@@ -117,3 +117,10 @@ what it said on the day. Staff may write all three themselves on a certificate o
 second lines under Date and No. — the only place **Implementation notes** allows an addition — and
 the meta row's gap is 28px rather than 36px, because a twelve-character code left the No. column
 touching the corner graphic. Nothing above the footer moved.
+
+**6. The hours are a line of their own in the body** (the owner, 2026-11-10: "mention the number of
+hours on certificates"). Under the Arabic thank-you: the number at the green box's 28px weight, then
+the footer's label style, `VOLUNTEER HOURS · ساعات التطوع`. A label beside a number, so the Arabic
+needs no plural that changes with the count. The line is not there when no hours are known. It
+replaces the small second line under Date that amendment 5 added; that column holds the date alone
+again, and the check code under No. is unchanged.

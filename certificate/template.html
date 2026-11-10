@@ -24,7 +24,8 @@
     {{arabic_line}}       the Arabic thank-you line; it names the gender too (see SPEC.md)
     {{initiative_name}}   the event, or the period a certificate for a period covers
     {{event_date}}        display date, e.g. "8 November 2026"
-    {{hours}}             hours volunteered, when they are known
+    {{hours}}             hours volunteered, when they are known: a line of their own under the
+                          Arabic thank-you (the owner, 2026-11-10); no line when there are none
     {{certificate_no}}    e.g. "MMV-2026-00012"
     {{check_code}}        the code anyone may check the certificate with (optional)
 
@@ -60,6 +61,9 @@
       <div class="recognition">{{recognition}}</div>
       <div class="initiative">{{initiative_name}}</div>
       <div class="thanks-ar ar" dir="rtl" lang="ar">{{arabic_line}}</div>
+      {{#hours}}
+      <div class="hours"><span class="hours-n">{{hours}}</span><span class="hours-label">Volunteer hours <span class="ar" lang="ar">· ساعات التطوع</span></span></div>
+      {{/hours}}
     </div>
 
     <div class="footer">
@@ -72,7 +76,6 @@
         <div class="meta-item">
           <span class="meta-label">Date <span class="ar" lang="ar">· التاريخ</span></span>
           <span class="meta-value">{{event_date}}</span>
-          {{#hours}}<span class="meta-sub">{{hours}} hours <span class="ar" lang="ar">· ساعة</span></span>{{/hours}}
         </div>
         <div class="meta-item">
           <span class="meta-label">No. <span class="ar" lang="ar">· رقم الشهادة</span></span>
