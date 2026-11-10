@@ -188,29 +188,33 @@ test.describe('@staff:sessions sessions in order and in colour', () => {
     await expect(dlg.locator('.spk-gh-past')).toHaveText('Past');
     await expect(dlg.locator('.spk-row').nth(0).locator('.badge-open')).toHaveCount(1);
     await expect(dlg.locator('.spk-row').nth(1).locator('.badge-closed')).toHaveCount(1);
-    // the code finds a session
+    // no session code any more (2026-11-10, the user: "remove session codes"): a code finds nothing
+    await expect(dlg.locator('.ssx-code')).toHaveCount(0);
     await dlg.locator('#spk-q').fill('PM-0305');
-    await expect(dlg.locator('.spk-row')).toHaveCount(1);
-    await expect(dlg.locator('.spk-row')).toContainText('Petromin night');
+    await expect(dlg.locator('.spk-row')).toHaveCount(0);
   });
 
-  test('each row carries the places left, the waitlist, the meeting place, its place in a series and its code', async ({ page }) => {
+  test('each row carries the places left, the waitlist, the meeting place and its place in a series, and no code', async ({ page }) => {
     await page.evaluate(`setStaffTab('sessions');S.sessView='list';S.sessGroup='none';renderSessions()`);
     const row = (id: string) => page.locator(`#tab-sessions .sess-lc[data-on-click*='"${id}"']`);
-    await expect(row(TODAY).locator('.ssx-code')).toHaveText('JC-0303');
+    await expect(page.locator('#tab-sessions .ssx-code')).toHaveCount(0);
     await expect(row(TODAY).locator('.ssx-place')).toHaveText('JCC');
     await expect(row(TODAY).locator('.ssx-ser')).toHaveText('1 of 2');
     await expect(row('2099-03-04').locator('.ssx-ser')).toHaveText('2 of 2');
     await expect(row(TODAY).locator('.ssx-left')).toHaveText('19 left');
     await expect(row('2099-03-05-pw').locator('.ssx-wl')).toHaveText('1 on waitlist');
     await expect(row('2099-02-24').locator('.ssx-left')).toHaveCount(0); // a past night has no places to offer
-    // the Sessions search finds a session by its code
-    await page.evaluate(`S.sessQ='jc-0304';renderSessions()`);
-    await expect(page.locator('#tab-sessions .sess-lc.sess-ag')).toHaveCount(1);
-    // the Bookings cards carry them too
+    // the Bookings cards, four short lines (2026-11-10): the status on the name's line, the place after the time,
+    // the places left and the waitlist ("W 1", said once) beside the fill bar
     await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${TODAY}';renderStaffQueue()`);
-    await expect(page.locator(`#sess-strip .sess-summary-chip[data-on-click*='"2099-03-05-pw"'] .ssx-wl`)).toHaveText('1 on waitlist');
-    await expect(page.locator(`#sess-strip .sess-summary-chip[data-on-click*='"${TODAY}"'] .ssx-code`)).toHaveText('JC-0303');
+    const card = (id: string) => page.locator(`#sess-strip .sess-bar-desktop .sess-summary-chip[data-on-click*='"${id}"']`);
+    await expect(card(TODAY).locator('.sess-chip-top .sess-chip-badge .badge-open')).toHaveCount(1);
+    await expect(card(TODAY).locator('.sess-chip-date .ssx-place')).toHaveText('JCC');
+    await expect(card(TODAY).locator('.sess-chip-date .ssx-ser')).toHaveText('1 of 2');
+    await expect(card('2099-03-05-pw').locator('.sess-chip-foot .n6c-left')).toHaveText(/W 1/);
+    await expect(card('2099-03-05-pw').locator('.ssx-wl')).toHaveCount(0);
+    await expect(page.locator('#sess-strip .ssx-code')).toHaveCount(0);
+    expect((await card(TODAY).boundingBox())!.height).toBeLessThan(100);
   });
 
   test('the roster with every session, the Dashboard and the scanner name a session the same way', async ({ page }) => {

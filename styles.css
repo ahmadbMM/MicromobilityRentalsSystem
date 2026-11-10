@@ -11041,13 +11041,27 @@ body.view-staff :is(#tab-queue,#tab-waitlist)>.stat-strip .stat-chip{min-height:
 /* ── Bookings: the rides as one tidy grid of equal cards, each a few lines tall (they were up to 297px of
    cards in three sizes; tonight's leads by its ring and type now, not by its size) ── */
 body.view-staff :is(#tab-queue,#tab-waitlist) .sess-summary-bar.sess-bar-desktop{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin:0 0 12px;}
-body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-summary-chip{min-width:0;max-width:none;padding:8px 12px;gap:8px;align-items:flex-start;}
-body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-summary-chip.today-sess{padding:8px 12px;}
-body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-summary-chip.today-sess .sess-chip-date{font-size:13px;font-weight:800;}
-body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-chip-date{font-size:12.5px;}
-body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-chip-top{margin-bottom:2px;}
-body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-chip-bar{margin-top:4px;}
+body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-summary-chip{min-width:0;max-width:none;padding:6px 10px;gap:8px;align-items:flex-start;}
+body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-summary-chip.today-sess{padding:6px 10px;}
+body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-summary-chip.today-sess .sess-chip-date{font-size:12.5px;font-weight:800;}
+body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-chip-date{font-size:12px;}
+body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-chip-top{gap:6px;margin-bottom:1px;}
+body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-chip-top .smk{width:20px;height:20px;border-radius:5px;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-chip-bf{margin-top:0;}
+/* smaller and more compact (2026-11-10, the user): four lines, not six. The status sits at the end of the name's line
+   (its own column took the card's whole height and pushed every line into ~190px), the meeting place and series follow
+   the time, and the fill bar shares its line with the places left. */
+body.view-staff .sess-chip-top .sess-chip-badge{flex:none;margin-inline-start:auto;}
+body.view-staff .sess-chip-top .sess-chip-badge [class^="badge-"]{font-size:11px;}
+body.view-staff .sess-chip-date .ssx{font-weight:500;color:var(--muted);vertical-align:bottom;}
+body.view-staff .sess-chip-date .ssx-place{margin-inline-start:6px;} /* its pin parts it from the time: a dot left dangling when the place wrapped */
+body.view-staff .sess-summary-chip:is(.th-jcc,.th-snd96) .sess-chip-date .ssx{color:rgba(255,255,255,.82);}
+body.view-staff .sess-chip-date .ssx-place bdi{max-width:150px;}
+body.view-staff .sess-chip-foot{display:flex;align-items:center;gap:8px;min-width:0;margin-top:3px;}
+body.view-staff .sess-chip-foot .sess-chip-bar{flex:1 1 auto;min-width:30px;margin:0;}
+body.view-staff .sess-summary-chip .sess-chip-foot .n6c-left{flex:none;margin:0;font-size:11px;line-height:1.2;white-space:nowrap;}
+/* the circuit's chevrons sit in the card's end corner, on the bar's line: the line stops short of them */
+body.view-staff .sess-summary-chip.th-jcc .sess-chip-foot{padding-inline-end:50px;}
 
 /* ── Saved views sit in the search row, after its buttons, not on a row of their own (Bookings, History,
    Workshop, Messages, the action log, Accounts) ── */
@@ -12787,15 +12801,13 @@ html[dir="rtl"] body.view-staff #tab-sessions .ss-tbl tr.ss-tr.st-full>td:first-
 html[dir="rtl"] body.view-staff #tab-sessions .ss-tbl tr.ss-tr.st-closed>td:first-child{box-shadow:inset -3px 0 0 var(--muted-l,#9aa29c);}
 /* the line where the past begins, in the agenda and the picker */
 body.view-staff #tab-sessions .ss-past-h{margin:22px 2px 2px;padding-top:10px;border-top:1px solid var(--sf-line,var(--border));font-size:12px;font-weight:600;color:var(--text);}
-/* the extras: small quiet chips; the code in the mono face */
+/* the extras: small quiet chips */
 body.view-staff .ssx-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0;font-size:11.5px;line-height:1.3;color:var(--muted);}
 body.view-staff .ssx{display:inline-flex;align-items:center;gap:3px;min-width:0;white-space:nowrap;}
 body.view-staff .ssx-place bdi{max-width:180px;overflow:hidden;text-overflow:ellipsis;}
 body.view-staff .ssx-wl{color:var(--orange,#8a5c14);font-weight:600;}
-body.view-staff .ssx-code{padding:0 5px;border-radius:4px;background:var(--sf-chip,var(--s2));color:var(--text);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:11px;letter-spacing:0;}
 body.view-staff .sess-summary-chip .ssx-row{margin-top:4px;}
 body.view-staff .sess-summary-chip:is(.th-jcc,.th-snd96) .ssx-row{color:rgba(255,255,255,.82);}
-body.view-staff .sess-summary-chip:is(.th-jcc,.th-snd96) .ssx-code{background:rgba(255,255,255,.16);color:#fff;}
 body.view-staff .sess-summary-chip:is(.th-jcc,.th-snd96) .ssx-wl{color:#fcd34d;}
 body.view-staff #tab-sessions .sess-ag-main>.ssx-row{padding-inline-start:30px;}
 #spk-pop .spk-r-txt>.ssx-row{margin-top:1px;}
