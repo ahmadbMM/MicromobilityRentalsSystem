@@ -9363,8 +9363,6 @@ body:not(.view-staff) .bk-pend .bk-ok-disc{display:grid;place-items:center;backg
 /* a field with an error keeps its red ring while it is being fixed, not the green one (2026-11-11) */
 body:not(.view-staff) :is(input,select,textarea).field-invalid:focus{border-color:var(--red);box-shadow:inset 0 0 0 1px var(--red);}
 body:not(.view-staff) :is(input,select,textarea).field-invalid:focus-visible{outline-color:var(--red);}
-/* the one ticket under the booked moment: its code alone at the top (the number is the moment's) */
-body:not(.view-staff) #tab-register .ticket-top.tk-top-qr{justify-content:center;}
 /* the place gone question (row 13) */
 body:not(.view-staff) .pg-dlg .modal-footer{flex-wrap:wrap;}
 /* the bar stays put on a phone, and nothing focused hides under it (rows 7, 12) */

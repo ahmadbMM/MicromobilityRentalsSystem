@@ -17436,8 +17436,6 @@ function renderRegister(){
 
 
   function renderOneTicket(tkt,idx,total){
-    // One ticket under the booked moment leaves its number to the moment, which says it large (2026-11-11: the number was
-    // on screen twice); a party's tickets keep theirs, each its own.
     // v2 ticket: centered queue number over a dashed perforation rule, 4 detail columns,
     // 124px QR on a white tile captioned "Scan on arrival", ghost calendar + directions actions.
     const _sess=_sessDisp(tkt.sessionId),_hold=_arHold(_sess,tkt);
@@ -17480,9 +17478,9 @@ function renderRegister(){
         <div class="wl-note">${t('wlPosNoNumMsg')}</div>
         <div class="ticket-qr-wrap">${qrHtml}</div>
       </div>`:`
-      <div class="ticket-top${total===1?' tk-top-qr':''}">
-        ${total===1?'':`<div class="ticket-num-label">${t(_isBlood(_sess)?(_bldVis(tkt)?'bldVisNumLabel':'bldNumLabel'):_isRun(_sess)?'runNumLabel':_isRace(_sess)?'vlNumLabel':'queueNumLabel')}</div>
-        <div class="ticket-num">#${tkt.queueNum}</div>`}
+      <div class="ticket-top">
+        <div class="ticket-num-label">${t(_isBlood(_sess)?(_bldVis(tkt)?'bldVisNumLabel':'bldNumLabel'):_isRun(_sess)?'runNumLabel':_isRace(_sess)?'vlNumLabel':'queueNumLabel')}</div>
+        <div class="ticket-num">#${tkt.queueNum}</div>
         <div class="ticket-qr-wrap">${qrHtml}</div>
       </div>`}
       <div class="ticket-cols">
