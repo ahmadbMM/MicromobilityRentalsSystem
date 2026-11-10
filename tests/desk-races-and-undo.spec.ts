@@ -162,7 +162,7 @@ test('when the promoted rider is already out, the restored booking waits on the 
   await undoTop(page);
   expect(q[2].status).toBe('active');                            // their place now
   expect(q[0].status).toBe('waitlist');                          // the night is full: A waits for a place
-  expect(q[0].waitlist_num).toBeTruthy();
+  expect(q[0]).toHaveProperty('waitlist_num', null);             // sent with none: the server gives the end of the line (_wl_num_assign, staff round s10)
 });
 
 test('re-opening a ride onto a bike someone else now has leaves that bike alone', async ({ page }) => {

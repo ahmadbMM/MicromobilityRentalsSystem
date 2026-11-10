@@ -19,6 +19,9 @@ export type FailWrite = {
 /** RPCs a spec must opt into: see the stub's answer for them below. */
 const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   'staff_wallet_fee', 'staff_wallet_fees', // wallet fees (20261107121000): tests/people-review2.spec.ts stubs them
+  // the desk's bulk writes in one call (20261111100000): the page sends them two or three at a time without these;
+  // tests/s10-writes.spec.ts stubs them by name
+  'staff_bulk_checkin', 'staff_bulk_return', 'staff_close_out',
   // The staff guardrails of 20260928200000: the page takes the plain writes when these are absent,
   // which is what most specs exercise; tests/staff-guardrails.spec.ts stubs them by name.
   'staff_pin_approve', 'staff_void_receipt', 'staff_refund_receipt', 'staff_set_price', 'staff_delete_session', 'staff_delete_bike',

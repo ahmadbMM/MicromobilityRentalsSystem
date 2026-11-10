@@ -8067,5 +8067,9 @@
   "leaveWlBtn": "Umalis sa waitlist",
   "mapsApple": "Apple Maps",
   "mapsGoogle": "Google Maps",
-  "offlineActTitle": "Offline ka. Kumonekta sa internet para baguhin ang booking na ito."
+  "offlineActTitle": "Offline ka. Kumonekta sa internet para baguhin ang booking na ito.",
+  "nsAskWl": "Aakyat si {0} mula sa waitlist.",
+  "nsAskLk": "Mapapalaya ang locker {0}.",
+  "nsAskLkAny": "Mapapalaya ang locker na nakareserba para sa kanila.",
+  "coNotSettled": "Hindi na-close out ang {0}:"
 }

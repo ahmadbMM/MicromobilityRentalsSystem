@@ -8067,5 +8067,9 @@
   "leaveWlBtn": "Quitter la liste d’attente",
   "mapsApple": "Plans d’Apple",
   "mapsGoogle": "Google Maps",
-  "offlineActTitle": "Vous êtes hors ligne. Connectez-vous à Internet pour modifier cette réservation."
+  "offlineActTitle": "Vous êtes hors ligne. Connectez-vous à Internet pour modifier cette réservation.",
+  "nsAskWl": "{0} quitte la liste d’attente et prend la place.",
+  "nsAskLk": "Le casier {0} est libéré.",
+  "nsAskLkAny": "Le casier réservé pour cette personne est libéré.",
+  "coNotSettled": "{0} n’ont pas pu être clôturés :"
 }

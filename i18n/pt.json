@@ -8067,5 +8067,9 @@
   "leaveWlBtn": "Sair da lista de espera",
   "mapsApple": "Mapas da Apple",
   "mapsGoogle": "Google Maps",
-  "offlineActTitle": "Você está sem conexão. Conecte-se à internet para alterar esta reserva."
+  "offlineActTitle": "Você está sem conexão. Conecte-se à internet para alterar esta reserva.",
+  "nsAskWl": "{0} sobe da lista de espera.",
+  "nsAskLk": "O cacifo {0} fica livre.",
+  "nsAskLkAny": "O cacifo reservado para esta pessoa fica livre.",
+  "coNotSettled": "Não foi possível fechar {0}:"
 }

@@ -114,9 +114,10 @@ test('a walk-up can be added and checked in in one go', async ({ page }) => {
   await page.locator('#wi-name').fill('Walk Up');
   await page.locator('#wi-sess').selectOption(D);
   await page.locator('#walkin-modal [data-wi-type="Road"]').click(); // a type is picked (2026-10-28: none starts pressed)
-  await page.getByRole('button', { name: 'Add & check in' }).click();
-  await expect(page.locator('#ci-confirm')).toBeVisible();
-  await expect.poll(() => page.evaluate(`(getQueue().find(e=>e.id===S._ciId)||{}).name`)).toBe('Walk Up');
+  // one rider: the payment and Check In are in the form, no second dialog (staff round s10, item 9; tests/s10-writes.spec.ts)
+  await page.locator('#walkin-modal .modal-footer .btn-primary', { hasText: 'Check In' }).click();
+  await expect.poll(() => page.evaluate(`(getQueue().find(e=>e.name==='Walk Up')||{}).status`)).toBe('active');
+  await expect(page.locator('#ci-confirm')).toHaveCount(0);
 });
 
 test('bulk payment and bulk check-in leave an undo', async ({ page }) => {
