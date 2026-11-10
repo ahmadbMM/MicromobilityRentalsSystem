@@ -9302,7 +9302,7 @@ async function _refEnter(){
   const v=_asciiDigits(String(i.value||'').trim());if(!v){i.focus();return;}
   S._refSending=true;const d=await _refSend(c,v,'code');S._refSending=false;
   if(d&&d.ok){toast(t('refEnterOk'));_refLoad(c,true,true);return;}
-  const k=d?({self:'refErrSelf',already:'refErrAlready',not_new:'refErrNotNew',off:'refErrOff'}[d.reason]||'refErrInvalid'):'errConnection';
+  const k=d?({self:'refErrSelf',already:'refErrAlready',not_new:'refErrNotNew',off:'refErrOff',busy:'errTooManyTries'}[d.reason]||'refErrInvalid'):'errConnection'; // busy: too many tries from this address (customer_set_referrer, 20261110235400)
   const msg=document.getElementById('ref-in-msg');if(msg)msg.textContent=t(k);else toast(t(k),'error');
 }
 function _bldQ(){return _isBlood(_sessGet(S.sfSession));}
