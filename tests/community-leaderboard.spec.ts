@@ -33,16 +33,20 @@ test('People (the old Customers address too) opens on its overview, every tab of
   const tab = page.locator('#tab-community');
   await expect(tab.locator('.page-title')).toHaveText('People');
   const pills = tab.locator('.filter-row').first().locator('.filter-pill');
-  await expect(pills).toHaveText(['Overview', 'Summary', 'Accounts', /^Applications/, /^Flagged/, 'Tags', 'Badges', 'Titles', 'Activities', /^Birthdays/, /^Referrals/, 'Activity', /^Duplicates/]); // Duplicates (admins) carries the likely pairs; Referrals the ones to check (2026-11-08)
+  // five groups since staff round s10 (item 35): each group's own views in a second row once it is open; the Overview
+  // group's second row is Overview and Summary (item 16)
+  await expect(pills).toHaveText(['Overview', /^Accounts/, 'Membership', 'Recognition', 'Activity', 'More']);
+  await expect(tab.locator('.ppl-sub .filter-pill')).toHaveText(['Overview', 'Summary']);
   await expect(pills.first()).toHaveClass(/active/);
   await expect(tab.locator('.dash-row', { hasText: 'Badr Next' })).toHaveCount(1); // the newest accounts
   await expect(tab.locator('.dash-kpi')).toHaveCount(0); // the figures are the Summary's (staff round s10)
-  await pills.nth(1).click();
+  await tab.locator('.ppl-sub .filter-pill', { hasText: 'Summary' }).click();
   expect(await page.evaluate('location.pathname')).toBe('/people/summary');
+  await expect(pills.first()).toHaveClass(/active/); // still the Overview group
   await expect(tab.locator('.dash-kpi', { hasText: 'Accounts' }).locator('strong')).toHaveText('2');
   // a figure opens its list
   await tab.locator('.dash-kpi', { hasText: 'Accounts' }).click();
-  await expect(pills.nth(2)).toHaveClass(/active/);
+  await expect(pills.nth(1)).toHaveClass(/active/); // the Accounts group
   await expect(tab.locator('#am-cust-rows')).toContainText('Amal Top');
   expect(await page.evaluate('location.pathname')).toBe('/people/accounts');
   // a tab this device never heard of lands on the overview

@@ -228,7 +228,8 @@ test.describe('@staff:customers wallet', () => {
     await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
     await expect(page.locator('#am-cust-rows .am-row[data-cust="c1"]')).toBeVisible();
     await expect(page.locator('.am-cw-btn')).toHaveCount(0);
-    await expect(page.locator('#tab-community .cmy-nav')).not.toContainText('Wallets');
+    await expect(page.locator('#tab-community .ppl-sub')).not.toContainText('Wallets'); // Accounts' own row since staff round s10 (People in groups)
+    await expect(page.locator('#tab-community .ppl-sub')).toContainText('Flagged');
   });
 });
 

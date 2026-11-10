@@ -40,7 +40,7 @@ test.describe('@staff:history saved views and dates', () => {
     const id = await page.evaluate(`_savedViews('history')[0].id`);
     await page.evaluate(`_svPick('history',${JSON.stringify(id)})`);
     expect(await page.evaluate('[S.histRange,S.histFrom,S.histTo]')).toEqual(['custom', '2026-01-31', '2026-01-01']);
-    expect(await page.evaluate(`JSON.parse(localStorage.getItem('cq_views')).length`)).toBe(1);
+    expect(await page.evaluate(`_pref('views.history',[]).length`)).toBe(1); // the account's prefs since staff round s10, not cq_views
   });
 
   test('a view shared with the team is written to staff_options views', async ({ page }) => {

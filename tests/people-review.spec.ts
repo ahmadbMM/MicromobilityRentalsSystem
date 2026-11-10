@@ -40,7 +40,7 @@ async function boot(page: Page, extra: Record<string, unknown> = {}) {
 test.describe('@staff:people People review', () => {
   test('a saved view clears every filter it does not set, on Accounts and on Sessions (PP01)', async ({ page }) => {
     await boot(page);
-    await page.evaluate(`localStorage.setItem('cq_views',JSON.stringify([{id:'v1',sec:'accounts',name:'Members',state:{amMember:'yes'}},{id:'v2',sec:'sessions',name:'Find',state:{sessQ:'lap'}}]))`);
+    await page.evaluate(`_prefSet('views.accounts',[{id:'v1',sec:'accounts',name:'Members',state:{amMember:'yes'}}]);_prefSet('views.sessions',[{id:'v2',sec:'sessions',name:'Find',state:{sessQ:'lap'}}])`); // the account's prefs since staff round s10
     await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
     await page.evaluate(`S.amNat='Saudi';S.amGender='female';S.amSuspect=true;_svPick('accounts','v1')`);
     expect(await page.evaluate('[S.amMember,S.amNat,S.amGender,S.amSuspect]')).toEqual(['yes', '', '', false]);

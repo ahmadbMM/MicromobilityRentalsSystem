@@ -44,7 +44,7 @@ test.describe('@staff:community bulk flagging', () => {
     await page.locator('.am-row[data-cust="c2"] .am-sel').click();
     await expect(page.locator('.am-row[data-cust="c2"] .am-sel')).toHaveAttribute('aria-pressed', 'true');
     await expect(bar.locator('.am-seln')).toHaveText('Selected: 1');
-    await bar.getByRole('button', { name: 'Select all (3)' }).click();
+    await bar.getByRole('button', { name: 'Select all 3 matching' }).click(); // it names its scope: every account that matches (staff round s10)
     await expect(bar.locator('.am-seln')).toHaveText('Selected: 3');
     await expect(page.locator('#am-cust-rows .am-sel[aria-pressed="true"]')).toHaveCount(3);
     await bar.locator('.am-selgo').click();
