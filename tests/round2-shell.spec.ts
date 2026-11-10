@@ -74,13 +74,9 @@ test.describe('@staff:shell round two outside the roster', () => {
     await expect(long.locator('svg.art-ic')).toHaveCount(1);
     await expect(long.locator('.dash-n')).toHaveText('1');
     await expect(long.locator('.dash-row-main')).toHaveText('Rides past 2 hours');
-    // one row's cards are one height, and an odd last card takes the whole row
-    const rows = await tab.locator('.dash-grid > .dash-card').evaluateAll((cs) => {
-      const by: Record<string, number[]> = {};
-      cs.forEach((c) => { const r = c.getBoundingClientRect(); (by[Math.round(r.top)] ||= []).push(Math.round(r.height)); });
-      return Object.values(by);
-    });
-    for (const hs of rows) expect(new Set(hs).size, JSON.stringify(rows)).toBe(1);
+    // a row's cards keep their own heights (staff round s10, item 34: "Nights left open" stood 180px tall for one line),
+    // and an odd last card takes the whole row
+    expect(await tab.locator('.dash-grid').evaluate((g) => getComputedStyle(g).alignItems)).toBe('start');
     const last = tab.locator('.dash-grid > .dash-card').last();
     if ((await tab.locator('.dash-grid > .dash-card').count()) % 2) {
       await expect(last).toHaveClass(/\bdash-wide\b/);

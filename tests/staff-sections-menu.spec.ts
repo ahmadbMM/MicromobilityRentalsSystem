@@ -35,7 +35,7 @@ test.describe('small screens', () => {
     for (const name of ['Bookings', 'Sales', 'Inventory', 'People', 'Analytics', 'History']) { // Riders is a page in Bookings now
       await expect(nav.locator('.tab-btn', { hasText: name })).toBeVisible();
     }
-    await expect(nav.locator('.snav-group', { hasText: 'Insights' })).toBeVisible();
+    await expect(nav.locator('.snav-group', { hasText: 'Admin' })).toBeVisible(); // the six groups since s10 (D7)
 
     // Choosing one closes the menu; the bar stays the icon alone.
     await nav.locator('.tab-btn', { hasText: 'Analytics' }).click();

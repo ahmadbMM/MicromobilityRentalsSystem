@@ -490,7 +490,7 @@ export const STAFF_PARTS = {
   vlap: ['_vlStaffOpen', '_vlAthleteEdit', '_vlPairOpen', '_vlCfgOpen', 'printKaminReport', 'exportKaminXlsx', '_vrbOpen', '_prbOpen', 'printVlReceipts'], // 2026-10-17: Victory Lap - athletes and teams, an athlete's race, pairing, the race's settings, the report for Kamin Sports; 2026-10-23: the report builder, and the partner (Defe) report builder beside it, which shares its workbook writer
   // _ahActShow (community): a customer's own activity in their profile; imports: partner companies' employee lists (2026-10-09)
   imports: ['openRosterImport'],
-  team: ['renderTeam', '_ptcOpen'], settings: ['renderSettings'], // 2026-10-02: the account's Settings page, and Team with it, out of the desk's core; 2026-11-08: the part-timers' hours asked at a JCC or Petromin close-out
+  team: ['renderTeam', '_ptcOpen'], settings: ['renderSettings', '_gsOpen', 'renderDashboard'], // 2026-10-02: the account's Settings page, and Team with it, out of the desk's core; 2026-11-08: the part-timers' hours asked at a JCC or Petromin close-out; 2026-11-10 (staff round s10): the Ctrl K bar and the Dashboard ride in Settings' part, which every account fetches (Settings is always open): out of the desk's core without a file of their own
   // 2026-10-09: the fleet's condition (the check after a return, incidents, the maintenance log and its report)
   fleet: ['_bpFleetFill', '_fleetAfterReturn', '_bkCheckClear', '_fleetReport', '_retPhotoPick'],
   // 2026-10-09: the audit trail, void/refund reasons, the till, the exceptions and Team reports
