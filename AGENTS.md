@@ -3074,3 +3074,37 @@ The rail, Ctrl K, the bell, the Dashboard, unsaved-work guards and confirm butto
   the account window and the bell were already isolated). Arabic letter-spacing is already 0 for every element
   (`:is(html[lang="ar"],...) *{letter-spacing:0!important}`). Physical properties converted: `.color-del`,
   `.sess-list-scroll`; the rest are symmetric, safe-area, centred or have a `[dir=rtl]` override. Clock formats unchanged (D8).
+
+## Staff round s10: handover notes, incidents, places left per type (2026-11-10, migration 20261111130000)
+
+Items 48-50 of `reports/Staff website design and function.md` (builder "features").
+- **Handover notes** (`session_notes`: staff read; `_staff_mod('queue', true)` writes; the author or an admin edits or
+  deletes; the database stamps author and time, an edit stamps `edited_at`). Bookings' figures bar ends with
+  `_s10Figs()` (one call, inside `#q-live-count`, and after the approval ride's strip): the places left per type, then
+  `Notes (N)` (`.snt-chip`), which opens the centred desk sheet (`_sntOpen`, desk part) with the night's notes, newest
+  first, and an add box; no toast, no bar. Reads are narrow (`session_id=in.(...)`) and once a page per night
+  (`_sntNeed`: the roster's night, today's nights for the bell and the Dashboard); the pop-up reads its night again.
+  Another desk's note arrives on the private topic **staff-ref**, event `session_notes`, sent by the table's trigger
+  (`_session_notes_broadcast`): `setupRefRealtime` hands it to `_sntRt` by a built name. Never add a poll or a whole read.
+  The bell kind `snote` (NT_KINDS, its Settings switch, queue accounts) lists notes others wrote on today's nights; the
+  Dashboard card shows today's latest five (no card when there are none).
+- **Incidents** (`booking_incidents`: staff read; queue editors write; admins delete; no edits; the database copies the
+  booking's session, account and name and stamps who recorded it; `happened_at` never in the future). "Record incident"
+  is a ⋯ menu entry (`_incMenu`, RS_ITEM `_incOpen:['ac','warn']`, right after Emergency contact on waiting, on-bike and
+  done bookings), never the row's slot; its label and the sheet's chips carry the count. The sheet (desk part) asks what
+  happened with six named buttons, when (now, Riyadh) and a note. The account window's Stats part lists the account's
+  incidents (`_incAhSec`); admins have **History > Incidents** (`/history/incidents`, the latest 200; RLS lets an admin delete a row, the page
+  offers no button yet).
+  A session's incidents are read once a page with its roster (the menu counts), an account's with its window (again
+  after two minutes), a booking's when the sheet opens.
+- **Places left per type** (`_tylN`): the server holds every booking to the session's places (`_capacity_guard`,
+  `spotsLeft`) but a type to its own count ONLY while bikes of it are out of service (`_out_bikes_guard` /
+  `_out_bikes_room`); `bike_slots` by type (or the fleet picked) is otherwise not enforced, so "Road 0 left" can still
+  be booked online while the session has room. The figure uses the server's counting (`_n6rTypePlaces`, `_n6rHeld`:
+  rows not cancelled, removed or no-show, waitlisted too, less bikes out), capped by the session's places left; a type
+  staff closed (`closed_types`) shows "closed"; none on an approval ride. The walk-in form's type buttons say it too
+  (`_tylWi`).
+- Rules: the desk part carries the dialogs and the drawing helpers the core names by a built name (`_s10W`: the bell's
+  `_sntBell`, the Dashboard's `_sntDash`, the account window's `_incAhSec`); keep new code there. Language keys for
+  booking incidents start with `incd` (a `'b'+` prefix in the People part names every key starting with "b"; `inc*`
+  keys are the fleet's bike incidents). `tests/s10-notes-incidents.spec.ts`.
