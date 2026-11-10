@@ -11166,6 +11166,35 @@ html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).t
 #sc-sheet .sc-none{color:var(--muted);font-size:13px;}
 #sc-sheet .sc-lbl{font-size:13px;font-weight:600;margin-bottom:4px;}
 #sc-sheet textarea{width:100%;box-sizing:border-box;resize:vertical;font:inherit;padding:8px;}
+/* Round s10 (2026-11-10): the figures bar's places left by bike type and the night's Notes; the notes' and Record incident
+   pop-ups (the desk sheet, centred); incidents in the account window and History > Incidents */
+body.view-staff :is(#tab-queue,#tab-waitlist) .s10-figs{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;padding-inline-start:8px;border-inline-start:1px solid var(--sf-line,var(--border));}
+body.view-staff #tab-queue .tyl-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;font-size:13px;font-weight:600;color:var(--muted);}
+body.view-staff #tab-queue .tyl{white-space:nowrap;}
+body.view-staff #tab-queue .tyl b{color:var(--text);}
+body.view-staff #tab-queue .tyl-0 b{color:var(--orange);}
+body.view-staff #tab-queue .tyl-x{color:var(--red);}
+body.view-staff #tab-queue .snt-chip{white-space:nowrap;}
+@media(max-width:767px){body.view-staff #tab-queue .s10-figs,body.view-staff #tab-queue .tyl-row{flex-wrap:nowrap;}}
+body.view-staff #walkin-modal .tyl-wi{display:block;font-size:11px;font-weight:600;opacity:.8;}
+body.view-staff :is(#desk-sheet,#cust-modal,#tab-history) :is(.snt-list,.inc-list){list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+body.view-staff :is(#desk-sheet,#cust-modal,#tab-history) :is(.snt-item,.inc-li){border:1px solid var(--border);border-radius:var(--r-md,6px);padding:8px 10px;}
+body.view-staff :is(#desk-sheet,#cust-modal,#tab-history) :is(.snt-item,.inc-li) .sc-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+body.view-staff #desk-sheet .snt-acts{margin-inline-start:auto;display:inline-flex;gap:6px;}
+body.view-staff :is(#desk-sheet,#cust-modal,#tab-history) :is(.snt-body,.inc-note){margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;}
+body.view-staff #desk-sheet .snt-none{color:var(--muted);font-size:13px;}
+body.view-staff #desk-sheet .snt-lbl{display:block;font-size:13px;font-weight:600;margin:0 0 4px;}
+body.view-staff #desk-sheet :is(.snt-new,.inc-form){display:flex;flex-direction:column;gap:6px;}
+body.view-staff #desk-sheet :is(.snt-new,.inc-form) textarea{width:100%;box-sizing:border-box;resize:vertical;font:inherit;padding:8px;}
+body.view-staff #desk-sheet .inc-kinds{display:flex;flex-wrap:wrap;gap:6px;}
+body.view-staff #desk-sheet .inc-k{min-height:44px;padding:0 12px;border:1.5px solid var(--border);border-radius:var(--r-md,6px);background:var(--s1);color:var(--text);font:inherit;font-weight:600;cursor:pointer;}
+body.view-staff #desk-sheet .inc-k[aria-pressed="true"]{border-color:var(--green);background:rgba(var(--green-rgb),.12);color:var(--green);}
+body.view-staff #desk-sheet .inc-k:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+body.view-staff #desk-sheet .inc-err{color:var(--red);font-size:13px;font-weight:600;}
+body.view-staff #desk-sheet .inc-err:empty{display:none;}
+body.view-staff #cust-modal .inc-list{margin-bottom:10px;}
+body.view-staff .rmt-chip.rmt-inc{color:var(--orange);display:inline-flex;align-items:center;gap:4px;}
+body.view-staff #tab-dashboard .snt-dash-b{white-space:normal;overflow-wrap:anywhere;}
 /* Victory Lap Doubles teams read as one (2026-10-25): the chip, and the team's rows framed and tinted together */
 .vl-dbl-chip{display:inline-block;padding:0 6px;font-size:11px;font-weight:800;background:#5b3fd6;color:#fff;}
 .queue-table tbody tr.vl-dbl td,.vl-st-table tr.vl-dbl td{background-image:linear-gradient(rgba(91,63,214,.08),rgba(91,63,214,.08));}
