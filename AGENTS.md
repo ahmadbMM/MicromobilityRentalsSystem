@@ -2122,10 +2122,9 @@ section layout per section, and 25 control heights. The rules now (CSS: "STAFF T
   and No-show paint the row first and mark it `.rq-pend` (a dashed edge on its pill) until the server answers; a
   refusal puts it back and says why ON the row for about 12 s (`_rowFail` / `_rowSay`, `.rq-err`; a table write goes
   through `_writeErr` with `S._wrRow` set just before), never on a bar - off the roster the error bar still says it.
-  After a check-in made on this device the slot reads Undo for 10 s (`_ruMap`, `RU_MS`, `_ruRun`, d_undo), for every
-  staff member: it reverts what the check-in did (status and W number, bike, arrival and who, the payment, type and
-  ride group it recorded: `_undoCheckinWrite` with `_ciPrevPay`), spends the check-in's line in the Log and puts a
-  redo there. `tests/round2-roster.spec.ts`.
+  The slot's 10-second Undo after a check-in (`_ruMap`, `_ruRun`, d_undo) was REMOVED on 2026-11-10 (the owner's D1):
+  an admin undoes a check-in from History > Log, on any device (see "Staff round s10: paint" below).
+  `tests/round2-roster.spec.ts`.
 - **The ride cards** are one grid of equal compact cards (`.sess-bar-desktop`); date and time wrap onto the lines they
   need and are never clipped (no line clamp: two lines cut a gathering ride's "Start 6 AM" off a 220px card). Each
   time is a nowrap `<bdi>`, and a gathering ride's two labelled times are two, so the line breaks between them.
@@ -2817,3 +2816,35 @@ appears on customers account add it to the 3 dots list on each booking".
 - No-show from the menu asks (a centred confirm, `n6cNsAsk` plus `nsAskWl` / `nsAskLk`) only when it moves the next
   rider up from the waitlist (auto mode, a place freed) or frees a reserved locker; otherwise it is one tap. The X key
   always asks (`confirmNoShow(id, true)`).
+
+## Staff round s10: paint (2026-11-10)
+- **One roster paint per frame.** `_qPaintSoon()` (beside `renderStaffQueue`) asks for a repaint in the next animation
+  frame; every ask in that frame is one paint, and a direct `renderStaffQueue()` takes any paint still waiting with it
+  (it cancels the frame). An action keeps its FIRST paint direct (the row answers at the tap: "paint first, reconcile
+  after"); every repaint after an await goes through `_qPaintSoon()`: the check-in drawer's answer and its end, the bike
+  picker's check-in, the queued (outbox) check-in, Express, bulk check-in, the row error running out (`_rowTimer`). A
+  background repaint of Bookings or the Waitlist (`_renderStaffTab(true)`: `_reloadRows`, the poll, realtime through
+  `_rtPaint`) goes through it too, so `_reloadRows`' repaint and the caller's own one after it are one paint. A spec that
+  awaits a reload and then reads the roster must use an auto-waiting `expect`, not a one-off DOM read.
+- **A realtime echo of a row the device already holds as it reads is not painted**: `_rtMergeRow` answers `'same'` when
+  `entryFromDB(row)` stringifies like the held entry (it is still noted for `_rtReplaySince`).
+- **A tick redraws what a tick changes** (`_qSelPaint`): `#q-bulk` (built by `_qBulkHtml`, shared with the full paint),
+  every `input.rq-chki` (each names its booking in `data-sel`) and the header's box; `_lcStick()` re-measures. Only the
+  first tick and the last untick (the filter row and the actions swap places) paint the roster. `toggleSfSelect(id)` is
+  still the API; the box itself calls `_qSelClick` on CLICK (it carries Shift): Shift-click ticks or clears every box
+  shown from the last one clicked (`S._selAt`). Space on the J/K-marked row ticks its box (`_kbDesk`; a focused button
+  keeps its own Space). Waitlisted riders have a box (`_bulkChk`, `_dkYSelOk`): they count for Check in, not No-show.
+- **No row Undo after a check-in (the owner's D1).** Every check-in's Log line carries `kind 'checkin'`, `entity
+  'booking'`, `entity_id` = ONE booking id (staff_actions columns, via `_saMeta`): the drawer's (pushUndo meta), the bike
+  picker's, the outbox replay's, the Petromin page's, and for several riders at once (bulk, a Staff List party, Express
+  with a party) ONE LINE PER RIDER through `_ciLogEach(entries)`, "Check In: #n Name", sent in one insert. The group's
+  topbar Undo line ("Undo Check-in · N", or Express's "Check In: #1 A, #2 B") carries no meta, so the Log offers no
+  second undo for it. An id list in one `entity_id` is never written for check-ins (the column holds 200 characters).
+  The count line `logBulkCheckin` is gone. The topbar Undo and the Log's local Undo (`_undoableFor`) are unchanged.
+- **"Updated h:mm" in the figures bar** while `_rtLive()` is false (`_lcUpdHtml`, `.q-lc-upd`, small inline text right
+  after the numbers, never a bar): the time of `_lastRefresh`. `_tickRefreshLabel` (every 5 s) repaints Bookings when
+  the channel's state and the bar disagree; `_autoRefresh` moves the time in place when a poll changed nothing.
+- **The "?" list** has one Enter row (`kbEnterRow`), one X row (`kbXRow`), Space (`kbSpaceRow`) and Shift-click
+  (`kbShiftRange`); `kbOpenRow`, `n6cKbReturn`, `n6cKbNsRow` and `kbNoShow` are gone.
+- `tests/s10-paint.spec.ts`. A throttled-desktop proxy of a phone (Chromium, CPU 4x, 390x844, 40 riders) measured
+  Confirm to painted row, a tick and a filter change before and after (numbers in the round's report).
