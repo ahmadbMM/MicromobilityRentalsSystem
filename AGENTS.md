@@ -2223,6 +2223,14 @@ tables `lockers` and `locker_rentals`.
   `staff_locker_paid` once the receipt is booked, so `locker_rentals.till_lines` lets a refund or a change find them; lines
   rung up before 2026-11-10 are not linked (refunded at the till as before). Money toasts are `info` (seen, not only heard).
   The page reads `house`/`refunded` (`LK_COLS_X`) and reads without them on a database before the migration. `tests/locker-edit.spec.ts`.
+- **A booking's locker sits in its Add-ons dialog (the user, 2026-11-10: "i want the locker to be shown on add ons in each booking
+  if it was added ... allow the staff to undo or to unassign a locker").** The fee line already counted in the row's Add-ons chip
+  but the picker listed stock items only. Staff now see a Locker card on top (`_lkAdHtml`: number, time, key state, fee) with
+  **Unassign** while it has a number (`_lkUnassignAsk`: `staff_locker_edit` with `p_code ''` takes the number off, the rental stays
+  reserved with its time and fee, a key given is taken back) and **Cancel locker** until it is handed back (`_lkCancelAsk`). The
+  picker is in the customer half, so it draws an empty `#lk-ad-slot` and calls `_lkAdFill` (a STAFF_ENTRY); the questions are
+  lifted above the picker (`_lkAdAsk`: the confirm sits at z-index 300, the picker at 9500). Assign a locker offers Unassign too.
+  No database change. `tests/locker-addons.spec.ts`.
 
 ## Sessions is a section of its own (2026-11-06)
 
