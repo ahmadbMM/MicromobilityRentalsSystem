@@ -705,7 +705,7 @@ begin
 end $chk$;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261110233200', 'bh10_payments')
+values ('20261110235200', 'bh10_payments')
 on conflict (version) do nothing;
 
 commit;

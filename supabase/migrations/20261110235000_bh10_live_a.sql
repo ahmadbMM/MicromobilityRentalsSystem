@@ -69,24 +69,24 @@ do $pre$
 declare f record; m text;
 begin
   for f in select * from (values
-    ('public.staff_move_session(text,text,text,boolean)', 'a14f16129bc04a43f42f48ef98b2bc3d', 'bb71358198b434dbe7aea0f61ed12eb3'),
-    ('public._addons_price_snapshot()', '7964147a9e109be1ab78ce8df614ee49', 'e12efd7e33defcc8e90a7161ee5e8e17'),
-    ('public._promote_next_waitlist(text)', '010e80159695750e600f353972125e20', '16c6c245c7838ac2ab5a5aa11ad57463'),
-    ('public._wl_offer_fill(text)', '4f91a7bdb0734c71cf1fdf0407b7413e', 'a77cc99d4453dbfb7c83008ffc0bdd1e'),
-    ('public.customer_claim_spot(text,boolean)', 'ddd839954640e17868b5eed07c0d26d2', '9f53495e64fc3c20a551964a54602c42'),
-    ('public._community_booking_gate()', '773d3c7ea38fca7e4eea215f54421852', '6b1cefd3f6e183d5cb1876da751808fd'),
-    ('public._session_has_room(text,text,text)', '30069f5e8ae37b6f454acc030a9644ca', 'f6c9c802362568337001523b18b9041d'),
-    ('public.customer_booking_update(text,text,text,jsonb)', '1f73337bd73e7199dc2740dc3fe144c9', 'd61393557605123ad51a193ce8fd6bbf'),
-    ('public.customer_wallet_release(text,text,text[])', 'a70ff85802b06ea712cfe1e9e51efc58', '7024cf45594a250b6c4214022c733fe0'),
-    ('public.customer_locker_reserve(text,text,text[],text,text[])', '8e43c2f99752faf8e1bf63672f61c210', '1bbef4fae4133e41b52d9973fcd1aef2'),
-    ('public.customer_locker_offer(text)', '49867a72b22f487ba422a5889fcb3bdf', '9c9063515c3545f7809bf9d86a3eb430'),
-    ('public.staff_locker_cancel(uuid,text,boolean)', 'b52cd4730a91a656854e80fb0fccb379', 'a82bd7a87e28f2d35a838f62b99148a9'),
-    ('public.partner_book(text,text,text,text,jsonb)', '5b22fd148a3cf14bad3454a03c888cea', '32cff4dfc2d6b1c73d387c1e03e9aa4a'),
-    ('public._promo_count()', 'd03cd1016a3c3bd9a6a9a5066ff9eeaf', '228871c08cc4b42c1715bf2a5636e47a')
+    ('public.staff_move_session(text,text,text,boolean)', 'a14f16129bc04a43f42f48ef98b2bc3d', '917abe7bc68593907b67e029a35e2150'),
+    ('public._addons_price_snapshot()', '7964147a9e109be1ab78ce8df614ee49', '9ac95bad323aebfca26c3af2b2dfe0c5'),
+    ('public._promote_next_waitlist(text)', '010e80159695750e600f353972125e20', '4863eb1839cc8c6b9fb0ce2c7430a29c'),
+    ('public._wl_offer_fill(text)', '4f91a7bdb0734c71cf1fdf0407b7413e', '6bbd530b16c3e5d5cf315413d617c27f'),
+    ('public.customer_claim_spot(text,boolean)', 'ddd839954640e17868b5eed07c0d26d2', '9f6c3c0d24e389bc2b5028d080307d45'),
+    ('public._community_booking_gate()', '773d3c7ea38fca7e4eea215f54421852', '9b89ab7e8b9e88230bd2fb0ff7f60078'),
+    ('public._session_has_room(text,text,text)', '30069f5e8ae37b6f454acc030a9644ca', '8d0093f3caabecfae1c74e63ddf4ab38'),
+    ('public.customer_booking_update(text,text,text,jsonb)', '1f73337bd73e7199dc2740dc3fe144c9', 'fb1da7542a0e4702b265c0479de2f543'),
+    ('public.customer_wallet_release(text,text,text[])', 'a70ff85802b06ea712cfe1e9e51efc58', 'beffd992c7d927d4cc6afad972064e1e'),
+    ('public.customer_locker_reserve(text,text,text[],text,text[])', '8e43c2f99752faf8e1bf63672f61c210', '43efc3eeddf3eaffc02a4ada7818599e'),
+    ('public.customer_locker_offer(text)', '49867a72b22f487ba422a5889fcb3bdf', '2cdedfc5c7cc9f39ec4d7d9213b57c8d'),
+    ('public.staff_locker_cancel(uuid,text,boolean)', 'b52cd4730a91a656854e80fb0fccb379', 'f4d685aaabd67e84d1d59025e1f7d95f'),
+    ('public.partner_book(text,text,text,text,jsonb)', '5b22fd148a3cf14bad3454a03c888cea', '0fccb469d85e610c6a5df32223f4c7ad'),
+    ('public._promo_count()', 'd03cd1016a3c3bd9a6a9a5066ff9eeaf', 'fa0028d76febe62340a3336bb02258d3')
   ) v(fn, was, now_) loop
     select md5(p.prosrc) into m from pg_proc p where p.oid = f.fn::regprocedure;
     if m is distinct from f.was and m is distinct from f.now_
-       and position('20261110233000' in (select p.prosrc from pg_proc p where p.oid = f.fn::regprocedure)) = 0 then
+       and position('20261110235000' in (select p.prosrc from pg_proc p where p.oid = f.fn::regprocedure)) = 0 then
       raise exception '% changed since 2026-11-10 (md5 %): rebuild this file from the live definition', f.fn, m;
     end if;
   end loop;
@@ -159,7 +159,7 @@ begin
     and not exists (select 1 from volunteer_shifts x where x.session_id = v_to and x.customer_id = h.customer_id);
   update volunteer_hours set session_id = v_to where session_id = p_from;
   update volunteer_log set session_id = v_to where session_id = p_from;
-  /* What else names the session (bug hunt 2026-11-10, 20261110233000): a promo code made for this one
+  /* What else names the session (bug hunt 2026-11-10, 20261110235000): a promo code made for this one
      session, the volunteers' VL- free-ride codes, their portal Updates (on delete cascade) and their
      certificates (on delete set null) stayed with the old id; they move with the session now. */
   update promo_codes set session_id = v_to where session_id = p_from;
@@ -205,7 +205,7 @@ begin
       elsif not staff and (v_id is null or
           /* Only as many as were bought at that price keep it: lines that grew are priced afresh, all of
              them at today's price (20261005210000). Every line of the item at that price is added up, so
-             one line sent many times is a line that grew (bug hunt 2026-11-10, 20261110233000). */
+             one line sent many times is a line that grew (bug hunt 2026-11-10, 20261110235000). */
           (select coalesce(sum(case when (n ->> 'qty') ~ '^[0-9]{1,3}$' then greatest((n ->> 'qty')::int, 1) else 1 end), 0)
              from jsonb_array_elements(j) n
             where jsonb_typeof(n) = 'object' and n ->> 'id' = v_id and n -> 'p' = o -> 'p')
@@ -237,7 +237,7 @@ AS $function$
    bike for one more rider of type p_type, counted as _out_bikes_guard counts a new booking: every place
    taken (with p_held only the places held, the waitlist left out), the rider's own row p_exclude left out.
    True with no bike out, on an approval ride, and for an own bike but on the Petromin night
-   (bug hunt 2026-11-10, 20261110233000). */
+   (bug hunt 2026-11-10, 20261110235000). */
 declare s sessions%rowtype; _own boolean; _out int; _n int; _live int; _slots jsonb; _places int;
 begin
   select * into s from sessions where id = p_session_id;
@@ -318,7 +318,7 @@ begin
      and not (_s.member_cap is not null and _mem >= _s.member_cap
               and partner is null and coalesce(type_preference,'') <> 'Own')
      /* bikes out of service take their places off, the rider's own bike type's too, as _out_bikes_guard
-        counts them for a new booking (bug hunt 2026-11-10, 20261110233000) */
+        counts them for a new booking (bug hunt 2026-11-10, 20261110235000) */
      and (coalesce(_s.out_bikes, '{}'::jsonb) = '{}'::jsonb
           or _out_bikes_room(p_session_id, type_preference, id, true))
    order by coalesce(waitlist_num, 2147483647), registered_at
@@ -365,7 +365,7 @@ begin
   select count(*) into _open from waitlist_offers o
    where o.session_id = p_session_id and o.status = 'open' and o.expires_at > now();
   /* bikes out of service take their places off, as _out_bikes_guard counts them (bug hunt 2026-11-10,
-     20261110233000) */
+     20261110235000) */
   select coalesce(sum(greatest(0, floor((value #>> '{}')::numeric))), 0)::int into _out
     from jsonb_each(coalesce(_s.out_bikes, '{}'::jsonb)) where jsonb_typeof(value) = 'number';
   _free := greatest(0, coalesce(_s.capacity, 12) - _out) - _held - _open;
@@ -453,7 +453,7 @@ begin
     return jsonb_build_object('ok', false, 'reason', 'FULL');
   end if;
   /* the bikes out of service and the members limit, as a promotion counts them (bug hunt 2026-11-10,
-     20261110233000) */
+     20261110235000) */
   if not _out_bikes_room(o.session_id, q.type_preference, q.id, true) then
     return jsonb_build_object('ok', false, 'reason', 'FULL');
   end if;
@@ -538,7 +538,7 @@ begin
        where q.session_id = s.id and q.partner is null and q.id <> new.id
          and coalesce(q.status, '') not in ('cancelled', 'removed', 'noshow', 'waitlist');
       /* a place offered to a waitlisted member is theirs while the offer is open (claim mode), as
-         _wl_offer_fill counts it (bug hunt 2026-11-10, 20261110233000) */
+         _wl_offer_fill counts it (bug hunt 2026-11-10, 20261110235000) */
       _live := _live + (select count(*) from waitlist_offers o join queue_entries q on q.id = o.booking_id
                          where o.session_id = s.id and o.status = 'open' and o.expires_at > now()
                            and q.partner is null and coalesce(q.type_preference, '') <> 'Own'
@@ -591,7 +591,7 @@ begin
        and (_own or coalesce(q.type_preference, '') <> 'Own');
     if _live >= coalesce(s.capacity, 12) then return false; end if;
     /* the bikes out of service, as _out_bikes_guard counts them for a new booking (bug hunt 2026-11-10,
-       20261110233000) */
+       20261110235000) */
     if not _out_bikes_room(p_session_id, p_type, p_exclude, false) then return false; end if;
   end if;
   /* The members limit, as _community_booking_gate holds a new booking to it, approval ride or not, with
@@ -665,7 +665,7 @@ begin
   elsif _want = 'cancelled' then
     if q.status not in ('waiting','waitlist') then return false; end if;
     /* A paid ride that has ended is settled at close-out, not by the rider: cancelled afterwards it gave
-       its wallet money back for a ride missed (bug hunt 2026-11-10, 20261110233000). */
+       its wallet money back for a ride missed (bug hunt 2026-11-10, 20261110235000). */
     if coalesce(q.paid, false) or coalesce(q.wallet_paid, 0) > 0 then
       select * into _at from sessions where sessions.id = q.session_id;
       begin _ended := (select w.ends_at from _session_window(_at) w) <= now();
@@ -898,7 +898,7 @@ begin
       raise exception 'WALLET_NOT_OPEN' using errcode = 'P0001';
     end if;
     /* A ride that has ended keeps its payment until close-out settles it (a paid no-show keeps it): taken
-       back afterwards it undid the payment for a ride missed (bug hunt 2026-11-10, 20261110233000). */
+       back afterwards it undid the payment for a ride missed (bug hunt 2026-11-10, 20261110235000). */
     select * into s from sessions where id = q.session_id;
     begin _ended := (select w.ends_at from _session_window(s) w) <= now();
     exception when others then _ended := false; end;
@@ -953,7 +953,7 @@ begin
     end if;
   end loop;
   /* a period already over tonight is not open either, as on the /lockers page (bug hunt 2026-11-10,
-     20261110233000) */
+     20261110235000) */
   if not _lk_period_ok(k, p_period) or d is null or _lk_ended(d, p_period) then
     raise exception 'LOCKER_NOT_OPEN' using errcode = 'P0001';
   end if;
@@ -999,7 +999,7 @@ begin
     from sessions s where s.id = p_session;
   if d is null then return jsonb_build_object('kind', ''); end if;
   /* 'ended': the periods already over, which the booking flow no longer offers (bug hunt 2026-11-10,
-     20261110233000) */
+     20261110235000) */
   return jsonb_build_object('kind', k, 'one', _lk_price('early'), 'both', _lk_price('both'), 'left', _lk_left(d),
                             'ended', jsonb_build_object('early', _lk_ended(d, 'early'), 'late', _lk_ended(d, 'late'),
                                                        'both', _lk_ended(d, 'both'), 'pm', _lk_ended(d, 'pm')));
@@ -1026,7 +1026,7 @@ begin
        and _lk_slots(x.period) && _lk_slots(r.period) limit 1;
     if found then raise exception 'LOCKER_TAKEN: the locker is with %', coalesce(who, '?') using errcode = 'P0001'; end if;
     /* the evening's places too: the one the hand-back gave up may have gone to someone else since; the
-       rental is still 'returned', so _lk_room counts without it (bug hunt 2026-11-10, 20261110233000) */
+       rental is still 'returned', so _lk_room counts without it (bug hunt 2026-11-10, 20261110235000) */
     if not _lk_room(r.day, r.period, 1) then raise exception 'LOCKERS_FULL' using errcode = 'P0001'; end if;
     update locker_rentals set status = 'in_use', returned_at = null, returned_by = null where id = r.id;
     return jsonb_build_object('ok', true);
@@ -1093,7 +1093,7 @@ begin
   if _code then
     /* Wrong codes are counted per address and a locked address refused, as saturday_book does: guessed
        without a limit, a partner's places went to whoever found a code (bug hunt 2026-11-10,
-       20261110233000). */
+       20261110235000). */
     if exists (select 1 from login_throttle l
                 where l.identifier = 'partnercode:' || _client_ip() and l.locked_until > now()) then
       raise exception 'RATE_LIMITED' using errcode = 'P0001';
@@ -1141,7 +1141,7 @@ CREATE OR REPLACE FUNCTION public._promo_count()
 AS $function$
 declare _o text; _n text;
 begin
-  /* A deleted booking gives its use back, as a cancelled one does (bug hunt 2026-11-10, 20261110233000):
+  /* A deleted booking gives its use back, as a cancelled one does (bug hunt 2026-11-10, 20261110235000):
      the desk's Undo and a group insert rolled back kept a limited code's use for good. */
   if tg_op = 'DELETE' then
     if coalesce(old.status,'') not in ('cancelled','removed') and nullif(old.promo_code, '') is not null then
@@ -1228,7 +1228,7 @@ begin
 end $chk$;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261110233000', 'bh10_live_a')
+values ('20261110235000', 'bh10_live_a')
 on conflict (version) do nothing;
 
 commit;
