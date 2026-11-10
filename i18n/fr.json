@@ -6632,6 +6632,7 @@
   "zvAdded": "Bénévole ajouté.",
   "zvManyHint": "Collez des numéros de mobile, un par ligne. Chacun doit déjà avoir un compte.",
   "zvManyDone": "Ajoutés : {0}. Introuvables : {1}.",
+  "zvManyShared": "Non ajoutés (plusieurs comptes ont ce mobile) : {0}. Utilisez Ajouter un bénévole pour choisir la personne.",
   "zvHoursOn": "Date",
   "zvHoursSession": "Session",
   "zvHoursNoSession": "Aucune session",

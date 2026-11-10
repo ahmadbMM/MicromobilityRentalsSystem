@@ -405,6 +405,17 @@ test.describe('@customer:reserve the friend\'s referral discount', () => {
     expect(rows).toEqual([[fare / 2, 'RW-K7MQ2X-4FZ'], [fare, null]]);
   });
 
+  test('it stays on through the review, which books with it', async ({ page }) => {
+    await friend(page);
+    await step2(page, 's0', ['Hybrid']);
+    await expect.poll(() => page.evaluate('S.promoApplied&&S.promoApplied.auto')).toBe(true);
+    // Continue draws the review: the code used to come off right there, and the friend was booked at full fare
+    await page.evaluate('S.regStep=3;renderRegister()');
+    expect(await page.evaluate('S.promoApplied&&[S.promoApplied.code,S.promoApplied.auto]')).toEqual(['RW-K7MQ2X-4FZ', true]);
+    const fare = await page.evaluate(`priceForType('Hybrid')`) as number;
+    await expect(page.locator('#reg-promo-disc-review')).toContainText(String(fare / 2));
+  });
+
   test('never on Carbon; taken off it stays off on this ride, and Redeem puts it back', async ({ page }) => {
     await friend(page, { 'rpc:promo_lookup': { ok: true, code: 'RW-K7MQ2X-4FZ', kind: 'percent', value: 50, applies_to: null, session_id: null, ride_kind: null } });
     await step2(page, 's0', ['Road Carbon']);
@@ -455,6 +466,30 @@ test.describe('@customer:reserve the friend\'s referral discount', () => {
     await expect.poll(() => page.evaluate('S.promoApplied&&[S.promoApplied.code,S.promoApplied.one]')).toEqual(['RW-K7MQ2X-4FZ', true]);
     expect(calls.find((c) => c.name === 'customer_set_referrer')!.body).toMatchObject({ p_id: 'c1', p_code: 'k7mq2x', p_via: 'code' });
     await expect(page.locator('#toast-container')).toContainText('You get 50% off your own bike');
+  });
+
+  test('a friend\'s code typed where it does not pay links the account and stays off: not on Carbon, not on a ride other than JCC or Petromin', async ({ page }) => {
+    const calls = rpcs(page);
+    let linked = false;
+    const paidSat = { ...sat, id: 's3', session_date: '2099-02-14', paid_ride: true };
+    await rider(page, { sessions: [jcc, sat, pm, paidSat], 'rpc:customer_blood_rewards': [], 'rpc:promo_lookup': { ok: false, reason: 'invalid' } }, '/', false);
+    const json = (b: unknown) => ({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(b) });
+    await page.route(/\/rest\/v1\/rpc\/customer_referral/, (r) => r.fulfill(json(card({ can_enter: !linked, referred: linked, joined: 0, rode: 0, earned: 0, welcome: linked ? W : null }))));
+    await page.route(/\/rest\/v1\/rpc\/customer_set_referrer/, (r) => { linked = true; return r.fulfill(json({ ok: true, held: false, welcome: W.code })); });
+    await step2(page, 's0', ['Road Carbon']);
+    await page.locator('#reg-promo-step2').fill('k7mq2x');
+    await page.locator('#reg-promo-btn-step2').click();
+    await expect(page.locator('.cu-promo-err')).toContainText(await page.evaluate(`t('errRefCodeCarbon')`) as string);
+    expect(await page.evaluate('S.promoApplied')).toBeNull();
+    expect(calls.filter((c) => c.name === 'customer_set_referrer')).toHaveLength(1); // the link itself is made
+    await expect(page.locator('#toast-container')).toContainText('You get 50% off your own bike');
+    // the code held: a paid ride that is neither JCC nor a Petromin night does not take it (the server would book the full fare)
+    await step2(page, 's3', ['Hybrid']);
+    expect(await page.evaluate('S.promoApplied')).toBeNull();
+    await page.locator('#reg-promo-step2').fill('SUMMER');
+    await page.locator('#reg-promo-btn-step2').click();
+    await expect(page.locator('.cu-promo-err')).toContainText(await page.evaluate(`t('errRefCodeSession')`) as string);
+    expect(await page.evaluate('S.promoApplied')).toBeNull();
   });
 
   test('a typed friend\'s code the server refuses says why in the promo box', async ({ page }) => {

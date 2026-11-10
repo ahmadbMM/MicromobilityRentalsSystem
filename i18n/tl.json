@@ -6632,6 +6632,7 @@
   "zvAdded": "Naidagdag ang volunteer.",
   "zvManyHint": "I-paste ang mga mobile number, isa sa bawat linya. Dapat may account na ang bawat isa.",
   "zvManyDone": "Naidagdag: {0}. Hindi nakita: {1}.",
+  "zvManyShared": "Hindi naidagdag (higit sa isang account ang may ganyang mobile): {0}. Gamitin ang Magdagdag ng volunteer para piliin ang tao.",
   "zvHoursOn": "Petsa",
   "zvHoursSession": "Session",
   "zvHoursNoSession": "Walang session",

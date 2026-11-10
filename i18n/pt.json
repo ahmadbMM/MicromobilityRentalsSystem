@@ -6632,6 +6632,7 @@
   "zvAdded": "Voluntário adicionado.",
   "zvManyHint": "Cole números de telemóvel, um por linha. Cada um já deve ter uma conta.",
   "zvManyDone": "Adicionados: {0}. Não encontrados: {1}.",
+  "zvManyShared": "Não adicionados (mais de uma conta tem esse telemóvel): {0}. Use Adicionar um voluntário para escolher a pessoa.",
   "zvHoursOn": "Data",
   "zvHoursSession": "Sessão",
   "zvHoursNoSession": "Sem sessão",

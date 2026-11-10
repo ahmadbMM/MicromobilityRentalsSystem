@@ -329,7 +329,9 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     const times = rpcs(page, 'staff_volunteer_shift_times');
     const sh = shifts.map((x) => (x.customer_id === 'c1' ? { ...x, status: 'done', clock_in: '2099-11-05T14:00:00+00:00', clock_out: '2099-11-05T16:00:00+00:00' } : x));
     const award = [{ id: 11, customer_id: 'c1', session_id: SID, hours: 2, worked_on: '2026-11-05', source: 'session', added_by: 'Admin One' }];
-    await staff(page, { volunteer_shifts: sh, volunteer_hours: award, 'rpc:staff_volunteer_hours_void': { ok: true, total: 0 }, 'rpc:staff_volunteer_shift_times': { ok: true } });
+    // c1's account holds 12 hours; the void answers what is left (10): the cached total takes that, not 12 less what
+    // is still on the session once the award is marked void (nothing)
+    await staff(page, { customers: customers.map((c) => (c.id === 'c1' ? { ...c, volunteer_hours: 12 } : c)), volunteer_shifts: sh, volunteer_hours: award, 'rpc:staff_volunteer_hours_void': { ok: true, total: 10 }, 'rpc:staff_volunteer_shift_times': { ok: true } });
     await menu(page, row(page, 'c1'), 'Manage');
     const box = page.locator('#confirm-modal');
     await expect(box.getByRole('button', { name: 'Undo check-out' })).toBeVisible();
@@ -340,6 +342,22 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     await expect.poll(() => times.length).toBe(1);
     expect(voids[0]).toEqual({ p_id: 11 });
     expect(times[0]).toMatchObject({ p_customer: 'c1', p_out: null });
+    expect(await page.evaluate(`_vm().tot&&_vm().tot.get('c1')`)).toBe(10);
+  });
+
+  test('add several: a number written with spaces is one number, Arabic digits count, and a mobile two accounts share is left to Add a volunteer', async ({ page }) => {
+    const saves = rpcs(page, 'staff_volunteer_save');
+    const twins = [{ id: 'c4', name: 'Lina Fares', phone: '+966500000004', created_at: '2026-01-04' }, { id: 'c5', name: 'Hadi Fares', phone: '+966500000004', created_at: '2026-01-05' }];
+    await staff(page, { customers: [...customers, ...twins], 'rpc:staff_volunteer_save': { ok: true } });
+    await expect.poll(() => page.evaluate('(S.customers||[]).length')).toBe(5);
+    await page.evaluate('_vmManyOpen()');
+    await page.locator('#vm-many').fill('+966 50 000 0002\n٠٥٠٠٠٠٠٠٠٣\n0500000004\n050 999 9999');
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Add', exact: true }).click();
+    const res = page.locator('#vm-many-res');
+    await expect(res).toContainText('Added: 2.');
+    expect(saves.map((s) => s.p_customer).sort()).toEqual(['c2', 'c3']);
+    await expect(res).toContainText('Not found: 050 999 9999.'); // said as typed, not dropped
+    await expect(res).toContainText('more than one account has the mobile): 0500000004.');
   });
 
   test('roles say how many they need, on Shifts, and the session form saves the numbers', async ({ page }) => {

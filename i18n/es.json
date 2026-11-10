@@ -6632,6 +6632,7 @@
   "zvAdded": "Voluntario añadido.",
   "zvManyHint": "Pega números de móvil, uno por línea. Cada uno ya debe tener una cuenta.",
   "zvManyDone": "Añadidos: {0}. No encontrados: {1}.",
+  "zvManyShared": "No añadidos (más de una cuenta tiene ese móvil): {0}. Usa Añadir un voluntario para elegir a la persona.",
   "zvHoursOn": "Fecha",
   "zvHoursSession": "Sesión",
   "zvHoursNoSession": "Sin sesión",

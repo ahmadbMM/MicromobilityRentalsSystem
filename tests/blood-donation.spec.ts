@@ -458,6 +458,43 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect(page.locator('#share-gate .sg-box')).toBeVisible();
   });
 
+  test('a changed phone is saved as sign-up saves it, one another account holds is said at the box, and a blood type leaves "I don\'t have one" pressed', async ({ page }) => {
+    const updates: Record<string, unknown>[] = [];
+    await stubSupabase(page, custFx({ 'rpc:customer_set_gender': true, 'rpc:customer_profile': profile({ gender: 'female' }) }));
+    await page.route(/\/rest\/v1\/rpc\/customer_update_profile/, (route) => {
+      const b = route.request().postDataJSON();
+      updates.push(b);
+      const taken = b.p_phone === '+966500000077';
+      return route.fulfill({ status: taken ? 409 : 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
+        body: taken ? JSON.stringify({ code: '23505', message: 'phone_taken', details: null, hint: null }) : 'true' });
+    });
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate('goLanding()');
+    await page.locator('.bld-card').click();
+    await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
+    await page.locator('.bld-role[data-role="donor"]').click();
+    await page.locator('#bld-club-none').click();
+    await page.locator('.bld-pick[data-bt="A+"]').click();
+    await expect(page.locator('#bld-club-none')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#bld-club-none')).toHaveClass(/\bon\b/);
+    await page.locator('.bld-role[data-role="visitor"]').click();
+    // a local number another account holds: sent as +966..., and the box says why
+    await page.locator('#bld-phone').fill('0500000077');
+    await page.locator('#bld-next').click();
+    await expect.poll(() => updates.length).toBe(1);
+    expect(updates[0]).toMatchObject({ p_phone: '+966500000077' });
+    await expect(page.locator('#bld-phone-err')).toContainText(await page.evaluate(`t('errPhoneExists')`) as string);
+    await expect(page.locator('#share-gate .sg-box')).toHaveCount(0);
+    // written with spaces: one number, stored the way sign-up stores it
+    await page.locator('#bld-phone').fill('050 000 0009');
+    await page.locator('#bld-next').click();
+    await expect.poll(() => updates.length).toBe(2);
+    expect(updates[1]).toMatchObject({ p_phone: '+966500000009', p_email: 'sara@example.com', p_name: 'Sara Haddad' });
+    await expect(page.locator('#share-gate .sg-box')).toBeVisible();
+  });
+
   const preRow = { id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', waiver_version: 'blood-2026-11-v1', waiver_at: '2099-11-01T10:00:00Z', data_share_at: '2099-11-01T10:00:00Z', blood_role: null, blood_club: null };
   const clubCalls = async (page: Page) => {
     const calls: Record<string, unknown>[] = [];
