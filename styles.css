@@ -1140,7 +1140,7 @@
     .color-slot{position:relative;}
     .color-slot input[type="color"]{width:52px;height:52px;border-radius:4px;border:2px solid rgba(var(--tint-rgb),.1);cursor:pointer;padding:3px;background:var(--s3);transition:border-color .2s;}
     .color-slot input[type="color"]:hover{border-color:rgba(var(--green-rgb),.5);}
-    .color-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--red);border:none;color:#fff;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;box-shadow:0 2px 6px rgba(var(--red-rgb),.3);}
+    .color-del{position:absolute;top:-6px;inset-inline-end:-6px;width:18px;height:18px;border-radius:50%;background:var(--red);border:none;color:#fff;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;box-shadow:0 2px 6px rgba(var(--red-rgb),.3);}
     .add-color-slot{width:52px;height:52px;border-radius:4px;border:2px dashed rgba(var(--tint-rgb),.12);background:rgba(var(--tint-rgb),.03);color:var(--muted);font-family:var(--font-body);font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;text-align:center;line-height:1.2;}
     .add-color-slot:hover{border-color:rgba(var(--green-rgb),.45);color:var(--green);background:rgba(var(--green-rgb),.05);}
     .bike-color-strip{height:6px;border-radius:4px;margin-bottom:4px;box-shadow:0 1px 6px rgba(16,19,18,.06);}
@@ -1942,7 +1942,7 @@
     #tab-bikes .flt-gr{color:var(--green);}
     #tab-bikes .flt-outbtn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(var(--tint-rgb),.02);border:1.5px solid rgba(var(--tint-rgb),.07);border-radius:6px;cursor:pointer;font-family:var(--font-body);transition:border-color .2s;}
     #tab-bikes .flt-outbar{width:4px;height:24px;border-radius:3px;background:rgba(160,160,160,.4);flex-shrink:0;}
-    #tab-bikes .flt-outname{font-size:15px;font-weight:600;color:var(--muted-l);}
+    #tab-bikes .flt-outname{font-size:15px;font-weight:600;color:var(--muted);} /* --muted-l was 4.47:1 on the button's wash; --muted is 5.4:1 (a11y gate, staff round s10) */
     #tab-bikes .flt-outn{background:rgba(var(--tint-rgb),.07);border-radius:2px;padding:2px 8px;font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--muted);}
     #tab-bikes .flt-outarr{font-size:16px;color:var(--muted);}
     #tab-bikes .flt-mt10{margin-top:10px;}
@@ -2819,7 +2819,7 @@
     /* ── Sessions two-pane (iPad/desktop list+detail) + master-detail (phone) ── */
     .sess-twopane{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:16px;align-items:start;}
     .sess-list-pane{min-width:0;}
-    .sess-list-scroll{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 300px);max-height:calc(100dvh - 300px);overflow-y:auto;padding-right:2px;-webkit-overflow-scrolling:touch;}
+    .sess-list-scroll{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 300px);max-height:calc(100dvh - 300px);overflow-y:auto;padding-inline-end:2px;-webkit-overflow-scrolling:touch;}
     .sess-lc{display:block;width:100%;text-align:start;background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:12px 14px;cursor:pointer;font-family:var(--font-body);transition:border-color .15s,background .15s;}
     .sess-lc:hover{border-color:rgba(var(--green-rgb),.35);background:var(--s2);}
     .sess-lc.selected{border-color:var(--green);background:rgba(var(--green-rgb),.08);}
@@ -2830,6 +2830,9 @@
     .sess-lc-bar{height:4px;border-radius:2px;background:var(--border);overflow:hidden;margin-bottom:6px;}
     .sess-lc-bar>div{height:100%;border-radius:2px;transition:width .25s;}
     .sess-lc-count{font-size:11px;color:var(--muted-l);font-weight:600;}
+    /* On the picked session's green wash (and the picked layout button's) the muted and green inks fell to 4.2-4.4:1 (a11y gate, staff round s10) */
+    html:not([data-staff-theme="dark"]) body.view-staff .sess-lc.selected .sess-lc-count{color:var(--muted);}
+    html:not([data-staff-theme="dark"]) body.view-staff .sess-lc.selected .badge-open,html:not([data-staff-theme="dark"]) body.view-staff .sess-view-toggle .view-toggle-btn.active{color:var(--green-h);}
     .sess-detail-pane{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:20px;min-width:0;}
     .sess-back-btn{display:none;background:none;border:none;color:var(--green);font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;padding:0 0 12px;align-items:center;gap:4px;min-height:44px;}
     .sess-detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;}
@@ -3026,6 +3029,7 @@
     #tab-history .hist-sub{font-size:var(--staff-fs-sm,12px);color:var(--muted);font-weight:600;}
     #tab-history .hist-sub3{font-size:var(--staff-fs-sm,12px);color:var(--muted);font-weight:600;margin-top:3px;}
     #tab-history .hist-name{cursor:pointer;text-decoration:underline;text-decoration-color:rgba(var(--tint-rgb),.2);text-underline-offset:2px;}
+    body.view-staff #tab-history .hist-name{padding-block:3px;margin-block:-3px;} /* 24x24 hit area (WCAG 2.5.8, staff round s10): padding grows it, the negative margin gives the room back, so nothing moves */
     #tab-history .hist-noemail{font-style:italic;color:var(--muted);}
     #tab-history .hist-ht{font-size:12px;font-weight:600;color:var(--green);white-space:nowrap;}
     #tab-history .hist-day{font-weight:600;font-size:13px;}
@@ -6871,6 +6875,7 @@ button.ca-chk{cursor:pointer;text-decoration:underline;text-underline-offset:2px
 .ca-bk-acts a{text-decoration:none;display:inline-flex;align-items:center}
 .ca-bk-k{font-size:12px;font-weight:600;color:var(--muted)}
 .ca-link{background:none;border:0;padding:0;color:var(--green);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+body.view-staff .ca-link{padding-block:4px;margin-block:-4px;} /* 24x24 hit area (WCAG 2.5.8, staff round s10): padding grows it, the negative margin gives the room back, so nothing moves */
 .ca-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .ca-actions a{text-decoration:none;display:inline-flex;align-items:center}
 /* call / WhatsApp links are buttons: square, the owner 2026-10-11 (bug hunt 2026-10-28) */
@@ -7760,6 +7765,7 @@ body.view-staff .bk-attn-name{display:flex;align-items:center;gap:8px;flex-wrap:
 body.view-staff .bk-attn-dot{width:8px;height:8px;border-radius:50%;background:var(--orange);flex:none;}
 body.view-staff .bk-attn-dot.red{background:var(--red);}
 body.view-staff .bk-attn-link{border:0;background:none;padding:0;font:inherit;font-weight:600;font-size:13.5px;color:var(--text);cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;}
+body.view-staff .bk-attn-link{padding-block:3px;margin-block:-3px;} /* 24x24 hit area (WCAG 2.5.8, staff round s10): padding grows it, the negative margin gives the room back, so nothing moves */
 body.view-staff .bk-attn-meta{font-size:12px;color:var(--muted);}
 body.view-staff .bk-attn-flags{display:flex;gap:6px;flex-wrap:wrap;}
 body.view-staff .bk-attn-flag{font-size:var(--staff-fs-sm);font-weight:600;border:1px solid var(--sf-line2);border-radius:4px;padding:2px 8px;background:rgba(var(--warn-rgb),.08);color:var(--orange);font-variant-numeric:tabular-nums;}
@@ -9553,7 +9559,9 @@ body.view-staff .tm-can-k{font-weight:700;color:var(--muted);}
 
 /* WCAG 2.4.11: a control or row that takes the focus is never left under the sticky top bar (or the
    phone's bottom bar): the page scrolls it clear. --topbar-h is the bar's measured height. */
-html:has(body.view-staff){scroll-padding-top:calc(var(--topbar-h,56px) + 12px);scroll-padding-bottom:84px;}
+/* On Bookings the night's figures bar, the selection's actions and the table's header stick under the top bar too: the
+   padding is the whole stack (--q-stack, measured by _lcStick; 0 while Bookings is not on screen), staff round s10 */
+html:has(body.view-staff){scroll-padding-top:calc(var(--topbar-h,56px) + var(--q-stack,0px) + 12px);scroll-padding-bottom:84px;}
 
 /* ════════════════════════════════════════════════════════════════════════
    RUN FOR HER (the owner, 2026-10-05) - a running event for community members.
@@ -10449,6 +10457,8 @@ body:not(.view-staff) .skip-link{display:none;}
 body.view-staff th .q-sort-btn{display:inline;margin:0;padding:0;border:0;border-radius:3px;background:transparent none;color:inherit;
   font:inherit;letter-spacing:inherit;text-transform:inherit;text-align:inherit;white-space:nowrap;cursor:pointer;min-height:0;}
 body.view-staff th .q-sort-btn:focus-visible{outline:2px solid var(--sf-green-ink);outline-offset:2px;}
+/* 24px tall hit area (WCAG 2.5.8, staff round s10): an inline box's padding takes no room in the line, so the header keeps its height */
+body.view-staff th .q-sort-btn,:is(#tab-queue,#tab-waitlist) .queue-table thead th .q-sort-btn{padding-block:5px;}
 /* Settings > This device: theme and keyboard shortcuts */
 body.view-staff .set-look{display:grid;gap:12px;margin-top:14px;}
 body.view-staff .set-look .form-group{margin:0;}
@@ -12173,6 +12183,9 @@ body.vol-mode #scan-modal .bkm-srow,body.vol-mode #scan-modal .bkm-srow6,body.vo
 #tab-sessions .ss-th-btn{background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer;min-height:0;}
 #tab-sessions .ss-th-btn.on{color:var(--text);}
 #tab-sessions .ss-link{background:none;border:none;padding:0;font:inherit;font-weight:600;color:var(--green);cursor:pointer;text-decoration:underline;text-underline-offset:2px;min-height:0;}
+/* 24x24 hit area (WCAG 2.5.8, staff round s10): padding grows it, the negative margin gives the room back, so nothing moves */
+#tab-sessions .ss-th-btn{padding-block:5px;margin-block:-5px;}
+#tab-sessions .ss-tbl .ss-link{padding-block:4px;margin-block:-4px;}
 #tab-sessions .ss-fillcell{display:flex;align-items:center;gap:8px;min-width:110px;}
 #tab-sessions .ss-fillcell .sess-lc-bar{flex:1 1 60px;margin:0;}
 #tab-sessions .ss-bulk{align-items:center;}
@@ -12641,6 +12654,7 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
 #tab-badgereq .bdr-row{padding:12px 0;border-top:1px solid var(--border);}
 #tab-badgereq .bdr-row.done>.bdg-item>:is(.bdg-m,.bdg-txt){opacity:.7;}
 #tab-badgereq .bdr-who{padding:0;border:0;background:none;color:var(--text);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+#tab-badgereq .bdr-who{padding-block:5px;margin-block:-5px;} /* 24x24 hit area (WCAG 2.5.8, staff round s10): padding grows it, the negative margin gives the room back, so nothing moves */
 #tab-badgereq .bdr-cmt{margin-top:2px;font-size:13px;line-height:1.45;color:var(--text);white-space:pre-line;overflow-wrap:anywhere;}
 #tab-badgereq .bdr-held{color:var(--orange);font-weight:600;}
 #tab-badgereq .bdr-chip{font-weight:600;}
@@ -12704,6 +12718,7 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
 #tab-lockers .lk-t-use{background:rgba(var(--green-rgb),.08);border-color:rgba(var(--green-rgb),.6);}
 #tab-lockers .lk-t-over{background:rgba(var(--red-rgb),.08);border-color:var(--red);}
 #tab-lockers .lk-t-out{opacity:.6;border-style:dashed;}
+#tab-lockers .lk-t-out .lk-t-sub{color:var(--text);} /* under the tile's .6 opacity the muted line was 2.6:1; the ink reads 4.8:1 and looks the same grey (a11y gate, staff round s10) */
 #tab-lockers .lk-t-flag{font-size:11px;font-weight:700;color:var(--red);}
 #tab-lockers .lk-res-f{margin-bottom:10px;}
 #tab-lockers .lk-res{display:flex;flex-direction:column;}
