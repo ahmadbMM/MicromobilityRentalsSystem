@@ -56,7 +56,7 @@ test('bulk approve takes the pending-and-waiting, leaves the waitlist, and is gu
   await expect.poll(() => patches.length, { timeout: 5000 }).toBeGreaterThan(0);
   const u = decodeURIComponent(patches[0]);
   expect(u).toContain('id=in.(p1,p2)');
-  expect(u).toContain('approval=eq.pending');   // a just-rejected rider is not resurrected
+  expect(u).toContain('or=(approval.is.null,approval.eq.pending)');   // a just-rejected rider is not resurrected; one with no approval yet is approved too (bug hunt 2026-11-10)
 });
 
 // The owner, 2026-10-02: "dont add a separate button for undo approval, clicking on the approved

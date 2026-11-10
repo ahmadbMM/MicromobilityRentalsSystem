@@ -11,7 +11,8 @@ const WL_AUTO = [{ key: 'biz', items: { wl_offer_mode: 'auto' } }];
 // (B6). Invented riders only.
 
 const SID = 's0';
-const SESSION = { id: SID, day: 'Friday', session_date: '2099-02-10', capacity: 3, status: 'open', created_at: 1 };
+// Room for four: a no-show frees a place the waitlist takes (a night already full moves nobody up, bug hunt 2026-11-10).
+const SESSION = { id: SID, day: 'Friday', session_date: '2099-02-10', capacity: 4, status: 'open', created_at: 1 };
 const row = (id: string, num: number, status: string, x: Record<string, unknown> = {}) => ({
   id, session_id: SID, session_day: 'Friday', session_date: '2099-02-10', queue_num: num, name: 'Rider ' + id.toUpperCase(),
   phone: '', customer_id: null, group_id: null, status, paid: true, price: 57.5, walk_in: true,
