@@ -7510,6 +7510,7 @@
   "lkCancelledToast": "Casier annulé",
   "lkAdded": "Casier ajouté à la réservation",
   "lkAddedTill": "Casier ajouté. Son prix est dans le panier des ventes.",
+  "lkTillHeld": "Le panier des ventes contient la vente d’un autre client : le prix du casier de {0} y entre une fois celle-ci enregistrée.",
   "lkAtTill": "payé aux ventes",
   "lkOnBill": "sur la réservation",
   "lkAddOne": "Ajouter un casier",

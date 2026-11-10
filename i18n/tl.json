@@ -7510,6 +7510,7 @@
   "lkCancelledToast": "Nakansela ang locker",
   "lkAdded": "Naidagdag ang locker sa booking",
   "lkAddedTill": "Naidagdag ang locker. Nasa Sales cart ang bayad nito.",
+  "lkTillHeld": "May benta ng ibang customer sa Sales cart: papasok ang bayad sa locker ni {0} kapag naitala na iyon.",
   "lkAtTill": "bayad sa Sales",
   "lkOnBill": "sa booking",
   "lkAddOne": "Magdagdag ng locker",

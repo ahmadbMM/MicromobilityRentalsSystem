@@ -7,6 +7,8 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb, type Fixtures } fr
 
 const ksaDay = (n = 0) => new Date(Date.now() + 3 * 3600e3 + n * 864e5).toISOString().slice(0, 10);
 const TODAY = ksaDay(0);
+// Tonight's locker times still ahead: the review drops the ones already over (_lkEnded), so a spec drawing it pins the clock.
+const noon = (page: Page) => page.clock.setFixedTime(new Date(`${TODAY}T12:00:00+03:00`));
 const sessions = [
   { id: 's1', day: 'Tuesday', session_date: TODAY, capacity: 40, status: 'open', created_at: 1, lockers: true, bike_slots: '{"_time":"21:00 - 23:00","_total":40}' },
   { id: 's2', day: 'Wednesday', session_date: ksaDay(1), capacity: 40, status: 'open', created_at: 2, lockers: true, event_kind: 'community', ride_kind: 'petromin', paid_ride: true, bike_slots: '{"_time":"19:00 - 21:00","_total":40}' },
@@ -242,6 +244,7 @@ test.describe('@customer:reserve lockers', () => {
   const drawReview = `(()=>{let h=document.getElementById('lk-t');if(!h){h=document.createElement('div');h.id='lk-t';document.body.prepend(h);}h.innerHTML=_lkReviewHtml(_sessGet('s1'));})()`;
 
   test('the review offers the night\'s periods with their prices; a full one cannot be picked; the fee joins the total', async ({ page }) => {
+    await noon(page);
     await rider(page, { queue_entries: [], 'rpc:customer_locker_offer': offer, 'rpc:locker_board': board });
     await page.evaluate(`_lkOfferLoad('s1',true)`);
     await page.waitForFunction(`!!_lkOffer('s1')`);
@@ -269,6 +272,7 @@ test.describe('@customer:reserve lockers', () => {
   });
 
   test('the cabinet: three across, numbered across the rows; taken and out-of-service doors cannot be picked; one per rider', async ({ page }) => {
+    await noon(page);
     await rider(page, { queue_entries: [], 'rpc:customer_locker_offer': offer, 'rpc:locker_board': board });
     await page.evaluate(`_lkOfferLoad('s1',true);_lkBoardLoad('${TODAY}',true)`);
     await page.waitForFunction(`!!_lkOffer('s1')&&!!_lkBoard('${TODAY}')`);
@@ -303,6 +307,7 @@ test.describe('@customer:reserve lockers', () => {
   });
 
   test('a picked door reserved by someone else meanwhile is dropped and said, and the booking waits at the cabinet', async ({ page }) => {
+    await noon(page);
     await rider(page, { queue_entries: [], 'rpc:customer_locker_offer': offer, 'rpc:locker_board': board });
     await page.evaluate(`_lkOfferLoad('s1',true);_lkBoardLoad('${TODAY}',true)`);
     await page.waitForFunction(`!!_lkOffer('s1')&&!!_lkBoard('${TODAY}')`);
@@ -322,6 +327,7 @@ test.describe('@customer:reserve lockers', () => {
   });
 
   test('after the booking the locker goes on the first riders\' rows; a database without lockers draws nothing', async ({ page }) => {
+    await noon(page);
     const seen = calls(page);
     await rider(page, { queue_entries: [], 'rpc:customer_locker_offer': offer, 'rpc:locker_board': board, 'rpc:customer_locker_reserve': { ok: true, rows: [] } });
     await page.evaluate(`_lkOfferLoad('s1',true);_lkBoardLoad('${TODAY}',true)`);
@@ -445,7 +451,13 @@ test.describe('@staff:lockers round two', () => {
     await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_sweep').length).toBe(1);
     expect(seen.find((c) => c.name === 'staff_locker_sweep')!.body).toEqual({ p_day: TODAY });
     await expect(page.locator('.toast', { hasText: '2 lockers freed' })).toBeVisible();
-    // the close-out names them too
+    // the close-out names them too, once their time is over: before it, closing out an earlier session of the evening must not
+    // free them (staff_locker_sweep frees every one of the day)
+    await page.clock.setFixedTime(new Date(`${TODAY}T19:00:00+03:00`));
+    const ahead = await page.evaluate(`_lkCoHtml('s1')`) as string;
+    expect(ahead).not.toContain('End of night');
+    expect(ahead).toContain('Still out: 1');
+    await page.clock.setFixedTime(new Date(`${TODAY}T20:30:00+03:00`));
     expect(await page.evaluate(`_lkCoHtml('s1')`)).toContain('End of night');
   });
 
@@ -525,6 +537,7 @@ test.describe('@customer:reserve lockers round two', () => {
   });
 
   test('a ride\'s ticket names the rider\'s own locker that evening; the review links the locker terms', async ({ page }) => {
+    await noon(page);
     const held = bk('q1', 1);
     await rider(page, { queue_entries: [held], 'rpc:my_bookings': [held], 'rpc:customer_locker_offer': { kind: 'jcc', one: 10, both: 15, left: { total: 6, early: 4, late: 4, both: 4, pm: 0 } },
       'rpc:locker_board': { day: TODAY, kind: 'jcc', one: 10, both: 15, left: {}, ended: {}, units: [{ code: '7', out: false }], taken: { e: [], l: [] } },

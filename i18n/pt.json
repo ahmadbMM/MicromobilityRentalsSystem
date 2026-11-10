@@ -7510,6 +7510,7 @@
   "lkCancelledToast": "Cacifo cancelado",
   "lkAdded": "Cacifo adicionado à reserva",
   "lkAddedTill": "Cacifo adicionado. O preço está no carrinho de vendas.",
+  "lkTillHeld": "O carrinho de vendas tem a venda de outro cliente: o preço do cacifo de {0} entra quando essa for registada.",
   "lkAtTill": "pago nas vendas",
   "lkOnBill": "na reserva",
   "lkAddOne": "Adicionar um cacifo",

@@ -7510,6 +7510,7 @@
   "lkCancelledToast": "Taquilla cancelada",
   "lkAdded": "Taquilla añadida a la reserva",
   "lkAddedTill": "Taquilla añadida. Su precio está en el carrito de ventas.",
+  "lkTillHeld": "El carrito de ventas tiene la venta de otro cliente: el precio de la taquilla de {0} entra cuando esa se registre.",
   "lkAtTill": "pagada en ventas",
   "lkOnBill": "en la reserva",
   "lkAddOne": "Añadir una taquilla",
