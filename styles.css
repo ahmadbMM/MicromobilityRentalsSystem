@@ -12899,3 +12899,90 @@ html[data-staff-theme="dark"] body.view-staff :is(.ssx-row,#spk-pop .spk-r-sub) 
 #lk-ed .lk-ed-more{display:flex;flex-wrap:wrap;gap:8px;padding-top:12px;border-top:1px solid var(--sf-line,var(--border));}
 #lk-ed .lk-ed-wa{display:inline-flex;align-items:center;text-decoration:none;}
 @media(max-width:420px){#lk-ed .lk-ed-doors{grid-template-columns:repeat(4,minmax(0,1fr));}}
+/* ══ The locker dialogs (2026-11-10, the user: "the lockers assignment modal looks very basic and not going with the
+   website's theme"). The staff dialog chrome they never had - every other dialog styles its title row, close button,
+   body and actions under its own id, these had none, so the close sat as a bare button under the title - and the body
+   scrolls inside the screen (Edit ran off the top on a laptop). Then Assign a locker itself: who and which evening, the
+   locker it has as a card, the times as cards, the cabinet's doors three across as it stands, one action. ══ */
+:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .confirm-box{display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);}
+:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-dh10{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin:-6px -10px 12px 0;}
+html[dir="rtl"] :is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-dh10{margin:-6px 0 12px -10px;}
+:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-dt{padding-top:8px;font-size:18px;font-weight:600;line-height:1.3;color:var(--text);overflow-wrap:anywhere;}
+:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-xt{flex:none;display:grid;place-items:center;width:40px;height:40px;padding:0;border:0;border-radius:var(--sf-r-ctl,8px);background:transparent;color:var(--muted);font-size:24px;line-height:1;cursor:pointer;transition:background-color var(--sf-dur,140ms) var(--sf-ease,ease),color var(--sf-dur,140ms) var(--sf-ease,ease);}
+:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-xt:hover{background:var(--sf-hover,var(--s3));color:var(--text);}
+:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-xt:focus-visible{outline:2px solid var(--sf-green-ink,var(--green));outline-offset:1px;}
+:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-dbody{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:14px;margin:0 -4px;padding:2px 4px;}
+:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-dbody>.form-group{margin:0;}
+:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-dact{flex:none;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--sf-sep,var(--border));}
+:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-dact>button{min-height:var(--sf-ctl-size,40px);}
+/* a time and its price as two words, not "8 PM· SAR 10" (the button's flex dropped the space before the dot) */
+:is(#lk-rent,#lk-ed) .lk-rent-ps .toggle-btn{gap:.3em;}
+/* the sheet's and the hand-keys dialog's rows: the last one has no rule under it */
+:is(#lk-modal,#lk-hand) .lk-sh-row:last-child{border-bottom:0;}
+
+/* ── Assign a locker ── */
+#lk-as .lk-as-box{width:min(var(--sf-dlg-m,480px),calc(100vw - 32px));}
+#lk-as .lk-as-hd{min-width:0;display:flex;flex-direction:column;gap:2px;}
+#lk-as .lk-as-sub{font-size:13px;line-height:1.4;color:var(--muted);overflow-wrap:anywhere;}
+#lk-as .lk-as-sub bdi{color:var(--text);font-weight:500;}
+/* the locker it has: its number in a door-like tile, its time, where it stands and how it is paid */
+#lk-as .lk-as-cur{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--sf-r-card,12px);background:var(--sf-sunken,var(--s2));box-shadow:inset 0 0 0 1px var(--sf-line,var(--border));}
+#lk-as .lk-as-cur.done{opacity:.75;}
+#lk-as .lk-as-n{flex:none;display:grid;place-items:center;min-width:44px;height:44px;padding:0 6px;box-sizing:border-box;border-radius:var(--sf-r-ctl,8px);background:var(--sf-card,var(--s1));box-shadow:var(--sf-sh-1,0 0 0 1px var(--border));font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text);}
+#lk-as .lk-as-n.on{background:var(--sf-green-ink,var(--green));box-shadow:none;color:var(--sf-card,#fff);}
+#lk-as .lk-as-ct{min-width:0;display:flex;flex-direction:column;gap:2px;font-size:14px;color:var(--text);}
+#lk-as .lk-as-ct1 b{font-weight:600;}
+#lk-as .lk-as-st{font-size:13px;color:var(--muted);}
+#lk-as .lk-as-dot{display:inline-flex;align-items:center;gap:6px;font-weight:500;color:var(--text);}
+#lk-as .lk-as-dot::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--muted-l);}
+#lk-as .lk-as-dot.ok::before{background:var(--sf-green-ink,var(--green));}
+#lk-as .lk-as-dot.warn::before{background:var(--orange);}
+#lk-as .lk-as-dot.bad{color:var(--red);}
+#lk-as .lk-as-dot.bad::before{background:var(--red);}
+/* a section's label row: the label, and what goes beside it (where the fee goes; the box to type a number) */
+#lk-as .lk-as-lr{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:34px;margin-bottom:8px;}
+#lk-as .lk-as-l{margin:0;font-size:13px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--text);}
+#lk-as .lk-as-note{font-size:12px;color:var(--muted);text-align:end;}
+/* the times: a card each, the time over its price; picked like every staff toggle */
+#lk-as .lk-as-ps{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;}
+#lk-as .lk-as-p{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;min-height:54px;padding:8px 12px;border:1px solid var(--sf-ctl,var(--border));border-radius:var(--sf-r-ctl,8px);background:var(--sf-card,var(--s1));color:var(--text);font:inherit;text-align:start;cursor:pointer;transition:border-color var(--sf-dur,140ms) var(--sf-ease,ease),background-color var(--sf-dur,140ms) var(--sf-ease,ease);}
+#lk-as .lk-as-p b{font-size:14px;font-weight:600;white-space:nowrap;}
+#lk-as .lk-as-p span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;}
+#lk-as .lk-as-p:hover:not(:disabled){border-color:var(--sf-ctl-h,var(--muted));}
+#lk-as .lk-as-p.on{border-color:var(--sf-green-ink,var(--green));box-shadow:inset 0 0 0 1px var(--sf-green-ink,var(--green));background:linear-gradient(var(--sf-accent-wash,transparent),var(--sf-accent-wash,transparent)) var(--sf-card,var(--s1));}
+#lk-as .lk-as-p.on b,#lk-as .lk-as-p.on span{color:var(--sf-green-ink,var(--green));}
+#lk-as .lk-as-p:disabled{opacity:.5;cursor:not-allowed;}
+#lk-as .lk-as-p:focus-visible,#lk-as .lk-as-d:focus-visible{outline:2px solid var(--sf-green-ink,var(--green));outline-offset:2px;}
+#lk-as .lk-as-in{width:116px;min-height:34px;margin:0;padding:6px 10px;font-size:14px;text-align:center;font-variant-numeric:tabular-nums;}
+/* the cabinet: three across in its frame, a door per number with a handle; taken or out of service sunk and marked */
+#lk-as .lk-as-doors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px;border-radius:var(--sf-r-card,12px);background:var(--sf-sunken,var(--s2));box-shadow:inset 0 0 0 1px var(--sf-line,var(--border));}
+#lk-as .lk-as-d{position:relative;display:flex;align-items:center;gap:6px;min-height:42px;padding:0 22px 0 12px;border:1px solid var(--sf-line2,var(--border));border-radius:var(--sf-r-ctl,8px);background:var(--sf-card,var(--s1));color:var(--text);font:inherit;text-align:start;cursor:pointer;transition:border-color var(--sf-dur,140ms) var(--sf-ease,ease),background-color var(--sf-dur,140ms) var(--sf-ease,ease),transform var(--sf-dur,140ms) var(--sf-ease,ease);}
+#lk-as .lk-as-d::after{content:"";position:absolute;inset-inline-end:9px;top:50%;width:3px;height:14px;margin-top:-7px;border-radius:2px;background:var(--sf-line2,var(--border));}
+#lk-as .lk-as-d b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;}
+#lk-as .lk-as-d span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:600;color:var(--sf-green-ink,var(--green));}
+#lk-as .lk-as-d .art-ic{flex:none;color:var(--muted-l);}
+#lk-as .lk-as-d:hover:not(:disabled){border-color:var(--sf-ctl-h,var(--muted));}
+#lk-as .lk-as-d:active:not(:disabled){transform:scale(.97);}
+#lk-as .lk-as-d.cur{border-color:var(--sf-green-ink,var(--green));box-shadow:inset 0 0 0 1px var(--sf-green-ink,var(--green));}
+#lk-as .lk-as-d.on{border-color:transparent;background:var(--sf-green-ink,var(--green));color:var(--sf-card,#fff);}
+#lk-as .lk-as-d.on::after{background:var(--sf-card,#fff);opacity:.6;}
+#lk-as .lk-as-d:is(.tk,.out){background:transparent;border-color:var(--sf-line,var(--border));color:var(--muted-l);cursor:not-allowed;}
+#lk-as .lk-as-d.out{border-style:dashed;}
+#lk-as .lk-as-d:is(.tk,.out)::after{opacity:.5;}
+#lk-as .lk-as-d.gap{visibility:hidden;}
+#lk-as .lk-as-none{grid-column:1/-1;padding:8px 4px;}
+#lk-as .lk-as-msg{min-height:18px;margin-top:6px;font-size:13px;line-height:1.4;color:var(--muted);}
+#lk-as .lk-as-msg:empty{min-height:0;margin:0;}
+#lk-as .lk-as-msg.err{color:var(--red);font-weight:500;}
+/* the rarer things: hand back (when a door is picked), unassign, the full edit, cancel */
+#lk-as .lk-as-more{display:flex;flex-wrap:wrap;gap:8px;}
+#lk-as .lk-as-more .lk-as-x{margin-inline-start:auto;color:var(--red);}
+#lk-as .chrome-dact .btn-primary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* the action not open yet (no time, or a door that cannot be had): plainly off, not a green that does nothing */
+:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-dact .btn-primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}
+:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-dact .btn-primary[aria-busy="true"]{opacity:.75;cursor:progress;}
+@media (pointer:coarse){#lk-as .lk-as-d{min-height:46px;}#lk-as .lk-as-in{min-height:40px;}}
+@media (prefers-reduced-motion:reduce){#lk-as .lk-as-d,#lk-as .lk-as-p,:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-xt{transition:none;}#lk-as .lk-as-d:active:not(:disabled){transform:none;}}
+/* booth: the edges solid, the picked door ringed in black too */
+html[data-staff-theme="booth"] #lk-as :is(.lk-as-d,.lk-as-p){border-width:2px;}
+html[data-staff-theme="booth"] #lk-as .lk-as-d.on{outline:2px solid var(--text);outline-offset:1px;}

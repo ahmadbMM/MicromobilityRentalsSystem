@@ -98,7 +98,7 @@ test.describe('@staff:lockers a booking\'s locker in its add-ons', () => {
   test('Assign a locker offers Unassign beside Hand back once the booking has a number', async ({ page }) => {
     await staff(page);
     await page.evaluate(`_lkAssignOpen('q1')`);
-    const dlg = page.getByRole('dialog', { name: /Assign a locker · #1 Rana Rider/ });
+    const dlg = page.getByRole('dialog', { name: /Assign a locker #1 Rana Rider/ });
     await expect(dlg.getByRole('button', { name: 'Hand back' })).toBeVisible();
     await expect(dlg.getByRole('button', { name: 'Unassign' })).toBeVisible();
     await expect(dlg.getByRole('button', { name: 'Cancel locker' })).toBeVisible();

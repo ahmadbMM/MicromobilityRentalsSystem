@@ -135,7 +135,7 @@ test.describe('@staff:lockers the Lockers section', () => {
     await page.waitForFunction(`(S._rowMenus||{}).q2&&S._rowMenus.q1`);
     expect(await page.evaluate(`['q1','q2'].every(id=>S._rowMenus[id].some(i=>/Assign a locker/.test(i.label)))`)).toBe(true);
     await page.evaluate(`_lkAssignOpen('q2')`);
-    const dlg = page.getByRole('dialog', { name: /Assign a locker · #2 Omar Other/ });
+    const dlg = page.getByRole('dialog', { name: /Assign a locker #2 Omar Other/ }) // its name says whose (the title and who, under it);
     await expect(dlg).toContainText('6 PM - 8 PM');
     await dlg.locator('#lk-as-in').fill('l2');
     await dlg.locator('#lk-as-in').press('Enter');
@@ -148,9 +148,9 @@ test.describe('@staff:lockers the Lockers section', () => {
     const sat = bk('q5', 5, { session_id: 's3', session_date: ksaDay(2), name: 'Rana Rider', customer_id: 'c1' });
     await staff(page, { queue_entries: [...queue, sat], 'rpc:staff_locker_walkup': { ok: true, id: 'R7', price: 15 } });
     await page.evaluate(`_lkAssignOpen('q5')`);
-    const dlg = page.getByRole('dialog', { name: /Assign a locker · #5 Rana Rider/ });
-    await expect(dlg.locator('.lk-rent-ps .toggle-btn')).toHaveCount(4); // any period: the night offers none of its own
-    await dlg.getByRole('button', { name: /6 PM - 11 PM · SAR 15/ }).click();
+    const dlg = page.getByRole('dialog', { name: /Assign a locker #5 Rana Rider/ });
+    await expect(dlg.locator('.lk-as-p')).toHaveCount(4); // any period: the night offers none of its own
+    await dlg.getByRole('button', { name: /6 PM - 11 PM\s*SAR 15/ }).click();
     await dlg.locator('#lk-as-go').click();
     await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_walkup').length).toBe(1);
     expect(seen.find((c) => c.name === 'staff_locker_walkup')!.body).toEqual({ p_customer: 'c1', p_name: 'Rana Rider', p_period: 'both', p_day: ksaDay(2) });
