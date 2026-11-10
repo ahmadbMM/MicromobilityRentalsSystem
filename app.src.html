@@ -22795,7 +22795,7 @@ function renderAccount(){
   // page-life flag used to stay set after a sign-out or one failed call, the form then showed a
   // blank nationality, and saving erased the one on file.
   const _pf=S._profFresh;
-  if(cust.session_token&&!(_pf&&_pf.id===cust.id&&Date.now()-_pf.at<60000)&&S._profHydrating!==cust.id){
+  if(sb&&cust.session_token&&!(_pf&&_pf.id===cust.id&&Date.now()-_pf.at<60000)&&S._profHydrating!==cust.id){ // no client yet: asked on a later paint (the call threw and the flag stayed set)
     S._profHydrating=cust.id;
     const _done=()=>{if(S._profHydrating===cust.id)S._profHydrating=null;};
     Promise.all([sb.rpc('customer_profile',{p_id:cust.id,p_token:cust.session_token}),_aboutRead(cust)]).then(([{data,error},ab])=>{
@@ -28177,7 +28177,7 @@ function showEditCustomerModal(id){
   if(c.phone){const m=COUNTRY_CODES.find(([code])=>c.phone.startsWith(code));if(m){cc=m[0];phone=c.phone.slice(m[0].length);}else phone=c.phone;}
   S._cf={mode:'edit',id:c.id,origName:c.name||'',first:n.first,middle:n.middle,last:n.last,email:c.email||'',cc,phone,pwd:'',
     height:c.height!=null?String(c.height):'',gender:c.gender||'',heard:c.heard_from||'',birth:c.birth_date||'',country:c.country||'',city:c.city||'',nationality:c.nationality||'',socials:c.socials||null,type:c.type_preference||'Any',
-    defpay:_housePayTypes(c)?'house':'',defpayTypes:(h=>h&&h!=='all'?h:bikeTypeOpts(false))(_housePayTypes(c)),origDefPay:c.default_pay||null,hiddenTypes:_hiddenTypes(c),
+    defpay:_housePayTypes(c)?'house':'',defpayTypes:(h=>h&&h!=='all'?h:bikeTypeOpts(false))(_housePayTypes(c)),origDefPay:c.default_pay||null,hiddenTypes:_hiddenTypes(c),origHidden:_hiddenTypes(c),
     rideNews:c.ride_news===true,rideNewsAt:c.ride_news_at||null,prof:c.profession||'',work:c.workplace||'',aboutIn:('profession' in c)&&('workplace' in c),heardIn:('heard_from' in c),
     origPhone:c.phone||'',origEmail:(c.email||'').toLowerCase()};
   _cfWaSet(S._cf,c);
@@ -31401,10 +31401,12 @@ function _accPwdClose(){const m=document.getElementById('acc-pwd-modal');if(m){m
 // staff device's own copy (S.cashSales) stands in as before. Voided and refunded lines are struck
 // through and left out of the total.
 function _purchLoad(cust){
-  const p=S._purch;if(!cust.session_token||(p&&p.id===cust.id&&(p.busy||Date.now()-p.at<60000)))return;
+  // No client yet (supabase-js later than the boot's wait): not asked and not marked busy, so a later paint asks (bug hunt
+  // 2026-11-10: the call threw on the missing client, the busy mark stayed, and the card never filled that visit).
+  const p=S._purch;if(!sb||!cust.session_token||(p&&p.id===cust.id&&(p.busy||Date.now()-p.at<60000)))return;
   S._purch={id:cust.id,at:Date.now(),rows:p&&p.id===cust.id?p.rows:null,busy:true};
   const fin=rows=>{const q=S._purch;if(!q||q.id!==cust.id)return;q.busy=false;if(rows)q.rows=rows;const h=document.getElementById('acc-purch');if(h)h.innerHTML=_purchHtml(cust);_accRowsPaint();};
-  sb.rpc('customer_purchases',{p_id:cust.id,p_token:cust.session_token}).then(({data,error})=>fin(!error&&Array.isArray(data)&&data),()=>fin(null));
+  Promise.resolve().then(()=>sb.rpc('customer_purchases',{p_id:cust.id,p_token:cust.session_token})).then(({data,error})=>fin(!error&&Array.isArray(data)&&data),()=>fin(null));
 }
 // The account's purchases and their total, or null before they are known (_purchHtml, and the Purchases row's value).
 function _purchList(cust){
@@ -31587,9 +31589,10 @@ function _cfDefTy(ty,btn){
   if(i>=0)a.splice(i,1);else a.push(ty);
   if(btn){btn.classList.toggle('active',i<0);btn.setAttribute('aria-pressed',String(i<0));}
 }
-// Multi-select toggle for the HIDDEN bike types (types this customer never sees).
+// Multi-select toggle for the HIDDEN bike types (types this customer never sees). An admin's alone: the database refuses
+// a change to them from anyone else (customers_admin_cols, ADMIN_ONLY), and with them the whole save (bug hunt 2026-11-10).
 function _cfHidTy(ty,btn){
-  if(!S._cf)return;
+  if(!S._cf||!isAdmin())return;
   const a=S._cf.hiddenTypes||(S._cf.hiddenTypes=[]);
   const i=a.indexOf(ty);
   if(i>=0)a.splice(i,1);else a.push(ty);
@@ -31600,6 +31603,12 @@ function _cfHiddenVal(){
   const all=bikeTypeOpts(false);
   const sel=(S._cf.hiddenTypes||[]).filter(ty=>all.includes(ty));
   return sel.length?sel.join(','):null;
+}
+// Whether the editor's hidden types differ from the account's when it opened, as a set: an untouched list is never
+// sent (re-joined, a stored list written another way read as a change and was refused for everyone but an admin).
+function _cfHiddenChanged(d){
+  const all=bikeTypeOpts(false),k=a=>(a||[]).filter(ty=>all.includes(ty)).slice().sort().join(',');
+  return k(d.hiddenTypes)!==k(d.origHidden);
 }
 // Serialize the editor's default-payment state: all (or no) types picked = plain 'house'.
 function _cfDefPayVal(){
@@ -31795,7 +31804,8 @@ function renderCustFormModal(){
       <div class="form-group cmy-mt8" id="cf-defpay-types"><label>${t('housePayTypesLabel')}</label>
         <div class="cmy-row6w">${bikeTypeOpts(false).map(ty=>`<button type="button" class="toggle-btn${(d.defpayTypes||[]).includes(ty)?' active':''}" aria-pressed="${((d.defpayTypes||[]).includes(ty))?'true':'false'}"${_scYDefPayOk()?'':' disabled'} data-on-click="${_on("_cfDefTy",ty,_EL)}">${typeLabel(ty)}</button>`).join('')}</div></div>
       <div class="form-group cmy-mt8"><label>${t('hiddenTypesLabel')}</label>
-        <div class="cmy-row6w">${bikeTypeOpts(false).map(ty=>`<button type="button" class="toggle-btn${(d.hiddenTypes||[]).includes(ty)?' active':''}" aria-pressed="${((d.hiddenTypes||[]).includes(ty))?'true':'false'}" data-on-click="${_on("_cfHidTy",ty,_EL)}">${typeLabel(ty)}</button>`).join('')}</div></div>
+        <div class="cmy-row6w">${bikeTypeOpts(false).map(ty=>`<button type="button" class="toggle-btn${(d.hiddenTypes||[]).includes(ty)?' active':''}" aria-pressed="${((d.hiddenTypes||[]).includes(ty))?'true':'false'}"${isAdmin()?'':' disabled aria-describedby="cf-hidty-hint"'} data-on-click="${_on("_cfHidTy",ty,_EL)}">${typeLabel(ty)}</button>`).join('')}</div>
+        ${isAdmin()?'':`<div id="cf-hidty-hint" class="label-hint scy-dp-hint">${esc(t('adminOnlyMsg'))}</div>`}</div>
       ${isCreate?'':`<div class="form-group cmy-mt8"><label>${t('amEditTags')}</label>
         <div class="cmy-cf-tags">
           ${(()=>{const _tm=_tagsById();const myCT=(S.customerTags||[]).filter(ct=>ct.customer_id===d.id&&_tm[ct.tag_id]);return myCT.length?myCT.map(ct=>_tagChip(_tm[ct.tag_id],ct)).join(''):`<span class="am-meta">${t('amNoTags')}</span>`;})()}
@@ -32015,7 +32025,7 @@ async function saveCustForm(){
   // can be closed while the checks are on the wire, and a value read after that came back empty -
   // default_pay and hidden_types null (a VIP's house bookings repriced), profession, company and
   // how they heard wiped, a typed password never set.
-  const _dp=_cfDefPayVal(),_ht=_cfHiddenVal();
+  const _dp=_cfDefPayVal(),_ht=_cfHiddenVal(),_htCh=_cfHiddenChanged(d);
   const _v=id=>String((document.getElementById(id)||{}).value||'').replace(/\s+/g,' ').trim();
   // profession, company and how they heard (20261002180000): an account holds every field its application asked
   const _about={...(d.aboutIn?{profession:_v('cf-prof').slice(0,80)||null,workplace:_v('cf-work').slice(0,120)||null}:{}),...(d.heardIn?{heard_from:_v('cf-heard')||null}:{})}; // not loaded = not sent: an empty box is not the account's answer
@@ -32024,6 +32034,9 @@ async function saveCustForm(){
   const _em=_cfEmVal(d);if(_em&&_em.err){toast(_em.err,'error');document.getElementById(_em.at||'cf-em-name')?.focus();return;}
   const _wa=d.mode==='edit'?_cfWaVal(d,fullPhone):{};if(_wa.err){toast(_wa.err,'error');document.getElementById('cf-wa-phone')?.focus();return;}
   const _sp=_cfSpVal(d);if(_sp.err){toast(_sp.err,'error');document.getElementById(_sp.at||'cf-sp-add')?.focus();return;}
+  // A password typed on an edit is checked before anything is written (bug hunt 2026-11-10): checked after the default
+  // payment, a refused one left the account on the house with its live bookings at their old price and nothing logged.
+  if(d.mode==='edit'&&pwdTyped&&(pwdTyped.length<8||!/[A-Z]/.test(pwdTyped)||!/[0-9]/.test(pwdTyped))){toast(t('errPasswordLen'),'error');document.getElementById('cf-pwd')?.focus();return;}
   if(d.mode==='create'){
     if(!email){toast(t('errValidEmail'),'error');return;}
     if(!fullPhone){toast(t('errPhoneRequired'),'error');return;}
@@ -32048,7 +32061,8 @@ async function saveCustForm(){
       // The default payment through staff_set_default_pay (approved above); an older database takes an admin's plain write.
       let _dpCol={};
       if(_dpNew){const got=await _scYDefPaySet(newId,_dpNew);if(got==='absent'){if(isAdmin())_dpCol={default_pay:_dpNew};else toast(t('dbPending'),'warning');}}
-      if(birth||country||city||nationality||soc.val||_dpCol.default_pay||_ht)await _wr(sb.from('customers').update({birth_date:birth,country,city,nationality,socials:soc.val,..._dpCol,hidden_types:_ht}).eq('id',newId),'save account details');
+      if(birth||country||city||nationality||soc.val||_dpCol.default_pay)await _wr(sb.from('customers').update({birth_date:birth,country,city,nationality,socials:soc.val,..._dpCol}).eq('id',newId),'save account details');
+      if(_ht&&isAdmin())await _wr(sb.from('customers').update({hidden_types:_ht}).eq('id',newId),'save account details'); // apart: refused, it took the details above with it
       logAction(t('logAcctCreated')+name);
       await loadData();closeCustFormModal();toast(name+'! '+t('toastAccountCreated'));renderCommunity();
     }finally{S._cfBusy=false;}
@@ -32065,24 +32079,38 @@ async function saveCustForm(){
       // A changed default payment goes through the on-the-house approval first (S02-core2-02): staff_set_default_pay
       // writes it, so the save below leaves the column alone; an older database takes an admin's plain write.
       const _dpCh=_scYDefPayOk()&&!_scYSameDp(_dp,d.origDefPay||null);
-      let _dpCol={};
+      let _dpCol={},_dpOn=false;
       if(_dpCh){
         const got=await _scYDefPaySet(d.id,_dp);
         if(got===null)return;
         if(got==='absent'){if(!isAdmin()){toast(t('dbPending'),'warning');return;}_dpCol={default_pay:_dp};}
+        else _dpOn=true;
       }
-      // Optional password change: only if staff typed one. Validated then set SERVER-SIDE (bcrypt) via
+      // staff_set_default_pay has written it: a step after it that fails still brings the live bookings to the new
+      // terms and logs it, and the next save does not ask the approval again (bug hunt 2026-11-10).
+      const _dpAfter=async()=>{
+        if(!_dpOn)return;_dpOn=false;
+        const _vip=_isVip({id:d.id});
+        await _houseReprice(d.id,[name,d.origName],ty=>_houseCovers(d.origDefPay,_vip,ty),ty=>_houseCovers(_dp,_vip,ty));
+        logAction(t('naEditTitle')+': '+(d.origName||name)+' · '+t('defaultPayLabel'));
+        d.origDefPay=_dp;renderStaffQueue();
+      };
+      // Optional password change: only if staff typed one (its form checked above). Set SERVER-SIDE (bcrypt) via
       // the is_staff()-guarded RPC, which also rotates the session token so old logins are invalidated.
       const newPwd=pwdTyped;
       const tempPwd=!!newPwd; // every password staff set is temporary: the rider picks their own at sign-in (the owner, 2026-10-07)
+      // The hidden types only when they changed (customers_admin_cols refuses a change from anyone but an admin).
+      const res=await sb.from('customers').update({name,email,phone:fullPhone,height,type_preference:type,birth_date:birth,country,city,nationality,socials:soc.val,..._dpCol,...(_htCh?{hidden_types:_ht}:{}),...(d.gender?{gender:d.gender}:{}),..._about,..._bt,..._sp.row,...((_em&&_em.row)||{}),...(_wa.row||{})}).eq('id',d.id);
+      if(res.error&&res.error.code==='23505'){toast(t('errEmailExists'),'error');await _dpAfter();return;} // the unique key an edit can hit: another account's email
+      if(_writeErr(res,'save account')){await _dpAfter();return;}
+      // The password once the account row took the save (bug hunt 2026-11-10): set before it, a save then refused left
+      // the rider signed out under a password nobody was sent. A refused one is said, and the editor stays open on
+      // what was saved, for another try.
+      let _pwErr='';
       if(newPwd){
-        if(newPwd.length<8||!/[A-Z]/.test(newPwd)||!/[0-9]/.test(newPwd)){toast(t('errPasswordLen'),'error');return;}
         const{data:pwok,error:pwerr}=await sb.rpc('staff_set_customer_temp_password',{p_customer_id:d.id,p_new_pwd:newPwd});
-        if(pwerr||pwok!==true){toast(pwerr?_scYSay(pwerr):t('errConnection'),'error');return;} // e.g. RPC not deployed → run sql/staff-set-password.sql
+        if(pwerr||pwok!==true)_pwErr=pwerr?_scYSay(pwerr):t('errConnection'); // e.g. RPC not deployed → run sql/staff-set-password.sql
       }
-      const res=await sb.from('customers').update({name,email,phone:fullPhone,height,type_preference:type,birth_date:birth,country,city,nationality,socials:soc.val,..._dpCol,hidden_types:_ht,...(d.gender?{gender:d.gender}:{}),..._about,..._bt,..._sp.row,...((_em&&_em.row)||{}),...(_wa.row||{})}).eq('id',d.id);
-      if(res.error&&res.error.code==='23505'){toast(t('errEmailExists'),'error');return;} // the unique key an edit can hit: another account's email
-      if(_writeErr(res,'save account'))return;
       // Sync the corrected CONTACT info onto the account holder's OWN live bookings only. One account
       // can hold rows for several DIFFERENT people (group bookings, staff-added riders, name-matched
       // walk-ins all share the holder's customer_id), so we match on the holder's PRIOR name — never a
@@ -32105,9 +32133,13 @@ async function saveCustForm(){
         await _houseReprice(d.id,[name,d.origName],ty=>_houseCovers(d.origDefPay,_vip,ty),ty=>_houseCovers(_newDp,_vip,ty));
       }}
       logAction(t('naEditTitle')+': '+name);
-      if(tempPwd)logAction(t('pwdGenLog').replace('{0}',name)); // never the password itself
+      if(tempPwd&&!_pwErr)logAction(t('pwdGenLog').replace('{0}',name)); // never the password itself
       // A new email can change how the account signs in (20260930100000): the marks are asked again.
       if(email!==(d.origEmail||''))S._siAt=0;
+      if(_pwErr){ // saved but for the password: the editor now stands on what was saved, so another save only sets it
+        Object.assign(d,{origName:name,origEmail:email,origPhone:fullPhone,origHidden:(d.hiddenTypes||[]).slice()});if(_dpCh)d.origDefPay=_dp;
+        await loadData();renderCommunity();renderStaffQueue();toast(_pwErr,'error');return;
+      }
       await loadData();closeCustFormModal();toast(t('accountSaved'));renderCommunity();renderStaffQueue();
       if(tempPwd)_tpMsgOpen(name,email,fullPhone,newPwd);
     }finally{S._cfBusy=false;}
@@ -32195,7 +32227,7 @@ function showWalkinModal(){
 }
 // The bike type goes with the rider it was picked for: kept across walk-ins, the next walk-up
 // was booked (and priced) as the last one's Road unless someone noticed the highlighted pill.
-function closeWalkinModal(){const m=document.getElementById('walkin-modal');if(m){m.style.display='none';m.innerHTML='';}S._wiRiders=[];S._wiCustId=null;S._wiType=null;S._wiRg=null;S._wiKm=null;S._wiTried=null;} // a failed insert's rows are this form's to look up, never a later walk-in's (2026-10-05)
+function closeWalkinModal(){const m=document.getElementById('walkin-modal');if(m){m.style.display='none';m.innerHTML='';}S._wiRiders=[];S._wiCustId=null;S._wiAuto=null;S._wiType=null;S._wiRg=null;S._wiKm=null;S._wiTried=null;} // a failed insert's rows are this form's to look up, never a later walk-in's (2026-10-05)
 function _wiRgSet(g){_wiSync();S._wiRg=g;showWalkinModal();}
 function _wiKmSet(k){_wiSync();S._wiKm=_runKmOk(k)?Number(k):null;showWalkinModal();}
 // ── Walk-in name: a live list of accounts under the field, the typed name as-is on top ──
@@ -32243,8 +32275,12 @@ function _wiPickCust(id){
   const c=(S.customers||[]).find(x=>x.id===id);if(!c)return;
   S._wiCustId=id;
   const n=document.getElementById('wi-name');if(n)n.value=c.name||'';
-  const fill=(i,v)=>{const el=document.getElementById(i);if(el&&!el.value&&v)el.value=v;};
-  fill('wi-phone',c.phone||'');fill('wi-height',c.height?String(c.height):'');
+  // A box is filled when empty or still holding what the last pick put there (bug hunt 2026-11-10): picking another
+  // account after the wrong one kept the first one's phone and height, so the booking took them. Typed values stay.
+  const A=S._wiAuto||{},got={};
+  const fill=(i,k,v)=>{const el=document.getElementById(i);if(el&&(!el.value||el.value===A[k])){el.value=v;got[k]=v;}};
+  fill('wi-phone','phone',c.phone||'');fill('wi-height','height',c.height?String(c.height):'');
+  S._wiAuto=got;
   _wiHideSuggest();
   // The repaint rebuilds the extra-rider rows from state, so what was typed into them is read
   // back first; it used to vanish when the picked account's bike type differed.
@@ -32605,7 +32641,9 @@ function _koSessOk(s){
     &&!_noWalkin(s)&&!_isApprovalRide(s)&&!(_isCommunity(s)&&!_openToAll(s));
 }
 function _koRides(){return allSessions().filter(_koSessOk).sort(_sessOrder);}
-function _koMine(sid){const K=S._kiosk;return K&&K.acct?getQueue().find(e=>e.customerId===K.acct.id&&e.sessionId===sid&&['waiting','waitlist','active'].includes(e.status)):null;}
+// A new account has no id until the booking makes it: nothing is its own yet (bug hunt 2026-11-10: null matched every
+// booking without an account, said "already booked" and showed a stranger's name).
+function _koMine(sid){const K=S._kiosk;return K&&K.acct&&K.acct.id?getQueue().find(e=>e.customerId===K.acct.id&&e.sessionId===sid&&['waiting','waitlist','active'].includes(e.status)):null;}
 // ── Find an account ──
 function _koFind(){
   const K=S._kiosk;_koKeep();
@@ -32619,8 +32657,24 @@ function _koFind(){
 // shows, read from the account's own stored row on the server: the last four of its first emergency contact's
 // number, else its birth year; an account with neither keeps the phone's last four (it gives a contact next).
 // The tries now count for the whole visit (_koReset clears them).
+// Wrong answers are also counted per account on this tablet, apart from the visit (bug hunt 2026-11-10): _koReset gave
+// three fresh tries at once, so the ~80 likely birth years could be walked through. Three wrong answers lock that
+// account on the kiosk for half an hour, across visits and a reload; the desk helps meanwhile.
+const KO_LOCK_N=3,KO_LOCK_MS=30*60000;
+function _koLocks(){
+  let o=S._koLock;
+  if(!o){try{o=JSON.parse(localStorage.getItem('cq_kolock')||'{}');}catch(_){o=null;}o=S._koLock=(o&&typeof o==='object'&&!Array.isArray(o))?o:{};}
+  const now=Date.now();
+  Object.keys(o).forEach(k=>{const v=o[k];if(!v||typeof v!=='object'||(v.until?v.until<=now:now-(Number(v.at)||0)>KO_LOCK_MS))delete o[k];});
+  return o;
+}
+function _koLockSave(){try{localStorage.setItem('cq_kolock',JSON.stringify(S._koLock||{}));}catch(_){}}
+function _koLocked(id){const v=_koLocks()[id];return!!(v&&v.until);}
+function _koMiss(id){const o=_koLocks(),v=o[id]||(o[id]={n:0});v.n=(Number(v.n)||0)+1;v.at=Date.now();if(v.n>=KO_LOCK_N)v.until=v.at+KO_LOCK_MS;_koLockSave();return!!v.until;}
+function _koHit(id){const o=_koLocks();if(o[id]){delete o[id];_koLockSave();}}
 async function _koPick(id){
   const K=S._kiosk;if(!K||K.busy)return;
+  if(_koLocked(id)){K.err=t('kioskTooMany');_koRender();return;}
   const c=(S.customers||[]).find(x=>x.id===id)||{};
   K.busy=true;K.err='';_koRender();
   let r;try{r=await sb.from('customers').select('emergency_phone,birth_date').eq('id',id).limit(1);}catch(e){r={error:e};}
@@ -32636,9 +32690,11 @@ function _koConfirm(){
   const v=_koDigits(_koVal('last4'));
   if(v.length!==4||v!==K.chk.d){
     K.tries++;K.D.last4='';
-    if(K.tries>=3){_koReset();K.err=t('kioskTooMany');_koRender();return;}
+    const locked=_koMiss(c.id);
+    if(K.tries>=3||locked){_koReset();K.err=t('kioskTooMany');_koRender();return;}
     K.err=t('kioskLast4Wrong');_koRender();return;
   }
+  _koHit(c.id);
   K.acct={id:c.id,name:c.name||'',email:c.email||'',phone:c.phone||'',height:c.height||null,type:c.type_preference||'',nationality:c.nationality||'',birth:c.birth_date||''};
   K.D.height=K.acct.height?String(K.acct.height):'';K.D.type=K.acct.type;
   K.busy=true;K.err='';_koRender();
@@ -32968,7 +33024,9 @@ function _beSyncNewRiders(){(S._beNewRiders||[]).forEach((r,i)=>{
   if(n)r.name=n.value;if(h)r.height=h.value;if(ty)r.type=ty.value;if(wl)r.wl=wl.checked;
 });}
 function _beAddRider(){_beSyncNewRiders();S._beNewRiders=[...(S._beNewRiders||[]),{name:'',height:'',type:'',wl:false}];showBookingEditModal(S._beId);} // no type until one is picked (the staff review, 2026-10-28, S03-core3-04)
-function _beRemoveRider(i){_beSyncNewRiders();(S._beNewRiders||[]).splice(i,1);showBookingEditModal(S._beId);}
+// The old rows leave the page before the repaint (bug hunt 2026-11-10): the repaint reads the boxes back by index, so
+// after the splice each later rider took the removed one's row and the LAST rider was the one that went.
+function _beRemoveRider(i){_beSyncNewRiders();(S._beNewRiders||[]).splice(i,1);document.querySelectorAll('#booking-edit-modal .dk-be-rrow').forEach(x=>x.remove());showBookingEditModal(S._beId);}
 function saveBookingEdit(){return _busyRun('bookingEdit',_saveBookingEdit);}
 async function _saveBookingEdit(){
   const e=_qGet(S._beId);if(!e){closeBookingEditModal();return;}
@@ -32986,7 +33044,8 @@ async function _saveBookingEdit(){
   // 2026-10-28, S03-core3-04): they were saved as Any. Asked before anything is written; a ride without bikes asks none.
   _beSyncNewRiders();
   const _nrS=_sessDisp(toSessionId),_nrBike=_needsBike(_nrS),_nrOk=bikeTypeOpts(_ownOffered(_nrS),_noCarbon(_nrS));
-  const _nr=(S._beNewRiders||[]).map((r,i)=>({i,name:_titleCaseName(_nameClean(r.name||'')),height:parseInt(r.height)||null,type:_nrBike?_xType(r,_nrOk):(CUST_TYPES.includes(r.type)?r.type:'Any'),wl:!!r.wl})).filter(r=>r.name||r.height);
+  // A row with a height and no name is "Guest of <parent>", as every other add names one (bug hunt 2026-11-10: saved nameless).
+  const _nr=(S._beNewRiders||[]).map((r,i)=>({i,name:_titleCaseName(_nameClean(r.name||'')),height:parseInt(r.height)||null,type:_nrBike?_xType(r,_nrOk):(CUST_TYPES.includes(r.type)?r.type:'Any'),wl:!!r.wl})).filter(r=>r.name||r.height).map(r=>r.name?r:{...r,name:_guestOf(name)});
   if(!_isApprovalRide(_nrS)&&!_isApprovalRide(_sessDisp(e.sessionId))&&!_noGroupAdd(_nrS)){const x=_nr.find(r=>!r.type);if(x){const el=document.getElementById('be-nr-type-'+x.i);_fieldErr(el,t('ridersWalkinErrType'));if(el)el.focus();return;}}
   const prev={name:e.name,phone:e.phone||'',height:e.height||null,size:e.size||'',type_preference:e.typePreference,price:e.price??DEFAULT_PRICE,
     session_id:e.sessionId,session_day:e.sessionDay,session_date:e.sessionDate,queue_num:e.queueNum,status:e.status};
@@ -33017,7 +33076,7 @@ async function _saveBookingEdit(){
   // off its ride and back by Undo came back without its group (2026-10-07).
   if('ride_group' in patch)prev.ride_group=e.rideGroup||null;
   if('run_km' in patch)prev.run_km=e.runKm||null;
-  const moving=toSessionId!==e.sessionId;let offBike=null;
+  const moving=toSessionId!==e.sessionId;let offBike=null,offAt=null,offBy=null;
   if(moving){
     const newSess=_sessDisp(toSessionId);if(!newSess)return;
     // Not onto a men-only or women-only session for the other gender (2026-10-27; the server leaves staff's moves to staff).
@@ -33053,6 +33112,7 @@ async function _saveBookingEdit(){
       if(!w){await loadDataLight();renderStaffQueue();return;}
       if(w.lost){closeBookingEditModal();await _lostRace();return;}
       patch.status='waiting';offBike=w.bikeIds;
+      offAt=w.checkedInAt||e.checkedInAt||null;offBy=w.by||null; // put back with the rider when the move does not happen or is undone: who checked them in was lost (bug hunt 2026-11-10)
     }
   }
   // Added riders — computed before the parent update so an account-less parent can be
@@ -33071,15 +33131,15 @@ async function _saveBookingEdit(){
   if(newRiders.length&&!groupId&&!e.customerId){groupId=uid();patch.group_id=groupId;prev.group_id=null;}
   // Guarded on the state the form opened with (a checked-in rider taken off the bike for a move is waiting now) (BK02).
   const _beGuard=offBike?'waiting':_beFrom;
-  let res=await sb.from('queue_entries').update(patch).eq('id',e.id).eq('status',_beGuard).select('id');
+  let res=await sb.from('queue_entries').update(patch).eq('id',e.id).eq('status',_beGuard).select('id,paid');
   // The move's number came from this device's copy: another desk adding to that night meanwhile
   // takes it (23505). Fresh numbers and one more try, as every insert does.
   if(moving&&res&&res.error&&(String(res.error.code||res.error.message).includes('23505')||/duplicate|unique/i.test(res.error.message||''))){
     await loadDataLight();patch.queue_num=nextQNum(toSessionId);
-    res=await sb.from('queue_entries').update(patch).eq('id',e.id).eq('status',_beGuard).select('id');
+    res=await sb.from('queue_entries').update(patch).eq('id',e.id).eq('status',_beGuard).select('id,paid');
   }
   if(res&&!res.error&&!_landed(res)){ // nothing matched: the rider moved on another desk meanwhile
-    if(offBike&&await _redoCheckinWrite(e.id,offBike)&&e.checkedInAt)await _wr(sb.from('queue_entries').update({checked_in_at:e.checkedInAt}).eq('id',e.id),'undo check-in');
+    if(offBike)await _redoCheckinWrite(e.id,offBike,offAt,undefined,offBy); // back on the bike at their first arrival, by whoever checked them in
     closeBookingEditModal();await _lostRace();return;
   }
   // A paid booking the server will not move to a ride with another fare (PAID_MOVE): said in the desk's words.
@@ -33088,7 +33148,7 @@ async function _saveBookingEdit(){
     // A rider taken off the bike for the move goes back on it: the move did not happen, and they
     // were left waiting on their own night with the bike back on the rack.
     if(offBike){
-      if(await _redoCheckinWrite(e.id,offBike)&&e.checkedInAt)await _wr(sb.from('queue_entries').update({checked_in_at:e.checkedInAt}).eq('id',e.id),'undo check-in');
+      await _redoCheckinWrite(e.id,offBike,offAt,undefined,offBy);
       await loadDataLight();renderStaffQueue();
     }
     return;
@@ -33137,17 +33197,36 @@ async function _saveBookingEdit(){
     }
   }
   const id=e.id,leftSt=patch.status||e.status,leftSid=patch.session_id||e.sessionId; // what the edit left, taken now: the undo writes only over that
+  // Only the fields the edit changed go back, over the booking paid or unpaid as the edit left it (bug hunt 2026-11-10):
+  // the whole old copy put the old price back over a booking paid since, and undid changes made since to fields the
+  // edit never touched.
+  const backKeys=[...new Set([...Object.keys(patch),'status'])].filter(k=>k in prev);
+  const _r0=(res&&res.data&&res.data[0])||{},paidLeft='paid' in _r0?!!_r0.paid:!!e.paid;
   pushUndo(`${t('undoEditBooking')} #${prev.queue_num} ${prev.name}`,async()=>{
+    // The riders the edit added go again only while nobody has acted on them (bug hunt 2026-11-10): run later (Logs,
+    // topbar), the undo deleted riders checked in or paid since, their payments with them. One checked in, paid,
+    // finished or cancelled since leaves the whole edit standing, as the walk-in's undo does.
+    let addedNow=[];
+    if(inserted.length){
+      const fr=await sb.from('queue_entries').select('id,status,paid').in('id',inserted);
+      if(!fr||fr.error){toast(t('errConnection'),'error');return false;}
+      const paidThen=new Map(insertedEnts.map(x=>[x.id,!!x.paid]));
+      addedNow=fr.data||[];
+      if(addedNow.some(x=>!['waiting','waitlist'].includes(x.status)||(!!x.paid&&!paidThen.get(x.id)))){toast(t('errChangedElsewhere'),'warning');await loadDataLight();renderStaffQueue();return false;}
+    }
     // A rider taken off their bike goes back to the old ride in line first, then back on the bike (the Undo check-in's own redo).
-    const back=offBike?{...prev,status:'waiting'}:prev;
+    const back=Object.fromEntries(backKeys.map(k=>[k,prev[k]]));if(offBike)back.status='waiting';
     // Guarded on the status and session the edit left (bug hunt 2026-10-28): run later (Logs, topbar), it put a rider
     // checked in or finished since back to waiting with the bike still assigned.
-    const ur=await sb.from('queue_entries').update(back).eq('id',id).eq('status',leftSt).eq('session_id',leftSid).select('id');
+    const ur=await sb.from('queue_entries').update(back).eq('id',id).eq('status',leftSt).eq('session_id',leftSid).eq('paid',paidLeft).select('id');
     if(_writeErr(ur,'undo edit')){await loadDataLight();renderStaffQueue();return false;} // nothing below may run over a booking still as edited
     if(!(ur.data||[]).length){toast(t('errChangedElsewhere'),'warning');await loadDataLight();renderStaffQueue();return false;}
-    if(offBike&&!(await _redoCheckinWrite(id,offBike,prevCiAt))){await loadDataLight();renderStaffQueue();return false;}
+    if(offBike&&!(await _redoCheckinWrite(id,offBike,prevCiAt,undefined,offBy))){await loadDataLight();renderStaffQueue();return false;}
     if(moving&&prev.status==='waitlist')await _addonStockQ(entryAddons(e),1); // back to waitlist = release what the move reserved above
-    if(inserted.length)await Promise.all(inserted.map(x=>sb.from('queue_entries').delete().eq('id',x))).catch(()=>{}); // fire-and-forget: the undo's clean-up, reloaded below
+    if(addedNow.length){ // each delete guarded on the row as just read: one acted on in between stays, and that is said
+      const dr=await Promise.all(addedNow.map(x=>sb.from('queue_entries').delete().eq('id',x.id).eq('status',x.status).eq('paid',!!x.paid).select('id'))).catch(()=>[]); // fire-and-forget: the undo's clean-up, reloaded below
+      if(dr.some(r=>!_landed(r)))toast(t('errChangedElsewhere'),'warning');
+    }
     if(parkedRows.length)await Promise.all(parkedRows.map(x=>sb.from('desk_waitlist').delete().eq('id',x))).catch(()=>{}); // ...and off the Staff List with them (fire-and-forget: the undo's clean-up)
     await loadDataLight();renderStaffQueue();
   });
@@ -33583,8 +33662,9 @@ async function _runEmShow(cid){
   const paint=body=>{m.style.display='block';m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_runEmShow_1",_EV,_EL)}"><div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="run-em-title">
     <div class="cmy-rej-head"><div class="cmy-minw0"><div id="run-em-title" class="chrome-dt">${t('emTitle')}</div></div><button data-on-click="${_on("closeConfirm")}" aria-label="${t('closeBtn')}" class="chrome-x x-close">&times;</button></div>${body}</div></div>`;};
   paint(`<div class="cmy-rej-msg" role="status">${t('loadingLabel')}…</div>`);
+  const tok=S._runEmTok=(S._runEmTok||0)+1; // a later opening owns the dialog (bug hunt 2026-11-10: a slow answer painted one runner's contacts into another's)
   const r=sb?await _emFetch('id,name',cols=>sb.from('customers').select(cols).eq('id',cid).maybeSingle()):null;
-  if(m.style.display==='none'||!document.getElementById('run-em-title'))return; // closed while it was read, or another dialog took its place
+  if(tok!==S._runEmTok||m.style.display==='none'||!document.getElementById('run-em-title'))return; // closed while it was read, or another dialog took its place
   if(!r||r.error||!r.data){paint(`<div class="cmy-rej-msg">${t('errConnection')}</div>`);return;}
   const c=r.data;
   const card=p=>{const ph=c[p+'phone'],rel=c[p+'relation'],f=p==='emergency_'?'emergency':'emergency2';return ph?`<div class="run-em-card"><div class="cu-f1-min0"><div class="run-em-n">${_pii('name',c[p+'name']||'',cid)}</div><div class="run-em-m">${esc(EM_RELS.includes(rel)?t('emRel_'+rel):'')} · <bdi dir="ltr">${_pii(f==='emergency'?'em':'em2',ph,cid)}</bdi></div></div></div>
@@ -33663,8 +33743,12 @@ async function _vtRcptOpen(id){
     <div class="cmy-rej-head"><div class="cmy-minw0"><div id="vt-rc-title" class="chrome-dt">${t('vtRcptLabel')}</div><div class="vl-st-sub"><bdi>#${e.queueNum||''} ${esc(_vlName(e))}</bdi>${e.vlReceiptAt?` · ${esc(typeof fmtStamp==='function'?fmtStamp(e.vlReceiptAt):e.vlReceiptAt)}`:''}</div></div>
       <button data-on-click="${_on("_vlClose")}" aria-label="${t('closeBtn')}" class="chrome-x x-close">&times;</button></div>${inner}</div></div>`;};
   paint(`<div class="vt-rc-wait">${t('pgSaving')}</div>`);
-  let img='';try{const r=await sb.from('vl_receipts').select('img').eq('entry_id',id).maybeSingle();img=(r&&r.data&&r.data.img)||'';}catch(_){}
-  if(h.style.display==='none')return;
+  const tok=S._vtRcTok=(S._vtRcTok||0)+1; // a later opening owns the dialog: an answer that comes back after it is dropped (bug hunt 2026-11-10)
+  // A read that failed is said, with Try again and no upload (bug hunt 2026-11-10): it showed "no receipt" and the upload,
+  // and an upload then replaced the athlete's receipt unseen.
+  let img='',bad=false;try{const r=await sb.from('vl_receipts').select('img').eq('entry_id',id).maybeSingle();if(!r||r.error)bad=true;else img=(r.data&&r.data.img)||'';}catch(_){bad=true;}
+  if(tok!==S._vtRcTok||h.style.display==='none'||!document.getElementById('vt-rc-title'))return;
+  if(bad){paint(`<div class="vt-rc-wait" role="alert">${esc(t('errConnection'))}</div><div class="vt-rc-act"><button type="button" class="btn-secondary" data-on-click="${_on("_vtRcptOpen",id)}">${t('retryBtn')}</button></div>`);return;}
   const k=_vtStaffKey(e),can=_editOk('queue')&&(k==='sent'||k==='paid'),up=_editOk('queue')&&!['cancelled','removed','noshow'].includes(e.status);
   const upBtn=lbl=>up?`<label class="btn-secondary vt-pick"><input type="file" accept="image/*" class="sr-only" data-on-change="${_on("_vtStaffPick",id,_EL)}">${esc(t(lbl))}</label>`:'';
   paint(img&&/^data:image\/(jpeg|png|webp);base64,/.test(img)?`<img class="vt-rc-img" src="${esc(img)}" alt="${esc(t('vtRcptLabel'))}">
