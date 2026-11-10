@@ -13101,6 +13101,17 @@ html[dir="rtl"] :is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) 
 :is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-dact .btn-primary[aria-busy="true"]{opacity:.75;cursor:progress;}
 @media (pointer:coarse){#lk-as .lk-as-d{min-height:46px;}#lk-as .lk-as-in{min-height:40px;}}
 @media (prefers-reduced-motion:reduce){#lk-as .lk-as-d,#lk-as .lk-as-p,:is(#lk-as,#lk-modal,#lk-rent,#lk-hand,#lk-ed,#lk-item,#lk-out) .chrome-xt{transition:none;}#lk-as .lk-as-d:active:not(:disabled){transform:none;}}
+/* Cancel a paid locker (2026-11-10): give the money back, or no refund - two cards like the Assign dialog's times */
+#confirm-modal .lk-cx{display:grid;gap:8px;}
+#confirm-modal .lk-cx-o{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;min-height:54px;padding:8px 12px;border:1px solid var(--sf-ctl,var(--border));border-radius:var(--sf-r-ctl,8px);background:var(--sf-card,var(--s1));color:var(--text);font:inherit;text-align:start;cursor:pointer;transition:border-color var(--sf-dur,140ms) var(--sf-ease,ease),background-color var(--sf-dur,140ms) var(--sf-ease,ease);}
+#confirm-modal .lk-cx-o b{font-size:14px;font-weight:600;}
+#confirm-modal .lk-cx-o span{font-size:12px;color:var(--muted);}
+#confirm-modal .lk-cx-o:hover{border-color:var(--sf-ctl-h,var(--muted));}
+#confirm-modal .lk-cx-o.on{border-color:var(--sf-green-ink,var(--green));box-shadow:inset 0 0 0 1px var(--sf-green-ink,var(--green));background:linear-gradient(var(--sf-accent-wash,transparent),var(--sf-accent-wash,transparent)) var(--sf-card,var(--s1));}
+#confirm-modal .lk-cx-o.on b{color:var(--sf-green-ink,var(--green));}
+#confirm-modal .lk-cx-o:focus-visible{outline:2px solid var(--sf-green-ink,var(--green));outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){#confirm-modal .lk-cx-o{transition:none;}}
+html[data-staff-theme="booth"] #confirm-modal .lk-cx-o{border-width:2px;}
 /* booth: the edges solid, the picked door ringed in black too */
 html[data-staff-theme="booth"] #lk-as :is(.lk-as-d,.lk-as-p){border-width:2px;}
 html[data-staff-theme="booth"] #lk-as .lk-as-d.on{outline:2px solid var(--text);outline-offset:1px;}

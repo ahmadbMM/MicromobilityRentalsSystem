@@ -2322,6 +2322,30 @@ tables `lockers` and `locker_rentals`.
   `_entryAddonMutate` takes such a line off with no stock to move), more of them only by staff and in stock. A booking that is
   over shows its add-ons with the steppers off; a done ride with a locker line opens its Add-ons from the roster (chip and
   phone card) so the locker is handed back or edited there. No database change, no new words.
+- **An automatic locker, and Cancel with no refund (the user, 2026-11-10: "add the ability to cancel locker reservation with no
+  refund, whenever a customer books a locker online or not on site assign them an automatic locker so it stays reserved for
+  them"; migration 20261111002000).** A reservation held with no number only counted against the evening's places; now the
+  database holds a free door at once (`_lk_free_unit(day, period, except)`: a door in service nobody holds for any slot of the
+  time; doors already taken for the evening's other slot first, so whole doors stay for 6-11 PM and Petromin nights; then by
+  number) wherever a reservation is made away from the desk: `customer_locker_reserve` with no door picked (a page cached
+  before the cabinet, or the cabinet not read), a booking moved to another evening whose locker is someone else's there or
+  that had none (`_lk_booking_follow`), `staff_locker_edit` moving a reservation to another evening or to a time its door is
+  taken for, and `staff_locker_reserve` / `staff_locker_walkup` for a LATER evening (tonight the desk gives the door by tag
+  or number, as before; both answer the `code` they gave, which the Sales line names). An Unassign, and a rental left with
+  no number on the same evening, stay without one. When no single door is free for the whole time (one taken 6-8, another
+  9-11), the rental is still held with no number. The review still asks the rider to pick a door; a picked door taken in
+  the last moments (`LOCKER_TAKEN`/`LOCKER_OUT`) is reserved again with none picked (`_lkAfterBook`) and the rider is told
+  the one held (`lkGotOther`, from the answer's `lockers`). The migration gave a number to the reservations still to come
+  that had none (the rider's own, and staff ones for later evenings). **Cancel locker** on one that was paid for
+  (`_lkPaidMaybe`: a paid ride's bill, a wallet or card receipt, till lines; a ride not read here counts as maybe) asks where
+  the money goes (`_lkCancelAsk`, two radio cards, Give the money back picked first): back as before, or **No refund**:
+  `staff_locker_cancel(..., p_no_refund true)` frees the locker and keeps what was paid - the wallet or card receipt is not
+  voided (a card's refund owed, written by `_pay_locker_follow` where online payments exist, is declined), the fee stays on
+  a paid ride's bill (`locker_rentals.kept`, which `_lk_line` counts), till lines stay. Nothing paid yet is an ordinary
+  cancel (the answer's `kept` says which happened). The reason reads `staff (no refund)`, so the history, which reads without
+  the column, shows "Cancelled · No refund" (`_lkKept`, `_lkCxTxt`) and the report counts that money. Any staff; the page
+  sends `p_no_refund` only when it is picked, so the old three-argument call still works. Customers' own Remove is unchanged
+  (wallet money back). `tests/locker-no-refund.spec.ts`.
 
 ## Sessions is a section of its own (2026-11-06)
 
