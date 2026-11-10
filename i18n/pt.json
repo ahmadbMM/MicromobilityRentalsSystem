@@ -3597,6 +3597,7 @@
   "fixOwnSub": "Ainda faltam alguns dados na sua conta. Adicione-os uma vez e você poderá reservar.",
   "fixOwnSubPw": "O acesso com Google e Apple deixou de existir, então sua conta precisa de uma senha e de mais alguns dados. Adicione-os uma vez e você poderá reservar.",
   "fixOwnNote": "Você pode reservar assim que isso for salvo.",
+  "fixAddBtn": "Adicionar os dados",
   "appPwTitle": "Crie uma senha",
   "appPwSub": "O acesso com Google e Apple deixou de existir. Crie uma senha para continuar entrando com {0} ou seu número de celular.",
   "fixPwHint": "Pelo menos 8 caracteres, com uma letra maiúscula e um número.",

@@ -238,13 +238,67 @@ test.describe('riders added while editing a booking', () => {
     expect(updates).toHaveLength(1);
   });
 
-  test('when the request cannot be read, the refusal is said in words, never the server\'s code', async ({ page }) => {
+  // The user, 2026-11-10: "when showing an error add a button that directs to the missing info".
+  test('when the request cannot be read, the refusal is said in words with a button to what is owed', async ({ page }) => {
     const fx = await editing(page, { 'rpc:customer_create_booking': refused });
     fx['rpc:customer_fix_fields'] = { __rpcError: { status: 500, code: 'XX000', message: 'down' } };
     await page.evaluate(addRider);
-    await expect(page.locator('.toast', { hasText: 'still needs a few details' })).toBeVisible();
+    const bar = page.locator('#err-bar-el');
+    await expect(bar).toContainText('still needs a few details');
     await expect(page.locator('.toast', { hasText: 'FIX_FIRST' })).toHaveCount(0);
     await expect.poll(() => page.evaluate('S.regSubmitting')).toBe(false);
+    // Pressed once the list reads again: the request opens with what is owed.
+    fx['rpc:customer_fix_fields'] = ['email'];
+    await bar.getByRole('button', { name: 'Add details' }).click();
+    await expect(page.locator('#fix-gate .fx-item[data-fx="email"]')).toBeVisible();
+    await expect(bar).toHaveCount(0);
+    expect(await page.evaluate(`typeof S._fix.next`)).toBe('function');         // saving it carries the edit on
+  });
+});
+
+// A question added to the server after the page was loaded (the sport question, 2026-11-10, met a phone still
+// running the morning's build): the page has no box for it, and used to see nothing owed, book, and show the
+// server's refusal as a bare "Your account still needs a few details" toast. It opens a pop-up instead, with one
+// way on - the current build, whose check-up asks it - and Log out.
+test.describe('a question this page has no box for', () => {
+  const unknownAsk = ['a_question_from_a_later_build'];
+  test('a booking refused for it opens a pop-up, not a toast, and there is no way past it', async ({ page }) => {
+    await rider(page, [], { 'rpc:customer_create_booking': { __rpcError: { status: 400, code: 'P0001', message: 'FIX_FIRST' } } });
+    await page.waitForFunction(`S._commAskedFor==='c1'`);
+    await page.evaluate(`S._fixCache={id:'c1',at:Date.now(),fields:[],unknown:[]}`);
+    await page.route('**/rest/v1/rpc/customer_fix_fields*', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(unknownAsk) }));
+    await page.evaluate(`S.selEvent='jcc';S.selSession='${S1}';S.regQty=1;S.regBikeHeights=[175];S.regBikeTypes=['Road'];S.regRiderNames=['Spec Rider'];S.promoApplied=null;S.waiverOk=true;submitReg()`);
+    const box = page.locator('#fix-gate .fx-box');
+    await expect(box).toBeVisible();
+    await expect(box).toContainText('A few details for your account');
+    await expect(page.locator('#fix-gate button')).toHaveText(['Add details', 'Log out']);
+    await expect(page.locator('.toast', { hasText: 'still needs a few details' })).toHaveCount(0);
+    await expect(page.locator('#err-bar-el')).toHaveCount(0);
+    expect(await page.evaluate('S.regSubmitting')).toBe(false);
+    await page.keyboard.press('Escape');
+    for (const go of [`goCustomer('myrides')`, `goCustomer('account')`, `showView('customer')`]) {
+      await page.evaluate(go);
+      await expect(box).toBeVisible();
+    }
+    // Add details loads the page again (the current build).
+    await page.evaluate(`window.__before=1`);
+    await page.click('#fx-old-go');
+    await expect.poll(() => page.evaluate(`typeof window.__before`)).toBe('undefined');
+  });
+
+  test('it opens at sign-in too, before any booking', async ({ page }) => {
+    await rider(page, unknownAsk);
+    await expect(page.locator('#fix-gate .fx-box')).toContainText('A few details for your account');
+    await expect(page.locator('#fix-gate #fx-old-go')).toHaveText('Add details');
+    await page.click('#fix-gate .gate-out');
+    await expect(page.locator('#fix-gate')).toBeHidden();
+    expect(await page.evaluate('[!!S.loggedIn,!!S._fix]')).toEqual([false, false]);
+  });
+
+  test('beside questions it does know, the pop-up still loads the current build first', async ({ page }) => {
+    await rider(page, ['gender', ...unknownAsk]);
+    await expect(page.locator('#fix-gate #fx-old-go')).toBeVisible();
+    await expect(page.locator('#fix-gate .fx-item')).toHaveCount(0);
   });
 });
 

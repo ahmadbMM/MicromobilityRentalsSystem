@@ -9317,6 +9317,11 @@ body:not(.view-staff) #tab-account .acc-save{width:100%;margin-top:4px;}
   body:not(.view-staff) #tab-account :is(.acc-split:not(.acc-has-pg) .acc-row[data-acc-go="personal"],.acc-row[aria-current="page"]){background:var(--go-wash);}
   body:not(.view-staff) #tab-account .acc-pg-h{margin:0 0 14px;font-size:var(--fs-20);letter-spacing:0;}
 }
+/* The error bar on a rider screen: the toast's dark pill. Its words were the page's dark ink on the bar's fixed dark
+   red, all but unreadable, now that the bar carries the way to what an account owes (2026-11-10). */
+body:not(.view-staff) .err-bar{background:var(--night);border:0;border-radius:var(--r-ctl);box-shadow:var(--lq-3);}
+body:not(.view-staff) .err-bar .undo-bar-text{color:var(--night-ink);font-weight:600;}
+body:not(.view-staff) .err-bar .err-bar-detail{color:var(--night-ink-2);}
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).

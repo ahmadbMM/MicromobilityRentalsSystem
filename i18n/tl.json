@@ -3597,6 +3597,7 @@
   "fixOwnSub": "Kulang pa ng ilang detalye ang iyong account. Idagdag ang mga ito nang isang beses at makakapag-book ka na.",
   "fixOwnSubPw": "Wala na ang pag-sign in gamit ang Google at Apple, kaya kailangan ng iyong account ng password at ilan pang detalye. Idagdag ang mga ito nang isang beses at makakapag-book ka na.",
   "fixOwnNote": "Makakapag-book ka kapag na-save na ang mga ito.",
+  "fixAddBtn": "Idagdag ang mga detalye",
   "appPwTitle": "Gumawa ng password",
   "appPwSub": "Wala na ang pag-sign in gamit ang Google at Apple. Gumawa ng password para patuloy kang makapag-sign in gamit ang {0} o ang iyong numero ng mobile.",
   "fixPwHint": "Hindi bababa sa 8 character, may isang malaking titik at isang numero.",

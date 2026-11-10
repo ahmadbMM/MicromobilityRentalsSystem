@@ -3597,6 +3597,7 @@
   "fixOwnSub": "Il manque encore quelques informations à votre compte. Ajoutez-les une fois et vous pourrez réserver.",
   "fixOwnSubPw": "La connexion avec Google et Apple a pris fin : votre compte a donc besoin d’un mot de passe, et de quelques autres informations. Ajoutez-les une fois et vous pourrez réserver.",
   "fixOwnNote": "Vous pourrez réserver dès que c’est enregistré.",
+  "fixAddBtn": "Ajouter les informations",
   "appPwTitle": "Créez un mot de passe",
   "appPwSub": "La connexion avec Google et Apple a pris fin. Créez un mot de passe pour continuer à vous connecter avec {0} ou votre numéro de mobile.",
   "fixPwHint": "Au moins 8 caractères, dont une majuscule et un chiffre.",

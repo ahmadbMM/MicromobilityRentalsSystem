@@ -3597,6 +3597,7 @@
   "fixOwnSub": "A tu cuenta todavía le faltan algunos datos. Añádelos una vez y podrás reservar.",
   "fixOwnSubPw": "El inicio de sesión con Google y Apple ya no está disponible, así que tu cuenta necesita una contraseña y algunos datos más. Añádelos una vez y podrás reservar.",
   "fixOwnNote": "Podrás reservar en cuanto se guarden.",
+  "fixAddBtn": "Añadir los datos",
   "appPwTitle": "Crea una contraseña",
   "appPwSub": "El inicio de sesión con Google y Apple ya no está disponible. Crea una contraseña para seguir entrando con {0} o tu número de móvil.",
   "fixPwHint": "Al menos 8 caracteres, con una mayúscula y un número.",
