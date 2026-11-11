@@ -12084,6 +12084,47 @@ body.vol-mode #topbar-right{visibility:hidden;}
 .vol-chips{margin:8px 0 12px;}
 .vol-acts{display:grid;gap:8px;}
 .vol-acts .btn-sm{min-height:44px;width:100%;}
+/* The Door role (staff round s10, D11): one locked scan screen (#door-page, drawn by the door part), the panel hidden
+   under it, the topbar's account buttons hidden (the language stays). Phone first: one column, 44px+ targets; the tones
+   of the "send them to the desk" lines are the roster's (amber to the desk, red out, green in). */
+#door-page{display:none;}
+body.door-mode.view-staff #door-page{display:block;}
+body.door-mode #view-staff{display:none!important;}
+body.door-mode #topbar-right{visibility:hidden;}
+body.door-mode #scan-modal :is(.bkm-srow,.bkm-srow6,#scan-batch,#scan-express-hint,#scan-tally,#scan-details,#scan-except){display:none;}
+#door-page .zg-wrap{box-sizing:border-box;max-width:560px;margin:0 auto;padding:16px 16px 48px;display:grid;gap:12px;}
+#door-page .zg-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+#door-page .zg-title{margin:0;font-size:var(--fs-lg);font-weight:600;line-height:1.25;}
+#door-page :is(.zg-me,.zg-none,.zg-num){color:var(--muted);font-weight:500;}
+#door-page .zg-none{margin:0;}
+#door-page .zg-top .btn-sm{display:inline-flex;align-items:center;gap:6px;min-height:44px;flex:0 0 auto;}
+#door-page :is(.zg-pick,.zg-spec){display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+#door-page :is(.zg-pick,.zg-spec) .toggle-btn{min-height:44px;}
+#door-page .zg-figs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+#door-page .zg-fig{padding:12px 8px;background:var(--sf-card);border:1px solid var(--sf-line);border-radius:var(--sf-r-card);text-align:center;color:var(--muted);font-size:var(--fs-sm);overflow-wrap:anywhere;}
+#door-page .zg-fig b{display:block;color:var(--text);font-size:var(--fs-xl);font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums;}
+#door-page .zg-fig:first-child b{color:var(--sf-green-ink);}
+#door-page .zg-scan{display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;font-size:var(--fs-md);border-radius:var(--sf-r-card);}
+#door-page .zg-find{display:flex;gap:8px;margin:0;}
+#door-page .zg-find input{flex:1 1 auto;min-width:0;min-height:48px;font-size:var(--fs-md);}
+#door-page .zg-find button{min-height:48px;}
+#door-page .zg-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px;}
+#door-page .zg-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;width:100%;min-height:48px;padding:8px 12px;background:var(--sf-card);border:1px solid var(--sf-line);border-radius:var(--sf-r-ctl);color:var(--text);font:inherit;text-align:start;cursor:pointer;}
+#door-page .zg-row:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+#door-page .zg-rn{flex:1 1 auto;min-width:0;font-weight:600;overflow-wrap:anywhere;}
+#door-page .zg-card{display:grid;gap:12px;padding:14px;background:var(--sf-card);border:1px solid var(--sf-line2);border-radius:var(--sf-r-sheet);box-shadow:var(--sf-sh-1);}
+#door-page .zg-h2{margin:0;font-size:var(--fs-md);font-weight:600;}
+#door-page .zg-rider{display:grid;gap:8px;}
+#door-page .zg-rider+.zg-rider{padding-top:12px;border-top:1px solid var(--sf-sep);}
+#door-page .zg-name{font-size:var(--fs-lg);font-weight:600;line-height:1.3;overflow-wrap:anywhere;}
+#door-page .zg-sess{color:var(--orange);font-size:var(--fs-sm);font-weight:500;}
+#door-page .zg-spec b{font-size:var(--fs-md);font-weight:600;}
+#door-page .zg-in{width:100%;min-height:52px;font-size:var(--fs-md);border-radius:var(--sf-r-card);}
+#door-page .zg-why{padding:10px 12px;border:1px solid currentColor;border-radius:var(--sf-r-ctl);background:var(--sf-sunken);font-weight:600;}
+#door-page .zg-ok{color:var(--sf-green-ink);}
+#door-page .zg-warn{color:var(--orange);}
+#door-page :is(.zg-err,.zg-why.zg-err){color:var(--red);}
+#door-page .zg-mute{color:var(--muted);}
 /* ══ VOLUNTEERS, REBUILT (2026-11-09, the owner: "redesign the whole staff Volunteers section") ══════════════════════
    Soft Solid and the Bookings page's patterns: the pages as one segmented row, one figures bar whose numbers filter, a
    toolbar row (search, Select, saved views, the Filters button), and a table card whose rows carry a 3px status edge, a

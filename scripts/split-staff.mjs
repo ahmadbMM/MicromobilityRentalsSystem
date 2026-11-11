@@ -509,6 +509,8 @@ export const STAFF_PARTS = {
   // 2026-10-09 (R7): ride reminders on WhatsApp and who a freed waitlist place goes to (staff pick or a timed offer)
   // 2026-11-04: and telling the riders a freed place went to (its list and row chip stay in the core; its words in all ten languages here)
   remind: ['openRemindSheet', 'openWlOffers', '_ptOpen'],
+  // 2026-11-11 (staff round s10, D11): the Door role's locked scan screen (a Door account signs in to it; nobody else fetches it)
+  door: ['_doorEnter', '_doorPaint', '_doorScanned'],
 };
 function refsOf(code) {
   const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });

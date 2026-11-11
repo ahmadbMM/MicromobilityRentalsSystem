@@ -3220,3 +3220,44 @@ Items 48-50 of `reports/Staff website design and function.md` (builder "features
   core 338.8 / 346 (not raised). The `community` part (132 KB) was not split: the core is inside its budget and a split
   does not change the staff half; People's sub-views are drawn synchronously by `renderCommunity`, so a part of their
   own needs their callers made async first.
+
+## Staff round s10: the Door role (2026-11-11, migration 20261111180500)
+The owner's D11 ("do it all"): a staff role `door` for people whose only job is checking riders in at the entrance
+(helpers at runs, blood drives, the Corniche gate). Label "Door" (`roleDoor`, Arabic البوابة); Team invites one
+(`staff_invite`) or switches an account to it (`staff_set_access`).
+- **The page.** `goStaff` sends a Door account to `_doorEnter` (part `staff-parts/door.js`, entries `_doorEnter`,
+  `_doorPaint`, `_doorScanned`; `STAFF_PART_TABS.door=[]`, so nobody else fetches it). One screen, `#door-page`, made
+  after `#view-staff` (which `body.door-mode` hides, with `#topbar-right`; the topbar's language stays): the session
+  picker (today's sessions, `_doorSessions`), Arrived / Still to come / Expected, Scan ticket (the desk's scanner;
+  `_onScanPayload` hands a Door account's codes to `_doorScanned`), a search (code, booking number, mobile, name, today
+  only), the card (the rider and the rest of the party: number, name, marks, staff note, height and size, bike type)
+  with Check in or the line that sends them to the desk, and who has arrived. Keys start with `zg` (not `zd`, the
+  volunteers'; no core code builds a `'z'+` key). Check-in never opens the next rider: focus goes back to Scan.
+- **Locked.** No rail, menu, sections, ⋯ menu, G-chords or Ctrl K (both key listeners return for a Door account).
+  `setStaffTab`, `renderStaffQueue` and `_renderStaffTab` paint the Door screen instead (`_doorShow`); `_navUrl` gives
+  `/`; the popstate listener calls `goStaff` (never a staff-half name: the popstate listener is customer-half code, and
+  a reference to a part function pulled the whole Door chain into every rider's page); `_doorEnter` replaces the entry
+  and pushes one, so Back lands on it again; `goLanding` goes through `_staffHostGate`. Sign out asks first
+  (`_doorOut` -> `lockStaff`); another account signing in is the unlock.
+- **Who may be checked in here** (`_doorWhy`): waiting, today, approved, a waiver, nothing owed (paid, a free ride, own
+  bike, or a price the wallet covered), no deposit to take; a Saturday rider without a group picks one on the card.
+  Everything else says why and "send them to the desk". The write is the desk's: one `staff_checkin` with no bike and no
+  payment (the outbox when offline), the ride group when picked, a Log line with a client id.
+- **The database (enforced, not only the page).** `_staff_is_door()`; trigger `a_door_guard` (named to run before every
+  other BEFORE trigger) on `queue_entries` (`_door_queue_guard`: the one write a Door account may make is waiting ->
+  active changing only status, checked_in_at, checked_in_by, assigned_bike_id and ride_group, of a rider who owes nothing;
+  else `DOOR_UNPAID` / `DOOR_ONLY_CHECKIN`) and on cashier_sales, wallet_ledger, locker_rentals, lockers, locker_items,
+  staff_options, customers and sessions (`_door_write_guard`: no write of its own). Both act only at
+  `pg_trigger_depth() = 1`, so what other triggers do in a check-in's wake runs as for anyone. NOT on bikes or
+  bike_assignments: staff_checkin claims the booking's reserved bike itself. `_staff_cap` gives a Door account no
+  capability; `staff_invite` / `staff_set_access` write its lists as the database's own ({queue} / {}) whatever the page
+  sends (the page sends null: `_tmLists`), so `_staff_mod` gives it Bookings to read and nothing to change, and the
+  section allow-list trap does not arise. `_staff_role_mods('door')` is {queue}.
+- **Only the page**: bikes and bike_assignments, bookings' other tables, reading anything staff read (a Door account is
+  `is_staff()`), and the waiver, deposit and other-day rules (the server's check is "paid or owes nothing").
+- **Not the Volunteer role**, which is unchanged: blood donation only, `is_staff()` false, `staff_volunteer_*`, one donor
+  from a ticket or a whole number, never the list. A new role gets an entry in `STAFF_ROLES`, `_roleLabel`, `ROLE_TABS`,
+  `_staff_role_mods`, `staff_invite` and `staff_set_access`.
+- Size: the door part is 4.5 KB gzipped (its code alone; the core grew 0.4 KB for the hooks). Built locally on 343e558a
+  the staff half went 952.3 -> 957.4 KB against a 956 budget, which was NOT raised (the merge step decides).
+- Spec: `tests/s10b-door.spec.ts`.
