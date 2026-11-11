@@ -9401,6 +9401,8 @@ body:not(.view-staff) .sess-about.sess-i:focus-visible{outline-offset:-4px;borde
 body:not(.view-staff) .spots-soon{display:inline-flex;align-items:center;gap:5px;}
 /* the waitlist said in the bar and on the review before Confirm (row 1) */
 body:not(.view-staff) .cu-wl-chip{display:inline-flex;align-items:center;min-height:20px;padding:0 8px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--red-line);color:var(--red);font-size:var(--fs-12);font-weight:600;vertical-align:1px;}
+/* a type another rider filled while this one was on the form (TYPE_FULL, 2026-11-11): said on the review */
+body:not(.view-staff) .cu-cap-err{margin:6px 0 4px;color:var(--red);font-size:var(--fs-13);font-weight:600;}
 /* step 1's bar holds Back too (row 12); the top Back steps aside while it shows */
 body:not(.view-staff) .mm-reg-foot.reg-foot1{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 body:not(.view-staff) .reg-foot1 .cu-w100{flex:1;width:auto;}

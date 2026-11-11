@@ -3201,7 +3201,7 @@ Items 48-50 of `reports/Staff website design and function.md` (builder "features
   be booked online while the session has room. The figure uses the server's counting (`_n6rTypePlaces`, `_n6rHeld`:
   rows not cancelled, removed or no-show, waitlisted too, less bikes out), capped by the session's places left; a type
   staff closed (`closed_types`) shows "closed"; none on an approval ride. The walk-in form's type buttons say it too
-  (`_tylWi`).
+  (`_tylWi`). **Since 2026-11-11 the database holds every type to that count** (see "each bike type capped on its own" below).
 - Rules: the desk part carries the dialogs and the drawing helpers the core names by a built name (`_s10W`: the bell's
   `_sntBell`, the Dashboard's `_sntDash`, the account window's `_incAhSec`); keep new code there. Language keys for
   booking incidents start with `incd` (a `'b'+` prefix in the People part names every key starting with "b"; `inc*`
@@ -3220,3 +3220,47 @@ Items 48-50 of `reports/Staff website design and function.md` (builder "features
   core 338.8 / 346 (not raised). The `community` part (132 KB) was not split: the core is inside its budget and a split
   does not change the staff half; People's sub-views are drawn synchronously by `renderCommunity`, so a part of their
   own needs their callers made async first.
+
+## Staff round s10: each bike type capped on its own (2026-11-11, migration 20261111180600)
+
+The owner said yes ("do it all") to holding each bike type to its own places. Builder "caps", second batch.
+- **The rule lives in the database** (`_type_full_guard`, trigger `trg_type_full_guard`, BEFORE INSERT OR UPDATE OF
+  type_preference, session_id on queue_entries). A booking that takes a place (waiting or active) of a type whose places on
+  its session are all taken is refused **TYPE_FULL** (detail: the type; hint: "taken/places"). The count is the desk's
+  "places left" figure: `_type_places` (bike_slots by type, sizes summed, or the fleet picked `_bikes`) less the type's
+  bikes out, against the bookings of the type that are not cancelled, removed or a no-show, **the waitlist too**. A type
+  given no places and none out, 'Any', an own bike, the waitlist and approval rides are never held; a session that counts
+  only a total (every session since August) is unchanged.
+  - **Riders** are always refused (new booking, move to another session, change of type). One with no other type to
+    pick on that ride (every type they are offered full, closed, hidden from them, or Road Carbon for a VIP:
+    `_type_room_else`) joins the **waitlist** instead on a new booking or a move, as on a full night; a seat_only booking
+    then gets PLACE_GONE as before.
+  - **Staff** are refused too unless they said **Add anyway**: the request header `x-mm-type-cap: ok` on the insert
+    (supabase-js `.setHeader`), or `set_config('mm.type_cap_ok','1',true)` in a staff function. A staff change of type or
+    session on an existing booking passes (the bike handed over at the booth).
+  - `_out_bikes_room` now counts the type's places with no bike out too, so promotion (`_promote_next_waitlist`),
+    claim-mode offers (`_wl_offer_fill`), `staff_offer_spot`, `customer_claim_spot` and `_session_has_room` never move a
+    waitlisted rider into a full type (the next one of another type moves up). `_out_bikes_guard` keeps only the session's
+    places less the bikes out; the per-type half is `_type_full_guard`'s. Claim mode may still offer two places of one
+    type in a pass (the second claim is answered FULL), as it could with bikes out.
+- **Staff inserts go through `_qIns(rows, c)`** (walk-in `_wiInsertRiders`, group `_saveJccGroup`, community add
+  `_commBook`, riders added in the booking editor, the Staff List's `_giveDeskBike`). It asks first when this desk already
+  counts the type full (`_capOver`, the riders being added counted too) and again when the server refuses one it did not
+  see coming: the centred "Road is full (12 of 12). Add anyway?" (`_capAsk`, askConfirm) with **Add anyway** / **Pick
+  another type**. Add anyway sends the header and logs "Added over the Road limit: <names>" (kind `typecap`); Pick another
+  type returns `{error:{code:'READONLY'}}`, which `_writeErr` says nothing about, and the form stays open. `c` keeps the
+  answer across a retry (a booking number another desk took). A new staff insert of bookings uses `_qIns`, never a bare
+  `sb.from('queue_entries').insert`. The desk outbox keeps the answer (`op.cap`) for a walk-in queued offline; a later
+  TYPE_FULL there needs attention (Discard and add again; Retry does not override). The kiosk leaves a full type out
+  (`_koTypes`): a rider at the kiosk is never asked Add anyway.
+- **Rider screens.** `_capLeft(s, ty)` is the same count on the rider's device; a full type is shut on the picker like a
+  closed one and labelled **Full** (`_regTyFull` in `_regTypeShut`; the riders before this one on the form who picked it
+  count). When every type the rider is offered is full (`_capAll`) the ride is its waitlist (`_regWlNow`: the Waitlist
+  chip, Join waitlist) and every type is a preference again; so is a ride with no place left. A TYPE_FULL race is said on
+  the review (`S._capErr`, `.cu-cap-err`, role=alert, above the riders and their Change) and the data is read again, so
+  the riders step shows the type Full; picking a type clears it. A reschedule refuses a date where the type is full
+  (`rsTypeFull`) before moving anyone. `_errMessage` and `RPC_DESK` name TYPE_FULL (`errTypeFull`).
+- **Website: no counterpart.** micromobility.sa/saturday books Saturday rides, which are approval rides (exempt); the
+  Experiences page lists prices and links into the booking app; neither has a picker that books a counted ride.
+- Not done: the session list does not say "Waitlist" when every type is full (the step-1 bar, the review and Confirm
+  do); the "from" price still counts a full type. `tests/s10b-caps.spec.ts`.

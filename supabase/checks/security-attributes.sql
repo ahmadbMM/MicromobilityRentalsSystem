@@ -290,6 +290,10 @@ with expected(fname, want_definer, note) as (values
   ('staff_merge_customers',  true,  'moves every row of one account onto another across twelve tables; admins only'),
   ('staff_unmerge_customers',true,  'puts a merge back within thirty days; admins only'),
   ('_type_closed_guard',     false, 'trigger: reads sessions, which everyone may; is_staff() does its own privileged read'),
+  -- Each bike type capped on its own (20261111180600)
+  ('_type_full_guard',       true,  'trigger: counts a type''s bookings in queue_entries across RLS; revoked'),
+  ('_type_places',           true,  'reads a session''s bike_slots and the fleet picked; revoked'),
+  ('_type_room_else',        true,  'reads the rider''s hidden types and every type''s room; revoked'),
   ('_booking_window_guard',  false, 'trigger: reads site_content, which everyone may; is_staff() does its own privileged read'),
   ('staff_live_position',    true,  'writes live_positions, which no client can write; staff only'),
   ('staff_live_stop',        true,  'deletes from live_positions; staff only'),
