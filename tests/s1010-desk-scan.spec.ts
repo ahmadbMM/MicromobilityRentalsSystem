@@ -39,7 +39,7 @@ async function desk(page: Page) {
 test.describe('@staff:petromin s1010 desk: Petromin scans', () => {
   test('D8: in Express a Petromin ticket checks the rider in from the scan; the banner says who, which bike and the desk note', async ({ page }) => {
     const checkins = await desk(page);
-    await page.evaluate(`window.__said=[];_scanExpress=true;_scanRiderGo(S.riders.find(x=>x.id===1),'P-001',(m,c)=>window.__said.push([m,c]))`);
+    await page.evaluate(`window.__said=[];_scanExpress=true;_scanRiderGo(S.riders.find(x=>x.id===1),'P-001',(m,c)=>window.__said.push([m,c]),true)`); // true: read by the camera
     await expect.poll(() => checkins.length).toBeGreaterThan(0);
     expect(checkins[0]).toMatchObject({ p_booking_id: 'q1', p_bike_id: 'b2' }); // 185 cm: the Road L
     await expect.poll(() => page.evaluate('window.__said.length')).toBeGreaterThan(0);
@@ -49,9 +49,18 @@ test.describe('@staff:petromin s1010 desk: Petromin scans', () => {
     expect(colour).toBe('var(--green)');
     expect(await page.evaluate('!!S._riderModalId')).toBe(false); // no pop-up: the camera stays the desk's
     // scanned again: already in, nothing sent twice
-    await page.evaluate(`_scanRiderGo(S.riders.find(x=>x.id===1),'P-001',(m,c)=>window.__said.push([m,c]))`);
+    await page.evaluate(`_scanRiderGo(S.riders.find(x=>x.id===1),'P-001',(m,c)=>window.__said.push([m,c]),true)`);
     await expect.poll(() => page.evaluate('window.__said[window.__said.length-1][0]')).toContain('already');
     expect(checkins.length).toBe(1);
+  });
+
+  test('D8: a Petromin number from the Bookings search never runs Express and never reopens the camera', async ({ page }) => {
+    const checkins = await desk(page);
+    // no camera flag: the search box (a scanner gun) with Express and Keep scanning saved on the device
+    await page.evaluate(`_scanExpress=true;_scanCont=true;_scanRiderGo(S.riders.find(x=>x.id===1),'P-001',()=>{})`);
+    expect(await page.evaluate('S._riderModalId')).toBe('1'); // the pop-up opens, nobody is checked in
+    expect(await page.evaluate('_scanResume')).toBe(false); // closing it does not open the camera
+    expect(checkins.length).toBe(0);
   });
 
   test('D8: the pop-up\'s Change bike takes a bike from the camera', async ({ page }) => {

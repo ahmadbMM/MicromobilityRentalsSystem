@@ -34294,6 +34294,7 @@ async function _qIns(rows,c){
   return r;
 }
 async function _wiInsertRiders(sessId,riders,phone,custId,retry,rg){
+  _wiAttempted=null; // a return before trying leaves nothing to look for (bug hunt 2026-11-11): the last insert's rows were taken as this one's
   const sess=_sessDisp(sessId);if(!sess)return null;
   const groupId=riders.length>1?uid():null;
   const mk=()=>{const base=nextQNum(sessId);return riders.map((r0,i)=>{
@@ -38327,7 +38328,7 @@ function sfSearchEnter(){
   if(bm||pm){
     S.sfSearch='';const inp=document.getElementById('sf-search-input');if(inp)inp.value='';renderStaffQueue(true);
     if(bm)_bikeArrived(bm[1],'scan').catch(()=>{});
-    else _scanRider(pm[1].toUpperCase(),(msg,col)=>toast(msg,col==='var(--red)'?'error':'warning')).catch(()=>{});
+    else _scanRider(pm[1].toUpperCase(),(msg,col)=>toast(msg,col==='var(--red)'?'error':'warning')).catch(()=>{}); // not the camera: never Express
     return;
   }
   // Counted among the riders still expected, a booking number only on the ride picked (or, with
@@ -47498,7 +47499,7 @@ function _onScanPayload(raw){
   // Check in button (the rider is not in the queue, so not the check-in modal).
   const pm=_scanPmNo(txt);
   if(pm&&listed){say(t('scanBatchOnlyTickets'),'#ffb347');return;}
-  if(pm){_scanRider(pm[1].toUpperCase(),say).catch(()=>{});return;}
+  if(pm){_scanRider(pm[1].toUpperCase(),say,true).catch(()=>{});return;}
   // Numbered (MMC-7-a1b2c3) or number-free community format (MMC-a1b2c3): the id prefix
   // is the real key; the queue number, when present, is only an extra consistency check.
   const m=txt.match(/^MMC-(?:(\d+)-)?([0-9a-zA-Z][0-9a-zA-Z-]{3,7})$/);
@@ -51332,7 +51333,7 @@ function _bkPrivHtml(isEdit){
 function _bkPrivVal(k,v){
   const s=String(v==null?'':v).trim();if(!s)return null;
   if(k==='year'){const n=parseInt(_asciiDigits(s),10);return n>=1990&&n<=2100?n:null;}
-  return k==='tag'?_bkTagNorm(s):s;
+  return k==='tag'?(_bkTagNorm(s)||null):s; // nothing left of it (':' alone) is no tag: '' was saved as one, and the next such bike refused as a duplicate
 }
 // A model year typed out of that range is said on its field (the bug hunt, 2026-11-10): read as blank, a typo such as
 // 202 saved the bike with no year, over the one it had. Only a year typed in this form: one read as it is stays as it is.
@@ -51340,7 +51341,8 @@ function _bkYearOk(){const P=S._bkPriv||{},y=String(P.year??'').trim();if(y&&P.t
 // A tag id as staff_resolve_bike and staff_link_tag read one: letters and digits, upper-case.
 // A UID pasted as a phone NFC app shows it (04:A3:2B:...) was saved with its colons and never
 // matched a tap or a reader, which the resolver strips before comparing.
-function _bkTagNorm(v){return String(v==null?'':v).replace(/[^0-9A-Za-z]/g,'').toUpperCase();}
+// Arabic-Indic digits read as ASCII first (bug hunt 2026-11-11): typed on an Arabic keyboard they were dropped.
+function _bkTagNorm(v){return _asciiDigits(v).replace(/[^0-9A-Za-z]/g,'').toUpperCase();}
 // The columns to write: every field for a new bike; for an edit, those that changed from what
 // was read, or only those typed when the read failed. prev holds what an undo puts back.
 function _bkPrivPatch(isNew){
@@ -51496,7 +51498,9 @@ function _csvParse(text){
   for(let i=0;i<text.length;i++){
     const c=text[i];
     if(q){if(c==='"'){if(text[i+1]==='"'){cell+='"';i++;}else q=false;}else{if(c==='\n')ln++;cell+=c;}continue;}
-    if(c==='"'){q=true;continue;}
+    // A quote opens a quoted cell only as its first character (bug hunt 2026-11-11): an inch mark typed unquoted
+    // (29", 27.5") opened one mid-cell, and the rows after it folded into that cell and were lost without a word.
+    if(c==='"'&&cell===''){q=true;continue;}
     if(c===delim){row.push(cell);cell='';continue;}
     if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;end();at=++ln;continue;}
     cell+=c;
@@ -51621,11 +51625,12 @@ async function _addBikeNow(){
   if(!_bkYearOk())return;
   const customName=(document.getElementById('bk-name')?.value||'').trim();
   const name=customName||genBikeName(S.addBikeType,S._bkFrame,bikeNum,size);
-  _autoSaveBkOpts(brand,model,groupset);
+  const wheel=_bkAddTyped('bk-wheel',S._bkWheelAdd,S._bkWheel),brake=_bkAddTyped('bk-brake',S._bkBrakeAdd,S._bkBrake);
+  _autoSaveBkOpts(brand,model,groupset,S._bkWheelAdd?wheel:'',S._bkBrakeAdd?brake:'');
   const colorNames=S.addBikeColorNames.slice(0,S.addBikeColors.length).map(n=>n||'');
   const rentalPrice=_bkRentalVal();
   const startDate=(document.getElementById('bk-start')?.value||S._bkStartDate||_todayISO());
-  const bike={id:uid(),name,size,type:S.addBikeType,colors:[...S.addBikeColors],color_names:colorNames,status:'available',brand,model,groupset,speeds,rental_price:rentalPrice,frame_type:S._bkFrame,bike_number:bikeNum,in_service_date:startDate,retired_date:null,wheel_size:S._bkWheel||null,brake_type:S._bkBrake||null,weight_kg:_bkWeightVal(),..._bkPrivPatch(true).patch};
+  const bike={id:uid(),name,size,type:S.addBikeType,colors:[...S.addBikeColors],color_names:colorNames,status:'available',brand,model,groupset,speeds,rental_price:rentalPrice,frame_type:S._bkFrame,bike_number:bikeNum,in_service_date:startDate,retired_date:null,wheel_size:wheel||null,brake_type:brake||null,weight_kg:_bkWeightVal(),..._bkPrivPatch(true).patch};
   const ins=await sb.from('bikes').insert(bike);
   if(ins.error){
     // Another device took this number between the check above and the insert. It used to be
@@ -51712,8 +51717,10 @@ async function _saveBikeEditNow(){
   if(getBikes().some(b=>b.id!==S.editBikeId&&Number(b.bike_number)===bikeNum)){toast(t('errBikeNumberDup'),'error');return;}
   if(!_bkYearOk())return;
   const name=(document.getElementById('bk-name')?.value||'').trim()||genBikeName(S.addBikeType,S._bkFrame,bikeNum,size);
-  _autoSaveBkOpts(brand,model,groupset);
-  const b=getBikes();const existing=b.find(x=>x.id===S.editBikeId);if(!existing)return;
+  const wheel=_bkAddTyped('bk-wheel',S._bkWheelAdd,S._bkWheel),brake=_bkAddTyped('bk-brake',S._bkBrakeAdd,S._bkBrake);
+  _autoSaveBkOpts(brand,model,groupset,S._bkWheelAdd?wheel:'',S._bkBrakeAdd?brake:'');
+  // A bike deleted on another device while its form was open here: Save said nothing and the form stayed (bug hunt 2026-11-11).
+  const b=getBikes();const existing=b.find(x=>x.id===S.editBikeId);if(!existing){toast(t('nfcUnknownBike').replace('{0}',String(bikeNum)),'error');_resetBikeForm();renderBikes();return;}
   // The number is not just a label: it is what the sticker on the frame says, and the NFC
   // tag opens micromobility.sa/bikes/<number> (the old /b/<number> redirects there). Handing the number to another bike silently
   // repoints a sticker that is already stuck on this one, so it is the single edit here
@@ -51733,7 +51740,7 @@ async function _saveBikeEditNow(){
   const prevPhoto=existing.photo||null;
   const bid=S.editBikeId;
   const priv=_bkPrivPatch(false);Object.assign(prev,priv.prev);
-  const res=await sb.from('bikes').update({...priv.patch,name,size,type:S.addBikeType,colors:[...S.addBikeColors],color_names:editColorNames,brand,model,groupset,speeds,rental_price:rentalPrice,frame_type:S._bkFrame,bike_number:bikeNum,in_service_date:startDate,wheel_size:S._bkWheel||null,brake_type:S._bkBrake||null,weight_kg:_bkWeightVal()}).eq('id',bid);
+  const res=await sb.from('bikes').update({...priv.patch,name,size,type:S.addBikeType,colors:[...S.addBikeColors],color_names:editColorNames,brand,model,groupset,speeds,rental_price:rentalPrice,frame_type:S._bkFrame,bike_number:bikeNum,in_service_date:startDate,wheel_size:wheel||null,brake_type:brake||null,weight_kg:_bkWeightVal()}).eq('id',bid);
   if(res.error&&_errKind(res.error)==='dup'){toast(_bkTagTaken(res.error)?t('bkTagTaken'):t('errBikeNumberDup'),'error');return;} // the form stays as it is
   if(_writeErr(res,'save bike'))return;
   await _wr(sb.from('bikes').update({photo:S._bkPhoto||null}).eq('id',bid),'save bike photo');
@@ -52305,12 +52312,17 @@ function delBike(id){
 
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__bkFieldHtml_1(event,el,a0){if(event.key==='Enter'){event.preventDefault();_bkOptSave(a0);}}
+// A wheel size or brake typed after "+ Add new" is kept on the form as it is typed, so a redraw keeps it.
+function _on__bkFieldHtml_2(event,el,a0){if(a0==='bk-wheel'&&S._bkWheelAdd)S._bkWheel=el.value;else if(a0==='bk-brake'&&S._bkBrakeAdd)S._bkBrake=el.value;}
+// The wheel size or brake a save writes (bug hunt 2026-11-11): one typed after "+ Add new" and saved without its tick
+// was dropped, and an edit wrote null over the bike's old value. What is typed, else what the field held before.
+function _bkAddTyped(id,addMode,cur){if(!addMode)return cur||'';const el=document.getElementById(id);return String((el?el.value:cur)||'').trim()||(S._bkAddWas||{})[id]||'';}
 function _bkFieldHtml(id,val,addMode,list){
   if(addMode){
     return`<div class="flt-g6">
       <input id="${id}" type="text" value="${esc(val)}" placeholder="${t('typeNewLabel')||'Type new...'}"
         class="flt-f1"
-        data-on-keydown="${_on("_on__bkFieldHtml_1",_EV,_EL,id)}">
+        data-on-keydown="${_on("_on__bkFieldHtml_1",_EV,_EL,id)}"${id==='bk-wheel'||id==='bk-brake'?` data-on-input="${_on("_on__bkFieldHtml_2",_EV,_EL,id)}"`:''}>
       <button class="btn-primary flt-optsave" data-on-click="${_on("_bkOptSave",id)}">✓ ${t('saveBtn')||'Save'}</button>
       <button class="btn-secondary flt-optx" data-on-click="${_on("_bkOptCancel",id)}" aria-label="${t('cancelBtn')}">${_artIcon('close',11)}</button>
     </div>`;
@@ -52363,7 +52375,7 @@ function showOptListModal(kind){
   if(kind==='models'&&!S._bkBrand){toast(t('bkChooseBrandFirst'),'warning');return;}
   if(S._optEdit&&S._optEdit.kind===kind&&S._optEdit.brand===(S._bkBrand||''))return; // already open: keep what is being edited
   const items=kind==='brands'?_bkBrandNames():kind==='models'?_bkModelsFor(S._bkBrand):kind==='groupsets'?_bkGroupsetList():kind==='wheels'?_bkWheelList():kind==='brakes'?_bkBrakeList():_bkFrameList();
-  S._optEdit={kind,brand:S._bkBrand||'',items:items.map(v=>({v,orig:v})),add:''}; // orig: which row this was, so a rename keeps what hangs off it
+  S._optEdit={kind,brand:S._bkBrand||'',items:items.map(v=>({v,orig:v})),add:'',orig0:items.slice()}; // orig: which row this was, so a rename keeps what hangs off it
   renderOptListModal();
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -52402,7 +52414,9 @@ async function _optListSave(){
   const ren=v=>{const r=v?rows.find(it=>it.orig===v):null;return r?r.v:v;};
   // Cleared only when it was in the list and is gone from it (the bug hunt, 2026-11-10): a value the list never held - shown
   // all the same (_bkFieldHtml), as an imported brake 'Disc' - was cleared too, and the bike saved with no brake or wheel.
-  const before=new Set(o.items.map(it=>it.orig).filter(Boolean)),gone=v=>!!v&&before.has(v)&&!items.includes(v);
+  // The list as it opened (bug hunt 2026-11-11): read from the rows left, an entry dropped with the cross was not
+  // in it, so the form kept it and the bike's save put it back on the list.
+  const before=new Set((o.orig0||o.items.map(it=>it.orig)).filter(Boolean)),gone=v=>!!v&&before.has(v)&&!items.includes(v);
   let ok=true;
   if(o.kind==='brands'){
     const prev=_optList('bike_brands');
@@ -52468,11 +52482,13 @@ function _bkOptCancel(id){
   renderBikes();
 }
 // A bike saved with a brand, model or groupset the lists do not know yet teaches the lists.
-async function _autoSaveBkOpts(brand,model,groupset){
+async function _autoSaveBkOpts(brand,model,groupset,wheel,brake){
   try{
     if(brand&&!_bkBrandNames().includes(brand))await _optAddBrand(brand);
     if(brand&&model&&!_bkModelsFor(brand).includes(model))await _optAddModel(brand,model);
     if(groupset&&!_bkGroupsetList().includes(groupset))await _optAddGroupset(groupset);
+    if(wheel&&!_bkWheelList().includes(wheel))await _optAddSimple('bike_wheels',_bkWheelList(),wheel); // typed after "+ Add new"
+    if(brake&&!_bkBrakeList().includes(brake))await _optAddSimple('bike_brakes',_bkBrakeList(),brake);
   }catch(_){}
 }
 
@@ -53377,7 +53393,9 @@ async function _riderBikeChange1(id){
   // A number that has been used is cleared from the field (the pop-up's redraw keeps what is typed); looked up
   // afresh, as a redraw during the lookup above replaces the field.
   const clr=()=>{const x=document.getElementById('rider-bike-in');if(x)x.value='';};
-  if(getAssignedBikeIds(e).includes(b.id)){clr();return;}
+  // The bike held for the booking, typed after another pick (bug hunt 2026-11-11): the earlier pick stayed and the
+  // check-in handed that one over. Before the check-in it drops the pick, so the held bike is the one planned.
+  if(getAssignedBikeIds(e).includes(b.id)){clr();if(e.status!=='active'&&_riderPick[String(r.id)]){delete _riderPick[String(r.id)];_renderRiderModal();renderRiders(true);}return;}
   if(b.status!=='available'){toast(_ciBikeStatusText(d)||t('errBikeUnavailable'),'warning');return;}
   if(e.status!=='active'){_riderPick[String(r.id)]=b.id;clr();_renderRiderModal();renderRiders(true);return;}
   const old=getAssignedBikeIds(e)[0]||null;
@@ -53505,7 +53523,10 @@ function riderUndoCheckinParty(id){
 }
 // The booking pop-up: everything on the registration and the desk actions, opened from a scan
 // of the rider's QR (MMP-<number>) or from the booking number in the list.
-async function _scanRider(no,say){
+// fromCam: read by the camera. A number from the Bookings search (a scanner gun) never runs Express and never
+// reopens the camera (bug hunt 2026-11-11): with Express or Keep scanning saved on the device, it checked a whole
+// party in unopened, or opened the camera over the desk when the pop-up closed.
+async function _scanRider(no,say,fromCam){
   if(!S.ridersLoaded)await loadRiders();
   // Numbers repeat night to night: tonight's wins (the camera takes today's tickets), then the
   // night on show, then a live night, then the latest. The night on show came first, and a desk
@@ -53519,14 +53540,14 @@ async function _scanRider(no,say){
   if(!r){say(t('scanNotFound'),'var(--red)');return;}
   // The night's own date stands in when the ride is not on this device yet (a scan at boot, before
   // the sessions load): with none, every registration read as tonight's (2026-10-07).
-  if(!_scanDayOk(r.session_id,r.session_id,null,say,()=>_scanRiderGo(r,no,say)))return; // tonight's registration, or an exception
-  _scanRiderGo(r,no,say);
+  if(!_scanDayOk(r.session_id,r.session_id,null,say,()=>_scanRiderGo(r,no,say,fromCam)))return; // tonight's registration, or an exception
+  _scanRiderGo(r,no,say,fromCam);
 }
-function _scanRiderGo(r,no,say){
-  if(_scanExpress&&!S._ciId&&say){_scanRiderExpress(r,no,say).catch(()=>{});return;} // Express: in from the scan, the camera stays up (D8)
+function _scanRiderGo(r,no,say,fromCam){
+  if(_scanExpress&&!S._ciId&&say&&fromCam){_scanRiderExpress(r,no,say).catch(()=>{});return;} // Express: in from the scan, the camera stays up (D8)
   try{if(navigator.vibrate)navigator.vibrate(80);}catch(e){}
   toast(t('ridersScanFound').replace('{0}',no).replace('{1}',r.name||''));
-  _scanResume=_scanCont;closeScanModal(_scanCont);
+  if(fromCam){_scanResume=_scanCont;closeScanModal(_scanCont);}
   openRiderModal(r.id);
 }
 // Booking details for a Petromin party: the scanned rider first, as a queue ticket lists them (_scanDetailsOf).
@@ -53856,13 +53877,13 @@ function renderRiderWalkin(){
   const noSess=edit&&!d.session;
   const sessOpts=(noSess?'<option value="" selected>—</option>':'')+sess.map(s=>`<option value="${esc(s.id)}"${d.session===s.id?' selected':''}>${esc(_sessLabel(s))}</option>`).join('');
   const ccOpts=_ccOpts(d.cc);
-  const typeBtns=['Road','Hybrid','Mountain'].map(ty=>`<button type="button" class="toggle-btn${d.type===ty?' active':''}" aria-pressed="${(d.type===ty)?'true':'false'}" data-on-click="${_on("_on_renderRiderWalkin_1",_EV,_EL,ty)}">${typeLabel(ty)}</button>`).join('');
+  const typeBtns=['Road','Hybrid','Mountain'].map(ty=>`<button type="button" class="toggle-btn${d.type===ty?' active':''}" aria-pressed="${(d.type===ty)?'true':'false'}" data-on-click="${_on("_on_renderRiderWalkin_1",_EV,_EL,ty)}"${d._pending?' disabled':''}>${typeLabel(ty)}</button>`).join('');
   const coBtns=['Petromin','Petrolube'].map(c=>`<button type="button" class="toggle-btn${d.company===c?' active':''}" aria-pressed="${(d.company===c)?'true':'false'}" data-on-click="${_on("_on_renderRiderWalkin_2",_EV,_EL,c,c)}">${c}</button>`).join('');
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_renderRiderWalkin_3",_EV,_EL)}"><div class="modal-box iv-mw460" role="dialog" aria-modal="true" aria-labelledby="rw-title">
     <div class="modal-title" id="rw-title">${edit?`${t('ridersEditTitle')}${d.bookingNo?` · <span class="iv-tnum">${esc(d.bookingNo)}</span>`:''}`:t('ridersWalkinTitle')}</div>
     <div class="modal-sub">${edit?t('ridersEditSub'):t('ridersWalkinSub')}</div>
-    ${sess.length||noSess?`<div class="form-group"><label for="rw-session-spk">${t('colSession')}</label>${_spk(`<select id="rw-session" aria-label="${esc(t('colSession'))}" data-on-change="${_on("_rwSession",_P("value"))}"${d.locked?' disabled':''}>${sessOpts}</select>`)}</div>`:`<div class="pg-msg" role="alert">${t('ridersWalkinNoSess')}</div>`}
+    ${sess.length||noSess?`<div class="form-group"><label for="rw-session-spk">${t('colSession')}</label>${_spk(`<select id="rw-session" aria-label="${esc(t('colSession'))}" data-on-change="${_on("_rwSession",_P("value"))}"${d.locked||d._pending?' disabled':''}>${sessOpts}</select>`)}</div>`:`<div class="pg-msg" role="alert">${t('ridersWalkinNoSess')}</div>`}
     <div class="form-group"><label>${t('ridersCompany')} <span class="label-hint">(${t('optionalLabel')})</span></label><div class="iv-row6">${coBtns}</div></div>
     <div class="form-group"><label for="rw-badge">${t('colBadge')}</label><input id="rw-badge" type="text" value="${esc(d.badge)}" data-on-input="${_on("_rwInput","badge",_P("value"))}" autocomplete="off" maxlength="40"${d.badgeLocked?' disabled':''}></div>
     <div class="form-group"><label for="rw-name">${t('ridersWalkinName')}</label><input id="rw-name" type="text" value="${esc(d.name)}" data-on-input="${_on("_on_renderRiderWalkin_4",_EV,_EL)}" autocomplete="off" maxlength="120"></div>
@@ -53896,12 +53917,16 @@ function _rwValidate(d){
   // A box holding only a placeholder ('-', 'n/a') is no phone, as the RPC treats it.
   const phoneRaw=String(d.phone||'').trim();const phoneDigits=phoneRaw.replace(/\D/g,'');
   const phone=phoneDigits?_normPhone(phoneRaw,d.cc||'+966'):null;
+  // A companion's own row, edited (bug hunt 2026-11-11): their rules, as rider_register and rider_party_add apply them -
+  // one name will do and a blank height stays unknown. The employee's made staff invent a surname or a height to save.
+  const _self=d.editId?(S.riders||[]).find(x=>String(x.id)===d.editId):null,comp=!!_self&&_riderPartyNo(_self)>1;
+  const hBlank=comp&&!String(d.height??'').trim();
   d.err='';
   if(!d.session&&!d.editId)d.err=t('ridersWalkinErrSession'); // an edit may keep a registration that never had one
   else if(!badge)d.err=t('ridersWalkinErrBadge');
-  else if(!name||!/\s/.test(name))d.err=t('ridersWalkinErrName');
+  else if(!name||(!comp&&!/\s/.test(name)))d.err=t('ridersWalkinErrName');
   else if(phoneDigits&&!/^\+\d{8,15}$/.test(phone||''))d.err=t('ridersWalkinErrPhone');
-  else if(!(h>=100&&h<=250))d.err=t('ridersWalkinErrHeight');
+  else if(!hBlank&&!(h>=100&&h<=250))d.err=t('ridersWalkinErrHeight');
   else if(!['Road','Hybrid','Mountain'].includes(d.type))d.err=t('ridersWalkinErrType');
   // Companions: name, height and bike type each, the same rules rider_register() applies.
   // Companions: every field optional at the desk. A blank name becomes the employee's first
@@ -53925,7 +53950,7 @@ function _rwValidate(d){
     if(r.hRaw&&!(r.height>=100&&r.height<=250))d.err=t('ridersWalkinRiderN').replace('{0}',i+2).replace('{1}',t('ridersWalkinErrHeight'));
     return !!d.err;
   });
-  return d.err?null:{badge,name,h,phone,riders};
+  return d.err?null:{badge,name,h:hBlank?null:h,phone,riders};
 }
 // A booking write that landed, mirrored on this tab's copy of the row (a fresh array, so
 // nothing keyed on the old one keeps a stale answer). The rest of the save, and a retry of it,
@@ -53965,7 +53990,7 @@ async function saveRiderEdit(){
   if((d.company||null)!==(r.company||null))patch.company=d.company||null;
   if(name!==r.name)patch.name=name;
   if((phone||null)!==(r.phone||null))patch.phone=phone;
-  if(h!==Number(r.height))patch.height=h;
+  if(h!=null&&h!==Number(r.height))patch.height=h; // a companion's blank height stays unknown
   if(d.type!==r.type_preference)patch.type_preference=d.type;
   // A move to another night is not a column written here: staff_rider_party_move moves the whole
   // party and numbers it on that night (below).
@@ -53992,11 +54017,18 @@ async function saveRiderEdit(){
   // write that failed after it used to be dropped: the modal closed with the booking still on
   // the old night under the old name. The wish stays until the bookings match it.
   const bk=d._bk=d._bk||{emp:{},comp:{},to:null,cancel:[],add:[]};
+  // A wish the form no longer holds goes (bug hunt 2026-11-11): after a refused move or a failed save, staff putting the
+  // night, a name or a type back still had the old wish written to the bookings - moved to the refused night while the
+  // registration stayed put. A wish kept after its registration saved still matches the form, so a retry keeps it.
+  const _drop=(w,k,val)=>{if(w&&w[k]!==undefined&&(w[k]??null)!==(val??null))delete w[k];};
+  _drop(bk.emp,'name',name);_drop(bk.emp,'phone',phone);_drop(bk.emp,'height',h);_drop(bk.emp,'type',d.type);
+  for(const c of v.riders.filter(c=>c.id)){const w=bk.comp[c.id];if(!w)continue;_drop(w,'name',c.typed?c.name:undefined);_drop(w,'height',c.height);_drop(w,'type',c.type);}
   if(patch.name!==undefined)bk.emp.name=name;
   if(patch.phone!==undefined)bk.emp.phone=phone;
   if(patch.height!==undefined)bk.emp.height=h;
   if(patch.type_preference!==undefined)bk.emp.type=d.type;
   if(moving)bk.to=d.session;
+  else if(bk.to&&bk.to!==(r.session_id||''))bk.to=null; // the registration is not on that night: the move was refused, or put back
   for(const [id,cp] of compUpd){const w=bk.comp[id]=bk.comp[id]||{};if(cp.name!==undefined)w.name=cp.name;if(cp.height!==undefined)w.height=cp.height;if(cp.type_preference!==undefined)w.type=cp.type_preference;}
   const live=x=>!!x&&['waiting','waitlist','active'].includes(x.status);
   const bkOf=reg=>{const x=reg&&reg.matched_entry_id?_qGet(reg.matched_entry_id):null;return live(x)?x:null;};
@@ -54175,7 +54207,7 @@ async function submitRiderWalkin(){
     if(/^rider_/.test(String(code))&&res.rider)msg=t('ridersWalkinRiderN').replace('{0}',res.rider).replace('{1}',msg);
     d.saving=false;d.err=msg;renderRiderWalkin();return;
   }
-  await _rwFinish(d,res,{name,h,phone,riders,prevComp});
+  await _rwFinish(d,res,{name,h,phone,riders,prevComp,session:d.session,type:d.type}); // the night and type registered: a Retry or a duplicate answer books those
 }
 // The session's live bookings, read from the server rather than from the tab's copy of them.
 // A rider who booked on their own phone while walking to the desk is a realtime message away
@@ -54228,7 +54260,10 @@ function _rwRetry(){
 // again for a slip in the booking insert. The modal stays up until the booking exists.
 async function _rwFinish(d,res,r){
   d._pending={res,r};
-  const rows=await _rwLiveRows(d.session);
+  // The night and bike type rider_register registered (bug hunt 2026-11-11): read from the form, a picker changed while
+  // Retry or the duplicate question waited booked the rider on another night, or with another type, than their registration.
+  const sid=r.session||d.session,ty=r.type||d.type;
+  const rows=await _rwLiveRows(sid);
   const companions=r.riders||[];
   // A party already on the night (the desk entering its registration again): rider_register keeps each
   // companion's row and its link, so a companion whose booking is still live keeps that booking and
@@ -54240,7 +54275,7 @@ async function _rwFinish(d,res,r){
     const prev=r.prevComp||[];
     if(companions.length||prev.length)await loadRiders();
     const live=new Set(rows.map(x=>String(x.id)));
-    const reg=(S.riders||[]).filter(x=>x.booking_no&&x.booking_no===res.booking_no&&(x.session_id||'')===d.session&&_riderPartyNo(x)>=2);
+    const reg=(S.riders||[]).filter(x=>x.booking_no&&x.booking_no===res.booking_no&&(x.session_id||'')===sid&&_riderPartyNo(x)>=2);
     const regOf=i=>reg.find(y=>_riderPartyNo(y)===i+2)||null;
     d._comp={
       held:companions.map((c,i)=>{const x=regOf(i);return x&&x.matched_entry_id&&live.has(String(x.matched_entry_id))?String(x.matched_entry_id):null;}),
@@ -54271,10 +54306,10 @@ async function _rwFinish(d,res,r){
     d._heldId=entry?entry.id:null;
     // Everyone who still needs a place: the employee unless they hold one already, then the
     // companions without one. One insert, one roster group, consecutive numbers.
-    const toInsert=(entry?[]:[{name:r.name,height:r.h,type:d.type}]).concat(companions.map((c,i)=>C.held[i]?null:{name:C.names[i],height:c.height,type:c.type}).filter(Boolean));
+    const toInsert=(entry?[]:[{name:r.name,height:r.h,type:ty}]).concat(companions.map((c,i)=>C.held[i]?null:{name:C.names[i],height:c.height,type:c.type}).filter(Boolean));
     if(toInsert.length){
       d._tried=null;
-      created=await _wiInsertRiders(d.session,toInsert,entry?'':(r.phone||''),null,_rwRetry);
+      created=await _wiInsertRiders(sid,toInsert,entry?'':(r.phone||''),null,_rwRetry);
       if(!created){ // the registration is saved and only the booking is outstanding: say so, and
         // leave one way forward, so a second tap cannot start the whole thing again. The
         // error bar _wiInsertRiders raised carries a second Retry and sits over this modal's
@@ -54293,16 +54328,17 @@ async function _rwFinish(d,res,r){
   closeRiderWalkin();
   // Link every registration row to its booking: the employee by the id the RPC returned, the
   // companions by their place in the party (rows 2..N of the same number, after a reload).
-  const ci=!!d.checkin&&_rwTonight(d.session); // a later night's walk-in is registered and booked, never checked in yet
+  const ci=!!d.checkin&&_rwTonight(sid); // a later night's walk-in is registered and booked, never checked in yet
   const stamp=ci?{checked_in_at:new Date().toISOString(),checked_in_by:_opName()||null}:{};
   const link=e=>e?{matched_entry_id:e.id,matched_customer_id:e.customerId||null,match_kind:'booking'}:{};
   const writes=[]; // each one a call to make, so Retry can send them again
   const regIns=[]; // the registrations stamped as checked in, each with its booking, which goes Active with it
-  if(res.id){regIns.push({...((S.riders||[]).find(x=>x.id===res.id)||{}),id:res.id,name:r.name,height:r.h,type_preference:d.type,matched_entry_id:entry?entry.id:null});writes.push(()=>sb.from('rider_registrations').update({...link(entry),...stamp}).eq('id',res.id));}
+  if(res.id){regIns.push({...((S.riders||[]).find(x=>x.id===res.id)||{}),id:res.id,name:r.name,height:r.h,type_preference:ty,matched_entry_id:entry?entry.id:null});writes.push(()=>sb.from('rider_registrations').update({...link(entry),...stamp}).eq('id',res.id));}
   if(companions.length){
     await loadRiders();
-    const _emp=(S.riders||[]).find(x=>x.id===res.id);
-    (S.riders||[]).filter(x=>x.booking_no&&x.booking_no===res.booking_no&&(!_emp||x.session_id===_emp.session_id)&&_riderPartyNo(x)>=2).forEach(x=>{
+    // Always on the night registered (bug hunt 2026-11-11): numbers restart each night, and with the employee's row
+    // missing from a failed reload the number alone took other nights' companions, linked and stamped as tonight's.
+    (S.riders||[]).filter(x=>x.booking_no&&x.booking_no===res.booking_no&&(x.session_id||'')===sid&&_riderPartyNo(x)>=2).forEach(x=>{
       const ce=compEntries[_riderPartyNo(x)-2];
       regIns.push({...x,matched_entry_id:ce?ce.id:null});
       writes.push(()=>sb.from('rider_registrations').update({...link(compEntries[_riderPartyNo(x)-2]),...stamp}).eq('id',x.id));
@@ -54339,11 +54375,14 @@ function _on_renderRiders_2(event,el){S.ridersType=el.value;renderRiders()}
 // admins, openRosterImport). Beside each registration: whether its employee id is on its company's list.
 // Read once per page load (S._roster: the rows; false without the table, so the chips stay away).
 function _rosterKey(co,id){return String(co||'').trim().toLowerCase()+'|'+String(id||'').trim().toUpperCase();}
+// A badge as the registration's own identity reads it (badge_key): letters and digits only (bug hunt 2026-11-11). PM-1234
+// typed on the form read 'Not on list' against PM1234. The import keeps _rosterKey, as staff_roster_import matches.
+function _rosterBadge(co,id){const k=String(id||'').toUpperCase().replace(/[^A-Z0-9]/g,'');return k?String(co||'').trim().toLowerCase()+'|'+k:'';}
 async function _rosterLoad(force){
   if(!sb||S._rosterBusy||(S._roster!==undefined&&!force))return;S._rosterBusy=true;
   try{const r=await _pagedAll(()=>sb.from('corporate_roster').select('company,employee_id,name,active').order('id'));
     if(r.error){const c=String(r.error.code||'');S._roster=c==='PGRST205'||c==='42P01'?false:null;} // a refusal: no chips, and no read-repaint loop
-    else{const m=new Map(),cos=new Set();(r.data||[]).forEach(x=>{m.set(_rosterKey(x.company,x.employee_id),x);cos.add(String(x.company||'').trim().toLowerCase());});S._roster={m,cos,rows:r.data||[]};}
+    else{const m=new Map(),b=new Map(),cos=new Set();(r.data||[]).forEach(x=>{m.set(_rosterKey(x.company,x.employee_id),x);const bk=_rosterBadge(x.company,x.employee_id),was=bk&&b.get(bk);if(bk&&(!was||(!was.active&&x.active)))b.set(bk,x);cos.add(String(x.company||'').trim().toLowerCase());});S._roster={m,b,cos,rows:r.data||[]};}
   }catch(_){}
   S._rosterBusy=false;if(_pmOpen())renderRiders(true);
   // An import dialog opened while the read ran: its company list and new/update marks follow the roster (bug hunt 2026-10-28)
@@ -54352,7 +54391,7 @@ async function _rosterLoad(force){
 function _rosterChip(r){
   const R=S._roster,co=String((r&&r.company)||'').trim().toLowerCase();
   if(!R||!r.badge||!R.cos.has(co))return'';
-  const x=R.m.get(_rosterKey(r.company,r.badge)),k=!x?'rosterNot':x.active?'rosterOn':'rosterLeft';
+  const x=R.m.get(_rosterKey(r.company,r.badge))||(R.b&&R.b.get(_rosterBadge(r.company,r.badge)))||null,k=!x?'rosterNot':x.active?'rosterOn':'rosterLeft';
   return`<span class="iv-roster ${!x?'no':x.active?'ok':'left'}" title="${esc(x?x.name:'')}">${t(k)}</span>`;
 }
 // ── Import a partner company's employee list (2026-10-09, M20) ──────────────────────────────────────
