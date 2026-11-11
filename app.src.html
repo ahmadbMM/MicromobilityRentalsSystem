@@ -1115,7 +1115,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   errLoginFirst:'Sign in first.',
   errSelectSession:'Choose a session above.',
   errSessionClosed:'That session is no longer open.',
-  typeClosedPill:'Closed',errTypeClosed:'That bike type is closed for this session. Please choose another.',rsTypeClosed:'Your bike type is closed on that date. Please choose another date.',typeFullPill:'Full',errTypeFull:'That bike type is full on this ride. Please choose another.',rsTypeFull:'Your bike type is full on that date. Please choose another date.',capFullQ:'{0} is full ({1} of {2}). Add anyway?',capAddAnyway:'Add anyway',capPickOther:'Pick another type',capLog:'Added over the {0} limit',
+  typeClosedPill:'Closed',errTypeClosed:'That bike type is closed for this session. Please choose another.',rsTypeClosed:'Your bike type is closed on that date. Please choose another date.',typeFullPill:'Full',errTypeFull:'That bike type is full on this ride. Please choose another.',rsTypeFull:'Your bike type is full on that date. Please choose another date.',capFullQ:'{0} is full ({1} of {2}). Add anyway?',capAddAnyway:'Add anyway',capPickOther:'Pick another type',capLog:'Added over the {0} limit',tcapLabel:'Places per bike type',tcapNone:'No limit',tcapOver:'These add up to {0}, more than the {1} bikes on the session. The total still caps it.',tcapLine:'Places per bike type: {0}',
   closeTypesBtn:'Close bike types',closeTypesSub:'Tap a type to close it. Riders cannot book a closed type on this session; bookings already made stay, and staff can still add riders.',closeTypesLast:'At least one type has to stay open. To stop all bookings, close the session.',typesClosedChip:'Bike types closed: {0}',undoTypesClosed:'Bike types closed',typesClosedSaved:'Bike types saved.',
   errValidHeightCm:'Enter a height between 100 and 250 cm.',
   errSelectTypeGeneric:'Choose a bike type.',
@@ -1737,7 +1737,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   errLoginFirst:'الرجاء تسجيل الدخول أولاً.',
   errSelectSession:'الرجاء اختيار جلسة من الأعلى.',
   errSessionClosed:'هذه الجلسة لم تعد مفتوحة.',
-  typeClosedPill:'مغلق',errTypeClosed:'هذا النوع من الدراجات مغلق في هذه الجلسة. يرجى اختيار نوع آخر.',rsTypeClosed:'نوع دراجتك مغلق في ذلك الموعد. يرجى اختيار موعد آخر.',typeFullPill:'ممتلئ',errTypeFull:'هذا النوع من الدراجات ممتلئ في هذه الجولة. يرجى اختيار نوع آخر.',rsTypeFull:'نوع دراجتك ممتلئ في ذلك الموعد. يرجى اختيار موعد آخر.',capFullQ:'{0} ممتلئ ({1} من {2}). هل تضيفه على أي حال؟',capAddAnyway:'أضف على أي حال',capPickOther:'اختر نوعًا آخر',capLog:'أُضيف فوق حد {0}',
+  typeClosedPill:'مغلق',errTypeClosed:'هذا النوع من الدراجات مغلق في هذه الجلسة. يرجى اختيار نوع آخر.',rsTypeClosed:'نوع دراجتك مغلق في ذلك الموعد. يرجى اختيار موعد آخر.',typeFullPill:'ممتلئ',errTypeFull:'هذا النوع من الدراجات ممتلئ في هذه الجولة. يرجى اختيار نوع آخر.',rsTypeFull:'نوع دراجتك ممتلئ في ذلك الموعد. يرجى اختيار موعد آخر.',capFullQ:'{0} ممتلئ ({1} من {2}). هل تضيفه على أي حال؟',capAddAnyway:'أضف على أي حال',capPickOther:'اختر نوعًا آخر',capLog:'أُضيف فوق حد {0}',tcapLabel:'الأماكن لكل نوع دراجة',tcapNone:'بلا حد',tcapOver:'مجموعها {0}، وهذا أكثر من {1} دراجة في الجلسة. يبقى المجموع هو الحد للجلسة.',tcapLine:'الأماكن لكل نوع دراجة: {0}',
   closeTypesBtn:'إغلاق أنواع الدراجات',closeTypesSub:'اضغط على النوع لإغلاقه. لا يمكن للركاب حجز نوع مغلق في هذه الجلسة؛ تبقى الحجوزات القائمة، ويظل بإمكان الموظفين إضافة ركاب.',closeTypesLast:'يجب أن يبقى نوع واحد مفتوحًا على الأقل. لإيقاف جميع الحجوزات، أغلق الجلسة.',typesClosedChip:'أنواع الدراجات المغلقة: {0}',undoTypesClosed:'أنواع الدراجات المغلقة',typesClosedSaved:'تم حفظ أنواع الدراجات.',
   errValidHeightCm:'أدخل طولاً بين 100 و250 سم.',
   errSelectTypeGeneric:'الرجاء اختيار نوع الدراجة.',
@@ -3011,7 +3011,7 @@ const S={
   queue:[],bikes:[],customers:[],sessions:[],tags:[],customerTags:[],amSearch:'',amTagFilter:'',tagEdit:null,tagCustId:null,
   showAddSession:false,newSessDate:'',newSessStartTime:'21:00',newSessEndTime:'23:00',
   newSessMode:'counts',  
-  newSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},
+  newSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},newSessTypeCaps:{},editSessTypeCaps:{},
   editSessionId:null,
   editSessAssignedIds:[],
   editSessMode:'fleet',editSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},
@@ -24888,6 +24888,7 @@ function startEditSession(id){
   S.editSessWlMode=_wl?_wl.m:'count';
   S.editSessWlVal=_wl?_wl.v:'';
   const fmt=slotsFormat(slots);
+  S.editSessTypeCaps=fmt==='total'?_tcapOf(slots):{}; // the places per bike type beside a plain count (2026-11-11)
   if(fmt==='ids'&&slots._bikes){
     S.editSessMode='fleet';
     // A retired bike never comes back and the picker never shows it, so it could not be
@@ -25672,11 +25673,11 @@ function _nsFillSync(){const el=document.getElementById('ns-fill');if(el)el.text
 function _nsToggleDay(i){const d=new Set(S.newSessDays||[]);if(d.has(i))d.delete(i);else d.add(i);S.newSessDays=[...d].sort((a,b)=>a-b);renderSessions();}
 // A template is the whole form but its date and repeat, saved by name and shared by every
 // device (staff_options session_templates). Tapping one fills the form.
-const NS_TPL_KEYS=['newSessEvent','newSessRoute','newSessTitle','newSessSpots','newSessStartTime','newSessEndTime','newSessCollect','newSessWlCollect','newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds','newSessAddons','newSessWlMode','newSessWlVal','newSessMapUrl','newSessBfSel','newSessBfName','newSessBfUrl','newSessDays','newSessDesc','newSessPrice','newSessOpenAll','newSessKm','newSessGender','newSessLockers'];
+const NS_TPL_KEYS=['newSessEvent','newSessRoute','newSessTitle','newSessSpots','newSessStartTime','newSessEndTime','newSessCollect','newSessWlCollect','newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds','newSessAddons','newSessWlMode','newSessWlVal','newSessMapUrl','newSessBfSel','newSessBfName','newSessBfUrl','newSessDays','newSessDesc','newSessPrice','newSessOpenAll','newSessKm','newSessGender','newSessLockers','newSessTypeCaps'];
 // What a template that predates a key (or never had it) leaves behind: these are cleared, not kept
 // from whatever form was open before, so a 50 SAR members-only event does not become free and open,
 // and a pool session from an older template is mixed, not men or women only as the last form was (2026-10-27).
-const NS_TPL_BLANK={newSessWlCollect:null,newSessRoute:'',newSessDesc:'',newSessPrice:'',newSessOpenAll:true,newSessKm:{},newSessGender:''};
+const NS_TPL_BLANK={newSessTypeCaps:{},newSessWlCollect:null,newSessRoute:'',newSessDesc:'',newSessPrice:'',newSessOpenAll:true,newSessKm:{},newSessGender:''};
 const NS_EV_NAME={blood:'evBloodName',jcc:'evJccName',community:'evSatName',petromin:'evPetroName',swim:'evSwimName',workshop:'evWorkshopName',snd96:'evSnd96Name',event:'evEventName',runher:'evRunHerName',vlap:'evVlapName',arena:'evArenaName',defe5k:'evDefeName'};
 function _nsTpls(){return _optList('session_templates').filter(x=>x&&x.id&&x.label&&x.form&&typeof x.form==='object');}
 async function _nsTplSave(){
@@ -26118,6 +26119,9 @@ function _nsCopy(s,T){
     T.newSessMode='total';T.newSessTotal=slots._total;
   }else{
     T.newSessMode='counts';
+  }
+  T.newSessTypeCaps=T.newSessMode==='total'?_tcapOf(slots):{}; // the places per bike type come too (2026-11-11)
+  if(T.newSessMode==='counts'){
     const ts={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};
     // A plain number per type (the 'counts' shape) goes on M, as the editor reads it; reading it as
     // sizes gave every box 0 and the clone could not be saved without typing the fleet again.
@@ -26138,9 +26142,9 @@ function cloneSession(id){
 // (the staff review, 2026-10-28, S02-core2-14): admins make three to five rides a week and most fields repeat, and a Saturday ride
 // used to start as "gather 21:00, start 23:00". Not typed = still what the form opened with or what the last pick put there. The
 // bikes go as one: their mode and counts mean nothing apart. A template's form, or a clone's, has been filled already.
-const NS_FILL_BIKES=['newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds'];
+const NS_FILL_BIKES=['newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds','newSessTypeCaps'];
 function _nsFillBlank(){return{newSessLockers:true,newSessStartTime:'21:00',newSessEndTime:'23:00',newSessSpots:'',newSessMapUrl:'',newSessBfName:'',newSessBfUrl:'',newSessBfSel:'',newSessRoute:'',newSessGender:'',newSessCollect:'',newSessWlCollect:null,newSessWlMode:'count',newSessWlVal:'',newSessAddons:[],
-  newSessMode:'counts',newSessTotal:S._nsTotal0,newSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},newSessAssignedIds:[]};}
+  newSessMode:'counts',newSessTotal:S._nsTotal0,newSessTypeCaps:{},newSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},newSessAssignedIds:[]};}
 function _nsFill(){
   if(S._nsTplId)return;
   if(S._nsTotal0===undefined)S._nsTotal0=S.newSessTotal; // what the form opened with
@@ -27198,7 +27202,7 @@ function _on_renderSessions_17(event,el){S.newSessMode='total';renderSessions()}
 function _on_renderSessions_18(event,el){S.newSessMode='counts';renderSessions()}
 function _on_renderSessions_19(event,el){S.newSessMode='fleet';renderSessions()}
 function _on_renderSessions_20(event,el,a0,a1){S.newSessTypeSizes[a0][a1]=Math.max(0,parseInt(el.value)||0);_debRender('sess',renderSessions)}
-function _on_renderSessions_21(event,el){S.newSessTotal=el.value}
+function _on_renderSessions_21(event,el){S.newSessTotal=el.value;_tcapSync('ns')}
 function _on_renderSessions_22(event,el){_n6sFormReset();S._vsf=null;S.showAddSession=false;S._nsTplId=null;S.newSessAssignedIds=[];S.newSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
 function _on_renderSessions_23(event,el){const was=S.editSessDate;S.editSessDate=el.value;_esRevealFollow(was)}
 function _on_renderSessions_24(event,el,a0){S.editSessStatus=a0;renderSessions()}
@@ -27217,7 +27221,7 @@ function _on_renderSessions_33(event,el){S.editSessMode='total';renderSessions()
 function _on_renderSessions_34(event,el){S.editSessMode='counts';renderSessions()}
 function _on_renderSessions_35(event,el){S.editSessMode='fleet';renderSessions()}
 function _on_renderSessions_36(event,el,a0,a1){S.editSessTypeSizes[a0][a1]=Math.max(0,parseInt(el.value)||0);_debRender('sess',renderSessions)}
-function _on_renderSessions_37(event,el){S.editSessTotal=el.value}
+function _on_renderSessions_37(event,el){S.editSessTotal=el.value;_tcapSync('es')}
 function _on_renderSessions_38(event,el){S.editSessFollow=false;S._vsf=null;S.editSessionId=null;S.editSessGender=null;S.editSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
 function _on_renderSessions_40(event,el,a0){event.stopPropagation();closeOutSession(a0)}
 function _on_renderSessions_41(event,el,a0){event.stopPropagation();showCancelNight(a0)}
@@ -27415,7 +27419,7 @@ function renderSessions(){
         <div class="form-group ss-mb16">
           <label for="ns-total">${t('totalBikesSession')}</label>
           <input type="number" id="ns-total" min="1" max="500" value="${esc(String(S.newSessTotal||10))}" data-on-input="${_on("_on_renderSessions_21",_EV,_EL)}" class="ss-mw140">
-        </div>`:newBikePicker()}
+        </div>${_kindHas(_nsKind(),'bike')?_tcapHtml('ns',null):''}`:newBikePicker()}
       ${(()=>{
         if(_nsSeats())return''; // a complimentary ride sells nothing - no add-ons
         const items=(S.inventory||[]).filter(it=>(Number(it.qty)||0)>0);
@@ -27591,7 +27595,7 @@ function renderSessions(){
         <div class="form-group ss-mb16">
           <label for="es-total">${t('totalBikesSession')}</label>
           <input type="number" id="es-total" min="1" max="500" value="${esc(String(S.editSessTotal||10))}" data-on-input="${_on("_on_renderSessions_37",_EV,_EL)}" class="ss-mw140">
-        </div>`:bikePicker()}
+        </div>${_needsBike(editSess)?_tcapHtml('es',editSess):''}`:bikePicker()}
       ${(()=>{
         if(_isFreeRide(editSess))return''; // a complimentary ride sells nothing - no add-ons
         const items=(S.inventory||[]).filter(it=>(Number(it.qty)||0)>0);
@@ -27709,7 +27713,7 @@ function renderSessions(){
       return`<div class="sess-rider"><span class="sess-rider-q">#${e.queueNum}</span><div class="sess-rider-info"><div class="sess-rider-name">${esc(e.name)}</div>${bk?`<div class="sess-rider-bike">${bk}</div>`:''}</div>${statusBadge(e.status)}</div>`;
     }).join(''):_emptyState(t('sessNoRiders'),{cls:'ss-noriders'});
     return`<button class="sess-back-btn" data-on-click="${_on("selectSessionDetail",null)}">‹ ${t('sessBackList')}</button>
-      <div class="sess-detail-head"><div class="ss-minw0"><div class="sess-detail-nm">${_sessMk(_selSess,16)}<span>${esc(_evName(_selSess))}</span></div><div class="sess-detail-date">${shortDate(_selSess.session_date||_selSess.id)}</div><div class="sess-detail-day">${dayLabel(_selSess.day)||''} · <bdi>${sessionTime(_selSess)}</bdi></div>${_sgChip(_selSess)?`<div class="sess-detail-sg">${_sgChip(_selSess)}</div>`:''}${_bfAt(_selSess)?`<div class="sess-detail-bf">${_artIcon('cup',13)}<bdi>${esc(_bfAt(_selSess))}</bdi></div>`:''}${_revealStaffHtml(_selSess,'sess-detail-rv')}${_typesClosedLine(_selSess,'sess-detail-tc')}</div>${d.badge}</div>
+      <div class="sess-detail-head"><div class="ss-minw0"><div class="sess-detail-nm">${_sessMk(_selSess,16)}<span>${esc(_evName(_selSess))}</span></div><div class="sess-detail-date">${shortDate(_selSess.session_date||_selSess.id)}</div><div class="sess-detail-day">${dayLabel(_selSess.day)||''} · <bdi>${sessionTime(_selSess)}</bdi></div>${_sgChip(_selSess)?`<div class="sess-detail-sg">${_sgChip(_selSess)}</div>`:''}${_bfAt(_selSess)?`<div class="sess-detail-bf">${_artIcon('cup',13)}<bdi>${esc(_bfAt(_selSess))}</bdi></div>`:''}${_revealStaffHtml(_selSess,'sess-detail-rv')}${_typesClosedLine(_selSess,'sess-detail-tc')}${_tcapLine(_selSess)}</div>${d.badge}</div>
       <div class="sess-detail-stats">
       ${(()=>{const _c=waitlistCap(_selSess);if(_c==null)return'';
         const _u=waitlistUsed(_selSess.id);
@@ -28217,7 +28221,7 @@ async function _saveSessionEdit(){
   }else if(S.editSessMode==='total'){
     // Plain bike count: capacity without a type/size breakdown.
     total=Math.max(1,Math.min(500,parseInt(document.getElementById('es-total')?.value||S.editSessTotal||'10')||10));
-    slots={_time:timeVal,_total:total};
+    slots={_time:timeVal,_total:total,...(_needsBike(sess)?_tcapSlot(S.editSessTypeCaps):{})}; // each type's own places, where given (2026-11-11)
   }else if(S.editSessMode==='counts'){
     const ts=S.editSessTypeSizes||{};
     const sizes=BIKE_SIZES;
@@ -28459,7 +28463,7 @@ function _nsSlots(timeVal,collectVal){
   }else if(S.newSessMode==='total'){
     // Plain bike count: capacity without a type/size breakdown.
     total=Math.max(1,Math.min(500,parseInt(document.getElementById('ns-total')?.value||S.newSessTotal||'10')||10));
-    slots={_time:timeVal,_total:total};
+    slots={_time:timeVal,_total:total,...(_kindHas(_nsKind(),'bike')?_tcapSlot(S.newSessTypeCaps):{})}; // each type's own places, where given (2026-11-11)
   }else if(S.newSessMode==='counts'){
     
     const ts=S.newSessTypeSizes||{};
@@ -28666,6 +28670,32 @@ function _typesClosedLine(s,cls){
   return c.length?`<div class="${cls}">${esc(t('typesClosedChip').replace('{0}',c.map(typeLabel).join(', ')))}</div>`:'';
 }
 function _tcTypes(s){return bikeTypeOpts(_ownOffered(s),_noCarbon(s)).filter(x=>x!=='Any');}
+// ── Places per bike type (2026-11-11), optional, on a session that counts its bikes as a total ──
+// Each number is that type's own places, saved as bike_slots[type] beside _total (the shape the database's _type_places and
+// the desk's _n6rTypePlaces read; the database holds each type to it, 20261111180600). Empty or 0: no limit of its own, as
+// before. The total still caps the session: more than it in all is said under the fields. A type staff closed is not
+// asked (its number, if any, is kept); a new session asks every bike type. State: newSessTypeCaps / editSessTypeCaps.
+function _tcapTypes(s){return(s?_tcTypes(s):N6R_TYPES).filter(x=>x!=='Own'&&!(s&&_typeClosed(s,x)));}
+function _tcapOf(sl){const o={};N6R_TYPES.forEach(ty=>{if(typeof sl[ty]==='number'&&sl[ty]>0)o[ty]=String(sl[ty]);});return o;}
+function _tcapSlot(o){const r={};Object.keys(o||{}).forEach(ty=>{const n=parseInt(o[ty],10);if(N6R_TYPES.includes(ty)&&n>0)r[ty]=Math.min(500,n);});return r;}
+function _tcapKey(pre){return pre==='es'?'editSessTypeCaps':'newSessTypeCaps';}
+function _tcapOver(pre){
+  const n=Object.values(_tcapSlot(S[_tcapKey(pre)])).reduce((a,x)=>a+x,0),tot=parseInt(document.getElementById(pre+'-total')?.value||(pre==='es'?S.editSessTotal:S.newSessTotal)||'10')||10;
+  return n>tot?t('tcapOver').replace('{0}',n).replace('{1}',tot):'';
+}
+function _tcapHtml(pre,s){
+  const k=_tcapKey(pre),o=S[k]=S[k]||{};
+  return`<fieldset class="form-group ss-tcap"><legend>${t('tcapLabel')}</legend><div class="ss-tcap-row">${_tcapTypes(s).map(ty=>{const id=pre+'-tcap-'+ty.replace(/\W/g,'');
+    return`<span class="ss-tcap-f"><label for="${id}">${esc(typeLabel(ty))}</label><input type="number" id="${id}" min="0" max="500" inputmode="numeric" value="${esc(o[ty]||'')}" placeholder="${esc(t('tcapNone'))}" data-on-input="${_on('_tcapIn',_EL,pre,ty)}"></span>`;}).join('')}</div><p class="ss-tcap-over" id="${pre}-tcap-over" role="status">${esc(_tcapOver(pre))}</p></fieldset>`;
+}
+function _tcapIn(el,pre,ty){const k=_tcapKey(pre);S[k]=S[k]||{};S[k][ty]=el.value;_tcapSync(pre);}
+function _tcapSync(pre){const o=document.getElementById(pre+'-tcap-over');if(o)o.textContent=_tcapOver(pre);}
+// The Sessions detail: "Places per bike type: Road 2 · Hybrid 4" on a session that counts its types (not an approval ride).
+function _tcapLine(s){
+  if(!s||!_needsBike(s)||s.needs_approval)return'';
+  const l=N6R_TYPES.map(ty=>[ty,_n6rTypePlaces(s,ty)]).filter(x=>x[1]>0);
+  return l.length?`<div class="sess-detail-tc sess-detail-tcap">${esc(t('tcapLine').replace('{0}',l.map(([ty,n])=>typeLabel(ty)+' '+n).join(' · ')))}</div>`:'';
+}
 function showTypeClose(sid){
   const s=_sessDisp(sid),m=document.getElementById('confirm-modal');
   if(!s||!m||(m.style.display!=='none'&&m.innerHTML))return;

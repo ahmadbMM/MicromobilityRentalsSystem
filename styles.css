@@ -2906,6 +2906,13 @@
     #tab-sessions .ss-mw140{max-width:140px;}
     #tab-sessions .ss-mw240{max-width:240px;}
     #tab-sessions .ss-mw340{max-width:340px;}
+    /* places per bike type beside the bike count (2026-11-11): one small box per type, the sum said when over the total */
+    #tab-sessions .ss-tcap{border:0;padding:0;margin:0 0 16px;min-width:0;}
+    #tab-sessions .ss-tcap legend{padding:0;margin-bottom:6px;font-size:var(--staff-fs-sm);font-weight:600;color:var(--muted);}
+    #tab-sessions .ss-tcap-row{display:flex;flex-wrap:wrap;gap:8px 12px;}
+    #tab-sessions .ss-tcap-f{display:flex;flex-direction:column;gap:4px;width:96px;}
+    #tab-sessions .ss-tcap-over{margin:6px 0 0;font-size:var(--staff-fs-sm);font-weight:600;color:var(--warn);}
+    #tab-sessions .ss-tcap-over:empty{display:none;}
     #tab-sessions .ss-datewarn{font-size:11px;color:var(--muted-l);margin-top:5px;font-weight:600;}
     #tab-sessions .ss-times{display:flex;align-items:center;gap:8px;margin-top:4px;}
     #tab-sessions .ss-time{background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:600;padding:6px 10px;cursor:pointer;}

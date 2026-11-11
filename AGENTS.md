@@ -3262,5 +3262,16 @@ The owner said yes ("do it all") to holding each bike type to its own places. Bu
   (`rsTypeFull`) before moving anyone. `_errMessage` and `RPC_DESK` name TYPE_FULL (`errTypeFull`).
 - **Website: no counterpart.** micromobility.sa/saturday books Saturday rides, which are approval rides (exempt); the
   Experiences page lists prices and links into the booking app; neither has a picker that books a counted ride.
+- **Places per bike type on the session form** (no session since September had type keys: the form wrote `_time` and
+  `_total` only). In the bike-count mode (`total`) of the add and edit forms, an optional box per bike type the session
+  offers (`_tcapHtml`; a closed type is not asked and its number is kept; Own and Any never), saved as a plain number
+  beside `_total` (`bike_slots.Road = 2`, `_tcapSlot`): the shape `_type_places` and `_n6rTypePlaces` read. Empty or 0 is
+  no limit of its own. A sum over the total is said under the boxes (`_tcapOver`, role=status, kept true as either is
+  typed); the total still caps the session. State `newSessTypeCaps` / `editSessTypeCaps` (strings as typed); a clone and a
+  template carry them (`_nsCopy`, `NS_TPL_KEYS`, `NS_FILL_BIKES`; `NS_TPL_BLANK` clears them for an older template), and
+  Copy week copies bike_slots whole. `slotsFormat` still reads such a session as `total` (it checks `_total` first), so
+  the check-in picker and the labels are unchanged. The Sessions detail says them (`_tcapLine`: "Places per bike type:
+  Road 2 · Hybrid 4").
+- The custom header was checked on the production gateway: its CORS preflight echoes `x-mm-type-cap` back.
 - Not done: the session list does not say "Waitlist" when every type is full (the step-1 bar, the review and Confirm
   do); the "from" price still counts a full type. `tests/s10b-caps.spec.ts`.

@@ -197,3 +197,74 @@ test.describe('@staff:walk-in a bike type whose places are all taken', () => {
     expect(await page.evaluate(`_koTypes(_sessGet('${PLAIN}'))`)).toContain('Road');
   });
 });
+
+// ── Places per bike type on the session form (2026-11-11) ──────────────────────────────────────────
+// No session since September counted its types: the form wrote _time and _total only. It now asks, optionally, the places
+// of each bike type the session offers, saved as bike_slots[type] beside _total (what _type_places and the desk read).
+const TOTAL = 'n-total';
+const totalNight = night(TOTAL, { _total: 20 }, { closed_types: ['Kids'] });
+
+test.describe('@staff:sessions places per bike type', () => {
+  async function sessionsDesk(page: Page, list: Record<string, unknown>[], queue: Record<string, unknown>[] = []) {
+    await page.clock.setFixedTime(NOW);
+    await stubSupabase(page, { sessions: list, queue_entries: queue, bikes: [] });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('allSessions().length>0');
+  }
+
+  test('the edit form asks each offered type (not a closed one), says a sum over the total, and saves beside _total', async ({ page }) => {
+    await sessionsDesk(page, [totalNight]);
+    const patches: Record<string, unknown>[] = [];
+    page.on('request', (r) => { if (r.method() === 'PATCH' && /\/rest\/v1\/sessions/.test(r.url())) patches.push(r.postDataJSON() as Record<string, unknown>); });
+    await page.evaluate(`setStaffTab('sessions');startEditSession('${TOTAL}')`);
+    const form = page.locator('#sess-edit-form');
+    await expect(form.locator('.ss-tcap legend')).toHaveText('Places per bike type');
+    await expect(form.locator('#es-tcap-Road')).toHaveValue('');                 // empty: no limit of its own, as before
+    await expect(form.locator('#es-tcap-Road')).toHaveAttribute('placeholder', 'No limit');
+    await expect(form.locator('#es-tcap-Kids')).toHaveCount(0);                  // closed on this session
+    await form.locator('#es-tcap-Road').fill('15');
+    await form.locator('#es-tcap-Hybrid').fill('8');
+    await expect(form.locator('#es-tcap-over')).toHaveText('These add up to 23, more than the 20 bikes on the session. The total still caps it.');
+    await form.locator('#es-tcap-Hybrid').fill('');
+    await expect(form.locator('#es-tcap-over')).toBeHidden();
+    await form.locator('#es-tcap-Road').fill('2');
+    await page.evaluate('saveSessionEdit()');
+    await expect.poll(() => patches.find((p) => typeof p.bike_slots === 'string')).toBeTruthy();
+    const slots = JSON.parse(String(patches.find((p) => typeof p.bike_slots === 'string')!.bike_slots));
+    expect(slots).toMatchObject({ _total: 20, _time: '21:00 - 23:00', Road: 2 });
+    expect(slots.Hybrid).toBeUndefined();
+  });
+
+  test('a clone and a template keep them; the Sessions detail says them', async ({ page }) => {
+    const capped = night(TOTAL, { _total: 20, Road: 2, Hybrid: 4 });
+    await sessionsDesk(page, [capped]);
+    await page.evaluate(`setStaffTab('sessions');cloneSession('${TOTAL}')`);
+    expect(await page.evaluate('[S.newSessMode,S.newSessTypeCaps]')).toEqual(['total', { Road: '2', Hybrid: '4' }]);
+    await expect(page.locator('#ns-tcap-Road')).toHaveValue('2');
+    expect(await page.evaluate(`NS_TPL_KEYS.includes('newSessTypeCaps')&&NS_FILL_BIKES.includes('newSessTypeCaps')`)).toBe(true);
+    expect(await page.evaluate(`_nsSlots('21:00 - 23:00','').slots`)).toMatchObject({ _total: 20, Road: 2, Hybrid: 4 });
+    await page.evaluate(`S.showAddSession=false;selectSessionDetail('${TOTAL}')`);
+    await expect(page.locator('#tab-sessions .sess-detail-tcap')).toHaveText('Places per bike type: Road 2 · Hybrid 4');
+  });
+
+  test('Road 2 with two Road bookings: Full in the rider picker and "Road 0 left" on the desk', async ({ page }) => {
+    const capped = night(TOTAL, { _total: 20, Road: 2 });
+    const two = [booking('t1', TOTAL, 'Road', 'waiting', 1), booking('t2', TOTAL, 'Road', 'waiting', 2)];
+    await sessionsDesk(page, [capped], two);
+    await page.evaluate(`setStaffTab('queue');setSfSession('${TOTAL}')`);
+    await expect(page.locator('#q-live-count .tyl-row')).toContainText('Road 0 left');
+    // the same night on a rider's device
+    const rp = await page.context().newPage();
+    await rp.clock.setFixedTime(NOW);
+    await stubSupabase(rp, { sessions: [capped], 'rpc:list_sessions': [capped], queue_entries: two, bikes: [] });
+    await loginCustomer(rp, { id: 'c1', name: 'Spec Rider', height: 175 });
+    await rp.goto('/');
+    await waitForSb(rp);
+    await rp.evaluate(atRiders(TOTAL));
+    await expect(pill(rp, 'Road')).toBeDisabled();
+    await expect(pill(rp, 'Road')).toContainText('Full');
+    await expect(pill(rp, 'Hybrid')).toBeEnabled();
+  });
+});
