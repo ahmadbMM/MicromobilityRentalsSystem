@@ -13442,3 +13442,26 @@ body.view-staff .dash-night.full .dash-fill::after{background:var(--orange);}
 html[data-staff-theme="booth"] body.view-staff .dash-night{border-width:2px;}
 #tab-settings .set-ntg+.set-ntg{margin-top:12px;}
 #tab-settings .set-ntg-h{margin:0 0 4px;font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--muted);}
+/* Staff round s10, second batch "extras" (2026-11-11): follow-ups on a person (the account window, People > Follow-ups, the
+   pop-up in #confirm-modal), the WhatsApp messages sent on the account window, the palette's search tips. */
+body.view-staff :is(#cust-modal,#tab-community) .fup-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+body.view-staff :is(#cust-modal,#tab-community) .fup-li{border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;}
+body.view-staff :is(#cust-modal,#tab-community) .fup-li.fup-late{border-inline-start:3px solid var(--orange);}
+body.view-staff :is(#cust-modal,#tab-community) .fup-late .fup-when{color:var(--red);}
+body.view-staff :is(#cust-modal,#tab-community) .fup-when{font-weight:600;font-size:var(--sf-fs-sm,.8125rem);}
+body.view-staff :is(#cust-modal,#tab-community) .fup-note{font-size:var(--sf-fs-md,.9375rem);white-space:pre-wrap;overflow-wrap:anywhere;}
+body.view-staff :is(#cust-modal,#tab-community) .fup-li .sc-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+body.view-staff :is(#cust-modal,#tab-community) .fup-acts{display:inline-flex;gap:6px;margin-inline-start:auto;}
+body.view-staff #tab-community .fup-who{background:none;border:0;padding:4px;margin:-4px;font:inherit;font-weight:600;color:var(--text);text-decoration:underline;cursor:pointer;}
+body.view-staff #tab-community .fup-pills{margin-bottom:10px;}
+body.view-staff #confirm-modal .fup-form{display:flex;flex-direction:column;gap:6px;}
+body.view-staff #confirm-modal .fup-lbl{font-size:var(--sf-fs-sm,.8125rem);font-weight:600;}
+body.view-staff #confirm-modal .fup-form :is(input,textarea){width:100%;box-sizing:border-box;font:inherit;padding:8px;border-radius:8px;}
+body.view-staff #confirm-modal .fup-form textarea{resize:vertical;}
+body.view-staff #confirm-modal .fup-err{color:var(--red);font-size:var(--sf-fs-sm,.8125rem);font-weight:600;}
+body.view-staff #confirm-modal .fup-err:empty{display:none;}
+body.view-staff #cust-modal .wal-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;}
+body.view-staff #cust-modal .wal-li{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;font-size:var(--sf-fs-sm,.8125rem);}
+body.view-staff #cust-modal .wal-what{font-weight:600;overflow-wrap:anywhere;}
+#gs-panel .gs-tips{border-top:1px solid var(--border);font-size:var(--sf-fs-xs,.75rem);padding:10px 16px;}
+#gs-panel .gs-tips[hidden]{display:none;}
