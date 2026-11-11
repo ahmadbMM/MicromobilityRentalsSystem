@@ -11366,6 +11366,44 @@ body.view-staff #desk-sheet .inc-err:empty{display:none;}
 body.view-staff #cust-modal .inc-list{margin-bottom:10px;}
 body.view-staff .rmt-chip.rmt-inc{color:var(--orange);display:inline-flex;align-items:center;gap:4px;}
 body.view-staff #tab-dashboard .snt-dash-b{white-space:normal;overflow-wrap:anywhere;}
+/* Night checklists (staff round s10, second batch, D10): the opening and close-night lists in the centred desk sheet,
+   the Dashboard's prompt and Settings' editor. Tokens only: --fs-*, --sf-r-*, no raw font sizes, weights 600 at most.
+   An item is a grid: its mark (or the tick's box) in the first column, the reason and the way to do it under the words. */
+body.view-staff #desk-sheet .ck-body{display:flex;flex-direction:column;gap:8px;}
+body.view-staff #desk-sheet #ck-foot{display:contents;}
+body.view-staff #desk-sheet .ck-prog{font-weight:600;color:var(--muted);}
+body.view-staff #desk-sheet .ck-prog.ck-all{color:var(--green);}
+body.view-staff #desk-sheet .ck-note{color:var(--muted);font-size:var(--fs-sm);}
+body.view-staff #desk-sheet .ck-h{margin:4px 0 0;font-size:var(--fs-sm);font-weight:600;color:var(--muted);}
+body.view-staff #desk-sheet .ck-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+body.view-staff #desk-sheet .ck-li{display:grid;grid-template-columns:22px minmax(0,1fr);align-items:center;gap:2px 8px;border:1px solid var(--border);border-radius:var(--sf-r-ctl);padding:6px 10px;background:var(--s1);}
+body.view-staff #desk-sheet .ck-li.ck-done{border-color:rgba(var(--green-rgb),.35);}
+body.view-staff #desk-sheet .ck-li>:is(.ck-why,.ck-acts){grid-column:2;}
+body.view-staff #desk-sheet .ck-li>.ck-tick{grid-column:1/-1;}
+body.view-staff #desk-sheet .ck-mk{display:inline-flex;justify-content:center;}
+body.view-staff #desk-sheet .ck-mk.ck-ok{color:var(--green);}
+body.view-staff #desk-sheet .ck-mk.ck-no{color:var(--orange);}
+body.view-staff #desk-sheet .ck-mk.ck-wait{color:var(--muted);}
+body.view-staff #desk-sheet .ck-l{font-weight:600;overflow-wrap:anywhere;}
+body.view-staff #desk-sheet .ck-why{color:var(--muted);font-size:var(--fs-sm);overflow-wrap:anywhere;}
+body.view-staff #desk-sheet .ck-tick{display:flex;align-items:center;gap:8px;min-height:44px;padding:0;border:0;background:none;color:var(--text);font:inherit;text-align:start;cursor:pointer;}
+body.view-staff #desk-sheet .ck-tick svg{flex:none;color:var(--muted);}
+body.view-staff #desk-sheet .ck-tick[aria-checked="true"] svg{color:var(--green);}
+body.view-staff #desk-sheet .ck-tick:disabled{cursor:default;}
+body.view-staff #desk-sheet .ck-tick:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:var(--sf-r-xs);}
+body.view-staff #desk-sheet .ck-acts{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:4px;}
+body.view-staff #desk-sheet .ck-owe-r{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;align-self:stretch;overflow-wrap:anywhere;}
+body.view-staff #desk-sheet .ck-left{display:inline-flex;align-items:center;gap:4px;}
+body.view-staff #desk-sheet .ck-left[aria-pressed="true"]{background:var(--sf-select);border-color:var(--text);color:var(--text);}
+body.view-staff #desk-sheet .ck-open{display:flex;flex-direction:column;gap:4px;padding:8px 10px;border:1px solid rgba(var(--warn-rgb),.45);border-radius:var(--sf-r-ctl);background:rgba(var(--warn-rgb),.07);color:var(--orange);font-size:var(--fs-sm);overflow-wrap:anywhere;}
+body.view-staff #ck-set .ck-set-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:8px;}
+@media (min-width:768px){body.view-staff #ck-set .ck-set-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+body.view-staff #ck-set .ck-set-ol{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:6px;}
+body.view-staff #ck-set .ck-set-row{display:flex;align-items:center;gap:6px;}
+body.view-staff #ck-set .ck-set-row input{flex:1 1 auto;min-width:0;}
+body.view-staff #ck-set .ck-mv{display:inline-flex;align-items:center;justify-content:center;min-width:36px;}
+body.view-staff #ck-set .ck-dn svg{transform:rotate(180deg);}
+body.view-staff #ck-set .ck-set-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;}
 /* Victory Lap Doubles teams read as one (2026-10-25): the chip, and the team's rows framed and tinted together */
 .vl-dbl-chip{display:inline-block;padding:0 6px;font-size:11px;font-weight:800;background:#5b3fd6;color:#fff;}
 .queue-table tbody tr.vl-dbl td,.vl-st-table tr.vl-dbl td{background-image:linear-gradient(rgba(91,63,214,.08),rgba(91,63,214,.08));}

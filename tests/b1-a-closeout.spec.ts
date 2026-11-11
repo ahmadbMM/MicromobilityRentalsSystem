@@ -85,6 +85,7 @@ test.describe('@staff:bookings b1-a close out settles the night correctly', () =
     const bikes = [bike('b1', 1, 'in-use')];
     const { writes, returns } = await boot(page, [night(OLD, OLD)], q, bikes);
     await page.evaluate(`closeOutSession('${OLD}')`);
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     const box = page.locator('#confirm-modal .confirm-box');
     await expect(box.locator('#co-x-sum')).toHaveText('2 checked-in rider(s) will be marked Completed and 3 who never arrived will be marked No-show. Waitlisted riders are not touched.');
     const paid = box.locator('.co-x-paid .co-x-row');
@@ -133,6 +134,7 @@ test.describe('@staff:bookings b1-a close out settles the night correctly', () =
     await page.clock.setFixedTime(new Date(`${DAY}T20:00:00+03:00`)); // the evening of the session, before its 23:00 end
     await boot(page, [ev], q);
     await page.evaluate(`setStaffRole('frontdesk');closeOutSession('${EV}')`);
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     const box = page.locator('#confirm-modal .confirm-box');
     await expect(box.locator('.co-x-early')).toHaveText('This session ends at 11 PM. 2 rider(s) may still arrive.');
     await expect(box.locator('.co-x-paid .co-x-row')).toHaveCount(1);
@@ -149,11 +151,13 @@ test.describe('@staff:bookings b1-a close out settles the night correctly', () =
     await page.evaluate('closeConfirm()');
     await page.clock.setFixedTime(new Date(`${DAY}T23:20:00+03:00`));
     await page.evaluate(`closeOutSession('${EV}')`);
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     await expect(box.locator('.co-x-early')).toHaveCount(0);
     await expect(box.getByRole('button', { name: 'Close out early' })).toHaveCount(0);
     await page.evaluate('closeConfirm()');
     await page.clock.setFixedTime(new Date(`${DAY}T20:00:00+03:00`));
     await page.evaluate(`closeOutSession('${EV}')`);
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     const early = box.getByRole('button', { name: 'Close out early' });
     await expect(early).toBeVisible();
     await early.click();
@@ -189,6 +193,7 @@ test.describe('@staff:bookings b1-a close out settles the night correctly', () =
     // Close out now opens the Close out dialog, which still asks before it settles anything
     await page.evaluate(`toggleSession('${OLD}','closed')`);
     await ask.getByRole('button', { name: 'Close out now' }).click();
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     const box = page.locator('#confirm-modal .confirm-box');
     await expect(box).toContainText('Close out the night');
     await expect(box.locator('#co-x-sum')).toContainText('1 checked-in rider(s) will be marked Completed and 2 who never arrived');
@@ -242,6 +247,7 @@ test.describe('@staff:bookings b1-a close out settles the night correctly', () =
     await expect(line).toContainText('3 still open');
     await line.click();
     await expect.poll(() => page.evaluate(`S.staffTab+'|'+S.queueView+'|'+S.sfSession`)).toBe(`queue|bookings|${OLD}`);
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     await expect(page.locator('#confirm-modal .confirm-box')).toContainText('Close out the night');
     // Settings lists the new kind so an account can turn it off
     expect(await page.evaluate(`NT_KINDS.some(k=>k[0]==='coopen'&&k[1]==='ntkCoOpen')`)).toBe(true);

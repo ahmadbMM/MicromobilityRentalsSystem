@@ -3220,3 +3220,40 @@ Items 48-50 of `reports/Staff website design and function.md` (builder "features
   core 338.8 / 346 (not raised). The `community` part (132 KB) was not split: the core is inside its budget and a split
   does not change the staff half; People's sub-views are drawn synchronously by `renderCommunity`, so a part of their
   own needs their callers made async first.
+
+## Staff round s10: night checklists (2026-11-11, migration 20261111180400)
+
+Owner decision D10 ("do it all"), builder "checklist" of the second batch. `tests/s10b-checklist.spec.ts`.
+- **Close-night list.** `closeOutSession` (desk part) opens `_ckOpen('close',sid,1)` BEFORE its own question, after the
+  outbox block (BK04, kept) and the "nothing to settle" return. The list's Close out (all done) or Close out anyway (items
+  open) sets `S._ckPass` and calls `closeOutSession` again, which takes it ONCE; the close-out's confirm then logs
+  "Close checklist done" or "Close checklist: closed with N open (...)" after its own line. A new way into the close-out
+  needs nothing: every caller goes through `closeOutSession`. A spec that drives a close-out clicks `#desk-sheet .ck-go`
+  first (the existing close-out specs do).
+- **Automatic items** (`_ckAuto`, the close list only, each with its reason): no one on a bike (bike nights only), everyone
+  who owes (`_brOwes`: on a bike, done, or checked in) paid or knowingly left owing (Leave owing per rider, a tick
+  `owe:<booking id>`), every locker key back (`_lkSweepCounts(day).out`, the lockers' end-of-night data; "No lockers
+  tonight" when the night has none), no unsent changes on this phone (`_n6bCoPending`), the drawer counted (a narrow read
+  when the list opens: the day's till closed, or one `till_counts` row). Their words are `ckAuto<k>` (a built key prefix).
+- **Staff-ticked items**: `staff_options` key `night_checklists` = `{v, must, open:[{k, lk|l}], close:[...]}`; a built-in
+  item keeps its language key (`lk`) until renamed; `CK_DEF` holds the built-in lists. Built-in keys carry behaviour:
+  `note` ticks itself when the night has a handover note and links to Notes, `incident` shows tonight's count and links
+  admins to History > Incidents, `prep` (Bike prep), `float` (the till), `scanner` (the scanner), `lockers` (Lockers).
+  `CK_BIKE` items stay off a night without bikes (no cycling words there). Admins edit both lists (add, rename, remove,
+  reorder) and the switch **"The checklist must be complete before Close out"** (off unless set) in Settings > Business
+  (`_ckSetHtml`, drawn through `_s10W`); `_staff_opt_ok` makes the key admin-only (re-created from 20261111180200).
+  The switch is enforced on the page only (no Close out button while an item is open; `_ckGo` refuses too);
+  `staff_close_out` does not read it.
+- **Opening list**: "Open the night" in Bookings' More / Desk tools (`shGrpSession`, a night not yet ended) and a Dashboard
+  card while today's open night has not finished it (`_ckDash` through `_s10W`, first in the grid).
+- **Ticks** are `session_checks` rows (session, list 'open'|'close', item key; unique per night, list and item; stamped
+  by the database: `done_by`, `done_by_name` from staff.display_name, `done_at`); staff read, `_staff_mod('queue', true)`
+  ticks and unticks (insert / delete; no updates); anon nothing. Every change is broadcast on **staff-ref**, event
+  `session_checks` (`setupRefRealtime` hands it to `_ckRt` by a built name). Reads are narrow: the night when its list
+  opens, today's nights for the Dashboard, once a page. Never add a poll. Before the table exists a tick stays on the
+  device and the list says "Waiting for the database update".
+- All the code is in the desk part (`_ckOpen` is its entry; `_ckLoad` names `_ckDash`, `_ckRt`, `_ckSetHtml` so they ride
+  there); the core holds only the header button, the realtime line and the two `_s10W` calls (`_s10W` now redraws
+  Settings > Business too when the part arrives). Pop-ups are the centred desk sheet; no toast after a tick or a save.
+- Budget: the feature costs about 4.9 KB gzipped on the staff half (957.2 against 956 at the time; 952.3 before it) and
+  0.1 on the core (339.0 / 346). The budget was not raised here.

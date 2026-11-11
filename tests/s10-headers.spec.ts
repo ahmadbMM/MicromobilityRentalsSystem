@@ -61,9 +61,9 @@ test.describe('@staff:bookings s10 section header', () => {
     const more = head.locator('.sh-more');
     await expect(more).toHaveText(/More actions/);
     await more.click();
-    await expect(sheet(page).locator('.rmt-grp-h')).toHaveText(['Add', 'People', 'Reports', 'Your shift', 'View']);
+    await expect(sheet(page).locator('.rmt-grp-h')).toHaveText(['Session', 'Add', 'People', 'Reports', 'Your shift', 'View']); // Session: Open the night (D10)
     const names = await tileNames(page);
-    for (const n of ['Add group', 'Reminders', 'Print Report', 'Bike prep', 'First-timers', 'My shift', 'Share my location · Ride leader', 'Share my location · Sweeper', 'Comfortable', 'Compact']) expect(names.join('|')).toContain(n);
+    for (const n of ['Open the night', 'Add group', 'Reminders', 'Print Report', 'Bike prep', 'First-timers', 'My shift', 'Share my location · Ride leader', 'Share my location · Sweeper', 'Comfortable', 'Compact']) expect(names.join('|')).toContain(n);
     expect(names.join('|')).not.toContain('Close out'); // in sight on a desk: not twice
     await sheet(page).getByRole('menuitem', { name: 'My shift' }).click(); // a tile runs the button it stands for
     await expect(sheet(page)).toHaveCount(0);
@@ -84,6 +84,7 @@ test.describe('@staff:bookings s10 section header', () => {
     for (const n of ['Session settings', 'Close out (7)', 'Add group', 'Reminders', 'My shift', 'Bike prep']) expect(names).toContain(n);
     expect(names).not.toContain('Comfortable'); // the desk's table density is no phone's
     await sheet(page).getByRole('menuitem', { name: /Close out/ }).click();
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     await expect(page.locator('#confirm-modal')).toContainText(/close/i);
     await page.evaluate('closeConfirm()');
     // search is a field across the row

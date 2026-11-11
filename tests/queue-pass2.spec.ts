@@ -83,6 +83,7 @@ test('closing a free session on its day leaves every rider as they are; only Clo
   await page.waitForTimeout(600);
   expect(patches).toEqual([]);                                                            // closing is only a status change
   await page.evaluate(`closeOutSession('${free.id}')`);
+  await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
   await page.locator('.confirm-box button').filter({ hasText: /close out/i }).click();
   await expect.poll(() => patches.some(p => p.body.status === 'noshow')).toBe(true);     // the button settles them
   expect(patches.find(p => p.body.status === 'noshow')!.url).toContain('a1');
