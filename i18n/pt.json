@@ -2473,6 +2473,7 @@
   "mwBrowseBtn": "Das reservas",
   "mwHideBtn": "Ocultar lista",
   "mwNoMatches": "Ninguém restante para adicionar corresponde a isso.",
+  "mwPickOne": "Há mais de uma reserva com esse número: toque na que quer adicionar.",
   "mwCustTag": "Cliente",
   "mwFromBookings": "Reservas e lista de espera",
   "mwFromCustomers": "Clientes salvos",

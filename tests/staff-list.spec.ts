@@ -427,6 +427,23 @@ test.describe('finding a booking by its number', () => {
     expect(rows[0].name).toBe('Forty Two');
   });
 
+  // Bug hunt 2026-11-11: Enter clicked whatever line was on top, so "4" with #4 not addable (already ridden, parked or on
+  // another ride) parked #41 and its party. Only the number typed in full is parked; otherwise the box says so.
+  test('Enter parks only the booking holding the number in full', async ({ page }) => {
+    await stubSupabase(page, { sessions, queue_entries: many.filter((e) => e.id !== 'e4'), desk_waitlist: [] });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('queue');S.queueView='managed';renderStaffQueue()`);
+    const rows = watchInserts(page);
+    await page.locator('#mw-name').fill('4');
+    await expect(page.locator('#mw-suggest .mw-sug').first()).toContainText('Forty');
+    await page.locator('#mw-name').press('Enter');
+    await expect(page.locator('#mw-name-err')).toBeVisible();
+    await page.waitForTimeout(300);
+    expect(rows.length).toBe(0);
+  });
+
   test('Enter on a name nobody has still adds it by hand', async ({ page }) => {
     await open(page);
     const rows = watchInserts(page);

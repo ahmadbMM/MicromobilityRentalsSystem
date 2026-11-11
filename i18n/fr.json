@@ -2473,6 +2473,7 @@
   "mwBrowseBtn": "Depuis les réservations",
   "mwHideBtn": "Masquer la liste",
   "mwNoMatches": "Plus personne à ajouter ne correspond.",
+  "mwPickOne": "Plusieurs réservations portent ce numéro : touchez celle à ajouter.",
   "mwCustTag": "Client",
   "mwFromBookings": "Réservations et liste d'attente",
   "mwFromCustomers": "Clients enregistrés",
