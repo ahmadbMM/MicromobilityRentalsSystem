@@ -87,7 +87,7 @@ test('a booking already on a bike still shows its status at the top', async ({ p
     queue_num: 7, price: 57.5, approval: null, status: 'active',
   })]);
   await expect(card.locator('.status-badge')).toHaveCount(1);
-  await expect(card.locator('.status-badge')).toContainText('On Bike');
+  await expect(card.locator('.status-badge')).toContainText('On bike');
 });
 
 // The wallet pass shows the booking number, which on a ride staff approve is theirs to

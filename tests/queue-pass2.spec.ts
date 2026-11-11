@@ -32,8 +32,8 @@ test('the payment pill opens one menu that also edits the price; the pencil is g
   await page.locator('.pay-toggle:visible').first().click();
   const menu = page.locator('.pay-menu-popup');
   await expect(menu).toContainText('Pending');
-  await expect(menu).toContainText('Edit Price');
-  await menu.getByRole('menuitem', { name: /Edit Price/ }).click();   // an action among the states (menuitemradio)
+  await expect(menu).toContainText('Edit price');
+  await menu.getByRole('menuitem', { name: /Edit price/ }).click();   // an action among the states (menuitemradio)
   await expect.poll(() => page.evaluate(`document.getElementById('edit-price-modal').style.display`)).toBe('flex');
 });
 
@@ -122,7 +122,7 @@ test('every queue action stays in reach: More on a desk, one Desk tools button o
   const head = page.locator('#tab-queue .section-header');
   await head.locator('.sh-more').click();
   const sheet = page.locator('.row-sheet');
-  for (const name of ['Add group', 'Print Report']) await expect(sheet.getByRole('menuitem', { name })).toBeVisible();
+  for (const name of ['Add group', 'Print report']) await expect(sheet.getByRole('menuitem', { name })).toBeVisible();
   await expect(sheet.getByRole('menuitem', { name: 'Add rider' })).toHaveCount(0); // not on a circuit night (2026-10-07)
   await page.locator('.row-sheet-close').click();
   if (info.project.name === 'mobile') {

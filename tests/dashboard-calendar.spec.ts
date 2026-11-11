@@ -46,7 +46,7 @@ test('the Dashboard shows today: numbers, sessions, what needs attention and qui
   expect(await page.evaluate(`({tab:S.staffTab,sess:S.sfSession})`)).toEqual({ tab: 'queue', sess: TODAY });
 });
 
-test('Front Desk does not get the Dashboard', async ({ page }) => {
+test('Front desk does not get the Dashboard', async ({ page }) => {
   await staff(page);
   await page.evaluate(`setStaffRole('frontdesk');setStaffTab('dashboard')`);
   expect(await page.evaluate('S.staffTab')).toBe('queue');

@@ -51,7 +51,7 @@ test('Waiting keeps the payment and type it was given, and Confirm leaves the ri
 test('the four outcomes are one row of choices, Check in first and chosen, and Confirm applies it', async ({ page }) => {
   const { modal, patches } = await open(page);
   const outs = modal.locator('.ci-outcomes .ci-out');
-  await expect(outs).toHaveText(['Check In', 'Save, check in later', 'No-Show', 'Cancel booking']);
+  await expect(outs).toHaveText(['Check in', 'Save, check in later', 'No-show', 'Cancel booking']);
   await expect(modal.locator('#ci-out-checkin')).toHaveAttribute('aria-checked', 'true');
   // choosing another and coming back moves the choice, and touches nothing on the server
   await modal.locator('#ci-out-noshow').click();
@@ -77,7 +77,7 @@ test('every button in the modal matches the ones beside it, each outcome in its 
   const { modal } = await open(page);
   const same = (w: number[]) => { expect(w.length).toBeGreaterThan(1); expect(Math.max(...w) - Math.min(...w)).toBeLessThanOrEqual(1); };
   const widths = (loc: import('@playwright/test').Locator) => loc.evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().width)));
-  same(await widths(modal.locator('.ci-outcomes .ci-out')));   // Check In · Waiting · No-Show · Cancel booking
+  same(await widths(modal.locator('.ci-outcomes .ci-out')));   // Check in · Waiting · No-show · Cancel booking
   same(await widths(modal.locator('.modal-footer > button')));  // Close · Confirm
   for (const g of await modal.locator('.ci-opts').all()) same(await widths(g.locator('.toggle-btn')));
   const colours = await modal.locator('.ci-outcomes .ci-out').evaluateAll((els) => els.map((e) => getComputedStyle(e).borderTopColor));

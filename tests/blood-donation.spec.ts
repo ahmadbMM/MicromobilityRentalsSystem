@@ -644,7 +644,7 @@ test.describe('@staff:bookings Blood Donation', () => {
     await expect(tq.locator('tbody .bld-bt')).toHaveText(['O+', 'AB\u2212', 'Not known']);
     // no bike words and no money at the desk
     const panel = page.locator('#tab-queue');
-    expect(await panel.innerText()).not.toMatch(/on bike|Return Bike|# of Riders|\bPaid\b|Payment|⃁|\bSAR\b|Walk-in|Add rider/i);
+    expect(await panel.innerText()).not.toMatch(/on bike|Return bike|# of riders|\bPaid\b|Payment|⃁|\bSAR\b|Walk-in|Add rider/i);
     await expect(panel).toContainText('Checked in');
     await expect(tq.getByRole('button', { name: 'Finished' })).toHaveCount(2);
     await expect(page.locator('.walkin-head')).toHaveCount(0);

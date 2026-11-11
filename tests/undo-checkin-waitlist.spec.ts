@@ -173,7 +173,7 @@ test.describe('@staff:bookings undo check-in, back to the waitlist', () => {
     await boot(page, t, { audit_log });
     const audit = auditReads(page);
     await page.evaluate(`confirmPartyUndoCheckin(['X','Y','Z'])`);
-    await page.locator('#confirm-modal button', { hasText: 'Undo Check-in' }).click();
+    await page.locator('#confirm-modal button', { hasText: 'Undo check-in' }).click();
     await expect.poll(() => t.queue_entries.map((r) => r.status)).toEqual(['waitlist', 'waiting', 'waiting']);
     expect(t.queue_entries[0].waitlist_num).toBe(2);
     expect(audit).toHaveLength(1);

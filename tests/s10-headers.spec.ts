@@ -55,7 +55,7 @@ test.describe('@staff:bookings s10 section header', () => {
     await expect(head.locator('.co-head')).toBeVisible();
     await expect(head.locator('.n6t-sess')).toBeVisible();
     expect(await head.locator('.btn-green').filter({ visible: true }).count()).toBe(1); // at most one solid primary
-    for (const name of ['Reminders', 'Print Report', 'Bike prep', 'First-timers', 'My shift', 'Add group', 'Share my location'])
+    for (const name of ['Reminders', 'Print report', 'Bike prep', 'First-timers', 'My shift', 'Add group', 'Share my location'])
       await expect(page.locator('#tab-queue').getByRole('button', { name, exact: true })).toHaveCount(0);
     await expect(page.locator('#tab-queue .density-toggle, #tab-queue .q-views .live-share')).toHaveCount(0); // the second and third rows are folded
     const more = head.locator('.sh-more');
@@ -63,7 +63,7 @@ test.describe('@staff:bookings s10 section header', () => {
     await more.click();
     await expect(sheet(page).locator('.rmt-grp-h')).toHaveText(['Add', 'People', 'Reports', 'Your shift', 'View']);
     const names = await tileNames(page);
-    for (const n of ['Add group', 'Reminders', 'Print Report', 'Bike prep', 'First-timers', 'My shift', 'Share my location · Ride leader', 'Share my location · Sweeper', 'Comfortable', 'Compact']) expect(names.join('|')).toContain(n);
+    for (const n of ['Add group', 'Reminders', 'Print report', 'Bike prep', 'First-timers', 'My shift', 'Share my location · Ride leader', 'Share my location · Sweeper', 'Comfortable', 'Compact']) expect(names.join('|')).toContain(n);
     expect(names.join('|')).not.toContain('Close out'); // in sight on a desk: not twice
     await sheet(page).getByRole('menuitem', { name: 'My shift' }).click(); // a tile runs the button it stands for
     await expect(sheet(page)).toHaveCount(0);
@@ -123,12 +123,12 @@ test.describe('@staff:bookings s10 section header', () => {
     const acts = page.locator('#tab-sessions .sess-detail-actions');
     await expect(acts.getByRole('button', { name: 'Edit', exact: true })).toBeVisible();
     await expect(acts.getByRole('button', { name: 'Open in Bookings' })).toBeVisible();
-    for (const name of ['Clone', 'Copy link', 'Riders CSV', 'Mark Full', 'Close bike types', 'Print lead sheet'])
+    for (const name of ['Clone', 'Copy link', 'Riders CSV', 'Mark full', 'Close bike types', 'Print lead sheet'])
       await expect(page.locator('#tab-sessions').getByRole('button', { name, exact: true })).toHaveCount(0);
     await acts.locator('.sh-more').click();
     await expect(sheet(page).locator('.rmt-grp-h')).toHaveText(['Status', 'Share', 'Session']);
     const names = (await tileNames(page)).join('|');
-    for (const n of ['Mark Full', 'Close bike types', 'Close out (7)', 'Copy link', 'Riders CSV', 'Clone', 'Print lead sheet']) expect(names).toContain(n);
+    for (const n of ['Mark full', 'Close bike types', 'Close out (7)', 'Copy link', 'Riders CSV', 'Clone', 'Print lead sheet']) expect(names).toContain(n);
     await expect(sheet(page).locator('.rmt-foot .rmt-tile')).toHaveText(['Close', 'Cancel session (7)', 'Delete']);
     await expect(sheet(page).locator('.rmt-foot').getByRole('menuitem', { name: 'Delete' })).toBeDisabled(); // it has bookings
   });
@@ -158,9 +158,9 @@ test.describe('@staff:bookings s10 section header', () => {
     const an = page.locator('#tab-analytics .an-title-btns');
     await expect(an.getByRole('button', { name: 'Share digest' })).toBeVisible();
     await expect(an.getByRole('button', { name: 'Export CSV' })).toBeVisible();
-    await expect(an.getByRole('button', { name: /Height & Bike report/ })).toHaveCount(0);
+    await expect(an.getByRole('button', { name: /Height & bike report/ })).toHaveCount(0);
     await an.locator('.sh-more').click();
-    expect(await tileNames(page)).toEqual(['Height & Bike report', 'Height & Bike report CSV']);
+    expect(await tileNames(page)).toEqual(['Height & bike report', 'Height & bike report CSV']);
   });
 });
 
@@ -190,8 +190,10 @@ test.describe('@staff:people s10 account window', () => {
     await open(page, 1366, 900);
     await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
     await page.evaluate(`openAccountHistory('c1')`);
-    const box = (await page.locator('#cust-modal .ah-box').boundingBox())!;
-    expect(Math.round(box.x + box.width)).toBeGreaterThanOrEqual(1365);
+    // at the viewport's end edge once the window has settled (it draws again when the account's history arrives)
+    const rect = `(()=>{const x=document.querySelector('#cust-modal .ah-box');if(!x)return null;const r=x.getBoundingClientRect();return {x:r.left,width:r.width,right:Math.round(r.right)};})()`;
+    await expect.poll(async () => ((await page.evaluate(rect)) as { right: number } | null)?.right || 0).toBeGreaterThanOrEqual(1365);
+    const box = (await page.evaluate(rect)) as { x: number; width: number };
     expect(box.width).toBeLessThanOrEqual(560);
     const title = (await page.locator('#tab-community .page-title').boundingBox())!;
     expect(title.x + title.width).toBeLessThanOrEqual(box.x); // the page moved over

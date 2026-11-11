@@ -117,7 +117,7 @@ test.describe('@staff:bookings the breakfast venue on the staff side', () => {
     for (const n of ['Rider a', 'Rider b', 'Rider c', 'Rider d']) expect(h).toContain(n);
     expect(h).not.toContain('Rider e');
     expect(h).toContain('Complete');
-    expect(h).toContain('No-Show');
+    expect(h).toContain('No-show');
     // the CSV carries the same four
     const csv = await page.evaluate(`(()=>{let r=null;const o=window._downloadCsv;window._downloadCsv=(n,rows)=>{r=rows;};try{exportSessionExcel();}finally{window._downloadCsv=o;}return r;})()`) as string[][];
     expect(csv.length).toBe(5);

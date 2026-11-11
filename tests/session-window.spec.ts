@@ -77,7 +77,7 @@ test.describe('booking window', () => {
     await page.locator('.bw-card button', { hasText: 'Save' }).click();
     await expect.poll(() => dels).toBe(1);
     await expect.poll(() => page.evaluate(`_bwGet()`)).toEqual({ days: null, at: null });
-    // Front Desk has no card
+    // Front desk has no card
     await page.evaluate(`S.staffRole='frontdesk';S.queueView='sessions';renderSessions()`);
     await expect(page.locator('.bw-card')).toHaveCount(0);
   });

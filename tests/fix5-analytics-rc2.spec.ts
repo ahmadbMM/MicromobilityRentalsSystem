@@ -3,7 +3,7 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // Analytics fixes of 2026-10-05 (fix5, slice rc2): promo redemptions without cancelled bookings, paid
 // no-shows out of the revenue lost, the account holder (not a companion) named on the retention lists
-// and their WhatsApp links, every rider of a party counted, every bike type in the Height & Bike report
+// and their WhatsApp links, every rider of a party counted, every bike type in the Height & bike report
 // with a translated leftover, two rides on one day kept apart in the durations, the session table's
 // headings reachable by keyboard, the Ratings view honouring the range, and the rating pictures drawn
 // within what iOS can hold. State is set straight into S; every name and number is invented.
@@ -91,7 +91,7 @@ test.describe('@staff:analytics fix5 rc2', () => {
     await expect(tab(page).locator('.an-rfm-chip, .an-rfm-chip-off', { hasText: 'Friend Fixture' })).toHaveCount(0);
   });
 
-  test('Number of Riders counts each rider of a party on one account', async ({ page }) => {
+  test('Number of riders counts each rider of a party on one account', async ({ page }) => {
     const d = ksa(-3);
     await show(page, {
       sessions: [sess('s1', d)],
@@ -103,11 +103,11 @@ test.describe('@staff:analytics fix5 rc2', () => {
         { id: 'r5', session_id: 's1', session_date: d, customer_id: null, name: 'Walk Fixture', phone: '0551777777' },
       ],
     }, 'ridership');
-    const card = tab(page).locator('.analytics-kpi-card', { hasText: 'Number of Riders' });
+    const card = tab(page).locator('.analytics-kpi-card', { hasText: 'Number of riders' });
     await expect(card.locator('.analytics-kpi-value')).toHaveText('4');
   });
 
-  test('the Height & Bike report counts every bike type and names the leftover in the staff language', async ({ page }) => {
+  test('the Height & bike report counts every bike type and names the leftover in the staff language', async ({ page }) => {
     const d = ksa(-3);
     const r = (id: string, type: string, height: number) => ({ id, session_id: 's1', session_date: d, name: 'Rider ' + id, type_preference: type, height });
     await show(page, {
@@ -133,7 +133,7 @@ test.describe('@staff:analytics fix5 rc2', () => {
         { id: 'b', session_id: 'late', session_date: d, ride_duration: 60 },
       ],
     }, 'ridership');
-    const card = tab(page).locator('.chart-card', { hasText: 'Avg Duration by Session' });
+    const card = tab(page).locator('.chart-card', { hasText: 'Avg duration by session' });
     const labels = card.locator('.analytics-bar-label');
     await expect(labels).toHaveCount(2);
     await expect(labels.nth(0)).toContainText('6 PM');

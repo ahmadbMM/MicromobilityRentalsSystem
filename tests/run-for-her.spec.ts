@@ -212,7 +212,7 @@ test.describe('@staff:bookings Run for Her', () => {
     await expect(tq.locator('.queue-table tbody tr[data-id]')).toHaveCount(4);
     // a runner on the run finishes; there is no bike to return
     await expect(tq.locator('tr[data-id="r1"]')).toContainText('Finished');
-    await expect(tq.locator('tr[data-id="r1"]')).not.toContainText('Return Bike');
+    await expect(tq.locator('tr[data-id="r1"]')).not.toContainText('Return bike');
   });
 
   test('the roster shows who is a member, filters and sorts by it, with no Approve or Publish', async ({ page }) => {

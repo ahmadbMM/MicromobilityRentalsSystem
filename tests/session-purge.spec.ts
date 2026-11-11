@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// Deleted Sessions can be emptied for good (the owner, 2026-09-28). Only a session nothing points
+// Deleted sessions can be emptied for good (the owner, 2026-09-28). Only a session nothing points
 // at goes: queue_entries and cashier_sales carry session_id with no foreign key, so a session with
 // a booking or a sale on record - cancelled or refunded included - stays where it is.
 
@@ -51,17 +51,17 @@ test('a deleted session with nothing on record is deleted for good', async ({ pa
   expect(deletes[0]).toContain('id=eq.2026-10-01');
   expect(deletes[0]).toContain('status=eq.deleted'); // a session restored meanwhile is left alone (the server checks)
   expect(deletes[0]).toContain('op=Spec Staff'); // the operator's approval travels with it
-  await expect(page.locator('#tab-sessions')).not.toContainText('Deleted Sessions');
+  await expect(page.locator('#tab-sessions')).not.toContainText('Deleted sessions');
 });
 
-test('a session with a cancelled booking on record stays in Deleted Sessions', async ({ page }) => {
+test('a session with a cancelled booking on record stays in Deleted sessions', async ({ page }) => {
   const fx = { sessions: [LIVE, del('2026-10-08')], queue_entries: [{ id: 'q1', session_id: '2026-10-08', session_date: '2026-10-08', queue_num: 1, name: 'R', status: 'cancelled', price: 75 }] };
   const deletes = await boot(page, fx);
   await page.locator('#tab-sessions tr', { hasText: 'Oct' }).getByRole('button', { name: 'Delete permanently' }).click();
   await confirm(page, 'Delete permanently');
-  await expect(page.locator('#toast-container')).toContainText('Kept in Deleted Sessions');
+  await expect(page.locator('#toast-container')).toContainText('Kept in Deleted sessions');
   expect(deletes).toHaveLength(0);
-  await expect(page.locator('#tab-sessions')).toContainText('Deleted Sessions (1)');
+  await expect(page.locator('#tab-sessions')).toContainText('Deleted sessions (1)');
 });
 
 test('Delete all removes every clean one and keeps the one with a sale', async ({ page }) => {
@@ -75,7 +75,7 @@ test('Delete all removes every clean one and keeps the one with a sale', async (
   await expect(page.locator('#confirm-modal')).toContainText('All 3 deleted sessions');
   await confirm(page, 'Delete all permanently');
   await expect(page.locator('#toast-container')).toContainText('Sessions deleted permanently: 2.');
-  await expect(page.locator('#toast-container')).toContainText('Kept in Deleted Sessions: 1');
+  await expect(page.locator('#toast-container')).toContainText('Kept in Deleted sessions: 1');
   expect(deletes.map((q) => new URLSearchParams(q).get('id'))).toEqual(['eq.2026-10-01', 'eq.2026-10-08']);
-  await expect(page.locator('#tab-sessions')).toContainText('Deleted Sessions (1)');
+  await expect(page.locator('#tab-sessions')).toContainText('Deleted sessions (1)');
 });

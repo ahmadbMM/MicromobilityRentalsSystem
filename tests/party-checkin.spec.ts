@@ -3,8 +3,8 @@ import { stubSupabase, unlockStaff, waitForSb, checkinAsRow } from './helpers/su
 
 // A party on the roster gets a one-tap "Check in (N)" next to its one-tap "Mark paid".
 // On 2026-09-08 the card offered only "Mark paid" at party level: the desk paid six parties
-// with it, handed out the bikes, and 17 riders rode as 'waiting' — the On Bike count read 66
-// for a session of ~100. Solo rows keep their own per-rider Check In and get no party button.
+// with it, handed out the bikes, and 17 riders rode as 'waiting' — the On bike count read 66
+// for a session of ~100. Solo rows keep their own per-rider Check in and get no party button.
 test('a party row gets a one-tap Check in that activates every expected member', async ({ page }) => {
   const row = (id: string, qn: number, name: string, groupId: string | null, status = 'waiting'): Record<string, unknown> => ({
     id, session_id: 's0', session_day: 'Friday', session_date: '2099-02-10', queue_num: qn,

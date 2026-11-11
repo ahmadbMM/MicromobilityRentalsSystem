@@ -59,7 +59,7 @@ test.describe('@staff:perf staff parts by role (2026-10-09)', () => {
     await page.evaluate(`_loadStaffPart('analytics')`);
     expect(asked.some((p) => p === '/lang/staff-analytics-ar.json')).toBe(true);
     expect(await page.evaluate(`t('anRevCollected')`)).toBe('الإيرادات المحصلة');
-    expect(await page.evaluate(`LANG.en.anRevCollected`)).toBe('Revenue Collected');
+    expect(await page.evaluate(`LANG.en.anRevCollected`)).toBe('Revenue collected');
     // a language chosen afterwards brings the strings of the parts already here
     await page.evaluate(`loadLangPack('fr')`);
     expect(asked.some((p) => p === '/lang/staff-analytics-fr.json')).toBe(true);

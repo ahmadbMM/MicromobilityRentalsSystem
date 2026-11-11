@@ -61,7 +61,7 @@ test('ST02: the Owner preset reads the Dashboard without its actions; a manager 
   await page.evaluate(`S._myEdit=null;setStaffRole('manager');renderDashboard()`);
   await expect(dash.getByRole('button', { name: 'Check in next' })).toHaveCount(1);
   expect(await dash.locator('.dash-kpi').evaluateAll(els => els.map(e => e.getAttribute('data-on-click') || '').filter(x => x.includes('"sessions"')).length)).toBe(0);
-  await expect(dash.getByRole('button', { name: /New Session/ })).toHaveCount(0);
+  await expect(dash.getByRole('button', { name: /New session/ })).toHaveCount(0);
 });
 
 test('ST03: S opens Sessions in one step; an account without Sessions stays where it is', async ({ page }) => {

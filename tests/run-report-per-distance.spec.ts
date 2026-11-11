@@ -75,7 +75,7 @@ test.describe('@staff:bookings Run for Her report per distance', () => {
     // counted 1..2, a runner is checked in (not on a bike), no distance column on a one-distance sheet
     expect(html.match(/<td class="rp-seq">(\d+)<\/td>/g)).toEqual(['<td class="rp-seq">1</td>', '<td class="rp-seq">2</td>']);
     expect(body).toContain('Checked in');
-    expect(body).not.toContain('On Bike');
+    expect(body).not.toContain('On bike');
     expect(html).not.toMatch(/<th>Distance<\/th>/);
     expect(html).not.toMatch(/<th>Bike<\/th>/);
     // no money on a free run: no Collected tile, no VAT line
@@ -95,7 +95,7 @@ test.describe('@staff:bookings Run for Her report per distance', () => {
   test('the full report keeps every runner, with the distance column and a tile per distance', async ({ page }) => {
     await boot(page);
     await catchReports(page);
-    await page.locator('#print-opts-modal').getByRole('button', { name: 'PDF / Print' }).click();
+    await page.locator('#print-opts-modal').getByRole('button', { name: 'PDF / print' }).click();
     const html = (await page.evaluate('window.__rep') as string[])[0];
     const body = text(html);
     expect(html).toMatch(/<th>Distance<\/th>/);
@@ -216,12 +216,12 @@ test.describe('@staff:bookings Run for Her report per distance', () => {
     await page.evaluate('printDaySheet()');
     const html = (await page.evaluate('window.__rep') as string[])[0];
     expect(html).toMatch(/<th>Distance<\/th>/);
-    expect(html).not.toMatch(/<th>Bike Type<\/th>/);
+    expect(html).not.toMatch(/<th>Bike type<\/th>/);
     const body = text(html);
     expect(body).toContain('Runners: 3');
     expect(body).toMatch(/Runner r1 5 km Checked in/);
     expect(body).toMatch(/Runner r2 3 km /);
     expect(body).toMatch(/Runner r4 — /);
-    expect(body).not.toContain('On Bike');
+    expect(body).not.toContain('On bike');
   });
 });

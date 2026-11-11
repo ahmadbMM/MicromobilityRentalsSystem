@@ -83,7 +83,7 @@ test('an admin edits a message on Settings and it is saved for everyone', async 
   await expect(sec.locator('.tpl-row[data-tpl="bd_wish"] .tpl-own')).toHaveText('Customized');
 });
 
-test('Front Desk does not see the templates', async ({ page }) => {
+test('Front desk does not see the templates', async ({ page }) => {
   await boot(page);
   await page.evaluate(`setStaffRole('frontdesk');setStaffTab('settings')`);
   await expect(page.locator('#tab-settings .form-title')).toHaveText(['Profile', 'Sign-in', 'Notifications', 'This device', 'Personal', 'Display']);

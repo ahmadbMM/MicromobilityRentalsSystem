@@ -16,6 +16,7 @@ import {
   checkCustomerColors, checkNoEmoji, includedFiles, checkPhoneRulesVersion, checkFieldNames, formatFieldNames,
 } from './split-staff.mjs';
 import { checkConfirmClass } from './check-confirm-class.mjs';
+import { checkStaffCss, loadAllow } from './check-staff-css.mjs';
 
 // Modularization foundation: logic can live in separate src/ files and be pulled in
 // at build time via `<!--include:path/to/file.js-->` markers. Inlining (not ES-module
@@ -355,6 +356,13 @@ let out = await minify(src, {
 // the staff loader adds styles.css itself. app.css is written minified here, so the file in the repo
 // is the file that ships and its tag is the hash of those bytes.
 const appCssRes = customerCss(cssSource, out + '\n' + appCode, staffAll);
+// ── Staff rules stay on the type scale, weights <= 600 and the radius ladder (staff round s10, item 27) ──
+// scripts/check-staff-css.mjs; the intentional exceptions, each with its reason, are in scripts/staff-css-allow.json.
+{
+  const c = checkStaffCss(cssSource, out + '\n' + appCode, staffAll, loadAllow());
+  if (c.offenders.length || c.stale.length) throw new Error(`build: styles.css's staff rules left their tokens (use --sf-fs-*, a weight of 400-600 and the --sf-r-* ladder, or add a reason to scripts/staff-css-allow.json):\n${c.offenders.map((o) => `  ${o.why}: ${o.sel} { ${o.prop}: ${o.value} }`).concat(c.stale.map((a) => `  allow-list entry matches nothing: ${a.sel} { ${a.prop}: ${a.value} }`)).join('\n')}`);
+  console.log(`build: staff CSS on its tokens (type scale, weights <= 600, radius ladder; ${c.allowed} listed exceptions)`);
+}
 const appHover = gateHover(appCssRes.css);
 const appCss = new CleanCSS({ level: 1 }).minify(appHover.css);
 if (appCss.errors.length) throw new Error(`build: app.css did not minify: ${appCss.errors.join('; ')}`);

@@ -165,7 +165,7 @@ test.describe('@staff:sessions a date’s own line', () => {
     await page.evaluate(`setStaffTab('sessions');startEditSession('2099-03-10')`);
     await expect(page.locator('#es-desc')).toHaveValue('');
     await page.locator('#es-desc').fill('Bring lights for the ride home.');
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => patches.filter((p) => 'description' in p).length).toBe(1);
     expect(patches.find((p) => 'description' in p)).toMatchObject({ description: 'Bring lights for the ride home.' });
     // the new-date form: the box is there for a circuit evening too, and its words go in with the row

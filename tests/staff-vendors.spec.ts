@@ -223,7 +223,7 @@ test.describe('@staff:vendors Vendors', () => {
     await expect(panel(page).locator('.vendor-not-set-up')).toContainText("isn’t set up yet");
   });
 
-  test('Front Desk does not have it', async ({ page }) => {
+  test('Front desk does not have it', async ({ page }) => {
     await open(page);
     await page.evaluate(`S.staffRole='frontdesk';renderStaffTabs();setStaffTab('vendors')`);
     await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="vendors"]')).toHaveCSS('display', 'none');

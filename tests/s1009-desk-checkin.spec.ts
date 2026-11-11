@@ -92,7 +92,7 @@ test.describe('@staff:checkin s1009 desk: Confirm', () => {
     await expect(err).toContainText('#7 Rider Seven not checked in');
     await expect(err).toContainText('Bike no longer available');
     await expect(page.locator('#err-bar-el')).toBeHidden();
-    // the row's own Check In opens that rider's check-in again
+    // the row's own Check in opens that rider's check-in again
     await page.locator('#q-results [data-id="e1"] .rq-act').filter({ visible: true }).first().click();
     await expect(modal.locator('#dlgt-checkin')).toContainText('Rider Seven');
   });

@@ -92,12 +92,12 @@ test.describe('@staff:settings simple phone view', () => {
     // a card: no select box or booked-at line, its one action and ⋯; add-ons listed only where there are some, none added here
     await expect(card(page, 'w1').locator('.rq-cchk')).toBeHidden();
     await expect(card(page, 'w1').locator('.q-booked-at')).toBeHidden();
-    await expect(card(page, 'w1').locator('.rq-act')).toHaveText('Check In');
+    await expect(card(page, 'w1').locator('.rq-act')).toHaveText('Check in');
     await expect(card(page, 'w1').locator('.rq-more')).toBeVisible();
     await expect(card(page, 'w1').locator('.rq-cadi')).toContainText('Water');
     await expect(card(page, 'w1').locator('.rq-cadbtn')).toHaveCount(0);
     await expect(card(page, 'w2').locator('.rq-cad')).toHaveCount(0);
-    await expect(card(page, 'a1').locator('.rq-act')).toHaveText('Return Bike');
+    await expect(card(page, 'a1').locator('.rq-act')).toHaveText('Return bike');
     // the figures filter the list
     await page.locator('#q-live-count .q-lc-active').click();
     await expect(card(page, 'w1')).toHaveCount(0);
@@ -121,7 +121,7 @@ test.describe('@staff:settings simple phone view', () => {
     await expect(page.locator('#tab-sessions .ss-figs')).toBeHidden();
     await page.evaluate(`selectSessionDetail('${TODAY}')`);
     const acts = page.locator('#tab-sessions .sess-detail-actions button');
-    expect(await acts.allTextContents()).toEqual(['Mark Full', 'Close']);
+    expect(await acts.allTextContents()).toEqual(['Mark full', 'Close']);
     expect(await page.locator('#tab-sessions .ss-links button').allTextContents()).toEqual(['Open in Bookings']);
     await expect(page.locator('#tab-sessions .n6r-box')).toHaveCount(0);
   });

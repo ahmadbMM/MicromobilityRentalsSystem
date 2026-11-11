@@ -97,16 +97,16 @@ test.describe('@staff:customers customer activity', () => {
     await expect(page.locator('#cust-modal')).toContainText('Omar Saleh');
   });
 
-  test('its address opens the view, the old History address follows it, and History keeps the Action Log', async ({ page }) => {
+  test('its address opens the view, the old History address follows it, and History keeps the Action log', async ({ page }) => {
     await staff(page, '/history/customers');
     await page.waitForFunction(`S.staffTab==='community'&&S.communityTab==='activity'`);
     expect(at(page)).toBe('/people/activity');
     await expect(rows(page)).toHaveCount(5);
     await page.evaluate(`setStaffTab('history')`);
     await expect(page.locator('#tab-history .filter-pill', { hasText: 'Customer activity' })).toHaveCount(0);
-    await page.locator('#tab-history .filter-pill', { hasText: 'Action Log' }).click();
+    await page.locator('#tab-history .filter-pill', { hasText: 'Action log' }).click();
     expect(at(page)).toBe('/history/log');
-    await expect(page.locator('#hist-log-host .lg-h3')).toHaveText('Action Log');
+    await expect(page.locator('#hist-log-host .lg-h3')).toHaveText('Action log');
   });
 
   test('a refused read leaves the view empty and says so, without asking again in a loop', async ({ page }) => {

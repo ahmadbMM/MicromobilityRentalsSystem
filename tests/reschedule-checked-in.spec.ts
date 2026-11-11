@@ -95,7 +95,7 @@ test('Reschedule is in the row menu of a checked-in rider and opens the editor o
   await row.getByRole('button', { name: /More actions/ }).click();
   await page.waitForTimeout(150); // let the just-positioned menu settle before clicking into it
   const menu = page.locator('.pay-menu-popup');
-  await expect(menu.getByRole('menuitem', { name: /Undo Check-in/i })).toBeVisible(); // the checked-in row's menu
+  await expect(menu.getByRole('menuitem', { name: /Undo check-in/i })).toBeVisible(); // the checked-in row's menu
   await menu.getByRole('menuitem', { name: 'Reschedule' }).click();
   await expect.poll(() => page.evaluate('S._beId')).toBe(MOVER);
   await expect.poll(() => page.evaluate('document.activeElement&&document.activeElement.id')).toBe('be-sess');

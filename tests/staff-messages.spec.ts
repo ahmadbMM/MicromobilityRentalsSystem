@@ -32,7 +32,7 @@ const panel = (page: Page) => page.locator('#tab-messages');
 const card = (page: Page, id: number) => page.locator(`.sm-row[data-sm-id="${id}"]`);
 const dialog = (page: Page) => page.locator('#confirm-modal');
 
-test('it sits under Website with the count of new messages; Front Desk does not have it', async ({ page }) => {
+test('it sits under Website with the count of new messages; Front desk does not have it', async ({ page }) => {
   await open(page, { site_messages: [msg({}), msg({ id: 8, kind: 'help', topic: 'warranty' }), msg({ id: 9, status: 'closed' })] });
   const item = page.locator('#staff-tab-nav .tab-btn[data-stab="messages"]');
   await expect(item).toHaveClass(/active/);

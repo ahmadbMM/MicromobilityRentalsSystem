@@ -91,7 +91,7 @@ test.describe('inventory sections derive from the data, not this device', () => 
   // Custom categories (Drinks, Protein Cookies) were created on another device, so
   // this browser's localStorage has no cq_inv_cats_supp entry for them. Their items
   // carry supplements-only fields (flavour/volume/nutrition), which must be enough
-  // to place them in Supplements & Beverages.
+  // to place them in Supplements & beverages.
   const fixtures = {
     inventory: [
       { id: 'i1', name: 'Recover Vitamin Water', brand: 'Vitamin Well', category: 'Drinks', qty: 10, low_threshold: 2, flavour: 'Berry', volume_ml: 500 },
@@ -107,7 +107,7 @@ test.describe('inventory sections derive from the data, not this device', () => 
     await goStaffTab(page, 'inventory');
   });
 
-  test('custom supplement categories land in Supplements & Beverages on a fresh device', async ({ page }) => {
+  test('custom supplement categories land in Supplements & beverages on a fresh device', async ({ page }) => {
     await page.locator('.inv-navbtn', { hasText: 'Supplements' }).click();
     const inv = page.locator('#tab-inventory');
     await expect(inv.getByText('Recover Vitamin Water').first()).toBeVisible();

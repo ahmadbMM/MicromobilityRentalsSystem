@@ -28,7 +28,7 @@ test('the payment menu is a menu: named, keyboard-driven, and focus returns to t
   await expect(menu).toBeVisible();
   const items = menu.locator('[role="menuitemradio"]');
   await expect(items).toHaveCount(3);                                   // the three states
-  await expect(menu.getByRole('menuitem', { name: /Edit Price/ })).toHaveCount(1);   // and the one action
+  await expect(menu.getByRole('menuitem', { name: /Edit price/ })).toHaveCount(1);   // and the one action
   await expect(items.filter({ hasText: 'Pending' })).toHaveAttribute('aria-checked', 'true');   // the state it is in
   // the checked item has focus; the arrows move it; Escape closes and the pill has focus again
   expect(await page.evaluate(`document.activeElement.textContent.trim()`)).toContain('Pending');

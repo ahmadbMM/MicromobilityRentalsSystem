@@ -50,7 +50,7 @@ test.describe('@staff:bookings bug hunt Oct 7 (s08)', () => {
     await modal.locator('#be-sess').selectOption(RUN);
     await expect(modal.locator('.run-km-field')).toBeVisible(); // the run's own question, once it is the target
     await modal.locator('.run-km-field [data-km="5"]').click();
-    await modal.getByRole('button', { name: 'Save Changes' }).click();
+    await modal.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => sent.find((b) => b.session_id === RUN) || null).toMatchObject({ session_id: RUN, run_km: 5, type_preference: 'None' });
   });
 
@@ -62,7 +62,7 @@ test.describe('@staff:bookings bug hunt Oct 7 (s08)', () => {
     await expect(modal.locator('.rg-field')).toBeVisible();
     await modal.locator('#be-sess').selectOption(JCC);
     await expect(modal.locator('.rg-field')).toHaveCount(0); // a JCC night has no groups
-    await modal.getByRole('button', { name: 'Save Changes' }).click();
+    await modal.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => sent.find((b) => b.session_id === JCC) || null).toMatchObject({ ride_group: null });
     await page.locator('#topbar-right .undo-btn').click();
     await expect.poll(() => sent.find((b) => b.session_id === SAT) || null).toMatchObject({ ride_group: 'beg' });

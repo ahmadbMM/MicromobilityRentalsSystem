@@ -6,7 +6,7 @@ import { stubSupabase, unlockStaff, waitForSb, type FailWrite } from './helpers/
 // paint; a moved booking takes the new ride's type rules and fare; the account editor writes what
 // it showed even when it is closed mid-save; the walk-in's Retry never books a landed party twice;
 // Previous / Next follow the roster as drawn; Enter on a booking number counts the ride picked;
-// Front Desk sees no Saturday cancellations; "vs last week" compares like with like; bulk Paid
+// Front desk sees no Saturday cancellations; "vs last week" compares like with like; bulk Paid
 // re-reads its own rows; the sort headers are buttons.
 
 const head = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
@@ -254,7 +254,7 @@ test.describe('@staff:bookings rb1 roster (2026-10-05)', () => {
     expect(await page.evaluate('S._ciId||null')).toBeNull();
   });
 
-  test('Front Desk is not shown a Saturday ride’s cancellations', async ({ page }) => {
+  test('Front desk is not shown a Saturday ride’s cancellations', async ({ page }) => {
     const sat = { id: 'sat1', day: 'Saturday', session_date: dayOff(2), capacity: 20, spots: 20, status: 'open', created_at: 1,
       event_kind: 'community', ride_kind: 'saturday', needs_approval: true, paid_ride: false, bike_slots: '{"_time":"06:00 - 08:00"}' };
     const now = new Date().toISOString();

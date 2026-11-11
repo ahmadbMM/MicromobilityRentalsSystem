@@ -51,7 +51,7 @@ test('the bike card offers Return while the bike is out', async ({ page }) => {
   await openStaff(page, base);
   await page.evaluate("openBikeProfile('b1')");
   const card = page.locator('#bike-profile-modal');
-  await card.getByRole('button', { name: /Return Bike/i }).click();
+  await card.getByRole('button', { name: /Return bike/i }).click();
   await expect(page.locator('#return-modal')).toHaveCSS('display', 'flex');
   await expect(page.locator('#return-modal')).toContainText('Rider Seven');
 });

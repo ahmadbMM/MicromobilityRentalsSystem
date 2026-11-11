@@ -50,7 +50,7 @@ const row = (page: Page, id: string) => page.locator(`#q-results .queue-table tb
 test.describe('@staff:bookings round two roster', () => {
   test('one action per row for its state, ⋯ for the rest, each named with its booking; the select box has a column of its own', async ({ page }) => {
     await open(page);
-    const want: Record<string, string> = { w1: 'Check In', r1: 'Give bike', a1: 'Return Bike', d1: 'Re-open', n1: 'Customer Showed', l1: 'Check In', p1: 'Check in (2)' };
+    const want: Record<string, string> = { w1: 'Check in', r1: 'Give bike', a1: 'Return bike', d1: 'Re-open', n1: 'Customer showed', l1: 'Check in', p1: 'Check in (2)' };
     for (const [id, label] of Object.entries(want)) {
       const slot = row(page, id).locator('td.rq-mng');
       await expect(slot.locator('.rq-act'), id).toHaveCount(1);
@@ -132,7 +132,7 @@ test.describe('@staff:bookings round two roster', () => {
     await expect(bar).toBeVisible();
     await expect(bar).toHaveAttribute('role', 'toolbar');
     await expect(bar.locator('.rq-bulkn')).toHaveText('2 selected');
-    for (const b of ['Check in', 'Mark paid', 'No-Show (2)', 'Clear']) await expect(bar.getByRole('button', { name: b })).toBeVisible();
+    for (const b of ['Check in', 'Mark paid', 'No-show (2)', 'Clear']) await expect(bar.getByRole('button', { name: b })).toBeVisible();
     await expect(page.locator('#tab-queue .filter-bar')).toHaveCount(0); // in its place
     expect(await bar.evaluate((e) => getComputedStyle(e).position)).toBe('sticky');
     await expect(page.locator('#tab-queue .rq-bulk')).toHaveCount(0); // the old bottom bar
@@ -151,12 +151,12 @@ test.describe('@staff:bookings round two roster', () => {
     await page.evaluate(`showCheckinModal('w1')`);
     await page.locator('#ci-confirm').click();
     const slot = row(page, 'w1').locator('td.rq-mng');
-    await expect(slot.locator('.rq-act')).toHaveText('Return Bike');
+    await expect(slot.locator('.rq-act')).toHaveText('Return bike');
     await expect(slot.locator('.rq-undo')).toHaveCount(0);
     expect(await page.evaluate(`[typeof _ruRun,typeof _ruMark,typeof RU_MS]`)).toEqual(['undefined', 'undefined', 'undefined']);
     // the topbar's Undo still holds the check-in (an admin's), and its Log line names the booking
-    await expect.poll(() => page.evaluate(`S.actionLog.some(l=>/^Check In: #1 /.test(l.label)&&!l.undone)`)).toBe(true);
-    expect(await page.evaluate(`S.fullLog.filter(l=>/^Check In: #1 /.test(l.label)).map(l=>l.m)`)).toEqual([expect.objectContaining({ kind: 'checkin', entity: 'booking', entity_id: 'w1' })]);
+    await expect.poll(() => page.evaluate(`S.actionLog.some(l=>/^Check in: #1 /.test(l.label)&&!l.undone)`)).toBe(true);
+    expect(await page.evaluate(`S.fullLog.filter(l=>/^Check in: #1 /.test(l.label)).map(l=>l.m)`)).toEqual([expect.objectContaining({ kind: 'checkin', entity: 'booking', entity_id: 'w1' })]);
   });
 
   test('a desk tap paints its row at once; refused, the row goes back and says why on itself, not on a bar', async ({ page }) => {

@@ -123,7 +123,7 @@ test('fees: off until switched on; an admin charges from the wallet', async ({ p
   await page.waitForFunction('typeof _cwOk==="function"&&_cwOk()');
   await page.evaluate(`openAccountHistory('c1')`);
   const fee = page.locator('#cust-modal .n6q-fee');
-  await expect(fee).toContainText('No-Show');
+  await expect(fee).toContainText('No-show');
   const btn = fee.getByRole('button', { name: /Charge SAR 20 from wallet/ });
   if (await page.evaluate('isAdmin()')) {
     await btn.click();

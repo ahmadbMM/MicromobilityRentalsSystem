@@ -183,13 +183,13 @@ test.describe('@staff:bookings s1010 desk', () => {
   });
 
   test('D13: My shift lists this operator\'s actions today and what is still open', async ({ page }) => {
-    await boot(page, { staff_actions: [{ at: new Date().toISOString(), action: 'Check In: #9 Someone', who: 'Spec Staff' }] });
+    await boot(page, { staff_actions: [{ at: new Date().toISOString(), action: 'Check in: #9 Someone', who: 'Spec Staff' }] });
     await page.locator('#tab-queue .sh-more').click(); // My shift is a tile in the header's More (staff round s10)
     await page.getByRole('menuitem', { name: 'My shift' }).click();
     const s = page.locator('#desk-sheet [role="dialog"]');
     await expect(s).toBeVisible();
     await expect(s.locator('#dk-sheet-t')).toContainText('My shift');
-    await expect(s).toContainText('Check In: #9 Someone');
+    await expect(s).toContainText('Check in: #9 Someone');
     await expect(s).not.toContainText('Needs bike'); // the Give bike step is off (GIVE_BIKE_STEP, 2026-10-12)
     await expect(s).toContainText('Still owing · 1');
     await expect(s).toContainText('Rami Owes');

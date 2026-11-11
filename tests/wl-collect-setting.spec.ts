@@ -43,7 +43,7 @@ test.describe('@staff:sessions the waitlist collection time', () => {
     await page.locator('#es-wlcollect').fill('21:40');
     await page.locator('#es-start').fill('20:50'); // typed: no longer follows
     await expect(page.locator('#es-wlcollect')).toHaveValue('21:40');
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => patches.filter((p) => 'bike_slots' in p).length).toBeGreaterThan(0);
     expect(slotsOf(patches.find((p) => 'bike_slots' in p)!)._wlCollect).toBe('21:40');
   });
@@ -53,11 +53,11 @@ test.describe('@staff:sessions the waitlist collection time', () => {
     const patches = writes(page, 'PATCH');
     await page.evaluate(`setStaffTab('sessions');startEditSession('2099-03-10')`);
     await page.locator('#es-wlcollect').fill('20:00'); // before the 20:15 collection
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page.locator('#sess-edit-form')).toContainText('can’t collect bikes before the bike collection time');
     expect(patches.filter((p) => 'bike_slots' in p).length).toBe(0);
     await page.evaluate(`startEditSession('2099-03-10')`);
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => patches.filter((p) => 'bike_slots' in p).length).toBeGreaterThan(0);
     expect('_wlCollect' in slotsOf(patches.find((p) => 'bike_slots' in p)!)).toBe(false);
   });
@@ -67,7 +67,7 @@ test.describe('@staff:sessions the waitlist collection time', () => {
     const patches = writes(page, 'PATCH');
     await page.evaluate(`setStaffTab('sessions');startEditSession('2099-03-10')`);
     await page.locator('#es-wlcollect').fill('');
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => patches.filter((p) => 'bike_slots' in p).length).toBeGreaterThan(0);
     expect(slotsOf(patches.find((p) => 'bike_slots' in p)!)._wlCollect).toBe('');
     expect(await page.evaluate(`[_wlCollectTime({id:'x',bike_slots:'{"_time":"21:00 - 23:00","_wlCollect":""}'}),_wlCollectTime({id:'x',bike_slots:'{"_time":"21:00 - 23:00"}'})]`)).toEqual(['', '21:15']);

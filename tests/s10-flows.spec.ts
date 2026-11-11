@@ -43,7 +43,7 @@ test.describe('@staff:bookings s10 check-in all paid (D2)', () => {
     await expect(modal).toContainText('Grouped One');                  // the rider who owes keeps their own drawer
     await expect(modal.locator('#ci-allpaid')).toHaveCount(0);           // nobody paid is left to take
     await expect(modal.locator('#ci-confirm')).toBeEnabled();
-    await expect.poll(() => page.evaluate(`S.actionLog.map(l=>l.label)`)).toEqual(expect.arrayContaining(['Check In: #2 Grouped Two', 'Check In: #3 Grouped Three']));
+    await expect.poll(() => page.evaluate(`S.actionLog.map(l=>l.label)`)).toEqual(expect.arrayContaining(['Check in: #2 Grouped Two', 'Check in: #3 Grouped Three']));
     expect(await page.evaluate(`['e2','e3'].map(id=>_qGet(id).status)`)).toEqual(['active', 'active']);
     expect(ids).not.toContain('e1');
   });

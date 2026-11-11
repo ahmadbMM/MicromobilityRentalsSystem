@@ -73,11 +73,11 @@ test.describe('@staff:bookings free rides have no Mark paid', () => {
     await expect(ret).toHaveCSS('display', 'flex');
     await expect(ret).toContainText('Road 001');
     await expect(ret.locator('.dk-rt-fgpay')).toHaveCount(0);
-    await expect(ret).not.toContainText('Payment Pending');
+    await expect(ret).not.toContainText('Payment pending');
     await page.evaluate(`closeReturnModal()`);
 
     await page.evaluate(`doReturn('p2')`);
-    await expect(ret.locator('.dk-rt-fgpay')).toContainText('Payment Pending');
+    await expect(ret.locator('.dk-rt-fgpay')).toContainText('Payment pending');
   });
 
   test('a free ride without bikes finishes without the payment question', async ({ page }) => {

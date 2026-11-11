@@ -75,13 +75,13 @@ test.describe('@staff:sessions the Sessions review', () => {
     await open(page);
     const posts = writes(page, 'POST');
     await page.evaluate(`S.showAddSession=true;S.newSessEvent='jcc';S.newSessMode='total';S.newSessTotal=6;S.newSessDate='2099-03-03';renderSessions()`);
-    await page.locator('#tab-sessions').getByRole('button', { name: 'Create Session' }).click();
+    await page.locator('#tab-sessions').getByRole('button', { name: 'Create session' }).click();
     const dlg = page.getByRole('dialog', { name: 'These dates clash with sessions already there' });
     await expect(dlg).toContainText('same kind');
     await dlg.getByRole('button', { name: 'Cancel' }).click();
     await page.waitForTimeout(200);
     expect(posts).toHaveLength(0);
-    await page.locator('#tab-sessions').getByRole('button', { name: 'Create Session' }).click();
+    await page.locator('#tab-sessions').getByRole('button', { name: 'Create session' }).click();
     await dlg.getByRole('button', { name: 'Go ahead anyway' }).click();
     await expect.poll(() => posts.length).toBe(1);
     expect(posts[0]).toContain('"session_date":"2099-03-03"');
@@ -93,7 +93,7 @@ test.describe('@staff:sessions the Sessions review', () => {
     const posts = writes(page, 'POST');
     await page.evaluate(`S.showAddSession=true;S.newSessEvent='jcc';S.newSessMode='total';S.newSessTotal=6;S.newSessDate='2099-05-04';S.n6sEvery='2';S.n6sUntil='2099-06-01';renderSessions()`);
     await expect(page.locator('#tab-sessions .n6s-pub .toggle-btn', { hasText: 'Open at a set time' })).toBeEnabled();
-    await page.locator('#tab-sessions').getByRole('button', { name: 'Create Session' }).click();
+    await page.locator('#tab-sessions').getByRole('button', { name: 'Create session' }).click();
     await expect.poll(() => posts.length).toBe(3);
     const sid = JSON.parse(posts[0].slice(posts[0].indexOf(' ') + 1)).series_id;
     expect(sid).toBeTruthy();

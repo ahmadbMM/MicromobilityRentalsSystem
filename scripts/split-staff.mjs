@@ -414,10 +414,14 @@ function classOnPage(parts, n) {
 // puts view-staff on <body> in the staff view, which is entered through goStaff (staff code) or by
 // the boot after it has awaited _loadStaff.
 export const STAFF_SCOPE = new Set(['view-staff']);
-export function customerCss(css, customerText, staffText, scope = STAFF_SCOPE) {
+/** The test customerCss puts to a selector: true when only the staff screens can match it (scripts/check-staff-css.mjs uses it too). */
+export function staffSelTest(customerText, staffText, scope = STAFF_SCOPE) {
   const cust = classParts(customerText), staffWords = new Set(staffText.match(/-?[A-Za-z_][\w-]*/g) || []);
   const staffOnly = (n) => scope.has(n) || (staffWords.has(n) && !classOnPage(cust, n));
-  const staffSel = (sel) => requiredNames(sel).some(staffOnly);
+  return (sel) => requiredNames(sel).some(staffOnly);
+}
+export function customerCss(css, customerText, staffText, scope = STAFF_SCOPE) {
+  const staffSel = staffSelTest(customerText, staffText, scope);
   let kept = 0, dropped = 0, droppedBytes = 0;
   const droppedSelectors = [];
   const GROUP = /^@(?:media|supports|layer|container|document)\b/i;

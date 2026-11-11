@@ -122,7 +122,7 @@ test('before the database update the merge says so instead of failing', async ({
   expect(await page.evaluate(`S.undoStack.length`)).toBe(0);
 });
 
-test('Front Desk has no Duplicates tab', async ({ page }) => {
+test('Front desk has no Duplicates tab', async ({ page }) => {
   await boot(page);
   await page.evaluate(`setStaffRole('admin');setStaffTab('customers');setCustomersTab('duplicates')`);
   await expect(page.locator('#tab-community .filter-pill', { hasText: 'Duplicates' })).toHaveCount(1);

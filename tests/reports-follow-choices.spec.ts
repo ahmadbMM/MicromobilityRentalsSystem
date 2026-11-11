@@ -116,7 +116,7 @@ test.describe('the session exports', () => {
   test('the close-out prints the rider count as a count', async ({ page }) => {
     await boot(page, { queue_entries: rows });
     const html = await page.evaluate(printed(`S._ctSession='s0';printCloseout()`)) as string;
-    expect(html).toMatch(/Total Riders<\/span><strong[^>]*>\d+<\/strong>/);
+    expect(html).toMatch(/Total riders<\/span><strong[^>]*>\d+<\/strong>/);
   });
 
   test('an old split whose card slice also paid add-ons does not print a negative cash figure', async ({ page }) => {

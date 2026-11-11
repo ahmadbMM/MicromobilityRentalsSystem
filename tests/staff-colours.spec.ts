@@ -47,12 +47,14 @@ test.describe('@staff:bookings Bookings in colour', () => {
   test('each ride chip wears its event’s look, with its mark', async ({ page }) => {
     await bookings(page);
     const chip = (id: string) => `#sess-strip .sess-summary-chip[data-on-click*='"setSfSession","${id}"']`;
-    await expect(page.locator(chip(J))).toHaveClass(/\bth-jcc\b/);
-    expect(await bg(page, chip(J))).toBe('rgb(6, 52, 111)'); // the circuit's navy
-    // every card leads with the kind's mark and its name, the circuit's too (2026-11-10), white on the navy
+    // staff round s10 (item 23): the circuit's navy card is a plain Soft Solid card, white with a 3px edge in its state,
+    // its kind's mark and its name in ink
+    await expect(page.locator(chip(J))).toHaveClass(/\bth-plain\b/);
+    expect(await bg(page, chip(J))).toBe('rgb(255, 255, 255)');
     await expect(page.locator(`${chip(J)} .smk.ev-jcc`)).toHaveCount(1);
     await expect(page.locator(`${chip(J)} .sess-chip-event`)).toHaveText('Jeddah Corniche Circuit');
-    expect(await page.locator(`${chip(J)} .sess-chip-event`).evaluate((el) => getComputedStyle(el).color)).toBe('rgb(255, 255, 255)');
+    expect(await page.locator(`${chip(J)} .sess-chip-event`).evaluate((el) => getComputedStyle(el).color)).toBe('rgb(17, 21, 18)');
+    expect(await page.locator(chip(J)).evaluate((el) => getComputedStyle(el).borderInlineStartWidth)).toBe('3px');
     await expect(page.locator(`#sess-strip img.sf-mark`)).toHaveCount(0);
     for (const id of ['2099-10-24', '2099-10-22-pm']) {
       await expect(page.locator(chip(id))).toHaveClass(/\bth-comm\b/);
@@ -65,14 +67,14 @@ test.describe('@staff:bookings Bookings in colour', () => {
     await expect(page.locator(chip('2099-10-17-rh'))).toHaveClass(/\bth-runher\b/);
     expect(await img(page, chip('2099-10-17-rh'))).toContain('radial-gradient');
     await expect(page.locator(`${chip('2099-10-17-rh')} .smk.ev-runher`)).toHaveCount(1);
-    await expect(page.locator(chip('2099-09-23-nd'))).toHaveClass(/\bth-snd96\b/);
-    expect(await bg(page, chip('2099-09-23-nd'))).toBe('rgb(0, 38, 40)');
+    await expect(page.locator(chip('2099-09-23-nd'))).toHaveClass(/\bth-plain\b/);
+    expect(await bg(page, chip('2099-09-23-nd'))).toBe('rgb(255, 255, 255)');
     await expect(page.locator(chip('2099-10-28-ev'))).toHaveClass(/\bth-event\b/);
     await expect(page.locator(`${chip('2099-10-28-ev')} .smk.ev-event`)).toHaveCount(1);
-    // the picked ride is ringed in its own accent, and hovering keeps the look
-    expect(await page.locator(chip(J)).evaluate((el) => getComputedStyle(el).boxShadow)).toContain('rgb(14, 151, 213)');
+    // the picked ride is ringed, and hovering keeps the look
+    expect(await page.locator(chip(J)).evaluate((el) => getComputedStyle(el).boxShadow)).toContain('0px 0px 0px 2px');
     await page.locator(chip('2099-09-23-nd')).hover();
-    expect(await bg(page, chip('2099-09-23-nd'))).toBe('rgb(0, 38, 40)');
+    expect(await bg(page, chip('2099-09-23-nd'))).toBe('rgb(255, 255, 255)');
     // the Sessions view is an agenda (2026-11-10): plain rows, each with its kind's mark, no card themes
     await page.evaluate(`S.queueView='sessions';renderStaffQueue()`);
     await expect(page.locator(`#tab-sessions .sess-lc.sess-ag`)).toHaveCount(6);
@@ -97,7 +99,7 @@ test.describe('@staff:bookings Bookings in colour', () => {
         const a = lum(getComputedStyle(el).color), b = lum(getComputedStyle(chip).backgroundColor);
         return { th: [...chip.classList].find((k) => k.startsWith('th-')) || '', ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) };
       }));
-      expect(got.map((x) => x.th)).toEqual(expect.arrayContaining(['th-jcc', 'th-snd96', 'th-comm', 'th-runher', 'th-event']));
+      expect(got.map((x) => x.th)).toEqual(expect.arrayContaining(['th-plain', 'th-comm', 'th-runher', 'th-event']));
       for (const x of got) expect(x.ratio, x.th).toBeGreaterThanOrEqual(4.5);
     });
   }
@@ -107,12 +109,14 @@ test.describe('@staff:bookings Bookings in colour', () => {
     const tr = (name: string) => `#tab-queue .queue-table-desktop-wrap tbody tr:has-text("${name}")`;
     const want: [string, string, string, string][] = [
       ['Waiting Rider', 'row-waiting', 'rgb(255, 255, 255)', 'st-waiting'],
-      ['Bike Held', 'row-reserved', 'rgb(251, 245, 249)', 'st-reserved'], // the brand's plum wash since round two (was the framework violet's)
-      ['To Hold', 'row-toreserve', 'rgb(252, 244, 255)', 'st-toreserve'],
-      ['Waitlisted Rider', 'row-waitlist', 'rgb(255, 246, 235)', 'st-waitlist'],
-      ['On The Bike', 'row-active', 'rgb(255, 250, 235)', 'st-active'],
-      ['Done Paid', 'row-done-paid', 'rgb(238, 252, 243)', 'st-done'],
-      ['Done Unpaid', 'row-done', 'rgb(238, 252, 243)', 'st-done'],
+      // D6 (the owner, staff round s10): a row is tinted only for an exception (a no-show, a cancellation, an overdue
+      // ride); the others keep their 3px edge and their pill on a plain row
+      ['Bike Held', 'row-reserved', 'rgb(255, 255, 255)', 'st-reserved'],
+      ['To Hold', 'row-toreserve', 'rgb(255, 255, 255)', 'st-toreserve'],
+      ['Waitlisted Rider', 'row-waitlist', 'rgb(255, 255, 255)', 'st-waitlist'],
+      ['On The Bike', 'row-active', 'rgb(255, 255, 255)', 'st-active'],
+      ['Done Paid', 'row-done-paid', 'rgb(255, 255, 255)', 'st-done'],
+      ['Done Unpaid', 'row-done', 'rgb(255, 255, 255)', 'st-done'],
       ['No Show Rider', 'row-noshow-cancel', 'rgb(254, 242, 242)', 'st-noshow'],
     ];
     for (const [name, cls, colour, badge] of want) {
@@ -132,7 +136,7 @@ test.describe('@staff:bookings Bookings in colour', () => {
     expect(await bg(page, `${tr('Waiting Rider')} .pay-toggle.pending`)).toBe('rgb(254, 243, 199)');
     expect(await bg(page, `${tr('House Rider')} .pay-toggle.house`)).toBe('rgb(227, 251, 246)');
     // the figures above the roster are the key: the live count's Not arrived and On bike (since 2026-10-27, when the
-    // strip's Expected and On Bike, the same numbers, went) and the strip's Completed
+    // strip's Expected and On bike, the same numbers, went) and the strip's Completed
     const mark = (sel: string) => page.evaluate(`getComputedStyle(document.querySelector('${sel}'),'::before').backgroundColor`);
     expect(await mark('#q-live-count .q-lc-waiting')).toBe('rgb(255, 255, 255)');
     expect(await mark('#q-live-count .q-lc-active')).toBe('rgb(212, 160, 23)');
@@ -157,10 +161,10 @@ test.describe('@staff:bookings Bookings in colour', () => {
     expect(await member.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
   });
 
-  test('on a phone the cards take the same colours and edge', async ({ page }) => {
+  test('on a phone the cards take the same colours and edge (D6: a tint only for an exception)', async ({ page }) => {
     await bookings(page, 390);
     const card = (name: string) => `#tab-queue .queue-mobile-view .q-card:has-text("${name}")`;
-    for (const [name, colour] of [['Waiting Rider', 'rgb(255, 255, 255)'], ['On The Bike', 'rgb(255, 250, 235)'], ['Done Paid', 'rgb(238, 252, 243)'], ['No Show Rider', 'rgb(254, 242, 242)']]) {
+    for (const [name, colour] of [['Waiting Rider', 'rgb(255, 255, 255)'], ['On The Bike', 'rgb(255, 255, 255)'], ['Done Paid', 'rgb(255, 255, 255)'], ['No Show Rider', 'rgb(254, 242, 242)']]) {
       expect(await bg(page, card(name)), name).toBe(colour);
       expect(await page.locator(card(name)).first().evaluate((el) => getComputedStyle(el).boxShadow), name).toContain('inset');
     }

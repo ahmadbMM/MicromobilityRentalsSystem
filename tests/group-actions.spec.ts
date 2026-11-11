@@ -106,16 +106,16 @@ test('the party menu undoes the check-in of everyone riding, and marks the rest 
   const writes = patches(page);
   const menuBtn = vis(page, '#tab-queue .rq-more[aria-haspopup="menu"]').first();
   await menuBtn.click();
-  await page.getByRole('menuitem', { name: 'Undo Check-in (2)' }).click();
+  await page.getByRole('menuitem', { name: 'Undo check-in (2)' }).click();
   await expect(page.locator('#confirm-modal')).toContainText('Party One');
   await expect(page.locator('#confirm-modal')).toContainText('Party Two');
-  await page.locator('#confirm-modal button', { hasText: 'Undo Check-in' }).click();
+  await page.locator('#confirm-modal button', { hasText: 'Undo check-in' }).click();
   await expect.poll(() => writes.filter(w => w.body.status === 'waiting').map(w => w.id).sort()).toEqual(['p1', 'p2']);
 
   await vis(page, '#tab-queue .rq-more[aria-haspopup="menu"]').first().click();
-  await page.getByRole('menuitem', { name: 'No-Show (1)' }).click();         // only the rider still waiting
+  await page.getByRole('menuitem', { name: 'No-show (1)' }).click();         // only the rider still waiting
   await expect(page.locator('#confirm-modal')).toContainText('Party Three');
-  await page.locator('#confirm-modal button', { hasText: 'No-Show' }).click();
+  await page.locator('#confirm-modal button', { hasText: 'No-show' }).click();
   await expect.poll(() => writes.some(w => w.id === 'p3' && w.body.status === 'noshow')).toBe(true);
 });
 
@@ -148,7 +148,7 @@ test('the Petromin registrations have their own page in Queue, opened from a log
   // The folded party: Return all and Undo check-in, without opening it.
   const party = page.locator('#pm-host tbody tr', { hasText: 'MMP-101' });
   await expect(party.getByRole('button', { name: 'Return all (2)' })).toBeVisible();
-  await expect(party.getByRole('button', { name: 'Undo Check-in (2)' })).toBeVisible();
+  await expect(party.getByRole('button', { name: 'Undo check-in (2)' })).toBeVisible();
   const regWrites: string[] = [];
   page.on('request', r => { if (r.method() === 'PATCH' && /rider_registrations/.test(r.url())) regWrites.push(r.url()); });
   await party.getByRole('button', { name: 'Return all (2)' }).click();

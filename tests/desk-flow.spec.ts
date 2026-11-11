@@ -77,15 +77,15 @@ test('Confirm on the check-in modal says what it records for the payment', async
 });
 
 // The Give bike step is off (GIVE_BIKE_STEP, the owner 2026-10-12): checked in is on a bike, number or not.
-test('a checked-in rider without a bike reads "On Bike" and is returned, not given a bike', async ({ page }) => {
+test('a checked-in rider without a bike reads "On bike" and is returned, not given a bike', async ({ page }) => {
   await queue(page);
   const rows = page.locator('.queue-table tbody tr, .q-card');
   const bikeless = rows.filter({ hasText: 'Bikeless Rider' }).first();
-  await expect(bikeless).toContainText('On Bike');
+  await expect(bikeless).toContainText('On bike');
   await expect(bikeless).not.toContainText('Needs bike');
   await expect(bikeless.locator('.give-bike-btn')).toHaveCount(0);
   await expect(page.locator('#tab-queue .filter-pill', { hasText: 'Hand-over' })).toHaveCount(0);
-  await expect(rows.filter({ hasText: 'Paid Rider' }).first()).toContainText('On Bike');
+  await expect(rows.filter({ hasText: 'Paid Rider' }).first()).toContainText('On bike');
 });
 
 // The live count's Not arrived is the filter the Expected chip was (one bar of the night's figures, 2026-10-27);
@@ -115,8 +115,8 @@ test('a walk-up can be added and checked in in one go', async ({ page }) => {
   await page.locator('#wi-name').fill('Walk Up');
   await page.locator('#wi-sess').selectOption(D);
   await page.locator('#walkin-modal [data-wi-type="Road"]').click(); // a type is picked (2026-10-28: none starts pressed)
-  // one rider: the payment and Check In are in the form, no second dialog (staff round s10, item 9; tests/s10-writes.spec.ts)
-  await page.locator('#walkin-modal .modal-footer .btn-primary', { hasText: 'Check In' }).click();
+  // one rider: the payment and Check in are in the form, no second dialog (staff round s10, item 9; tests/s10-writes.spec.ts)
+  await page.locator('#walkin-modal .modal-footer .btn-primary', { hasText: 'Check in' }).click();
   await expect.poll(() => page.evaluate(`(getQueue().find(e=>e.name==='Walk Up')||{}).status`)).toBe('active');
   await expect(page.locator('#ci-confirm')).toHaveCount(0);
 });
@@ -129,7 +129,7 @@ test('bulk payment and bulk check-in leave an undo', async ({ page }) => {
   await page.evaluate(`doUndo()`);
   await expect.poll(() => writes.some((w) => w.id === 'w1' && w.body.paid === false)).toBe(true);
   await page.evaluate(`S.sfSelected=['w1'];bulkSfCheckin()`);
-  await expect(page.locator('#topbar-right .undo-btn')).toHaveAttribute('title', /Undo Check-in · 1/);
+  await expect(page.locator('#topbar-right .undo-btn')).toHaveAttribute('title', /Undo check-in · 1/);
 });
 
 test('On the house asks the operator PIN, like a void', async ({ page }) => {

@@ -91,7 +91,7 @@ test.describe('@staff:sessions the Sessions section, second round', () => {
   test('New session opens clean whatever an earlier form left', async ({ page }) => {
     await open(page);
     await page.evaluate(`S.showAddSession=false;S.newSessEvent='event';S.newSessTitle='Left behind';S.newSessPrice='99';S.newSessDays=[2,4]`);
-    await page.locator('#tab-sessions .section-header').getByRole('button', { name: /New Session/ }).click();
+    await page.locator('#tab-sessions .section-header').getByRole('button', { name: /New session/ }).click();
     await expect(page.locator('#sess-add-form')).toBeVisible();
     expect(await page.evaluate(`[S.newSessEvent,S.newSessTitle,S.newSessPrice,S.newSessDays.length]`)).toEqual(['jcc', '', '', 0]);
   });

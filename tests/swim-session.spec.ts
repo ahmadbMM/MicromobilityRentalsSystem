@@ -52,7 +52,7 @@ test('choosing it skips the riders step — there is nothing to ask', async ({ p
   await asMember(page);
   await page.evaluate(`S.selSession='${SWIM}';regNextFromSession()`);
   expect(await page.evaluate('S.regStep')).toBe(3);            // straight to the review, waiver on it
-  await expect(page.locator('#tab-register')).not.toContainText('Bike Type');
+  await expect(page.locator('#tab-register')).not.toContainText('Bike type');
   await expect(page.locator('#tab-register')).not.toContainText('Height');
 });
 
@@ -126,7 +126,7 @@ test('staff checking a swimmer in are offered no bike', async ({ page }) => {
   const html = await page.evaluate(`document.getElementById('checkin-modal').innerHTML`) as string;
   expect(html).not.toContain('openModal(');       // no route into the bike picker
   expect(html).toContain('ci-out-checkin');        // but they can still be marked as here:
-  expect(html).toContain('confirmCheckinOutcome'); // Check In is chosen, and Confirm applies it
+  expect(html).toContain('confirmCheckinOutcome'); // Check in is chosen, and Confirm applies it
 });
 
 test('the swim session carries its own identity colour, not the circuit blue', async ({ page }) => {

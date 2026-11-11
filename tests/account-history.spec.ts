@@ -70,7 +70,7 @@ test('the Accounts row shows what is coming up and opens it over the rider\'s pa
   await expect(modal(page).locator('.ah-kpi-v')).toHaveText(['1', '1', '1', 'SAR 115']); // done, no-show, cancelled, paid
 
   // Today: out on a bike now.
-  await expect(cards(page).nth(0).locator('.status-badge')).toHaveText('On Bike');
+  await expect(cards(page).nth(0).locator('.status-badge')).toHaveText('On bike');
   await expect(cards(page).nth(0)).toContainText('Road 07');
   // Ahead, soonest first: the party of two, then the Petromin waitlist place.
   await expect(cards(page).nth(1).locator('.ah-bk-party')).toHaveText('2 riders');
@@ -80,7 +80,7 @@ test('the Accounts row shows what is coming up and opens it over the rider\'s pa
   // Then the history, newest first, with what happened to each.
   await expect(cards(page).nth(3).locator('.status-badge')).toHaveText('Complete');
   await expect(cards(page).nth(3)).toContainText('★ 9/10');
-  await expect(cards(page).nth(4).locator('.status-badge')).toHaveText('No-Show');
+  await expect(cards(page).nth(4).locator('.status-badge')).toHaveText('No-show');
   await expect(cards(page).nth(5).locator('.status-badge')).toHaveText('Cancelled by Customer');
   // Only bookings still to be ridden can be edited; another rider's never shows.
   await expect(modal(page).locator('.ah-edit')).toHaveCount(4);

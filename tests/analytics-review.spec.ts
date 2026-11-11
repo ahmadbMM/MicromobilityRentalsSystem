@@ -93,7 +93,7 @@ test('the lapsed rider WhatsApp link carries the full international number', asy
   expect(href).toContain('https://wa.me/966512345678?');
 });
 
-test('This Month arrows compare the month so far with the same days of last month', async ({ page }) => {
+test('This month arrows compare the month so far with the same days of last month', async ({ page }) => {
   const today = ksaToday(), day = Number(today.slice(8, 10));
   const thisMonth = today.slice(0, 7) + '-01', lastMonth = addDays(thisMonth, -1).slice(0, 7) + '-01';
   const dimPrev = Number(addDays(thisMonth, -1).slice(8, 10));
@@ -113,7 +113,7 @@ test('This Month arrows compare the month so far with the same days of last mont
     ],
     setup: "S.analyticsRange='month';S.anSession='all';S.anView='ridership';",
   });
-  const badge = page.locator('#tab-analytics .analytics-kpi-label', { hasText: 'Number of Rides' }).locator('.an-delta'); // one ride tile since 2026-10-29 (S08-analytics-18)
+  const badge = page.locator('#tab-analytics .analytics-kpi-label', { hasText: 'Number of rides' }).locator('.an-delta'); // one ride tile since 2026-10-29 (S08-analytics-18)
   await expect(badge).toHaveText(/0%/);
 });
 
@@ -127,7 +127,7 @@ test('revenue per ride divides the rides\' fares, not money paid ahead for later
     ],
     setup: "S.analyticsRange='all';S.anSession='all';",
   });
-  const v = await page.locator('#tab-analytics .hl-item', { hasText: 'Revenue per Ride' }).locator('.hl-value').textContent();
+  const v = await page.locator('#tab-analytics .hl-item', { hasText: 'Revenue per ride' }).locator('.hl-value').textContent();
   expect(v).toMatch(/^SAR 100(?!\.)/); // one money format since 2026-10-09: cents only when there are any (was SAR 100.00)
 });
 
@@ -151,7 +151,7 @@ test('the live board counts held places, not every row that was not cancelled', 
   // 4: the two waiting, the one on a bike and the waitlisted row, which the server counts against
   // capacity (_capacity_guard) and so takes a place customers can no longer book; removed, no-show
   // and cancelled rows hold none. Capped at the capacity, so a full night never reads 53/40 (2026-10-04).
-  await expect(page.locator('#tab-analytics .chart-card').first()).toContainText('4/12');
+  await expect(page.locator('#tab-analytics .an-live-card') /* the Today band, the Dashboard's tiles since s10 */).toContainText('4/12');
 });
 
 test('the growth funnel bars have width', async ({ page }) => {

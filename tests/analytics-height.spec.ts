@@ -26,7 +26,7 @@ test('analytics: session picker, rider-heights card, and the per-session report 
 
   // rider-heights card present with the average (185+158+172)/3 = 172
   const html = await page.evaluate(`document.getElementById('tab-analytics').innerHTML`);
-  expect(html).toContain('Rider Heights');
+  expect(html).toContain('Rider heights');
   expect(html).toContain('172 cm');
 
   // session picker exists with both sessions + "All sessions"

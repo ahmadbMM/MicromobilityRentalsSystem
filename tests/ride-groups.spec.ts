@@ -93,7 +93,7 @@ test('the Saturday check-in asks the type and the group, with Cancel, Waiting an
   const box = page.locator('#checkin-modal .ci-sat');
   await expect(box).toBeVisible();
   await expect(box.locator('.ci-outcomes, #ci-bike, #ci-money')).toHaveCount(0); // no outcomes, no bike field, no money
-  await expect(box.locator('.modal-footer button')).toHaveText(['Cancel', 'Save, check in later', 'Check In']);
+  await expect(box.locator('.modal-footer button')).toHaveText(['Cancel', 'Save, check in later', 'Check in']);
   // Never greyed out in advance (staff round s10, item 6): tapped without a group, the dialog says so and nothing is written
   await expect(box.locator('#ci-confirm')).toBeEnabled();
   await expect(box.locator('#ci-waiting')).toBeEnabled();

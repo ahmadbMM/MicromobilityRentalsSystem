@@ -79,7 +79,7 @@ test('offers no undo, and the dialog says so', async ({ page }) => {
 
 
 
-test('Front Desk never sees the button', async ({ page }) => {
+test('Front desk never sees the button', async ({ page }) => {
   await openEditor(page, [booking('b1', 'c1', 'done')], false);
   await expect(page.getByRole('button', { name: /Delete account/i })).toHaveCount(0);
 });

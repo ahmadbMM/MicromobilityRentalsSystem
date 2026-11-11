@@ -6,7 +6,7 @@ const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' }
 // the scanner on this check-in: each ticket scanned joins the run the way Scan several builds one
 // - steps, the next rider opening by itself - and the camera stays up for the next; it is a list
 // held in this tab, so nothing is written to group_id and each rider keeps their own payment and
-// bike. "To staff list" parks the rider on the Staff Managed Waitlist instead of a bike (the row
+// bike. "To staff list" parks the rider on the Staff managed waitlist instead of a bike (the row
 // menu's button, from inside the modal) and the run moves on without them.
 const A1 = 'a1a1a1a1-0000-4000-8000-000000000001', B2 = 'b2b2b2b2-0000-4000-8000-000000000002';
 const E5 = 'e5e5e5e5-0000-4000-8000-000000000005';

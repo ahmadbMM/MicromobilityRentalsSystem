@@ -47,7 +47,7 @@ async function open(page: Page, extra: Record<string, unknown> = {}) {
 const panel = (page: Page) => page.locator('#tab-catalog');
 const row = (v: unknown) => (Array.isArray(v) ? v[0] : v) as Record<string, unknown>;
 
-test('admins find it under Website; Front Desk does not', async ({ page }) => {
+test('admins find it under Website; Front desk does not', async ({ page }) => {
   await open(page);
   const item = page.locator('#staff-tab-nav .tab-btn[data-stab="catalog"]');
   await expect(item).toHaveText('Bikes catalog');

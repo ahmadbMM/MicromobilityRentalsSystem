@@ -43,7 +43,7 @@ test.describe('protein sub-categories', () => {
     expect(top).toEqual(expect.arrayContaining(['__all__', '__sec__supp']));
     expect(top).not.toContain('__grp__ProteinSnacks');
 
-    // Supplements & Beverages: items render directly in category sections -
+    // Supplements & beverages: items render directly in category sections -
     // no drill-in cards for Protein Snacks or its sub-types.
     const supp = await pickerCards(page, '__sec__supp');
     expect(supp.map((c) => c.cat)).not.toContain('__grp__ProteinSnacks');
@@ -113,7 +113,7 @@ test.describe('protein sub-categories', () => {
     expect(top).toEqual(expect.arrayContaining(['__all__', '__sec__supp', '__sec__equip']));
     expect(top).not.toContain('__grp__ProteinSnacks');
     expect(top).not.toContain('Helmet');
-    // Supplements & Beverages: its items directly (no group cards), none of the equipment
+    // Supplements & beverages: its items directly (no group cards), none of the equipment
     const suppCards = (await pickerCards(page, '__sec__supp')).map((c) => c.cat);
     expect(suppCards).not.toContain('__grp__ProteinSnacks');
     await expect(page.locator('#tab-cashier')).toContainText('Bar');

@@ -59,7 +59,7 @@ test.describe('the printed reports', () => {
     expect(cssv).not.toBeNull();
     const vars = JSON.parse(cssv![1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
     expect(vars['--rp-pg']).toBe('"Page " counter(page) " of " counter(pages)');
-    expect(vars['--rp-run']).toMatch(/^"Session Report · Sunday/);
+    expect(vars['--rp-run']).toMatch(/^"Session report · Sunday/);
     // The sheet is drawn with them on <html>, where the page margins read them.
     const p = await page.context().newPage();
     await p.goto('/robots.txt');

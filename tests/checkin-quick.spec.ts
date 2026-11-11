@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb, checkinAsRow } from './helpers/supabase';
 
-// Check In opens the quick modal: staff confirm payment (paid or not) and the bike TYPE —
+// Check in opens the quick modal: staff confirm payment (paid or not) and the bike TYPE —
 // no specific bike. The classic picker stays one tap away via "Assign specific bike…".
 test('quick check-in confirms payment + bike type without picking a bike', async ({ page }) => {
   const sessions = [{ id: 's0', day: 'Friday', session_date: '2099-02-10', capacity: 12, status: 'open', created_at: 1 }];

@@ -61,7 +61,7 @@ test.describe('@staff:analytics b2-f numbers safe to decide on', () => {
     expect(r.device).toBeCloseTo(70, 6); // Growth's own target on this device, before the team has one
   });
 
-  test('This Month: the share of the month\'s target and the pace; a tile with no target of its own has no pill', async ({ page }) => {
+  test('This month: the share of the month\'s target and the pace; a tile with no target of its own has no pill', async ({ page }) => {
     const today = ksa(0), [y, m, d] = today.split('-').map(Number), dim = new Date(Date.UTC(y, m, 0)).getUTCDate();
     await show(page, {
       sessions: [sess('t1', today)],
@@ -123,7 +123,7 @@ test.describe('@staff:analytics b2-f numbers safe to decide on', () => {
     }, 'operations');
     const now = await page.evaluate(`_kpiNow()`) as Record<string, number>;
     expect(now).toMatchObject({ rides: 3, occupancy: 50, revenue: 200, till: 30, sales: 230 });
-    await expect(kpi(page, 'Avg Occupancy').locator('.analytics-kpi-value')).toHaveText('50%'); // the same number, one definition
+    await expect(kpi(page, 'Avg occupancy').locator('.analytics-kpi-value')).toHaveText('50%'); // the same number, one definition
     await page.evaluate(`S.staffOptions={biz:{kpi_targets:{revenue:400,till:60,sales:1000,occupancy:80}}};setStaffTab('dashboard')`);
     const card = page.locator('.kpi-card');
     await expect(card.locator('[data-kpi]')).toHaveCount(4);
@@ -158,12 +158,12 @@ test.describe('@staff:analytics b2-f numbers safe to decide on', () => {
     await expect(kpi(page, 'Billed to companies').locator('.analytics-kpi-value')).toContainText('SAR 50');
     await expect(kpi(page, 'Billed to companies').locator('.analytics-kpi-sub')).toHaveText('Rides on a company invoice: 1');
     await expect(kpi(page, 'Collected').first().locator('.analytics-kpi-sub')).toHaveText('39% collection rate'); // 100 of 257.5
-    await expect(kpi(page, 'Avg / Session').locator('.analytics-kpi-value')).toContainText('SAR 103'); // our 307.5 over 3 sessions held
-    const byDay = tab(page).locator('.chart-card', { hasText: 'Revenue by Day of Week' });
+    await expect(kpi(page, 'Avg / session').locator('.analytics-kpi-value')).toContainText('SAR 103'); // our 307.5 over 3 sessions held
+    const byDay = tab(page).locator('.chart-card', { hasText: 'Revenue by day of week' });
     await expect(byDay.locator('.analytics-bar-value')).toHaveCount(1);
     await expect(byDay.locator('.analytics-bar-value')).toContainText('SAR 100'); // the organiser's 150 is not ours
     await page.evaluate(`setAnView('overview')`);
-    await expect(tab(page).locator('.hl-item', { hasText: 'Revenue per Ride' }).locator('.hl-value')).toContainText('SAR 76.88'); // 307.5 over our 4 rides
+    await expect(tab(page).locator('.hl-item', { hasText: 'Revenue per ride' }).locator('.hl-value')).toContainText('SAR 76.88'); // 307.5 over our 4 rides
     // the month's forecast books no organiser money for the race still to come
     const fc = await page.evaluate(`(()=>{S.sessions=[{id:'u1',session_date:'2026-09-20',ride_kind:'vlap',event_kind:'community',capacity:50,status:'open'},{id:'u2',session_date:'2026-09-21',capacity:10,status:'open'}];
       return _anMonthForecast(S.sessions,[{id:'r1',sessionId:'u1',status:'waiting',paid:false,price:150},{id:'r2',sessionId:'u1',status:'waiting',paid:true,pay_method:'transfer',price:150},{id:'r3',sessionId:'u2',status:'waiting',paid:false,price:60}],new Date('2026-09-15T09:00:00Z'));})()`) as Record<string, number>;
@@ -187,14 +187,14 @@ test.describe('@staff:analytics b2-f numbers safe to decide on', () => {
         { id: 't1', session_id: 't', session_date: today, status: 'waiting', paid: false }, { id: 't2', session_id: 't', session_date: today, status: 'waiting', paid: false },
       ],
     }, 'operations');
-    await expect(kpi(page, 'Sessions Held').locator('.analytics-kpi-value')).toHaveText('1');
-    await expect(kpi(page, 'Avg Occupancy').locator('.analytics-kpi-value')).toHaveText('30%');
-    await expect(kpi(page, 'No-Show Rate').locator('.analytics-kpi-value')).toHaveText('25%');
-    await expect(kpi(page, 'Cancellation Rate').locator('.analytics-kpi-value')).toHaveText('20%'); // 1 of 5 on the night held, not 3 of 10
+    await expect(kpi(page, 'Sessions held').locator('.analytics-kpi-value')).toHaveText('1');
+    await expect(kpi(page, 'Avg occupancy').locator('.analytics-kpi-value')).toHaveText('30%');
+    await expect(kpi(page, 'No-show rate').locator('.analytics-kpi-value')).toHaveText('25%');
+    await expect(kpi(page, 'Cancellation rate').locator('.analytics-kpi-value')).toHaveText('20%'); // 1 of 5 on the night held, not 3 of 10
     await expect(kpi(page, 'Avg fill rate').locator('.analytics-kpi-value')).toHaveText('40%'); // 4 places booked of 10, the no-show too
     await expect(tab(page).locator('.an-up-line').first()).toHaveText('Sessions to come: 2, 6 of 18 places booked');
     await page.evaluate(`setAnView('ridership')`);
-    await expect(kpi(page, 'Completion Rate').locator('.analytics-kpi-value')).toHaveText('75%');
+    await expect(kpi(page, 'Completion rate').locator('.analytics-kpi-value')).toHaveText('75%');
     await page.evaluate(`setAnView('growth')`);
     const rows = tab(page).locator('.an-funnel-row');
     await expect(rows).toHaveCount(4);
@@ -262,8 +262,8 @@ test.describe('@staff:analytics b2-f numbers safe to decide on', () => {
         { id: 'o2', session_id: 'old', session_date: '2026-07-01', status: 'done', paid: false }, // not one (the owner's rule)
       ],
     }, 'ridership');
-    await expect(kpi(page, 'Number of Rides').locator('.analytics-kpi-value')).toHaveText('1');
-    await expect(tab(page).locator('.analytics-kpi-label', { hasText: 'Completed Rides' })).toHaveCount(0);
+    await expect(kpi(page, 'Number of rides').locator('.analytics-kpi-value')).toHaveText('1');
+    await expect(tab(page).locator('.analytics-kpi-label', { hasText: 'Completed rides' })).toHaveCount(0);
     await page.evaluate(`setAnView('operations')`);
     await expect(tab(page).locator('table.analytics-trend-table[data-nosort] tbody tr').first().locator('td').nth(2)).toHaveText('1 / 10');
   });

@@ -54,7 +54,7 @@ test.describe('@staff:sessions a ride moved to another date takes its announce t
     await page.locator('#es-date').fill('2099-10-31');
     await expect(page.locator('#es-reveal')).toHaveValue('2099-10-30T20:00'); // a week on, the same Riyadh time
     await expect(page.locator('#es-reveal-note')).toContainText('Breakfast spot hidden until');
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => revealPatch(sw))
       .toMatchObject({ url: expect.stringContaining('id=eq.2099-10-31'), body: { reveal_at: '2099-10-30T17:00:00.000Z' } });
     await page.waitForFunction('S.editSessionId===null&&S.undoStack.length>0');
@@ -76,7 +76,7 @@ test.describe('@staff:sessions a ride moved to another date takes its announce t
     await page.locator('#es-reveal').fill('2099-10-29T18:00');
     await page.locator('#es-date').fill('2099-10-31');
     await expect(page.locator('#es-reveal')).toHaveValue('2099-10-29T18:00'); // the staffer's own time stays put
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => revealPatch(sw)).toMatchObject({ body: { reveal_at: '2099-10-29T15:00:00.000Z' } });
   });
 
@@ -87,7 +87,7 @@ test.describe('@staff:sessions a ride moved to another date takes its announce t
     await expect(page.locator('#es-reveal')).toHaveValue('');
     await page.locator('#es-date').fill('2099-10-31');
     await expect(page.locator('#es-reveal')).toHaveValue('');
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => sw.find((x) => x.method === 'POST') || null).toMatchObject({ body: { id: '2099-10-31', reveal_at: null } });
     await page.waitForFunction('S.editSessionId===null');
     expect(revealPatch(sw)).toBeNull();
@@ -124,13 +124,13 @@ test.describe('@staff:bookings moving riders onto Run for Her asks what adding t
     await modal.locator('#ge-sess').selectOption(RUN);
     await expect(modal.locator('.run-km-field')).toBeVisible();
     await expect(modal.locator('#ge-r-name-1')).toHaveValue('Nora Saleh'); // what was typed stays
-    await modal.getByRole('button', { name: 'Save Changes' }).click();
+    await modal.getByRole('button', { name: 'Save changes' }).click();
     await expect(modal.locator('.run-km-field .field-err')).toBeVisible();
     await expect.poll(() => said(page)).toContain('Pick 3 km or 5 km.');
     expect(qw).toHaveLength(0);
     await modal.locator('.run-km-field [data-km="3"]').click();
     await expect(modal.locator('.run-km-field [data-km="3"]')).toHaveAttribute('aria-pressed', 'true');
-    await modal.getByRole('button', { name: 'Save Changes' }).click();
+    await modal.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => qw.filter((x) => x.method === 'PATCH').length).toBe(2);
     for (const id of ['e1', 'e2']) expect(patchesOf(qw, id)[0]).toMatchObject({ session_id: RUN, run_km: 3, type_preference: 'None' });
     expect(patchesOf(qw, 'e2')[0]).toMatchObject({ name: 'Nora Saleh' });
@@ -148,7 +148,7 @@ test.describe('@staff:bookings moving riders onto Run for Her asks what adding t
     const modal = page.locator('#group-edit-modal');
     await modal.locator('#ge-sess').selectOption(RUN);
     await modal.locator('.run-km-field [data-km="5"]').click();
-    await modal.getByRole('button', { name: 'Save Changes' }).click();
+    await modal.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => said(page)).toContain('For runners 18 and over: Lina Haddad');
     await expect(modal.locator('#ge-sess')).toBeVisible(); // the dialog stays open on the refusal
     expect(qw).toHaveLength(0);
@@ -164,7 +164,7 @@ test.describe('@staff:bookings moving riders onto Run for Her asks what adding t
       await page.evaluate(`showBookingEditModal('${id}')`);
       await modal.locator('#be-sess').selectOption(RUN);
       await modal.locator('.run-km-field [data-km="5"]').click();
-      await modal.getByRole('button', { name: 'Save Changes' }).click();
+      await modal.getByRole('button', { name: 'Save changes' }).click();
       if (id === 'b1') {
         await expect.poll(() => said(page)).toContain('For runners 18 and over: Lina Haddad');
         await expect(modal).toBeVisible();

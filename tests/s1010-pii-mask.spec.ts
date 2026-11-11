@@ -114,7 +114,7 @@ test.describe('@staff:bookings s1010 personal data', () => {
     await expect(page.locator('.pii-m')).toHaveCount(0);
   });
 
-  test('an account with can_see_pii_unmasked sees no mask; before the database update a look goes to the Action Log', async ({ page }) => {
+  test('an account with can_see_pii_unmasked sees no mask; before the database update a look goes to the Action log', async ({ page }) => {
     await boot(page, { 'rpc:staff_pii_reveal': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.staff_pii_reveal in the schema cache' } } });
     const posts: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (r.method() === 'POST' && r.url().includes('/rest/v1/staff_actions')) { try { posts.push(r.postDataJSON()); } catch { /* none */ } } });

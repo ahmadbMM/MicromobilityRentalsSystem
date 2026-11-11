@@ -154,7 +154,7 @@ test('offline, a walk-in and a move wait in the desk outbox and go once the conn
   await page.evaluate(`showWalkinModal()`);
   await page.locator('#wi-name').fill('Walk Off');
   await page.locator('#walkin-modal [data-wi-type="Road"]').click();
-  await page.locator('#walkin-modal .modal-footer button', { hasText: 'Add Walk-in' }).click();
+  await page.locator('#walkin-modal .modal-footer button', { hasText: 'Add walk-in' }).click();
   await expect.poll(() => page.evaluate(`_DQ.map(o=>o.kind).join()`)).toBe('walkin');
   await page.evaluate(`staffToWaitlist('w1');0`);
   await expect.poll(() => page.evaluate(`_DQ.map(o=>o.kind).join()`)).toBe('walkin,move');
@@ -191,7 +191,7 @@ test('a walk-in for one rider is one dialog: payment and Check in in the form; a
   await form.locator('[data-wi-pay="pending"]').click();
   await expect(form.locator('[data-wi-pay="pending"]')).toHaveAttribute('aria-pressed', 'true');
   await form.locator('[data-wi-pay="card"]').click();
-  await form.locator('.modal-footer .btn-primary', { hasText: 'Check In' }).click();
+  await form.locator('.modal-footer .btn-primary', { hasText: 'Check in' }).click();
   await expect.poll(() => ci.length).toBe(1);
   expect(ci[0].body).toMatchObject({ p_paid: true, p_pay_method: 'card' });
   await expect(page.locator('#checkin-modal .modal-box')).toHaveCount(0);   // no second dialog

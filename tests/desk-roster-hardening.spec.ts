@@ -239,7 +239,7 @@ test('a saved nationality that is not on the list survives an unrelated save', a
 });
 
 // ── smaller desk rules ───────────────────────────────────────────────────────
-test('Front Desk does not see cancelled Saturday-ride bookings on All sessions', async ({ page }) => {
+test('Front desk does not see cancelled Saturday-ride bookings on All sessions', async ({ page }) => {
   const COMM = '2099-03-07';
   await boot(page, { sessions: [sess(LIVE), sess(COMM, { event_kind: 'community', ride_kind: 'saturday', needs_approval: true })],
     queue_entries: [row('j1', { status: 'cancelled', name: 'Circuit Cancel' }),

@@ -56,11 +56,11 @@ test('the Accounts panel offers the report builder, with columns, summaries, fil
   await expect(m).toContainText('Columns');
   await expect(m).toContainText('Summaries & charts');
   await expect(m).toContainText('Filters');
-  await expect(m).toContainText('PDF / Print');
+  await expect(m).toContainText('PDF / print');
   await expect(m).toContainText('Excel (CSV)');
   await expect(m.locator('#acr-count')).toContainText('4 / 4');
   // every profile field, tag field and history figure is on offer as a column
-  for (const lbl of ['Tags', 'Tag since', 'Age', 'Country of residence', 'Nationality', 'City', 'Joined', 'Rides completed', 'Community rides', 'Upcoming', 'No-Show', 'Last ride', 'Spent (SAR)', 'Default payment'])
+  for (const lbl of ['Tags', 'Tag since', 'Age', 'Country of residence', 'Nationality', 'City', 'Joined', 'Rides completed', 'Community rides', 'Upcoming', 'No-show', 'Last ride', 'Spent (SAR)', 'Default payment'])
     await expect(m).toContainText(lbl);
 });
 
@@ -552,7 +552,7 @@ test('@staff:community Edit default opens the saved default, saves it back and l
   await expect(m.locator('.modal-title')).toHaveText('Edit the default community report');
   await expect(m.locator('[data-rep="cols:spent"]')).toHaveAttribute('aria-pressed', 'false');
   await expect(m.locator('[data-rep="cols:minutes"]')).toHaveAttribute('aria-pressed', 'true');
-  await expect(m.getByRole('button', { name: 'PDF / Print' })).toHaveCount(0);
+  await expect(m.getByRole('button', { name: 'PDF / print' })).toHaveCount(0);
   await m.locator('[data-rep="cols:spent"]').click();
   await m.getByRole('button', { name: 'Save default' }).click();
   await expect(m).toBeHidden();

@@ -25,7 +25,7 @@ test.describe('@staff:analytics weekly revenue per day', () => {
     await expect(items).toHaveCount(2);
     await items.nth(0).locator('.rpi-open').click();
     const tbl = items.nth(0).locator('table.rpi-days');
-    await expect(tbl.locator('thead th')).toHaveText(['Day', 'Completed Rides', 'Fares', 'Till sales', 'Card', 'Cash', 'Total']);
+    await expect(tbl.locator('thead th')).toHaveText(['Day', 'Completed rides', 'Fares', 'Till sales', 'Card', 'Cash', 'Total']);
     await expect(tbl.locator('tbody tr')).toHaveCount(2);
     const last = tbl.locator('tbody tr').nth(1);
     await expect(last).toContainText('SAR 1,200');
@@ -38,6 +38,6 @@ test.describe('@staff:analytics weekly revenue per day', () => {
     // an older week: its days, rides only
     await items.nth(0).locator('.rpi-open').click();
     await items.nth(1).locator('.rpi-open').click();
-    await expect(items.nth(1).locator('table.rpi-days thead th')).toHaveText(['Day', 'Completed Rides']);
+    await expect(items.nth(1).locator('table.rpi-days thead th')).toHaveText(['Day', 'Completed rides']);
   });
 });

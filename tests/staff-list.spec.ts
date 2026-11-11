@@ -353,7 +353,7 @@ test.describe('party-level actions', () => {
   test('checks the whole party in at once', async ({ page }) => {
     await openWithParty(page);
     const patches = watchPatches(page);
-    await page.locator('#mw-host').getByRole('button', { name: /Check In \(3\)/i }).click();
+    await page.locator('#mw-host').getByRole('button', { name: /Check in \(3\)/i }).click();
     await expect.poll(() => patches.filter((p) => p.body.includes('"status":"active"')).length).toBe(3);
   });
 
@@ -376,7 +376,7 @@ test.describe('party-level actions', () => {
     await page.evaluate(`setStaffTab('queue');S.queueView='managed';renderStaffQueue();mwFromBooking('g1')`);
     await expect.poll(async () => page.locator('#mw-host .q-card').count()).toBe(1);
     await expect(page.locator('#mw-host').getByRole('button', { name: /Paid \(/i })).toHaveCount(0);
-    await expect(page.locator('#mw-host').getByRole('button', { name: /Check In \(2\)/i })).toHaveCount(1);
+    await expect(page.locator('#mw-host').getByRole('button', { name: /Check in \(2\)/i })).toHaveCount(1);
   });
 });
 

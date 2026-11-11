@@ -2,8 +2,8 @@ import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // micromobility.sa is controlled from the staff page (owner, 2026-09-24). The Website section
-// reads site_content, edits the Coming Soon screen's words in English and Arabic, shows the
-// Coming Soon switch (it opens the site, after a confirmation), switches the built pages on and off,
+// reads site_content, edits the Coming soon screen's words in English and Arabic, shows the
+// Coming soon switch (it opens the site, after a confirmation), switches the built pages on and off,
 // and keeps a history where any change can be put back. Admin only.
 
 const sessions = [{ id: '2099-05-05', day: 'Tuesday', session_date: '2099-05-05', capacity: 40, status: 'open', created_at: 1, bike_slots: '{"_time":"21:00 - 23:00"}' }];
@@ -26,7 +26,7 @@ async function open(page: Page, extra: Record<string, unknown> = {}) {
 }
 const panel = (page: Page) => page.locator('#tab-website');
 
-test('admins find it in the menu; Front Desk does not', async ({ page }) => {
+test('admins find it in the menu; Front desk does not', async ({ page }) => {
   await open(page);
   const item = page.locator('#staff-tab-nav .tab-btn[data-stab="website"]');
   await expect(item).toHaveText('micromobility.sa');
@@ -49,10 +49,10 @@ test('before the database update it says so, instead of failing', async ({ page 
   await expect(panel(page)).toContainText("isn't set up yet");
 });
 
-test('Coming Soon is on; the switch opens the website only once confirmed', async ({ page }) => {
+test('Coming soon is on; the switch opens the website only once confirmed', async ({ page }) => {
   // Home is built (2026-09-25), so the switch is the one thing that opens the site.
   const writes = await open(page, { site_content: [{ key: 'site.coming_soon', value: true, updated_at: '2026-09-24T10:00:00Z', updated_by: 'migration' }] });
-  await expect(panel(page)).toContainText('Coming Soon is on');
+  await expect(panel(page)).toContainText('Coming soon is on');
   const sw = page.locator('#web-cs-switch');
   await expect(sw).toBeChecked();
   await expect(sw).toBeEnabled();
@@ -66,7 +66,7 @@ test('Coming Soon is on; the switch opens the website only once confirmed', asyn
   expect(writes[0].body).toEqual([{ key: 'site.coming_soon', value: false, updated_by: 'Spec Staff' }]);
 });
 
-test('a refused Coming Soon switch leaves nothing to undo', async ({ page }) => {
+test('a refused Coming soon switch leaves nothing to undo', async ({ page }) => {
   await stubSupabase(page, { sessions, queue_entries: [], bikes: [], site_content: [{ key: 'site.coming_soon', value: true }], site_content_history: [] }, { table: 'site_content', status: 403, once: true });
   await unlockStaff(page);
   await page.goto('/');
@@ -76,10 +76,10 @@ test('a refused Coming Soon switch leaves nothing to undo', async ({ page }) => 
   await page.locator('#confirm-modal').getByRole('button', { name: 'Open the website' }).click();
   await expect(page.locator('#err-bar-el')).toContainText('did not save'); // the error bar, like every refused write
   // it used to log "Website opened" with an undo for a change that never happened
-  expect(await page.evaluate(`S.actionLog.some(l=>typeof l.fn==='function'&&/Website|Coming Soon/i.test(l.label))`)).toBe(false);
+  expect(await page.evaluate(`S.actionLog.some(l=>typeof l.fn==='function'&&/Website|Coming soon/i.test(l.label))`)).toBe(false);
 });
 
-test('the Coming Soon words show what is saved, else the original wording', async ({ page }) => {
+test('the Coming soon words show what is saved, else the original wording', async ({ page }) => {
   await open(page, { site_content: [{ key: 'coming_soon.title', value: { en: 'Almost there.', ar: 'اقتربنا.' } }] });
   await expect(page.locator('input[data-web-key="coming_soon.title"][data-web-lang="en"]')).toHaveValue('Almost there.');
   await expect(page.locator('input[data-web-key="coming_soon.title"][data-web-lang="ar"]')).toHaveValue('اقتربنا.');
@@ -161,7 +161,7 @@ test('a built page is switched on from the Pages list at once, with undo', async
   const sw = row.locator('input.web-toggle');
   await expect(sw).toBeEnabled();
   await expect(sw).not.toBeChecked();
-  // Home opens with the Coming Soon switch, and a page that is not built cannot be switched on.
+  // Home opens with the Coming soon switch, and a page that is not built cannot be switched on.
   await expect(pages.locator('tr', { hasText: 'Home' }).locator('input.web-toggle')).toBeDisabled();
   await expect(pages.locator('tr', { hasText: 'Store' }).locator('input.web-toggle')).toBeDisabled();
   await sw.click();
@@ -175,7 +175,7 @@ test('a built page is switched on from the Pages list at once, with undo', async
   expect(writes[1].url).toContain('key=in.(page.experiences.visible)');
 });
 
-test('a page that is on waits for Coming Soon, then is live; off writes false', async ({ page }) => {
+test('a page that is on waits for Coming soon, then is live; off writes false', async ({ page }) => {
   const writes = await open(page, { site_content: [{ key: 'page.club.visible', value: true }] });
   const club = panel(page).locator('.web-pages tr', { hasText: 'Club' });
   await expect(club).toContainText('On - opens with the site');

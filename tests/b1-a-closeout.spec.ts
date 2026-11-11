@@ -139,7 +139,7 @@ test.describe('@staff:bookings b1-a close out settles the night correctly', () =
     await expect(box.locator('.co-x-paid')).toContainText('#1 Rider P');
     await expect(box.locator('.co-x-paid')).toContainText('They came');   // a session without bikes never says rode
     await expect(box.locator('.co-x-paid')).not.toContainText('They rode');
-    await expect(box.locator('.co-x-undo')).toHaveText('Your account cannot undo a close-out. A rider marked No-show by mistake can be brought back with Customer Showed on their row.');
+    await expect(box.locator('.co-x-undo')).toHaveText('Your account cannot undo a close-out. A rider marked No-show by mistake can be brought back with Customer showed on their row.');
     await expect(box).not.toContainText(/bar at the top/i);
     // in the warning colour (the token every warning on the desk wears)
     const warn = await page.evaluate(`(()=>{const s=document.createElement('span');s.style.color='var(--orange)';document.body.appendChild(s);const c=getComputedStyle(s).color;s.remove();return c;})()`);
@@ -228,7 +228,7 @@ test.describe('@staff:bookings b1-a close out settles the night correctly', () =
     expect(open.ids.sort()).toEqual([OLD, SAT].sort());                   // one line per night, an admin sees the Saturday side
     expect(open.txt.find((t) => t.includes('3 still open'))).toBeTruthy(); // 2 on a bike and 1 waiting, as one line
     expect(ks.find((k) => k.k === 'long')!.ids).toEqual(['t1']);         // only today's long ride; the old night's riders are not one line each
-    // Front Desk never meets the Saturday side; an account without Bookings has no such line
+    // Front desk never meets the Saturday side; an account without Bookings has no such line
     await page.evaluate(`setStaffRole('frontdesk')`);
     ks = await kinds();
     expect(ks.find((k) => k.k === 'coopen')!.ids).toEqual([OLD]);
@@ -280,7 +280,7 @@ test.describe('@staff:bookings b1-a close out settles the night correctly', () =
     await expect(box).toContainText('#4 Rider Y2 · Paid');
     await expect(box).toContainText('Your account cannot undo actions.');
     await expect(box).not.toContainText('Their session has not started yet.');
-    await box.getByRole('button', { name: 'No-Show' }).click();
+    await box.getByRole('button', { name: 'No-show' }).click();
     await expect.poll(() => nsWrites().length).toBe(4);
     expect(q[2].status).toBe('noshow');
     expect(q[3].status).toBe('noshow');

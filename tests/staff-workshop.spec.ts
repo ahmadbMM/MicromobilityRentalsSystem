@@ -35,7 +35,7 @@ const panel = (page: Page) => page.locator('#tab-workshop');
 const card = (page: Page, id: number) => page.locator(`.ws-row[data-ws-id="${id}"]`);
 const dialog = (page: Page) => page.locator('#confirm-modal');
 
-test('it sits under Commerce with the count of new requests, and Front Desk has it too', async ({ page }) => {
+test('it sits under Commerce with the count of new requests, and Front desk has it too', async ({ page }) => {
   await open(page, { workshop_jobs: [job({}), job({ id: 43 }), job({ id: 44, status: 'confirmed' })] });
   const item = page.locator('#staff-tab-nav .tab-btn[data-stab="workshop"]');
   await expect(item).toHaveClass(/active/);
@@ -150,7 +150,7 @@ test('Edit keeps staff notes and can clear the time', async ({ page }) => {
   expect(writes[0].body).toEqual({ scheduled_for: null, staff_notes: 'Customer will bring the old chain', updated_by: 'Spec Staff' });
 });
 
-test('Front Desk cannot delete a request', async ({ page }) => {
+test('Front desk cannot delete a request', async ({ page }) => {
   await open(page);
   await page.evaluate(`S.staffRole='frontdesk';renderStaffTabs();setStaffTab('workshop')`);
   await card(page, 42).getByRole('button', { name: 'Edit' }).click();

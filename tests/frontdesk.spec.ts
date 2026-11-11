@@ -31,7 +31,7 @@ test('front desk mode limits the staff tabs to Sales, Bookings & Riders, and the
   const panel = page.locator('#tab-queue');
   await expect(panel.locator('tr, .q-card').filter({ hasText: 'Sat Rider' }).filter({ visible: true })).toHaveCount(1);
 
-  // Switch to Front Desk -> only Sales (cashier), Bookings (queue) and the Workshop, whose
+  // Switch to Front desk -> only Sales (cashier), Bookings (queue) and the Workshop, whose
   // bikes come in at the desk; the Petromin registrations are a page inside Queue, not a tab
   await page.evaluate('setStaffRole("frontdesk")');
   expect((await vis()).sort()).toEqual(['cashier', 'lockers', 'queue', 'settings', 'waitlist', 'workshop']); // Lockers and the Waitlist (a section since then) since 2026-11-09 // Settings is every account's own page (2026-10-02)
@@ -48,7 +48,7 @@ test('front desk mode limits the staff tabs to Sales, Bookings & Riders, and the
   await expect(riders.locator('button[data-on-click*="openRidersReport"]')).toHaveCount(0);
   await page.evaluate('S.queueView="bookings";setStaffTab("queue")');
 
-  // Front Desk: no Sessions pill, no Saturday rows, no Saturday option in the filter,
+  // Front desk: no Sessions pill, no Saturday rows, no Saturday option in the filter,
   // no community Add-rider button — JCC data only; the Waitlist is a section of its own on the desk's rail (2026-11-09).
   await page.evaluate('renderStaffQueue()');
   await expect(panel.getByRole('button', { name: 'Sessions', exact: true })).toHaveCount(0); // the pill, not the session picker's "All sessions"

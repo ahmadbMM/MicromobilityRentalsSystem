@@ -103,12 +103,12 @@ test.describe('@customer:waiver the waiver of a bike-free session', () => {
 });
 
 test.describe('@customer:tickets a bike-free ticket', () => {
-  test('a checked-in participant reads Checked in, not On Bike, and the landing card does not say on the bike', async ({ page }) => {
+  test('a checked-in participant reads Checked in, not On bike, and the landing card does not say on the bike', async ({ page }) => {
     await bootCustomer(page, [ev(today)], [row('q1', today + '-ev', today, { status: 'active', checked_out_at: null, checked_in_at: today + 'T07:05:00Z' })], false);
     await page.evaluate(`goCustomer('myrides')`);
     const tk = page.locator('#tab-myrides .ticket-card').first();
     await expect(tk.locator('.ticket-right .status-badge')).toHaveText('Checked in');
-    await expect(tk).not.toContainText(/On Bike|on the bike/i);
+    await expect(tk).not.toContainText(/On bike|on the bike/i);
     const card = await page.evaluate(`_todayCardHtml(S.loggedIn)`);
     expect(card).toContain('Checked in');
     expect(card).not.toMatch(/on the bike/i);

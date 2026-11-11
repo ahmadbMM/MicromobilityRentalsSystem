@@ -387,7 +387,7 @@ test.describe('@staff:team b2-d a change of access asks a confirm, then the PIN 
     await desk.getByRole('button', { name: 'Save' }).click();
     const dlg = page.locator('#confirm-modal');
     await expect(dlg).toContainText('Access for desk@example.com');
-    await expect(dlg).toContainText('Role for desk@example.com: Front Desk → Admin');
+    await expect(dlg).toContainText('Role for desk@example.com: Front desk → Admin');
     await expect(dlg).toContainText('An admin opens and changes every section and can do everything.');
     await page.waitForTimeout(300);
     expect(named(calls, 'staff_set_access')).toHaveLength(0);

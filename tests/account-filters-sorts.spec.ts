@@ -49,7 +49,7 @@ test.describe('@staff:accounts and members filters and sorts', () => {
       ['Rides', '0', ['c3']],
       ['Rides', '2', ['c2']],
       ['Rides', 'nobook', ['c3']],
-      ['No-Show', '1', ['c2']],
+      ['No-show', '1', ['c2']],
       ['Height', '180', ['c2']],
       ['Age', '45', ['c2']],
       ['Age', 'unset', ['c3']],

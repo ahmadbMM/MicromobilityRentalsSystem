@@ -125,7 +125,7 @@ test.describe('@staff:sessions the announce time on the session forms', () => {
     await box.fill('2099-10-23T20:00');
     await expect(page.locator('#es-reveal-note')).toContainText('Breakfast spot hidden until');
     await expect(page.locator('#es-reveal-clr')).toBeVisible();
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => patches.filter((p) => 'reveal_at' in p).length).toBe(1);
     // 20:00 in Riyadh is 17:00 UTC; the meeting point and breakfast go in the same write
     expect(patches.find((p) => 'reveal_at' in p)).toMatchObject({ reveal_at: '2099-10-23T17:00:00.000Z' });
@@ -139,7 +139,7 @@ test.describe('@staff:sessions the announce time on the session forms', () => {
     await page.evaluate(`setStaffTab('sessions');startEditSession('${SAT}')`);
     await expect(page.locator('#es-reveal')).toHaveValue('2099-10-23T20:00');
     await page.locator('#es-reveal').fill('2099-10-24T07:00'); // the ride gathers at 6 that morning
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => patches.filter((p) => 'reveal_at' in p).length).toBe(1);
     expect(patches.find((p) => 'reveal_at' in p)).toMatchObject({ reveal_at: '2099-10-24T04:00:00.000Z' });
     await expect(page.locator('#es-reveal')).toHaveCount(0); // the save has finished and closed the editor
@@ -148,7 +148,7 @@ test.describe('@staff:sessions the announce time on the session forms', () => {
     await expect(page.locator('#es-reveal')).toHaveValue('2099-10-24T07:00');
     await page.locator('#es-reveal-clr').click();
     await expect(page.locator('#es-reveal')).toHaveValue('');
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => patches.filter((p) => 'reveal_at' in p).length).toBe(1);
     expect(patches.find((p) => 'reveal_at' in p)).toMatchObject({ reveal_at: null });
   });

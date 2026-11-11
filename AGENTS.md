@@ -3220,3 +3220,35 @@ Items 48-50 of `reports/Staff website design and function.md` (builder "features
   core 338.8 / 346 (not raised). The `community` part (132 KB) was not split: the core is inside its budget and a split
   does not change the staff half; People's sub-views are drawn synchronously by `renderCommunity`, so a part of their
   own needs their callers made async first.
+- Merged with main again on 2026-11-11 (main's Community tab rebuild, volunteer enhancements, the "You're booked" ticket,
+  pay hold): the round's four migrations are renumbered 20261111180000-180300 (main's 20261111100000_community_tab took
+  the first number); section_checks (180200) now writes its own ledger row. Staff half budget 936 -> 956 (952.3 measured).
+
+## Staff round s10: the look pass (2026-11-11, items 18-25, 27 and D6)
+
+- **Type scale in rem.** `--sf-fs-xs/sm/md/lg/xl/2xl` = 12 / 13 / 15 / 17 / 22 / 28px as rem (the root stays at the
+  browser's size, so a phone's text-size setting reaches the staff screens); `--sf-fs-tick` 11px for chart ticks only,
+  `--sf-fs-input` 16px for a phone's selects and fields (iOS zooms below 16). `--staff-fs-sm` is `--sf-fs-xs` (13px in
+  ar/ur/hi/ne/bn). `body.view-staff` is 15px (was the page's 14px); bare buttons inherit their row's size; b/strong 600.
+  Weights 400 / 500 / 600 only; the booth's status words and the waitlist pill are the owner's two 700s.
+- **Radius ladder** 4 / 8 / 12 / 14 / 16 / pill (`--sf-r-*`); staff `--r-sm` is 8px (was 6).
+- **The build check** `scripts/check-staff-css.mjs` (run by `npm run build:html`; `node scripts/check-staff-css.mjs
+  --stats` for a census) fails on a raw px font-size, a weight above 600 or a radius off the ladder in any staff rule:
+  a rule `staffSelTest` (split-staff.mjs) keeps out of app.css, or one that needs a staff host (`STAFF_HOSTS`: the
+  section panels and the staff dialogs' hosts, whose markup ships hidden in index.html). Exceptions go in
+  `scripts/staff-css-allow.json` with a reason; an entry that matches nothing fails too. New staff CSS: use the tokens.
+- **Sentence case** in English labels (the en strings, never CSS text-transform; no uppercase or tracking on labels);
+  other languages untouched; proper nouns kept. Codes (promo, booking numbers) may stay uppercase.
+- **Green** is a primary action or success only: heights, sort headers, the Sessions "today" heading, session-card names
+  are ink; the roster's one action slot is a tonal button (booth keeps solid). Payment pills are round.
+- **D6:** a roster row is tinted only for an exception: `row-noshow-cancel` and `row-overdue` (`_rowOverdue(e)`, on a
+  bike past `OVERDUE_RIDE_MIN`, the figures bar's overdue count). Other states keep the 3px edge and the pill.
+- **Bookings' session cards:** the circuit and the National Day ride render `th-plain` (Soft Solid card) with
+  `ss-<status>` for the 3px edge; the light event themes stay. Analytics' insight cards are neutral with a state edge;
+  its Today band is the Dashboard's `.dash-kpi` tiles; Sessions' detail tiles are an equal grid that wraps.
+- **One style each:** section sub-navigation (Analytics views, Sessions layouts, People groups, History, Inventory,
+  Volunteers, account window) is underline tabs, never chips; count badges are one spaced pill (`> .num`, `.ah-n`,
+  `.vx-tab-n`); selects carry one stroke chevron; `_emptyState(msg,{icon,act})` draws an `_artIcon` + the line + the
+  section's next action on staff screens (riders keep the plain line); top-bar icons one size and ink (Lock not red).
+- **Dark:** colour dots carry a 1px ring; staff checkboxes are drawn (appearance none, a visible edge); field edges
+  (`--sf-ctl`) are .38 white (3:1).

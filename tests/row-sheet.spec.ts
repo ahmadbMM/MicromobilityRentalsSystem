@@ -62,11 +62,11 @@ test('the menu opens as a sheet at the edge, headed by the rider, with every act
 test('a row runs its action and the sheet closes; the backdrop and the × close it too', async ({ page }) => {
   await roster(page);
   await more(page).click();
-  await sheet(page).locator('[role="menuitem"]', { hasText: 'No-Show' }).click();
+  await sheet(page).locator('[role="menuitem"]', { hasText: 'No-show' }).click();
   await expect(page.locator('.pay-menu-popup')).toHaveCount(0);
   // one-tap No-show (2026-10-09): it runs without a confirm
   await expect(page.locator('#confirm-modal .confirm-box')).toHaveCount(0);
-  await expect(page.locator('.toast', { hasText: 'Marked as No-Show' }).first()).toBeAttached(); // a quiet toast
+  await expect(page.locator('.toast', { hasText: 'Marked as No-show' }).first()).toBeAttached(); // a quiet toast
   await more(page).click();
   await expect(sheet(page)).toBeVisible();
   await page.locator('.row-sheet-bg').click({ position: { x: 5, y: 5 } });
@@ -87,7 +87,7 @@ test('the actions sit under headings, the rare ones last in theirs with no More 
   await expect(s.locator('.rmt-chips .rmt-pending')).toHaveText('Pending');
   // headings in their order, each action under its own
   await expect(s.locator('.rmt-grp-h')).toHaveText(['Status', 'Booking', 'Party']);
-  await expect(s.getByRole('group', { name: 'Status' }).getByRole('menuitem', { name: 'No-Show' })).toBeVisible();
+  await expect(s.getByRole('group', { name: 'Status' }).getByRole('menuitem', { name: 'No-show' })).toBeVisible();
   await expect(s.getByRole('group', { name: 'Booking' }).getByRole('menuitem', { name: 'Edit' })).toBeVisible();
   // no More fold (the user, 2026-11-10): a rarely used action shows under its own heading, after the everyday ones
   await expect(s.locator('.rmt-more')).toHaveCount(0);

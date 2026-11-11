@@ -34,7 +34,7 @@ const panel = (page: Page) => page.locator('#tab-ambassadors');
 const card = (page: Page, id: number) => page.locator(`.amb-row[data-amb-id="${id}"]`);
 const dialog = (page: Page) => page.locator('#confirm-modal');
 
-test('it sits under People with applications and rewards waiting; Front Desk does not have it', async ({ page }) => {
+test('it sits under People with applications and rewards waiting; Front desk does not have it', async ({ page }) => {
   await open(page, {
     ambassadors: [amb({}), amb({ id: 6, phone: '+966551234568', status: 'active', code: 'OMAR10', name: 'Omar Hassan' })],
     ambassador_redemptions: [{ id: 1, created_at: '2099-05-02T10:00:00Z', ambassador_id: 6, item: 'Store kit', points: 1000, status: 'requested', updated_at: '2099-05-02T10:00:00Z', updated_by: 'website' }],

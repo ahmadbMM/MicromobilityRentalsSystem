@@ -1,0 +1,8 @@
+[
+  { "sel": "html[data-staff-theme=\"booth\"] body.view-staff .status-badge", "prop": "font-weight", "value": "700",
+    "why": "The owner's exception: the booth theme's status words are read from a step back in full sun, so they stay bold." },
+  { "sel": "body.view-staff .status-badge.badge-waitlist", "prop": "font-weight", "value": "700",
+    "why": "The owner's exception: the waitlist pill stays bold so a waitlisted rider is never read as booked." },
+  { "sel": "#kiosk .ko-h1", "prop": "font-size", "value": "clamp(26px,5vw,38px)",
+    "why": "The desk kiosk's heading faces riders at arm's length on a tablet, not staff at a desk: it scales with the screen." }
+]

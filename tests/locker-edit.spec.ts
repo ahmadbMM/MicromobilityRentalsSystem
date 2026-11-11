@@ -61,7 +61,7 @@ test.describe('@staff:lockers staff edit a reservation', () => {
     const d = dlg(page);
     await expect(d).toContainText('Omar Other');
     await d.getByRole('button', { name: /6 PM - 11 PM/ }).click();
-    await d.getByRole('button', { name: 'Save Changes' }).click();
+    await d.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => sent(seen, 'staff_locker_edit')).toBeTruthy();
     expect(sent(seen, 'staff_locker_edit')).toMatchObject({ p_rental: 'R6', p_day: null, p_period: 'both', p_code: null, p_name: null, p_customer: null });
     await expect(page.locator('.toast.info').filter({ hasText: 'SAR 5 more to take: it is in the Sales cart' })).toBeVisible();
@@ -83,7 +83,7 @@ test.describe('@staff:lockers staff edit a reservation', () => {
     await d.getByRole('button', { name: 'Change', exact: true }).click();
     await d.getByLabel('Account').fill('rana');
     await d.getByRole('button', { name: /Rana Rider/ }).click();
-    await d.getByRole('button', { name: 'Save Changes' }).click();
+    await d.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => sent(seen, 'staff_locker_edit')).toBeTruthy();
     expect(sent(seen, 'staff_locker_edit')).toMatchObject({ p_rental: 'R6', p_day: LATER, p_period: null, p_code: '3', p_customer: 'c1', p_name: 'Rana Rider' });
     await expect(page.locator('#toast-container .toast').filter({ hasText: 'Locker reservation saved' })).toHaveCount(1); // a quiet one: said, not drawn
@@ -103,7 +103,7 @@ test.describe('@staff:lockers staff edit a reservation', () => {
     await staff(page, { 'rpc:staff_locker_edit': { __rpcError: { status: 400, code: '42501', message: 'ADMIN_REFUND: 5' } } }, 'frontdesk');
     await row(page, 'Omar Other').getByRole('button', { name: 'Edit' }).click();
     await dlg(page).getByRole('button', { name: /9 PM - 11 PM/ }).click();
-    await dlg(page).getByRole('button', { name: 'Save Changes' }).click();
+    await dlg(page).getByRole('button', { name: 'Save changes' }).click();
     await expect(page.locator('.toast.error').filter({ hasText: 'back to the wallet: an admin makes it' })).toBeVisible();
     await expect(dlg(page)).toBeVisible(); // nothing changed: the dialog stays
   });

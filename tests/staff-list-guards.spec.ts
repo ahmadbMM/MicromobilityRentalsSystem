@@ -3,7 +3,7 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // The Staff List (the Waitlist view of Bookings) is worked at speed through an arrival rush.
 // These pin what the review found it could not take: a stored id that breaks out of an inline
-// handler, a second tap on Check In or Add while the first is still writing, and a background
+// handler, a second tap on Check in or Add while the first is still writing, and a background
 // refresh wiping the walk-up staff are typing in.
 
 const sessions = [{ id: 's0', day: 'Friday', session_date: '2099-02-10', capacity: 12, status: 'open', created_at: 1 }];
@@ -50,7 +50,7 @@ test('a booking id that tries to break out of its handler stays an id', async ({
   expect(await page.evaluate('window.__pwned')).toBeUndefined();
   expect(await page.locator('#mw-host img[src="x"]').count()).toBe(0);
   await page.evaluate(`window.showCheckinModal=id=>{window.__ciArg=id;}`);
-  await page.locator('#mw-host button.btn-green', { hasText: 'Check In' }).first().click();
+  await page.locator('#mw-host button.btn-green', { hasText: 'Check in' }).first().click();
   expect(await page.evaluate('window.__ciArg')).toBe(evil);
   expect(await page.evaluate('window.__pwned')).toBeUndefined();
 });
@@ -81,7 +81,7 @@ test('every row action encodes the id, whatever the booking status', async ({ pa
   expect(await page.evaluate('window.__pwned')).toBeUndefined();
 });
 
-test('two taps on a walk-up\'s Check In book one bike, not two', async ({ page }) => {
+test('two taps on a walk-up\'s Check in book one bike, not two', async ({ page }) => {
   await openList(page, { desk_waitlist: [walkup('w1', 'Walk Up')] });
   const inserts = countPosts(page, 'queue_entries');
   await page.evaluate(`window.showCheckinModal=()=>{};Promise.all([giveDeskBike('w1'),giveDeskBike('w1')])`);

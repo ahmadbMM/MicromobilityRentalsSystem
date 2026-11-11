@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // The Bookings status filter should use the same wording as the stat boxes:
-// Expected (waiting), On Bike (active), Completed (done).
+// Expected (waiting), On bike (active), Completed (done).
 test('status filter labels match the dashboard boxes', async ({ page }) => {
   await stubSupabase(page, {
     sessions: [{ id: 's1', day: 'Friday', session_date: '2099-01-09', capacity: 12, status: 'open', created_at: 1 }],
@@ -15,7 +15,7 @@ test('status filter labels match the dashboard boxes', async ({ page }) => {
   const set = new Set(opts as string[]);
   expect(set.has('Expected')).toBe(true);   // was "Waiting"
   expect(set.has('Completed')).toBe(true);  // was "Done"
-  expect(set.has('On Bike')).toBe(true);
+  expect(set.has('On bike')).toBe(true);
   expect(set.has('Waiting')).toBe(false);   // old label gone
   expect(set.has('Done')).toBe(false);
   // filtering by value still works

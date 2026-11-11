@@ -98,7 +98,7 @@ test('@staff the figures lay out again when the room changes', async ({ page }) 
 
 for (const lang of ['en', 'ar']) {
   for (const width of [820, 1100]) {
-    test(`@staff:bookings at ${width}px (${lang}) Manage booking stays pinned at the roster's end, so every Check In is on screen`, async ({ page }) => {
+    test(`@staff:bookings at ${width}px (${lang}) Manage booking stays pinned at the roster's end, so every Check in is on screen`, async ({ page }) => {
       await staffAt(page, width, 900, { lang });
       // the text one size up (Settings > This device), so this small night's roster is as wide as a busy one's
       await page.evaluate(`localStorage.setItem('cq_text_size','115');_uiApply();setStaffTab('queue');S.queueView='bookings';S.sfSession='${TODAY}';renderStaffQueue()`);
@@ -126,7 +126,7 @@ for (const lang of ['en', 'ar']) {
   }
 
   // From 1280px the roster's box does not scroll (its header sticks to the page), so a table wider than the box hangs out
-  // of it: 30px in light and dark, 54px in booth, where Return Bike went off the screen and the page scrolled sideways
+  // of it: 30px in light and dark, 54px in booth, where Return bike went off the screen and the page scrolled sideways
   // (2026-11-08, after the Soft Solid look's wider IBM Plex Sans). Booth is the widest: bigger status words, 2px rings.
   // The night holds what sets the columns' widths: a party still paying (Mark paid), a bike to reserve, the waitlist,
   // an owner's bike and a ride on the house.
@@ -174,7 +174,7 @@ for (const lang of ['en', 'ar']) {
   });
 }
 
-test('@staff a pinned cell takes its row\'s colour: the fleet\'s state and the stripe reach Manage bike and Manage Record', async ({ page }) => {
+test('@staff a pinned cell takes its row\'s colour: the fleet\'s state and the stripe reach Manage bike and Manage record', async ({ page }) => {
   await staffAt(page, 1024, 900);
   await page.evaluate(`setStaffTab('inventory')`);
   await expect(page.locator('#tab-bikes .bk-table tbody tr').first()).toBeVisible();
@@ -198,7 +198,7 @@ test('@staff a pinned cell takes its row\'s colour: the fleet\'s state and the s
     return [getComputedStyle(act).backgroundColor, getComputedStyle(mid).backgroundColor];
   }));
   expect(hist.length).toBeGreaterThan(1);
-  expect(hist[0][0]).toBe('rgb(255, 255, 255)'); // Manage Record pinned on a solid card (no zebra since Soft Solid)
+  expect(hist[0][0]).toBe('rgb(255, 255, 255)'); // Manage record pinned on a solid card (no zebra since Soft Solid)
 });
 
 test('@staff on the dark desk a pinned booking number is solid on a striped row, so nothing shows through it', async ({ page }) => {

@@ -79,7 +79,7 @@ test.describe('@staff:bookings s1009 desk: no-show', () => {
     await expect(ask).toContainText('Rider A');
     await expect(ask).toContainText('Rider B');
     expect(p.filter((x) => x.body.status === 'noshow')).toHaveLength(0);
-    await ask.getByRole('button', { name: 'No-Show' }).click();
+    await ask.getByRole('button', { name: 'No-show' }).click();
     await expect.poll(() => p.filter((x) => x.body.status === 'noshow').length).toBe(2);
     await page.waitForFunction(`S.undoStack.some(u=>/No-show · 2/i.test(u.label))`);
     expect(await page.evaluate('S.sfSelected.slice().sort().join()')).toBe('c,w'); // the rider on a bike and the waitlisted one stay selected

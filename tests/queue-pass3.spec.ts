@@ -49,7 +49,7 @@ test('the chips say how tonight compares with the same night last week', async (
     prev('p1', 1, { status: 'done', paid: true }), prev('p2', 2, { status: 'done', paid: true }), prev('p3', 3, { status: 'done', paid: true }), prev('p4', 4, { status: 'noshow' }), prev('p5', 5, { status: 'cancelled' }),
   ]);
   const deltas = await page.evaluate(`[...document.querySelectorAll('.stat-strip .stat-chip')].map(c=>[c.textContent.replace(/\\s+/g,' ').trim(), (c.querySelector('.stat-delta')||{}).textContent||null])`) as [string, string | null][];
-  const riders = deltas.find(([t]) => t.includes('# of Riders'))!, done = deltas.find(([t]) => t.includes('Completed'))!;
+  const riders = deltas.find(([t]) => t.includes('# of riders'))!, done = deltas.find(([t]) => t.includes('Completed'))!;
   expect(riders[1]).toBe('-1');                                 // 3 tonight vs 4 last week (the cancelled one never counted)
   expect(done[1]).toBe('-2');                                   // 1 vs 3
   await expect(page.locator('.stat-delta').first()).toHaveAttribute('title', 'vs last Friday');

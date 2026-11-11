@@ -72,7 +72,7 @@ test('after publish the numbers are public, so the roster shows them too', async
 
 // The row menu: a booking used to carry up to seven buttons over two lines. The two the desk
 // actually presses during an arrival rush stay large; the rest fold into one ⋯ menu.
-test('a waiting row shows Check In and one menu — the rest are inside it', async ({ page }) => {
+test('a waiting row shows Check in and one menu — the rest are inside it', async ({ page }) => {
   await stubSupabase(page, { sessions: [sessions[0]], bikes: [],
     queue_entries: [rider('a', OLD, 'waiting')] });
   await unlockStaff(page);
@@ -82,14 +82,14 @@ test('a waiting row shows Check In and one menu — the rest are inside it', asy
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${OLD}';renderStaffQueue()`);
   await page.waitForTimeout(250);
   const row = page.locator('#tab-queue').locator('tr, .q-card').filter({ hasText: 'R a' }).filter({ visible: true }).first();
-  await expect(row.getByRole('button', { name: /Check In/i })).toBeVisible();
-  await expect(row.getByRole('button', { name: /No-Show/i })).toHaveCount(0);  // folded away too
+  await expect(row.getByRole('button', { name: /Check in/i })).toBeVisible();
+  await expect(row.getByRole('button', { name: /No-show/i })).toHaveCount(0);  // folded away too
   await expect(row.getByRole('button', { name: /More actions/ })).toBeVisible();
   await expect(row.getByRole('button', { name: /Cancel/i })).toHaveCount(0);   // folded away
   await expect(row.getByRole('checkbox', { name: /#\d+/ })).toBeVisible(); // a real checkbox, not a button; its name is translated (selectBookingAria)
   await row.getByRole('button', { name: /More actions/ }).click();
   const menu = page.locator('.pay-menu-popup');
-  await expect(menu.getByRole('menuitem', { name: /No-Show/i })).toBeVisible();
+  await expect(menu.getByRole('menuitem', { name: /No-show/i })).toBeVisible();
   await expect(menu.getByRole('menuitem', { name: /Edit/i })).toBeVisible();
   await expect(menu.getByRole('menuitem', { name: /Cancel/i })).toBeVisible();
 });

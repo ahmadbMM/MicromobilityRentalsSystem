@@ -81,7 +81,7 @@ test('a customer without the tag goes straight to the Activity waiver; the Satur
   const panel = page.locator('#tab-register');
   await expect(panel).toContainText('Activity waiver');
   await expect(panel).not.toContainText('Ride waiver');
-  await expect(panel).not.toContainText('Bike Type');
+  await expect(panel).not.toContainText('Bike type');
   await expect(panel.locator('.reg-stepper')).toHaveAttribute('aria-label', 'Step 2 of 2');
   // Back from the review returns to the day list, not to an empty riders panel
   await page.locator('#tab-register .mm-reg-foot .btn-secondary').click();

@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // The record of who did what (2026-10-09; migration 20261009150000): a record's Changes panel reads
-// its audit_log rows as sentences (M1), admins search the trail and export it, the Action Log pages
+// its audit_log rows as sentences (M1), admins search the trail and export it, the Action log pages
 // on the server with a custom range, names the signed-in account and opens the record a line is
 // about (M2), and History > Exceptions and Analytics > Team add up voids, refunds, discounts, price
 // changes and each person's work (M3, M5).
@@ -66,7 +66,7 @@ test.describe('@staff:history audit trail, action log, exceptions, team', () => 
     await expect(page.locator('#tab-history').getByRole('button', { name: 'Audit trail' })).toHaveCount(0);
   });
 
-  test('the Action Log: a line carries what it was about, the account and the amount, and opens the record', async ({ page }) => {
+  test('the Action log: a line carries what it was about, the account and the amount, and opens the record', async ({ page }) => {
     await boot(page, { staff_actions: [{ id: 5, at: NOW, action: 'Check in: #7 Rider One', who: 'Device Name', user_id: UID, kind: 'checkin', entity: 'booking', entity_id: 'q1', amount: 75 }] });
     const sent: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (r.method() === 'POST' && r.url().includes('/rest/v1/staff_actions')) { try { sent.push(r.postDataJSON()); } catch { /* none */ } } });
@@ -83,7 +83,7 @@ test.describe('@staff:history audit trail, action log, exceptions, team', () => 
     await expect(page.locator('#booking-edit-modal [role="dialog"]')).toBeVisible();
   });
 
-  test('the Action Log asks the server for the custom range and for older pages', async ({ page }) => {
+  test('the Action log asks the server for the custom range and for older pages', async ({ page }) => {
     const many = Array.from({ length: 200 }, (_, i) => ({ id: 1000 - i, at: NOW, action: 'Line ' + i, who: 'X', user_id: null }));
     await boot(page, { staff_actions: many });
     const gets: string[] = [];

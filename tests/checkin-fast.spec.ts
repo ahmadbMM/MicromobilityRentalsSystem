@@ -133,7 +133,7 @@ test('a no-show member can be opened again and brought back to be checked in', a
   await expect(step1).toBeEnabled();
   await step1.click();
   await expect(modal).toContainText('is marked no-show');
-  await modal.getByRole('button', { name: 'Customer Showed' }).click();
+  await modal.getByRole('button', { name: 'Customer showed' }).click();
   await expect(modal).toContainText('Rider 1 of 2');
   await expect(modal.locator('#ci-confirm')).toBeVisible();     // back to a normal check-in
   await expect(modal.getByRole('list', { name: 'Riders in this party' }).getByRole('button', { name: /1 First/ })).toBeVisible();

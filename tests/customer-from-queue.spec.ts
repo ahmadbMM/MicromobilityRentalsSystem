@@ -16,7 +16,7 @@ test('the Customer button on a queue row opens the account editor', async ({ pag
     S.staffTab = 'queue'; renderStaffQueue();
   });
 
-  // Customer now lives in the row's ⋯ menu — the desk keeps only Check In and No-Show large
+  // Customer now lives in the row's ⋯ menu — the desk keeps only Check in and No-show large
   const row = page.locator('#tab-queue').locator('tr, .q-card').filter({ hasText: 'Linked Rider' }).filter({ visible: true });
   await row.getByRole('button', { name: /More actions/ }).click();
   await page.waitForTimeout(150);   // let the just-positioned menu settle before clicking into it

@@ -54,7 +54,7 @@ test.describe('@staff:bookings the desk', () => {
   test('a party checked in from the Staff List can be undone, like the roster\'s bulk check-in', async ({ page }) => {
     await boot(page);
     await page.evaluate(`S.staffRole='admin';mwPartyCheckin('w1')`);
-    await expect.poll(() => page.evaluate(`(S.undoStack[S.undoStack.length-1]||{}).label||''`)).toMatch(/Undo Check-in · 2/);
+    await expect.poll(() => page.evaluate(`(S.undoStack[S.undoStack.length-1]||{}).label||''`)).toMatch(/Undo check-in · 2/);
   });
 });
 

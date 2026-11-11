@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// The Edit Payment Amount modal must show the FULL total (rental + add-ons), list each add-on
+// The Edit payment amount modal must show the FULL total (rental + add-ons), list each add-on
 // with steppers, and offer an "add add-ons" button.
 test('edit-price modal shows the rental+add-ons total and per-add-on steppers', async ({ page }) => {
   await stubSupabase(page, {

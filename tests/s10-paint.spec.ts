@@ -66,12 +66,12 @@ test.describe('@staff:bookings s10 roster paint and selection', () => {
     await page.evaluate(`showCheckinModal('w1')`);
     await countPaints(page);
     await page.locator('#ci-confirm').click();
-    await expect(row(page, 'w1').locator('td.rq-mng .rq-act')).toHaveText('Return Bike');
+    await expect(row(page, 'w1').locator('td.rq-mng .rq-act')).toHaveText('Return bike');
     await expect(row(page, 'w1')).not.toHaveClass(/rq-pend/);
     await page.waitForTimeout(600);
     expect(await paints(page)).toBeLessThanOrEqual(3); // the tap, the answer, the re-read (it was 4, and a 5th when the Undo ran out)
     await expect(row(page, 'w1').locator('.rq-undo')).toHaveCount(0);
-    await expect.poll(() => sent.filter((x) => x.kind === 'checkin')).toEqual([expect.objectContaining({ entity: 'booking', entity_id: 'w1', action: 'Check In: #1 Rider 1' })]);
+    await expect.poll(() => sent.filter((x) => x.kind === 'checkin')).toEqual([expect.objectContaining({ entity: 'booking', entity_id: 'w1', action: 'Check in: #1 Rider 1' })]);
   });
 
   test('a tick redraws the selection\'s actions, not the roster; the first and the last swap the filter row', async ({ page }) => {
@@ -138,10 +138,10 @@ test.describe('@staff:bookings s10 roster paint and selection', () => {
     await box(page, 'l1').check();
     await box(page, 'w3').check();
     const bulk = page.locator('#q-bulk');
-    await expect(bulk.getByRole('button', { name: 'No-Show (1)' })).toBeVisible();
+    await expect(bulk.getByRole('button', { name: 'No-show (1)' })).toBeVisible();
     await bulk.getByRole('button', { name: 'Check in', exact: true }).click();
     await expect.poll(() => sent.filter((x) => x.kind === 'checkin').map((x) => x.entity_id).sort()).toEqual(['l1', 'w3']);
-    for (const x of sent.filter((r) => r.kind === 'checkin')) expect(x).toMatchObject({ entity: 'booking', action: expect.stringMatching(/^Check In: #(3|6) Rider (3|6)$/) });
+    for (const x of sent.filter((r) => r.kind === 'checkin')) expect(x).toMatchObject({ entity: 'booking', action: expect.stringMatching(/^Check in: #(3|6) Rider (3|6)$/) });
     expect(await page.evaluate(`S.fullLog.filter(l=>l.m&&l.m.kind==='checkin').map(l=>l.m.entity_id).sort()`)).toEqual(['l1', 'w3']);
     expect(await page.evaluate(`S.fullLog.some(l=>/in bulk|checked in \\d/i.test(l.label))`)).toBe(false); // the count line went
   });

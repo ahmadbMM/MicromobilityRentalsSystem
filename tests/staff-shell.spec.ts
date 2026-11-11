@@ -32,7 +32,7 @@ async function staff(page: Page, x: Record<string, unknown> = {}) {
   await waitForSb(page);
 }
 
-test('the staff bar holds a search button, not a search bar, and no Admin / Front Desk switch', async ({ page }) => {
+test('the staff bar holds a search button, not a search bar, and no Admin / Front desk switch', async ({ page }) => {
   await staff(page);
   const btn = page.locator('#topbar .gs-btn');
   await expect(btn).toHaveAttribute('aria-label', 'Search');
@@ -40,7 +40,7 @@ test('the staff bar holds a search button, not a search bar, and no Admin / Fron
   const box = await btn.boundingBox();
   expect(box!.width).toBeLessThan(48);
   await expect(page.locator('#topbar .role-seg')).toHaveCount(0);
-  await expect(page.locator('#topbar')).not.toContainText('Front Desk');
+  await expect(page.locator('#topbar')).not.toContainText('Front desk');
   await btn.click();
   await expect(page.locator('#gs-panel .gs-box')).toBeVisible();
 });
@@ -102,7 +102,7 @@ test('the × in the search bar empties it, then closes the search', async ({ pag
   await expect(page.locator('#gs-input')).toHaveValue('');
 });
 
-test('Front Desk searches only what its own sections hold', async ({ page }) => {
+test('Front desk searches only what its own sections hold', async ({ page }) => {
   await staff(page);
   await page.evaluate(`S.staffRole='frontdesk';renderTopbarRight();_gsOpen()`);
   await page.locator('#gs-input').fill('amal');
@@ -131,7 +131,7 @@ test('the bell says nothing about what was already there, then one line for each
   await expect(page.locator('#nt-panel .nt-box')).toHaveCount(0);
   expect(await page.evaluate('S.staffTab')).toBe('inventory');
   await expect(bell.locator('.nt-badge')).toHaveCount(0);
-  // Front Desk is not told about stock it cannot open
+  // Front desk is not told about stock it cannot open
   await page.evaluate(`S.staffRole='frontdesk';renderTopbarRight();S.inventory=[...S.inventory,{id:'i3',name:'Lights',category:'Lights',qty:0,low_threshold:2,price:10}];_ntSync()`);
   await expect(page.locator('#nt-btn .nt-badge')).toHaveCount(0);
 });

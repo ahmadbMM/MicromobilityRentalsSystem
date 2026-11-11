@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// The desk, 2026-10-05 fixes: Front Desk never meets the Saturday side (search, day sheet, the
+// The desk, 2026-10-05 fixes: Front desk never meets the Saturday side (search, day sheet, the
 // bell, the Staff List's rides and Browse), a walk-up's price follows its bike type, a phone typed
 // in Arabic-Indic digits is taken, a slow press on a Staff List suggestion still picks it, and a
 // unit of an add-on added after a price change is charged at today's price.
@@ -36,7 +36,7 @@ function bodies(page: Page, method: string, path: string) {
 }
 
 test.describe('@staff:bookings fix5 desk', () => {
-  test('Front Desk never meets the Saturday side', async ({ page }) => {
+  test('Front desk never meets the Saturday side', async ({ page }) => {
     await desk(page, { queue_entries: [
       qe('j1', circuit, 1, 'Circuit Walker'), qe('s1', sat, 1, 'Saturday Walker'),
       qe('j2', circuit, 2, 'Circuit Long', { status: 'active', checked_in_at: ago }), qe('s2', sat, 2, 'Saturday Long', { status: 'active', checked_in_at: ago }),
