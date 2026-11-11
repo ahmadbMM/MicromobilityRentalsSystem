@@ -76,6 +76,17 @@ test.describe('@staff:bookings the code each booking used', () => {
     await expect(tr(page, 'q1').locator('.rq-rider .code-tag')).toHaveCount(0);
   });
 
+  test('a tight roster never cuts the code short (Arabic, the booth theme: "WELC..." after the look pass)', async ({ page }) => {
+    test.skip(test.info().project.name === 'mobile', 'the desktop roster table, which a phone does not show');
+    await boot(page, 1280);
+    await page.evaluate(`setLang('ar');document.documentElement.setAttribute('data-staff-theme','booth');renderStaffQueue()`);
+    await expect(tr(page, 'q1').locator('.code-c')).toBeVisible();
+    // squeeze the table to its narrowest: each column at its min-content width, as a crowded night leaves it
+    await page.evaluate(`(()=>{const t=document.querySelector('#tab-queue .queue-table');t.style.width='600px';t.style.minWidth='0';})()`);
+    const cut = await page.locator('#tab-queue .queue-table .code-cell .code-c').evaluateAll((els) => els.filter((el) => el.scrollWidth > el.clientWidth + 1).map((el) => el.textContent));
+    expect(cut).toEqual([]);
+  });
+
   test('phone cards and the booking window: the mark and the code beside the name, the kind in the title', async ({ page }) => {
     await boot(page, 390);
     const card = page.locator('#tab-queue .queue-mobile-view .q-card[data-id="q2"]');

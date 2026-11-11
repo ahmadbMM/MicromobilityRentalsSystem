@@ -3452,3 +3452,22 @@ The owner's D11 ("do it all"): a staff role `door` for people whose only job is 
 - Size: the door part is 4.5 KB gzipped (its code alone; the core grew 0.4 KB for the hooks). Built locally on 343e558a
   the staff half went 952.3 -> 957.4 KB against a 956 budget, which was NOT raised (the merge step decides).
 - Spec: `tests/s10b-door.spec.ts`.
+
+## Staff round s10: the second batch merged (2026-11-11)
+- Merged in order split, checklist, caps, extras, door, then main (sports in the account report builder, the community
+  form rework, the Back button on Reserve's first step). Migrations 20261111180400 night_checklists, 180500 door_role,
+  180600 type_caps, 180700 account_followups follow 180000-180300; each re-creation starts from the one before it
+  (180400's `_staff_opt_ok` = 180200's + `night_checklists`; 180500's `_staff_role_mods` = 180200's + door -> {queue};
+  only 180500 re-creates `staff_invite` / `staff_set_access` / `_staff_cap`; only 180600 touches `_out_bikes_room`,
+  `_out_bikes_guard`, `_promote_next_waitlist`, `_wl_offer_fill`, `staff_offer_spot`). On queue_entries `a_door_guard`
+  runs before `trg_type_full_guard` (name order); the type guard fires on insert or a type/session change only, which a
+  Door check-in never makes. A Door account has modules_edit {} so `_staff_mod('queue', true)` refuses it the ticks,
+  handover notes, incidents and follow-ups.
+- People > Activity > Follow-ups stays in the `community` part (not peoplemore): `_renderPeople` calls `_fupList()`
+  directly, and the Dashboard / bell read `_fupDue` from it. Its Open / Done switch is the shared underline tabs
+  (`cmy-nav`); its empty states and the Door screen's carry `_emptyState(..., {icon})`; the Door's arrived count is the
+  shared spaced badge (`.ah-n`).
+- `_qIns` (caps) sends one booking as it came (an object), not a list of one: specs read `postDataJSON()` as an object.
+- The roster's Code column: under a tight table (Arabic, the booth theme) the code itself is never cut short
+  (`.code-cell .code-full` tracks `auto minmax(min-content,1fr)`, the kind's name `width:0;min-width:100%` ellipsizes).
+- Budgets: customer 326.1 / 328 (main's), staff half 974.5 / 978 (956 -> 978), desk core 329.1 / 346.

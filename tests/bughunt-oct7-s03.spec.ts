@@ -62,6 +62,7 @@ test.describe('@staff:bookings staff list: Enter acts on a search only', () => {
     await page.locator('#mw-name').press('Enter');
     await expect.poll(() => rows.length).toBe(1);
     expect(rows[0].name).toBe('Ali');
+    await expect(page.locator('#mw-name')).toHaveValue(''); // the first add has landed (it empties the form): type the next after it
     // the account's name in full, but with a phone typed for the walk-up: still the walk-up, phone and all
     await page.locator('#mw-name').fill('Alia Saleh');
     await page.locator('#mw-phone').fill('0551234567');

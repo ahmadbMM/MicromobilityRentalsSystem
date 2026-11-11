@@ -92,7 +92,7 @@ test('the multi-rider add still puts a party on the list', async ({ page }) => {
       (Array.isArray(b) ? b : [b]).forEach((x: Record<string, unknown>) => rows.push(x));
     }
   });
-  await page.locator('#tab-waitlist').getByRole('button', { name: /Add to waitlist/i }).click();
+  await page.locator('#tab-waitlist').getByRole('button', { name: /Add to waitlist/i }).first().click(); // the header's (an empty list offers the same action)
   await page.locator('#wl-name').fill('Family Head');
   await page.locator('#wl-phone').fill('0551234567');   // required: a walk-up needs a contact
   await page.evaluate(`_wlxAdd()`);                     // re-renders, keeping what was typed

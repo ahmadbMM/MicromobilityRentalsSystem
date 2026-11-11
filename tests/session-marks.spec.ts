@@ -225,7 +225,8 @@ test.describe('@staff:sessions sessions in order and in colour', () => {
     await expect(hdr.locator('.smk.ev-jcc')).toHaveCount(1);
     // the Dashboard: today's sessions with their mark and status in green, the next one by its label, the night to close out by name
     await page.evaluate(`setStaffTab('dashboard')`);
-    const today = page.locator('#tab-dashboard .dash-row', { hasText: 'Jeddah Corniche Circuit' }).first();
+    // a session's own row (its status): the opening checklist's prompt (D10) names the session too
+    const today = page.locator('#tab-dashboard .dash-row', { hasText: 'Jeddah Corniche Circuit', has: page.locator('.dash-st') }).first();
     await expect(today.locator('.smk.ev-jcc')).toHaveCount(1);
     await expect(today.locator('.dash-st.st-open')).toHaveCount(1);
     await expect(page.locator('#tab-dashboard')).toContainText('Next: Circuit · Today · 9 PM');

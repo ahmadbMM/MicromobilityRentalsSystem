@@ -129,7 +129,7 @@ async function walkIn(page: Page, sid: string, ty: string) {
   await page.locator('#wi-name').fill('Walk Up');
   await page.locator('#wi-sess').selectOption(sid);
   await page.locator(`#walkin-modal [data-wi-type="${ty}"]`).click();
-  await page.locator('#walkin-modal .modal-footer .btn-secondary', { hasText: 'Add Walk-in' }).click();
+  await page.locator('#walkin-modal .modal-footer .btn-secondary', { hasText: 'Add walk-in' }).click();
 }
 
 test.describe('@staff:walk-in a bike type whose places are all taken', () => {

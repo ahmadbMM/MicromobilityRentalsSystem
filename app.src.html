@@ -9956,7 +9956,7 @@ function _doorPaint(){
       <form class="zg-find" role="search" data-on-submit="${_on('_doorFind',_EV)}"><input id="zg-q" type="text" enterkeyhint="search" autocomplete="off" spellcheck="false" maxlength="60" value="${esc(D.q)}" placeholder="${T('zgSearchPh')}" aria-label="${T('zgSearchPh')}" data-on-input="${_on('_doorFind')}"><button class="btn-secondary">${T('volFindBtn')}</button></form>
       <div id="zg-hits"></div><div id="zg-card"></div><div id="zg-arr"></div></div>`;}
   const put=(id,x)=>{document.getElementById(id).innerHTML=x;};
-  put('zg-sess',!ss.length?`<p class="zg-none">${T('zgNoSess')}</p>`:ss.length<2?`<p class="zg-none">${esc(_sessShortG(ss[0])+' · '+sessionTime(ss[0]))}</p>`
+  put('zg-sess',!ss.length?_emptyState(T('zgNoSess'),{icon:'ticket'}):ss.length<2?`<p class="zg-none">${esc(_sessShortG(ss[0])+' · '+sessionTime(ss[0]))}</p>`
     :`<div class="zg-pick" role="group" aria-label="${T('colSession')}">${ss.map(s=>`<button type="button" class="toggle-btn${s.id===D.sid?' active':''}" aria-pressed="${s.id===D.sid}" data-on-click="${_on('_doorSess',s.id)}"><bdi>${esc(_sessShortG(s))}</bdi> · ${esc(sessionTime(s))}</button>`).join('')}</div>`);
   const rows=Q.filter(e=>e.sessionId===D.sid),inn=rows.filter(e=>e.status==='active'||e.status==='done').sort((a,b)=>String(b.checkedInAt||'').localeCompare(String(a.checkedInAt||''))),left=rows.filter(e=>e.status==='waiting').length;
   const fig=(n,k)=>`<div class="zg-fig"><b>${n}</b>${T(k)}</div>`;
@@ -9974,8 +9974,8 @@ function _doorPaint(){
         ${D.err[m.id]?`<div class="zg-err" role="alert">${esc(D.err[m.id])}</div>`:''}
         ${w?`<div class="zg-why zg-${w.c}" role="status">${esc(w.x)}</div>`:`<button type="button" class="btn-primary zg-in"${busy||rg&&!_rgOk(D.rg[m.id])?' disabled':''} data-on-click="${_on('_doorIn',m.id)}">${T(busy?'ciSending':'zgCheckIn')}</button>`}</div>`;}).join('')}
     ${ready.length>1?`<button type="button" class="btn-primary zg-in" data-on-click="${_on('_doorIn',null)}">${esc(t('zgAll').replace('{0}',ready.length))}</button>`:''}</section>`);
-  put('zg-arr',D.sid?`<section aria-labelledby="zg-arr-t"><h2 id="zg-arr-t" class="zg-h2">${T('zgArrivedT')} <span class="zg-num">${inn.length}</span></h2>
-    ${inn.length?`<ul class="zg-list">${inn.slice(0,300).map(e=>`<li><button type="button" class="zg-row" data-on-click="${_on('_doorOpen',e.id)}"><span class="zg-num"><bdi>${esc(e.checkedInAt?_tkHm(e.checkedInAt):'')}</bdi></span><span class="zg-rn">${num(e)}${_snChip(e)}${_blkChip(e)}</span>${e.checkedInBy?`<span class="zg-num"><bdi>${esc(e.checkedInBy)}</bdi></span>`:''}</button></li>`).join('')}</ul>`:`<p class="zg-none">${T('zgNoneYet')}</p>`}</section>`:'');
+  put('zg-arr',D.sid?`<section aria-labelledby="zg-arr-t"><h2 id="zg-arr-t" class="zg-h2">${T('zgArrivedT')}<span class="ah-n">${inn.length}</span></h2>
+    ${inn.length?`<ul class="zg-list">${inn.slice(0,300).map(e=>`<li><button type="button" class="zg-row" data-on-click="${_on('_doorOpen',e.id)}"><span class="zg-num"><bdi>${esc(e.checkedInAt?_tkHm(e.checkedInAt):'')}</bdi></span><span class="zg-rn">${num(e)}${_snChip(e)}${_blkChip(e)}</span>${e.checkedInBy?`<span class="zg-num"><bdi>${esc(e.checkedInBy)}</bdi></span>`:''}</button></li>`).join('')}</ul>`:_emptyState(T('zgNoneYet'),{icon:'people'})}</section>`:'');
   if(window.mmLoading&&S.dataLoaded)window.mmLoading.hide();
 }
 function _doorSess(id){_door().sid=id;_doorPaint();}
@@ -34081,8 +34081,8 @@ function _capAsk(f){return askConfirm({title:t('capFullQ').replace('{0}',typeLab
 async function _capPre(rows,c){if(!c.asked){c.asked=1;const f=_capOver(rows);if(f){if(!await _capAsk(f))return false;c.ok=f;}}return true;}
 function _capLog(c,rows){if(!c.ok||c.lg)return;c.lg=1;logAction(t('capLog').replace('{0}',typeLabel(c.ok.ty))+': '+rows.map(x=>x.name).filter(Boolean).join(', '),{k:'typecap',e:'booking',id:rows[0]&&rows[0].id});}
 async function _qIns(rows,c){
-  c=c||{};rows=[].concat(rows);
-  const no={error:{code:'READONLY'}},go=()=>c.ok?sb.from('queue_entries').insert(rows).setHeader('x-mm-type-cap','ok'):sb.from('queue_entries').insert(rows);
+  c=c||{};const body=rows;rows=[].concat(rows); // one booking goes as it came (an object), not a list of one
+  const no={error:{code:'READONLY'}},go=()=>c.ok?sb.from('queue_entries').insert(body).setHeader('x-mm-type-cap','ok'):sb.from('queue_entries').insert(body);
   if(!await _capPre(rows,c))return no;
   let r=await go();
   if(!c.ok&&r&&r.error&&/TYPE_FULL/.test(r.error.message||'')){
@@ -52540,11 +52540,11 @@ function _fupAhSec(cid){
 function _fupList(){
   const o=_fup(),v=S._fupV==='done'?'done':'open',d=todayStr();_fupNeed(v,6e4);
   const pill=(k,l)=>`<button type="button" class="filter-pill${v===k?' active':''}" aria-pressed="${v===k}" data-on-click="${_on('_fupView',k)}">${esc(l)}</button>`;
-  const head=`<div class="filter-row fup-pills">${pill('open',t('afuOpenV'))}${pill('done',t('afuDoneV'))}</div>`;
+  const head=`<div class="filter-row cmy-nav fup-pills">${pill('open',t('afuOpenV'))}${pill('done',t('afuDoneV'))}</div>`;
   if(o.miss)return head+_emptyState(esc(t('dbPending')));
   if(!o.got[v+'@'+d])return head+(o.bad[v+'@'+d]?_loadErr(esc(t('errConnection')),_on('_fupRetry',v)):skeletonList());
   const l=v==='done'?[...o.rows.values()].filter(r=>r.done_at).sort((a,b)=>String(b.done_at).localeCompare(String(a.done_at))):_fupOpenRows();
-  return head+(l.length?`<ul class="fup-list fup-page">${l.map(r=>_fupLi(r,1)).join('')}</ul>`:_emptyState(esc(t(v==='done'?'afuNoneDone':'afuNone'))));
+  return head+(l.length?`<ul class="fup-list fup-page">${l.map(r=>_fupLi(r,1)).join('')}</ul>`:_emptyState(esc(t(v==='done'?'afuNoneDone':'afuNone')),{icon:'bell'}));
 }
 function _fupView(k){S._fupV=k;renderCommunity();}
 function _fupRetry(v){const o=_fup(),k=v+'@'+todayStr();delete o.at[k];delete o.bad[k];renderCommunity();}

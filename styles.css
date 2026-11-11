@@ -6891,10 +6891,10 @@ body.view-staff .ca-link{padding-block:4px;margin-block:-4px;} /* 24x24 hit area
 .cfn-range{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
 .cfn-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}
 .cfn-stat{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--sf-line2,var(--border));border-radius:var(--sf-r-card,12px);background:var(--sf-card,var(--s1))}
-.cfn-stat b{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
-.cfn-stat span{font-size:12px;color:var(--muted)}
-.cfn-h{margin:16px 0 6px;font-size:14px;font-weight:600}
-.cfn-note{margin:10px 0;color:var(--muted);font-size:13px}
+.cfn-stat b{font-size:var(--sf-fs-xl);font-weight:600;font-variant-numeric:tabular-nums}
+.cfn-stat span{font-size:var(--sf-fs-xs);color:var(--muted)}
+.cfn-h{margin:16px 0 6px;font-size:var(--sf-fs-md);font-weight:600}
+.cfn-note{margin:10px 0;color:var(--muted);font-size:var(--sf-fs-sm)}
 .cfn-t th,.cfn-t td{padding:8px 10px}
 .cfn-t .cfn-num{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ca-msg-sub{font-size:var(--sf-fs-sm);color:var(--muted);line-height:1.5;margin:8px 0 12px}
@@ -11220,6 +11220,10 @@ body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-pe
 .code-full .code-c{grid-row:1;grid-column:2;font-weight:700;}
 .code-full .code-kn{grid-row:2;grid-column:2;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:10px;font-weight:600;color:var(--muted);}
 :is(#tab-queue,#tab-waitlist) .code-cell .code-tag{margin:0;max-width:14em;}
+/* the code itself is never cut short in a tight roster (Arabic, the booth theme: "WELC...", 2026-11-11): its column is at
+   least the code's width; the kind's name below fills the code's width and ellipsizes (the tag's title carries it whole) */
+:is(#tab-queue,#tab-waitlist) .code-cell .code-full{grid-template-columns:auto minmax(min-content,1fr);}
+:is(#tab-queue,#tab-waitlist) .code-cell .code-full .code-kn{width:0;min-width:100%;}
 :is(#tab-queue,#tab-waitlist) .code-cell .code-tag+.code-tag{margin-top:4px;}
 :is(#tab-queue,#tab-waitlist) .code-cell{white-space:normal;}
 /* the rider's ticket: the kind's name, then the code, then what it took off */
