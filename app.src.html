@@ -35809,7 +35809,7 @@ function _vlSplitHtml(base){
       <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vlStaffOpen",sid)}">${_artIcon('people',12)} ${t('vlStaffBtn')}</button>
       <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vlCfgOpen",sid)}">${_artIcon('cog',12)} ${t('vlCfgBtn')}</button>
       <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vrbOpen",sid)}">${ICON_PRINT} ${t('vrbBtn')}</button>
-      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("printVlReceipts",sid)}">${ICON_PRINT} ${t('vrbRcBtn')}</button>
+      ${_isArena(_sessGet(sid))?'':`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("printVlReceipts",sid)}">${ICON_PRINT} ${t('vrbRcBtn')}</button>`}
     </div>`:''}`;
 }
 function _on_renderStaffQueue_16(event,el){S.sfLimit=(S.sfLimit||150)+200;renderStaffQueue()}
@@ -46043,7 +46043,7 @@ const VRB_SETS={
 };
 // What each race kind offers in the builder: the Arena race has no T-shirts, 5 km times, tickets or receipts.
 const VRB_AR_OFF=['shirt','t5k','dist','kamin','shirts','fShirt','fT5k'];
-function _vrbAr(){const st=S._vrb;return !!st&&_isArena(_sessGet(st.sid));}
+function _vrbAr(sid){const id=sid||(S._vrb&&S._vrb.sid);return !!id&&_isArena(_sessGet(id));} // sid: a print started outside the builder
 const VRB_SETKEYS={org:'vrbSetOrg',kamin:'vlKaminBtn',start:'vrbSetStart',shirts:'vrbSetShirts',contacts:'vrbSetContacts',pay:'vrbSetPay'};
 const VRB_SECS=[{k:'summary',key:'repOptSummary'},{k:'matrix',key:'vrbSecMatrix'},{k:'shirts',key:'vrbSecShirts'},{k:'teams',key:'vrbSecTeams'},{k:'pairs',key:'vrbSecPairs'},{k:'list',key:'vrbSecList'}];
 const VRB_AGES=[[16,17],[18,24],[25,34],[35,44],[45,200]];
@@ -46066,8 +46066,8 @@ function _vrbOpts(){
   return S._vrbO;
 }
 function _vrbSave(){try{localStorage.setItem('cq_vl_rep_opts',JSON.stringify(_vrbOpts()));}catch(_){}}
-function _vrbFilterDefs(){
-  const ns=t('vrbNotSet'),all=['all',t('filterAll')],ar=_vrbAr(),K=RACE_KIND[ar?'arena':'vlap'];
+function _vrbFilterDefs(sid){
+  const ns=t('vrbNotSet'),all=['all',t('filterAll')],ar=_vrbAr(sid),K=RACE_KIND[ar?'arena':'vlap'];
   return[
     ['fStatus',t('filterStatus'),[all,['booked',t('vrbStBooked')],['notin',t('vrbStNotIn')],['in',t('tkStIn')],['done',t('vrbStDone')],['wl',t('statusWaitlist')]]],
     ['fRace',t('vlRaceLabel'),[all,...(ar?[]:[['singles',t('vrbAllSingles')],['doubles',t('vrbAllDoubles')]]),...K.races.map(r=>[r,_vlRaceTxt(r)]),['none',t('vlStNoRace')]]],
@@ -46307,6 +46307,7 @@ function _vrbXlsx(sheets,fname){
 }
 async function printVlReport(sid,opts){
   const win=window.open('','_blank','width=1300,height=760'); // on the tap: a window opened after the read would be blocked
+  if(!opts)_vrbDropStale(sid||S.sfSession);
   const o=opts||_vrbOpts(),d=await _vrbLoad(sid);
   if(!d){try{win&&win.close();}catch(_){}return;}
   const b=_vrbBuild(d,o),s=d.sess,what=_vrbLabel(o,s);
@@ -46316,6 +46317,7 @@ async function printVlReport(sid,opts){
   if(_openReport(html,1300,760,win)===null)toast(t('repPopupBlocked'),'info');
 }
 async function exportVlXlsx(sid,opts){
+  if(!opts)_vrbDropStale(sid||S.sfSession);
   const o=opts||_vrbOpts(),d=await _vrbLoad(sid);if(!d)return;
   const b=_vrbBuild(d,o),what=_vrbLabel(o,d.sess),grp=o.group!=='none',sheets=[];
   if(o.secs.list||!(o.secs.teams||o.secs.matrix||o.secs.shirts||o.secs.pairs)){
@@ -46357,6 +46359,7 @@ async function exportVlXlsx(sid,opts){
 // a Doubles team is one block headed Doubles team with its code, the partners side by side.
 async function printVlReceipts(sid){
   const win=window.open('','_blank','width=1100,height=760');
+  _vrbDropStale(sid||S.sfSession); // the Bookings bar prints without opening the builder: a pick saved for the other race kind goes too
   const o=_vrbOpts(),d=await _vrbLoad(sid);
   if(!d){try{win&&win.close();}catch(_){}return;}
   const b=_vrbBuild(d,o),s=d.sess,ids=b.rows.filter(r=>r.e.vlReceiptAt).map(r=>r.e.id),img=new Map();
@@ -46398,8 +46401,8 @@ function _vrbOpen(sid){
 // time, a Victory Lap race or division, saved on a VL night and then the Arena race opened) is not on screen and
 // its select reads "All", yet _vrbOk still applied it and emptied the report. It goes back to "All", the sort
 // to the number (as _accDropStale does for the account builder).
-function _vrbDropStale(){
-  const o=_vrbOpts(),defs=_vrbFilterDefs(),ar=_vrbAr();let drop=false;
+function _vrbDropStale(sid){
+  const o=_vrbOpts(),defs=_vrbFilterDefs(sid),ar=_vrbAr(sid);let drop=false;
   Object.keys(_vrbDefaults()).filter(k=>/^f[A-Z]/.test(k)).forEach(k=>{
     if(o[k]!=='all'&&!defs.some(([dk,,ops])=>dk===k&&ops.some(op=>op[0]===o[k]))){o[k]='all';drop=true;}
   });
@@ -46420,7 +46423,7 @@ function _vrbToggle(kind,k){
 }
 function _vrbSet(k,v){const o=_vrbOpts();o[k]=v;_vrbSave();_vrbCount();}
 function _vrbUseSet(k){const o=_vrbOpts(),d=_vrbDefaults(k);o.set=k;o.cols=d.cols;_vrbSave();_vrbPaint();}
-function _vrbReset(){S._vrbO=_vrbDefaults();_vrbSave();_vrbPaint();}
+function _vrbReset(){S._vrbO=_vrbDefaults(_vrbAr()?'org':'kamin');_vrbSave();_vrbPaint();} // the Arena race: back to the organisers' set, as _vrbOpen
 function _vrbPaint(){
   const st=S._vrb;if(!st)return;const s=_sessGet(st.sid);if(!s)return;
   const m=document.getElementById('print-opts-modal'),o=_vrbOpts();
@@ -47770,12 +47773,16 @@ function _scIndex(rows){
 }
 function _scMe(){try{return localStorage.getItem('cq_role_uid')||null;}catch(_){return null;}} // the signed-in staff account (as _prefAll reads it)
 function _scMissingErr(err){const s=String((err&&(err.code+' '+err.message))||'');return /PGRST205|42P01|staff_comments/.test(s);}
+// A comment added or deleted while a read is out (S._scGen moves on) is never undone by that read's older rows, and a
+// read asked for meanwhile runs once it is done (bug hunt 2026-11-11: a note just added vanished for a minute).
 async function _scLoad(){
-  if(S._scBusy||!sb)return;S._scBusy=true;
-  let changed=false;
+  if(!sb)return;if(S._scBusy){S._scAgain=true;return;}
+  S._scBusy=true;S._scAgain=false;
+  const gen=S._scGen||0;let changed=false;
   try{
     const{data,error}=await _pagedAll(()=>sb.from('staff_comments').select(SC_COLS).order('created_at').order('id'));
     if(error){if(_scMissingErr(error))S._scMissing=true;}
+    else if((S._scGen||0)!==gen)S._scAgain=true;
     else{
       const rows=data||[],sig=rows.length+':'+rows.map(r=>r.id).join(',');
       S._scMissing=false;changed=sig!==S._scSig;S._scSig=sig;_scIndex(rows);
@@ -47783,6 +47790,7 @@ async function _scLoad(){
   }catch(e){}
   finally{S._scBusy=false;S._scAt=Date.now();}
   if(changed)_scRepaint();
+  if(S._scAgain){S._scAgain=false;_scLoad();}
 }
 // A minute old (or never read): read again; the counts on show stay meanwhile. Before the table exists, every ten minutes.
 function _scEnsure(){if(sb&&!S._scBusy&&Date.now()-(S._scAt||0)>(S._scMissing?600000:60000))_scLoad();}
@@ -47829,7 +47837,7 @@ function _scOpen(kind,id){
 function _on__scBg(event,el){if(event.target===el)_scClose();}
 function _on__scInput(event,el){S._scDraft=el.value;}
 function _on__scKey(event,el){if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();_scAdd();}}
-function _scClose(){S._scOpen=null;const m=document.getElementById('sc-sheet');if(m){m.style.display='none';m.innerHTML='';}}
+function _scClose(){S._scOpen=null;S._scShown=null;const m=document.getElementById('sc-sheet');if(m){m.style.display='none';m.innerHTML='';}}
 function _scPaint(){
   const o=S._scOpen;if(!o)return;
   let m=document.getElementById('sc-sheet');
@@ -47839,6 +47847,18 @@ function _scPaint(){
     const mine=(me&&c.author_id===me)||isAdmin();
     return`<li class="sc-item" data-sc-id="${esc(String(c.id))}"><div class="sc-meta"><b>${esc(c.author_name||t('scStaff'))}</b> · ${esc(fmtStamp(c.created_at))}${mine?`<button type="button" class="btn-sm btn-muted sc-del" data-on-click="${_on("_scDelete",String(c.id))}">${t('scDeleteBtn')}</button>`:''}</div><div class="sc-body">${esc(c.body)}</div></li>`;
   }).join(''):`<li class="sc-none">${t('scNone')}</li>`;
+  // The same thread already on show: the list and the heading change, the note being typed keeps its focus, caret and
+  // keyboard (bug hunt 2026-11-11: any desk's comment, read each minute, rebuilt the sheet under the typing).
+  const key=_scKey(o.kind,o.id),ta=m.querySelector('#sc-new');
+  if(ta&&S._scShown&&S._scShown.key===key){
+    const ul=m.querySelector('.sc-list'),h=m.querySelector('#sc-sheet-t'),ad=m.querySelector('.sc-add');
+    if(ul&&S._scShown.items!==items){ul.innerHTML=items;ul.scrollTop=ul.scrollHeight;}
+    if(h)h.textContent=t('scTitle')+(what?' · '+what:'');
+    if(ad)ad.disabled=!!S._scSaving;
+    if(ta.value!==(S._scDraft||''))ta.value=S._scDraft||''; // emptied after an Add
+    S._scShown={key,items};return;
+  }
+  S._scShown={key,items};
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__scBg",_EV,_EL)}">
     <div class="confirm-box sc-sheet" role="dialog" aria-modal="true" aria-labelledby="sc-sheet-t">
@@ -47867,7 +47887,7 @@ async function _scAdd(){
   const got=(res&&Array.isArray(res.data)&&res.data[0])||{};
   const row={id:got.id??('tmp'+Date.now()),created_at:got.created_at||new Date().toISOString(),kind:o.kind,target_id:o.id,
     body:got.body||body,author_id:got.author_id||_scMe(),author_name:got.author_name||S._meName||_opName()||null};
-  const all=[];(S._scMap||new Map()).forEach(l=>all.push(...l));all.push(row);_scIndex(all);
+  const all=[];(S._scMap||new Map()).forEach(l=>all.push(...l));all.push(row);S._scGen=(S._scGen||0)+1;_scIndex(all);
   S._scSig=null;S._scDraft='';
   logAction(`${t('scTitle')}: ${_scWhat(o.kind,o.id)}`,{k:'note',e:o.kind,id:o.id});
   toast(t('scAdded'),'success');
@@ -47881,7 +47901,7 @@ async function _scDelete(cid){
   if(!ok)return;
   let res;try{res=await sb.from('staff_comments').delete().eq('id',c.id).select('id');}catch(e){res={error:e};}
   if(_writeErr(res,'staff comment delete'))return;
-  const all=[];(S._scMap||new Map()).forEach(l=>all.push(...l.filter(x=>String(x.id)!==String(cid))));_scIndex(all);
+  const all=[];(S._scMap||new Map()).forEach(l=>all.push(...l.filter(x=>String(x.id)!==String(cid))));S._scGen=(S._scGen||0)+1;_scIndex(all);
   S._scSig=null;
   toast(t('scDeleted'),'success');
   _scRepaint();
@@ -48283,7 +48303,7 @@ async function _ckSetSave(){
 // nights on show - riders without a bike, riders who owe, bikes out over the overdue time - for a handover.
 async function _myShiftOpen(){
   S._dkFrom=document.activeElement;
-  const op=_opName(),since=todayStr()+'T00:00:00+03:00';
+  const op=_opName(),since=new Date(todayStr()+'T00:00:00+03:00').toISOString(); // staff_actions.at is text in UTC 'Z': compare a UTC bound, or 00:00-02:59 KSA drops out
   const today=todayStr(),onShow=e=>S.sfSession==='all'?String(e.sessionDate||e.sessionId||'').slice(0,10)===today:e.sessionId===S.sfSession;
   const q=getQueue().filter(onShow);
   const noBike=q.filter(_awaitsBike);
@@ -48501,8 +48521,11 @@ async function _ciCustomerShowed(){
 function _partyMoney(members){
   const live=members.filter(e=>!['cancelled','noshow','removed'].includes(e.status));
   const r2=n=>Math.round(n*100)/100;
-  const total=r2(live.reduce((s,e)=>s+(e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e))-(e.paid?0:_walPaid(e)),0));
-  const paid=r2(live.filter(e=>e.paid).reduce((s,e)=>s+(e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e)),0));
+  // _ciWal: the wallet part of a rider the check-in is about to mark Paid (_ciAsConfirmed) - the desk takes the rest
+  // (bug hunt 2026-11-11: the drawer said Paid SAR 75 for a rider who had 30 of it in from the wallet).
+  const own=e=>(e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e))-(Number(e._ciWal)||0);
+  const total=r2(live.reduce((s,e)=>s+own(e)-(e.paid?0:_walPaid(e)),0));
+  const paid=r2(live.filter(e=>e.paid).reduce((s,e)=>s+own(e),0));
   return{total,paid,due:r2(total-paid),count:live.length,paidCount:live.filter(e=>e.paid).length};
 }
 // What Confirm would charge this rider given the type and payment picked in the modal - the
@@ -48544,7 +48567,8 @@ function _ciAsConfirmed(m){
   const cur=m.id===S._ciId,d=cur?null:(S._ciDrafts||{})[m.id];
   const ty=cur?S._ciType:(d&&d.type)||resolvedType(m)||'Any';
   const mode=cur?S._ciPaid:(d&&d.paid)||(m.paid?((m.price??DEFAULT_PRICE)===0?'house':'card'):'pending');
-  return{...m,price:_ciPendingPrice(m,ty,mode),paid:mode==='card'||mode==='house'};
+  const price=_ciPendingPrice(m,ty,mode),wal=mode==='card'&&!m.paid?Math.min(Number(m.walletPaid)||0,price+addonsCost(entryAddons(m))):0;
+  return{...m,price,paid:mode==='card'||mode==='house',_ciWal:wal};
 }
 function _partyOf(e){
   const k=_partyKey(e);if(!k)return[e];
@@ -49002,7 +49026,7 @@ async function _deskMove(e,was,patch,lk,direct){
 }
 function _dqDropAll(){
   _DQ=[];_dqDbP=null;
-  try{localStorage.removeItem('cq_desk_outbox');}catch(_){}
+  try{localStorage.removeItem('cq_desk_outbox');localStorage.removeItem('cq_desk_outbox_whole');}catch(_){}
   try{if(typeof indexedDB!=='undefined')indexedDB.deleteDatabase('mm-desk');}catch(_){}
 }
 // What a check-in will make of the row and the bikes, laid over them until it is sent.
@@ -49053,22 +49077,33 @@ function _dqDb(){
   });
   return _dqDbP;
 }
+// The changes kept in localStorage are never hidden behind an older IndexedDB list (bug hunt 2026-11-11): a page whose
+// IndexedDB refused a write keeps the whole list there (cq_desk_outbox_whole), which stands until IndexedDB takes a
+// write again; one that had no IndexedDB (none, or its 3 s open ran out) is added to IndexedDB's list by op id.
 async function _dqRead(){
   const db=await _dqDb();
-  if(db){
+  let ls=null,whole=false;
+  try{const l=JSON.parse(localStorage.getItem('cq_desk_outbox')||'null');if(Array.isArray(l))ls=l;whole=localStorage.getItem('cq_desk_outbox_whole')==='1';}catch(_){}
+  if(db&&!(ls&&whole)){
     const v=await new Promise(res=>{try{const rq=db.transaction(['ops'],'readonly').objectStore('ops').get('list');rq.onsuccess=()=>res(rq.result);rq.onerror=()=>res(undefined);}catch(_){res(undefined);}});
-    if(Array.isArray(v))return v;
+    if(Array.isArray(v)){
+      if(!ls||!ls.length)return v;
+      const have=new Set(v.map(o=>o&&o.oid));
+      return[...v,...ls.filter(o=>o&&!have.has(o.oid))].sort((a,b)=>(Number(a&&a.at)||0)-(Number(b&&b.at)||0));
+    }
   }
-  try{const l=JSON.parse(localStorage.getItem('cq_desk_outbox')||'[]');return Array.isArray(l)?l:[];}catch(_){return[];}
+  return ls||[];
 }
 async function _dqWrite(list){
   const db=await _dqDb();
   if(db){
     const ok=await new Promise(res=>{try{const tx=db.transaction(['ops'],'readwrite');tx.objectStore('ops').put(list,'list');tx.oncomplete=()=>res(true);tx.onerror=tx.onabort=()=>res(false);}catch(_){res(false);}});
-    if(ok){try{localStorage.removeItem('cq_desk_outbox');}catch(_){}return true;}
+    if(ok){try{localStorage.removeItem('cq_desk_outbox');localStorage.removeItem('cq_desk_outbox_whole');}catch(_){}return true;}
   }
-  if(!list.length){try{localStorage.removeItem('cq_desk_outbox');}catch(_){}return true;}
-  return _lsSetCritical('cq_desk_outbox',JSON.stringify(list));
+  if(!list.length&&!db){try{localStorage.removeItem('cq_desk_outbox');}catch(_){}return true;}
+  const ok=_lsSetCritical('cq_desk_outbox',JSON.stringify(list));
+  if(ok&&db)try{localStorage.setItem('cq_desk_outbox_whole','1');}catch(_){} // IndexedDB's own list is now the older one
+  return ok;
 }
 function _dqLock(name,fn){try{if(navigator.locks&&navigator.locks.request)return navigator.locks.request(name,()=>fn());}catch(_){}return fn();}
 // The list read, changed by fn and written back, one tab at a time. false when it could not be stored.
@@ -49482,10 +49517,10 @@ function renderCheckinModal(){
         const mine=_partyMoney([_pend]),all=_party.length>1?_partyMoney(_party.map(m=>_ciAsConfirmed(m))):null;
         // One line: this rider's amount; for a party, the party's total and what is still due.
         return `<div id="ci-money" class="bkm-money">
-          <b class="bkm-fs14">${_money(mine.total)}</b>${mine.paidCount?`<span class="bkm-cgreen">✓ ${t('paidLabel')}</span>`:''}
+          <b class="bkm-fs14">${_money(mine.total)}</b>${mine.paidCount?`<span class="bkm-cgreen">✓ ${t('paidLabel')}</span>`:''}${!e.paid&&S._ciPaid!=='house'&&Number(e.walletPaid)>0?`<span class="bkm-cmuted">${t('cwTitle')} ${_money(Number(e.walletPaid))}</span>`:''}
           ${all?`<span class="bkm-cmutedl">·</span><span class="bkm-cmuted">${t(_batch?'ciBatchWord':'ciPartyWord')} ${_money(all.total)}</span><span class="${all.due>0?'bkm-corange':'bkm-cgreen'}">${all.due>0?`${_money(all.due)} ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</span>`:''}
         </div>`;})()}
-      ${(free||ownFree)?'':_payOnl(e)?`<div class="form-group bkm-fg810"><label>${t('colPayment')}</label><div class="ci-opts"><span class="pay-toggle paid ci-pay-onl">✓ ${esc(t('payOnline'))}</span></div></div>`:`<div class="form-group bkm-fg810"><label>${t('colPayment')}${!e.paid?` · ${_money(_ciPendingPrice(e),_NOISO)}`:''}</label>
+      ${(free||ownFree)?'':_payOnl(e)?`<div class="form-group bkm-fg810"><label>${t('colPayment')}</label><div class="ci-opts"><span class="pay-toggle paid ci-pay-onl">✓ ${esc(t('payOnline'))}</span></div></div>`:`<div class="form-group bkm-fg810"><label>${t('colPayment')}${!e.paid?` · ${_money(Math.max(0,_ciPendingPrice(e)-(Number(e.walletPaid)||0)),_NOISO)}`:''}</label>
         <div class="ci-opts">
           ${payBtn('pending',' '+t('pendingLabel'))}
           ${payBtn('card','✓ '+t('paidLabel'))}
@@ -49662,7 +49697,13 @@ function _ciConfirmBlocked(){
   if((o==='checkin'||o==='waiting')&&(_ciBikeTimer||S._ciBikeMsg===t('ciBikeLooking')))return true;
   return o==='checkin'&&_ciBikeBlocked();
 }
-function _ciPickOutcome(v){S._ciOutcome=v;renderCheckinModal();}
+// Waiting saves only a payment that was tapped (bug hunt 2026-11-11): the Paid an unpaid rider's drawer opens on recorded a
+// card payment for a rider only held for later. The pill and the button show Pending there; Check in brings the Paid back.
+function _ciPickOutcome(v){
+  const e=_qGet(S._ciId);
+  if(e&&!e.paid&&S._ciPayPicked!==S._ciId&&(v==='waiting'||v==='checkin'))S._ciPaid=v==='waiting'?'pending':'card';
+  S._ciOutcome=v;renderCheckinModal();
+}
 function confirmCheckinOutcome(){
   const o=S._ciOutcome||'checkin';
   if(o==='waiting')return applyCheckinChanges();
@@ -49763,7 +49804,8 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
     // registrations; showCheckinModal starts loading them, and a Confirm quicker than that load
     // used to price them at the public fare. Wait for it here.
     if(!S.ridersLoaded&&ty!==e.typePreference){const _s=_sessDisp(e.sessionId);if(_s&&_s.ride_kind==='petromin')await loadRiders();}
-    const mode=_payOnl(e)?'card':(ty==='Own'&&!(addonsCost(entryAddons(e))>0))?'house':(S._ciPaid||'pending'); // a bike owner is free; paid online stays as it was paid
+    const _pick=_applyOnly&&S._ciPayPicked!==e.id?(e.paid?((e.price??DEFAULT_PRICE)===0?'house':'card'):'pending'):S._ciPaid; // a save keeps the row's own payment unless one was tapped (_ciPickOutcome)
+    const mode=_payOnl(e)?'card':(ty==='Own'&&!(addonsCost(entryAddons(e))>0))?'house':(_pick||'pending'); // a bike owner is free; paid online stays as it was paid
     const isHouseNow=e.paid&&(e.price??DEFAULT_PRICE)===0;
     const c=e.customerId?(S.customers||[]).find(x=>x.id===e.customerId):null;
     const houseForTy=c&&_custHouseFor(c,ty)&&String(c.name||'').trim().toLowerCase()===String(e.name||'').trim().toLowerCase();
@@ -49782,7 +49824,7 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
       else{_hs='later';_n6bLater=true;_n6bHouseAmt=Number(typePrice())||0;}
     }
     if(S._ciId!==e.id)return; // the modal moved on while the keypad was open
-    if(_hs==='later')_method=undefined;
+    if(_hs==='later'){_method=undefined;if(!e.paid)setPrice(typePrice());} // the new type's fare rides in the check-in: a house refused or not given after it leaves the right amount owed (bug hunt 2026-11-11)
     else if(_hs==='ok'){e.paid=true;e.price=0;e.pay_method=null;_method=undefined;S._ciHsOk=e.id;}
     else if(mode==='house'){
       if(!e.paid)patch.paid=true;
@@ -49812,13 +49854,14 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
   // Confirm: save and stand back. The bike is written as a reservation (no claim, no arrival
   // stamp), exactly as Reserve bike does, so the rider can still be checked in later.
   if(_applyOnly){
-    if(_bikeId)patch.assigned_bike_id=_bikeId;
+    if(_bikeId){patch.assigned_bike_id=_bikeId;if(e.reserved){patch.reserved=false;patch.reserved_bike_no=null;}if(e.toReserve)patch.to_reserve=false;} // a fleet bike replaces a typed number and answers the mark, as in reserveBike
     if(!Object.keys(patch).length){closeCheckinModal();return;}
     const _qa=await sb.from('queue_entries').update(patch).eq('id',e.id).in('status',['waiting','waitlist']).select('id');
     if(_writeErr(_qa,'save',()=>applyCheckinChanges()))return;
     // Checked in, cancelled or marked no-show on another desk meanwhile: nothing was saved, so no
     // Payment line in the log and no silent close as if it had been (2026-10-14).
     if(!_landed(_qa)){_ciDropDraft(e.id);closeCheckinModal();return _lostRace();}
+    if(_bikeId){e.assignedBikeId=_bikeId;if(patch.reserved===false){e.reserved=false;e.reservedBikeNo=null;}if(patch.to_reserve===false)e.toReserve=false;}
     // a bike reserved for someone else and taken here ("assign anyway") moves, as Reserve bike does
     if(_bikeId&&_qa.data&&_qa.data.length)await _dropOtherReservations([_bikeId],e.id);
     if(patch.paid!==undefined||patch.price!==undefined)logAction(`${t('colPayment')}: #${e.queueNum} ${e.name}`,{k:'pay',e:'booking',id:e.id,amt:patch.price!==undefined?patch.price:null});
@@ -49875,7 +49918,7 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
   S._flashId=e.id;S._flashColor='green';_qPaintSoon(); // the row moves now (its pending mark off); the re-sync below confirms it
   if(_n6bLater)await _n6bHouseAfter(e); // on the house, now that the rider is in (BK03)
   await _ciLeaveWl(e,_wasWl); // the add-ons' stock and the Staff List row, kept for an Undo check-in
-  if(_gotBikes.length)await _dropOtherReservations(_gotBikes,e.id);
+  const _movedRsv=_gotBikes.length?await _dropOtherReservations(_gotBikes,e.id):[]; // "assign anyway": given back by an Undo (bug hunt 2026-11-11)
   // Undoable like Express, bulk and Hand-over (2026-10-09, D5): the topbar's Undo / History > Log
   // put back the status, the bike and the payment this check-in recorded. pushUndo logs the line.
   let _undoPay=_ciPayChanged(_prevPay,S._ciHsOk===e.id?{...patch,paid:true,price:0,pay_method:null,card_amount:null}:patch);S._ciHsOk=null; // a house set through staff_set_house goes back with an Undo too
@@ -49887,6 +49930,7 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
     const w=await _undoCheckinWrite(cur,_wasWl?'waitlist':'waiting',_ciPrevPay.get(e.id));
     if(!w||w.lost){await _reloadRows([e.id]);renderStaffQueue();return false;}
     _ciPrevPay.delete(e.id);_ciUndoLocal(e.id,w);renderStaffQueue();
+    if(_movedRsv.length)await _rsvGiveBack(_movedRsv);
     await _reloadRows([e.id]);renderStaffQueue();
   };
   pushUndo(`${t('checkInBtn')}: #${e.queueNum} ${e.name}`,_ciUndoFn,{k:'checkin',e:'booking',id:e.id,amt:e.paid?_bookingAmount(e):null});
@@ -50445,7 +50489,10 @@ async function _confirmAssignRun(){
   // And one bike of the booked type (the bug hunt, 2026-11-10): the check-in modal's rule, an edited price stands unless
   // the type changes (typePrice). The list fare went over a price set in this very picker (PIN and action log) and on a
   // swap to another bike of the type. A booking on Any, a real type change and a booking with no price yet still take it.
-  const _sameType=!!(rider&&rider.price!=null&&selected.length===1&&rider.typePreference&&rider.typePreference!=='Any'&&selected[0].type===rider.typePreference);
+  // Not when the bike the rider has now is of another type (bug hunt 2026-11-11): that bike set the price (a Road fare on a
+  // Hybrid booking), and a change back to a Hybrid kept it.
+  const _sameType=!!(rider&&rider.price!=null&&selected.length===1&&rider.typePreference&&rider.typePreference!=='Any'&&selected[0].type===rider.typePreference
+    &&alreadyAssigned.every(id=>{const b=allBikes.find(x=>x.id===id);return !b||b.type===rider.typePreference;}));
   if(rider&&selected.length>0&&!_paidRow&&!_premiumTier&&!_promoPriced&&!_freeRide&&!_sameType){
     // On THIS booking's fare table: a Petromin employee from the ride's own form rides at the
     // employee fare, and priceForBike alone charged them the public 57.50 for a bike their
@@ -50459,6 +50506,9 @@ async function _confirmAssignRun(){
   const isReassign=rider&&rider.status==='active';
   
   const toFree=alreadyAssigned.filter(id=>!S.modalBikes.includes(id));
+  // An Undo puts the fare back only while the row is still unpaid at the fare the change set (bug hunt 2026-11-11): a payment
+  // taken since stands at what was paid.
+  const _undoPrice=()=>(priceUpdate.price!=null&&prevPrice!=null&&prevPrice!==priceUpdate.price)?_wr(sb.from('queue_entries').update({price:prevPrice}).eq('id',riderId).eq('paid',false).eq('price',priceUpdate.price),'undo'):null;
   // A bike change goes through staff_swap_bike, as the Hand-over does: the old bike's open
   // assignment closes as 'swapped', the old bike is freed and the new one claimed and assigned in
   // one transaction. Written straight to the rows, the old assignment stayed open: staff_checkin
@@ -50636,20 +50686,20 @@ async function _confirmAssignRun(){
         let r;try{r=await sb.rpc('staff_swap_bike',{p_booking_id:riderId,p_new_bike_id:alreadyAssigned[0]});}catch(err){r={error:err};}
         if(r&&r.error){toast(_rpcMessage(r.error),'error');await loadData();renderStaffQueue();return false;}
         if(!(r&&r.data&&r.data.ok===true)){toast(t('errSomethingWrong'),'error');await loadData();renderStaffQueue();return false;}
-        if(priceUpdate.price!=null&&prevPrice!=null)await _wr(sb.from('queue_entries').update({price:prevPrice}).eq('id',riderId),'undo');
+        await _undoPrice();
         await _reloadRows([riderId]);await _rsvGiveBack(_moved);renderStaffQueue();return;
       }
       const back=await _reclaimBikes(toFree);
       if(back.length<toFree.length){await _releaseBikes(back,'bike assign');toast(t('errBikeUnavailable'),'error');await loadData();renderStaffQueue();return false;}
       // a rider who had no bike yet (checked in without one) goes back to none, not to the text '[]'
       const undoAssign={assigned_bike_id:alreadyAssigned.length===0?null:alreadyAssigned.length===1?alreadyAssigned[0]:JSON.stringify(alreadyAssigned)};
-      if(priceUpdate.price!=null&&prevPrice!=null)undoAssign.price=prevPrice;
       const u=await sb.from('queue_entries').update(undoAssign).eq('id',riderId).eq('status','active').select('id');
       if(_writeErr(u,'undo')||!_landed(u)){
         await _releaseBikes(back,'bike assign');
         if(!(u&&u.error))await _lostRace();else{await loadData();renderStaffQueue();}
         return false;
       }
+      await _undoPrice();
       delete S._extraBikes[riderId];
       // the bike given up by the undo leaves no open assignment behind (a database before the
       // reassign trigger would keep one, and staff_checkin would refuse that bike to anyone else)
