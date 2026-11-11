@@ -16812,7 +16812,7 @@ function renderTopbarRight(){
         <button type="button" class="cust-topbar-link" data-on-click="${_on("goCustomer","account")}" title="${t('tabAccount')}" aria-label="${t('tabAccount')}">
           ${avatar}
           <span class="chrome-av-txt">
-            <span class="cust-topbar-name">${esc((cust.name||'').split(' ')[0])}</span>
+            <span class="cust-topbar-name" dir="auto">${esc((cust.name||'').split(' ')[0])}</span>
             <span class="cust-topbar-email">${esc(cust.email||cust.phone||'')}</span>
           </span>
         </button>
@@ -16837,7 +16837,7 @@ function renderTopbarRight(){
         <button type="button" class="cust-topbar-link" data-on-click="${_on("goCustomer","account")}" title="${t('tabAccount')}" aria-label="${t('tabAccount')}">
           ${avatar}
           <span class="chrome-av-txt">
-            <span class="cust-topbar-name">${esc((cust.name||'').split(' ')[0])}</span>
+            <span class="cust-topbar-name" dir="auto">${esc((cust.name||'').split(' ')[0])}</span>
             <span class="cust-topbar-email">${esc(cust.email||cust.phone||'')}</span>
           </span>
         </button>
@@ -38646,7 +38646,9 @@ function _opGateRender(){
   // A name half-typed in the box survives the redraw that brings the list.
   const typedNow=(document.getElementById('op-gate-name')||{}).value||'';
   // No backdrop-close and, on a first gate, no cancel: anonymous staff actions are what this prevents.
-  m.innerHTML=`<div class="modal-backdrop opg-z290"><div class="modal-box op-gate opg-w380" role="dialog" aria-modal="true" aria-labelledby="dlgt-opGate">${body}</div></div>`;
+  // An approval (a PIN or a manager's) is asked from inside other dialogs (a wallet change in #mny-modal at 400, a row
+  // sheet at 9001): it is drawn above them, or the keypad sat hidden under the dialog that asked for it.
+  m.innerHTML=`<div class="modal-backdrop opg-z290${G.approve?' opg-ztop':''}"><div class="modal-box op-gate opg-w380" role="dialog" aria-modal="true" aria-labelledby="dlgt-opGate">${body}</div></div>`;
   const inp=document.getElementById('op-gate-name');if(inp&&typedNow)inp.value=typedNow;
 }
 function _opgPick(name,pin){const G=S._opg;if(!G||G.busy||G.list===undefined)return;if(!pin){_opGatePick(name);return;}G.pick=name;G.digits='';G.msg='';G.shake=false;_opGateRender();}
