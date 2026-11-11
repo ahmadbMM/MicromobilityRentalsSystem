@@ -144,6 +144,7 @@ test.describe('@staff:sessions rb1 close out (2026-10-05)', () => {
     const p: { url: string; body: string }[] = [];
     page.on('request', (r) => { if (r.method() === 'PATCH' && r.url().includes('/rest/v1/queue_entries')) p.push({ url: decodeURIComponent(r.url()), body: r.postData() || '' }); });
     await page.evaluate(`closeOutSession('${OLD}')`);
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     await page.locator('.confirm-box button').filter({ hasText: /close out/i }).click();
     await expect.poll(() => p.length).toBe(2);
     const ids = (u: string) => u.match(/id=in\.\(([^)]*)\)/)?.[1].split(',') ?? [];

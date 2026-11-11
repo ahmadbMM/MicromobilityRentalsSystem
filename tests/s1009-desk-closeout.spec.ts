@@ -71,6 +71,7 @@ test.describe('@staff:bookings s1009 desk: close out', () => {
     const bikes = [bike('b1', 1, 'in-use'), bike('b2', 2, 'in-use')];
     const { returns } = await boot(page, q, bikes);
     await page.evaluate(`closeOutSession('${OLD}')`);
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     const box = page.locator('#confirm-modal .confirm-box');
     await expect(box.locator('.co-bike')).toHaveCount(2);
     await expect(box).toContainText('Bikes still out (2)');
@@ -104,6 +105,7 @@ test.describe('@staff:bookings s1009 desk: close out', () => {
     const bikes = [bike('b1', 1, 'in-use'), bike('b2', 2, 'in-use')];
     const { returns, writes } = await boot(page, q, bikes);
     await page.evaluate(`closeOutSession('${OLD}')`);
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     const box = page.locator('#confirm-modal .confirm-box');
     await box.locator('.co-bike').filter({ hasText: '#001' }).locator('.co-mk-damaged').click();
     await box.locator('.co-bike').filter({ hasText: '#002' }).locator('.co-mk-missing').click();

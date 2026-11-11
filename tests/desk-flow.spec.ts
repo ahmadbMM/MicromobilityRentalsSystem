@@ -102,6 +102,7 @@ test('the figures filter the roster and clear it; the night carries its Close ou
   await expect(closeOut).toContainText('(4)');                              // three on bikes or bikeless, one expected
   if (await closeOut.isVisible()) await closeOut.click();
   else { await page.locator('#tab-queue .sh-more').click(); await page.getByRole('menuitem', { name: /Close out/ }).click(); } // a phone's Desk tools (staff round s10)
+  await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
   const box = page.locator('#confirm-modal');
   await expect(box).toContainText('still owe');
   await expect(box).toContainText('230');                                  // r1 and r3, 115 each

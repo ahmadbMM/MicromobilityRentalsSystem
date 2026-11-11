@@ -48,6 +48,7 @@ test('checked-in riders become done, no-arrivals become no-show, guarded', async
     if (r.url().includes('/rpc/staff_return')) returns.push(JSON.parse(r.postData() || '{}').p_booking_id);
   });
   await page.evaluate(`closeOutSession('${OLD}')`);
+  await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
   await page.locator('.confirm-box button').filter({ hasText: /close out/i }).click();
   const ids = (u: string) => decodeURIComponent(u).match(/id=in\.\(([^)]*)\)/)?.[1].split(',') ?? [];
   await expect.poll(() => p.filter((x) => ids(x.url).length).length, { timeout: 5000 }).toBeGreaterThanOrEqual(2);

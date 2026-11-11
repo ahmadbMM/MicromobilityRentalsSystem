@@ -113,6 +113,7 @@ test('the close-out is one staff_close_out and names every rider it could not se
   });
   const co = calls(page, /rpc\/staff_close_out/), ret = calls(page, /rpc\/staff_return(\?|$)/);
   await page.evaluate(`closeOutSession('${DAY}')`);
+  await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
   await page.locator('#confirm-modal .chrome-dact button').last().click();
   await expect.poll(() => co.length).toBe(1);
   expect(co[0].body).toMatchObject({ p_session_id: DAY, p_done: ['d1'], p_noshow: ['n1', 'n2'] });

@@ -48,6 +48,7 @@ function shiftPosts(page: Page) {
 }
 async function closeOut(page: Page, sid: string) {
   await page.evaluate(`closeOutSession('${sid}')`);
+  await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
   await page.locator('#confirm-modal .confirm-box button').filter({ hasText: /close out/i }).click();
   await expect(page.locator('#eon-modal .eon-box')).toBeVisible();
 }

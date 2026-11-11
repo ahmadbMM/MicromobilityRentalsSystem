@@ -31,10 +31,12 @@ test.describe('@staff:bookings bug hunt oct 7 (s09)', () => {
       e('p1', OLD, 'active', { checked_in_at: '2020-01-01T21:00:00Z' }),
     ]);
     await page.evaluate(`closeOutSession('${FREE}')`);
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     await expect(page.locator('#confirm-modal .confirm-box')).toBeVisible();
     await expect(page.locator('#confirm-modal .confirm-box')).not.toContainText(/still owe/i);
     await page.evaluate('closeConfirm()');
     await page.evaluate(`closeOutSession('${OLD}')`);
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     await expect(page.locator('#confirm-modal .confirm-box')).toContainText(/1 of them still owe/i);
   });
 

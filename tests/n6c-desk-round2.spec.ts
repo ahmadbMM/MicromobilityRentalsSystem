@@ -124,6 +124,7 @@ test.describe('@staff:bookings The desk, second round', () => {
     await page.evaluate(`_remClose()`);
     await page.evaluate(`(()=>{const e=_qGet('r1');e.lateMsgAt=e.lateMsgAt||new Date().toISOString();})()`);
     void page.evaluate(`closeOutSession('s1')`);
+    await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     await expect(dlg.locator('.n6c-co')).toContainText('Rider r1');
     await expect(dlg.locator('.n6c-co')).toContainText('no reply');
   });
