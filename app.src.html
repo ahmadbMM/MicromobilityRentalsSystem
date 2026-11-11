@@ -54867,7 +54867,7 @@ function renderWorkshop(listOnly){
 // that names nobody with the account's email), read back, and repainted.
 // at: the job's updated_at the patch was worked out from. Given, the write lands only on that version, and 'stale'
 // comes back when another device changed the job since (the caller reads it again and works it out anew).
-async function _wsSave(j,patch,okMsg,at){
+async function _wsSave(j,patch,okMsg,at,retry){
   // A save sent while another is in flight waits for it: it returned at once, after its dialog had closed,
   // and the edit was lost without a word (bug hunt 2026-10-28). _wp is a real promise, so awaiting it never sends again.
   const W=_ws();while(W.working){try{await W._wp;}catch(_){}}
@@ -54876,7 +54876,7 @@ async function _wsSave(j,patch,okMsg,at){
   let _wpDone;W._wp=new Promise(r=>{_wpDone=r;}); // what a save sent meanwhile waits on (bug hunt 2026-10-28)
   try{let q=sb.from('workshop_jobs').update({...patch,updated_by:_opName()||null}).eq('id',j.id);if(at)q=q.eq('updated_at',at);res=await q.select(_wsCols());}catch(e){res={error:e};}
   W.working=false;_wpDone();
-  if(_writeErr(res,'workshop save')){_wsLoad();return false;}
+  if(_writeErr(res,'workshop save',retry)){_wsLoad();return false;}
   const row=Array.isArray(res.data)?res.data[0]:null;
   if(!row&&at)return'stale';
   if(!row){
@@ -54886,6 +54886,8 @@ async function _wsSave(j,patch,okMsg,at){
   }
   Object.assign(j,row);
   delete W.events[j.id]; // the history grew: read again when opened
+  // An open History panel reads it again now (bug hunt 2026-11-11, app39-1): it stayed grey loading bars for good.
+  if(W.hist[j.id])_wsHistLoad(j.id);
   if(okMsg){logAction(okMsg);toast(okMsg,'success');}
   _wsTabLabelSync();renderWorkshop();
   return true;
@@ -55072,8 +55074,16 @@ async function _wsPaySave(id){
   // paid becomes the price only on the first payment), and the till's lines say what was paid in all.
   const patch=p0?{}:{...(_ws().noX?{}:{paid_at:at,paid_receipt:rid}),...(j.price_final==null||Number(j.price_final)!==amt?{price_final:amt}:{})};
   const msg=t('wsPaidToast').replace('{0}',_wsRef(j)).replace('{1}',_money(amt,_NOISO));
-  if(Object.keys(patch).length)await _wsSave(j,patch,null);
-  logAction(msg);toast(msg);renderWorkshop();
+  const done=()=>{logAction(msg);toast(msg);renderWorkshop();};
+  if(!Object.keys(patch).length)return done();
+  // The job is said paid only once its patch is saved (bug hunt 2026-11-11, app39-2): a failed save showed its error and
+  // "paid" together, and the job kept its old price, owing the difference with Take payment offered again. The error's
+  // Retry sends the same patch, unless the job has been paid on another receipt since.
+  const send=async()=>{
+    const jj=_wsFind(id);if(!jj||(jj.paid_receipt&&jj.paid_receipt!==rid)){renderWorkshop();return;}
+    if(await _wsSave(jj,patch,null,null,send)===true)done();
+  };
+  await send();
 }
 function _wsMechOpen(id){
   const j=_wsFind(id);if(!j)return;
@@ -55142,8 +55152,10 @@ async function _wsReport(){
   const waitIds=jobs.filter(j=>j.status==='awaiting_parts').map(j=>j.id);
   let ev=null,wev=null;
   try{
-    const[a,b]=await Promise.all([sb.from('workshop_job_events').select('job_id,at,status').eq('status','completed').order('at',{ascending:true}).limit(5000),
-      waitIds.length?sb.from('workshop_job_events').select('job_id,at,status').in('job_id',waitIds).order('at',{ascending:true}).limit(5000):Promise.resolve({data:[]})]);
+    // Page by page (bug hunt 2026-11-11, app39-3): one request stops at PostgREST's 1000 rows, and the newest jobs' events
+    // were the ones cut, so their turnaround ran to their last edit.
+    const[a,b]=await Promise.all([_pagedAll(()=>sb.from('workshop_job_events').select('id,job_id,at,status').eq('status','completed').order('at',{ascending:true}).order('id')),
+      waitIds.length?_pagedAll(()=>sb.from('workshop_job_events').select('id,job_id,at,status').in('job_id',waitIds).order('at',{ascending:true}).order('id')):Promise.resolve({data:[]})]);
     if(!a.error)ev=a.data||[];if(!b.error)wev=b.data||[];
   }catch(_){}
   const done=new Map(),parts=new Map(),last=new Map();(ev||[]).forEach(e=>{if(!done.has(e.job_id))done.set(e.job_id,e.at);});
@@ -55168,10 +55180,19 @@ async function _wsHist(id){
   if(W.hist[j.id]){delete W.hist[j.id];renderWorkshop(true);return;}
   W.hist[j.id]=true;renderWorkshop(true);
   if(W.events[j.id]&&W.events[j.id]!=='err')return;
+  await _wsHistLoad(j.id);
+}
+// A job's history read for its open panel. Only the latest read lands: one sent before a save is not laid over the
+// read the save started.
+async function _wsHistLoad(id){
+  const W=_ws(),seq=W.evSeq||(W.evSeq={}),n=seq[id]=(seq[id]||0)+1;
+  let ev;
   try{
-    const{data,error}=await sb.from('workshop_job_events').select('at,status,note,by').eq('job_id',j.id).order('at',{ascending:true}).limit(200);
-    W.events[j.id]=error?'err':(data||[]);
-  }catch(e){W.events[j.id]='err';}
+    const{data,error}=await sb.from('workshop_job_events').select('at,status,note,by').eq('job_id',id).order('at',{ascending:true}).limit(200);
+    ev=error?'err':(data||[]);
+  }catch(e){ev='err';}
+  if(seq[id]!==n)return;
+  W.events[id]=ev;
   if(S.staffTab==='workshop')renderWorkshop(true);
 }
 // The database writes its notes in a fixed form ('requested', 'scheduled 2026-09-26 17:00',
@@ -55937,7 +55958,9 @@ async function _vendorLoad(){
       sb.from('vendor_users').select(VENDOR_USER_COLS).order('created_at').limit(5000),
       sb.from('vendor_dates').select('*').gte('day',from).order('day').limit(2000),
       sb.from('vendor_series').select('*').order('starts_on').limit(2000),
-      sb.from('vendor_bookings').select(VENDOR_BK_COLS).gte('day',from).order('day').limit(5000),
+      // Page by page (bug hunt 2026-11-11, app39-4): one request stops at PostgREST's 1000 rows, so the upcoming days were cut
+      // and the 30 s poll's signature never matched this list, reloading the section every time.
+      _pagedAll(()=>sb.from('vendor_bookings').select(VENDOR_BK_COLS).gte('day',from).order('day').order('id')),
       // The venues' feedback (20261003180000): its own answer, so a database without the table
       // (or a refusal) leaves the other tabs working.
       sb.from('vendor_feedback').select(VENDOR_FB_COLS).gte('day',from).order('day',{ascending:false}).limit(2000).then(x=>x,e=>({error:e})),
@@ -56870,7 +56893,7 @@ function _webEdApply(f,cur,lang,v){
     case 'text':case 'longtext':{const o=Object.assign({en:'',ar:''},(cur&&typeof cur==='object')?cur:{});o[lang]=String(v);if(lang!=='en'&&lang!=='ar'&&!o[lang].trim())delete o[lang];return o;}
     case 'link':return{href:String(v).trim()};
     case 'image':return{url:String(v)};
-    case 'number':return v===''?null:Number(v);
+    case 'number':return v===''?NaN:Number(v); // empty is refused as a bad number (null is "back to Original": the row went)
     case 'toggle':return !!v;
   }
   return v;
@@ -56990,7 +57013,11 @@ async function _webShrink(file){
   const sc=Math.min(1,2000/Math.max(bmp.width,bmp.height));
   const w=Math.max(1,Math.round(bmp.width*sc)),h=Math.max(1,Math.round(bmp.height*sc));
   const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(bmp,0,0,w,h);
-  const png=file.type==='image/png'||(file.type!=='image/jpeg'&&_imgHasAlpha(bmp)); // keeps a transparent background (the hero bike)
+  // Keeps a transparent background (the hero bike). A PNG is read whole, so a small cut-out is not missed; an opaque PNG
+  // photo goes as a JPEG (bug hunt 2026-11-11, app40-2): kept a PNG it came out over the 5 MB limit.
+  let png=false;
+  if(file.type==='image/png'){try{const d=c.getContext('2d').getImageData(0,0,w,h).data;for(let i=3;i<d.length;i+=4)if(d[i]<255){png=true;break;}}catch(_){png=true;}}
+  else png=file.type!=='image/jpeg'&&_imgHasAlpha(bmp);
   const type=png?'image/png':'image/jpeg';
   const blob=await new Promise(r=>c.toBlob(r,type,.85));
   return{blob,type,ext:png?'png':'jpg',bmp};
@@ -57106,7 +57133,7 @@ function _webFieldHtml(k,f,v,i,fid){
       return`<div class="web-ed-field">${lbl}<div class="web-ed-bi">${one('en','ltr')}${one('ar','rtl')}</div>${f.mono||f.enArOnly?'':_webMoreLangs(f,v,id,call,tag)}</div>`;
     }
     case 'link':return`<div class="web-ed-field">${lbl}<input id="${id}" type="text" dir="ltr" inputmode="url" value="${esc((v&&v.href)||'')}" placeholder="https://" data-on-input="${_on(...call('','value'))}"></div>`;
-    case 'number':return`<div class="web-ed-field">${lbl}<input id="${id}" type="number" dir="ltr" value="${v===null||v===undefined?'':esc(String(v))}"${f.min!==undefined?` min="${f.min}"`:''}${f.max!==undefined?` max="${f.max}"`:''}${f.step!==undefined?` step="${f.step}"`:''} data-on-input="${_on(...call('','value'))}"></div>`;
+    case 'number':return`<div class="web-ed-field">${lbl}<input id="${id}" type="number" dir="ltr" value="${v===null||v===undefined||Number.isNaN(v)?'':esc(String(v))}"${f.min!==undefined?` min="${f.min}"`:''}${f.max!==undefined?` max="${f.max}"`:''}${f.step!==undefined?` step="${f.step}"`:''} data-on-input="${_on(...call('','value'))}"></div>`;
     case 'toggle':return`<div class="web-ed-field"><label class="web-switch"><input id="${id}" type="checkbox" class="web-toggle" role="switch" ${v?'checked':''} data-on-change="${_on(...call('','checked'))}"><span>${esc(_webLbl(f.label))}</span></label></div>`;
     case 'image':{
       const u=(v&&v.url)||'';
@@ -58365,8 +58392,10 @@ async function _n6wAnLoad(){
   if(A.busy||Date.now()-A.at<600000)return;
   A.busy=true;
   const get=q=>Promise.resolve(q).catch(e=>({error:e}));
-  const[h,x]=await Promise.all([get(sb.from('volunteer_hours').select('customer_id,session_id,hours,worked_on,voided_at').is('voided_at',null).limit(20000)),
-    get(sb.from('volunteer_shifts').select('customer_id,session_id,status,clock_in').limit(20000))]);
+  // Page by page (bug hunt 2026-11-11, app41-2): one request stops at PostgREST's 1000 rows whatever .limit says, and the
+  // totals were worked out from whichever thousand came back.
+  const[h,x]=await Promise.all([get(_pagedAll(()=>sb.from('volunteer_hours').select('id,customer_id,session_id,hours,worked_on,voided_at').is('voided_at',null).order('id'),'id')),
+    get(_pagedAll(()=>sb.from('volunteer_shifts').select('id,customer_id,session_id,status,clock_in').order('id'),'id'))]);
   A.busy=false;A.err=!!(h.error||x.error);
   // A failed read may be tried again a minute on, or at once from its Retry: it was held for the full ten minutes
   // with nothing to press (bug hunt 2026-11-10).
@@ -58420,9 +58449,13 @@ async function _spAnLoad(force){
   A.busy=true;
   // Paged (2026-11-11): one request stops at PostgREST's 1000 rows, and every account is asked the question.
   let r;try{[r]=await Promise.all([_pagedAll(()=>sb.from('customers').select('id,sport_competes,sport_federations,sport_other,sport_answered_at').not('sport_competes','is',null).order('id')),_spOptsLoad(true)]);}catch(e){r={error:e};}
-  A.busy=false;A.at=Date.now();A.err=!!(r&&r.error);if(!A.err)A.rows=r.data||[];
+  A.busy=false;A.err=!!(r&&r.error);if(!A.err)A.rows=r.data||[];
+  // A failed read may be tried again a minute on, or at once from its Retry, as the Volunteers view (bug hunt 2026-11-11,
+  // app41-3): it was held ten minutes with nothing to press.
+  A.at=A.err?Date.now()-540000:Date.now();
   if(S.view==='staff'&&S.staffTab==='analytics'&&S.anView==='sports')_spAnPaint();
 }
+function _spAnRetry(){const A=S._spAn;if(A){A.at=0;A.err=false;}_spAnPaint();}
 function _spAnF(){return S.spAnF||(S.spAnF={scope:'all',gender:'all',open:''});}
 function _spAnSet(k,v){const F=_spAnF();F[k]=F[k]===v&&k==='open'?'':v;_spAnPaint();}
 function _spAnRefresh(){_spAnLoad(true);_spAnPaint();}
@@ -58482,7 +58515,7 @@ function _spAnNames(ids,byId){
 function _spAnPaint(){
   const host=document.getElementById('an-sp-host');if(!host)return;
   const D=_spAnData();
-  if(!D){const A=S._spAn;host.innerHTML=A&&A.err?_emptyState(esc(t('spAnErr'))):skeletonList();_spAnLoad();return;}
+  if(!D){const A=S._spAn;host.innerHTML=A&&A.err?_loadErr(esc(t('spAnErr')),_on("_spAnRetry")):skeletonList();_spAnLoad();return;}
   _spAnLoad(); // read again after ten minutes
   const F=D.F,pct=(a,b)=>b?Math.round(a/b*100):0,n=v=>esc(String(v));
   const kpi=(v,l,sub)=>`<div class="analytics-kpi-card"><div class="analytics-kpi-value">${esc(String(v))}</div><div class="analytics-kpi-label">${esc(l)}</div>${sub?`<div class="an-c-muted">${esc(sub)}</div>`:''}</div>`;
@@ -58522,8 +58555,15 @@ function _spAnPaint(){
   _cssvApply(host);
 }
 // The answers as a CSV (one row an account in the filters' view), or the figures by federation.
-function _spAnCsv(kind){
-  const D=_spAnData();if(!D)return;
+async function _spAnCsv(kind){
+  let D=_spAnData();if(!D)return;
+  // Names, phones, emails and birth dates of every answering account: the export right and the operator's PIN, as the
+  // Accounts export (bug hunt 2026-11-11, app41-1). The figures by federation hold no one's details.
+  if(kind!=='feds'){
+    if(!_can('export')){toast(t('capNoExport'),'error');return;}
+    if(!await _pinApprove(t('anNavSports')))return;
+    D=_spAnData();if(!D)return;
+  }
   const yes=t('waYes'),no=t('waNo');
   if(kind==='feds'){
     const rows=[[t('spAnFedCol'),t('spAnGroupCol'),t('spAnAccounts'),t('spAnShareCol'),t('commTitle')]];
@@ -59566,6 +59606,10 @@ async function _rpcOp(fn,args,free){
 // (2026-10-05). That is the server's answer (_rcRestockOf); nothing when the call waits in the outbox
 // (its flush restocks from the answer it gets); this screen's rows only on a database before the RPCs,
 // which answers nothing to go by.
+// A receipt with lines still waiting in the outbox (recorded offline, or a backlog still draining) is voided or refunded
+// behind them (bug hunt 2026-11-11, app42-3): sent at once, the server changed only the lines it held, and the rest landed
+// later as live sales, their stock never put back. Queued, the flush holds it until they land (_stuck).
+function _outboxHoldsReceipt(key,ids){return _outbox().some(op=>op.kind==='upsert'&&((op.data&&op.data.receipt_id===key)||ids.indexOf(op.id)>=0));}
 async function _salesVoid(key,rows,what,reason){
   reason=reason?String(reason).slice(0,300):null; // why (2026-10-09): void_reason, read by the Exceptions report
   if(_roNow()){_roRefusal();return false;}
@@ -59573,12 +59617,13 @@ async function _salesVoid(key,rows,what,reason){
   // manager limit (bug hunt 2026-10-28); it asked only the operator's own PIN. The server checks both too.
   if(!_can('refund')){toast(t('capNoRefund'),'error');return false;}
   const ids=rows.map(r=>r.id),opId=_opId(),amt=_rcTotal(rows.filter(x=>x.pay!=='refunded')),mo={kind:'refund',amount:amt};
-  const r=await _gatedRpc(what,a=>_rpcOp('staff_void_receipt',{p_receipt_id:key,p_reason:reason,...a,p_op_id:opId}),mo);
+  const wait=_outboxHoldsReceipt(key,ids);
+  const r=wait?(await _pinApprove(what,mo)?{error:null,wait:true}:null):await _gatedRpc(what,a=>_rpcOp('staff_void_receipt',{p_receipt_id:key,p_reason:reason,...a,p_op_id:opId}),mo);
   if(r===null)return false;
   if(r.error&&_rpcAbsent(r.error))return _salesApply([],ids)?{restock:rows.filter(x=>x.pay!=='refunded')}:false;
   const had=(S.cashSales||[]).slice();
   S.cashSales=had.filter(x=>ids.indexOf(x.id)<0);
-  if(r.error&&_errKind(r.error)==='net'){
+  if(r.wait||(r.error&&_errKind(r.error)==='net')){
     if(!_outboxEnqueueMany([{kind:'void',id:key,data:{p_receipt_id:key,p_reason:reason,..._pinArgs(mo),p_op_id:opId},rows:ids,amt}])){S.cashSales=had;return false;}
     ids.forEach(_voidedAdd);return{restock:[]};
   }
@@ -59590,12 +59635,13 @@ async function _salesRefund(key,rows,what,reason){
   if(_roNow()){_roRefusal();return false;}
   if(!_can('refund')){toast(t('capNoRefund'),'error');return false;} // Team > the account's caps (2026-10-09); the server checks it too
   const opId=_opId(),amt=Math.round(rows.reduce((s2,x)=>s2+(x.pay==='refunded'?0:_lineCharge(x)),0)*100)/100,mo={kind:'refund',amount:amt};
-  const r=await _gatedRpc(what,a=>_rpcOp('staff_refund_receipt',{p_receipt_id:key,p_reason:reason,...a,p_op_id:opId}),mo);
+  const wait=_outboxHoldsReceipt(key,rows.map(x=>x.id)); // behind its lines still waiting to be sent, as a void
+  const r=wait?(await _pinApprove(what,mo)?{error:null,wait:true}:null):await _gatedRpc(what,a=>_rpcOp('staff_refund_receipt',{p_receipt_id:key,p_reason:reason,...a,p_op_id:opId}),mo);
   if(r===null)return false;
   if(r.error&&_rpcAbsent(r.error))return _salesApply(rows.map(x=>({...x,pay:'refunded'})),[])?{restock:rows.filter(x=>x.pay!=='refunded'&&x.category!=='__cardmeta__')}:false;
   const now=new Date().toISOString(),had=(S.cashSales||[]).slice();
   S.cashSales=had.map(x=>(x.receipt_id||x.id)===key&&x.pay!=='refunded'?{...x,pay:'refunded',refunded_at:now}:x);
-  if(r.error&&_errKind(r.error)==='net'){
+  if(r.wait||(r.error&&_errKind(r.error)==='net')){
     if(!_outboxEnqueueMany([{kind:'refund',id:key,data:{p_receipt_id:key,p_reason:reason,..._pinArgs(mo),p_op_id:opId},amt}])){S.cashSales=had;return false;}
     return{restock:[]};
   }
@@ -59797,7 +59843,8 @@ function _ctPreview(){
   const g=document.getElementById('ct-grand');if(g)g.textContent=_money(after,_NOISO);
   const sp=document.getElementById('ct-split');if(sp)sp.innerHTML=_ctSplitHtml(wallet,card,cash);
 }
-function _ctCardSAR(paidTotal){const v=parseFloat(S._ctCard);if(isNaN(v)||v<=0)return 0;const c=S._ctCardPct?paidTotal*(v/100):v;return Math.min(Math.max(0,paidTotal),Math.round(c*100)/100);}
+// card / pct: the card box and its % switch as they were at the tap (_ctRecord); the live ones otherwise.
+function _ctCardSAR(paidTotal,card,pct){const v=parseFloat(card===undefined?S._ctCard:card);if(isNaN(v)||v<=0)return 0;const c=(pct===undefined?S._ctCardPct:pct)?paidTotal*(v/100):v;return Math.min(Math.max(0,paidTotal),Math.round(c*100)/100);}
 async function _ctRecord(){
   if(S._ctBusy)return; // a second tap while the stock write is out recorded the receipt twice
   const _ctx=S._ctSession;if(!_ctx){toast(t('errSelectSession'),'error');return;}
@@ -59805,7 +59852,8 @@ async function _ctRecord(){
   // The lines this receipt records, as they are at the tap (bug hunt 2026-11-10, app39-7): the cart stays live while the wallet's
   // call is out, so an item tapped meanwhile is the next receipt's, and a line of this one cannot be taken out (_ctCartRemove).
   const cart=S._ctCart,cust=(S._ctCust||'').trim()||null;
-  const b=await _ctBook(cart,{sess:_ctx,cust,custId:S._ctCustId,disc:_ctDiscountSAR(_ctChargeableTotal(cart)),wallet:_ctWalletOn(),card:_ctCardSAR,busy:on=>{S._ctBusy=on;S._ctPaying=on?cart:null;}});
+  const cardIn=S._ctCard,cardPct=S._ctCardPct; // the card box as it is at the tap (bug hunt 2026-11-11, app42-2)
+  const b=await _ctBook(cart,{sess:_ctx,cust,custId:S._ctCustId,disc:_ctDiscountSAR(_ctChargeableTotal(cart)),wallet:_ctWalletOn(),card:n=>_ctCardSAR(n,cardIn,cardPct),busy:on=>{S._ctBusy=on;S._ctPaying=on?cart:null;}});
   if(!b){renderCashier();return;}
   // The receipt is booked: its cart leaves the screen now, before the stock write, so a second tap
   // or a redraw meanwhile cannot record it again, and items added meanwhile start the next one.
@@ -59838,7 +59886,7 @@ function _ctCtxNow(){
 async function _ctBook(cart,o){
   if(_roNow()){_roRefusal();return null;} // a view-only Sales records nothing (the outbox would send it)
   const _ctx=o.sess===undefined?_ctCtxNow():o.sess,sessId=_ctx===SHOP_CTX?null:(_ctx||null); // a shop sale belongs to no ride
-  const rid=uid(),cust=o.cust||null,at=new Date().toISOString();
+  let rid=uid(),at=new Date().toISOString();const cust=o.cust||null;
   const rows=cart.map(l=>({id:uid(),receipt_id:rid,session_id:sessId,customer_name:l.pay==='team'?null:cust,item_id:l.item_id||null,name:l.name,category:l.cat,qty:l.qty,price:l.price,pay:l.pay,team_name:l.team||null,created_at:at})); // MM Team lines belong to the team member, not a customer
   // Per-receipt discount as a negative 'paid' line (no schema change needed)
   const discSAR=o.disc||0;
@@ -59854,12 +59902,31 @@ async function _ctBook(cart,o){
   const paidTotal=rows.filter(r=>r.pay==='paid').reduce((s,r)=>s+r.qty*r.price,0);
   // The wallet's part first, and only on the server's word: if it refuses, nothing is recorded yet and the sale stays on screen.
   let walTake=0,walRow=null;
-  if(o.wallet&&paidTotal>0){
-    if(_isOffline()){toast(t('cwErrOffline'),'error');return null;}
+  // A wallet call whose answer was lost may have taken the money (bug hunt 2026-11-11, app42-1): each tap made a new receipt id,
+  // so the server's check for a retry never matched and the rider paid twice. The same sale tapped again goes with the same
+  // receipt id and time, answered with what was taken; any other sale (another account or amount, or no wallet part) first
+  // gives that receipt's part back (staff_wallet_unpay_sale; nothing to give back is fine).
+  const walOn=!!o.wallet&&paidTotal>0,walAmt=Math.round(paidTotal*100)/100,payKey=walOn?[o.custId,sessId||'',walAmt].join('|'):'';
+  if(walOn&&_isOffline()){toast(t('cwErrOffline'),'error');return null;}
+  if(S._ctPayRid&&S._ctPayRid.key!==payKey&&!_isOffline()){
     if(o.busy)o.busy(true);
-    let wr;try{wr=await _roFree(()=>sb.rpc('staff_wallet_pay_sale',{p_receipt_id:rid,p_customer:o.custId,p_session:sessId,p_amount:Math.round(paidTotal*100)/100,p_name:cust,p_at:at,p_op:_opName()||null}));}catch(e){wr={error:e};}
+    let ur;try{ur=await _roFree(()=>sb.rpc('staff_wallet_unpay_sale',{p_receipt_id:S._ctPayRid.rid}));}catch(e){ur={error:e};}
     if(o.busy)o.busy(false);
-    if(wr.error){if(!wr.error.said)wr.error.said=_rpcSay(wr.error);toast(_cwSay(wr.error),'error');_cwLoad(true).catch(()=>{});return null;}
+    if(ur&&ur.error){if(walOn){toast(_cwSay(ur.error),'error');return null;}} // kept, and tried again at the next sale
+    else{S._ctPayRid=null;_cwLoad(true).catch(()=>{});}
+  }
+  if(walOn){
+    let first=false;
+    if(S._ctPayRid&&S._ctPayRid.key===payKey){rid=S._ctPayRid.rid;at=S._ctPayRid.at;rows.forEach(r=>{r.receipt_id=rid;r.created_at=at;});}
+    else{S._ctPayRid={rid,at,key:payKey};first=true;}
+    if(o.busy)o.busy(true);
+    let wr;try{wr=await _roFree(()=>sb.rpc('staff_wallet_pay_sale',{p_receipt_id:rid,p_customer:o.custId,p_session:sessId,p_amount:walAmt,p_name:cust,p_at:at,p_op:_opName()||null}));}catch(e){wr={error:e};}
+    if(o.busy)o.busy(false);
+    if(wr.error){
+      // The first try refused by the server took nothing; any other failure may have taken it, and the receipt id is kept.
+      if(first&&['perm','rule','dup','ref'].includes(_errKind(wr.error))&&S._ctPayRid&&S._ctPayRid.rid===rid)S._ctPayRid=null;
+      if(!wr.error.said)wr.error.said=_rpcSay(wr.error);toast(_cwSay(wr.error),'error');_cwLoad(true).catch(()=>{});return null;
+    }
     walTake=Number(wr.data&&wr.data.taken)||0;walRow=wr.data&&wr.data.row||null;
   }
   const cardSAR=o.card?o.card(paidTotal-walTake):0;
@@ -59879,6 +59946,7 @@ async function _ctBook(cart,o){
     return null; // _lsSetCritical has already said why
   }
   if(walRow){S.cashSales=[...(S.cashSales||[]).filter(r=>r.id!==walRow.id),walRow];_cwLoad(true).catch(()=>{});}
+  if(walOn)S._ctPayRid=null; // the receipt is booked: its wallet part is no longer waiting
   // The locker lines name their rentals (2026-11-10): told to the database once the receipt is booked, so a refund or a change
   // of the locker finds what was paid for it (staff_locker_paid). Only lines taken now; one left unlinked is refunded at the till.
   return{rid,rows,cust,n:cart.length,lk:cart.map((l,i)=>l&&l.lk&&l.pay==='paid'&&rows[i]?{r:l.lk,l:rows[i].id}:null).filter(Boolean)};
@@ -60238,12 +60306,16 @@ async function markBikeServiced(bid,from){
   const freed=!!sp&&await _bkStatusWrite(bid,sp,b.status,'mark serviced');
   if(freed)Object.assign(b,sp);
   pushUndo(`${t('bpMarkServiced')}: ${b.name}`,async()=>{
-    // Back into maintenance only if this freed it and nobody has taken the bike out since.
-    const cur=getBikes().find(x=>x.id===bid);
-    const back={last_serviced_at:prev.last_serviced_at,...(freed&&(prev.status==='maintenance'||prev.status==='check')&&(!cur||cur.status==='available')?{status:prev.status,retired_date:prev.retired_date}:{})};
-    const u=await sb.from('bikes').update(back).eq('id',bid);
+    // The stamp on the id; back into maintenance only if this freed it and nobody has taken the bike out since, through the
+    // status-guarded write as the forward one (bug hunt 2026-11-11, app42-4): decided from this device's copy alone, a bike
+    // handed out on another desk meanwhile went back off the road under its rider.
+    const u=await sb.from('bikes').update({last_serviced_at:prev.last_serviced_at}).eq('id',bid);
     if(_writeErr(u,'undo serviced'))return false;
-    if(cur)Object.assign(cur,back);
+    const cur=getBikes().find(x=>x.id===bid);if(cur)cur.last_serviced_at=prev.last_serviced_at;
+    if(freed&&(prev.status==='maintenance'||prev.status==='check')&&(!cur||cur.status==='available')){
+      const back={status:prev.status,retired_date:prev.retired_date};
+      if(await _bkStatusWrite(bid,back,'available','undo serviced')){const c2=getBikes().find(x=>x.id===bid);if(c2)Object.assign(c2,back);}
+    }
     renderBikes();
   });
   toast(`✓ ${b.name} — ${t('bpMarkServiced')}`);

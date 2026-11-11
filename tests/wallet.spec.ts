@@ -139,6 +139,33 @@ test.describe('@staff:customers wallet', () => {
     expect(await page.evaluate(`[S._ctCart.length,(S.cashSales||[]).length]`)).toEqual([1, 0]);
   });
 
+  test('a wallet call whose answer was lost goes again with the same receipt id; another sale gives that part back first', async ({ page }) => {
+    const seen = calls(page);
+    const row = { id: 'wal-x', receipt_id: 'x', session_id: 's1', name: 'Wallet', category: '__cardmeta__', qty: 0, price: 120, pay: 'wallet', created_at: new Date().toISOString() };
+    await staff(page, { cashier_sales: [], 'rpc:staff_wallet_pay_sale': { ok: true, taken: 120, balance: 0, row }, 'rpc:staff_wallet_unpay_sale': { ok: true } });
+    let n = 0;
+    await page.route('**/rest/v1/rpc/staff_wallet_pay_sale*', (r) => (n++ % 2 === 0 ? r.abort('failed') : r.fallback()));
+    const pays = () => seen.filter((c) => c.name === 'staff_wallet_pay_sale').map((c) => c.body.p_receipt_id);
+    const ring = (price: number) => page.evaluate(`S._netDown=false;setStaffTab('cashier');S._ctSession='s1';S._ctCustId='c1';S._ctCust='Rana Rider';S._ctWallet='c1';S._ctCart=[{item_id:null,name:'Gel',cat:'Food',qty:1,price:${price},pay:'paid'}];renderCashier();_ctRecord()`);
+    await ring(200);
+    await expect.poll(() => pays().length).toBe(1);
+    await expect.poll(() => page.evaluate('!S._ctBusy&&S._ctCart.length')).toBe(1); // lost: nothing recorded, the sale stays
+    await page.evaluate(`S._netDown=false;_ctRecord()`); // the same sale again
+    await expect.poll(() => pays().length).toBe(2);
+    expect(pays()[1]).toBe(pays()[0]);
+    await expect.poll(() => page.evaluate('S._ctCart.length')).toBe(0);
+    expect(await page.evaluate(`(S.cashSales||[]).filter(r=>r.category==='Food').map(r=>r.receipt_id)`)).toEqual([pays()[0]]);
+    await ring(200); // lost again; then another amount: that part goes back before the new one is taken
+    await expect.poll(() => pays().length).toBe(3);
+    await expect.poll(() => page.evaluate('!S._ctBusy&&S._ctCart.length')).toBe(1);
+    const lost = pays()[2];
+    expect(lost).not.toBe(pays()[0]);
+    await ring(150);
+    await expect.poll(() => pays().length).toBe(4);
+    expect(seen.find((c) => c.name === 'staff_wallet_unpay_sale')?.body).toMatchObject({ p_receipt_id: lost });
+    expect(pays()[3]).not.toBe(lost);
+  });
+
   test('a receipt with a wallet part is not edited, and its part is neither card nor cash', async ({ page }) => {
     const at = new Date().toISOString();
     const sales = [
