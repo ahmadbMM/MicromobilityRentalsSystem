@@ -386,6 +386,9 @@ async function petrominPass(request, q, env, passTypeId, teamId) {
   } catch (e) {
     return json({ ok: false, error: "lookup failed" }, 502);
   }
+  // A lock on the shared address is not a missing booking: it answers 429, so the form does not tell a rider whose
+  // number is right to register again, and it counts no miss here (that would only lengthen everyone's wait).
+  if (r && r.ok !== true && r.error === "throttled") return json({ ok: false, error: "throttled" }, 429);
   if (!r || r.ok !== true || !r.booking_no || !r.session || typeof r.session !== "object") {
     _pmMissCount(ip, true);
     return json({ ok: false, error: "not found" }, 404);
@@ -620,7 +623,9 @@ async function _serverLockers(SUPA, hdr, customerId, token, group, day) {
     return [];
   }
 }
-// A booking's add-ons as queue_entries.addons stores them: a JSON list of item ids or {id, qty}.
+// A booking's add-ons as queue_entries.addons stores them: a JSON list of item ids or {id, qty, p}.
+// p is the unit price the line was sold at (the database stamps it, 20261004120000); it is kept, and a line is
+// merged only with one of the same id at the same price, as the app's entryAddons does.
 function _entryAddons(raw) {
   let list;
   try { list = Array.isArray(raw) ? raw : raw ? JSON.parse(raw) : []; } catch (e) { return null; }
@@ -629,34 +634,53 @@ function _entryAddons(raw) {
   for (const a of list) {
     const id = a && typeof a === "object" ? a.id : a;
     const qty = a && typeof a === "object" ? Math.max(1, Number(a.qty) || 1) : 1;
-    if (id != null && id !== "") out.push({ id: String(id), qty });
+    const p = a && typeof a === "object" && typeof a.p === "number" && Number.isFinite(a.p) ? a.p : undefined;
+    if (id == null || id === "") continue;
+    const ex = out.find((x) => x.id === String(id) && x.p === p);
+    if (ex) ex.qty += qty;
+    else out.push(p === undefined ? { id: String(id), qty } : { id: String(id), qty, p });
   }
   return out;
 }
-// The party's add-ons, named and priced from the inventory (readable with the anon key, as the app
-// reads it): {addons: [{n, q, p}], known}. known is false when they could not all be read.
+// The paid locker fee rides on the booking as an add-on line {id: 'locker', qty: 1, p: fee} with no inventory row.
+const LOCKER_LINE = "locker";
+// The party's add-ons: {addons: [{n, q, p}], known}. Each line is priced as the desk and the wallet charge it
+// (_wallet_amount: the line's own p, else today's inventory price), and named from the inventory (readable with
+// the anon key, as the app reads it). known is false when a line's price could not be read.
 async function _serverAddons(SUPA, ANON, group) {
   const want = new Map();
   for (const r of group) {
     const list = _entryAddons(r.addons);
     if (!list) return { addons: [], known: false };
-    for (const a of list) want.set(a.id, (want.get(a.id) || 0) + a.qty);
+    for (const a of list) {
+      const key = a.id + "|" + (a.p === undefined ? "" : a.p);
+      const w = want.get(key);
+      if (w) w.q += a.qty;
+      else want.set(key, { id: a.id, q: a.qty, p: a.p });
+    }
   }
   if (!want.size) return { addons: [], known: true };
   try {
-    const ids = [...want.keys()].slice(0, 50).map((i) => `"${i.replace(/["\\]/g, "")}"`).join(",");
-    const res = await fetch(`${SUPA}/rest/v1/inventory?select=id,name,price&id=in.(${encodeURIComponent(ids)})`, {
-      headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
-    });
-    if (!res.ok) return { addons: [], known: false };
-    const rows = await res.json();
-    const by = new Map((Array.isArray(rows) ? rows : []).map((x) => [String(x.id), x]));
+    const need = [...new Set([...want.values()].map((w) => w.id).filter((id) => id !== LOCKER_LINE))];
+    let by = new Map();
+    if (need.length) {
+      const ids = need.slice(0, 50).map((i) => `"${i.replace(/["\\]/g, "")}"`).join(",");
+      const res = await fetch(`${SUPA}/rest/v1/inventory?select=id,name,price&id=in.(${encodeURIComponent(ids)})`, {
+        headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
+      });
+      if (!res.ok) return { addons: [], known: false };
+      const rows = await res.json();
+      by = new Map((Array.isArray(rows) ? rows : []).map((x) => [String(x.id), x]));
+    }
     const out = [];
-    for (const [id, q] of want) {
+    for (const { id, q, p } of want.values()) {
       const it = by.get(id);
-      if (!it) return { addons: [], known: false };
-      const price = it.price != null && !Number.isNaN(+it.price) ? +it.price : 0;
-      out.push({ n: it.name || id, q, p: Math.round(price * q * 100) / 100 });
+      let price;
+      if (p !== undefined) price = p;
+      else if (it) price = it.price != null && !Number.isNaN(+it.price) ? +it.price : 0;
+      else return { addons: [], known: false };
+      const n = (it && it.name) || (id === LOCKER_LINE ? "Locker" : "Add-on");
+      out.push({ n, q, p: Math.round(price * q * 100) / 100 });
     }
     return { addons: _cleanAddons(out), known: true };
   } catch (e) {

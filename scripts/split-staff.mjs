@@ -155,6 +155,13 @@ export function splitStaff(html, staffUrl, staffCssUrl = '') {
   if (notFn.length) throw new Error(`split-staff: ${notFn.join(', ')} must be plain function declarations to be entry points`);
 
   const text = (arr) => arr.map((st) => code.slice(st.node.start, st.node.end)).join('\n');
+  // The staff sections' own addresses, read off STAFF_PATHS (and the two older names _parsePath still takes): the early
+  // load at the top of the script runs before that const and SIGNUP_PATH exist, where _parsePath throws (bug hunt 2026-11-11).
+  const spDecl = decl.get('STAFF_PATHS');
+  const spInit = spDecl && spDecl.node.type === 'VariableDeclaration' ? (spDecl.node.declarations.find((d) => d.id.name === 'STAFF_PATHS') || {}).init : null;
+  if (!spInit || spInit.type !== 'ObjectExpression') throw new Error('split-staff: STAFF_PATHS (the staff sections\' paths) was not found as an object literal');
+  const staffSegs = [...new Set([...spInit.properties.map((p) => (p.value && p.value.type === 'Literal' ? String(p.value.value).split('/')[0] : '')), 'community', 'customers'].filter(Boolean))];
+  const staffPathRe = `^/(?:${staffSegs.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?:/|$)`;
   // A stub whose name the loaded file did not replace (a deploy moved or renamed it, and the server
   // answers any ?v= with today's file) called itself on the cached resolved promise forever and froze
   // the tab: it now throws once instead (bug hunt 2026-10-28).
@@ -164,8 +171,11 @@ export function splitStaff(html, staffUrl, staffCssUrl = '') {
   // something else (the real function, or a part's stand-in), it hands over at once (bug hunt 2026-11-10).
   const go = (n, f) => `()=>{if(${n}===m)throw new Error('${n} missing from ${f} - reload the page');return ${n}(...a);}`;
   const own = (n) => `const m=_stubC.${n};if(${n}!==m)return ${n}(...a);`;
+  // A way in whose staff half did not come down (a timeout, offline before the service worker holds it) did nothing and
+  // said nothing: its callers use it for the effect alone, so the rejection reached only the global log (bug hunt
+  // 2026-11-11). Only the download's failure is taken here; an error of the real function goes on as before.
   const stubs = stubbed.map((n) => ALWAYS_LOAD.has(n)
-    ? `function ${n}(...a){${own(n)}return _loadStaff().then(${go(n, 'staff.js')});}`
+    ? `function ${n}(...a){${own(n)}return _loadStaff().then(${go(n, 'staff.js')},e=>_staffLoadFailed(e,()=>${n}(...a)));}`
     : `function ${n}(...a){${own(n)}if(_staffWanted())return _loadStaff().then(${go(n, 'staff.js')});}`).join('\n')
     + `\nvar _stubC={${stubbed.map((n) => `${n}:${n}`).join(',')}};`;
   const loader = `
@@ -182,11 +192,15 @@ export function splitStaff(html, staffUrl, staffCssUrl = '') {
 var _staffP=null,_staffJsP=null,_staffCssP=null;
 var STAFF_JS=${JSON.stringify(staffUrl)}; // var, and this block leads the script: the boot calls _loadStaff before the script has finished running
 var STAFF_CSS=${JSON.stringify(staffCssUrl || '')};
+var STAFF_PATH_RE=new RegExp(${JSON.stringify(staffPathRe)},'i'); // the staff sections' paths (STAFF_PATHS), for the test below
 var STAFF_LANG_V={}; // the build stamps {code:contentHash} of lang/staff-<code>.json
 var LANG_STAFF={},_staffLangP={},_staffLangGot={};
 // The stored marks and the address first, S.view last: this runs at the top of the script too
 // (the early load below), before S exists, and the try answers false only when nothing else did.
-function _staffWanted(){try{if(localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1'||_isStaffHost())return true;const q=new URLSearchParams(location.search);if(q.has('staff')||q.has('bike'))return true;const p=_parsePath(location.pathname);if(p&&p.view==='staff')return true;return S.view==='staff';}catch(e){return false;}}
+// A staff section's path is matched by STAFF_PATH_RE first: _parsePath reads consts that do not exist
+// yet up there, so it threw and every staff path answered false there. ?locker is a locker's tag, as
+// the head's test (_stw) has it.
+function _staffWanted(){try{if(localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1'||_isStaffHost())return true;const q=new URLSearchParams(location.search);if(q.has('staff')||q.has('bike')||q.has('locker'))return true;if(STAFF_PATH_RE.test(location.pathname))return true;const p=_parsePath(location.pathname);if(p&&p.view==='staff')return true;return S.view==='staff';}catch(e){return false;}}
 // A script that neither loads nor errors (a proxy that swallows it, a tab frozen mid-download)
 // used to hold the boot forever: after 30 s the promise rejects and a later call may try again.
 function _loadStaffJs(){
@@ -210,7 +224,7 @@ function _loadStaffCss(){
   if(own)try{own.remove();}catch(e){} // it failed: ask again below
   _staffCssP=new Promise((res,rej)=>{
     const l=document.createElement('link');let done=false;
-    const fail=why=>{if(done)return;done=true;_staffCssP=null;try{l.remove();}catch(e){}rej(new Error(why));};
+    const fail=why=>{if(done)return;done=true;_staffCssP=null;try{l.remove();}catch(e){}_staffCssFallback();rej(new Error(why));};
     const tm=setTimeout(()=>fail('styles.css did not load in 30 s'),30000);
     l.rel='stylesheet';l.href=STAFF_CSS;l.setAttribute('data-staff-css','');
     // styles.css holds every rule app.css does, in the same order: switching app.css off leaves the
@@ -220,6 +234,19 @@ function _loadStaffCss(){
     document.head.appendChild(l);
   });
   return _staffCssP;
+}
+// styles.css did not come (bug hunt 2026-11-11). A page whose head wrote styles.css alone was left with no stylesheet,
+// and once staff.js is in, no stub calls _loadStaff again, so nothing ever asked for it again. app.css comes back at once
+// (every customer screen's rules and most of the staff ones; styles.css switches it off when it arrives), and styles.css
+// is asked for again a few times, sooner when the connection returns.
+var _staffCssRetry=0,_staffCssTries=0;
+function _appCssHref(){try{for(const n of document.querySelectorAll('noscript')){const m=/\\/app\\.css\\?v=[\\w-]+/.exec(n.textContent||'');if(m)return m[0];}}catch(e){}return'/app.css';} // the head's own tag, with its version
+function _staffCssFallback(){
+  try{if(!document.querySelector('link[rel="stylesheet"][href^="/app.css"]')){const a=document.createElement('link');a.rel='stylesheet';a.href=_appCssHref();document.head.appendChild(a);}}catch(e){}
+  if(_staffCssRetry||_staffCssTries>=5)return;
+  _staffCssTries++;
+  const again=()=>{if(!_staffCssRetry)return;clearTimeout(_staffCssRetry);_staffCssRetry=0;try{window.removeEventListener('online',again);}catch(e){}_loadStaffCss().catch(()=>{});};
+  _staffCssRetry=setTimeout(again,15000*_staffCssTries);try{window.addEventListener('online',again);}catch(e){}
 }
 // The language on screen: S when it exists, else what the head's early script chose (S is still in
 // its temporal dead zone at the top of the script, where typeof throws too - hence the try).
@@ -236,9 +263,14 @@ function _loadStaff(){
   // window.__staffPartsNow (set by the test suite's stubs): the staff half's parts come before the
   // promise resolves, so a spec may call a section's functions at once. Anywhere else they follow the
   // desk's first paint on their own (splitSections).
-  _staffP=Promise.all([_loadStaffJs(),_loadStaffCss(),_loadStaffLang(_staffLangCode())]).then(()=>{if(window.__staffPartsNow&&typeof _loadStaffParts==='function')return _loadStaffParts();},e=>{_staffP=null;throw e;});
+  // A stylesheet that did not come is not a failed load (bug hunt 2026-11-11): the real functions are in once staff.js
+  // is, and _staffCssFallback above keeps the page styled and asks again.
+  _staffP=Promise.all([_loadStaffJs(),_loadStaffCss().catch(e=>{try{_logError((e&&e.message)||'styles.css did not load','staff-css',true);}catch(_){}}),_loadStaffLang(_staffLangCode())]).then(()=>{if(window.__staffPartsNow&&typeof _loadStaffParts==='function')return _loadStaffParts();},e=>{_staffP=null;throw e;});
   return _staffP;
 }
+// What a way in says when the staff half could not be fetched: the error bar, whose Try again calls the
+// same way in again with the same arguments (bug hunt 2026-11-11).
+function _staffLoadFailed(e,again){try{_logError((e&&e.message)||String(e||'staff.js did not load'),'staff-load',true);}catch(_){}try{errorBar(t('mbErr'),again);}catch(_){}}
 // A staff device starts the download here, at the top of the script, instead of after the whole
 // customer half has parsed and run to the boot: the files come down side by side.
 try{if(_staffWanted())_loadStaff().catch(()=>{});}catch(e){}

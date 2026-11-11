@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { createHash } from 'node:crypto';
 import { stubSupabase, unlockStaff } from './helpers/supabase';
 
 // Since 2026-09-27 the page's Content-Security-Policy allows no inline script, and since 2026-09-29
@@ -75,6 +76,21 @@ test('the server sends a policy without unsafe-inline for scripts or styles, nam
   expect(csp).toContain('report-uri /api/csp-report');
   expect(res!.headers()['reporting-endpoints']).toContain('/api/csp-report');
   expect(await page.evaluate(() => document.querySelectorAll('[onclick],[oninput],[onchange],[onkeydown],[onsubmit]').length)).toBe(0);
+});
+
+// The /staff/ stub carries its own inline script (it marks the staff entry and moves to /), and the browser runs it
+// under the same policy: its hash has to be named too. Read as the server sends it, since the page leaves at once.
+test('the policy names the /staff/ stub\'s inline script as well', async ({ page }) => {
+  const res = await page.request.get('/staff/');
+  expect(res.status()).toBe(200);
+  const script = (res.headers()['content-security-policy'] || '').split(';').map((s) => s.trim()).find((s) => s.startsWith('script-src')) || '';
+  const named = [...script.matchAll(/'sha256-([^']+)'/g)].map((m) => m[1]);
+  const html = await res.text();
+  const inline = [...html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/g)]
+    .filter((m) => { const t = (m[1].match(/\btype\s*=\s*(["']?)([^"'\s>]*)\1/i) || [])[2]; return !t || /^(?:text\/javascript|module)$/i.test(t); })
+    .map((m) => createHash('sha256').update(m[2]).digest('base64'));
+  expect(inline.length).toBeGreaterThanOrEqual(1);
+  for (const h of inline) expect(named).toContain(h);
 });
 
 test('a customer trips nothing: landing, reserve, sign-in, my bookings, account', async ({ page }) => {

@@ -547,7 +547,9 @@ const STYLE_ATTRS_MAX = 0;
 const styleAttrs = [out, appCode, staffAll].reduce((n, text) => n + (text.match(/[\s`'"(+]style=/g) || []).length + (text.match(/setAttribute\(\s*['"]style['"]/g) || []).length, 0);
 if (styleAttrs > STYLE_ATTRS_MAX) throw new Error(`build: the page writes ${styleAttrs} inline style(s), which the policy (style-src without 'unsafe-inline') would refuse - write a class, or data-cssv for a run-time value, instead of style="..." or setAttribute('style')`);
 const inlineHashes = (html) => [...html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/g)]
-  .filter((m) => !/\btype\s*=\s*["']?(?!(?:text\/javascript|module)["'\s>])/i.test(m[1]))
+  // Hash every block the browser runs: no type, or type text/javascript or module (quoted or not); a data block
+  // such as ld+json is left out. The type's value is read whole, as a lookahead after an optional quote backtracks.
+  .filter((m) => { const t = (m[1].match(/\btype\s*=\s*(["']?)([^"'\s>]*)\1/i) || [])[2]; return !t || /^(?:text\/javascript|module)$/i.test(t); })
   .map((m) => createHash('sha256').update(m[2]).digest('base64'));
 const staffStub = await readFile(new URL('../staff/index.html', import.meta.url), 'utf8');
 const hashes = [...new Set([...inlineHashes(out), ...inlineHashes(staffStub)])];

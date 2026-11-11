@@ -80,7 +80,7 @@ for (let w = -Math.floor(WEEKS / 2); w < Math.ceil(WEEKS / 2); w++) {
   const sat = day(w * 7 + 6); const satPast = sat < TODAY;
   sessions.push({ id: sat, date: sat, kind: 'saturday', past: satPast });
   out.push(`insert into public.sessions (id, day, session_date, capacity, status, created_at, bike_slots, event_kind, ride_kind, needs_approval, hide_queue, spots, paid_ride) values (${q(sat)}, ${q(dayName(sat))}, ${q(sat)}, 25, ${q(satPast ? 'closed' : 'open')}, now()::text, '{"_time":"06:30 - 07:00"}', 'community', 'saturday', true, true, 25, false) on conflict (id) do nothing;`);
-  if (w % 4 === 1) {
+  if (((w % 4) + 4) % 4 === 1) { // a remainder keeps the sign of w in JS: past weeks need it made non-negative
     const ev = day(w * 7 + 2); const evPast = ev < TODAY;
     out.push(`insert into public.sessions (id, day, session_date, capacity, status, created_at, bike_slots, event_kind, ride_kind, needs_approval, hide_queue, spots, paid_ride, open_to_all, title, description, price) values (${q(ev + '-ev')}, ${q(dayName(ev))}, ${q(ev)}, 30, ${q(evPast ? 'closed' : 'open')}, now()::text, '{"_time":"19:00 - 21:00"}', 'community', 'event', false, true, 30, true, true, 'Bike maintenance class', 'Two hours on brakes, gears and flats.', 40) on conflict (id) do nothing;`);
   }
