@@ -49,22 +49,25 @@ test('an Apple relay account is asked for its everyday email and a password, the
 
   // The relay address itself is not an answer.
   await setVal(page, 'fx-email', 'other@privaterelay.appleid.com');
-  await setVal(page, 'fx-pw', 'Welcome9A'); await setVal(page, 'fx-pw2', 'Welcome9A');
+  await setVal(page, 'fx-pw', 'Welcome9A');
   await page.click('#fx-save');
   await expect(page.locator('#fix-gate .fx-item[data-fx="email"] .pg-msg')).toHaveText('That’s a private Apple address. Enter the email you use every day.');
   await expect(page.locator('#fx-pw')).toHaveValue('Welcome9A');                // a repaint keeps the password it was given
-  // Weak, then mismatched.
+  // Too short, then too easy to guess; one box, with show/hide (2026-11-11).
+  await expect(page.locator('#fx-pw2')).toHaveCount(0);
   await setVal(page, 'fx-email', 'Sara@Example.com');
-  await setVal(page, 'fx-pw', 'weakpass'); await setVal(page, 'fx-pw2', 'weakpass');
+  await setVal(page, 'fx-pw', 'short1');
   await page.click('#fx-save');
-  await expect(page.locator('#fix-gate .fx-item[data-fx="password"] .pg-msg')).toContainText('at least 8 characters');
-  await setVal(page, 'fx-pw', 'Welcome9A'); await setVal(page, 'fx-pw2', 'Welcome9B');
+  await expect(page.locator('#fix-gate .fx-item[data-fx="password"] .pg-msg')).toHaveText('Use at least 8 characters.');
+  await setVal(page, 'fx-pw', 'Password123');
   await page.click('#fx-save');
-  await expect(page.locator('#fix-gate .fx-item[data-fx="password"] .pg-msg')).toHaveText('Passwords do not match.');
+  await expect(page.locator('#fix-gate .fx-item[data-fx="password"] .pg-msg')).toHaveText('This password is too easy to guess. Choose another.');
   expect(sent).toHaveLength(0);
+  await setVal(page, 'fx-pw', 'Welcome9A');
+  await page.locator('#fix-gate .fx-item[data-fx="password"] .pw-eye').click();
+  await expect(page.locator('#fx-pw')).toHaveAttribute('type', 'text');
   expect(await page.locator('#fix-gate').innerHTML()).not.toContain('Welcome9');  // never written into the markup
 
-  await setVal(page, 'fx-pw2', 'Welcome9A');
   await page.click('#fx-save');
   await expect(box).toBeHidden();
   expect(sent).toHaveLength(1);
@@ -92,7 +95,7 @@ test('an account with no password meets the check-up when the site opens, before
   await expect(box.locator('.pg-title')).toHaveText('Create a password');
   await expect(box.locator('.gate-out')).toBeVisible(); // Log out is the only other way off it
   await expect(box.locator('button', { hasText: /not now|later|skip/i })).toHaveCount(0);
-  await setVal(page, 'fx-pw', 'Welcome9A'); await setVal(page, 'fx-pw2', 'Welcome9A');
+  await setVal(page, 'fx-pw', 'Welcome9A');
   await page.click('#fx-save');
   await expect(box).toBeHidden();
   expect(sent).toHaveLength(1);
@@ -149,11 +152,21 @@ test('an email already on another account is named, and nothing else is lost', a
   await rider(page, RELAY, ['email', 'password'], { 'rpc:customer_fix_save': { __rpcError: { status: 409, code: '23505', message: 'email_taken' } } });
   await page.evaluate(`selectEvent('jcc')`);
   await setVal(page, 'fx-email', 'taken@example.com');
-  await setVal(page, 'fx-pw', 'Welcome9A'); await setVal(page, 'fx-pw2', 'Welcome9A');
+  await setVal(page, 'fx-pw', 'Welcome9A');
   await page.click('#fx-save');
   await expect(page.locator('#fix-gate .fx-item[data-fx="email"] .pg-msg')).toHaveText('An account with this email already exists.');
   await expect(page.locator('#fx-email')).toHaveValue('taken@example.com');
   expect(await page.evaluate('S.loggedIn.email')).toBe(RELAY);
+});
+
+test('a password the server would not take is asked again, saying why', async ({ page }) => {
+  // customer_fix_save leaves 'password' asked when it refuses one: on a database without 20261111130000 the old
+  // rule (an upper-case letter and a digit) still stands.
+  await rider(page, 'sara@example.com', ['password'], { 'rpc:customer_fix_save': ['password'] });
+  await page.evaluate(`selectEvent('jcc')`);
+  await setVal(page, 'fx-pw', 'corniche ride');
+  await page.click('#fx-save');
+  await expect(page.locator('#fix-gate .fx-item[data-fx="password"] .pg-msg')).toHaveText('Use at least 8 characters, with an upper-case letter and a number.');
 });
 
 // ── Staff ─────────────────────────────────────────────────────────────────────

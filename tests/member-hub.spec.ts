@@ -49,12 +49,12 @@ test.describe('@customer:members the Community tab', () => {
     expect(await page.evaluate(`Array.from({length:HUB_TIPS},(_,i)=>'tip'+i).filter(k=>!HUB_T[k])`)).toEqual([]);
   });
 
-  test('one read, no sub-menu, no Back, nothing about anyone else, and no sideways scroll', async ({ page }) => {
+  test('one read, no sub-menu, the page\'s Back, nothing about anyone else, and no sideways scroll', async ({ page }) => {
     const sent = rpcSent(page);
     await member(page);
     expect([...new Set(sent.map((x) => x.fn).filter((f) => f.startsWith('hub_') || f === 'member_directory'))]).toEqual(['hub_feed']);
     await expect(page.locator('#hub-nav, .hub-tab, #tab-members .mb-row, #mb-q')).toHaveCount(0);
-    await expect(page.locator('#cust-back-btn')).toBeHidden();
+    await expect(page.locator('#cust-back-btn')).toBeVisible(); // the Community tab keeps the page's Back (the user, 2026-11-11)
     await expect(page.locator('#hub-body')).not.toContainText(/kudos|No challenge is running/i);
     expect(await page.evaluate('document.documentElement.scrollWidth<=window.innerWidth')).toBe(true);
     await page.evaluate(`setCustTab('myrides')`);

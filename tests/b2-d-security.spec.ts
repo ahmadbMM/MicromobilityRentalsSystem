@@ -343,12 +343,12 @@ test.describe('@staff:bookings b2-d the customer password reset (P15)', () => {
     await roster(page);
     await page.evaluate(`S.showResetTool=true;renderStaffQueue()`);
     await page.fill('#staff-reset-email', 'lost@example.test');
-    await page.fill('#staff-reset-pw', 'Abcdefg1');
+    await page.fill('#staff-reset-pw', 'Corniche8');
     await page.evaluate('staffResetPassword()');
     await expect(page.locator('#staff-reset-result')).toHaveText('Your role cannot do this. Ask an admin.');
     await page.route(/\/rest\/v1\/rpc\/staff_set_customer_temp_password/, (r) => r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: 'true' }));
     const calls = watch(page);
-    await page.fill('#staff-reset-pw', 'Abcdefg1');
+    await page.fill('#staff-reset-pw', 'Corniche8');
     await page.evaluate('staffResetPassword()');
     await expect(page.locator('#staff-reset-result')).toContainText('Password reset for Lost Key.');
     await expect.poll(() => named(calls, 'staff_actions', 'POST').map(row0)).toContainEqual(expect.objectContaining({ kind: 'pwd', entity: 'customer', entity_id: 'c9' }));

@@ -67,6 +67,64 @@ test('the Applications tab shows every answer, the handles as links, and an acco
   await expect(row(page, 'a3').locator('a.ca-chat')).toHaveAttribute('href', 'https://wa.me/966553579024');
 });
 
+// The community form rework (2026-11-11, 20261111130000): an applicant under 18 names a parent or guardian, and the
+// form keeps anonymous counts of where people leave it, read in the Form drop-off dialog.
+test('an under-18 application shows its parent or guardian, with a call and a WhatsApp link', async ({ page }) => {
+  const guardian = { name: 'Mona Mansour', relation: 'parent', phone: '0551112222', privacy_version: '2026-11-11', at: '2026-11-11T08:00:00Z' };
+  await applicationsTab(page, { community_applications: apps.map((a) => (a.id === 'a1' ? { ...a, birth_date: '2010-05-01', guardian } : a.id === 'a2' ? { ...a, guardian: { ...guardian, name: 'Sami Saleh', relation: 'guardian' } } : a)) });
+  const g = row(page, 'a1').locator('.ca-kv', { hasText: 'Parent or guardian' });
+  await expect(g).toContainText('Mona Mansour · Parent');
+  await expect(g.locator('a[href="tel:+966551112222"]')).toHaveCount(1);
+  await expect(g.locator('a.ca-gd-wa')).toHaveAttribute('href', 'https://wa.me/966551112222');
+  await expect(row(page, 'a2').locator('.ca-kv', { hasText: 'Parent or guardian' })).toContainText('Sami Saleh · Legal guardian');
+  await page.locator('.filter-pill[data-ca-filter="rejected"]').click();
+  await expect(row(page, 'a3').locator('.ca-kv', { hasText: 'Parent or guardian' })).toHaveCount(0); // an adult's card has no such line
+});
+
+test('Form drop-off shows the form counts for 7, 30 or 90 days', async ({ page }) => {
+  const funnel = {
+    days: 30, visits: 1240, made: 22, sent: 15,
+    screens: [{ screen: 'gate', reached: 40, passed: 38 }, { screen: 'password', reached: 30, passed: 24 }, { screen: 'newscreen', reached: 5, passed: 0 }],
+    left_at: [{ screen: 'password', field: 'pwd', n: 6 }],
+    errors: [{ field: 'pwd', code: 'common', n: 4 }],
+    devices: { phone: 31, desktop: 9, '?': 2 },
+  };
+  const days: unknown[] = [];
+  await applicationsTab(page, { 'rpc:staff_community_form_funnel': funnel });
+  page.on('request', (r) => { if (r.method() === 'POST' && /rpc\/staff_community_form_funnel/.test(r.url())) days.push(JSON.parse(r.postData() || '{}').p_days); });
+  await page.locator('#ca-tb .ca-funnel-btn').click();
+  const dlg = page.locator('#confirm-modal .cfn-box');
+  await expect(dlg).toBeVisible();
+  await expect(dlg.locator('#cfn-title')).toHaveText('Where people leave the community form');
+  await expect(dlg.locator('[data-cfn-days="30"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(dlg.locator('.cfn-stat').nth(0)).toContainText('1,240');
+  await expect(dlg.locator('.cfn-stat').nth(0)).toContainText('Visits');
+  await expect(dlg.locator('.cfn-stat').nth(1)).toContainText('Accounts made');
+  await expect(dlg.locator('.cfn-stat').nth(2)).toContainText('Applications sent');
+  const screens = dlg.locator('table.cfn-t').first().locator('tbody tr');
+  await expect(screens).toHaveCount(3);
+  await expect(screens.nth(0)).toContainText('First question');
+  await expect(screens.nth(0)).toContainText('95%');
+  await expect(screens.nth(1)).toContainText('Password');
+  await expect(screens.nth(1)).toContainText('80%');
+  await expect(screens.nth(2)).toContainText('newscreen'); // an id the app has no name for shows as it is
+  await expect(dlg.locator('table.cfn-t').nth(1)).toContainText('pwd');
+  await expect(dlg.locator('table.cfn-t').nth(2)).toContainText('common');
+  await expect(dlg).toContainText('Phones');
+  await expect(dlg).toContainText('Not known');
+  await dlg.locator('[data-cfn-days="7"]').click();
+  await expect(dlg.locator('[data-cfn-days="7"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect.poll(() => days).toEqual([30, 7]);
+  await dlg.locator('.ca-x').click();
+  await expect(page.locator('#confirm-modal .cfn-box')).toHaveCount(0);
+});
+
+test('Form drop-off says when the database does not count the form yet', async ({ page }) => {
+  await applicationsTab(page, { 'rpc:staff_community_form_funnel': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.staff_community_form_funnel(p_days) in the schema cache' } } });
+  await page.locator('#ca-tb .ca-funnel-btn').click();
+  await expect(page.locator('#confirm-modal .cfn-box')).toContainText('Not set up yet');
+});
+
 // How they heard of us: the community form asks it since 2026-09-28 (the booking app's sign-up no
 // longer does), and the card shows the answer in the staff member's language.
 test('the card shows how the applicant heard of us, and Not answered when it is empty', async ({ page }) => {
@@ -461,15 +519,16 @@ test('A rider signed in with a temporary password must choose their own before a
   await expect(gate).toBeVisible();
   await expect(gate).toContainText('Choose your own password');
   await expect(gate.locator('.pg-kicker')).toHaveText('Password'); // any account may be here, not only a new member
+  await expect(page.locator('#pm-new2')).toHaveCount(0); // one box with show/hide (2026-11-11)
   await page.fill('#pm-new', 'short');
-  await page.fill('#pm-new2', 'short');
   await page.click('#pm-save');
-  await expect(page.locator('#pm-err')).toContainText('at least 8 characters');
+  await expect(page.locator('#pm-err')).toHaveText('Use at least 8 characters.');
+  await page.fill('#pm-new', 'iloveyou');
+  await page.click('#pm-save');
+  await expect(page.locator('#pm-err')).toHaveText('This password is too easy to guess. Choose another.');
+  await page.locator('#pwd-gate .pw-eye').click();
+  await expect(page.locator('#pm-new')).toHaveAttribute('type', 'text');
   await page.fill('#pm-new', 'MyOwnPass9');
-  await page.fill('#pm-new2', 'MyOwnPass8');
-  await page.click('#pm-save');
-  await expect(page.locator('#pm-err')).toContainText('do not match');
-  await page.fill('#pm-new2', 'MyOwnPass9');
   await page.click('#pm-save');
   await expect(gate).toHaveCount(0);
   expect(calls).toEqual([{ p_id: 'ca01', p_token: 'tok-temp', p_new_pwd: 'MyOwnPass9' }]);

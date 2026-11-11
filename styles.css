@@ -6886,6 +6886,17 @@ body.view-staff .ca-link{padding-block:4px;margin-block:-4px;} /* 24x24 hit area
 .ca-msg-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ca-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:var(--sf-fs-xl);line-height:1;padding:0 4px}
 .ca-x:hover{color:var(--text)}
+/* Form drop-off (_cfnRender, 2026-11-11): the community form's anonymous counts, in the applications' dialog. */
+.cfn-box{max-width:640px;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto}
+.cfn-range{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.cfn-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}
+.cfn-stat{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--sf-line2,var(--border));border-radius:var(--sf-r-card,12px);background:var(--sf-card,var(--s1))}
+.cfn-stat b{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.cfn-stat span{font-size:12px;color:var(--muted)}
+.cfn-h{margin:16px 0 6px;font-size:14px;font-weight:600}
+.cfn-note{margin:10px 0;color:var(--muted);font-size:13px}
+.cfn-t th,.cfn-t td{padding:8px 10px}
+.cfn-t .cfn-num{text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ca-msg-sub{font-size:var(--sf-fs-sm);color:var(--muted);line-height:1.5;margin:8px 0 12px}
 /* A Saturday ride booking's messages (_rmRender): the three to pick from */
 .rm-list{display:flex;flex-direction:column;gap:8px}
@@ -7149,9 +7160,11 @@ body .vendor-dlg textarea.vendor-pw-msg{width:100%;min-height:170px;box-sizing:b
 #acc-pwd-modal .pg-box{position:relative;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow-y:auto;}
 #acc-pwd-modal .ap-x{position:absolute;top:10px;inset-inline-end:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent none;border:0;border-radius:999px;color:#4f565c;cursor:pointer;padding:0;}
 #acc-pwd-modal .pg-kicker{padding-inline-end:40px;}
-#acc-pwd-modal .pw-wrap{position:relative;}
-#acc-pwd-modal .pw-wrap input{padding-inline-end:48px;}
-#acc-pwd-modal .pw-eye{position:absolute;top:4px;inset-inline-end:4px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent none;border:0;border-radius:8px;color:#4f565c;cursor:pointer;padding:0;}
+/* Show/hide on a rider's password box (_pwEyeBtn, 2026-11-11): My Account, the forced change, sign-up and the
+   check-up. The button sits inside the box's end, centred on any box height; :is(#_x,*) lifts each rule over the boxes' own (.auth-field input, .pg-field input) and the rider buttons'. */
+.pw-wrap{position:relative;}
+.pw-wrap input[type]:is(#_x,*){padding-inline-end:48px;}
+.pw-wrap .pw-eye:is(#_x,*){position:absolute;top:0;bottom:0;margin:auto 0;inset-inline-end:4px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent none;border:0;border-radius:8px;color:var(--muted);cursor:pointer;padding:0;min-height:0;box-shadow:none;}
 #acc-pwd-modal .ap-hint{margin-top:8px;font-size:12.5px;color:#4f565c;}
 #acc-pwd-modal .pg-msg:not(:empty){margin-top:10px;}
 #acc-pwd-modal .ap-done{display:flex;gap:8px;align-items:flex-start;color:#0f1215;}
@@ -9033,7 +9046,6 @@ body:not(.view-staff) .hub-stats{display:grid;grid-template-columns:1fr 1fr;gap:
 body:not(.view-staff) .hub-stat strong{display:block;font-size:var(--fs-20);}
 /* The Community tab as one feed (2026-11-11, member-hub.js): a night hero for the next session, white cards for what the
    member is working towards, flat cards on the page for the staff's words. Glass stays on the bars; nothing moves in by itself. */
-body:not(.view-staff) .cust-back-btn[hidden]{display:none;}
 body:not(.view-staff) #tab-members .page-title:focus{outline:none;}
 body:not(.view-staff) .hub-skel i{height:120px;}
 body:not(.view-staff) .hub-skel i:first-child{height:180px;}
@@ -9415,11 +9427,6 @@ body:not(.view-staff) .spots-soon{display:inline-flex;align-items:center;gap:5px
 body:not(.view-staff) .cu-wl-chip{display:inline-flex;align-items:center;min-height:20px;padding:0 8px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--red-line);color:var(--red);font-size:var(--fs-12);font-weight:600;vertical-align:1px;}
 /* a type another rider filled while this one was on the form (TYPE_FULL, 2026-11-11): said on the review */
 body:not(.view-staff) .cu-cap-err{margin:6px 0 4px;color:var(--red);font-size:var(--fs-13);font-weight:600;}
-/* step 1's bar holds Back too (row 12); the top Back steps aside while it shows */
-body:not(.view-staff) .mm-reg-foot.reg-foot1{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-body:not(.view-staff) .reg-foot1 .cu-w100{flex:1;width:auto;}
-body:not(.view-staff) .reg-foot-back{flex:none;width:44px;min-width:44px;height:44px;padding:0;display:inline-grid;place-items:center;border-radius:50%;}
-body:not(.view-staff):has(#tab-register.active .reg-foot1) #cust-back-btn{display:none;}
 /* the step-2 bar's total (row 9) */
 body:not(.view-staff) .reg-foot-tot{align-self:center;font-size:var(--fs-17);font-weight:700;color:var(--ink);white-space:nowrap;}
 body:not(.view-staff) .reg-foot-tot:empty{display:none;}

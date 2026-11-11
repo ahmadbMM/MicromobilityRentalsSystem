@@ -20,7 +20,8 @@ test.describe('@customer:account change password', () => {
   test('checks the boxes, says each refusal, keeps this device signed in with the new token', async ({ page }) => {
     const sent: Record<string, unknown>[] = [];
     // A wrong current password is answered, not raised (20261004100000); the others still raise.
-    const answers = ['ok:BAD_PASSWORD', 'SAME_PASSWORD', 'LOCKED', 'tok:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'];
+    // WEAK_PASSWORD first: a database without 20261111130000 still asks an upper-case letter and a digit.
+    const answers = ['WEAK_PASSWORD', 'ok:BAD_PASSWORD', 'SAME_PASSWORD', 'LOCKED', 'tok:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'];
     await account(page, {}, {}, () => page.route(/\/rest\/v1\/rpc\/customer_change_password/, async (route) => {
       sent.push(route.request().postDataJSON());
       const a = answers.shift()!;
@@ -31,7 +32,8 @@ test.describe('@customer:account change password', () => {
     const dlg = page.locator('#acc-pwd-modal [role="dialog"]');
     await expect(dlg).toBeVisible();
     await expect(dlg).toContainText('Change your password');
-    await expect(dlg).toContainText('Min 8 chars, 1 uppercase, 1 number');
+    await expect(dlg).toContainText('At least 8 characters');
+    await expect(page.locator('#ap-new2')).toHaveCount(0); // one box with show/hide, not a second to type it again (2026-11-11)
     await expect(dlg).not.toContainText('Google or Apple'); // a password account: the current one is asked for
 
     const err = page.locator('#ap-err');
@@ -41,12 +43,15 @@ test.describe('@customer:account change password', () => {
     await page.fill('#ap-cur', 'Oldpass1');
     await page.fill('#ap-new', 'short');
     await save.click();
-    await expect(err).toHaveText(/at least 8 characters/);
-    await page.fill('#ap-new', 'Newpass12');
-    await page.fill('#ap-new2', 'Newpass13');
+    await expect(err).toHaveText('Use at least 8 characters.');
+    await page.fill('#ap-new', 'Qwerty123');
     await save.click();
-    await expect(err).toHaveText('Passwords do not match.');
+    await expect(err).toHaveText('This password is too easy to guess. Choose another.');
     expect(sent).toHaveLength(0); // nothing reached the server yet
+    await page.fill('#ap-new', 'corniche ride');
+    await save.click();
+    await expect(err).toHaveText('Use at least 8 characters, with an upper-case letter and a number.');
+    expect(sent).toHaveLength(1);
 
     // Show and hide.
     const eye = page.locator('#acc-pwd-modal .pw-eye').nth(1);
@@ -56,7 +61,7 @@ test.describe('@customer:account change password', () => {
     await eye.click();
     await expect(page.locator('#ap-new')).toHaveAttribute('type', 'password');
 
-    await page.fill('#ap-new2', 'Newpass12');
+    await page.fill('#ap-new', 'Newpass12');
     await save.click();
     await expect(err).toHaveText('That is not your current password.');
     await save.click();
@@ -65,7 +70,7 @@ test.describe('@customer:account change password', () => {
     await expect(err).toHaveText('Too many wrong tries. Try again in 15 minutes.');
     await save.click();
     await expect(dlg).toContainText('any other phone or computer signed in to your account has been signed out');
-    expect(sent[3]).toMatchObject({ p_id: 'c1', p_token: 'tok-spec', p_current: 'Oldpass1', p_new: 'Newpass12' });
+    expect(sent[4]).toMatchObject({ p_id: 'c1', p_token: 'tok-spec', p_current: 'Oldpass1', p_new: 'Newpass12' });
     expect(await page.evaluate(`(S.loggedIn||{}).session_token`)).toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     expect(await page.evaluate(`JSON.parse(localStorage.getItem('cq_session')).session_token`)).toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     await dlg.getByRole('button', { name: 'Done' }).click();
@@ -83,7 +88,6 @@ test.describe('@customer:account change password', () => {
     const dlg = page.locator('#acc-pwd-modal [role="dialog"]');
     await expect(dlg).toContainText('Leave the current password empty');
     await page.fill('#ap-new', 'Newpass12');
-    await page.fill('#ap-new2', 'Newpass12');
     await page.locator('#ap-save').click();
     await expect(dlg).toContainText('Your password is changed.');
     expect(sent[0]).toMatchObject({ p_current: '', p_new: 'Newpass12' });

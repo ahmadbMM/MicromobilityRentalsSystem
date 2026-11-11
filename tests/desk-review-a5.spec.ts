@@ -155,7 +155,7 @@ test('the password reset tool prints a server message as text', async ({ page })
   }));
   await page.evaluate(`S.showResetTool=true;renderStaffQueue()`);
   await page.fill('#staff-reset-email', 'someone@example.test');
-  await page.fill('#staff-reset-pw', 'Abcdefg1');
+  await page.fill('#staff-reset-pw', 'Corniche8');
   await page.evaluate('staffResetPassword()');
   await expect(page.locator('#staff-reset-result')).toContainText('<img src=x id=pwn>');
   expect(await page.locator('#pwn').count()).toBe(0);
