@@ -614,6 +614,7 @@
   "tabPeople": "Mga Tao",
   "pplSub": "Lahat ng account at ang komunidad: mga miyembro, aplikasyon, kahilingan, tag, badge at kaarawan.",
   "pplFind": "Maghanap ng tao: pangalan, telepono, email o Instagram",
+  "pplPartErr": "Hindi nag-load ang view na ito. Tingnan ang iyong koneksyon at subukang muli.",
   "pplScope": "Sino ang ipapakita",
   "pplEveryone": "Lahat",
   "pplNonMembers": "Hindi miyembro",

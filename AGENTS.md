@@ -3252,3 +3252,28 @@ Items 48-50 of `reports/Staff website design and function.md` (builder "features
   section's next action on staff screens (riders keep the plain line); top-bar icons one size and ink (Lock not red).
 - **Dark:** colour dots carry a 1px ring; staff checkboxes are drawn (appearance none, a visible edge); field edges
   (`--sf-ctl`) are .38 white (3:1).
+
+## Staff round s10: People in parts (2026-11-11, item 47)
+- **Parts inside a part.** `STAFF_PART_UP` in `scripts/split-staff.mjs` names a part that only ever runs after another
+  (one level): its loader fetches the outer part first (`_loadStaffPart`, the generated `STAFF_PART_UP` map in the core),
+  so what the two reach - or two parts inside one - stays in the OUTER part instead of going back to the core, and so do
+  the strings both name (`partLangKeys`). Cut as plain parts, People's views shared ~36 KB gzipped of helpers with
+  Accounts that would all have gone to the core.
+- **People's rarely opened views are two such parts, fetched the first time one is opened** (`STAFF_PART_TABS`: none):
+  `peopleapps` (Applications: community and learning to ride) and `peoplemore` (Badges, Titles, the members' page,
+  Birthdays and its printed week, Referrals, Tags, Duplicates, the customers' activity log, the account report's builder
+  and default print, the actions on a group of accounts). The `community` part went from 474 KB raw / 135 KB gzipped to
+  189 KB / 57 KB (its Arabic pack 61 KB -> 22 KB): that is what opening People > Accounts fetches now.
+- **A view's renderer is a stand-in until its part has come**, answering a promise, not markup. `_renderPeople` passes each
+  moved renderer through `_pplPartHtml`: a loading line (`#ppl-part-wait`) in its place, one repaint when the part is here
+  (only for the latest ask), and "This view did not load" with Try again when it did not. A NEW People view whose code
+  should stay out of Accounts' part: add its renderer to `peoplemore` and wrap the call the same way. Calling a moved
+  renderer anywhere else for its markup is a bug (it gives a promise until the part is here); calling it for its effect
+  (`renderCustActivity`, `showAccountReportOptions`, `openSegmentActions`, `printDefaultAccountReport`) is fine.
+- **A session's report is a part (`sessreport`)**: Print report's options dialog and the sheets it prints or saves (the
+  report, its CSV, the breakfast report, the Saturday roster), ~10 KB gzipped out of the desk's core; the desk fetches it
+  with its own parts after the first paint (tabs: queue). The day sheet and the close-out stay in the core.
+- **Every part stand-in hands over through `_partGo(name, part, args)`** (it reads `window[name]`, a script's top-level
+  function): ~100 stand-ins each wrote their body out, 2.5 KB gzipped of the core. A spec that asks whether a function is
+  still a stand-in tests `String(fn)` for `_partGo`.
+- Budgets after this: staff half 952.9 / 956 (was 952.3), desk core 327.3 / 346 (was 338.9). `tests/people-parts.spec.ts`.

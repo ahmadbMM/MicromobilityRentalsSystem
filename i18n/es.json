@@ -614,6 +614,7 @@
   "tabPeople": "Personas",
   "pplSub": "Todas las cuentas y la comunidad: miembros, solicitudes, peticiones, etiquetas, insignias y cumpleaños.",
   "pplFind": "Buscar a una persona: nombre, teléfono, correo o Instagram",
+  "pplPartErr": "Esta vista no se cargó. Comprueba tu conexión e inténtalo de nuevo.",
   "pplScope": "A quién mostrar",
   "pplEveryone": "Todos",
   "pplNonMembers": "No miembros",
