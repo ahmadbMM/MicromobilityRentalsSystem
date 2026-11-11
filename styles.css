@@ -2906,6 +2906,13 @@
     #tab-sessions .ss-mw140{max-width:140px;}
     #tab-sessions .ss-mw240{max-width:240px;}
     #tab-sessions .ss-mw340{max-width:340px;}
+    /* places per bike type beside the bike count (2026-11-11): one small box per type, the sum said when over the total */
+    #tab-sessions .ss-tcap{border:0;padding:0;margin:0 0 16px;min-width:0;}
+    #tab-sessions .ss-tcap legend{padding:0;margin-bottom:6px;font-size:var(--staff-fs-sm);font-weight:600;color:var(--muted);}
+    #tab-sessions .ss-tcap-row{display:flex;flex-wrap:wrap;gap:8px 12px;}
+    #tab-sessions .ss-tcap-f{display:flex;flex-direction:column;gap:4px;width:96px;}
+    #tab-sessions .ss-tcap-over{margin:6px 0 0;font-size:var(--staff-fs-sm);font-weight:600;color:var(--warn);}
+    #tab-sessions .ss-tcap-over:empty{display:none;}
     #tab-sessions .ss-datewarn{font-size:var(--sf-fs-xs);color:var(--muted-l);margin-top:5px;font-weight:600;}
     #tab-sessions .ss-times{display:flex;align-items:center;gap:8px;margin-top:4px;}
     #tab-sessions .ss-time{background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:var(--sf-r-xs);color:var(--text);font-family:var(--font-body);font-size:var(--sf-fs-sm);font-weight:600;padding:6px 10px;cursor:pointer;}
@@ -9406,6 +9413,8 @@ body:not(.view-staff) .sess-about.sess-i:focus-visible{outline-offset:-4px;borde
 body:not(.view-staff) .spots-soon{display:inline-flex;align-items:center;gap:5px;}
 /* the waitlist said in the bar and on the review before Confirm (row 1) */
 body:not(.view-staff) .cu-wl-chip{display:inline-flex;align-items:center;min-height:20px;padding:0 8px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--red-line);color:var(--red);font-size:var(--fs-12);font-weight:600;vertical-align:1px;}
+/* a type another rider filled while this one was on the form (TYPE_FULL, 2026-11-11): said on the review */
+body:not(.view-staff) .cu-cap-err{margin:6px 0 4px;color:var(--red);font-size:var(--fs-13);font-weight:600;}
 /* step 1's bar holds Back too (row 12); the top Back steps aside while it shows */
 body:not(.view-staff) .mm-reg-foot.reg-foot1{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 body:not(.view-staff) .reg-foot1 .cu-w100{flex:1;width:auto;}

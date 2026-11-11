@@ -1115,7 +1115,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   errLoginFirst:'Sign in first.',
   errSelectSession:'Choose a session above.',
   errSessionClosed:'That session is no longer open.',
-  typeClosedPill:'Closed',errTypeClosed:'That bike type is closed for this session. Please choose another.',rsTypeClosed:'Your bike type is closed on that date. Please choose another date.',
+  typeClosedPill:'Closed',errTypeClosed:'That bike type is closed for this session. Please choose another.',rsTypeClosed:'Your bike type is closed on that date. Please choose another date.',typeFullPill:'Full',errTypeFull:'That bike type is full on this ride. Please choose another.',rsTypeFull:'Your bike type is full on that date. Please choose another date.',capFullQ:'{0} is full ({1} of {2}). Add anyway?',capAddAnyway:'Add anyway',capPickOther:'Pick another type',capLog:'Added over the {0} limit',tcapLabel:'Places per bike type',tcapNone:'No limit',tcapOver:'These add up to {0}, more than the {1} bikes on the session. The total still caps it.',tcapLine:'Places per bike type: {0}',
   closeTypesBtn:'Close bike types',closeTypesSub:'Tap a type to close it. Riders cannot book a closed type on this session; bookings already made stay, and staff can still add riders.',closeTypesLast:'At least one type has to stay open. To stop all bookings, close the session.',typesClosedChip:'Bike types closed: {0}',undoTypesClosed:'Bike types closed',typesClosedSaved:'Bike types saved.',
   errValidHeightCm:'Enter a height between 100 and 250 cm.',
   errSelectTypeGeneric:'Choose a bike type.',
@@ -1738,7 +1738,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   errLoginFirst:'الرجاء تسجيل الدخول أولاً.',
   errSelectSession:'الرجاء اختيار جلسة من الأعلى.',
   errSessionClosed:'هذه الجلسة لم تعد مفتوحة.',
-  typeClosedPill:'مغلق',errTypeClosed:'هذا النوع من الدراجات مغلق في هذه الجلسة. يرجى اختيار نوع آخر.',rsTypeClosed:'نوع دراجتك مغلق في ذلك الموعد. يرجى اختيار موعد آخر.',
+  typeClosedPill:'مغلق',errTypeClosed:'هذا النوع من الدراجات مغلق في هذه الجلسة. يرجى اختيار نوع آخر.',rsTypeClosed:'نوع دراجتك مغلق في ذلك الموعد. يرجى اختيار موعد آخر.',typeFullPill:'ممتلئ',errTypeFull:'هذا النوع من الدراجات ممتلئ في هذه الجولة. يرجى اختيار نوع آخر.',rsTypeFull:'نوع دراجتك ممتلئ في ذلك الموعد. يرجى اختيار موعد آخر.',capFullQ:'{0} ممتلئ ({1} من {2}). هل تضيفه على أي حال؟',capAddAnyway:'أضف على أي حال',capPickOther:'اختر نوعًا آخر',capLog:'أُضيف فوق حد {0}',tcapLabel:'الأماكن لكل نوع دراجة',tcapNone:'بلا حد',tcapOver:'مجموعها {0}، وهذا أكثر من {1} دراجة في الجلسة. يبقى المجموع هو الحد للجلسة.',tcapLine:'الأماكن لكل نوع دراجة: {0}',
   closeTypesBtn:'إغلاق أنواع الدراجات',closeTypesSub:'اضغط على النوع لإغلاقه. لا يمكن للركاب حجز نوع مغلق في هذه الجلسة؛ تبقى الحجوزات القائمة، ويظل بإمكان الموظفين إضافة ركاب.',closeTypesLast:'يجب أن يبقى نوع واحد مفتوحًا على الأقل. لإيقاف جميع الحجوزات، أغلق الجلسة.',typesClosedChip:'أنواع الدراجات المغلقة: {0}',undoTypesClosed:'أنواع الدراجات المغلقة',typesClosedSaved:'تم حفظ أنواع الدراجات.',
   errValidHeightCm:'أدخل طولاً بين 100 و250 سم.',
   errSelectTypeGeneric:'الرجاء اختيار نوع الدراجة.',
@@ -3014,7 +3014,7 @@ const S={
   queue:[],bikes:[],customers:[],sessions:[],tags:[],customerTags:[],amSearch:'',amTagFilter:'',tagEdit:null,tagCustId:null,
   showAddSession:false,newSessDate:'',newSessStartTime:'21:00',newSessEndTime:'23:00',
   newSessMode:'counts',  
-  newSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},
+  newSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},newSessTypeCaps:{},editSessTypeCaps:{},
   editSessionId:null,
   editSessAssignedIds:[],
   editSessMode:'fleet',editSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},
@@ -5552,6 +5552,7 @@ function _errMessage(err){
   if(_mbRefused(err)){const c=S.view==='staff'?_mbCapNum():null;return c!=null?t('mbFullStaff').replace('{0}',String(c)):t('mbFullMsg');} // the member cap (20261017120000)
   if(_sgErrOf(err))return _sgErrOf(err); // men only or women only (GENDER_ONLY, 20261027150000): a move, a cancel taken back
   if(/FIX_FIRST/.test(String((err&&err.message)||'')))return t('fixOwnSub');
+  if(/TYPE_FULL/.test(String((err&&err.message)||'')))return t('errTypeFull'); // a type's places all taken (20261111180600)
   if(/PAID_ONLINE/.test(String((err&&err.message)||'')))return t('payOnlineLocked'); // a booking paid online keeps how it was paid (20261110150000) // owed details, where the request itself could not be opened (_fixRefused)
   switch(_errKind(err)){
     case'perm':return t('errWritePerm');
@@ -14620,7 +14621,7 @@ function _rpcAbsentNote(m){try{const k=m.slice(0,90);if(_rpcAbsentSeen.has(k))re
 // The RPCs raise 'CODE: English sentence'. The desk's own codes are said in the desk's language, since most booth staff read
 // Arabic and these come when two desks touch one rider or bike (the staff review, 2026-10-28, S01-core1-05); any other code's
 // sentence is what staff read. An error bar keeps the server's words in its small detail line.
-const RPC_DESK={NOT_APPROVED:'qYNotAppr',BAD_BOOKING_STATE:'errChangedElsewhere',BIKE_UNAVAILABLE:'errBikeUnavailable',BIKE_NOT_FOUND:'nfcUnknownBike',BIKE_NEEDS_CHECK:'chkBanner',BOOKING_NOT_FOUND:'vndErrNotLive'};
+const RPC_DESK={NOT_APPROVED:'qYNotAppr',BAD_BOOKING_STATE:'errChangedElsewhere',BIKE_UNAVAILABLE:'errBikeUnavailable',BIKE_NOT_FOUND:'nfcUnknownBike',BIKE_NEEDS_CHECK:'chkBanner',BOOKING_NOT_FOUND:'vndErrNotLive',TYPE_FULL:'errTypeFull'};
 function _rpcMessage(err){
   const m=String((err&&err.message)||(typeof err==='string'?err:'')),k=RPC_DESK[(/^[A-Z_]+/.exec(m)||[])[0]];
   if(!k)return m.replace(/^[A-Z_]+:\s*/,'')||t('errConnection');
@@ -16343,10 +16344,11 @@ async function _giveDeskBike(id){
     registeredAt:new Date().toISOString(),walkIn:!_match,customerId:(_match&&_match.id)||null,
     price:_house?null:_wlRowPrice(w),approval:null}); // payment taken while waiting carries onto the booking
   if(_house&&!entry.paid)entry.price=_entryFallbackPrice(entry); // its fare: the ride's, else the type's
-  let res=await sb.from('queue_entries').insert(entryToDB(entry));
+  const cap={}; // a type full on the ride asks first (2026-11-11)
+  let res=await _qIns(entryToDB(entry),cap);
   if(res&&res.error&&(String(res.error.code||res.error.message).includes('23505')||/duplicate|unique/i.test(res.error.message||''))){
     await loadDataLight();entry.queueNum=nextQNum(sess.id); // another device grabbed the number: take a fresh one and retry once
-    res=await sb.from('queue_entries').insert(entryToDB(entry));
+    res=await _qIns(entryToDB(entry),cap);
   }
   if(_writeErr(res,'walk-in'))return;
   if(w.pay_method)await _wr(sb.from('queue_entries').update({pay_method:w.pay_method,card_amount:w.card_amount??null}).eq('id',entry.id),'payment method'); // said when refused; the booking itself is already made
@@ -17261,10 +17263,24 @@ function _regTyBarred(ty,sess){
 // A type closed on this ride (_typeClosed) is shut to a row of the form: never picked, never carried over. A rider
 // changing a booking keeps the type that row already holds, as the database does (_type_closed_guard).
 function _regTypeShut(s,ty,i){
-  if(!_typeClosed(s,ty))return false;
+  if(!_typeClosed(s,ty)&&!_regTyFull(s,ty,i))return false;
   if(!S.modifyEntryId)return true;
   const e=_modEntries(S.loggedIn||getSession(),s.id)[i];
   return !e||e.typePreference!==ty;
+}
+// Each bike type capped on its own (the owner, 2026-11-11; the database's _type_full_guard, 20261111180600). A type's
+// places left on a ride that counts them (bike_slots by type or the fleet picked, less its bikes out, less every booking
+// of it that is not cancelled, removed or a no-show, the waitlist too: the desk's figure), else null.
+function _capLeft(s,ty){const p=s&&!s.needs_approval&&_needsBike(s)&&_n6rTypePlaces(s,ty);return p?p-(_n6rOut(s)[ty]||0)-_n6rHeld(s,ty):null;}
+// Every type this rider is offered is full: the ride is its waitlist for them, as the server answers (_type_room_else).
+function _capAll(s){const o=bikeTypeOpts(_ownOffered(s),_noCarbon(s)).filter(x=>x!=='Any'&&!_typeClosed(s,x)&&!_regTypeHidden(x));return o.length>0&&o.every(x=>(_capLeft(s,x)??1)<=0);}
+// A full type is shut to rider i (the riders before them who picked it count too) while the ride still has a place: on its
+// waitlist path every type is a preference again.
+function _regTyFull(s,ty,i){
+  let l=_capLeft(s,ty);if(l==null||_sessFull(s)||spotsLeft(s.id)<1||_capAll(s))return false;
+  const m=S.modifyEntryId?_modEntries(S.loggedIn||getSession(),s.id):[];
+  for(let j=0;j<i;j++)if(S.regBikeTypes[j]===ty&&(m[j]||{}).typePreference!==ty)l--;
+  return l<=0;
 }
 
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -17296,7 +17312,7 @@ function _regFootSum(s){
 function _regWlNow(s,qty){
   if(!s)return false;
   const need=_needsBike(s)?S.regBikeTypes.slice(0,qty).concat(Array(Math.max(0,qty-S.regBikeTypes.length)).fill('')).filter(ty=>ty!=='Own'||_ownTakesPlace(s)).length:qty;
-  return need>0&&(_sessFull(s)||(!_isApprovalRide(s)&&spotsLeft(s.id)<need));
+  return need>0&&(_sessFull(s)||(!_isApprovalRide(s)&&spotsLeft(s.id)<need)||_capAll(s)); // every type full (_capAll): the waitlist too
 }
 // The step-2 bar's total, once every rider has a type (row 9): the number the review will say, beside Review booking.
 function _regFootTot(s){
@@ -17543,9 +17559,10 @@ function renderRegister(){
     // Every real bike carries an "i" beside its pill (_typePick): its picture and brief, with a Choose.
     // Each pill says what that bike costs, so Road Carbon's price is not a surprise at the total.
     // A type closed on this ride stays on the list, greyed and saying so, so a rider is not left wondering where it
-    // went; its "i" still describes the bike, without a Choose.
+    // went; its "i" still describes the bike, without a Choose. A type whose places are all taken does the same, labelled
+    // Full (_regTyFull, 2026-11-11).
     const _shut=ty=>_regTypeShut(_selSessObj,ty,i);
-    const _pp=ty=>_shut(ty)?` <span class="tp-price">${t('typeClosedPill')}</span>`:(_freeSel||_evSeatPrice(_selSessObj)!=null||ty==='Any'||ty==='Own')?'':` <span class="tp-price">${_sarA(esc(_sar(priceForType(ty))))}</span>`;
+    const _pp=ty=>_shut(ty)?` <span class="tp-price">${t(_typeClosed(_selSessObj,ty)?'typeClosedPill':'typeFullPill')}</span>`:(_freeSel||_evSeatPrice(_selSessObj)!=null||ty==='Any'||ty==='Own')?'':` <span class="tp-price">${_sarA(esc(_sar(priceForType(ty))))}</span>`;
     const _selTy=_mbOnlyOwn?'Own':selTy;
     const typeBtns=_tyOpts.map(ty=>_typePick(
       `<button type="button" role="radio" id="ty-${i}-${ty.replace(/\W/g,'')}" class="toggle-btn${_selTy===ty?' active':''}${_shut(ty)?' tp-shut':''}" aria-checked="${(_selTy===ty)?'true':'false'}" tabindex="${(_selTy===ty)||(!_selTy&&ty===_tyOpts.find(x=>!_shut(x)))?'0':'-1'}" data-type-slot="${i}" data-type="${ty}"${((_mbOnlyOwn&&ty!=='Own')||_shut(ty))?' disabled aria-disabled="true"':''} data-on-click="${_on("setBikeType",i,ty)}"><span class="tp-txt">${typePillLabel(ty)}${_pp(ty)}</span></button>`,ty,_shut(ty)?null:i)
@@ -17832,6 +17849,7 @@ function renderRegister(){
         </div>`:''}
       </div>
       <div class="cu-rv-sec cu-rv-sec-chg"><span>${_isBlood(_selSessObj)?t(S.regBldRole==='visitor'?'bldColVisitor':'bldRoleDonor'):`${t(_needsBike(_selSessObj)?'reviewRidersLabel':'reviewPartLabel')} (${S.regQty})`}</span>${_steps.includes(2)?`<button type="button" class="cu-rv-chg" data-on-click="${_on('_regChange',2)}" aria-label="${esc(t('lkChange')+' · '+_stepLbl(2))}">${t('lkChange')}</button>`:''}</div>
+      ${S._capErr?`<p class="cu-cap-err" role="alert">${t('errTypeFull')}</p>`:''}
       ${reviewRiders}
       ${reviewAddons}
       ${_promoBoxHtml('review',_promoDisc,_freeSel||(isModifyMode&&S.regQty<=existingEntries.length),isModifyMode)}
@@ -18507,9 +18525,10 @@ function _regSideHtml(sess){
 }
 function setBikeType(idx,type){
   if(type==='Any')return; // never a rider's choice (the owner, 2026-10-09: "make sure they can never choose any")
-  if(type&&_regTypeShut(_sessDisp(S.selSession),type,idx))return; // nor a type closed on this ride
+  if(type&&_regTypeShut(_sessDisp(S.selSession),type,idx))return; // nor a type closed on this ride, or full
+  const _was=S.regBikeTypes[idx],_cs=_sessDisp(S.selSession);S._capErr=0;
   S.regBikeTypes[idx]=type;if(S._kidsAuto)S._kidsAuto[idx]=false; // a tap makes it the rider's own pick
-  if(idx===0&&_refWAuto()){renderRegister();return;} // the friend's referral discount came on or went: the step again
+  if((idx===0&&_refWAuto())||(S.regQty>1&&(_capLeft(_cs,type)!=null||_capLeft(_cs,_was)!=null))){renderRegister();return;} // the friend's referral discount came on or went, or a type counted on this ride (the next riders' places): the step again
   const _pills=[...document.querySelectorAll(`[data-type-slot="${idx}"]`)];
   _pills.forEach(btn=>{
     const on=btn.dataset.type===type;
@@ -18669,6 +18688,9 @@ function _bookRefused(err,sess){
   // A type staff closed while this rider was on the form (TYPE_CLOSED, _type_closed_guard): the sessions are read again
   // and the riders step, with that type greyed and no longer picked, asks for another.
   if(/TYPE_CLOSED/.test(m)){toast(t('errTypeClosed'),'error');loadDataLight().then(()=>{if(S.view==='customer'){S.regStep=2;renderRegister();}}).catch(()=>{});return;}
+  // A type whose places another rider took while this one was on the form (TYPE_FULL, _type_full_guard 20261111180600):
+  // said on the review, above its riders and their Change; the riders step then shows that type Full.
+  if(/TYPE_FULL/.test(m)){S._capErr=1;loadDataLight().catch(()=>{}).then(()=>{if(S.view==='customer'){S.regStep=3;renderRegister();}});return;}
   // A men-only or women-only session this account is not for (GENDER_ONLY, 20261027150000): said in words, and the
   // sessions read again, which no longer list it.
   {const sg=_sgErrOf(err);if(sg){toast(sg,'error');loadDataLight().then(()=>{if(S.view==='customer')renderRegister();}).catch(()=>{});return;}}
@@ -18759,6 +18781,7 @@ async function submitReg(){
   try{await _submitReg();}finally{S._regBusy=false;}
 }
 async function _submitReg(){
+  S._capErr=0;
   const cust=S.loggedIn||getSession();
   if(!cust){toast(t('errLoginFirst'),'error');return;}
   if(!S.selSession){
@@ -19061,6 +19084,7 @@ function _modNameLocked(i){
   return i<S._modKey.split(',').length&&(i===0||_asCustomer());
 }
 async function submitModifyBooking(){
+  S._capErr=0;
   const cust=S.loggedIn||getSession();
   if(!cust){toast(t('errLoginFirst'),'error');return;}
   if(!S.selSession){toast(t('errSelectSession'),'error');return;}
@@ -24870,6 +24894,7 @@ function startEditSession(id){
   S.editSessWlMode=_wl?_wl.m:'count';
   S.editSessWlVal=_wl?_wl.v:'';
   const fmt=slotsFormat(slots);
+  S.editSessTypeCaps=fmt==='total'?_tcapOf(slots):{}; // the places per bike type beside a plain count (2026-11-11)
   if(fmt==='ids'&&slots._bikes){
     S.editSessMode='fleet';
     // A retired bike never comes back and the picker never shows it, so it could not be
@@ -25654,11 +25679,11 @@ function _nsFillSync(){const el=document.getElementById('ns-fill');if(el)el.text
 function _nsToggleDay(i){const d=new Set(S.newSessDays||[]);if(d.has(i))d.delete(i);else d.add(i);S.newSessDays=[...d].sort((a,b)=>a-b);renderSessions();}
 // A template is the whole form but its date and repeat, saved by name and shared by every
 // device (staff_options session_templates). Tapping one fills the form.
-const NS_TPL_KEYS=['newSessEvent','newSessRoute','newSessTitle','newSessSpots','newSessStartTime','newSessEndTime','newSessCollect','newSessWlCollect','newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds','newSessAddons','newSessWlMode','newSessWlVal','newSessMapUrl','newSessBfSel','newSessBfName','newSessBfUrl','newSessDays','newSessDesc','newSessPrice','newSessOpenAll','newSessKm','newSessGender','newSessLockers'];
+const NS_TPL_KEYS=['newSessEvent','newSessRoute','newSessTitle','newSessSpots','newSessStartTime','newSessEndTime','newSessCollect','newSessWlCollect','newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds','newSessAddons','newSessWlMode','newSessWlVal','newSessMapUrl','newSessBfSel','newSessBfName','newSessBfUrl','newSessDays','newSessDesc','newSessPrice','newSessOpenAll','newSessKm','newSessGender','newSessLockers','newSessTypeCaps'];
 // What a template that predates a key (or never had it) leaves behind: these are cleared, not kept
 // from whatever form was open before, so a 50 SAR members-only event does not become free and open,
 // and a pool session from an older template is mixed, not men or women only as the last form was (2026-10-27).
-const NS_TPL_BLANK={newSessWlCollect:null,newSessRoute:'',newSessDesc:'',newSessPrice:'',newSessOpenAll:true,newSessKm:{},newSessGender:''};
+const NS_TPL_BLANK={newSessTypeCaps:{},newSessWlCollect:null,newSessRoute:'',newSessDesc:'',newSessPrice:'',newSessOpenAll:true,newSessKm:{},newSessGender:''};
 const NS_EV_NAME={blood:'evBloodName',jcc:'evJccName',community:'evSatName',petromin:'evPetroName',swim:'evSwimName',workshop:'evWorkshopName',snd96:'evSnd96Name',event:'evEventName',runher:'evRunHerName',vlap:'evVlapName',arena:'evArenaName',defe5k:'evDefeName'};
 function _nsTpls(){return _optList('session_templates').filter(x=>x&&x.id&&x.label&&x.form&&typeof x.form==='object');}
 async function _nsTplSave(){
@@ -26101,6 +26126,9 @@ function _nsCopy(s,T){
     T.newSessMode='total';T.newSessTotal=slots._total;
   }else{
     T.newSessMode='counts';
+  }
+  T.newSessTypeCaps=T.newSessMode==='total'?_tcapOf(slots):{}; // the places per bike type come too (2026-11-11)
+  if(T.newSessMode==='counts'){
     const ts={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};
     // A plain number per type (the 'counts' shape) goes on M, as the editor reads it; reading it as
     // sizes gave every box 0 and the clone could not be saved without typing the fleet again.
@@ -26121,9 +26149,9 @@ function cloneSession(id){
 // (the staff review, 2026-10-28, S02-core2-14): admins make three to five rides a week and most fields repeat, and a Saturday ride
 // used to start as "gather 21:00, start 23:00". Not typed = still what the form opened with or what the last pick put there. The
 // bikes go as one: their mode and counts mean nothing apart. A template's form, or a clone's, has been filled already.
-const NS_FILL_BIKES=['newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds'];
+const NS_FILL_BIKES=['newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds','newSessTypeCaps'];
 function _nsFillBlank(){return{newSessLockers:true,newSessStartTime:'21:00',newSessEndTime:'23:00',newSessSpots:'',newSessMapUrl:'',newSessBfName:'',newSessBfUrl:'',newSessBfSel:'',newSessRoute:'',newSessGender:'',newSessCollect:'',newSessWlCollect:null,newSessWlMode:'count',newSessWlVal:'',newSessAddons:[],
-  newSessMode:'counts',newSessTotal:S._nsTotal0,newSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},newSessAssignedIds:[]};}
+  newSessMode:'counts',newSessTotal:S._nsTotal0,newSessTypeCaps:{},newSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},newSessAssignedIds:[]};}
 function _nsFill(){
   if(S._nsTplId)return;
   if(S._nsTotal0===undefined)S._nsTotal0=S.newSessTotal; // what the form opened with
@@ -27181,7 +27209,7 @@ function _on_renderSessions_17(event,el){S.newSessMode='total';renderSessions()}
 function _on_renderSessions_18(event,el){S.newSessMode='counts';renderSessions()}
 function _on_renderSessions_19(event,el){S.newSessMode='fleet';renderSessions()}
 function _on_renderSessions_20(event,el,a0,a1){S.newSessTypeSizes[a0][a1]=Math.max(0,parseInt(el.value)||0);_debRender('sess',renderSessions)}
-function _on_renderSessions_21(event,el){S.newSessTotal=el.value}
+function _on_renderSessions_21(event,el){S.newSessTotal=el.value;_tcapSync('ns')}
 function _on_renderSessions_22(event,el){_n6sFormReset();S._vsf=null;S.showAddSession=false;S._nsTplId=null;S.newSessAssignedIds=[];S.newSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
 function _on_renderSessions_23(event,el){const was=S.editSessDate;S.editSessDate=el.value;_esRevealFollow(was)}
 function _on_renderSessions_24(event,el,a0){S.editSessStatus=a0;renderSessions()}
@@ -27200,7 +27228,7 @@ function _on_renderSessions_33(event,el){S.editSessMode='total';renderSessions()
 function _on_renderSessions_34(event,el){S.editSessMode='counts';renderSessions()}
 function _on_renderSessions_35(event,el){S.editSessMode='fleet';renderSessions()}
 function _on_renderSessions_36(event,el,a0,a1){S.editSessTypeSizes[a0][a1]=Math.max(0,parseInt(el.value)||0);_debRender('sess',renderSessions)}
-function _on_renderSessions_37(event,el){S.editSessTotal=el.value}
+function _on_renderSessions_37(event,el){S.editSessTotal=el.value;_tcapSync('es')}
 function _on_renderSessions_38(event,el){S.editSessFollow=false;S._vsf=null;S.editSessionId=null;S.editSessGender=null;S.editSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
 function _on_renderSessions_40(event,el,a0){event.stopPropagation();closeOutSession(a0)}
 function _on_renderSessions_41(event,el,a0){event.stopPropagation();showCancelNight(a0)}
@@ -27398,7 +27426,7 @@ function renderSessions(){
         <div class="form-group ss-mb16">
           <label for="ns-total">${t('totalBikesSession')}</label>
           <input type="number" id="ns-total" min="1" max="500" value="${esc(String(S.newSessTotal||10))}" data-on-input="${_on("_on_renderSessions_21",_EV,_EL)}" class="ss-mw140">
-        </div>`:newBikePicker()}
+        </div>${_kindHas(_nsKind(),'bike')?_tcapHtml('ns',null):''}`:newBikePicker()}
       ${(()=>{
         if(_nsSeats())return''; // a complimentary ride sells nothing - no add-ons
         const items=(S.inventory||[]).filter(it=>(Number(it.qty)||0)>0);
@@ -27574,7 +27602,7 @@ function renderSessions(){
         <div class="form-group ss-mb16">
           <label for="es-total">${t('totalBikesSession')}</label>
           <input type="number" id="es-total" min="1" max="500" value="${esc(String(S.editSessTotal||10))}" data-on-input="${_on("_on_renderSessions_37",_EV,_EL)}" class="ss-mw140">
-        </div>`:bikePicker()}
+        </div>${_needsBike(editSess)?_tcapHtml('es',editSess):''}`:bikePicker()}
       ${(()=>{
         if(_isFreeRide(editSess))return''; // a complimentary ride sells nothing - no add-ons
         const items=(S.inventory||[]).filter(it=>(Number(it.qty)||0)>0);
@@ -27692,7 +27720,7 @@ function renderSessions(){
       return`<div class="sess-rider"><span class="sess-rider-q">#${e.queueNum}</span><div class="sess-rider-info"><div class="sess-rider-name">${esc(e.name)}</div>${bk?`<div class="sess-rider-bike">${bk}</div>`:''}</div>${statusBadge(e.status)}</div>`;
     }).join(''):_emptyState(t('sessNoRiders'),{cls:'ss-noriders'});
     return`<button class="sess-back-btn" data-on-click="${_on("selectSessionDetail",null)}">‹ ${t('sessBackList')}</button>
-      <div class="sess-detail-head"><div class="ss-minw0"><div class="sess-detail-nm">${_sessMk(_selSess,16)}<span>${esc(_evName(_selSess))}</span></div><div class="sess-detail-date">${shortDate(_selSess.session_date||_selSess.id)}</div><div class="sess-detail-day">${dayLabel(_selSess.day)||''} · <bdi>${sessionTime(_selSess)}</bdi></div>${_sgChip(_selSess)?`<div class="sess-detail-sg">${_sgChip(_selSess)}</div>`:''}${_bfAt(_selSess)?`<div class="sess-detail-bf">${_artIcon('cup',13)}<bdi>${esc(_bfAt(_selSess))}</bdi></div>`:''}${_revealStaffHtml(_selSess,'sess-detail-rv')}${_typesClosedLine(_selSess,'sess-detail-tc')}</div>${d.badge}</div>
+      <div class="sess-detail-head"><div class="ss-minw0"><div class="sess-detail-nm">${_sessMk(_selSess,16)}<span>${esc(_evName(_selSess))}</span></div><div class="sess-detail-date">${shortDate(_selSess.session_date||_selSess.id)}</div><div class="sess-detail-day">${dayLabel(_selSess.day)||''} · <bdi>${sessionTime(_selSess)}</bdi></div>${_sgChip(_selSess)?`<div class="sess-detail-sg">${_sgChip(_selSess)}</div>`:''}${_bfAt(_selSess)?`<div class="sess-detail-bf">${_artIcon('cup',13)}<bdi>${esc(_bfAt(_selSess))}</bdi></div>`:''}${_revealStaffHtml(_selSess,'sess-detail-rv')}${_typesClosedLine(_selSess,'sess-detail-tc')}${_tcapLine(_selSess)}</div>${d.badge}</div>
       <div class="sess-detail-stats">
       ${(()=>{const _c=waitlistCap(_selSess);if(_c==null)return'';
         const _u=waitlistUsed(_selSess.id);
@@ -28200,7 +28228,7 @@ async function _saveSessionEdit(){
   }else if(S.editSessMode==='total'){
     // Plain bike count: capacity without a type/size breakdown.
     total=Math.max(1,Math.min(500,parseInt(document.getElementById('es-total')?.value||S.editSessTotal||'10')||10));
-    slots={_time:timeVal,_total:total};
+    slots={_time:timeVal,_total:total,...(_needsBike(sess)?_tcapSlot(S.editSessTypeCaps):{})}; // each type's own places, where given (2026-11-11)
   }else if(S.editSessMode==='counts'){
     const ts=S.editSessTypeSizes||{};
     const sizes=BIKE_SIZES;
@@ -28442,7 +28470,7 @@ function _nsSlots(timeVal,collectVal){
   }else if(S.newSessMode==='total'){
     // Plain bike count: capacity without a type/size breakdown.
     total=Math.max(1,Math.min(500,parseInt(document.getElementById('ns-total')?.value||S.newSessTotal||'10')||10));
-    slots={_time:timeVal,_total:total};
+    slots={_time:timeVal,_total:total,...(_kindHas(_nsKind(),'bike')?_tcapSlot(S.newSessTypeCaps):{})}; // each type's own places, where given (2026-11-11)
   }else if(S.newSessMode==='counts'){
     
     const ts=S.newSessTypeSizes||{};
@@ -28649,6 +28677,32 @@ function _typesClosedLine(s,cls){
   return c.length?`<div class="${cls}">${esc(t('typesClosedChip').replace('{0}',c.map(typeLabel).join(', ')))}</div>`:'';
 }
 function _tcTypes(s){return bikeTypeOpts(_ownOffered(s),_noCarbon(s)).filter(x=>x!=='Any');}
+// ── Places per bike type (2026-11-11), optional, on a session that counts its bikes as a total ──
+// Each number is that type's own places, saved as bike_slots[type] beside _total (the shape the database's _type_places and
+// the desk's _n6rTypePlaces read; the database holds each type to it, 20261111180600). Empty or 0: no limit of its own, as
+// before. The total still caps the session: more than it in all is said under the fields. A type staff closed is not
+// asked (its number, if any, is kept); a new session asks every bike type. State: newSessTypeCaps / editSessTypeCaps.
+function _tcapTypes(s){return(s?_tcTypes(s):N6R_TYPES).filter(x=>x!=='Own'&&!(s&&_typeClosed(s,x)));}
+function _tcapOf(sl){const o={};N6R_TYPES.forEach(ty=>{if(typeof sl[ty]==='number'&&sl[ty]>0)o[ty]=String(sl[ty]);});return o;}
+function _tcapSlot(o){const r={};Object.keys(o||{}).forEach(ty=>{const n=parseInt(o[ty],10);if(N6R_TYPES.includes(ty)&&n>0)r[ty]=Math.min(500,n);});return r;}
+function _tcapKey(pre){return pre==='es'?'editSessTypeCaps':'newSessTypeCaps';}
+function _tcapOver(pre){
+  const n=Object.values(_tcapSlot(S[_tcapKey(pre)])).reduce((a,x)=>a+x,0),tot=parseInt(document.getElementById(pre+'-total')?.value||(pre==='es'?S.editSessTotal:S.newSessTotal)||'10')||10;
+  return n>tot?t('tcapOver').replace('{0}',n).replace('{1}',tot):'';
+}
+function _tcapHtml(pre,s){
+  const k=_tcapKey(pre),o=S[k]=S[k]||{};
+  return`<fieldset class="form-group ss-tcap"><legend>${t('tcapLabel')}</legend><div class="ss-tcap-row">${_tcapTypes(s).map(ty=>{const id=pre+'-tcap-'+ty.replace(/\W/g,'');
+    return`<span class="ss-tcap-f"><label for="${id}">${esc(typeLabel(ty))}</label><input type="number" id="${id}" min="0" max="500" inputmode="numeric" value="${esc(o[ty]||'')}" placeholder="${esc(t('tcapNone'))}" data-on-input="${_on('_tcapIn',_EL,pre,ty)}"></span>`;}).join('')}</div><p class="ss-tcap-over" id="${pre}-tcap-over" role="status">${esc(_tcapOver(pre))}</p></fieldset>`;
+}
+function _tcapIn(el,pre,ty){const k=_tcapKey(pre);S[k]=S[k]||{};S[k][ty]=el.value;_tcapSync(pre);}
+function _tcapSync(pre){const o=document.getElementById(pre+'-tcap-over');if(o)o.textContent=_tcapOver(pre);}
+// The Sessions detail: "Places per bike type: Road 2 · Hybrid 4" on a session that counts its types (not an approval ride).
+function _tcapLine(s){
+  if(!s||!_needsBike(s)||s.needs_approval)return'';
+  const l=N6R_TYPES.map(ty=>[ty,_n6rTypePlaces(s,ty)]).filter(x=>x[1]>0);
+  return l.length?`<div class="sess-detail-tc sess-detail-tcap">${esc(t('tcapLine').replace('{0}',l.map(([ty,n])=>typeLabel(ty)+' '+n).join(' · ')))}</div>`:'';
+}
 function showTypeClose(sid){
   const s=_sessDisp(sid),m=document.getElementById('confirm-modal');
   if(!s||!m||(m.style.display!=='none'&&m.innerHTML))return;
@@ -28968,7 +29022,7 @@ async function _commBook(sess,people,o){
     rideGroup:(_hasRideGroups(sess)&&_rgOk(o.rideGroup))?o.rideGroup:null,
     runKm:(_rideKind(sess)==='runher'&&_runKmOk(o.runKm))?Number(o.runKm):null});});}; // community: final list = selected, waiting = awaiting selection
   // The insert's answer is handed back: each caller says a refusal (_writeErr(res,'add rider')).
-  const ins=rows=>sb.from('queue_entries').insert(rows.map(entryToDB));
+  const cap={},ins=rows=>_qIns(rows.map(entryToDB),cap); // a type full on the ride asks first (2026-11-11)
   let entries=mkEntries();
   let res=await ins(entries);
   if(res&&res.error&&(String(res.error.code||res.error.message).includes('23505')||/duplicate|unique/i.test(res.error.message||''))){
@@ -29093,11 +29147,11 @@ async function _saveJccGroup(){
       // 'pending', so the whole group sat waiting on Approve and could not be checked in.
       price:_isFreeRide(sess)?0:priceForType(r.type),approval:_isApprovalRide(sess)?'approved':null,groupId,groupName:gname,groupContact:cname||null,groupPhone:phone||null,
       rideGroup:(_hasRideGroups(sess)&&_rgOk(S._jgRg))?S._jgRg:null},i===0);});};
-  let entries=mk();
-  let res=await sb.from('queue_entries').insert(entries.map(entryToDB));
+  let entries=mk();const cap={}; // a type full on the ride asks first (2026-11-11)
+  let res=await _qIns(entries.map(entryToDB),cap);
   if(res&&res.error&&(String(res.error.code||res.error.message).includes('23505')||/duplicate|unique/i.test(res.error.message||''))){
     await loadDataLight();entries=mk(); // another device grabbed the numbers: take fresh ones and retry once
-    res=await sb.from('queue_entries').insert(entries.map(entryToDB));
+    res=await _qIns(entries.map(entryToDB),cap);
   }
   if(_writeErr(res,'add group'))return;
   logAction(`${t('commAddGroupBtn')}: ${gname} (${entries.length})`);
@@ -33581,6 +33635,39 @@ function _wiRemoveRider(i){_wiSync();(S._wiRiders||[]).splice(i,1);showWalkinMod
 // all of them landed or none did, and a caller retrying a failure can look them up on the
 // server to tell a reply lost on the way back from a write that never happened.
 let _wiAttempted=null;
+// ── Each bike type capped on its own (the owner, 2026-11-11; _type_full_guard, 20261111180600) ──
+// The database refuses a booking of a type whose places on its ride are all taken (TYPE_FULL, hint "taken/places"), staff
+// too, unless they said Add anyway: the request header x-mm-type-cap: ok. A staff insert of bookings goes through _qIns:
+// a type this desk already counts full (_capLeft, the riders being added counted too) is asked about first in the centred
+// pop-up, "Road is full (12 of 12). Add anyway?", and a refusal the desk did not see coming asks the same; Add anyway sends
+// the header and the Log keeps a line; Pick another type comes back {error:{code:'READONLY'}}, which _writeErr says nothing
+// about (the form stays open). c keeps the answer for a retry of the same riders (a booking number another desk took).
+function _capOver(rows){
+  const k={};
+  for(const r of rows){
+    if(r.status!=='waiting'&&r.status!=='active')continue;
+    const s=_sessGet(r.session_id),ty=r.type_preference,l=_capLeft(s,ty);if(l==null)continue;
+    const n=k[r.session_id+ty]=(k[r.session_id+ty]||0)+1;
+    if(n>l){const of=_n6rTypePlaces(s,ty)-(_n6rOut(s)[ty]||0);return{ty,n:Math.max(of,_n6rHeld(s,ty)),of};}
+  }
+  return null;
+}
+function _capAsk(f){return askConfirm({title:t('capFullQ').replace('{0}',typeLabel(f.ty)).replace('{1}',f.n).replace('{2}',f.of),confirmLabel:t('capAddAnyway'),confirmClass:'btn-primary',cancelLabel:t('capPickOther')});}
+async function _capPre(rows,c){if(!c.asked){c.asked=1;const f=_capOver(rows);if(f){if(!await _capAsk(f))return false;c.ok=f;}}return true;}
+function _capLog(c,rows){if(!c.ok||c.lg)return;c.lg=1;logAction(t('capLog').replace('{0}',typeLabel(c.ok.ty))+': '+rows.map(x=>x.name).filter(Boolean).join(', '),{k:'typecap',e:'booking',id:rows[0]&&rows[0].id});}
+async function _qIns(rows,c){
+  c=c||{};rows=[].concat(rows);
+  const no={error:{code:'READONLY'}},go=()=>c.ok?sb.from('queue_entries').insert(rows).setHeader('x-mm-type-cap','ok'):sb.from('queue_entries').insert(rows);
+  if(!await _capPre(rows,c))return no;
+  let r=await go();
+  if(!c.ok&&r&&r.error&&/TYPE_FULL/.test(r.error.message||'')){
+    const h=String(r.error.hint||'').split('/');c.ok={ty:r.error.details||'',n:Math.max(+h[0]||0,+h[1]||0),of:+h[1]||0};
+    if(!await _capAsk(c.ok))return no;
+    r=await go();
+  }
+  if(r&&!r.error)_capLog(c,rows);
+  return r;
+}
 async function _wiInsertRiders(sessId,riders,phone,custId,retry,rg){
   const sess=_sessDisp(sessId);if(!sess)return null;
   const groupId=riders.length>1?uid():null;
@@ -33594,16 +33681,17 @@ async function _wiInsertRiders(sessId,riders,phone,custId,retry,rg){
       approval:_isApprovalRide(sess)?'approved':null,groupId,rideGroup:(_hasRideGroups(sess)&&_rgOk(rg))?rg:null,
       runKm:(_rideKind(sess)==='runher'&&_runKmOk(S._wiKm))?Number(S._wiKm):null},i===0);});}; // staff-added riders on a community event are pre-selected (and ride free)
   let entries=mk();_wiAttempted=entries;
+  const cap={};if(!await _capPre(entries.map(entryToDB),cap))return null; // a type full on this ride: Add anyway, or the form again (2026-11-11)
   // Offline, or a call the network dropped: kept in the desk outbox (round s10, item 5). The ids are made here, so the insert
   // sent later lands once (a second send finds its rows there, _dqSend), and the riders are on the roster until then
   // (_dqOverlay); the server numbers them when it lands.
-  const keep=async()=>await _dqEnqueue({kind:'walkin',bid:entries[0].id,ids:entries.map(e=>e.id),rows:entries.map(entryToDB),ents:entries,label:_dqLabel(entries[0])+(entries.length>1?` +${entries.length-1}`:''),sid:sessId});
+  const keep=async()=>{const ok=await _dqEnqueue({kind:'walkin',bid:entries[0].id,ids:entries.map(e=>e.id),rows:entries.map(entryToDB),ents:entries,label:_dqLabel(entries[0])+(entries.length>1?` +${entries.length-1}`:''),sid:sessId,...(cap.ok?{cap:1}:{})});if(ok)_capLog(cap,entries);return ok;}; // cap: sent with Add anyway
   if(_isOffline()){if(await keep())return entries;_writeErr({error:{message:t('errStorageFull')}},'walk-in');return null;}
-  let res=await sb.from('queue_entries').insert(entries.map(entryToDB));
+  let res=await _qIns(entries.map(entryToDB),cap);
   if(res&&res.error&&_errKind(res.error)==='net'&&await keep())return entries;
   if(res&&res.error&&(String(res.error.code||res.error.message).includes('23505')||/duplicate|unique/i.test(res.error.message||''))){
     await loadDataLight();entries=mk();_wiAttempted=entries; // another device grabbed the numbers: take fresh ones and retry once
-    res=await sb.from('queue_entries').insert(entries.map(entryToDB));
+    res=await _qIns(entries.map(entryToDB),cap);
   }
   if(_writeErr(res,'walk-in',retry))return null;
   return entries;
@@ -34019,7 +34107,7 @@ function _koRide(sid){
   if(mine){K.res={qn:mine.queueNum,name:mine.name,sid,already:true};_koGo('done');return;}
   _koGo(_needsBike(s)?'bike':'waiver');
 }
-function _koTypes(s){return bikeTypeOpts(_ownOffered(s),_noCarbon(s)).filter(x=>x!=='Any'&&!_typeClosed(s,x));} // the kiosk's device is signed in as staff, whom the server lets through
+function _koTypes(s){return bikeTypeOpts(_ownOffered(s),_noCarbon(s)).filter(x=>x!=='Any'&&!_typeClosed(s,x)&&!((_capLeft(s,x)??1)<=0));} // the kiosk's device is signed in as staff, whom the server lets through a closed type; a full one (2026-11-11) it refuses without Add anyway, which a rider at the kiosk is not asked
 function _koType(ty){const K=S._kiosk;_koKeep();K.D.type=ty;_koRender();}
 function _koBikeNext(){
   const K=S._kiosk;_koKeep();const s=_sessGet(K.sid),h=parseInt(_koDigits(K.D.height),10);
@@ -34434,7 +34522,7 @@ async function _saveBookingEdit(){
     const _seated=newRiders.filter(r=>!r.wl).length;
     const autoWl=_sessFull(sessT)||spotsLeft(toSessionId)<_seated+(moving?1:0);
     let qn=nextQNum(toSessionId)+(moving?1:0); // when moving, the edited entry already took the next number
-    let _wln=nextWlNum(toSessionId);
+    let _wln=nextWlNum(toSessionId);const cap={}; // a type full on the ride: asked once for the riders added (2026-11-11)
     for(const r of newRiders){
       const rStatus=(r.wl||autoWl)?'waitlist':'waiting';
       const ent=_applyDefaultPay({id:uid(),name:r.name,email:e.email||'',phone,size:r.height?heightToSize(r.height,r.type):'',height:r.height,waitlistNum:rStatus==='waitlist'?_wln++:null,
@@ -34443,10 +34531,10 @@ async function _saveBookingEdit(){
         queueNum:qn,status:rStatus,registeredAt:new Date().toISOString(),walkIn:!!e.walkIn,
         customerId:e.customerId||null,groupId,groupName:e.groupName||null,groupContact:e.groupContact||null,groupPhone:e.groupPhone||null,price:_isFreeRide(sessT)?0:priceForType(r.type),
         approval:_isApprovalRide(sessT)?'approved':null},false); // riders ADDED to an existing booking are never its first rider — no house perk
-      let r2=await sb.from('queue_entries').insert(entryToDB(ent));
+      let r2=await _qIns(entryToDB(ent),cap);
       if(r2&&r2.error&&(String(r2.error.code||r2.error.message).includes('23505')||/duplicate|unique/i.test(r2.error.message||''))){
         await loadDataLight();qn=nextQNum(toSessionId);ent.queueNum=qn; // another device grabbed the number: take a fresh one and retry once
-        r2=await sb.from('queue_entries').insert(entryToDB(ent));
+        r2=await _qIns(entryToDB(ent),cap);
       }
       if(_writeErr(r2,'add rider'))break;
       inserted.push(ent.id);insertedEnts.push(ent);qn++;
@@ -40194,6 +40282,7 @@ function _rsRefused(err,sess){
   if(/NOT_OPEN_YET/.test(m)){toast(_bwOpensText(sess)||t('rsNotOpenYet'),'error');return true;}
   if(/PAID_MOVE/.test(m)){toast(t('rsPaidMove'),'error');return true;}
   if(/TYPE_CLOSED/.test(m)){toast(t('rsTypeClosed'),'error');return true;}
+  if(/TYPE_FULL/.test(m)){toast(t('rsTypeFull'),'error');return true;}
   return false;
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -40245,6 +40334,8 @@ async function rescheduleBooking(fromSessionId,toSessionId){
   // A type closed on that date is said before anything moves: the server refuses only the rider on it, which would
   // leave a party split across two dates. The list stays open for another date.
   if(moving.some(e=>_typeClosed(newSess,e.typePreference))){toast(t('rsTypeClosed'),'error');return;}
+  // ...and a type whose places there are all taken (20261111180600), each rider of it counted
+  {const n={};if(moving.some(e=>(n[e.typePreference]=(n[e.typePreference]||0)+1)>(_capLeft(newSess,e.typePreference)??99))){toast(t('rsTypeFull'),'error');return;}}
   // Same capacity yardstick as booking (spotsLeft): counting only waiting+active here let a
   // rescheduler land as 'waiting' ahead of riders already waitlisted in the target session.
   if(spotsLeft(toSessionId)<moving.length){toast(t('rescheduleFull'),'error');return;}
@@ -48242,7 +48333,7 @@ async function _dqSend(op){
     return st===pa.status?{ok:true,data:{noop:true}}:{why:t('errChangedElsewhere')};
   }
   if(op.kind==='walkin'){ // a walk-in's insert (round s10): its ids were made on the desk, so a second send finds them there
-    let w;try{w=await _roFree(()=>sb.from('queue_entries').insert(op.rows));}catch(e){w={error:e};} // fire-and-forget: as above
+    let w;try{w=await _roFree(()=>{const q=sb.from('queue_entries').insert(op.rows);return op.cap?q.setHeader('x-mm-type-cap','ok'):q;});}catch(e){w={error:e};} // fire-and-forget: as above; cap: staff said Add anyway to a full type (2026-11-11)
     if(w&&w.error&&_errKind(w.error)==='dup'){let c;try{c=await sb.from('queue_entries').select('id').in('id',op.ids);}catch(e){c={error:e};}if(c&&c.error)return fail(c);if((c.data||[]).length===op.ids.length)return{ok:true,data:{noop:true}};}
     if(w&&w.error)return fail(w);
     return{ok:true};
