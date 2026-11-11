@@ -529,6 +529,8 @@ export const STAFF_PARTS = {
   // breakfast report, the Saturday roster) - out of the desk's core: ~9 KB gzipped no desk parsed before its first paint.
   // The day sheet and the close-out stay in the core.
   sessreport: ['showPrintReportOptions'],
+  // 2026-11-11 (staff round s10, D11): the Door role's locked scan screen (a Door account signs in to it; nobody else fetches it)
+  door: ['_doorEnter', '_doorPaint', '_doorScanned'],
 };
 // ── Parts inside a part (2026-11-11, staff round s10 item 47) ─────────────────────────────────────
 // People's code was a quarter of every part (community: 474 KB raw, 135 KB gzipped), all of it fetched to

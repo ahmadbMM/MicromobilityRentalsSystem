@@ -482,6 +482,9 @@ with expected(fname, want_definer, note) as (values
   ('_staff_role_mods',             false, 'pure: a role''s sections, the page''s ROLE_TABS (20261111180200)'),
   ('_staff_opt_ok',                true,  'staff_options write rule per key; calls is_admin / _staff_mod (20261111180200)'),
   ('_staff_views_guard',           true,  'trigger: the shared saved views, each needs change on its section (20261111180200)'),
+  ('_staff_is_door',               true,  'reads staff: is the caller an active Door account (20261111180500)'),
+  ('_door_queue_guard',            true,  'trigger: a Door account''s one booking write is a check-in of a rider who owes nothing (20261111180500)'),
+  ('_door_write_guard',            true,  'trigger: a Door account writes nothing of its own on the till, wallet, lockers, lists, accounts, sessions (20261111180500)'),
   -- Volunteer enhancements (20261111140000); the volunteer_* and staff_volunteer_* ones already above were rebuilt there too
   ('volunteer_plan',               true,  'writes the caller''s own shift (the time they plan to leave); token-checked'),
   ('volunteer_coming',             true,  'writes the caller''s own shift ("Still coming?", or withdraws it); token-checked'),
