@@ -316,17 +316,19 @@ export const DYNAMIC_KEYS = [
  * @param partTexts {name: code} of every staff part
  * @returns {{ core: Set<string>, parts: Record<string, Set<string>> }}
  */
-export function partLangKeys(staffKeys, coreText, partTexts, dynamic = DYNAMIC_KEYS) {
-  const core = langKeyParts(coreText);
+export function partLangKeys(staffKeys, coreText, partTexts, dynamic = DYNAMIC_KEYS, up = STAFF_PART_UP) {
+  const core = langKeyParts(coreText), fam = famOf(up);
   const parts = Object.entries(partTexts).map(([n, text]) => [n, langKeyParts(text)]);
   const out = { core: new Set(), parts: Object.fromEntries(parts.map(([n]) => [n, new Set()])) };
   for (const k of staffKeys) {
     if (dynamic.some((re) => re.test(k)) || namesKey(core, k)) { out.core.add(k); continue; }
     // One part only: a key two parts share stays in the core (copied into both it cost the staff
     // half ~7 KB gzipped for ~5 KB off the core, measured 2026-10-09).
+    // A part and the parts inside it (STAFF_PART_UP) are one owner: the key rides with the outer part, which has always come first.
     const owners = parts.filter(([, pp]) => namesKey(pp, k)).map(([n]) => n);
-    if (owners.length !== 1) { out.core.add(k); continue; }
-    out.parts[owners[0]].add(k);
+    const fams = [...new Set(owners.map(fam))];
+    if (fams.length !== 1) { out.core.add(k); continue; }
+    out.parts[owners.length === 1 ? owners[0] : fams[0]].add(k);
   }
   return out;
 }
@@ -509,7 +511,34 @@ export const STAFF_PARTS = {
   // 2026-10-09 (R7): ride reminders on WhatsApp and who a freed waitlist place goes to (staff pick or a timed offer)
   // 2026-11-04: and telling the riders a freed place went to (its list and row chip stay in the core; its words in all ten languages here)
   remind: ['openRemindSheet', 'openWlOffers', '_ptOpen'],
+  // 2026-11-11 (staff round s10, item 47): People's rarely opened views, out of the community part, each set fetched the
+  // first time one of its views is opened (STAFF_PART_TABS: none), and inside community (STAFF_PART_UP): Applications
+  // (community and learning to ride) in one; in the other Recognition (badges, titles, the members' page), Birthdays (and
+  // its printed week), Referrals, Tags, Duplicates, the customers' activity log, the account report (its builder and the
+  // default print) and the actions on a group of accounts (openSegmentActions, from the selection and the report).
+  peopleapps: ['_commApplications', '_learnApplications'],
+  peoplemore: ['_commBadges', '_commTitles', '_commActivities', '_commBirthdays', '_refRpHtml', '_commTags', '_commDuplicates',
+    'renderCustActivity', 'showAccountReportOptions', 'printDefaultAccountReport', 'openSegmentActions'],
+  // 2026-11-11 (item 47): a session's report - its options dialog and the sheets it prints or saves (the report, its CSV, the
+  // breakfast report, the Saturday roster) - out of the desk's core: ~9 KB gzipped no desk parsed before its first paint.
+  // The day sheet and the close-out stay in the core.
+  sessreport: ['showPrintReportOptions'],
 };
+// ── Parts inside a part (2026-11-11, staff round s10 item 47) ─────────────────────────────────────
+// People's code was a quarter of every part (community: 474 KB raw, 135 KB gzipped), all of it fetched to
+// open the Accounts list. Its rarely opened views are parts of their own now, each fetched the first time
+// it is opened. A part named here only ever runs after its parent part: its loader fetches the parent
+// first (_loadStaffPart), so what the child and its parent both reach - or two children of one parent -
+// stays in the PARENT instead of going back to the core (cut as plain parts, the views shared some 36 KB
+// gzipped of helpers with Accounts, and the core would have grown by that). One level only.
+// The view renderers People calls for their markup are entry points like any other: until the part has
+// come their stand-in answers a promise, so _renderPeople draws a short loading line (_pplPartHtml) and
+// paints again once it has come.
+export const STAFF_PART_UP = {
+  peopleapps: 'community', peoplemore: 'community',
+};
+// The parent's own family name: a part, or the part it lives inside.
+const famOf = (up) => (p) => up[p] || p;
 function refsOf(code) {
   const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
   const decl = new Map(); const stmts = [];
@@ -546,8 +575,13 @@ function refsOf(code) {
  * @param code the staff half's source (before minifying)
  * @returns {{ core: string, parts: Record<string,string>, report: Record<string, number> }}
  */
-export function splitSections(code, parts = STAFF_PARTS, roots = STAFF_ENTRY) {
+export function splitSections(code, parts = STAFF_PARTS, roots = STAFF_ENTRY, up = STAFF_PART_UP) {
   const { stmts, decl } = refsOf(code);
+  for (const [c, p] of Object.entries(up)) {
+    if (!parts[c] || !parts[p]) throw new Error(`split-staff: STAFF_PART_UP names ${parts[c] ? p : c}, which is not a staff part`);
+    if (up[p]) throw new Error(`split-staff: staff part ${p} is inside ${up[p]} and cannot hold ${c}: one level only`);
+  }
+  const fam = famOf(up);
   const entries = new Map();
   for (const [p, fns] of Object.entries(parts)) for (const f of fns) {
     const st = decl.get(f);
@@ -573,11 +607,21 @@ export function splitSections(code, parts = STAFF_PARTS, roots = STAFF_ENTRY) {
   let own = {};
   for (let round = 0; round < 50; round++) {
     own = {};
-    const count = new Map();
+    const by = new Map();
     for (const [p, fns] of Object.entries(parts)) {
       own[p] = reach(fns, core, new Set([...allEntries].filter((f) => entries.get(f) !== p)));
-      for (const st of own[p]) count.set(st, (count.get(st) || 0) + 1);
+      for (const st of own[p]) (by.get(st) || by.set(st, new Set()).get(st)).add(p);
     }
+    // What a part and the parts inside it reach (or two parts inside one) goes to that part: they run only after it.
+    for (const [st, ps] of by) {
+      if (ps.size < 2) continue;
+      const fs = new Set([...ps].map(fam));
+      if (fs.size !== 1) continue;
+      const f = [...fs][0];
+      for (const p of ps) own[p].delete(st);
+      own[f].add(st); by.set(st, new Set([f]));
+    }
+    const count = new Map([...by].map(([st, ps]) => [st, ps.size]));
     // A statement nothing reaches by name (a bell kind the desk calls through a list of names, as
     // _r7Bell -> _remDue) stays in the core, so whatever it calls must be there too: _remTargets went to
     // the reminders part and every bell paint threw "_remTargets is not defined" (2026-10-14).
@@ -597,7 +641,10 @@ export function splitSections(code, parts = STAFF_PARTS, roots = STAFF_ENTRY) {
   // Same guard as the customer stubs: a part that loaded without f (an older core fetching a newer
   // part after a deploy) must not leave the stub calling itself forever (bug hunt 2026-10-28).
   // and, as there, each stand-in knows itself by _stubP, so a kept reference called after its part arrived hands over (2026-11-10)
-  const stubs = [...entries].map(([f, p]) => `function ${f}(...a){const m=_stubP.${f};if(${f}!==m)return ${f}(...a);return _loadStaffPart(${JSON.stringify(p)}).then(()=>{if(${f}===m)throw new Error('${f} missing from staff part ${p} - reload the page');return ${f}(...a);});}`).join('\n')
+  // One body for every stand-in, _partGo, which reads the name off window (a script's top-level function is a property of
+  // it): the ~100 stand-ins each wrote that body out, 2.5 KB gzipped of the desk's core (2026-11-11, item 47).
+  const stubs = `function _partGo(f,p,a){const m=_stubP[f];if(window[f]!==m)return window[f](...a);return _loadStaffPart(p).then(()=>{if(window[f]===m)throw new Error(f+' missing from staff part '+p+' - reload the page');return window[f](...a);});}\n`
+    + [...entries].map(([f, p]) => `function ${f}(...a){return _partGo(${JSON.stringify(f)},${JSON.stringify(p)},a);}`).join('\n')
     + `\nvar _stubP={${[...entries].map(([f]) => `${f}:${f}`).join(',')}};`;
   const loader = `
 // ── The staff half's parts (generated by scripts/split-staff.mjs; do not edit here) ──────────────
@@ -609,6 +656,7 @@ export function splitSections(code, parts = STAFF_PARTS, roots = STAFF_ENTRY) {
 // rides inside the part).
 var STAFF_PARTS_V={}; // the build stamps {name:contentHash}
 var STAFF_PART_LANG_V={}; // the build stamps {name:{code:contentHash}}
+var STAFF_PART_UP=${JSON.stringify(Object.fromEntries(Object.entries(up).filter(([c]) => parts[c])))}; // a part inside another: {part:theOther} (STAFF_PART_UP in scripts/split-staff.mjs)
 var _staffPartP={},_staffPartsAll=null,_staffPartsDone=false,_staffPartsIdle=false,_partLangP={},_partLangGot={};
 // Never rejects: a pack that did not arrive leaves t() answering in English, as the core's packs do.
 function _loadPartLang(n,c){
@@ -623,13 +671,15 @@ function _loadPartLangs(c){return Promise.all(Object.keys(_staffPartP).map(n=>_l
 function _partLangsReady(c){return Object.keys(_staffPartP).every(n=>!c||c==='en'||!(STAFF_PART_LANG_V[n]&&STAFF_PART_LANG_V[n][c])||!!_partLangGot[n+':'+c]);}
 function _loadStaffPart(n){
   if(_staffPartP[n])return _staffPartP[n];
-  const code=new Promise((res,rej)=>{
+  // A part inside another (STAFF_PART_UP, 2026-11-11) runs after it: the other comes first, and a failed one lets a later call try again.
+  const up=STAFF_PART_UP[n];
+  const code=(up?_loadStaffPart(up):Promise.resolve()).then(()=>new Promise((res,rej)=>{
     const s=document.createElement('script');let done=false;
     const fail=why=>{if(done)return;done=true;delete _staffPartP[n];try{s.remove();}catch(e){}rej(new Error(why));};
     const tm=setTimeout(()=>fail('staff part '+n+' did not load in 30 s'),30000);
     s.src='/staff-parts/'+n+'.js?v='+STAFF_PARTS_V[n];s.onload=()=>{if(done)return;done=true;clearTimeout(tm);res();};s.onerror=()=>{clearTimeout(tm);fail('staff part '+n+' did not load');};
     document.head.appendChild(s);
-  });
+  }),e=>{delete _staffPartP[n];throw e;});
   _staffPartP[n]=Promise.all([code,_loadPartLang(n,_staffLangCode())]).then(()=>{});
   return _staffPartP[n];
 }

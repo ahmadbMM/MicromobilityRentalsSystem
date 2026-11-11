@@ -31,15 +31,15 @@ test.describe('@staff:perf staff parts by role (2026-10-09)', () => {
     const asked: string[] = [];
     await boot(page, { cq_role: 'frontdesk' }, asked);
     // the desk's own sections: the till (cashier), the workshop, the bikes, the fleet check after a return, the money dialogs
-    await expect.poll(() => ['cashier', 'workshop', 'fleet', 'money', 'settings'].every((n) => part(asked, n)), { timeout: 10000 }).toBe(true);
+    await expect.poll(() => ['cashier', 'workshop', 'fleet', 'money', 'settings', 'sessreport'].every((n) => part(asked, n)), { timeout: 10000 }).toBe(true); // sessreport: a session's report (2026-11-11)
     await page.waitForTimeout(500);
-    for (const n of ['analytics', 'website', 'vendors', 'community', 'catalog', 'ambassadors', 'messages', 'team', 'history', 'sela', 'imports']) {
+    for (const n of ['analytics', 'website', 'vendors', 'community', 'catalog', 'ambassadors', 'messages', 'team', 'history', 'sela', 'imports', 'peopleapps', 'peoplemore']) {
       expect(part(asked, n), `${n} was fetched`).toBe(false);
     }
     // A part no section of this account opens still comes when something asks for it (its stand-in).
     await page.evaluate(`_loadStaffPart('analytics')`);
     expect(part(asked, 'analytics')).toBe(true);
-    expect(await page.evaluate(`typeof renderAnalytics==='function'&&!/_loadStaffPart/.test(String(renderAnalytics))`)).toBe(true);
+    expect(await page.evaluate(`typeof renderAnalytics==='function'&&!/_loadStaffPart|_partGo/.test(String(renderAnalytics))`)).toBe(true); // a stand-in hands over to _partGo (2026-11-11)
   });
 
   test('an admin\'s device fetches every section\'s part, but not the two only an action reaches', async ({ page }) => {
@@ -48,6 +48,9 @@ test.describe('@staff:perf staff parts by role (2026-10-09)', () => {
     await expect.poll(() => ['analytics', 'community', 'website', 'vendors', 'team', 'history'].every((n) => part(asked, n)), { timeout: 10000 }).toBe(true);
     expect(part(asked, 'sela')).toBe(false);
     expect(part(asked, 'imports')).toBe(false);
+    // People's rarely opened views (2026-11-11): only when one is opened (tests/people-parts.spec.ts)
+    expect(part(asked, 'peopleapps')).toBe(false);
+    expect(part(asked, 'peoplemore')).toBe(false);
   });
 
   test('a part\'s strings come with it: Arabic from its own pack, English from inside the part', async ({ page }) => {
