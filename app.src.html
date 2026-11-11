@@ -626,7 +626,7 @@ new MutationObserver(()=>{
 // these listeners are registered before any other.
 const _EL={'@':'this'},_EV={'@':'event'},_P=p=>({'@':p}); // '@', not '$': escaped, {"@":..} carries "$&", which String.replace reads as a pattern when markup is put into a translated string
 function _on(...spec){return esc(JSON.stringify(spec));}
-const _ON_TYPES=['click','input','change','keydown','blur','focus','mouseover','mouseout','mousedown','submit','error','dragstart','dragover','drop'];
+const _ON_TYPES=['click','input','change','keydown','blur','focus','mouseover','mouseout','mousedown','submit','error','dragstart','dragover','drop','dragend'];
 const _ON_OWN={blur:1,focus:1,error:1}; // these do not bubble: the element's own attribute alone, heard in the capture phase
 function _onRun(spec,el,ev){
   let steps;
@@ -27055,9 +27055,11 @@ async function _n6sEditApply(){
   });
   renderSessions();renderStaffQueue();
 }
-// Empty: nobody booked (as deleteSession counts) and nothing sold on it.
+// Empty: nobody booked (as deleteSession counts) and nothing sold on it. A night older than the booking window this device
+// holds (_n6sMoneyOk) is never counted empty: its done rides are not here, and staff_delete_session refuses only live
+// ones, so a past night with real rides was deleted as empty (bug hunt 2026-11-11). Such a night is deleted on its own.
 function _n6sEmpty(list){
-  return list.filter(s=>!(_qBySession().get(s.id)||[]).some(e=>e.status!=='removed'&&e.status!=='cancelled'&&e.status!=='noshow')
+  return list.filter(s=>_n6sMoneyOk(s)&&!(_qBySession().get(s.id)||[]).some(e=>e.status!=='removed'&&e.status!=='cancelled'&&e.status!=='noshow')
     &&!(S.cashSales||[]).some(r=>r.session_id===s.id&&r.pay!=='refunded'&&r.category!=='__cardmeta__'&&r.category!=='__discount__'));
 }
 async function _n6sDelEmpty(){
@@ -27197,17 +27199,17 @@ function _ssBulkHtml(){
 function _ssBulk(st){
   let ids=(S.sessSel||[]).filter(id=>{const s=_sessGet(id);return s&&s.status!=='deleted'&&s.status!==st;});
   // Open never reopens a night that is over (SS01): the timer would only close it again, and riders saw it in the meantime.
-  const n0=ids.length;if(st==='open')ids=ids.filter(id=>!_sessPastDay(_sessGet(id)));const skipped=n0-ids.length;
+  const n0=ids.length;if(st==='open')ids=ids.filter(id=>{const s=_sessGet(id);return!_sessPastDay(s)&&!_sessEnded(s);});const skipped=n0-ids.length; // over earlier today too (_sessEnded)
   if(!ids.length){toast(skipped?t('n6sPastSkipped').replace('{0}',skipped):t('ssBNothing'),'info');return;}
   confirmDialog({title:t('ssBAsk').replace('{0}',ids.length).replace('{1}',t(SESS_STATUS_KEY[st])),body:st==='closed'?esc(t('ssBNote')):skipped?esc(t('n6sPastSkipped').replace('{0}',skipped)):'',confirmLabel:t('ssBGo'),confirmClass:st==='closed'?'btn-red':'btn-primary',onConfirm:()=>_busyRun('ssBulk',()=>_ssBulkDo(ids,st))});
 }
 async function _ssBulkDo(ids,st){
-  const prev=ids.map(id=>[id,(_sessGet(id)||{}).status||'closed']);
+  const prev=ids.map(id=>{const s=_sessGet(id)||{};return[id,s.status||'closed',s.cancelled_at||null];});
   if(_writeErr(await sb.from('sessions').update(st==='closed'?{status:st}:{status:st,cancelled_at:null}).in('id',ids),'session status'))return; // opened again: no longer called off (Cancel night)
   await _sessReload(ids);
   toast(t('ssBDone').replace('{0}',ids.length),'success');
   pushUndo(t('ssBUndo').replace('{0}',ids.length).replace('{1}',t(SESS_STATUS_KEY[st])),async()=>{
-    for(const[id,ps]of prev){if(_writeErr(await sb.from('sessions').update({status:ps}).eq('id',id),'undo session status'))return false;}
+    for(const[id,ps,pc]of prev){if(_writeErr(await sb.from('sessions').update({status:ps,...(pc&&st!=='closed'?{cancelled_at:pc}:{})}).eq('id',id),'undo session status'))return false;} // a night called off is called off again
     await _sessReload(ids);renderSessions();renderStaffQueue();
   });
   S.sessSel=[];renderSessions();renderStaffQueue();
@@ -27415,7 +27417,7 @@ function _n6rCalMode(v){S._n6rCalMode=v;renderSessions();}
 function _n6rCalModeHtml(){const w=_n6rCalWk(),b=(v,k)=>`<button type="button" class="btn-sm ${(v==='week')===w?'btn-green':'btn-muted'}" aria-pressed="${(v==='week')===w}" data-on-click="${_on('_n6rCalMode',v)}">${t(k)}</button>`;return`<span class="n6r-calmode" role="group" aria-label="${esc(t('ssLayout'))}">${b('month','n6rCalMonth')}${b('week','n6rCalWeek')}</span>`;}
 function _n6rCalEntry(x){
   const n=_placesTaken(x),cap=_placesCap(x),pct=cap?Math.round(n/cap*100):0,mv=_editOk('sessions')&&_ssDay(x)>=todayStr();
-  return`<button type="button" class="cal-sess ev-${_evOf(x)} st-${esc(x.status||'')} n6r-f-${pct>=100?'full':pct>=80?'high':pct>0?'ok':'none'}"${mv?` draggable="true" data-on-dragstart="${_on('_n6rDragStart',_EV,x.id)}"`:''} data-on-click="${_on('_n6rCalPop',x.id)}" title="${esc(_evName(x)+_sgDot(x))} · ${n}/${cap}">${_sessMk(x,12)}<span class="cal-time">${esc(_sessStart(x))}</span><span class="cal-name">${esc(_sessShortG(x))}</span><em>${n}/${cap}</em><i class="n6r-cbar" aria-hidden="true" data-cssv="${_cssv({'--n6r-w':Math.min(100,pct)+'%'})}"></i></button>`;
+  return`<button type="button" class="cal-sess ev-${_evOf(x)} st-${esc(x.status||'')} n6r-f-${pct>=100?'full':pct>=80?'high':pct>0?'ok':'none'}"${mv?` draggable="true" data-on-dragstart="${_on('_n6rDragStart',_EV,x.id)}" data-on-dragend="${_on('_n6rDragEnd')}"`:''} data-on-click="${_on('_n6rCalPop',x.id)}" title="${esc(_evName(x)+_sgDot(x))} · ${n}/${cap}">${_sessMk(x,12)}<span class="cal-time">${esc(_sessStart(x))}</span><span class="cal-name">${esc(_sessShortG(x))}</span><em>${n}/${cap}</em><i class="n6r-cbar" aria-hidden="true" data-cssv="${_cssv({'--n6r-w':Math.min(100,pct)+'%'})}"></i></button>`;
 }
 function _n6rCalDrop(iso,today){return iso>=today&&_editOk('sessions')?` data-on-dragover="${_on('_n6rDragOver',_EV)}" data-on-drop="${_on('_n6rDrop',_EV,iso)}"`:'';}
 function _n6rCalAdd(iso,today){return iso>=today?`<button type="button" class="cal-add" aria-label="${esc(t('calNewOn').replace('{0}',shortDate(iso)))}" data-on-click="${_on('_calNew',iso)}">+</button>`:'';}
@@ -27451,7 +27453,10 @@ function _n6rCalGo(id){closeConfirm();_calOpen(id);}
 function _n6rCalEdit(id){closeConfirm();startEditSession(id);setTimeout(()=>document.getElementById('sess-edit-form')?.scrollIntoView({behavior:_sb(),block:'start'}),50);}
 function _n6rDragStart(ev,id){S._n6rDrag=id;try{ev.dataTransfer.setData('text/plain',id);ev.dataTransfer.effectAllowed='move';}catch(_){}}
 function _n6rDragOver(ev){if(!S._n6rDrag)return;try{ev.dataTransfer.dropEffect='move';}catch(_){}return false;} // false: the dispatcher lets the drop land
-function _n6rDrop(ev,iso){try{ev.preventDefault();}catch(_){}const id=S._n6rDrag;S._n6rDrag=null;if(id)_n6rMove(id,iso);}
+// A drop moves only the session this drag carries: a drag let go anywhere else (outside the grid, on a past day, Esc)
+// left S._n6rDrag set, and a later drop of selected text or a link offered to move that old session (bug hunt 2026-11-11).
+function _n6rDrop(ev,iso){try{ev.preventDefault();}catch(_){}const id=S._n6rDrag;S._n6rDrag=null;let d='';try{d=ev.dataTransfer.getData('text/plain');}catch(_){}if(id&&d===id)_n6rMove(id,iso);}
+function _n6rDragEnd(){S._n6rDrag=null;}
 // The move itself is the editor's: staff_move_session (20261104160000) carries every table naming the ride, and Undo
 // takes it back to its own id. A database without it is told, not worked around.
 function _n6rMove(id,iso){
@@ -27635,17 +27640,20 @@ function _n6rRotaHtml(s){
     ${ed?`<div class="n6r-rota-add"><select id="n6r-rr" class="filter-select" aria-label="${esc(t('n6rRotaRole'))}">${N6R_ROLES.map(r=>`<option value="${r}">${esc(t(N6R_ROLE_KEY[r]))}</option>`).join('')}</select><input id="n6r-rn" type="text" maxlength="80" list="n6r-staff-dl" aria-label="${esc(t('n6rRotaName'))}" placeholder="${esc(t('n6rRotaName'))}"><datalist id="n6r-staff-dl">${_n6rStaffNames().map(n=>`<option value="${esc(n)}"></option>`).join('')}</datalist><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_n6rRotaAdd',s.id)}">${t('n6rRotaAdd')}</button></div>`:''}
   </div>`;
 }
-async function _n6rRotaAdd(sid){
+// One add at a time, and a name already in that role is not added again: a double tap on a slow line wrote the same
+// name twice, and the lead message and the printed roster listed it twice (bug hunt 2026-11-11).
+function _n6rRotaAdd(sid){return _busyRun('n6rRota',async()=>{
   const role=String((document.getElementById('n6r-rr')||{}).value||'lead'),name=String((document.getElementById('n6r-rn')||{}).value||'').replace(/\s+/g,' ').trim().slice(0,80);
   if(!N6R_ROLES.includes(role))return;
   if(!name){toast(t('n6rRotaNeedName'),'error');return;}
+  if(_n6rRotaOf(sid).some(x=>x.role===role&&String(x.name||'').trim().toLowerCase()===name.toLowerCase())){toast(t('bldAddAlready'),'info');return;}
   const row={id:uid(),session_id:sid,role,name};
   if(await _wr(sb.from('session_rota').insert(row),'staff rota'))return;
   if(!S._n6rRota)S._n6rRota=new Map();
   S._n6rRota.set(sid,[..._n6rRotaOf(sid),row]);
   logAction(t('n6rRotaLog').replace('{0}',t(N6R_ROLE_KEY[role])).replace('{1}',name).replace('{2}',shortDate(String(sid).slice(0,10))));
   renderSessions();
-}
+});}
 async function _n6rRotaDel(id){
   let sid=null,row=null;if(S._n6rRota)S._n6rRota.forEach((l,k)=>{const x=l.find(y=>y.id===id);if(x){sid=k;row=x;}});
   if(!row)return;
@@ -28626,7 +28634,7 @@ function _sessEditCols(row){const o={};SESS_EDIT_COLS.forEach(k=>{if(row&&k in r
 // _evName() says it in each viewer's own language.
 function _stockEvName(v){
   const x=String(v||'').trim().toLowerCase();if(!x)return false;
-  return Object.values(LANG).some(L=>L&&['evSatName','evPetroName','evSwimName','evWorkshopName','evSnd96Name','evEventName','evRunHerName','evYogaName','landCommTitle'].some(k=>L[k]&&String(L[k]).trim().toLowerCase()===x));
+  return Object.values(LANG).some(L=>L&&['evSatName','evPetroName','evSwimName','evWorkshopName','evSnd96Name','evEventName','evRunHerName','evYogaName','evJccName','evVlapName','evArenaName','evDefeName','evBloodName','landCommTitle'].some(k=>L[k]&&String(L[k]).trim().toLowerCase()===x));
 }
 // One save at a time, as addSession (2026-10-05): a second tap on Save while a date move was on the
 // wire ran the whole move again, and its 23505 retry put a copy of the ride on '<date>-2'.
@@ -29155,7 +29163,7 @@ async function _addSession(){
 async function toggleSession(id,newStatus){
   try{
     const prev=_sessDisp(id);
-    const prevStatus=prev?prev.status:'closed';
+    const prevStatus=prev?prev.status:'closed',prevCancel=newStatus!=='closed'&&prev&&prev.cancelled_at||null;
     // PostgREST resolves with {error} on a denial rather than throwing, so the catch below
     // never saw it and the success toast fired on a write that never happened.
     // A night called off (Cancel night's cancelled_at) and opened again is not called off any more.
@@ -29167,7 +29175,7 @@ async function toggleSession(id,newStatus){
     const lbl={open:t('sessOpened'),closed:t('sessClosed'),full:t('statusFull')+'.'}[newStatus]||newStatus;
     toast(lbl);
     pushUndo(`${t('undoSessionStatus')} ${shortDate(prev?.session_date||id)} → ${_own(SESS_STATUS_KEY,newStatus)?t(SESS_STATUS_KEY[newStatus]):newStatus}`,async()=>{ // the status in words, not its code (2026-10-05)
-      if(_writeErr(await sb.from('sessions').update({status:prevStatus}).eq('id',id),'undo session status'))return false;
+      if(_writeErr(await sb.from('sessions').update({status:prevStatus,...(prevCancel?{cancelled_at:prevCancel}:{})}).eq('id',id),'undo session status'))return false; // a night called off is called off again
       await _sessReload([id]);renderSessions();renderStaffQueue();
     });
     renderSessions();renderStaffQueue();
@@ -29276,6 +29284,14 @@ async function deleteSession(id){
   try{
     const bookings=(_qBySession().get(id)||[]).filter(e=>e.status!=='removed'&&e.status!=='cancelled'&&e.status!=='noshow').length;
     if(bookings>0){toast(t('errHasBookings'),'error');return;}
+    // A night older than the booking window this device holds: its done rides are not here, and staff_delete_session
+    // refuses only live ones, so the server is asked how many it has (bug hunt 2026-11-11).
+    const _ds=_sessGet(id);
+    if(_ds&&!_n6sMoneyOk(_ds)){
+      let h;try{h=await sb.from('queue_entries').select('id',{count:'exact',head:true}).eq('session_id',id).not('status','in','(removed,cancelled,noshow)');}catch(e){h={error:e};}
+      if(!h||h.error){toast(t('errConnection'),'error');return;}
+      if((h.count||0)>0){toast(t('errHasBookings'),'error');return;}
+    }
     // Don't orphan sales: block delete if the session has any non-refunded cashier rows
     const sales=(S.cashSales||[]).filter(r=>r.session_id===id&&r.pay!=='refunded'&&r.category!=='__cardmeta__'&&r.category!=='__discount__').length;
     if(sales>0){toast(t('errHasSales'),'error');return;}
@@ -29747,7 +29763,9 @@ async function _saveGroupEdit(){
   if(!members.length){closeGroupEditModal();return;}
   const primary=members[0];
   const gname=_titleCaseName(document.getElementById('ge-gname')?.value||'');
-  const cname=_titleCaseName(document.getElementById('ge-cname')?.value||'');
+  // A contact name typed here is letters and spaces, as Add group's; one left as it was stays as it was (bug hunt 2026-11-11).
+  const _cv=String(document.getElementById('ge-cname')?.value||'');
+  const cname=_titleCaseName(_cv.trim()===String(primary.groupContact||'').trim()?_cv:_nameClean(_cv));
   const oldMain=(primary.groupPhone||primary.phone||'').trim();
   const mainPhone=(document.getElementById('ge-phone')?.value||'').trim();
   const toSessionId=document.getElementById('ge-sess')?.value||primary.sessionId;
@@ -30195,20 +30213,36 @@ function _bdWishes(){return _optList(BD_KEY).filter(x=>x&&x.id&&x.y);}
 function _bdWished(id,y){return _bdWishes().find(x=>String(x.id)===String(id)&&+x.y===+y)||null;}
 // The Community's birthdays today nobody has wished yet: the bell's.
 function _bdTodayOpen(){return _bdRows(BD_TAG).rows.filter(r=>r.days===0&&!_bdWished(r.c.id,r.y));}
-// The mark is read fresh and merged before it is written, so two desks marking at once both
-// land. Marks older than last year fall away.
-async function _bdMark(id,y,on){
-  let cur=_bdWishes();
-  try{const r=await sb.from('staff_options').select('items').eq('key',BD_KEY).maybeSingle();if(r&&!r.error&&r.data&&Array.isArray(r.data.items))cur=r.data.items.filter(x=>x&&x.id&&x.y);}catch(e){}
+// The mark is read fresh and written against the row as it was read (its updated_at), as _sxLooksFine's: read and
+// written whole with nothing between, two marks at once (two desks, or two quick taps here) both read the same list
+// and the second write dropped the first, so a member wished showed as owed a wish again (bug hunt 2026-11-11). A
+// write that finds the row moved on reads it again and makes this one mark on that. This desk's marks go one after
+// another. Marks older than last year fall away.
+let _bdMarkQ=null;
+function _bdMark(id,y,on){const p=(_bdMarkQ||Promise.resolve()).then(()=>_bdMarkDo(id,y,on));_bdMarkQ=p.catch(()=>{});return p;}
+async function _bdMarkDo(id,y,on){
   const ty=+todayStr().slice(0,4);
-  const next=cur.filter(x=>!(String(x.id)===String(id)&&+x.y===+y)&&+x.y>=ty-1);
-  if(on)next.push({id:String(id),y:+y,at:Date.now(),by:_opName()||''});
-  const before=(S.staffOptions||{})[BD_KEY];
-  const ok=await _optWrite(BD_KEY,next);
-  if(!ok)S.staffOptions={...(S.staffOptions||{}),[BD_KEY]:before};
+  let next=null;
+  try{
+    for(let tries=0;tries<3&&!next;tries++){
+      const r=await sb.from('staff_options').select('items,updated_at').eq('key',BD_KEY).maybeSingle();
+      if(r.error)throw r.error;
+      const cur=(Array.isArray(r.data&&r.data.items)?r.data.items:[]).filter(x=>x&&x.id&&x.y);
+      const n=cur.filter(x=>!(String(x.id)===String(id)&&+x.y===+y)&&+x.y>=ty-1);
+      if(on)n.push({id:String(id),y:+y,at:Date.now(),by:_opName()||''});
+      const at=new Date().toISOString();
+      const w=r.data?await sb.from('staff_options').update({items:n,updated_at:at}).eq('key',BD_KEY).eq('updated_at',r.data.updated_at).select('key')
+        :await sb.from('staff_options').insert({key:BD_KEY,items:n,updated_at:at}).select('key');
+      if(w.error&&!r.data&&String(w.error.code)==='23505')continue; // another desk made the row first: read theirs
+      if(_writeErr(w,'options'))return false;
+      if(Array.isArray(w.data)&&w.data.length)next=n; // no row answered: it moved on since the read
+    }
+  }catch(e){toast(t('errConnection'),'error');return false;}
+  if(!next){toast(t('errConnection'),'error');return false;} // moved on every time: said, never dropped quietly
+  S.staffOptions={...(S.staffOptions||{}),[BD_KEY]:next};
   if(_pplOpen())renderCommunity();
   _ntSync();
-  return ok;
+  return true;
 }
 // Opening WhatsApp counts as the wish; the mark can be taken back.
 // Opening WhatsApp counts as the wish only within a week of that birthday: a chat opened from a row
@@ -30938,29 +30972,33 @@ async function _caBulk(kind,ids){
 async function _caBulkRun(kind,ids){
   const ap=kind==='approve';
   if(!await askConfirm({title:t(ap?'caBulkApproveQ':'caBulkRejectQ').replace('{0}',String(ids.length)),body:esc(t(ap?'caBulkApproveBody':'caBulkRejectBody')),confirmLabel:t(ap?'caApproveBtn':'caRejectBtn'),confirmClass:ap?'btn-primary':'btn-red'}))return;
-  let n=0,fail=0;const rows=[];
+  let n=0,fail=0,reload=false;const rows=[];
   for(const id of ids){
     const a=_caFind(id);if(!a||a.status!=='pending')continue;
     const r=ap?await _caApproveQuiet(a,_caDefaultTags(a)):await _caDecide(a,'rejected');
+    if(r&&r.fail){fail++;if(r.reload)reload=true;rows.push({a,ok:false,why:r.why});continue;} // the reason it was not approved, not a generic error (bug hunt 2026-11-11)
     if(r){n++;logAction(t(ap?'caApprovedToast':'caRejectedToast').replace('{0}',a.name));rows.push({a,ok:true,d:r===true?null:r,kind:ap?(r.existing?'existing':'new'):'reject'});}
     else{fail++;rows.push({a,ok:false,why:t('caErr')});}
   }
   S._caAppSel=new Set();
+  if(reload)await _caLoad(); // decided on another desk meanwhile: the list as it is now, not until the next minute's read
   toast(t(ap?'caBulkApproved':'caBulkRejected').replace('{0}',String(n))+(fail?' · '+t('caBulkFailed').replace('{0}',String(fail)):''),fail?'warning':'success');
   renderCommunity();
   // Every applicant's message on one sheet (2026-10-25); an account an approval made carries its password message
   // too, handed back only this once.
   _caBkMsgsOpen(ap?'approve':'reject',rows,null);
 }
-// An approval with no ride and no dialog, as _caApGo makes one: the server's approval, then the tags.
+// An approval with no ride and no dialog, as _caApGo makes one: the server's approval, then the tags. Not approved,
+// it answers {fail, why} with the reason the sheet shows (and reload when another desk decided it meanwhile).
 async function _caApproveQuiet(a,tags){
-  const comm=tags.includes(TAG_COMMUNITY);
-  if(_caApRival({kind:'approve',tags},(_caAcct(a)||{}).id))return false; // Community or Petromin, never both: counted as not approved
+  const comm=tags.includes(TAG_COMMUNITY),cid=(_caAcct(a)||{}).id;
+  if(_caApRival({kind:'approve',tags},cid))return{fail:true,why:t((tags.includes(TAG_VLAP)||_caTagHeld(cid,TAG_VLAP))?'tagOneOfTwoVl':'tagOneOfTwo')}; // Community or Petromin (or Victory Lap), never both: counted as not approved
   S._caWorking=true;
   const args={p_id:a.id,p_by:_opName()||null};if(!comm)args.p_community=false;
   let res;try{res=await sb.rpc('staff_community_approve',args);}catch(e){res={error:e};}
   S._caWorking=false;
-  if(_caRpcErr(res)||!res.data.ok)return false;
+  if(_caRpcErr(res))return{fail:true,why:t('caErr')};
+  if(!res.data.ok)return{fail:true,why:t('caErrDecided'),reload:true};
   const d=res.data;
   Object.assign(a,{status:'approved',decided_at:new Date().toISOString(),decided_by:_opName()||null,customer_id:d.customer_id,existing_account:!!d.existing,account_oauth:!!d.oauth});
   try{await _caApExtras(a,d,tags.filter(x=>x!==TAG_BLACKLIST),'',comm,false,null);}catch(e){}
@@ -31054,8 +31092,8 @@ async function _caBkGo(){
 // application, the tags and the place on the ride's Final list on the bike staff chose (their own answer, when
 // that is what staff picked). No place saved: the application stops naming the ride, as a single one does.
 async function _caBkInviteOne(a,b){
-  const acct=_caAcct(a);
-  if(_caApRival({kind:'invite',tags:b.tags},acct&&acct.id))return{ok:false,why:t('tagOneOfTwo')};
+  const acct=_caAcct(a),cid=acct&&acct.id;
+  if(_caApRival({kind:'invite',tags:b.tags},cid))return{ok:false,why:t((b.tags.includes(TAG_VLAP)||_caTagHeld(cid,TAG_VLAP))?'tagOneOfTwoVl':'tagOneOfTwo')}; // the rule that clashes, as _caApGo says it
   const comm=b.tags.includes(TAG_COMMUNITY);
   S._caWorking=true;
   const args={p_id:a.id,p_by:_opName()||null};if(!comm)args.p_community=false;
@@ -32104,7 +32142,7 @@ async function _caNewPwd(id){
     const gone=res.data.error==='not_new'||res.data.error==='missing';
     const msg=res.data.error==='chosen'?t('caErrChosen'):gone?t('caErrNoAccount'):t('caErr');
     toast(msg,(res.data.error==='chosen'||gone)?'warning':'error');
-    if(gone)renderCommunity(); // the row redraws as what it is: an application with no account
+    if(gone){await _caLoad();renderCommunity();} // read again, the row redraws as what it is now: the local copy alone drew it as before (bug hunt 2026-11-11)
     return;
   }
   // An invited rider was never welcomed as a member: their new password goes in the account
