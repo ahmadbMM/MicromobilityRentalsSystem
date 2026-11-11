@@ -3369,3 +3369,45 @@ The owner said yes ("do it all") to holding each bike type to its own places. Bu
 - The custom header was checked on the production gateway: its CORS preflight echoes `x-mm-type-cap` back.
 - Not done: the session list does not say "Waitlist" when every type is full (the step-1 bar, the review and Confirm
   do); the "from" price still counts a full type. `tests/s10b-caps.spec.ts`.
+
+## Staff round s10, second batch: follow-ups, the WhatsApp log, search operators (2026-11-11, migration 20261111180700)
+
+Builder "extras" (the report's three lower-priority ideas; the owner: "do it all"). Spec: `tests/s10b-extras.spec.ts`.
+- **Follow-ups** (`account_followups`: id, customer_id (FK to customers, cascade), due_on, note, created_by/_name, created_at,
+  done_at, done_by/_name). RLS: People view (`_staff_mod('community', false)`) reads, People change inserts and updates,
+  admins delete, anon nothing; `_account_followups_stamp` stamps the maker and, when done_at goes from empty to set, who
+  marked it done and now() (the page sends only `{customer_id, due_on, note}` and `{done_at}`). Client (People's part,
+  `_fup*`): Follow up is a More action on the account window (`_n6pAhBar`, People change only) and opens a centred
+  pop-up in `#confirm-modal` (due date, tomorrow by default; note; "Save follow-up"); the window's Account part lists
+  the account's open ones (`_fupAhSec`, nothing when none); People > Activity > Follow-ups (`/people/followups`,
+  `S._fupV` open / done) has Mark done and, for admins, Delete. The bell kind `fup` (NT_KINDS_OFF, section community;
+  `_ntOffice` calls `_fupBell` by a built name) has one line per follow-up due today or overdue, its id carrying the
+  day, so an overdue one comes back each morning until done. The Dashboard's "Waiting on the office" counts them
+  (`_fupDue` by a built name). Reads are narrow and scoped (`_fupNeed(scope, ttl)`: 'due' every five minutes from the
+  bell, 'c:<id>' with the window, 'open' / 'done' with the list); a read replaces only the rows of its scope (`_fupIn`).
+  No poll of its own. Strings start with `afu` (not `fup`: the customer half's `'f'+` prefix would ship every `f…` key
+  to riders).
+- **WhatsApp sent log**: `_waTap` (core, a capture click listener set once by `renderStaffTabs`) hears every tap on a
+  `wa.me/<number>` link on the staff site and calls `_waLog(url, el)` (a Settings part entry). It writes ONE
+  `logAction` line (client id, kind `whatsapp`, entity `booking` when it knows the booking, else `account`), labelled
+  "WhatsApp: <template or message> · <name>". It reads, in order: `data-wa-t` (a TPL template id, or a language key) /
+  `data-wa-c` / `data-wa-b` on the link or around it, the link's `_piiUse` arguments (single or multi-step handler),
+  the roster row it sits in (`[data-id]`), else the account holding the number. Helpers that open the chat with
+  `window.open` call `_waLog(url, {t, c, b})` themselves (reminders, the run, waitlist offers, the volunteers' team
+  message, a selection's message). A share with no number (`wa.me/?text=`) is not logged. **Rule: a new staff wa.me
+  link gets `data-wa-t` (and `data-wa-b`/`data-wa-c` when no `_piiAttrs` names the rider); a new `window.open` of a
+  chat calls `_waLog`.** The account window's "Messages sent" (`_walAhSec`, People's part) reads `staff_actions`
+  kind whatsapp on the account or its bookings (newest 30, again after two minutes) and adds this device's lines not in
+  the table yet by client id. History > Log has a WhatsApp pill (`_logCatOf(label, m)` -> 'wa'). Nothing is sent: no
+  email, no SMS, WhatsApp still by hand.
+- **Search operators** (`_sqParse` in Settings' part; the core asks through `_sqOf(q)`, a built name, so a query is
+  plain text until the part is in, and null off the staff view): `tag:` (name or id, held now), `type:`,
+  `status:waiting|onbike|done|noshow|waitlist|cancelled`, `paid:yes|no` (no = owes, `_brOwes`), `size:`,
+  `session:<date part, today, or title>`, `phone:`, `email:`; quoted values; an operator still empty asks nothing; an
+  unknown word before a colon stays text; Arabic names and values (وسم نوع حالة مدفوع مقاس جلسة هاتف/جوال بريد; ينتظر
+  راكب انتهى غائب احتياط; نعم/لا). `P = {q, ops, b(booking), a(account), r({ph, em, cid, st})}`: an account answers a
+  booking's operator through its own bookings. Hooked into `_searchHit` (Bookings, Waitlist) and `_dkXAcctHit` (People,
+  its find box, every account picker), Ctrl K (`_gsHits`: bookings and accounts only while operators are in the bar),
+  and the office lists' matchers (`_wsHit`, `_smHit`, `_ambHit`, Team's `_tmShown` filter, `_bdrShown`). An operator
+  search in Bookings pulls in no party mates. The `?` sheet and the empty palette (`#gs-tips`, outside the listbox) show
+  "Search tips". A new list search that should take them: `const P=_sqOf(q); if(P) return P.r({...}) && hit(row, P.q);`.

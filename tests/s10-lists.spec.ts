@@ -132,7 +132,7 @@ test.describe('@staff:lists People in five groups', () => {
     await expect(tab.locator('.ppl-sub .filter-pill')).toHaveText(['Badges', 'Titles', 'Members’ page']);
     await page.evaluate(`setCommTab('referrals')`);
     await expect(tab.locator('[data-ppl-grp="activity"]')).toHaveClass(/active/);
-    await expect(tab.locator('.ppl-sub .filter-pill')).toHaveText(['Activity', /^Referrals/]);
+    await expect(tab.locator('.ppl-sub .filter-pill')).toHaveText(['Activity', /^Referrals/, /^Follow-ups/]); // Follow-ups since s10b (extras)
     await expect(tab.locator('.ppl-sub .filter-pill.active')).toHaveText(/^Referrals/);
   });
 });
