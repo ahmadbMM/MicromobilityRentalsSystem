@@ -17813,7 +17813,9 @@ function _nextOpenRide(){
   return allSessions().filter(x=>_evMatch(x,'jcc')&&x.status==='open'&&!_sessPastDay(x)&&_bwOpen(x)&&!_sessFull(x))
     .sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id))[0]||null;
 }
-function _bookNextOpen(id){S.selEvent='jcc';S.selSession=id;S.regStep=1;setCustTab('register');}
+// Through the event and the date as a tap on Reserve does (_hubBook): setting the date straight kept the add-ons,
+// locker and promo code of another ride and skipped the date's gates.
+async function _bookNextOpen(id){await selectEvent('jcc');if(S.selEvent!=='jcc'||S.view!=='customer'||S.custTab!=='register')return;await selectSessCard(id);}
 function renderRegister(){
   const cust=S.loggedIn||getSession();
   // Open sessions are bookable; full sessions are joinable via the waitlist. The list shows
@@ -65793,7 +65795,7 @@ async function _ttAutoLoad(id){
 }
 function _ttQInput(v){S._ttQ=v;_debRender('ttq',renderCommunity);}
 function _ttUntilInput(v){S._ttUntil=v;}
-function _ttIsMember(cid){return(S.customerTags||[]).some(ct=>ct.customer_id===cid&&ct.tag_id==='tag_saturday'&&_tagActive(ct));}
+function _ttIsMember(cid){return _ctRowsFor(cid).some(ct=>ct.tag_id==='tag_saturday'&&_tagActive(ct));}
 function _ttHoldersHtml(x){
   const byId=new Map((S.customers||[]).map(c=>[String(c.id),c]));
   const who=(c,sub)=>`<span class="tg-who"><strong>${esc(c.name||'—')}</strong><small>${sub}</small></span>`;
@@ -65810,7 +65812,7 @@ function _ttHoldersHtml(x){
   const hit=c=>!q||String(c.name||'').toLowerCase().includes(q)||_phoneHit(c.phone,q);
   const held=(S.custTitles||[]).filter(ct=>ct.title_id===x.id&&_ttLive(ct)).map(ct=>({ct,c:byId.get(String(ct.customer_id))})).filter(o=>o.c);
   const ids=new Set(held.map(o=>String(o.c.id)));
-  const give=q.length>=2&&!x.retired?(S.customers||[]).filter(c=>!ids.has(String(c.id))&&_ttIsMember(c.id)&&hit(c)).slice(0,8).map(c=>`<div class="tg-row tg-give">${who(c,c.phone?_pii('phone',c.phone,c.id):_pii('email',c.email,c.id))}
+  const give=q.length>=2&&!x.retired?(S.customers||[]).filter(c=>!ids.has(String(c.id))&&hit(c)&&_ttIsMember(c.id)).slice(0,8).map(c=>`<div class="tg-row tg-give">${who(c,c.phone?_pii('phone',c.phone,c.id):_pii('email',c.email,c.id))}
       <button type="button" class="btn-sm btn-primary" data-on-click="${_on('_ttGive',c.id,x.id)}">${t('ttGive')}</button></div>`).join(''):'';
   return`<div class="tg-holders">
     ${x.retired?'':`<div class="form-row"><div class="form-group"><label for="tt-q">${t('ttSearch')}</label><input id="tt-q" type="text" class="search-input" value="${esc(S._ttQ||'')}" data-on-input="${_on('_ttQInput',_P('value'))}"></div>
@@ -66037,16 +66039,19 @@ function _acRepHtml(){
     return`<div class="am-tag-row" data-post="${esc(p.id)}"><strong>${esc(s?_acDate(s.session_date||s.id):_acDate(p.shows_from))}</strong><span class="am-meta">${esc(t('acRepCounts').replace('{0}',p.riders==null?'-':p.riders).replace('{1}',p.rides==null?'-':p.rides))} · ${esc(_acDate(p.shows_from))} – ${esc(_acDate(p.shows_until))}</span>${p.line?`<span class="am-meta"><bdi>${esc(p.line)}</bdi></span>`:''}
       <div class="cmy-am-tacts">${_acSureBtn('po'+p.id,t('deleteBtn'),'_acRepDel',p.id)}</div></div>`;}).join('')||_emptyState(t('acNone'));
   if(!S._acRepNew)return rows+`<button type="button" class="btn-secondary cmy-mt12" data-on-click="${_on('_acRepForm',true)}">+ ${t('acRepNew')}</button>`;
-  const sats=_acRepSats(),sid=S._acRepSess&&sats.some(s=>s.id===S._acRepSess)?S._acRepSess:(sats[0]&&sats[0].id)||'',n=_acRepCount(sid),img=S._acRepImg;
+  const sats=_acRepSats(),sid=S._acRepSess&&sats.some(s=>s.id===S._acRepSess)?S._acRepSess:(sats[0]&&sats[0].id)||'',n=_acRepCount(sid),img=S._acRepImg,f=S._acRepF||{};
   return rows+`<div class="inline-form bdg-form"><div class="form-row"><div class="form-group"><label for="ac-r-sess">${t('acRepRide')}</label><select id="ac-r-sess" data-on-change="${_on('_acRepPick',_P('value'))}">${sats.map(s=>`<option value="${esc(s.id)}"${s.id===sid?' selected':''}>${esc(_acDate(s.session_date||s.id))}</option>`).join('')}</select></div>
       <div class="form-group"><span class="am-meta">${esc(t('acRepCounts').replace('{0}',n.riders).replace('{1}',n.rides))}</span></div></div>
-    <div class="form-row">${_acField('ac-r-en','acRepLineEn','type="text" maxlength="200"')}${_acField('ac-r-ar','acRepLineAr','type="text" maxlength="200" dir="rtl"')}</div>
+    <div class="form-row">${_acField('ac-r-en','acRepLineEn',`type="text" maxlength="200" data-on-input="${_on('_acRepSet','en',_P('value'))}"`,f.en)}${_acField('ac-r-ar','acRepLineAr',`type="text" maxlength="200" dir="rtl" data-on-input="${_on('_acRepSet','ar',_P('value'))}"`,f.ar)}</div>
     <div class="form-row"><div class="form-group"><label for="ac-r-photo">${t('acRepPhoto')}</label><input id="ac-r-photo" type="file" accept="image/*" data-on-change="${_on('_acRepPhoto',_EL)}">${img?`<img class="ac-img" src="${esc(img)}" alt="">`:''}</div>
-      ${_acField('ac-r-to','acRepUntil','type="date"',_acDays(todayStr(),6))}</div>
-    <label class="cmy-chk"><input type="checkbox" id="ac-r-rule"> ${t('acRepRule')}</label>
+      ${_acField('ac-r-to','acRepUntil',`type="date" data-on-input="${_on('_acRepSet','to',_P('value'))}" data-on-change="${_on('_acRepSet','to',_P('value'))}"`,f.to||_acDays(todayStr(),6))}</div>
+    <label class="cmy-chk"><input type="checkbox" id="ac-r-rule"${f.rule?' checked':''} data-on-change="${_on('_acRepSet','rule',_P('checked'))}"> ${t('acRepRule')}</label>
     <div class="bdg-foot"><button type="button" class="btn-secondary" data-on-click="${_on('_acRepForm',false)}">${t('cancelBtn')}</button><button type="button" class="btn-primary" data-on-click="${_on('_acRepSave')}">${t('saveBtn')}</button></div></div>`;
 }
-function _acRepForm(on){S._acRepNew=!!on;S._acRepImg=null;S._acRepSess=null;renderCommunity();}
+function _acRepForm(on){S._acRepNew=!!on;S._acRepImg=null;S._acRepSess=null;S._acRepF={};renderCommunity();}
+// The typed lines, the last day and the photo-rule tick live in S, so a repaint (a photo picked, the ride changed,
+// a realtime update) draws them back instead of wiping them.
+function _acRepSet(k,v){(S._acRepF=S._acRepF||{})[k]=v;}
 function _acRepPick(v){S._acRepSess=v;renderCommunity();}
 function _acRepPhoto(el){
   const f=el&&el.files&&el.files[0];if(!f)return;
@@ -66057,7 +66062,7 @@ function _acRepPhoto(el){
     cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
     let q=.78,u=cv.toDataURL('image/jpeg',q);while(u.length>390000&&q>.3){q-=.12;u=cv.toDataURL('image/jpeg',q);}
     if(u.length>390000){toast(t('acNeedAll'),'error');return;}
-    S._acRepImg=u;renderCommunity();
+    S._acRepImg=u;if(S._acRepF)S._acRepF.rule=false;renderCommunity();
   };
   im.onerror=()=>URL.revokeObjectURL(url);im.src=url;
 }
@@ -66068,7 +66073,7 @@ async function _acRepSave(){
   const n=_acRepCount(sid);
   const row={id:'post_'+uid(),session_id:sid,line:_acVal('ac-r-en')||null,line_ar:_acVal('ac-r-ar')||null,riders:n.riders,rides:n.rides,img:S._acRepImg||null,shows_from:todayStr(),shows_until:to,created_by:_opName()||null};
   const r=await sb.from('hub_posts').insert(row);if(_writeErr(r,'save report'))return;
-  delete row.img;S._ac.posts=[row,...(S._ac.posts||[])];S._acRepNew=false;S._acRepImg=null;logAction(t('acRepNew'));renderCommunity();
+  delete row.img;S._ac.posts=[row,...(S._ac.posts||[])];S._acRepNew=false;S._acRepImg=null;S._acRepF={};logAction(t('acRepNew'));renderCommunity();
 }
 async function _acRepDel(id){
   if(!_acArm('po'+id))return;
@@ -66087,7 +66092,7 @@ function _acNumHtml(){
 }
 function _acNumPick(k){S._acNumM=k;renderCommunity();}
 async function _acNumLoad(m){
-  S._acNumBusy=true;const d=new Date(todayStr()+'T12:00:00Z');if(m==='prev')d.setUTCMonth(d.getUTCMonth()-1);
+  S._acNumBusy=true;const d=new Date(todayStr().slice(0,7)+'-01T12:00:00Z');if(m==='prev')d.setUTCMonth(d.getUTCMonth()-1);
   let r;try{r=await sb.rpc('staff_hub_numbers',{p_month:d.toISOString().slice(0,7)+'-01'});}catch(e){r={error:e};}
   S._acNumBusy=false;S._acNum={m,d:r&&!r.error&&r.data?r.data:{}};if(S.view==='staff'&&_pplOn('activities'))renderCommunity();
 }
@@ -66140,10 +66145,14 @@ async function _acPhotoNo(id){
 // ── the welcome
 function _acWelcomeHtml(){
   const from=Date.now()-30*864e5,members=(S.customers||[]).filter(c=>_ttIsMember(c.id)).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
-  const fresh=(S.customerTags||[]).filter(ct=>ct.tag_id==='tag_saturday'&&_tagActive(ct)&&Number(ct.added_at)>from).map(ct=>(S.customers||[]).find(c=>c.id===ct.customer_id)).filter(Boolean);
+  const byId=new Map((S.customers||[]).map(c=>[c.id,c]));
+  const fresh=(S.customerTags||[]).filter(ct=>ct.tag_id==='tag_saturday'&&_tagActive(ct)&&Number(ct.added_at)>from).map(ct=>byId.get(ct.customer_id)).filter(Boolean);
   const buddy=cid=>(S._ac.welcome.find(w=>w.customer_id===cid)||{}).buddy_id||'';
+  // Each member's <option> is built once and reused in every new member's list (was one full tag scan per member).
+  const opts=members.map(m=>`<option value="${esc(m.id)}">${esc(m.name||'—')}</option>`);
+  const list=c=>{const b=buddy(c.id);return members.map((m,i)=>m.id===c.id?'':m.id===b?`<option value="${esc(m.id)}" selected>${esc(m.name||'—')}</option>`:opts[i]).join('');};
   return`<div class="tg-sub">${t('acNewMembers')}</div>`+(fresh.map(c=>`<div class="tg-row" data-new="${esc(c.id)}"><span class="tg-who"><strong>${esc(c.name||'—')}</strong></span>
-    <select aria-label="${esc(t('acBuddy'))}" data-on-change="${_on('_acBuddySet',c.id,_P('value'))}"><option value="">${t('acNoBuddy')}</option>${members.filter(m=>m.id!==c.id).map(m=>`<option value="${esc(m.id)}"${buddy(c.id)===m.id?' selected':''}>${esc(m.name||'—')}</option>`).join('')}</select></div>`).join('')||_emptyState(t('acNone')));
+    <select aria-label="${esc(t('acBuddy'))}" data-on-change="${_on('_acBuddySet',c.id,_P('value'))}"><option value="">${t('acNoBuddy')}</option>${list(c)}</select></div>`).join('')||_emptyState(t('acNone')));
 }
 async function _acBuddySet(cid,bid){
   if(!bid){const r=await sb.from('member_welcome').delete().eq('customer_id',cid);if(_writeErr(r,'clear buddy'))return;S._ac.welcome=S._ac.welcome.filter(w=>w.customer_id!==cid);return;}
@@ -67631,16 +67640,17 @@ function _anHeightBikeData(){
   if(S.anSession&&S.anSession!=='all')sess=sess.filter(s=>s.id===S.anSession);
   return sess.map(s=>{
     const riders=(_qBySession().get(s.id)||[]).filter(e=>e.status==='done'||e.status==='active'); // only riders who actually rode (checked in / completed)
-    const people=riders.filter(r=>r.height!=null&&String(r.height).trim()!=='').map(r=>{const bk=getAssignedBikes(r);const _tp=(r.typePreference&&r.typePreference!=='Any')?r.typePreference:'—';return{name:r.name||'—',height:r.height,type:bk.length?bk[0].type:_tp};}).sort((a,b)=>(Number(a.height)||0)-(Number(b.height)||0));
-    // Count EVERY rider (same set as the heights list), by the bike they were assigned — or, if not
-    // yet assigned, their booked type. So the type total always equals the rider/height count.
+    const _rtype=r=>{const bk=getAssignedBikes(r);const _tp=(r.typePreference&&r.typePreference!=='Any')?r.typePreference:'—';return bk.length?bk[0].type:_tp;};
+    const people=riders.filter(r=>r.height!=null&&String(r.height).trim()!=='').map(r=>({name:r.name||'—',height:r.height,type:_rtype(r)})).sort((a,b)=>(Number(a.height)||0)-(Number(b.height)||0));
+    // Count EVERY rider who rode, by the bike they were assigned — or, if not yet assigned, their booked
+    // type — whether or not a height was given (a rider with no height still took a bike out).
     const typeCounts={};HB_TYPES.forEach(k=>{typeCounts[k]=0;});let other=0;
-    people.forEach(p=>{if(_own(typeCounts,p.type))typeCounts[p.type]++;else other++;});
+    riders.forEach(r=>{const ty=_rtype(r);if(_own(typeCounts,ty))typeCounts[ty]++;else other++;});
     const _hs=people.map(x=>Number(x.height)).filter(h=>h>=100&&h<=250);
     const hSummary={count:_hs.length,avg:_hs.length?Math.round(_hs.reduce((a,b)=>a+b,0)/_hs.length):0,min:_hs.length?Math.min(..._hs):0,max:_hs.length?Math.max(..._hs):0};
     const hRanges=[['<160',0],['160-169',0],['170-179',0],['180+',0]];
     _hs.forEach(h=>{if(h<160)hRanges[0][1]++;else if(h<170)hRanges[1][1]++;else if(h<180)hRanges[2][1]++;else hRanges[3][1]++;});
-    return{sess:s,people,typeCounts,other,rented:people.length,hSummary,hRanges};
+    return{sess:s,people,typeCounts,other,rented:riders.length,hSummary,hRanges};
   });
 }
 // Every type a rider can be on, as the forms list them (2026-10-05: Kids, Road Carbon, Gravel and a bike
@@ -67972,6 +67982,8 @@ function _renderAnalyticsNow(){
   const payMix=(()=>{const ms=_mnySum(_paidRows(queue));let card=ms.card,cash=ms.cash;
     [...sessIds].forEach(sid=>{const cc=_cashCardCash(sid),pu=_mnyPurch(_cashSessionLines(sid));card+=cc.card+pu.card;cash+=cc.cash+pu.cash;});
     return{card:Math.round(card),cash:Math.round(cash),unknown:Math.round(ms.unknown),online:Math.round(ms.online||0),wallet:Math.round(ms.wallet||0)};})();
+  // The card share is of every riyal collected, the wallet and online buckets too (they have tiles of their own beside it).
+  const payMixAll=payMix.card+payMix.cash+payMix.unknown+payMix.online+payMix.wallet;
   // Team-account consumption per member (products taken on the MM Team account). A till sale
   // keeps the member in team_name (a rental purchase line keeps it in team); reading .team off the
   // sale put every till line under "—".
@@ -68385,15 +68397,19 @@ function _renderAnalyticsNow(){
   let prevM=null,curM=null,_anWin=null;
   if(!(S.anSession&&S.anSession!=='all')){
     const _td=todayStr(),[ty,tm,tdd]=_td.split('-').map(Number);
+    // The previous window is measured on this device's bookings and till sales, which reach back only
+    // _qWindowCut() (365 days once the whole window is in): a window starting before that would read as about
+    // zero ('New' / a huge +%) beside the server's real y/y pill, so it is left out ('This Year' always).
+    const _pOk=from=>from>=_qWindowCut();
     if(S.analyticsRange==='month'){const py=tm===1?ty-1:ty,pm=tm===1?12:tm-1;
-      curM=_anMetricsFor(_ymd(ty,tm,1),_td);prevM=_anMetricsFor(_ymd(py,pm,1),_ymd(py,pm,Math.min(tdd,_dim(py,pm))));_anWin=[_ymd(ty,tm,1),_td];}
+      curM=_anMetricsFor(_ymd(ty,tm,1),_td);if(_pOk(_ymd(py,pm,1)))prevM=_anMetricsFor(_ymd(py,pm,1),_ymd(py,pm,Math.min(tdd,_dim(py,pm))));_anWin=[_ymd(ty,tm,1),_td];}
     else if(S.analyticsRange==='year'){
-      curM=_anMetricsFor(_ymd(ty,1,1),_td);prevM=_anMetricsFor(_ymd(ty-1,1,1),_ymd(ty-1,tm,Math.min(tdd,_dim(ty-1,tm))));_anWin=[_ymd(ty,1,1),_td];}
+      curM=_anMetricsFor(_ymd(ty,1,1),_td);if(_pOk(_ymd(ty-1,1,1)))prevM=_anMetricsFor(_ymd(ty-1,1,1),_ymd(ty-1,tm,Math.min(tdd,_dim(ty-1,tm))));_anWin=[_ymd(ty,1,1),_td];}
     else if(S.analyticsRange==='daterange'&&S.analyticsDateFrom&&S.analyticsDateTo){
       const f=S.analyticsDateFrom,to=S.analyticsDateTo;
       const len=Math.max(1,Math.round((Date.parse(to+'T00:00:00Z')-Date.parse(f+'T00:00:00Z'))/864e5)+1);
       const pTo=_isoAddDays(f,-1),pFrom=_isoAddDays(pTo,-(len-1));
-      if(pTo&&pFrom){curM=_anMetricsFor(f,to);prevM=_anMetricsFor(pFrom,pTo);_anWin=[f,to];}
+      if(pTo&&pFrom){curM=_anMetricsFor(f,to);if(_pOk(pFrom))prevM=_anMetricsFor(pFrom,pTo);_anWin=[f,to];}
     }
   }
   // Small delta pills for metric `key`: ▲/▼ % vs the previous period (the two windows above), vs the same
@@ -69088,7 +69104,7 @@ function _renderAnalyticsNow(){
     <div class="analytics-section-title">${t('anPayTitle')}</div>
     <div class="analytics-kpi-grid">
       <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green">${_money(payMix.cash)}</div><div class="analytics-kpi-label">${t('anCashCollected')}</div></div>
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-blue">${_money(payMix.card)}</div><div class="analytics-kpi-label">${t('anCardCollected')}</div><div class="analytics-kpi-sub">${payMix.card+payMix.cash+payMix.unknown>0?Math.round(payMix.card/(payMix.card+payMix.cash+payMix.unknown)*100):0}% ${t('anCardShare')}</div></div>
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-blue">${_money(payMix.card)}</div><div class="analytics-kpi-label">${t('anCardCollected')}</div><div class="analytics-kpi-sub">${payMixAll>0?Math.round(payMix.card/payMixAll*100):0}% ${t('anCardShare')}</div></div>
       ${payMix.online>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-blue">${_money(payMix.online)}</div><div class="analytics-kpi-label">${t('payOnline')}</div></div>`:''}
       ${payMix.wallet>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-blue">${_money(payMix.wallet)}</div><div class="analytics-kpi-label">${t('cwTitle')}</div></div>`:''}
       ${payMix.unknown>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-orange">${_money(payMix.unknown)}</div><div class="analytics-kpi-label an-c-orange">${t('mnyUnknown')}</div></div>`:''}
@@ -70369,13 +70385,19 @@ function _n6cPrepData(sid){
   const wl=all.filter(e=>e.status==='waitlist'&&!_isOwnBike(e)&&resolvedType(e)!=='None').length;
   const need={},noH={},types=new Set();
   rows.forEach(e=>{
-    let ty=resolvedType(e)||'Any';const z=Number(e.height)>0?bikeFit(e.height,ty):(e.size||'');
-    if(z==='Kids')ty='Kids';types.add(ty);
+    let ty=resolvedType(e)||'Any',z=Number(e.height)>0?bikeFit(e.height,ty):(e.size||'');
+    // A Kids bike has no frame size on this sheet and the fleet below keys every one as Kids|Kids: a Kids booking
+    // needs one whatever the height (above KIDS_MAX_CM bikeFit reads Road's chart, XS/S...) or with none typed.
+    if(z==='Kids'||ty==='Kids'){ty='Kids';z='Kids';}
+    types.add(ty);
     if(!z){noH[ty]=(noH[ty]||0)+1;return;}
     const k=ty+'|'+z;need[k]=(need[k]||0)+1;
   });
   const have={},fleet=(S.bikes||[]).filter(b=>b&&!_bkOut(b)&&b.type);
-  fleet.forEach(b=>{const k=b.type+'|'+(b.type==='Kids'?'Kids':(b.size||''));have[k]=(have[k]||0)+1;});
+  fleet.forEach(b=>{const z=b.type==='Kids'?'Kids':(b.size||''),k=b.type+'|'+z;have[k]=(have[k]||0)+1;
+    // Road Carbon has no fleet type of its own (PREMIUM_TIERS): it is ridden on a Road bike, a carbon frame first
+    // (_bestFreeBike), so its cell counts the carbon Road bikes of that size.
+    if(b.type===PREMIUM_TIERS['Road Carbon']&&/carbon/i.test(b.frame_type||'')){const kc='Road Carbon|'+z;have[kc]=(have[kc]||0)+1;}});
   const order=[...types].sort((a,b)=>((N6C_PREP_TYPES.indexOf(a)+1)||99)-((N6C_PREP_TYPES.indexOf(b)+1)||99)||a.localeCompare(b));
   return{n:rows.length,wl,need,noH,have,fleet:fleet.length>0,types:order};
 }
@@ -70383,7 +70405,8 @@ function _n6cPrepOpen(sid){
   const s=_sessGet(sid),m=document.getElementById('confirm-modal');if(!s||!m)return;
   const D=_n6cPrepData(sid),sizes=N6C_PREP_SIZES.filter(z=>D.types.some(ty=>D.need[ty+'|'+z])),anyNoH=D.types.some(ty=>D.noH[ty]);
   const cell=(ty,z)=>{const n=D.need[ty+'|'+z]||0,h=D.have[ty+'|'+z]||0;if(!n)return'<td class="num n6c-0">·</td>';
-    const short=D.fleet&&ty!=='Any'&&h<n;return`<td class="num${short?' n6c-short':''}"><b>${n}</b>${D.fleet&&ty!=='Any'?`<small> / ${h}</small>`:''}</td>`;};
+    // The Road Carbon riders take Road bikes too: the Road bikes of a size must cover both rows.
+    const short=D.fleet&&ty!=='Any'&&h<n+(ty===PREMIUM_TIERS['Road Carbon']?(D.need['Road Carbon|'+z]||0):0);return`<td class="num${short?' n6c-short':''}"><b>${n}</b>${D.fleet&&ty!=='Any'?`<small> / ${h}</small>`:''}</td>`;};
   const tot=ty=>sizes.reduce((a,z)=>a+(D.need[ty+'|'+z]||0),0)+(D.noH[ty]||0);
   const table=D.n?`<div class="n6c-prep-wrap"><table class="n6c-prep"><caption class="sr-only">${esc(t('n6cPrepBtn'))}</caption><thead><tr><th scope="col">${esc(t('filterType'))}</th>${sizes.map(z=>`<th scope="col" class="num">${esc(sizeLabel(z))}</th>`).join('')}${anyNoH?`<th scope="col" class="num">${esc(t('n6cPrepNoH'))}</th>`:''}<th scope="col" class="num">${esc(t('n6cPrepTotal'))}</th></tr></thead>
     <tbody>${D.types.map(ty=>`<tr><th scope="row">${esc(typeLabel(ty))}</th>${sizes.map(z=>cell(ty,z)).join('')}${anyNoH?`<td class="num">${D.noH[ty]||'·'}</td>`:''}<td class="num"><b>${tot(ty)}</b></td></tr>`).join('')}</tbody></table></div>`:_emptyState(t('n6cPrepNone'));
@@ -70614,12 +70637,35 @@ function _modalFocusables(modal){
 // Modals are built with innerHTML, so opening one leaves focus on the trigger (or dumps it on
 // <body>) and a screen reader announces nothing; closing one used to strand focus at the top of
 // the page. Watch for dialogs appearing/disappearing and move focus in, then hand it back.
-let _preModalFocus=null,_modalWasOpen=false;
+// Each dialog on screen, bottom first, keyed by its host (the [data-host] element it is drawn into, else the dialog
+// itself, so a re-render inside the same host is the same dialog), with what had focus before it opened. A single
+// open/closed flag (until 2026-11-11) moved focus only into the first dialog and handed it back only after the last:
+// a confirm opened over the check-in drawer or the cashier never got focus, one swapped in for another (closeConfirm,
+// then the customer form) neither, and closing the top one of two left focus on <body>.
+let _mfStack=[];
+function _mfKey(m){return(m.closest&&m.closest('[data-host]'))||m;}
+function _mfFirst(modal){
+  const f=_modalFocusables(modal);
+  const box=modal.querySelector('[role="dialog"]')||modal.firstElementChild;
+  // prefer a real control; otherwise focus the dialog box itself so it gets announced
+  if(f.length)f[0].focus();
+  else if(box){box.setAttribute('tabindex','-1');box.focus();}
+}
 function _syncModalFocus(){
   const modals=_visibleModals();const modal=modals[modals.length-1];
   try{document.body.classList.toggle('has-modal',!!modal);}catch(e){} // the floating Walk-in button steps aside for any dialog
-  if(modal&&!_modalWasOpen){
-    const ae=document.activeElement;
+  const keys=modals.map(_mfKey);
+  // The dialogs that closed since the last pass: focus goes back to what had it before the lowest of them.
+  let gone=false,back=null;
+  _mfStack=_mfStack.filter(x=>{if(keys.includes(x.k))return true;gone=true;if(!back&&x.back&&document.contains(x.back))back=x.back;return false;});
+  if(!modal){
+    if(back)try{back.focus({preventScroll:true});}catch(e){}
+    return;
+  }
+  const ae=document.activeElement,top=_mfKey(modal),asPage=!!(modal.parentElement&&modal.parentElement.classList.contains('as-page'));
+  const lost=!ae||ae===document.body||!document.contains(ae);
+  if(!_mfStack.some(x=>x.k===top)){
+    // A dialog new on top: the first one, one opened over another, or one swapped in for one that closed.
     // A modal that has already put focus inside itself keeps it (the check-in modal picks
     // Confirm or the bike field; a person may already be typing). This pass is debounced
     // behind every DOM mutation, so under load it used to land late and pull focus back to
@@ -70627,20 +70673,19 @@ function _syncModalFocus(){
     // The sign-in page (the auth box shown as the page, not over one) is left alone too: focus
     // on its first control ringed the "Create account" bar on arrival, as if it were picked. Tab
     // still starts there.
-    if((ae&&modal.contains(ae))||(modal.parentElement&&modal.parentElement.classList.contains('as-page'))){_preModalFocus=null;}
-    else{
-      _preModalFocus=ae&&ae!==document.body?ae:null;
-      const f=_modalFocusables(modal);
-      const box=modal.querySelector('[role="dialog"]')||modal.firstElementChild;
-      // prefer a real control; otherwise focus the dialog box itself so it gets announced
-      if(f.length)f[0].focus();
-      else if(box){box.setAttribute('tabindex','-1');box.focus();}
+    let b=null;
+    if(!((ae&&modal.contains(ae))||asPage)){
+      // A swap took the focused control away with the dialog that closed: the one before that dialog stands in.
+      b=lost?back:ae;
+      _mfFirst(modal);
     }
-  }else if(!modal&&_modalWasOpen){
-    const back=_preModalFocus;_preModalFocus=null;
-    if(back&&document.contains(back))try{back.focus({preventScroll:true});}catch(e){}
+    _mfStack.push({k:top,back:b});
+  }else if(gone&&!(ae&&modal.contains(ae))){
+    // A dialog over this one closed, and focus went with it: back to the control that opened it, else into this one.
+    // Under the sign-in page shown as the page, that control may be in the top bar beside it.
+    if(back&&(asPage||modal.contains(back)))try{back.focus({preventScroll:true});}catch(e){}
+    else if(lost&&!asPage)_mfFirst(modal);
   }
-  _modalWasOpen=!!modal;
 }
 try{
   const _mfo=new MutationObserver(recs=>{

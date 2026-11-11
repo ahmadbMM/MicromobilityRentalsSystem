@@ -9,7 +9,7 @@
 // Hand-written, not generated; the build stamps its address (HUB_V).
 /* global S, sb, esc, _on, getSession, _cssv, shortDate, t, _cuIc, sessionTime, _dayWord, _evName, _evOf, _evKindName, allSessions,
    _isCommunity, _sessPastDay, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
-   _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast */
+   _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard */
 const HUB_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 const HUB_T = {
   err: ['We could not do that. Please try again.', 'تعذّر ذلك. يرجى المحاولة مرة أخرى.', 'Action impossible. Veuillez réessayer.', 'No se pudo hacer. Inténtalo de nuevo.', 'Não foi possível. Tente novamente.', 'یہ نہیں ہو سکا۔ دوبارہ کوشش کریں۔', 'यह नहीं हो सका। फिर कोशिश करें।', 'Hindi ito nagawa. Pakisubukang muli.', 'यो हुन सकेन। फेरि प्रयास गर्नुहोस्।', 'এটি করা যায়নি। আবার চেষ্টা করুন।'],
@@ -118,8 +118,8 @@ async function _hubFetch(force) {
     S._hub = { forId: c.id, at: Date.now(), d };
     _hubSave(c, d);
     if (Array.isArray(d.awarded) && d.awarded.length) _hubCheer(d.awarded);
-  } else if (h && h.forId === c.id && h.d) h.stale = true;
-  else S._hub = { forId: c.id, at: Date.now(), d: null };
+  } else if (h && h.forId === c.id && h.d) { h.stale = true; h.failAt = Date.now(); }
+  else S._hub = { forId: c.id, at: Date.now(), d: null, failAt: Date.now() };
   if (S.custTab === 'members') _hubRender();
 }
 function _hubRetry() { if (S._hub) S._hub.stale = false; _hubRender(); _hubFetch(true); }
@@ -132,11 +132,14 @@ async function _hubCheer(slugs) {
   if (!r || r.error || !Array.isArray(r.data)) return;
   S._bdgMine = { id: c.id, at: Date.now(), busy: false, list: r.data };
   if (!Array.isArray(S._bdgCat) || !S._bdgCat.length) { try { const k = await sb.rpc('badge_catalog'); if (!k.error && Array.isArray(k.data)) S._bdgCat = k.data; } catch (_) {} }
-  const top = slugs[slugs.length - 1], g = r.data.find((x) => x && x.slug === top);
-  try { if (g && g.at) localStorage.setItem('cq_bdg_seen_' + c.id, String(Math.max(Date.parse(g.at) || 0, +localStorage.getItem('cq_bdg_seen_' + c.id) || 0))); } catch (_) {}
+  // Marked seen only when it opens here: a member who left the tab while this read, or another pop-up already up, leaves
+  // it unseen, so Account's own pop (_bdgCelebrate, within its three days) still shows it. It was marked first and lost.
   if (S.custTab !== 'members' || document.getElementById('badge-pop')) return;
+  const top = slugs[slugs.length - 1], g = r.data.find((x) => x && x.slug === top);
   const L = _mrBadgeList(c), i = L.findIndex((x) => (x.b && x.b.slug === top) || (x.lv && x.lv.some((y) => y.b && y.b.slug === top)));
-  if (i >= 0) _mrBadgeInfo(i, true);
+  if (i < 0) return;
+  try { if (g && g.at) localStorage.setItem('cq_bdg_seen_' + c.id, String(Math.max(Date.parse(g.at) || 0, +localStorage.getItem('cq_bdg_seen_' + c.id) || 0))); } catch (_) {}
+  _mrBadgeInfo(i, true);
 }
 
 // ── The page ──────────────────────────────────────────────────────────────────────────────────────
@@ -147,7 +150,8 @@ function _hubRender() {
   if (S._hub && (!c || S._hub.forId !== c.id)) S._hub = null;
   if (!S._hub && c) { const disk = _hubDisk(c); if (disk) S._hub = { forId: c.id, at: disk.at, d: disk.d }; }
   const h = S._hub, d = h && h.d;
-  if (!h || (d && !h.stale && Date.now() - h.at >= 12e4)) _hubFetch();
+  // A failed read (the copy kept and marked stale, or none at all) is tried again two minutes on too, not only by Retry.
+  if (!h || (d && !h.stale && Date.now() - h.at >= 12e4) || ((h.stale || !d) && Date.now() - (h.failAt || 0) >= 12e4)) _hubFetch();
   // Keep the focused control across a repaint (a pick, a slide), found again by what it does.
   const was = document.activeElement && body.contains(document.activeElement) ? document.activeElement.getAttribute('data-on-click') : null;
   if (!d) {
@@ -203,9 +207,15 @@ function _heroHtml(c) {
   return `<div class="hub-hero"><strong class="hub-hero-t">${_hT('noneOpen')}</strong>
     <button type="button" class="btn-primary hub-hero-b" data-on-click="${_on('setCustTab', 'register')}">${_hT('seeAll')}</button></div>`;
 }
-function _hubBook(id) {
+// The way a link to a date opens Reserve (?ev=&session=): the event first (its gates, and a fresh start without the
+// add-ons, locker, promo code, tickets or booking being changed from before), then the date with its own gates (the
+// profile, a rider turned down, the Saturday ride code, the age pop-ups). Setting the date straight skipped them all.
+async function _hubBook(id) {
   const s = _sessGet(id); if (!s) { setCustTab('register'); return; }
-  S.selEvent = _evOf(s); S.selSession = id; S.regStep = 1; setCustTab('register');
+  const ev = _evOf(s);
+  await selectEvent(ev);
+  if (S.selEvent !== ev || S.view !== 'customer' || S.custTab !== 'register') return;
+  await selectSessCard(id);
 }
 function _soonHtml(c) {
   if (!c) return '';
@@ -244,7 +254,11 @@ async function _hubPick(k) {
   let r; try { r = await sb.rpc('hub_pick_level', { ..._hTok(c), p_level: k }); } catch (e) { r = { error: e }; }
   S._hubPicking = false;
   if (!r || r.error || !r.data || r.data.ok !== true) { h.d.me.target = was; if (typeof toast === 'function') toast(_hT('err'), 'error'); _hubRender(); return; }
-  h.d.me.chosen = true; _hubSave(c, h.d); _hubRender();
+  // Onto the copy on screen now: a read that was in flight may have replaced S._hub with one taken before the pick
+  // (the old level, not chosen), and saving the replaced object put that older copy on the phone with a fresh time.
+  const cur = S._hub;
+  if (cur && cur.forId === c.id && cur.d && cur.d.me && cur.d.me.kind === 'level') { cur.d.me.target = k; cur.d.me.chosen = true; _hubSave(c, cur.d); }
+  _hubRender();
 }
 function _seasonHtml(g) {
   const n = Number(g.n) || 0, tg = Number(g.target) || 1, name = _hPick(g, 'name', 'name_ar');
