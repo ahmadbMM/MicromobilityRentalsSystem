@@ -351,6 +351,27 @@ writes (the reports, the receipt) runs under the same policy: its look lives in 
 `0` (clean-css): write `background:transparent none` and `outline:medium none`. A refused style on
 a real screen lands in error_log as `CSP style-src-attr: <the style> at <element> in #<host>`.
 
+## Deleting an account archives it (2026-11-11, migration 20261111200000)
+- The user: "when deleting an account i want you to keep his data archived and all trace and his history to stay
+  under his name". `staff_delete_customer` (same name and answer) archives: `customers.archived_at` set, bookings,
+  sales, wallet, badges, hours, notes all stay linked. The email, Apple address and phone MOVE into
+  `archived_email` / `archived_apple_email` / `archived_phone`, so a new account can take them and nothing that signs
+  in, signs up or matches by email/phone finds the archived row; the token is cleared, push rows, unsent pushes and
+  hand-offs go, its codes stop (`archived_codes`), its tags move into `archived_tags` (deleted as rows, so desks drop
+  them). Accounts merged into it are archived with it (`archived_root`).
+- Staff never see an archived account: the customers policies "staff read"/"staff update" add `archived_at is null`;
+  `staff_sync` (an INVOKER function) leaves them out and lists them as deleted through `_staff_archived_since`; the
+  staff-ref broadcast sends an archive as DELETE and a restore as INSERT. Any query staff run on `customers` simply
+  does not see them, so no client list needs its own filter.
+- Admins: Customers > Accounts header > Archived (`_arcOpen`, a `#mny-modal` dialog): `staff_archived_list`,
+  `staff_archived_account` (history), `staff_restore_customer` (PIN; an email another account took since stays with
+  it, `email_back:false`). The dialog steps aside (`_mnyClose`) before the confirm and the PIN, which draw lower.
+- Never delete an account row: the "admin delete" policy is gone and `customers_no_delete` refuses a delete from the
+  app (the SQL editor and service role are not stopped). `queue_archived_guard` refuses a booking for an archived
+  account; merge/unmerge refuse it (`ARCHIVED`); the token checks refuse it even if staff set a temp password.
+- The rider's "Request account deletion" wording is unchanged (the user's pick); the Privacy Notice's "Account and
+  profile" line says the closed account is kept under their name. `tests/account-archive.spec.ts`.
+
 ## No Google or Apple sign-in (2026-11-09)
 
 The owner: "i don't want to have any google or apple sign in anymore" (Create account lost them on

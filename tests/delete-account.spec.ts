@@ -1,11 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// Staff can delete a customer account. What goes is the login and everything personal hanging
-// off it; what stays is the riding record, name and all, so rosters, close-outs and analytics
-// read exactly as they did. The order matters more than it looks: queue_entries.customer_id is
-// a real foreign key, so the bookings have to be unlinked BEFORE the account row goes, or
-// Postgres refuses the delete and the staffer is left with a half-deleted account.
+// Staff can delete a customer account. Since 2026-11-11 (migration 20261111200000) the server archives it
+// instead: the row, its bookings, sales and history stay under the rider's name, the login and the sign-in
+// addresses go into the archive, and an admin can restore it (tests/account-archive.spec.ts).
 //
 // staff_delete_customer (migration 20260922150000) does all of it in one transaction on the
 // server, with the operator's approval since 20261004120000; the device-side steps a database
