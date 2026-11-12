@@ -1519,7 +1519,7 @@ async function buildPkpass(b, cfg) {
   const meetHeld = !!_revealAhead(sess) && !/^https:\/\//.test(String(sess && sess.meet_url || ""));
   const meetUrl = meetHeld ? "" : _meetUrl(sess);
   const _away = _loc ? _loc.toUpperCase() !== "JCC" : ride === "runher";
-  const place = meetHeld ? null : _meetPlace(sess, bikeRide, _away);
+  const place = _meetCoords(sess, bikeRide) || (meetHeld ? null : _meetPlace(sess, bikeRide, _away));
   const pass = {
     formatVersion: 1,
     passTypeIdentifier: cfg.passTypeId,
@@ -1534,6 +1534,9 @@ async function buildPkpass(b, cfg) {
     // Surface on the lock screen when bikes start going out, and expire when the night ends:
     // an expired pass leaves the stack and files itself away on its own.
     ...dates ? { relevantDate: dates.collect || dates.start, expirationDate: dates.end } : {},
+    // iOS 18 reads a window instead (relevantDates; the single date is reported deprecated from 18.1): from the gather
+    // time, or the bike collection, to the end. Older iOS ignores it and keeps relevantDate.
+    ..._relevantDates(dates && (dates.collect || dates.start), dates && dates.end),
     ...dead ? { voided: true } : {},
     barcodes: [{ format: "PKBarcodeFormatQR", message: barcodeMsg, messageEncoding: "iso-8859-1", altText: numsDisplay }],
     // keep the legacy single-barcode field too for older iOS
@@ -1695,6 +1698,7 @@ async function buildPetrominPkpass(r, cfg) {
     labelColor: skin.label,
     sharingProhibited: true,
     ...start ? { relevantDate: collectAt || start } : {},
+    ..._relevantDates(collectAt || start, end),
     ...end ? { expirationDate: end } : {},
     barcodes: [{ format: "PKBarcodeFormatQR", message: code, messageEncoding: "iso-8859-1", altText: no }],
     barcode: { format: "PKBarcodeFormatQR", message: code, messageEncoding: "iso-8859-1", altText: no },
@@ -1778,6 +1782,17 @@ function _meetPlace(sess, bikeRide = true, away = false) {
   const lat = +m[1], lng = +m[2];
   if (!(Math.abs(lat) <= 90 && Math.abs(lng) <= 180)) return null;
   return { lat, lng, text: bikeRide ? "Your ride's meeting point is nearby" : "Your meeting point is nearby" };
+}
+function _meetCoords(sess, bikeRide = true) {
+  if (!sess || sess.meet_lat == null || sess.meet_lng == null || sess.meet_lat === "" || sess.meet_lng === "") return null;
+  const lat = Number(sess.meet_lat), lng = Number(sess.meet_lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180 || lat === 0 && lng === 0) return null;
+  const name = String(sess.meet_name || "").replace(/\s+/g, " ").trim().slice(0, 80);
+  return { lat, lng, text: name || (bikeRide ? "Your ride's meeting point is nearby" : "Your meeting point is nearby") };
+}
+function _relevantDates(from, to) {
+  const a = Date.parse(from || ""), b = Date.parse(to || "");
+  return Number.isFinite(a) && Number.isFinite(b) && b > a ? { relevantDates: [{ startDate: from, endDate: to }] } : {};
 }
 function _attr(s) {
   return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

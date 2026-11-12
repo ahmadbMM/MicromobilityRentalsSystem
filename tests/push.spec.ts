@@ -25,8 +25,9 @@ test.describe('push is dormant until it is configured', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
-    await expect(page.getByText(/Turn on notifications/i)).toHaveCount(0);
+    await page.evaluate(`setCustTab('account');_accOpen('notifications')`);
+    await expect(page.locator('#acc-push')).toHaveCount(0); // the two switches (2026-11-13), not drawn at all
+    await expect(page.locator('#pp-rides, #pp-community')).toHaveCount(0);
   });
 });
 

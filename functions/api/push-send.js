@@ -33,7 +33,7 @@ export async function onRequestPost(context) {
   // The database's own notifications (push_outbox, rentals 20261108180000: a referral's free ride and its last week),
   // asked for by its pg_cron job. No token: a caller can only make what is already queued go out sooner.
   if (body && body.drain === true) return drain(request, env, PUB, PRIV, SERVICE);
-  const { staffToken, customerId, title, message, url, tag } = body || {};
+  const { staffToken, customerId, title, message, url, tag, lang } = body || {};
   if (!staffToken || !customerId || !title) return json({ ok: false, error: 'missing fields' }, 400);
 
   const SUPA = env.SUPABASE_URL || 'https://qpffkzmsfyilicwcsszz.supabase.co';
@@ -101,12 +101,7 @@ export async function onRequestPost(context) {
     if (id != null) await fetch(`${SUPA}/rest/v1/staff_actions?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` } }).catch(() => {}); // fire-and-forget: a row left behind only counts against this account
     return Number.isFinite(usedNow) ? json({ ok: false, error: 'rate limited', limit: PUSH_LIMIT, minutes: PUSH_WINDOW_MIN }, 429) : json({ ok: false, error: 'rate check failed' }, 503);
   }
-  const payload = JSON.stringify({
-    title: String(title).slice(0, 120),
-    body: String(message || '').slice(0, 300),
-    url: safeUrl(url, origin),
-    tag: String(tag || 'mm-general').replace(/[^\w.:-]/g, '').slice(0, 64) || 'mm-general',
-  });
+  const payload = payloadFor({ title, body: message, url, tag, lang }, origin);
 
   const results = await Promise.all(subs.map((s) => sendOne(s, payload, PUB, PRIV, env)));
   const sent = results.filter((r) => r.ok).length;
@@ -131,6 +126,8 @@ export async function onRequestPost(context) {
 // its browsers' read and its outcome, plus a send and at most a removal per browser. A row cut off half way kept
 // sent_at and 'sending' for good and was never sent (bug hunt 2026-11-10), so a row is only claimed while there is
 // room for it, and one that cannot go after all is given back (sent_at empty again) for the next drain.
+// The rows are read whole (select=*): the queue's own columns (cat, lang) arrive without this file naming them, and a
+// database without them still answers.
 const DRAIN_MAX = 15;          // 1 + 15 x 3 = 46: a batch of riders without browsers fits one call
 const DRAIN_SUBREQ_MAX = 48;
 const STALE_MS = 3 * 864e5;
@@ -139,7 +136,7 @@ async function drain(request, env, PUB, PRIV, SERVICE) {
   const H = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
   let sub = 0; // the subrequests this call has made (DRAIN_SUBREQ_MAX)
   const call = (url, init) => { sub++; return fetch(url, init); };
-  const listRes = await call(`${SUPA}/rest/v1/push_outbox?sent_at=is.null&order=id.asc&limit=${DRAIN_MAX}&select=id,customer_id,tag,title,body,url,created_at`, { headers: H });
+  const listRes = await call(`${SUPA}/rest/v1/push_outbox?sent_at=is.null&order=id.asc&limit=${DRAIN_MAX}&select=*`, { headers: H });
   if (!listRes.ok) return json({ ok: false, error: 'lookup failed' }, 502);
   const rows = await listRes.json().catch(() => []);
   const origin = new URL(request.url).origin;
@@ -167,10 +164,7 @@ async function drain(request, env, PUB, PRIV, SERVICE) {
       if (!subs.length) result = 'no subscriptions';
       else {
         const to = subs.slice(0, room); // first in a call it always fits: customer_push_subscribe keeps 21 browsers at most
-        const payload = JSON.stringify({
-          title: String(m.title || '').slice(0, 120), body: String(m.body || '').slice(0, 300), url: safeUrl(m.url, origin),
-          tag: String(m.tag || 'mm-general').replace(/[^\w.:-]/g, '').slice(0, 64) || 'mm-general',
-        });
+        const payload = payloadFor(m, origin); // m.lang: the member's language, where the queue keeps it
         sub += to.length; // sendOne makes at most one request per browser
         const results = await Promise.all(to.map((s) => sendOne(s, payload, PUB, PRIV, env)));
         const ok = results.filter((r) => r.ok).length;
@@ -185,6 +179,38 @@ async function drain(request, env, PUB, PRIV, SERVICE) {
     done++;
   }
   return json({ ok: true, drained: done, sent });
+}
+
+// One payload for every browser (R18, 2026-11-13), in the Declarative Web Push shape: {"web_push": 8030, "notification":
+// {title, body, navigate, lang, dir, tag}}. Safari from 18.4 (iOS and macOS) shows it itself, so a push the service worker
+// failed to show never costs the site its permission there, and a tap opens `navigate`, which must be an absolute address.
+// Every other browser, and an older Safari, hands the same JSON to service-worker.js, which reads it as well as the old
+// {title, body, url, tag}. lang comes with the row or the staff call; without one, Arabic or Urdu script says so, and
+// anything else is left to the browser (dir auto).
+const PUSH_LANGS = new Set(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']);
+function pushLang(lang, text) {
+  const l = String(lang || '').toLowerCase().slice(0, 2);
+  if (PUSH_LANGS.has(l)) return l;
+  const s = String(text || '');
+  if (/[\u0600-\u06FF]/.test(s)) return /[\u0679\u0688\u0691\u06BA\u06BE\u06C1\u06D2]/.test(s) ? 'ur' : 'ar';
+  if (/[\u0980-\u09FF]/.test(s)) return 'bn';
+  return '';
+}
+function payloadFor(m, origin) {
+  const title = String((m && m.title) || '').slice(0, 120) || 'MicroMobility';
+  const body = String((m && m.body) || '').slice(0, 300);
+  const lang = pushLang(m && m.lang, `${title} ${body}`);
+  let navigate;
+  try { navigate = new URL(safeUrl(m && m.url, origin), origin + '/').href; } catch { navigate = String(origin) + '/'; }
+  return JSON.stringify({
+    web_push: 8030,
+    notification: {
+      title, body, navigate,
+      tag: String((m && m.tag) || 'mm-general').replace(/[^\w.:-]/g, '').slice(0, 64) || 'mm-general',
+      ...lang ? { lang } : {},
+      dir: lang ? (lang === 'ar' || lang === 'ur' ? 'rtl' : 'ltr') : 'auto',
+    },
+  });
 }
 
 // Where a notification may lead: an address on this site only, at most 500 characters - the

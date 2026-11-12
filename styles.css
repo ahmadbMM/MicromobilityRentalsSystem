@@ -9414,6 +9414,15 @@ body:not(.view-staff) .bk-ok-q b{font-size:40px;line-height:1.1;font-weight:700;
 body:not(.view-staff) .bk-ok-sub{margin:4px 0 0;max-width:44ch;font-size:var(--fs-13);line-height:1.5;color:var(--ink-2);}
 body:not(.view-staff) .bk-ok-btns{display:grid;gap:8px;width:100%;max-width:380px;margin-top:10px;}
 body:not(.view-staff) .bk-ok-btns :is(.btn-primary,.btn-wallet,.wallet-slot){width:100%;}
+/* "Remind me" under the booked moment's buttons (R17, 2026-11-13), its Add to Home Screen steps, and Account's two switches (R16) */
+body:not(.view-staff) .bk-rm{display:grid;width:100%;max-width:380px;}
+body:not(.view-staff) :is(.bk-rm,.pp-card)[hidden]{display:none;}
+body:not(.view-staff) .bk-rm-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;}
+body:not(.view-staff) .bk-rm-on{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;font-size:var(--fs-15);font-weight:600;color:var(--go);}
+body:not(.view-staff) .pi-steps{list-style:none;display:grid;gap:10px;margin:16px 0;padding:0;counter-reset:pi;}
+body:not(.view-staff) .pi-steps li{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 14px;border-radius:var(--r-ctl);background:var(--card);box-shadow:var(--pl-1);counter-increment:pi;font-size:var(--fs-15);font-weight:600;line-height:1.35;color:var(--ink);}
+body:not(.view-staff) .pi-steps li::before{content:counter(pi);flex:none;width:20px;font-variant-numeric:tabular-nums;color:var(--ink-2);text-align:center;}
+body:not(.view-staff) .pi-ic{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:10px;background:var(--go-wash);color:var(--go);}
 body:not(.view-staff) #tab-register .ticket-card{scroll-margin-top:calc(var(--topbar-h,64px) + 12px);}
 
 /* ── Reason dialogs: one list of real radios, nothing picked, the answers stacked ── */

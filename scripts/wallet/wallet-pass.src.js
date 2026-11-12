@@ -267,7 +267,8 @@ async function buildPkpass(b, cfg) {
   const meetUrl = meetHeld ? "" : _meetUrl(sess);
   // where the session meets, read as the app's _sessLoc reads it (an unplaced Run for Her meets at the JYC)
   const _away = _loc ? _loc.toUpperCase() !== "JCC" : ride === "runher";
-  const place = meetHeld ? null : _meetPlace(sess, bikeRide, _away);
+  // A meeting point staff placed on the map (sessions.meet_lat / meet_lng, 2026-11-13) is the place, named by meet_name.
+  const place = _meetCoords(sess, bikeRide) || (meetHeld ? null : _meetPlace(sess, bikeRide, _away));
   const pass = {
     formatVersion: 1,
     passTypeIdentifier: cfg.passTypeId,
@@ -282,6 +283,9 @@ async function buildPkpass(b, cfg) {
     // Surface on the lock screen when bikes start going out, and expire when the night ends:
     // an expired pass leaves the stack and files itself away on its own.
     ...dates ? { relevantDate: dates.collect || dates.start, expirationDate: dates.end } : {},
+    // iOS 18 reads a window instead (relevantDates; the single date is reported deprecated from 18.1): from the gather
+    // time, or the bike collection, to the end. Older iOS ignores it and keeps relevantDate.
+    ..._relevantDates(dates && (dates.collect || dates.start), dates && dates.end),
     ...dead ? { voided: true } : {},
     barcodes: [{ format: "PKBarcodeFormatQR", message: barcodeMsg, messageEncoding: "iso-8859-1", altText: numsDisplay }],
     // keep the legacy single-barcode field too for older iOS
@@ -462,6 +466,7 @@ async function buildPetrominPkpass(r, cfg) {
     labelColor: skin.label,
     sharingProhibited: true,
     ...start ? { relevantDate: collectAt || start } : {},
+    ..._relevantDates(collectAt || start, end),
     ...end ? { expirationDate: end } : {},
     barcodes: [{ format: "PKBarcodeFormatQR", message: code, messageEncoding: "iso-8859-1", altText: no }],
     barcode: { format: "PKBarcodeFormatQR", message: code, messageEncoding: "iso-8859-1", altText: no },
@@ -552,6 +557,20 @@ function _meetPlace(sess, bikeRide = true, away = false) {
   const lat = +m[1], lng = +m[2];
   if (!(Math.abs(lat) <= 90 && Math.abs(lng) <= 180)) return null;
   return { lat, lng, text: bikeRide ? "Your ride's meeting point is nearby" : "Your meeting point is nearby" };
+}
+// The point staff set on the map for where the session meets (sessions.meet_lat / meet_lng, both or neither, 2026-11-13),
+// with its name (meet_name) as the Lock Screen text; null when it has none, and the link is read as before.
+function _meetCoords(sess, bikeRide = true) {
+  if (!sess || sess.meet_lat == null || sess.meet_lng == null || sess.meet_lat === "" || sess.meet_lng === "") return null;
+  const lat = Number(sess.meet_lat), lng = Number(sess.meet_lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180 || (lat === 0 && lng === 0)) return null;
+  const name = String(sess.meet_name || "").replace(/\s+/g, " ").trim().slice(0, 80);
+  return { lat, lng, text: name || (bikeRide ? "Your ride's meeting point is nearby" : "Your meeting point is nearby") };
+}
+// relevantDates (iOS 18): one window, written with its offset ("2026-09-23T20:15:00+03:00"), only when it runs forward.
+function _relevantDates(from, to) {
+  const a = Date.parse(from || ""), b = Date.parse(to || "");
+  return Number.isFinite(a) && Number.isFinite(b) && b > a ? { relevantDates: [{ startDate: from, endDate: to }] } : {};
 }
 function _attr(s) {
   return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

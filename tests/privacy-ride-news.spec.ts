@@ -9,7 +9,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/s
 // Staff can switch ride news OFF (a rider's STOP), never on.
 
 const JSON_HDR = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
-const VERSION = '2026-11-13'; // the answers sent on micromobility.sa/ask (others never see who sent one, staff do); 2026-11-11: for volunteers: what a team lead sees, the public certificate check page, staff-only ratings and motive; an under-18 community applicant's parent or guardian, the form's anonymous counts, ride news by WhatsApp only, no Apple or Google sign-in; nobody is asked again
+const VERSION = '2026-11-13'; // the answers sent on micromobility.sa/ask (others never see who sent one, staff do) and notifications with their two switches; 2026-11-11: for volunteers: what a team lead sees, the public certificate check page, staff-only ratings and motive; an under-18 community applicant's parent or guardian, the form's anonymous counts, ride news by WhatsApp only, no Apple or Google sign-in; nobody is asked again
 
 /** Answers an RPC and records every body sent to it. */
 async function captureRpc(page: Page, fn: string, answer: (body: Record<string, unknown>) => unknown) {

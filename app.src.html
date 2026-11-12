@@ -1214,7 +1214,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   noOtherTypes:'No other types available either.',
   noBikesForType:'No {0} bikes in the fleet.',
   doneSessChip:'done',activeSessChip:'on bike',
-  colContact:'Contact',callLabel:'Call',waYourTurnMsg:'Hello! Your turn at MicroMobility is coming up soon. Please head to the booth.\n\nمرحباً! اقترب دورك في مايكروموبيليتي. يرجى التوجه إلى الكشك.',pushTitle:'Notifications',pushSub:'Get told the moment a spot opens up for you, even when this page is closed.',pushEnableBtn:'Turn on notifications',pushDisableBtn:'Turn off notifications',pushOnToast:'Notifications are on.',pushOffToast:'Notifications are off.',pushBlockedMsg:'Notifications are blocked for this site in your browser settings.',pushFailedMsg:'Could not turn notifications on.',pushPromotedTitle:'A spot opened up',pushPromotedBody:'You’re off the waitlist: booking #{0} is confirmed. See you at the booth.',
+  colContact:'Contact',callLabel:'Call',waYourTurnMsg:'Hello! Your turn at MicroMobility is coming up soon. Please head to the booth.\n\nمرحباً! اقترب دورك في مايكروموبيليتي. يرجى التوجه إلى الكشك.',pushTitle:'Notifications',pushRides:'My rides',pushComm:'Community',pushRemindBtn:'Remind me',pushRemindOn:'Reminder on',pushIosTitle:'Add the app to your Home Screen',pushIosStep1:'Tap Share',pushIosStep2:'Add to Home Screen',pushIosStep3:'Open it from your Home Screen',pushBlockedMsg:'Notifications are blocked for this site in your browser settings.',pushFailedMsg:'Could not turn notifications on.',pushPromotedTitle:'A spot opened up',pushPromotedBody:'You’re off the waitlist: booking #{0} is confirmed. See you at the booth.',
   colPrice:'Price',
   colHeight:'Height',colDuration:'Duration',
   anDurationSection:'Ride duration',anAvgDuration:'Avg duration',anLongestRide:'Longest ride',anShortestRide:'Shortest ride',anDurRidesTracked:'rides tracked',
@@ -1883,7 +1883,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   noOtherTypes:'لا توجد أنواع أخرى متاحة.',
   noBikesForType:'لا توجد دراجات من نوع {0} في الأسطول.',
   doneSessChip:'منتهٍ',activeSessChip:'على الدراجة',
-  colContact:'تواصل',callLabel:'اتصال',waYourTurnMsg:'Hello! Your turn at MicroMobility is coming up soon. Please head to the booth.\n\nمرحباً! اقترب دورك في مايكروموبيليتي. يرجى التوجه إلى الكشك.',pushTitle:'الإشعارات',pushSub:'نُعلمك فور توفّر مكان لك، حتى لو كانت الصفحة مغلقة.',pushEnableBtn:'تفعيل الإشعارات',pushDisableBtn:'إيقاف الإشعارات',pushOnToast:'تم تفعيل الإشعارات.',pushOffToast:'تم إيقاف الإشعارات.',pushBlockedMsg:'الإشعارات محظورة لهذا الموقع في إعدادات متصفحك.',pushFailedMsg:'تعذّر تفعيل الإشعارات.',pushPromotedTitle:'توفّر مكان',pushPromotedBody:'خرجت من قائمة الانتظار - تم تأكيد الحجز رقم {0}. نراك في الكشك.',
+  colContact:'تواصل',callLabel:'اتصال',waYourTurnMsg:'Hello! Your turn at MicroMobility is coming up soon. Please head to the booth.\n\nمرحباً! اقترب دورك في مايكروموبيليتي. يرجى التوجه إلى الكشك.',pushTitle:'الإشعارات',pushRides:'رحلاتي',pushComm:'المجتمع',pushRemindBtn:'ذكّرني',pushRemindOn:'التذكير مفعّل',pushIosTitle:'أضف التطبيق إلى الشاشة الرئيسية',pushIosStep1:'اضغط مشاركة',pushIosStep2:'إضافة إلى الشاشة الرئيسية',pushIosStep3:'افتحه من الشاشة الرئيسية',pushBlockedMsg:'الإشعارات محظورة لهذا الموقع في إعدادات متصفحك.',pushFailedMsg:'تعذّر تفعيل الإشعارات.',pushPromotedTitle:'توفّر مكان',pushPromotedBody:'خرجت من قائمة الانتظار - تم تأكيد الحجز رقم {0}. نراك في الكشك.',
   colPrice:'السعر',
   colHeight:'الطول',colDuration:'المدة',
   anDurationSection:'مدة الركوب',anAvgDuration:'متوسط المدة',anLongestRide:'أطول جولة',anShortestRide:'أقصر جولة',anDurRidesTracked:'جولات مرصودة',
@@ -4867,7 +4867,8 @@ const PRIVACY_VERSION='2026-11-13';
 // news by WhatsApp only, the Apple and Google sign-in lines gone, that sign-in having ended 2026-11-09, and a deleted account
 // closed and kept, archived under the rider's name, its email free for a new account; the same day, the referral row: no
 // reward since 2026-11-10, one already given honoured until it expires; 2026-11-13: the answers sent on
-// micromobility.sa/ask, only by those who choose to answer: others never see who sent one, staff do) moves PRIVACY_VERSION,
+// micromobility.sa/ask, only by those who choose to answer: others never see who sent one, staff do; the same day,
+// notifications, the My rides and Community switches and their consent record, always optional) moves PRIVACY_VERSION,
 // the date shown, but not this one;
 // an account that confirmed this version or any later one is not asked again.
 const PRIVACY_ASK_FROM='2026-10-02';
@@ -4906,6 +4907,7 @@ en:[
     ['Badge requests: the badge you ask for, your comment and the proof you attach (a picture or a PDF), and our team’s answer','Always optional: only if you ask for a badge from your account page. Seen by you (except the proof, once sent) and our staff.','Deciding whether to give you the badge. The proof is deleted as soon as our team answers.'],
     ['Bookings and rides: rides booked, when you booked, your party, check-in and return times, bike used, payments, add-ons, waiver agreement, ratings','Created as you use the service','Running your rides, safety, payments and records'],
     ['Your choice about ride news, and when you made it','Recorded when you choose','Knowing whether we may send you ride news'],
+    ['Notifications on your phone or computer: your two switches, My rides (reminders, changes to rides you booked, waitlist places) and Community (a new challenge, the Saturday recap), when and on which device you set them, the words shown and this notice’s version, and the address your browser gives us to reach it','Always optional: only if you turn notifications on, in Account or with Remind me after a booking. Each switch turns off there as easily, and turning both off deletes that address.','Sending the notifications you chose and keeping proof of your choice. Each message passes, encrypted, through your browser’s own notification service, outside Saudi Arabia.'],
   ]}},
   {h:'How we collect it'},
   {ul:[
@@ -5023,6 +5025,7 @@ ar:[
     ['طلبات الأوسمة: الوسام الذي تطلبه، وتعليقك، والإثبات الذي ترفقه (صورة أو ملف PDF)، وردّ فريقنا','اختيارية دائمًا: فقط إذا طلبت وسامًا من صفحة حسابك. يراها أنت (عدا الإثبات بعد إرساله) وموظفونا.','تحديد ما إذا كنا سنمنحك الوسام. ويُحذف الإثبات فور ردّ فريقنا.'],
     ['الحجوزات والرحلات: الرحلات المحجوزة، ووقت الحجز، ومرافقوك، وأوقات تسجيل الوصول والإرجاع، والدراجة المستخدمة، والمدفوعات، والإضافات، والموافقة على الإقرار، والتقييمات','تُسجَّل أثناء استخدامك للخدمة','تشغيل رحلاتك، والسلامة، والمدفوعات، والسجلات'],
     ['اختيارك بشأن أخبار الرحلات ووقت اختيارك','يُسجَّل عند اختيارك','معرفة ما إذا كان يحق لنا إرسال أخبار الرحلات إليك'],
+    ['الإشعارات على هاتفك أو حاسوبك: مفتاحاك، رحلاتي (التذكيرات، والتغييرات على الرحلات التي حجزتها، والأماكن من قائمة الانتظار) والمجتمع (تحدٍّ جديد، وملخص السبت)، ومتى ضبطتهما وعلى أي جهاز، والكلمات المعروضة، وإصدار هذا الإشعار، والعنوان الذي يعطينا إياه متصفحك للوصول إليه','اختيارية دائمًا: فقط إذا فعّلت الإشعارات، من الحساب أو بزر ذكّرني بعد الحجز. ويُطفأ كل مفتاح من هناك بالسهولة نفسها، وإطفاء الاثنين يحذف ذلك العنوان.','إرسال الإشعارات التي اخترتها والاحتفاظ بإثبات اختيارك. تمر كل رسالة مشفّرةً عبر خدمة الإشعارات الخاصة بمتصفحك، خارج المملكة العربية السعودية.'],
   ]}},
   {h:'كيف نجمعها'},
   {ul:[
@@ -7000,6 +7003,7 @@ async function toggleRideNews(){
 async function _consentCheck(cust){
   _pwdMustCheck(cust); // every place that checks consent also checks for a temporary password to replace
   _commAskCheck(cust); // and a community member's birth date and nationality, and a password for an account with none
+  _pushCheck(cust); // and this browser's push subscription, where this account turned push on (R18)
   if(!cust||!cust.session_token||S._rnFetchedFor===cust.id)return;
   S._rnFetchedFor=cust.id;
   try{await _sbReady;}catch(e){}
@@ -7549,6 +7553,8 @@ async function doLogin(){
 
 function doLogout(silent){
   // No device log entry (2026-10-05): it kept the rider's name on a shared tablet, where the next person's History > Log showed it.
+  // A browser this account turned push on in stops getting its notifications (2026-11-13): the next person on it must not.
+  {const pc=S.loggedIn||getSession();if(pc&&pushEnabled())pushUnsubscribe(pc).catch(()=>{});S._pp=null;S._pcFor=null;S._rmDone=null;S._ppErr='';}
   S.loggedIn=null;clearSession();S._commAccess=null;
   S._pwdCheckedFor=null;_pwdMustClose();
   // The once-per-account reads start over (2026-10-07): the same account signing in again on this page
@@ -19376,6 +19382,7 @@ function _bkOkHtml(tks,wl,appr,nc){
     ${wl?'':_bkHubHtml(s)}
     ${sub?`<p class="bk-ok-sub">${sub}</p>`:''}
     <div class="bk-ok-btns"><button type="button" class="btn-primary" data-on-click="${_on('_bkOkShow')}">${t('tkShowTicket')}</button>${wal}</div>
+    ${_bkRemindHtml() /* "Remind me" (R17), its own wrapper */}
   </section>`;
 }
 // A booking made with no signal waits in this phone's outbox until the server has it (_bookOutboxFlush): until then it is
@@ -26370,19 +26377,7 @@ function renderAccount(){
         <div class="cu-card-foot">${_privacyLink()}</div>
       </div>`;
     })()}
-    ${(()=>{
-      // Notifications. Hidden entirely until a VAPID key is configured, and on browsers
-      // without push — an inert toggle is worse than none.
-      if(!pushSupported())return'';
-      const on=pushEnabled(),blocked=pushPermission()==='denied';
-      return`<div class="form-section cu-card640">
-        <h2 class="form-title cu-mb6">${t('pushTitle')}</h2>
-        <div class="cu-card-sub12">${t('pushSub')}</div>
-        ${blocked
-          ?`<div class="cu-push-blocked">${t('pushBlockedMsg')}</div>`
-          :`<button class="${on?'btn-secondary':'btn-primary'}" data-on-click="${_on("togglePush")}">${on?t('pushDisableBtn'):t('pushEnableBtn')}</button>`}
-      </div>`;
-    })()}
+    ${_ppHostHtml(cust) /* Notifications: My rides and Community (R16). Hidden until a VAPID key is configured, on browsers without push, and until the account's switches are read - an inert switch is worse than none */}
 `)}
     ${page('delete',`
     ${(()=>{
@@ -27731,6 +27726,10 @@ const _CU={
   cup:'<path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M6 2v2M10 2v2M14 2v2"/>',
   lotus:'<path d="M12 4.6c-2.1 2.8-2.1 7 0 10.4 2.1-3.4 2.1-7.6 0-10.4z"/><path d="M12 15c-1.5-3.3-4.4-5.1-7.8-5.1.2 3.7 3.4 5.6 7.8 5.1zM12 15c1.5-3.3 4.4-5.1 7.8-5.1-.2 3.7-3.4 5.6-7.8 5.1z"/><path d="M4.6 18.6h14.8"/>', // yoga (2026-11-12)
   run:'<circle cx="14.9" cy="4.6" r="1.9"/><path d="M13.9 8.1l-2.5 4.9 3 2.4-.9 4.9M11.4 13l-3 1.6-2.6-1.2M13.6 8.6l-3.1.7-1.6 2.1M13.6 8.6l2.6 2.4 2.6-.6"/>',
+  // the Add to Home Screen steps for "Remind me" in a Safari tab (2026-11-13): Share, Add to Home Screen, the app on the Home Screen
+  share:'<path d="M8.4 8.6H6.6A1.6 1.6 0 0 0 5 10.2v8.8a1.6 1.6 0 0 0 1.6 1.6h10.8a1.6 1.6 0 0 0 1.6-1.6v-8.8a1.6 1.6 0 0 0-1.6-1.6h-1.8M12 14.2V3.4M8.6 6.6L12 3.2l3.4 3.4"/>',
+  addSq:'<rect x="3.8" y="3.8" width="16.4" height="16.4" rx="3.4"/><path d="M12 8.2v7.6M8.2 12h7.6"/>',
+  appHome:'<rect x="6.4" y="2.8" width="11.2" height="18.4" rx="2.4"/><rect x="9.4" y="7.6" width="5.2" height="5.2" rx="1.3"/><path d="M10.8 18.2h2.4"/>',
 };
 // Each ride kind wears a drawn glyph beside its name (the chip was a dot of colour alone).
 const KIND_IC={saturday:'people',petromin:'stripes',event:'ticket',workshop:'clock',swim:'wave',snd96:'flag',jcc:'bike',runher:'run',vlap:'flag',arena:'flag',defe5k:'run',blood:'ticket',yoga:'lotus'};
@@ -43873,12 +43872,14 @@ async function pushSubscribe(silent){
   const c=S.loggedIn||getSession();
   if(!c||!c.session_token)return false;
   try{
+    // The first await: iOS and Safari answer a permission request only from inside the tap that asked.
     if(!silent&&Notification.permission==='default'){
       const p=await Notification.requestPermission();
       if(p!=='granted')return false;
     }
     if(Notification.permission!=='granted')return false;
-    const reg=await navigator.serviceWorker.ready;
+    const reg=await _pushReg();
+    if(!reg)return false;
     let sub=await reg.pushManager.getSubscription();
     if(!sub){
       sub=await reg.pushManager.subscribe({
@@ -43894,36 +43895,225 @@ async function pushSubscribe(silent){
       p_ua:(navigator.userAgent||'').slice(0,200),
     });
     if(error||data===false)return false;
-    try{localStorage.setItem('cq_push','1');}catch(e){}
+    // a subscription the push service moved: the old address goes from the server too
+    const was=_pushMark();
+    if(was&&was.id===c.id&&was.ep&&was.ep!==sub.endpoint)Promise.resolve(sb.rpc('customer_push_unsubscribe',{p_id:c.id,p_token:c.session_token,p_endpoint:was.ep})).catch(()=>{});
+    _pushMarkSet(c.id,sub.endpoint);
     return true;
   }catch(e){console.warn('push subscribe failed',e);return false;}
 }
-async function pushUnsubscribe(){
-  if(!pushSupported())return;
-  const c=S.loggedIn||getSession();
-  try{
-    const reg=await navigator.serviceWorker.ready;
-    const sub=await reg.pushManager.getSubscription();
-    if(sub){
-      // Tell the server first: dropping the local subscription while the row survives
-      // leaves the sender pushing into a dead endpoint until it 410s.
-      if(c&&c.session_token)await sb.rpc('customer_push_unsubscribe',{p_id:c.id,p_token:c.session_token,p_endpoint:sub.endpoint});
-      await sub.unsubscribe();
-    }
-  }catch(e){console.warn('push unsubscribe failed',e);}
-  try{localStorage.setItem('cq_push','0');}catch(e){}
+// The service worker's registration, or null when it never comes (a browser that blocks it): ready never settles there.
+function _pushReg(){
+  try{return Promise.race([navigator.serviceWorker.ready,new Promise(r=>setTimeout(()=>r(null),5000))]).catch(()=>null);}catch(e){return Promise.resolve(null);}
 }
+// The account this browser's subscription was made for, and its address ({id, ep}): a shared phone's next account never
+// inherits it, and an address that changed is told from the one registered (localStorage cq_push_ep).
+function _pushMark(){try{const o=JSON.parse(localStorage.getItem('cq_push_ep')||'null');return o&&typeof o.id==='string'?o:null;}catch(e){return null;}}
+function _pushMarkSet(id,ep){try{if(id)localStorage.setItem('cq_push_ep',JSON.stringify({id,ep:String(ep||'')}));else localStorage.removeItem('cq_push_ep');}catch(e){}}
+/** This browser stops: the server forgets its address first (a row left behind is pushed into until it 410s). */
+async function pushUnsubscribe(cust){
+  const c=cust||S.loggedIn||getSession(),m=_pushMark();
+  let sub=null;
+  try{if(pushSupported()){const reg=await _pushReg();sub=reg?await reg.pushManager.getSubscription():null;}}catch(e){sub=null;}
+  const eps=[...new Set([sub&&sub.endpoint,m&&c&&m.id===c.id?m.ep:''].filter(Boolean))];
+  if(c&&c.session_token)for(const ep of eps){try{await sb.rpc('customer_push_unsubscribe',{p_id:c.id,p_token:c.session_token,p_endpoint:ep});}catch(e){}}
+  try{if(sub)await sub.unsubscribe();}catch(e){console.warn('push unsubscribe failed',e);}
+  _pushMarkSet(null);
+}
+/** This account turned push on in this browser, and the browser still allows it. */
 function pushEnabled(){
-  try{return localStorage.getItem('cq_push')==='1'&&pushPermission()==='granted';}catch(e){return false;}
+  const c=S.loggedIn||getSession(),m=_pushMark();
+  return !!(c&&m&&m.id===c.id)&&pushPermission()==='granted';
 }
-async function togglePush(){
-  if(pushEnabled()){await pushUnsubscribe();toast(t('pushOffToast'));}
-  else{
-    const ok=await pushSubscribe(false);
-    toast(ok?t('pushOnToast'):(pushPermission()==='denied'?t('pushBlockedMsg'):t('pushFailedMsg')),ok?undefined:'warning');
+// ── The two switches and the consent record (R16, 2026-11-13) ─────────────────────────────────────────────────────
+// Account > Notifications holds two switches, My rides (reminders, changes, waitlist places) and Community (the month's
+// challenge, the Saturday recap), each one tap to turn off as to turn on. They are the account's (customer_push_prefs);
+// on a browser that is not subscribed both read off, since nothing reaches it. Every change is stored with a consent
+// record (customer_push_prefs_set): both switches, the page's language, the words on screen, the privacy notice's version
+// and a short device label. Turning one on asks the browser from that tap when it has not been asked; both off unsubscribes.
+// S._pp: {id, rides, community} once read, {id, wait} while reading, {id, gone} when the server cannot store them (no switch
+// then: a switch must never show a state that is not stored).
+async function _ppLoad(c){
+  if(!c||!c.session_token||!pushSupported()||(S._pp&&S._pp.id===c.id))return;
+  S._pp={id:c.id,wait:true};
+  try{await _sbReady;}catch(e){}
+  let v={id:c.id,gone:true};
+  try{
+    const{data,error}=await sb.rpc('customer_push_prefs',{p_id:c.id,p_token:c.session_token});
+    if(!error&&data&&data.ok)v={id:c.id,rides:data.rides!==false,community:!!data.community};
+  }catch(e){}
+  const cur=S.loggedIn||getSession();if(!cur||cur.id!==c.id)return;
+  S._pp=v;_ppPaint();
+}
+function _ppWords(){return[t('pushTitle'),t('pushRides'),t('pushComm')].join(' | ');}
+// "iPhone Safari Home Screen", "Android Chrome", "Windows Edge app": what the consent record calls this browser.
+function _pushStandalone(){try{return navigator.standalone===true||!!(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches);}catch(e){return false;}}
+function _pushDevice(){
+  const ua=navigator.userAgent||'',ipad=/iPad/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+  const os=/iPhone|iPod/.test(ua)?'iPhone':ipad?'iPad':/Android/.test(ua)?'Android':/Windows/.test(ua)?'Windows':/CrOS/.test(ua)?'ChromeOS':/Macintosh|Mac OS X/.test(ua)?'Mac':/Linux/.test(ua)?'Linux':'Device';
+  const br=/EdgiOS|EdgA\/|Edg\//.test(ua)?'Edge':/SamsungBrowser/.test(ua)?'Samsung Internet':/OPR\/|OPiOS/.test(ua)?'Opera':/FxiOS|Firefox\//.test(ua)?'Firefox':/CriOS|Chrome\//.test(ua)?'Chrome':/Safari\//.test(ua)?'Safari':'Browser';
+  return`${os} ${br}${_pushStandalone()?(os==='iPhone'||os==='iPad'?' Home Screen':' app'):''}`;
+}
+async function _ppSave(c,v,words){
+  try{
+    const{data,error}=await sb.rpc('customer_push_prefs_set',{p_id:c.id,p_token:c.session_token,p_rides:!!v.rides,p_community:!!v.community,
+      p_lang:S.lang||'en',p_words:String(words||'').slice(0,500),p_notice:PRIVACY_VERSION,p_device:_pushDevice()});
+    if(error||!data||data.ok!==true)return false;
+    S._pp={id:c.id,rides:!!v.rides,community:!!v.community};
+    return true;
+  }catch(e){return false;}
+}
+function _ppHostHtml(c){
+  if(!pushSupported()||!c||!c.session_token)return'';
+  _ppLoad(c);
+  const inner=_ppInner(c);
+  return`<div class="form-section cu-card640 pp-card" id="acc-push"${inner?'':' hidden'}>${inner}</div>`;
+}
+function _ppInner(c){
+  const p=S._pp;
+  if(!pushSupported()||!p||p.id!==c.id||p.wait||p.gone)return'';
+  const live=pushEnabled(),blocked=pushPermission()==='denied',off=!!S._ppBusy||blocked;
+  const sw=(k,l,on)=>`<label class="cw-sw pp-sw" for="pp-${k}"><input type="checkbox" role="switch" id="pp-${k}"${on?' checked':''}${off?' disabled':''} data-on-change="${_on('_ppSet',k,_P('checked'))}"><span class="cw-sw-box" aria-hidden="true"></span><span class="cw-sw-txt"><b>${esc(l)}</b></span></label>`;
+  return`<h2 class="form-title cu-mb6">${t('pushTitle')}</h2>
+    ${blocked?`<div class="cu-push-blocked">${t('pushBlockedMsg')}</div>`:''}
+    ${sw('rides',t('pushRides'),live&&p.rides)}${sw('community',t('pushComm'),live&&p.community)}
+    ${S._ppErr?`<div id="pp-err" class="cu-acc-err" role="alert">${esc(t(S._ppErr))}</div>`:''}`;
+}
+// Paints the switches and the "Remind me" in place; the switch that had the focus keeps it.
+function _ppPaint(){
+  const h=document.getElementById('acc-push'),c=S.loggedIn||getSession();
+  if(h&&c){
+    const fid=document.activeElement&&h.contains(document.activeElement)?document.activeElement.id:'';
+    const inner=_ppInner(c);h.innerHTML=inner;h.hidden=!inner;
+    if(fid){const f=document.getElementById(fid);if(f)try{f.focus({preventScroll:true});}catch(e){}}
   }
-  renderAccount();
+  _rmPaint();
 }
+async function _ppSet(which,on){
+  const c=S.loggedIn||getSession(),p=S._pp;
+  if(!c||!c.session_token||S._ppBusy||!p||p.id!==c.id||p.wait||p.gone||(which!=='rides'&&which!=='community'))return;
+  const live=pushEnabled(),next={rides:live&&p.rides,community:live&&p.community};
+  next[which]=!!on;
+  S._ppBusy=true;S._ppErr='';
+  document.querySelectorAll('#acc-push input').forEach(i=>{i.disabled=true;}); // not repainted: the tapped switch keeps its new state while the browser asks
+  let ok;
+  if(next.rides||next.community){
+    // the browser's question comes from this tap (pushSubscribe's first await) when it was never asked
+    ok=live||await pushSubscribe(false);
+    if(ok)ok=await _ppSave(c,next,_ppWords());
+    if(!ok&&!live)await pushUnsubscribe(c); // a subscription with no consent on record does not stay
+    if(!ok)S._ppErr=pushPermission()==='denied'?'pushBlockedMsg':'pushFailedMsg';
+  }else{
+    // both off: the choice is recorded and this browser stops, even when the record could not be written
+    await _ppSave(c,next,_ppWords());
+    await pushUnsubscribe(c);
+  }
+  S._ppBusy=false;_ppPaint();
+}
+// ── "Remind me" on You're booked (R17, 2026-11-13) ─────────────────────────────────────────────────────────────────
+// The one place the app asks: in the installed app, on Android and on a computer, the browser's own question straight from
+// the tap, then My rides on; in a Safari tab on an iPhone or iPad, where push reaches only an app on the Home Screen, a
+// centred pop-up with the Add to Home Screen steps (the owner approved them on a rider screen). Never on page load, never a
+// second time in a session after a no (sessionStorage cq_push_no), no banner. Hidden where push cannot work, and once My rides
+// is on in this browser. It sits in its own wrapper (#bk-rm) under the booked moment's buttons.
+function _pushNoAgain(){try{return sessionStorage.getItem('cq_push_no')==='1';}catch(e){return !!S._pushNo;}}
+function _pushNoSet(){S._pushNo=true;try{sessionStorage.setItem('cq_push_no','1');}catch(e){}}
+// A Safari tab on an iPhone or iPad from iOS 16.4 (web push for Home Screen apps), not the installed app.
+function _pushIosTab(){
+  try{
+    const ua=navigator.userAgent||'',ipad=/Macintosh/.test(ua)&&navigator.maxTouchPoints>1;
+    if(!(/iPhone|iPad|iPod/.test(ua)||ipad)||_pushStandalone())return false;
+    if(!/Safari\//.test(ua)||/CriOS|FxiOS|EdgiOS|OPiOS|GSA\/|Instagram|FBAN|FBAV|Line\//.test(ua))return false;
+    const m=ua.match(/OS (\d+)_(\d+)/)||ua.match(/Version\/(\d+)\.(\d+)/);
+    return !!m&&(+m[1]>16||(+m[1]===16&&+m[2]>=4));
+  }catch(e){return false;}
+}
+function _rmShown(){
+  if(!VAPID_PUBLIC_KEY)return false;
+  const c=S.loggedIn||getSession();if(!c||!c.session_token)return false;
+  const p=S._pp&&S._pp.id===c.id?S._pp:null;
+  if(p&&p.gone)return false; // no consent can be stored: no ask
+  if(S._rmDone&&S._rmDone===_rmFor())return true; // "Reminder on" after the tap
+  if(_pushNoAgain())return false;
+  if(_pushIosTab())return true;
+  if(!pushSupported()||pushPermission()==='denied')return false;
+  if(pushEnabled()&&(!p||p.wait||p.rides))return false; // My rides on already (or being read for a browser that has it)
+  return true;
+}
+function _rmFor(){const k=(S.lastTickets||[])[0];return k&&k.id?String(k.id):'';}
+function _rmInner(){
+  if(S._rmDone&&S._rmDone===_rmFor())return`<span class="bk-rm-on">${_cuIc('bell',18)}<span>${t('pushRemindOn')}</span></span>`;
+  return`<button type="button" class="btn-secondary bk-rm-btn"${S._rmBusy?' disabled':''} data-on-click="${_on('_pushRemind')}">${_cuIc('bell',18)}<span>${t('pushRemindBtn')}</span></button>`;
+}
+function _bkRemindHtml(){
+  const c=S.loggedIn||getSession();
+  if(VAPID_PUBLIC_KEY&&!_pushIosTab())_ppLoad(c);
+  const on=_rmShown();
+  return`<div id="bk-rm" class="bk-rm"${on?'':' hidden'}>${on?_rmInner():''}</div>`;
+}
+function _rmPaint(){
+  const h=document.getElementById('bk-rm');if(!h)return;
+  const on=_rmShown(),had=h.contains(document.activeElement);
+  h.innerHTML=on?_rmInner():'';h.hidden=!on;
+  if(had&&on){const b=h.querySelector('button');if(b)try{b.focus({preventScroll:true});}catch(e){}}
+}
+async function _pushRemind(){
+  const c=S.loggedIn||getSession();
+  if(S._rmBusy||!c||!c.session_token||!_rmShown())return;
+  if(_pushIosTab()){_pushIosOpen();return;}
+  const p=S._pp&&S._pp.id===c.id&&!S._pp.wait&&!S._pp.gone?S._pp:null,wasLive=pushEnabled();
+  S._rmBusy=true;_rmPaint();
+  let ok=await pushSubscribe(false); // the system prompt from this tap
+  if(ok)ok=await _ppSave(c,{rides:true,community:!!(wasLive&&p&&p.community)},t('pushRemindBtn'));
+  else if(pushPermission()!=='granted')_pushNoSet(); // a no: not asked again this session
+  if(!ok&&!wasLive)await pushUnsubscribe(c);
+  if(ok)S._rmDone=_rmFor()||'1';
+  S._rmBusy=false;_ppPaint();
+}
+// The Add to Home Screen steps, as icons: Share, Add to Home Screen, then open the app from the Home Screen.
+let _piFrom=null;
+function _pushIosOpen(){
+  const m=document.getElementById('bike-info-modal');if(!m)return;
+  _piFrom=document.activeElement;
+  _pushNoSet(); // shown once a session
+  const st=(ic,k)=>`<li><span class="pi-ic">${_cuIc(ic,26)}</span><span class="pi-t">${t(k)}</span></li>`;
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on_backdropOnly',_EV,_EL,'_pushIosClose')}">
+    <div class="modal-box bike-info-box pi-dlg" role="dialog" aria-modal="true" aria-labelledby="pi-t">
+      <div class="bike-info-body">
+        <h2 class="modal-title" id="pi-t">${t('pushIosTitle')}</h2>
+        <ol class="pi-steps">${st('share','pushIosStep1')}${st('addSq','pushIosStep2')}${st('appHome','pushIosStep3')}</ol>
+        <div class="modal-footer"><button type="button" class="btn-primary" data-on-click="${_on('_pushIosClose')}">${t('closeBtn')}</button></div>
+      </div>
+    </div>
+  </div>`;
+  m.style.display='block';
+  requestAnimationFrame(()=>{const b=m.querySelector('.pi-dlg .btn-primary');if(b)try{b.focus();}catch(e){}});
+}
+function _pushIosClose(){
+  const m=document.getElementById('bike-info-modal');if(m&&m.querySelector('.pi-dlg')){m.style.display='none';m.innerHTML='';}
+  const f=_piFrom;_piFrom=null;_rmPaint();
+  try{if(f&&f.isConnected)f.focus();else{const h=document.getElementById('bk-ok-t');if(h)h.focus({preventScroll:true});}}catch(e){}
+}
+// ── Every open of the app (R18, 2026-11-13) ────────────────────────────────────────────────────────────────────────
+// WebKit never fires pushsubscriptionchange and Safari drops a subscription without a word, so a browser this account
+// turned push on in checks it whenever the app opens (once a page life, again on coming back after half an hour): a
+// missing or moved subscription is made again and registered (pushSubscribe, silent; registering also tells the server
+// the address is alive); permission taken back in the browser's settings, the server forgets this browser.
+async function _pushCheck(cust){
+  if(!VAPID_PUBLIC_KEY||!cust||!cust.session_token)return;
+  const m=_pushMark();
+  if(!m||m.id!==cust.id||!pushSupported())return;
+  if(S._pcFor===cust.id&&Date.now()-(S._pcAt||0)<18e5)return;
+  S._pcFor=cust.id;S._pcAt=Date.now();
+  try{await _sbReady;}catch(e){}
+  if(!sb)return;
+  if(pushPermission()!=='granted'){
+    try{if(m.ep)await sb.rpc('customer_push_unsubscribe',{p_id:cust.id,p_token:cust.session_token,p_endpoint:m.ep});}catch(e){}
+    _pushMarkSet(null);
+  }else await pushSubscribe(true);
+  _ppPaint();
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.view!=='staff'){const c=S.loggedIn||getSession();if(c)_pushCheck(c);}});
 /** Fire-and-forget push to one rider. Silent when the sender is not configured. */
 async function pushNotify(customerId,title,message,url,tag){
   if(!customerId)return;
@@ -43933,7 +44123,7 @@ async function pushNotify(customerId,title,message,url,tag){
     if(!tok)return; // staff-only endpoint; nothing to send with
     await fetch('/api/push-send',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({staffToken:tok,customerId,title,message,url:url||'/',tag:tag||'mm-general'}),
+      body:JSON.stringify({staffToken:tok,customerId,title,message,url:url||'/',tag:tag||'mm-general',lang:S.lang||'en'}), // the language the words are in (the notification's lang and dir)
     });
   }catch(e){/* a failed notification must never block the booth */}
 }
