@@ -520,7 +520,8 @@ staff dialog as "Comes with a higher level", and `_bdgAllHolders` counts them. D
 `customer_badges` keep one row per level, so staff give, take back and count each level as before; nothing is stored
 for a level that comes with a higher one.
 Talent Scout (`talent_scout`, migration 20261112160000; the user, 2026-11-12: "a new badge for helping hire a micromobilian
-make only visible for its holders"): staff-given, a team pass on its lanyard (glyph `pass`) on the gold medal. A rider sees it only
+make only visible for its holders", then: "its for helping someone from the community get hired outside of micromobilty, or helped
+him get a job", words in migration 20261112190000): staff-given, a work pass on its lanyard (glyph `pass`) on the gold medal. A rider sees it only
 once they hold it: `BDG_HELD_ONLY` keeps it out of the greyed staff-given badges under Badges to earn, so out of Request a badge
 too (the website's `HELD_ONLY` in `lib/ride-record.ts` the same). A new staff-given badge that should stay out of sight goes in that set.
 2026-10-12 (migration 20261012120000, the owner: "put levels and multiple badges in each one"): the staff badges are ladders

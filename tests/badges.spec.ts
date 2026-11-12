@@ -534,7 +534,8 @@ test.describe('@customer:account badges', () => {
     await expect(page.locator('#badge-pop')).toContainText('Opens');
   });
 
-  // Talent Scout (the user, 2026-11-12: "a new badge for helping hire a micromobilian make only visible for its holders").
+  // Talent Scout (the user, 2026-11-12: "a new badge for helping hire a micromobilian make only visible for its holders";
+  // "its for helping someone from the community get hired outside of micromobilty, or helped him get a job").
   const scoutCat = [
     { slug: 'marshal', icon: 'shield', color: 'orange', name: 'Marshal', system: true, auto: false, sort: 10 },
     { slug: 'talent_scout', icon: 'pass', color: 'gold', name: 'Talent Scout', system: true, auto: false, sort: 86 },
@@ -563,7 +564,7 @@ test.describe('@customer:account badges', () => {
     await expect(chip.locator('svg.bdg-m.bdc-gold')).toHaveCount(1);
     expect(await page.evaluate(`BDG_GLYPH.pass===undefined`)).toBe(false);
     await chip.click();
-    await expect(page.locator('#badge-pop .badge-pop-about')).toContainText('hire a new Micromobilian');
+    await expect(page.locator('#badge-pop .badge-pop-about')).toContainText('someone from the MicroMobility community get hired or find a job');
     expect(await page.evaluate(`_bdrChoices(_mrBadgeList(S.loggedIn)).map(x=>x.b.slug)`)).toEqual(['marshal']);
   });
 });
