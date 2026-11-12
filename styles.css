@@ -12790,7 +12790,6 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .rq-pact{white-space:nowrap;}
 @media (pointer:coarse){
   body.view-staff :is(#tab-queue,#tab-waitlist) .rq-acts .rq-more{flex-basis:44px;width:44px;min-width:44px;}
   body.view-staff :is(#tab-queue,#tab-waitlist) .rq-chk{min-width:44px;min-height:44px;}
-  body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table{--rq-sel-w:52px;}
   body.view-staff :is(#tab-queue,#tab-waitlist) .rq-chki,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-selall{width:22px;height:22px;}
 }
 html[data-staff-theme="booth"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-acts .rq-more{border:2px solid #000;} /* the row undo it shared this with is gone (s10); the menu keeps its edge, not the action's width */
@@ -12827,6 +12826,9 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-acts{display:flex;flex
 body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-acts .rq-act{flex:1 1 auto;min-width:0;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-st2{max-width:100%;}
 /* tablets: the number stays pinned beside the select box as the table scrolls in its box */
+/* the select column at its touch width (a 44px box plus padding) only where the booking number is pinned beside it: from
+   1024px nothing is pinned, and 16px more on every roster row pushed the booth roster out of its box at 1280px */
+@media (pointer:coarse) and (min-width:768px) and (max-width:1023px){body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table{--rq-sel-w:52px;}}
 @media (min-width:768px) and (max-width:1023px){
   body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table-desktop-wrap .queue-table .rq-numc{position:sticky;inset-inline-start:var(--rq-sel-w,38px);z-index:3;box-shadow:1px 0 0 var(--border);}
   html[dir="rtl"] body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table-desktop-wrap .queue-table .rq-numc{box-shadow:-1px 0 0 var(--border);}
