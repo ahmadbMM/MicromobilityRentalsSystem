@@ -9353,6 +9353,48 @@ body:not(.view-staff) #cust-bottom-nav.lq-night .cust-bnav-btn.active{color:var(
   body:not(.view-staff) #cust-bottom-nav.lq-night .cust-bnav-btn.active{background:var(--tab-pill-night);}
 }
 
+/* ── Community where members are (2026-11-13, R4-R6, R10) ────────────────────────────────────────────────────────
+   The Community tab's dot: no number; at the icon's top end corner on the bar and the label's end on the top tabs (so
+   mirrored in Arabic and Urdu), ringed in the bar's own paper so it reads on glass, and in night red on the night bar. */
+body:not(.view-staff) :is(#customer-tab-nav .tab-btn,#cust-bottom-nav .cust-bnav-btn).has-dot{position:relative;}
+body:not(.view-staff) :is(#customer-tab-nav .tab-btn,#cust-bottom-nav .cust-bnav-btn).has-dot::after{content:'';position:absolute;z-index:2;width:9px;height:9px;margin:0;border-radius:50%;background:var(--red);box-shadow:0 0 0 2px var(--glass-solid);pointer-events:none;}
+body:not(.view-staff) #customer-tab-nav .tab-btn.has-dot::after{top:8px;inset-inline-end:8px;}
+body:not(.view-staff) #cust-bottom-nav .cust-bnav-btn.has-dot::after{top:7px;inset-inline-start:calc(50% + 6px);}
+body:not(.view-staff) #cust-bottom-nav.lq-night .cust-bnav-btn.has-dot::after{background:var(--night-red);box-shadow:0 0 0 2px var(--night);}
+@media (forced-colors:active){body:not(.view-staff) :is(#customer-tab-nav .tab-btn,#cust-bottom-nav .cust-bnav-btn).has-dot::after{forced-color-adjust:none;background:CanvasText;box-shadow:none;}}
+/* progress as the Community tab draws it: done filled, this booking outlined, the rest empty (with an edge of their own) */
+body:not(.view-staff) .hp-dots{display:flex;justify-content:center;gap:6px;width:100%;}
+body:not(.view-staff) .hp-dots i{flex:0 1 30px;height:10px;border-radius:999px;background:var(--card-3);box-shadow:inset 0 0 0 1px var(--line);}
+body:not(.view-staff) .hp-dots i.on{background:var(--go);box-shadow:none;}
+body:not(.view-staff) .hp-dots i.nx{background:transparent;box-shadow:inset 0 0 0 2px var(--go);}
+body:not(.view-staff) .hp-bar{display:flex;width:100%;max-width:240px;height:10px;border-radius:999px;background:var(--card-3);overflow:hidden;}
+body:not(.view-staff) .hp-bar i{width:var(--w,0);flex:none;border-radius:999px;}
+body:not(.view-staff) .hp-bar i.on{background:var(--go);}
+body:not(.view-staff) .hp-bar i.nx{box-shadow:inset 0 0 0 2px var(--go);}
+/* the rating's last screen: the same card, centred, one thing on it */
+body:not(.view-staff) #rate-modal .rg-fin{text-align:center;}
+body:not(.view-staff) #rate-modal .rg-fin-k{font-weight:700;font-size:var(--fs-13);color:var(--go-2);margin-bottom:10px;}
+body:not(.view-staff) #rate-modal .rg-fin-medal{display:block;width:84px;height:84px;margin:0 auto 6px;}
+body:not(.view-staff) #rate-modal .rg-fin-t{margin-top:4px;}
+body:not(.view-staff) #rate-modal .rg-fin-p{display:grid;justify-items:center;gap:8px;margin-top:18px;}
+body:not(.view-staff) #rate-modal .rg-fin-n{font-weight:800;font-size:var(--fs-20);font-variant-numeric:tabular-nums;color:var(--ink);}
+/* "You're booked": the challenge with this booking, a link to Community; the ticket below is untouched */
+body:not(.view-staff) .bk-ok-hub{width:100%;max-width:320px;}
+body:not(.view-staff) .bk-ok-hub:empty{display:none;}
+body:not(.view-staff) .bk-hub{display:grid;justify-items:center;gap:10px;width:100%;min-height:44px;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--card);color:var(--ink);font:inherit;cursor:pointer;}
+body:not(.view-staff) .bk-hub:hover{border-color:var(--go);}
+body:not(.view-staff) .bk-hub-k{display:flex;align-items:center;gap:6px;font-weight:600;font-size:var(--fs-15);}
+body:not(.view-staff) .bk-hub-k .cu-ic,body:not(.view-staff) .bk-hub-go{color:var(--go-2);}
+body:not(.view-staff) .bk-hub-go{display:flex;align-items:center;gap:4px;font-weight:700;font-size:var(--fs-13);}
+/* the badge pop-up a pulse opens: Community and Done */
+body:not(.view-staff) #badge-pop .badge-pop-acts{display:grid;gap:10px;margin-top:14px;}
+body:not(.view-staff) #badge-pop .badge-pop-acts>button{width:100%;min-height:44px;}
+/* the ride's own news on the ticket: start moved or shortened in amber, cancelled in red */
+body:not(.view-staff) .tk-rs{display:inline-block;margin-inline-start:6px;padding:1px 8px;border-radius:var(--r-chip);border:1px solid currentColor;font-size:var(--fs-12);font-weight:700;line-height:1.5;color:var(--amber);vertical-align:middle;}
+body:not(.view-staff) .tk-rs-cancelled{color:var(--red);}
+body:not(.view-staff) .ticket-card.tk-live:not(.tk-th) .tk-rs,body:not(.view-staff) .ticket-card:is(.th-jcc,.th-arena) .tk-rs{color:var(--night-amber);}
+body:not(.view-staff) .ticket-card.tk-live:not(.tk-th) .tk-rs-cancelled,body:not(.view-staff) .ticket-card:is(.th-jcc,.th-arena) .tk-rs-cancelled{color:var(--night-red);}
+
 /* ── The booked moment: a tick drawn in a disc that settles, once, on the booking (.play) ── */
 body:not(.view-staff) .bk-ok{display:grid;justify-items:center;gap:8px;margin:6px 0 24px;text-align:center;}
 body:not(.view-staff) .bk-ok-disc{display:grid;place-items:center;width:104px;height:104px;border-radius:50%;background:var(--go-wash);box-shadow:inset 0 0 0 1px var(--go-ring);}

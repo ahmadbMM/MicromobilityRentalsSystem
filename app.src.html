@@ -270,7 +270,7 @@ window.mmLoading=(function(){
 <nav class="tab-nav" id="customer-tab-nav" aria-label="Customer sections">
   <button class="tab-btn active" data-ctab="register" data-on-click='["setCustTab","register"]'>Reserve</button>
   <button class="tab-btn"        data-ctab="myrides"  data-on-click='["setCustTab","myrides"]'>Bookings</button>
-  <button class="tab-btn"        data-ctab="members"  data-on-click='["setCustTab","members"]' hidden>Community</button>
+  <button class="tab-btn"        data-ctab="members"  data-on-click='["_commTap"]' hidden>Community</button>
   <button class="tab-btn"        data-ctab="account"  data-on-click='["setCustTab","account"]'>Account</button>
 </nav>
 <div id="view-landing">
@@ -326,7 +326,7 @@ window.mmLoading=(function(){
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 7.6A1.6 1.6 0 0 1 5.2 6h13.6a1.6 1.6 0 0 1 1.6 1.6V10a2 2 0 0 0 0 4v2.4a1.6 1.6 0 0 1-1.6 1.6H5.2a1.6 1.6 0 0 1-1.6-1.6V14a2 2 0 0 0 0-4z"/><path d="M14.4 6.6v1.6M14.4 11.2v1.6M14.4 15.8v1.6"/></svg>
         <span id="bnav-myrides-lbl">Bookings</span>
       </button>
-      <button class="cust-bnav-btn" id="bnav-members" data-on-click='["setCustTab","members"]' hidden>
+      <button class="cust-bnav-btn" id="bnav-members" data-on-click='["_commTap"]' hidden>
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.6" r="3.2"/><path d="M3.2 19.6c.7-3.1 2.9-4.9 5.8-4.9s5.1 1.8 5.8 4.9"/><path d="M15.3 5.7a3.2 3.2 0 0 1 0 5.8"/><path d="M17.2 15.1c2 .6 3.2 2.2 3.7 4.5"/></svg>
         <span id="bnav-members-lbl">Community</span>
       </button>
@@ -851,6 +851,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   promoMgrTitle:'Promo codes',promoCodeLabel:'Code',promoKindLabel:'Type',promoValueLabel:'Value',promoPercentOpt:'Percent (%)',promoFlatOpt:'Flat (SAR)',promoActiveLabel:'Active',promoInactiveLabel:'Inactive',promoAddBtn:'+ Add code',promoLimitsLabel:'Limits',promoExpiresLabel:'Expires',promoMaxUsesLabel:'Max uses',promoCustomerLabel:'One customer only',promoUnlimited:'Unlimited',promoAnyone:'Anyone',promoUntil:'until {0}',promoOneCustomer:'One customer',promoExpiredLabel:'Expired',promoUsedUpLabel:'Used up',promoExpiredMsg:'That code has expired.',promoUsedUpMsg:'That code has been fully used.',promoNotYoursMsg:'That code belongs to another account.',promoNoSuchCustomer:'No customer with that name.',promoLimitsMissing:'Limit columns missing - run 20260816120000_promo_limits.sql; the code was saved without limits.',promoNoCodes:'No promo codes yet.',promoSavedToast:'Promo code saved',
   myCurrentRides:'Upcoming',myPastRides:'Past rides',noPastRides:'No completed rides yet.',noCurrentRides:'Nothing booked yet.',qrNoSignal:'No signal to draw the code. Show this at the booth:',rzNextRide:'Next open ride',
   bookAgainBtn:'Book again',bookUsualBtn:'Book my usual',bookUsualToast:'Your usual booking is filled in. Just confirm.',rateRideBtn:'Rate your ride',rateBikeLabel:'Bike',rateExpLabel:'Experience',rateNoteLabel:'Comments (optional)',rateSubmitBtn:'Submit rating',rateTagsLabel:'What stood out?',rateTagRoute:'Route',rateTagPace:'Pace',rateTagBike:'Bike',rateTagStaff:'Staff',rateTagSafety:'Safety',rateTagFun:'Fun',anRatingsNav:'Ratings',anTagsTitle:'What riders mention',anTagsSub:'Every rating that carried a tag, counted once per rider.',anBySessionTitle:'By ride',anBySessionSub:'Ratings per ride night, newest first.',anRatedShort:'rated',rateThanks:'Thanks for rating your ride.',rateRunBtn:'Rate your run',rateRunTitle:'How was your run?',rateRunThanks:'Thanks for rating your run.',rateTitle:'How was your ride?',rgQ_service:'Service',rgQ_ride:'The ride',rgQ_ride_checkin:'Check-in and bike collection',rgQ_ride_staff:'Staff',rgQ_ride_route:'Route',rgQ_breakfast:'Breakfast',rgQ_bf_restaurant:'Restaurant',rgQ_bf_atmosphere:'Atmosphere',rgQ_bf_food:'Food',rgQ_overall:'Overall experience',rgWhy:'You gave {0}. Why, and what could be better?',rgWhyErr:'Tell us why.',rgPickErr:'Pick a score from 1 to 10.',cancelReasonPick:'Choose a reason above.',cancelReasonWrite:'Write the reason in the box above.',rgEndLo:'Poor',rgEndHi:'Great',rgSkipBf:'I did not stay for breakfast',rgBfShareNote:'Your breakfast answers may be shared with the restaurant, without your name.',anCatTitle:'Scores by question',anCatSub:'Average of each question in the detailed ratings, and how many were 8 or under',anLowN:'{0} at 8 or under',waRateMsg:'Thanks for riding with MicroMobility! How was your ride? Rate it here:\n\nشكراً لركوبك مع مايكروموبيليتي! كيف كانت رحلتك؟ قيّمها هنا:',waRateRunMsg:'Thanks for running with MicroMobility! How was your run? Rate it here:\n\nشكراً لمشاركتك في الجري مع مايكروموبيليتي! كيف كان الجري؟ قيّمه هنا:',rateSessBtn:'Rate your session',sessWord:'Session',commCueUnderReviewSess:'Reserved - the participant list is being finalised',rateSessTitle:'How was your session?',rateSessThanks:'Thanks for rating your session.',waRateSessMsg:'Thanks for joining MicroMobility! How was your session? Rate it here:\n\nشكراً لانضمامك إلى مايكروموبيليتي! كيف كانت الفعالية؟ قيّمها هنا:',regStep1TitleSess:'Choose your session',regStep1TitleOneSess:'Your session',noSessionsAvailSess:'No sessions are open for booking right now.',commFullWaitlistSess:'This session is full. You can still reserve: you’ll join the waitlist.',regStep2TitleSess:'Who is coming',qtyDecSess:'Decrease number of places',qtyIncSess:'Increase number of places',partLabel:'Participant',partName:'Participant’s full name',partNamePh:'Enter the participant’s full name',errGroupCapSess:'Up to {0} participants per booking on this session.',tkReservedSubSess:'Staff confirm each participant. Your code appears in Bookings once your place is confirmed.',regBookAnotherSess:'Book another session',seatLabel:'Place',commMembersMsgSess:'Our community sessions are for our community members. Apply for membership, and our team will review your application.',rejMsgSess:'Your reservation for this session wasn’t confirmed. Places are limited and we try to fit in as many people as we can.',rejNextSess:'We’d love to see you at the next session.',wgSubSess:'Our team booked you on this session. Read its waiver and agree to it to continue.',tkCueDoneSess:'Session done: {0}.',tkCueDoneNoDurSess:'Session done.',noShowSessMsg:'You were marked as a no-show for this session.',people2:'2 participants',peopleN:'{0} participants',mrNextSess:'Next session: {0} ({1})',myPastAny:'Past bookings',icsDescMeet:'Your MicroMobility booking. Be at the meeting point by the gathering time and show your ticket there.',wlcDoneSubSess:'See you there. Your ticket is in Bookings.',wlcLateSubSess:'The time to claim it ran out, so the place went to the next person. You are still on the waitlist.',wlcNoSubSess:'The place goes to the next person. You are still on the waitlist.',receiptTitleSess:'Booking receipt',receiptThankYouSess:'Thank you for joining us at MicroMobility!',cancelPartyNoteSess:'This cancels the booking for all {0} participants.',
+  hubDotLbl:'Community, new',hpFirst:'Your first session',hpSecond:'Your second session',hpBack:'Back this month',hpLevel:'{0} sessions this month',hpWithThis:'With this booking: {0} of {1}',rsMoved:'Start moved',rsShortened:'Shortened',rsCancelled:'Cancelled',
   typePrefHint:'We\'ll pre-select this each time you book.',
   heardLabel:'How did you hear about us?',heardDesk:'Added by our team',heard_instagram:'Instagram',heard_tiktok:'TikTok',heard_snapchat:'Snapchat',heard_x:'X (Twitter)',heard_facebook:'Facebook',heard_youtube:'YouTube',heard_whatsapp:'WhatsApp',heard_google:'Google search',heard_friend:'A friend or family',heard_invited:'Invited by MicroMobility',heard_passed_by:'Passed by the circuit',heard_event:'An event or exhibition',heard_hotel:'Hotel or tour',heard_school:'School or university',heard_work:'Work or my company',heard_community:'A community ride',heard_other:'Other',
   tagBlacklistWarn:'This person is marked as not fit for the community.',tagBlacklistDropComm:'Also remove the Community tag',
@@ -1522,6 +1523,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   promoMgrTitle:'رموز الخصم',promoCodeLabel:'الرمز',promoKindLabel:'النوع',promoValueLabel:'القيمة',promoPercentOpt:'نسبة (%)',promoFlatOpt:'مبلغ ثابت (SAR)',promoActiveLabel:'مفعّل',promoInactiveLabel:'غير مفعّل',promoAddBtn:'+ إضافة رمز',promoLimitsLabel:'الحدود',promoExpiresLabel:'ينتهي في',promoMaxUsesLabel:'أقصى عدد استخدامات',promoCustomerLabel:'لعميل واحد فقط',promoUnlimited:'غير محدود',promoAnyone:'أي شخص',promoUntil:'حتى {0}',promoOneCustomer:'عميل واحد',promoExpiredLabel:'منتهٍ',promoUsedUpLabel:'استُنفد',promoExpiredMsg:'انتهت صلاحية هذا الرمز.',promoUsedUpMsg:'تم استخدام هذا الرمز بالكامل.',promoNotYoursMsg:'هذا الرمز يخص حسابًا آخر.',promoNoSuchCustomer:'لا يوجد عميل بهذا الاسم.',promoLimitsMissing:'أعمدة الحدود غير موجودة - شغّل 20260816120000_promo_limits.sql؛ تم حفظ الرمز بدون حدود.',promoNoCodes:'لا توجد رموز خصم بعد.',promoSavedToast:'تم حفظ رمز الخصم',
   myCurrentRides:'القادمة',myPastRides:'الجولات السابقة',noPastRides:'لا توجد جولات مكتملة بعد.',noCurrentRides:'لا حجوزات قادمة بعد.',qrNoSignal:'لا توجد إشارة لرسم الرمز. اعرض هذا عند الكشك:',rzNextRide:'أقرب جولة متاحة',
   bookAgainBtn:'احجز مجدداً',bookUsualBtn:'احجز المعتاد',bookUsualToast:'تم تجهيز حجزك المعتاد - أكّد فقط.',rateRideBtn:'قيّم جولتك',rateBikeLabel:'الدراجة',rateExpLabel:'التجربة',rateNoteLabel:'ملاحظات (اختياري)',rateSubmitBtn:'إرسال التقييم',rateTagsLabel:'ما الذي لفت انتباهك؟',rateTagRoute:'المسار',rateTagPace:'السرعة',rateTagBike:'الدراجة',rateTagStaff:'الفريق',rateTagSafety:'السلامة',rateTagFun:'المتعة',anRatingsNav:'التقييمات',anTagsTitle:'ما يذكره الراكبون',anTagsSub:'كل تقييم حمل وسماً، يُحسب مرة لكل راكب.',anBySessionTitle:'حسب الجولة',anBySessionSub:'التقييمات لكل ليلة جولة، الأحدث أولاً.',anRatedShort:'قيّموا',rateThanks:'شكراً على تقييمك.',rateRunBtn:'قيّم الجري',rateRunTitle:'كيف كان الجري؟',rateRunThanks:'شكراً على تقييم الجري.',rateTitle:'كيف كانت جولتك؟',rgQ_service:'الخدمة',rgQ_ride:'الجولة',rgQ_ride_checkin:'تسجيل الحضور واستلام الدراجة',rgQ_ride_staff:'الفريق',rgQ_ride_route:'المسار',rgQ_breakfast:'الإفطار',rgQ_bf_restaurant:'المطعم',rgQ_bf_atmosphere:'الأجواء',rgQ_bf_food:'الطعام',rgQ_overall:'التجربة بشكل عام',rgWhy:'أعطيت {0}. ما السبب، وما الذي يمكن تحسينه؟',rgWhyErr:'يرجى إخبارنا بالسبب.',rgPickErr:'اختر تقييماً من 1 إلى 10.',cancelReasonPick:'اختر سببًا من الأعلى.',cancelReasonWrite:'اكتب السبب في المربع أعلاه.',rgEndLo:'ضعيف',rgEndHi:'ممتاز',rgSkipBf:'لم أبقَ للإفطار',rgBfShareNote:'قد تُشارَك إجاباتك عن الإفطار مع المطعم، دون ذكر اسمك.',anCatTitle:'التقييم حسب السؤال',anCatSub:'متوسط كل سؤال في التقييمات المفصّلة، وعدد التقييمات 8 أو أقل',anLowN:'{0} بتقييم 8 أو أقل',waRateMsg:'Thanks for riding with MicroMobility! How was your ride? Rate it here:\n\nشكراً لركوبك مع مايكروموبيليتي! كيف كانت جولتك؟ قيّمها هنا:',waRateRunMsg:'Thanks for running with MicroMobility! How was your run? Rate it here:\n\nشكراً لمشاركتك في الجري مع مايكروموبيليتي! كيف كان الجري؟ قيّمه هنا:',rateSessBtn:'قيّم الفعالية',sessWord:'الفعالية',commCueUnderReviewSess:'تم الحجز - يجري إعداد قائمة المشاركين',rateSessTitle:'كيف كانت الفعالية؟',rateSessThanks:'شكراً على تقييم الفعالية.',waRateSessMsg:'Thanks for joining MicroMobility! How was your session? Rate it here:\n\nشكراً لانضمامك إلى مايكروموبيليتي! كيف كانت الفعالية؟ قيّمها هنا:',regStep1TitleSess:'اختر فعاليتك',regStep1TitleOneSess:'فعاليتك',noSessionsAvailSess:'لا توجد فعاليات متاحة للحجز الآن.',commFullWaitlistSess:'هذه الفعالية مكتملة. يمكنك الحجز مع ذلك: ستنضم إلى قائمة الانتظار.',regStep2TitleSess:'من سيحضر',qtyDecSess:'إنقاص عدد المقاعد',qtyIncSess:'زيادة عدد المقاعد',partLabel:'المشارك',partName:'الاسم الكامل للمشارك',partNamePh:'أدخل الاسم الكامل',errGroupCapSess:'حتى {0} مشاركين لكل حجز في هذه الفعالية.',tkReservedSubSess:'يؤكد الفريق كل مشارك على حدة. يظهر رمزك في الحجوزات بعد تأكيد مقعدك.',regBookAnotherSess:'حجز فعالية أخرى',seatLabel:'المقعد',commMembersMsgSess:'فعاليات مجتمعنا مخصّصة لأعضاء المجتمع. قدّم طلب العضوية وسيراجع فريقنا طلبك.',rejMsgSess:'لم يتم تأكيد حجزك لهذه الفعالية. المقاعد محدودة ونحاول استيعاب أكبر عدد ممكن من المشاركين.',rejNextSess:'يسعدنا أن نراك في الفعالية القادمة.',wgSubSess:'سجّلك فريقنا في هذه الفعالية. اقرأ إقرارها ووافق عليه للمتابعة.',tkCueDoneSess:'انتهت الفعالية: {0}.',tkCueDoneNoDurSess:'انتهت الفعالية.',noShowSessMsg:'سجّلك الفريق غائباً عن هذه الفعالية.',people2:'مشاركان',peopleN:'{0} مشاركين',mrNextSess:'فعاليتك القادمة: {0} ({1})',myPastAny:'الحجوزات السابقة',icsDescMeet:'حجزك مع MicroMobility. كن في نقطة التجمع بحلول وقت التجمع واعرض تذكرتك هناك.',wlcDoneSubSess:'نراك هناك. تذكرتك في «الحجوزات».',wlcLateSubSess:'انتهى وقت التأكيد فانتقل المكان إلى الشخص التالي. ما زلت في قائمة الانتظار.',wlcNoSubSess:'ينتقل المكان إلى الشخص التالي. ما زلت في قائمة الانتظار.',receiptTitleSess:'إيصال الحجز',receiptThankYouSess:'شكراً لانضمامك إلينا في مايكروموبيليتي!',cancelPartyNoteSess:'سيُلغى الحجز لجميع المشاركين ({0}).',
+  hubDotLbl:'المجتمع، جديد',hpFirst:'جلستك الأولى',hpSecond:'جلستك الثانية',hpBack:'عُد هذا الشهر',hpLevel:'{0} جلسات هذا الشهر',hpWithThis:'مع هذا الحجز: {0} من {1}',rsMoved:'تغيّر وقت الانطلاق',rsShortened:'مُختصرة',rsCancelled:'أُلغيت',
   typePrefHint:'نختاره لك تلقائياً في كل حجز.',
   heardLabel:'كيف عرفت عنا؟',heardDesk:'أضافه فريقنا',heard_instagram:'Instagram',heard_tiktok:'TikTok',heard_snapchat:'Snapchat',heard_x:'X (Twitter)',heard_facebook:'Facebook',heard_youtube:'YouTube',heard_whatsapp:'WhatsApp',heard_google:'بحث جوجل',heard_friend:'صديق أو أحد الأقارب',heard_invited:'بدعوة من مايكروموبيليتي',heard_passed_by:'مررت بالحلبة',heard_event:'فعالية أو معرض',heard_hotel:'فندق أو جولة سياحية',heard_school:'مدرسة أو جامعة',heard_work:'العمل أو شركتي',heard_community:'جولة مجتمعية',heard_other:'غير ذلك',
   tagBlacklistWarn:'هذا الشخص مُدرج كغير مناسب للمجتمع.',tagBlacklistDropComm:'إزالة وسم المجتمع أيضاً',
@@ -2262,6 +2264,7 @@ function setLang(lang,_fromUrl){
   document.querySelectorAll('#staff-tab-nav .snav-group').forEach(s=>{s.textContent=t(s.dataset.group);});
   try{_syncRailPin();_syncStaffNavLabel();}catch(e){}
   }catch(e){try{_logError('tab-label render: '+((e&&e.message)||e),'render');}catch(_){}}
+  if(S.view!=='staff')try{_commNavPaint();}catch(e){} // the Community tab's name with its dot, in the new language
   renderTopbarRight();
   if(S.view==='customer'){renderRegister();renderMyRides();if(S.custTab==='account')renderAccount();else if(S.custTab==='members')renderMembers();}
   else if(S.view==='staff')_renderStaffTab();
@@ -4447,6 +4450,7 @@ async function _loadDataInner(showLoader){
   if(!q.error&&S._netDown){S._netDown=false;_updateConnUI();}
   S.dataLoaded=true; // first successful load - render real content instead of skeletons
   setTimeout(()=>{try{_forceRatingPrompt();}catch(e){}},0); // a ride waiting for its rating takes the screen the moment the rider's bookings are in: opening the site, signing in (the owner, 2026-10-03)
+  setTimeout(()=>{try{_pulse();}catch(e){}},0); // a member's Community news: the dot, a badge (R1, R4)
   S._cacheOnly=false; // the queue's opening session can now be chosen from real data (_sfDefaultToToday)
   if(_firstLoad){
     Promise.all([_refP,_optP]).then(async()=>{
@@ -5317,7 +5321,8 @@ const VENUE_KEY={JCC:'evJccName',JYC:'venueJyc',[AR_LOC]:'venueGymnation'}; // J
 // rides staff approve, and Run for Her. Their ticket's button opens that point and says so.
 function _meetsAt(s){return _isApprovalRide(s)||_isRun(s)||_isArena(s);}
 // The session's own map link: a meeting point's, or the venue's of a date held away from the circuit (yoga, 2026-11-12).
-function _ownMapUrl(s){return (_meetsAt(s)||_isYoga(s))&&_safeUrl(s&&s.meet_url);}
+// A meeting point staff set as coordinates (sessions.meet_lat/meet_lng, 2026-11-13) opens Google Maps at that spot.
+function _ownMapUrl(s){const ll=_meetLL(s);return ll?'https://www.google.com/maps/search/?api=1&query='+ll:(_meetsAt(s)||_isYoga(s))&&_safeUrl(s&&s.meet_url);}
 // The Saturday ride's breakfast spot, told at a time staff choose (the owner, 2026-10-06: "add an option for
 // saturday social ride to announce/make the spot and location visible at the time the staff chooses", then "show
 // the meeting point immediately only hide the breakfast spot and location"). Until sessions.reveal_at,
@@ -5336,7 +5341,7 @@ function _spotHeld(s){
   if(has&&!_rtStaffDevice())return false;
   const now=Date.now();return r>now||(!has&&now-r<REVEAL_GRACE_MS);
 }
-function _meetHeld(s){return _spotHeld(s)&&!_safeUrl(s.meet_url);}
+function _meetHeld(s){return _spotHeld(s)&&!_safeUrl(s.meet_url)&&!_meetLL(s)&&!_meetNm(s);}
 // When they are told, in Riyadh time: "Tomorrow · 8 PM", "Friday · 9 Oct 2026 · 8:30 PM".
 function _revealWhen(s){
   const r=_revealMs(s);if(!r)return'';
@@ -5363,6 +5368,8 @@ function _sessLoc(s){return String((s&&s.location)||'').trim()||(_rideKind(s)===
 function _venueName(s){
   if(!s)return'';
   if(_meetHeld(s))return t('meetPointLbl'); // a held ride without its link still meets at a point, never the circuit
+  if(_meetNm(s))return _meetNm(s); // the meeting point by the name staff gave it (2026-11-13)
+  if(_meetLL(s)&&(_meetsAt(s)||!_sessLoc(s)))return t('meetPointLbl');
   if(_isApprovalRide(s)&&_safeUrl(s.meet_url))return t('meetPointLbl');
   const loc=_sessLoc(s);
   if(!loc&&_rideKind(s)==='yoga'&&_safeUrl(s.meet_url))return t('meetPointLbl'); // a yoga date without a venue's name (2026-11-12)
@@ -15802,6 +15809,7 @@ function _currentSessId(){
 function setCustTab(tab,part){
   if(S.view!=='customer'&&getSession())showView('customer'); // a customer tab implies the customer view
   S.custTab=tab;try{document.title=_pageTitle();}catch(e){}
+  if(tab==='members')_hubDotOff(); // the dot goes as the tab opens (R4); the tab's read clears it on the server
   if(tab==='account'){_accSubSet(part||'');S._accFromMenu=false;} // the tab bar opens Account's menu; a link names its part or page
   try{sessionStorage.setItem('cq_nav_ctab',tab);}catch(e){}
   _syncSndTheme(); // leaving Reserve by the tab bar has to take the National Day skin with it
@@ -15818,6 +15826,7 @@ function setCustTab(tab,part){
   try{_forceRatingPrompt();}catch(e){} // a pending post-ride rating is mandatory on any customer tab
   _lqNightWatch(); // the tab bar is back (or gone, on the booking steps): what is under it now
   if(tab!=='myrides')_wakeSync(); // today's code is off the screen: the phone may sleep again
+  setTimeout(_plsCheer,0); // a Community badge that waited behind a gate or a pop-up (R1)
 }
 // o.sid (2026-11-06, ST08): Bookings opens on that ride in one paint; opening it and then picking the ride drew the roster twice.
 function setStaffTab(tab,o){
@@ -15953,7 +15962,158 @@ function _commNavPaint(){
   if(top)top.hidden=!on;
   if(bot)bot.hidden=!on;
   if(grid)grid.classList.toggle('with-comm',on);
+  const cl=document.getElementById('bnav-members-lbl');if(cl)cl.textContent=t('mbTitle'); // a language change reaches the bar's label too
+  // The dot (R4): this account's last pulse lit it; never while the tab is open. Its state is said in the tab's name.
+  const c=S.loggedIn,p=S._pls,dot=on&&!!(c&&p&&p.id===c.id&&p.dot)&&!(S.view==='customer'&&S.custTab==='members');
+  [top,bot].forEach(b=>{if(!b)return;b.classList.toggle('has-dot',dot);if(dot)b.setAttribute('aria-label',t('hubDotLbl'));else b.removeAttribute('aria-label');});
+  if(on)_pulse();
 }
+// ── Community where members already are (2026-11-13, reports/Community tab reach after launch.md: R1, R4-R7) ──────────
+// One light read, hub_pulse (migration 20261113120000), for a member anywhere in the app: once the account's data is in
+// on opening, when the page comes back into view (at most once in ten minutes), after a rating and after a booking. It
+// lights a dot on the Community tab (never a number, never for a booking or a sale), brings the Community badges the
+// server gave that this member has not seen (the badge pop-up, once, on whatever tab is up; the rating's last screen
+// when a ride waits to be rated) and the member's challenge for the rating's last screen and "You're booked". Seen is
+// the server's (hub_seen), so another phone does not show a badge again. A database without it: none of this runs, and
+// Account's own pop-up shows Community badges as before (S._plsOff). S._hubSrc names the way in for the tab's read.
+const PLS_GAP=6e5;
+function _plsTok(c){return{p_id:c.id,p_token:c.session_token};}
+function _plsMine(){const c=S.loggedIn,p=S._pls;return c&&p&&p.id===c.id&&p.d&&p.d.member?p.d:null;}
+function _pulse(force){
+  const c=S.loggedIn;
+  if(!c||!c.session_token||S._plsOff||S.view==='staff'||_isStaffHost()||typeof sb==='undefined'||!sb||!S.dataLoaded||!_infoMember())return Promise.resolve(null);
+  let p=S._pls&&S._pls.id===c.id?S._pls:null;
+  if(p&&p.busy)return p.busy;
+  if(!force&&p&&Date.now()-p.at<PLS_GAP)return Promise.resolve(p.d);
+  if(!p)p=S._pls={id:c.id,at:0,d:null,dot:false};
+  const cur=p,asked=Date.now();
+  cur.busy=(async()=>{
+    let r;try{r=await sb.rpc('hub_pulse',_plsTok(c));}catch(e){r={error:e};}
+    cur.busy=null;
+    if(S._pls!==cur||!S.loggedIn||S.loggedIn.id!==c.id)return null; // signed out, or another account, meanwhile
+    if(r&&r.error&&_rpcAbsent(r.error)){S._plsOff=true;S._pls=null;_commNavPaint();return null;}
+    const d=r&&!r.error&&r.data&&r.data.ok===true?r.data:null;
+    if(!d){cur.at=asked-PLS_GAP+6e4;return cur.d;} // no answer: asked again a minute on
+    cur.at=Date.now();cur.d=d;
+    cur.dot=!!(d.member&&d.dot)&&asked>(S._hubDotOffAt||0); // the tab opened after this was asked: its own read cleared it
+    _commNavPaint();
+    if(d.member&&Array.isArray(d.fresh)&&d.fresh.length)setTimeout(_plsCheer,0);
+    return d;
+  })();
+  return cur.busy;
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')try{_pulse();}catch(e){}});
+// The tab bar's Community: a tap while the dot is lit is counted as the dot's.
+function _commTap(){const c=S.loggedIn,p=S._pls;S._hubSrc=c&&p&&p.id===c.id&&p.dot?'dot':'tab';setCustTab('members');}
+function _hubGo(src){S._hubSrc=src;setCustTab('members');}
+function _hubDotOff(){S._hubDotOffAt=Date.now();if(S._pls)S._pls.dot=false;}
+// Signed out on /members (a link from WhatsApp in a browser that is not signed in): the sign-in, then the tab (R7).
+function _hubSignIn(){try{sessionStorage.setItem(_TABLINK_KEY,'members');}catch(e){}setTimeout(goLanding,0);}
+// ?src= on a link into the tab: wa-<anything> is a WhatsApp link staff sent, push a notification, any other a link, and
+// /members opened with none (not a reload or Back) a link too. Then it comes off the address.
+function _readHubSrc(pn){
+  try{
+    const u=new URL(location.href),v=u.searchParams.get('src');
+    if(v!==null){u.searchParams.delete('src');history.replaceState(history.state,'',u.pathname+u.search+u.hash);}
+    if(!pn||pn.view!=='customer'||pn.ctab!=='members')return;
+    const nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];
+    if(v===null&&nav&&nav.type!=='navigate')return;
+    S._hubSrc=/^wa-/.test(v||'')?'wa':v==='push'?'push':'link';
+  }catch(e){}
+}
+// A Community badge: the two ladders, a season challenge's own, any the pulse brought. Account's pop-up leaves them to
+// the pulse while it runs (_bdgCelebrate).
+function _hubBdg(s){const d=S._pls&&S._pls.d;return /^(challenge|club_goal)_\d+$/.test(s||'')||!!(d&&[...(d.fresh||[]),...(d.goals||[]).map(g=>g&&g.badge)].some(x=>x&&x.slug===s));}
+// Something else holds the screen: a gate, a pop-up, a ride waiting for its rating (the badge goes to its last screen).
+function _plsHeld(){
+  if(!(S.view==='customer'||S.view==='landing')||S._rg||S._pg||S._fix||S._afx||S._xg||S._cg||S._wg||S._sg||S._siAsk||_pendingRatingId())return true;
+  if(document.querySelector('#badge-pop,#pwd-gate')||document.body.classList.contains('fix-open'))return true;
+  return[...document.querySelectorAll('[data-host]')].some(h=>h.firstElementChild&&h.getClientRects().length);
+}
+// The badge itself: the account's badges read again (the pop-up reads them), and the catalogue if not in yet.
+async function _plsBadge(c,slug){
+  let r;try{r=await sb.rpc('customer_my_badges',_plsTok(c));}catch(_){}
+  if(r&&!r.error&&Array.isArray(r.data)&&S.loggedIn&&S.loggedIn.id===c.id)S._bdgMine={id:c.id,at:Date.now(),busy:false,list:r.data};
+  if(!Array.isArray(S._bdgCat)||!S._bdgCat.length){try{const k=await sb.rpc('badge_catalog');if(!k.error&&Array.isArray(k.data))S._bdgCat=k.data;}catch(_){}}
+  return _bdgMineList(c).find(x=>x&&x.slug===slug)||(S._bdgCat||[]).find(x=>x&&x.slug===slug)||null;
+}
+// The newest badge not seen opens in the app's badge pop-up with Community and Done; every one brought is then seen.
+async function _plsCheer(){
+  const c=S.loggedIn,p=S._pls;
+  if(!c||!p||p.id!==c.id||!p.d||!p.d.member||S._plsCheering||_plsHeld())return;
+  const fresh=(p.d.fresh||[]).filter(x=>x&&x.slug&&!(p.seen&&p.seen.has(x.slug)));if(!fresh.length)return;
+  S._plsCheering=true;
+  try{
+    const top=fresh[fresh.length-1].slug;
+    if(!(await _plsBadge(c,top))||!S.loggedIn||S.loggedIn.id!==c.id||_plsHeld())return;
+    const i=_mrBadgeList(c).findIndex(x=>(x.b&&x.b.slug===top)||(x.lv&&x.lv.some(y=>y.b&&y.b.slug===top)));if(i<0)return;
+    _mrBadgeInfo(i,true,true);
+    _plsSeen(c,fresh.map(x=>x.slug));
+  }finally{S._plsCheering=false;}
+}
+function _plsSeen(c,slugs){
+  if(!c||!slugs||!slugs.length)return;
+  const p=S._pls;if(p&&p.id===c.id){p.seen=p.seen||new Set();slugs.forEach(s=>p.seen.add(s));}
+  try{Promise.resolve(sb.rpc('hub_seen',{..._plsTok(c),p_slugs:slugs})).catch(()=>{});}catch(_){}
+}
+function _bdgPopComm(){_bdgPopFrom=null;_bdgPopClose();_hubGo('badge');}
+// The challenge by its name, and progress as the Community tab draws it: dots up to five, a bar above that. plus: this
+// booking, an outlined dot after the done ones (R6).
+function _hpName(me){return me.kind==='first'?t('hpFirst'):me.kind==='second'?t('hpSecond'):me.kind==='back'?t('hpBack'):t('hpLevel').replace('{0}',me.target);}
+function _hpBar(n,tg,plus){
+  const v=Math.min(Math.max(0,Number(n)||0),tg),x=plus&&v<tg?1:0;
+  if(tg<=5)return`<span class="hp-dots" aria-hidden="true">${Array.from({length:tg},(_,i)=>`<i${i<v?' class="on"':i<v+x?' class="nx"':''}></i>`).join('')}</span>`;
+  const w=k=>_cssv({'--w':(k/tg*100).toFixed(1)+'%'});
+  return`<span class="hp-bar" aria-hidden="true"><i class="on" data-cssv="${w(v)}"></i>${x?`<i class="nx" data-cssv="${w(x)}"></i>`:''}</span>`;
+}
+// The rating's last screen (R5), in the same pop-up, once the last ride waiting is rated, for a member and only with
+// something to show: the badge just earned, else the month's challenge this ride moved, else the season challenge.
+// One of them, a Community button and Done, no sentence.
+async function _rgFinFor(e){
+  const c=S.loggedIn;if(!c||!e||_pendingRatingId())return null;
+  if(!_infoMember()&&(await commAccess())!==true)return null;
+  const wait=(x,ms)=>Promise.race([x,new Promise(r=>setTimeout(()=>r(null),ms))]);
+  const d=await wait(_pulse(true),4000);
+  if(!d||!d.member||!S.loggedIn||S.loggedIn.id!==c.id)return null;
+  const p=S._pls,fresh=(d.fresh||[]).filter(x=>x&&x.slug&&!(p&&p.seen&&p.seen.has(x.slug)));
+  if(fresh.length){const b=await wait(_plsBadge(c,fresh[fresh.length-1].slug),3000);if(b)return{k:'badge',b,nm:_bdgName(b),slugs:fresh.map(x=>x.slug)};}
+  const ds=String(e.sessionDate||e.sessionId||'').slice(0,10),me=d.me,g=Array.isArray(d.goals)?d.goals[0]:null;
+  if(me&&me.kind&&Number(me.target)>0&&Number(me.n)>0&&ds.slice(0,7)===String(me.ends_on||'').slice(0,7))return{k:'me',nm:_hpName(me),n:Number(me.n),tg:Number(me.target)};
+  if(g&&Number(g.target)>0&&Number(g.n)>0)return{k:'goal',nm:String((S.lang==='ar'&&g.name_ar)||g.name||''),n:Number(g.n),tg:Number(g.target)};
+  return null;
+}
+function _rgFinHtml(f){
+  const v=f.k==='badge'?0:Math.min(f.n,f.tg),txt=`${v} / ${f.tg}`;
+  return`<div class="auth-backdrop"><div class="pg-box fx-box rg-box rg-fin" role="dialog" aria-modal="true" aria-labelledby="rate-title" tabindex="-1">
+    ${f.k==='badge'?`<div class="rg-fin-k">${t('bdgNew')}</div>${_bdgMedal(f.b.icon,_bdgCol(f.b),'rg-fin-medal')}`:''}
+    <h2 id="rate-title" class="pg-title rg-fin-t"><bdi>${esc(f.nm)}</bdi></h2>
+    ${f.k==='badge'?'':`<div class="rg-fin-p" role="progressbar" aria-valuemin="0" aria-valuemax="${f.tg}" aria-valuenow="${v}" aria-valuetext="${esc(txt)}" aria-labelledby="rate-title">${_hpBar(v,f.tg)}<bdi class="rg-fin-n" dir="ltr">${esc(txt)}</bdi></div>`}
+    <button type="button" class="pg-btn" data-on-click="${_on('_rgFinGo')}">${t('mbTitle')}</button>
+    <button type="button" class="gate-out" data-on-click="${_on('_rgFinDone')}">${t('doneBtn')}</button>
+  </div></div>`;
+}
+function _rgFinDone(){S._rg=null;renderRateModal();setTimeout(_plsCheer,0);}
+function _rgFinGo(){S._rg=null;renderRateModal();_hubGo('rating');}
+// "You're booked" for a community session (R6): the member's challenge with this booking as an outlined dot, a link to
+// Community. Its own element, filled from the last pulse and again when the one after the booking answers; the ticket
+// under it is unchanged.
+function _bkHubHtml(s){return s&&_isCommunity(s)&&S.loggedIn?`<div class="bk-ok-hub" id="bk-ok-hub">${_bkHubIn(s)}</div>`:'';}
+function _bkHubIn(s){
+  const d=_plsMine(),me=d&&d.me,ds=String(s.session_date||s.id||'').slice(0,10),n=Number(me&&me.n)||0,tg=Number(me&&me.target)||0;
+  if(!me||!me.kind||!tg||n>=tg||ds.slice(0,7)!==String(me.ends_on||'').slice(0,7))return'';
+  return`<button type="button" class="bk-hub" data-on-click="${_on('_hubGo','booked')}"><span class="bk-hub-k">${_cuIc('flag',14)}<bdi>${esc(_hpName(me))}</bdi></span>${_hpBar(n,tg,true)}<span class="sr-only">${esc(t('hpWithThis').replace('{0}',n+1).replace('{1}',tg))}</span><span class="bk-hub-go">${t('mbTitle')}${_cuIc('go',14,true)}</span></button>`;
+}
+function _bkHubAfter(){Promise.resolve(_pulse(true)).then(()=>{const w=document.getElementById('bk-ok-hub'),tk=(S.lastTickets||[])[0],s=tk&&_sessDisp(tk.sessionId);if(w&&s)w.innerHTML=_bkHubIn(s);}).catch(()=>{});}
+// The ride's own news on the ticket (R10): a chip staff set (start moved, shortened, cancelled), and the meeting point as
+// a place (R11): coordinates open Google Maps there, and its name is the venue's.
+const RS_KEY={moved:'rsMoved',shortened:'rsShortened',cancelled:'rsCancelled'};
+function _rsChip(s){const k=s&&s.ride_status;return _own(RS_KEY,k)?`<span class="tk-rs tk-rs-${k}">${t(RS_KEY[k])}</span>`:'';}
+function _meetLL(s){
+  if(!s||s.meet_lat==null||s.meet_lng==null||s.meet_lat===''||s.meet_lng==='')return'';
+  const a=Number(s.meet_lat),b=Number(s.meet_lng);
+  return isFinite(a)&&isFinite(b)&&Math.abs(a)<=90&&Math.abs(b)<=180?a+','+b:'';
+}
+function _meetNm(s){return String((s&&((S.lang==='ar'&&s.meet_name_ar)||s.meet_name))||'').trim();}
 
 const _SNAV_ICON={reports:'print',store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',ask:'ask',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
@@ -19213,6 +19373,7 @@ function _bkOkHtml(tks,wl,appr,nc){
     <h1 class="page-title bk-ok-t" id="bk-ok-t" tabindex="-1">${wl?t('toastWaitlisted'):appr?t('tkReservedTitle'):t('tkBookedTitle')}</h1>
     <p class="bk-ok-s">${s?`<bdi>${esc(_evTitle(s))}</bdi><br>`:''}${esc(_dayWord(d)||dayLabel(p.sessionDay))} · ${esc(shortDate(d))}${s?` · <bdi>${sessionTime(s)}</bdi>`:''}</p>
     ${num?`<div class="bk-ok-q"><span>${t(_isBlood(s)?(_bldVis(p)?'bldVisNumLabel':'bldNumLabel'):_isRun(s)?'runNumLabel':_isRace(s)?'vlNumLabel':'queueNumLabel')}</span><b dir="ltr">${esc(num)}</b></div>`:''}
+    ${wl?'':_bkHubHtml(s)}
     ${sub?`<p class="bk-ok-sub">${sub}</p>`:''}
     <div class="bk-ok-btns"><button type="button" class="btn-primary" data-on-click="${_on('_bkOkShow')}">${t('tkShowTicket')}</button>${wal}</div>
   </section>`;
@@ -20293,6 +20454,7 @@ async function _submitReg(){
     else if(_isArena(sess))toast(bookingStatus==='waitlist'&&!_mixWl?t('toastWaitlisted'):t('arBookedToast')); // no number until it is paid
     else toast(_mixWl?`${t('toastRegistered')} ${_seatE.map(e=>`#${e.queueNum}`).join(', ')} · ${t('toastWaitlisted')}`:bookingStatus==='waitlist'?`${t('toastWaitlisted')} ${numStr}`:`${t('toastRegistered')} ${numStr}`);
     renderRegister();renderMyRides();_regFocus();
+    _bkHubAfter(); // a member's pulse after the booking: "You're booked" shows their challenge with it (R6)
     try{_forceRatingPrompt();}catch(e){} // a Defe place asks "Have you registered for the race?" at once
     if((bookingStatus!=='waitlist'||_mixWl)&&_isRace(sess)&&entries[0]&&entries[0].status!=='waitlist')_vtAsk(entries[0].id,true); // Victory Lap: a ticket, or buy one (2026-10-23); the Arena race: straight to the transfer (2026-11-02)
     // The National Day ride still holds its popup open (its federation form is the one thing a rider
@@ -20866,7 +21028,7 @@ function renderBookingTicket(entries,opts){
     ${_bigQr?`<div class="tk-qr-big">${ticketQR(bookingRef(primary),224,_qrTone(sess,g))}</div>`:''}
     <div class="cu-tk-when tk-when">
       <div class="tk-when-d">${_dw?`<strong class="tk-dw">${esc(_dw)}</strong><span class="tk-sep" aria-hidden="true">·</span>`:''}<bdi class="tk-seg">${esc(dayLabel(primary.sessionDay))} ${esc(shortDate(primary.sessionDate))}</bdi><span class="tk-sep" aria-hidden="true">·</span><bdi class="tk-seg">${sessTime}</bdi></div>
-      ${past?'':`<div class="tk-when-p"><span class="tk-venue">${esc(_venueName(sess))}</span>${(_allWl&&_wlCollectTime(sess))?'':(()=>{const g=_gathersTime(sess);const c=(_needsBike(sess)||g)&&_rideKind(sess)!=='vlap'?fmt12h(sessionCollectTime(sess)):'';return c?`<span class="tk-sep" aria-hidden="true">·</span><span class="cu-c-green tk-collect"><bdi>${esc((g?t('ticketGatherAt'):t('ticketCollectAt')).replace('{0}',c))}</bdi></span>`:'';})()}${_sgChip(sess)?' '+_sgChip(sess):''}</div>`}
+      ${past?'':`<div class="tk-when-p"><span class="tk-venue">${esc(_venueName(sess))}</span>${(_allWl&&_wlCollectTime(sess))?'':(()=>{const g=_gathersTime(sess);const c=(_needsBike(sess)||g)&&_rideKind(sess)!=='vlap'?fmt12h(sessionCollectTime(sess)):'';return c?`<span class="tk-sep" aria-hidden="true">·</span><span class="cu-c-green tk-collect"><bdi>${esc((g?t('ticketGatherAt'):t('ticketCollectAt')).replace('{0}',c))}</bdi></span>`:'';})()}${_sgChip(sess)?' '+_sgChip(sess):''}${_rsChip(sess)}</div>`}
     </div>
     ${_tg?'<div class="wl-x"><div>':''}
     <div class="cu-tk-body">
@@ -21237,6 +21399,7 @@ function openRateModal(id,forced){
   renderRateModal();
 }
 function closeRateModal(){
+  if(S._rg&&S._rg.fin){_rgFinDone();return;} // the last screen, after the rating: Escape is Done
   if(S._rg&&S._rg.forced&&S.loggedIn&&S.view!=='staff')return; // forced: only a rating (or Log out) closes it
   S._rg=null;renderRateModal();
 }
@@ -21272,6 +21435,11 @@ function renderRateModal(){
   _syncBldTheme();
   const g=S._rg,m=document.getElementById('rate-modal');if(!m)return;
   if(!g){m.style.display='none';m.innerHTML='';_fixOpenSync();return;} // every forced pop-up counted, the claim page too
+  if(g.fin){ // the last screen (R5): the same pop-up, centred
+    document.body.classList.add('fix-open');m.style.display='block';m.innerHTML=_rgFinHtml(g.fin);
+    if(!g.finShown){g.finShown=true;const b=m.querySelector('.rg-fin');if(b)try{b.focus({preventScroll:true});}catch(_){}}
+    return;
+  }
   const e=_qGet(g.id);if(!e){S._rg=null;return renderRateModal();}
   const s=_sessDisp(e.sessionId);
   g.bf=_bfName(s); // the breakfast question names where the rider ate
@@ -21316,7 +21484,13 @@ async function submitRating(){
   if(S._rg!==g)return; // signed out meanwhile
   if(error){g.saving=false;g.net=true;renderRateModal();return;}
   const e=_qGet(g.id);if(e){e.ratingBike=bike;e.ratingExp=exp;e.feedback=note;e.ratingDetail=detail;e.ratedAt=new Date().toISOString();}
-  S._rg=null;renderRateModal();toast(t(_rgRun(e)?'rateRunThanks':_ncEntry(e)?'rateSessThanks':'rateThanks'));renderMyRides(); // which opens the next unrated ride, if there is one
+  const thx=t(_rgRun(e)?'rateRunThanks':_ncEntry(e)?'rateSessThanks':'rateThanks');
+  // The last ride rated: a member may have a last screen to see (R5). The thank-you is still said, as before.
+  let fin=null;try{fin=await _rgFinFor(e);}catch(_){}
+  if(S._rg!==g)return;
+  if(fin){g.saving=false;g.fin=fin;if(fin.k==='badge')_plsSeen(S.loggedIn,fin.slugs);renderRateModal();toast(thx);renderMyRides();return;}
+  S._rg=null;renderRateModal();toast(thx);renderMyRides(); // which opens the next unrated ride, if there is one
+  setTimeout(_plsCheer,0);
 }
 // ── A desk-added booking's waiver: an unskippable page (the owner, 2026-10-04) ──
 // A booking made in the wizard carries the waiver it was agreed under (waiver_version). A rider staff
@@ -22107,7 +22281,7 @@ function _ttPick(id){const a=S._ttMine;if(a)_ttSavePrefs(id,a.hidden);}
 // member_directory read first, so a first open waited three times in a row).
 function renderMembers(){
   const host=document.getElementById('tab-members'),cust=S.loggedIn||getSession();if(!host)return;
-  if(!cust){host.innerHTML='';return;}
+  if(!cust){host.innerHTML='';if(S.view==='customer'&&S.custTab==='members')_hubSignIn();return;} // signed out: the sign-in, then back here (R7)
   if(!document.getElementById('hub-body'))host.innerHTML=`<h1 class="page-title" tabindex="-1">${t('mbTitle')}</h1><div id="hub-body"></div>`;
   else{const h=host.querySelector('h1');if(h)h.textContent=t('mbTitle');}
   const body=document.getElementById('hub-body');if(!window._hubRender&&body&&!body.firstChild)body.innerHTML=_skelHtml(2,'hub-skel');
@@ -22151,7 +22325,8 @@ function _bdgLevelsHtml(x){
     ${_bdgMedal(y.b.icon,_bdgCol(y.b),y.on?'':'locked')}<span class="badge-lvl-t"><b>${esc(_bdgName(y.b))}</b><small>${esc(_bdgDesc(y.b))}</small></span>
     <bdi class="badge-lvl-n">${y.on?ICON_TICK:y.p&&/^\d+\/\d+$/.test(y.p)?esc(y.p):_artIcon('lock',12)}</bdi></li>`).join('')}</ol>`;
 }
-function _mrBadgeInfo(i,fresh){
+// comm: a Community badge the pulse brought (R1): Community and Done in place of Close.
+function _mrBadgeInfo(i,fresh,comm){
   const cust=S.loggedIn;if(!cust)return;
   const x=_mrBadgeList(cust)[i];if(!x)return;
   const old=document.getElementById('badge-pop');
@@ -22170,11 +22345,12 @@ function _mrBadgeInfo(i,fresh){
     ${g&&g.note?`<div class="badge-pop-note"><bdi>${esc(g.note)}</bdi></div>`:''}
     ${g?`<div class="badge-pop-earned">${ICON_TICK} ${esc(t('bdgGivenBy').replace('{0}',_bdgDay(g.at)))}</div>`:x.lv?(x.lvN===x.lv.length?`<div class="badge-pop-earned">${ICON_TICK} ${t('bdMaxLevel')}</div>`:''):x.on?`<div class="badge-pop-earned">${ICON_TICK} ${t('bdEarned')}</div>`:(x.p?`<div class="badge-pop-prog">${x.p}</div>`:'')}
     ${_bdrPopHtml(x)}
-    <button type="button" class="btn-secondary cu-w100-mt14" data-on-click="${_on("_on__mrBadgeInfo_1",_EV,_EL)}">${t('closeWord')||'Close'}</button>
+    ${comm?`<div class="badge-pop-acts"><button type="button" class="btn-primary" data-on-click="${_on('_bdgPopComm')}">${t('mbTitle')}</button><button type="button" class="btn-secondary" data-on-click="${_on("_on__mrBadgeInfo_1",_EV,_EL)}">${t('doneBtn')}</button></div>`
+      :`<button type="button" class="btn-secondary cu-w100-mt14" data-on-click="${_on("_on__mrBadgeInfo_1",_EV,_EL)}">${t('closeWord')||'Close'}</button>`}
   </div>`;
   el.addEventListener('click',e=>{if(e.target===el)_bdgPopClose();});
   document.body.appendChild(el);
-  const cb=el.querySelector('.badge-pop-box > button');if(cb)try{cb.focus({preventScroll:true});}catch(_){}
+  const cb=el.querySelector(comm?'.badge-pop-acts .btn-secondary':'.badge-pop-box > button');if(cb)try{cb.focus({preventScroll:true});}catch(_){}
 }
 // Badge requests (the owner, 2026-11-08: "add a button on badges for customers to request a badge and adding a proof
 // either a pdf or an image as optional and a comment too optional"). A rider asks for any badge they do not hold (the
@@ -22330,7 +22506,7 @@ function _bdgFresh(at){const v=Date.parse(at||'');return Number.isFinite(v)&&Dat
 // The newest badge staff gave, while the account page is on screen.
 function _bdgCelebrate(){
   const cust=S.loggedIn;if(!cust||S.view!=='customer'||S.custTab!=='account'||document.getElementById('badge-pop'))return;
-  const at=g=>Date.parse(g&&g.at)||0,top=_bdgMineList(cust).reduce((a,g)=>at(g)>at(a)?g:a,null);
+  const at=g=>Date.parse(g&&g.at)||0,top=_bdgMineList(cust).filter(g=>S._plsOff||!_hubBdg(g&&g.slug)).reduce((a,g)=>at(g)>at(a)?g:a,null); // Community badges are the pulse's (R1), seen on the server
   if(!top||!_bdgFresh(top.at))return;
   const k='cq_bdg_seen_'+cust.id;
   try{if(at(top)<=(+localStorage.getItem(k)||0))return;localStorage.setItem(k,String(at(top)));}catch(_){return;}
@@ -72174,6 +72350,7 @@ function _bikeHereInstead(code,kind){try{sessionStorage.setItem('cq_bike_here','
   const _wlcTok=_readClaimParam(); // /?claim=: a freed waitlist place offered to this rider (2026-10-09)
   const _isStaffUrl=new URLSearchParams(window.location.search).has('staff')||_staffEntry||!!_bikeCode||!!_lockerCode||_isStaffHost()||_pathStaff;
   if(!_isStaffUrl)_readEventLink(); // ?ev=&session= from micromobility.sa/experiences
+  if(!_isStaffUrl)_readHubSrc(_pathNav); // /members?src=wa-recap: how the member came to the Community tab (R7)
   if(!_isStaffUrl&&_pathNav&&_pathNav.signup)S.authMode='signup'; // /signup opens Create account
   // The sign-in page may already be drawn by now; a mode the address or a link asked for redraws it.
   {const am=document.getElementById('auth-modal');if(am&&am.style.display==='flex'&&S._authRenderMode!==S.authMode)renderAuthModal();}
