@@ -1472,6 +1472,39 @@ database's `_yoga_entry_guard` ONE_PER_SESSION). Walk-ins allowed. `_isYoga(s)`.
   activity, `_yoga_entry_guard`). Session: `supabase/checks/yoga-session-2026-11-21.sql`, run after the app is live.
   Tests: `tests/yoga-session.spec.ts`.
 
+## Featured (2026-11-13)
+The user: "create a new featured section under micromobility experiences in the booking app to put featured sessions
+and special events such as hatha yoga class", then "even created one in the main event card picker page".
+- **What is featured** (`_featured(s)`): a date inside MicroMobility Experiences (`_featOk` = `_evMatch(s,'community')`:
+  the Saturday ride, a Petromin night, the pool, the Defe run, yoga) whose `bike_slots._feat` is 1; with no `_feat` the
+  kind answers (`FEAT_KINDS`: yoga and the Defe run are featured as made); `_feat` 0 switches a special event off. It
+  lives beside `_time` in the settings blob, so there is no column and no migration, and the database's own writers
+  (`_ac`) keep it. A date with a card of its own on the picker (Run for Her, the races, events, blood) is never featured.
+- **Inside Experiences** (`renderRegister`): the featured dates lead the list in `section.sess-feat` under an `h2`
+  "Featured" (`featTitle`, the star on a neon disc), each under its day heading as every date is (`_sessDays`); the
+  rest follow under "Upcoming" (`featRest`), each date once. One radio group: the tab stop (`_first`) is the first card
+  on the page. Nothing featured: the list as before, no headings.
+- **The event picker** (`_featLandHtml`, above "Pick your event", after today's card): up to `FEAT_LAND_MAX` (4) cards
+  (`_featCardHtml`: the day as a tile in the kind's colour, the name, the time, where, the price or who leads it, and
+  Waitlist / places left / when it opens as a date's card says them). Only dates the rider may see (`_infoShowSess`: a
+  members' date to members, as its Details are), live and still ahead, soonest first. A tap (`_featOpen`) goes through
+  `selectEvent` and `selectSessCard`, so every gate answers as a tap on the event card and the date would. Two or more
+  on a phone are one row that scrolls sideways (`.feat-rail`, the next card showing at the edge); yoga's card keeps its
+  own colours (`.feat-yg`). A line's rules are drawn before each part and cut where a line wraps (`.feat-meta`).
+- **Staff**: a "Featured" switch on both session forms for those kinds (`_featSessSwitch`, `ns-feat` / `es-feat`, the
+  toggle "Open to volunteers" wears, with one line of what it does, `ssFeatHint`). The
+  new form's follows the kind until staff touch it (`S.newSessFeat` null, reset by `_n6sFormReset`); the edit form's
+  opens on what riders see. `_featSlot` stores nothing while the switch agrees with the kind, else 1 or 0. A clone
+  keeps its original's answer; a template pushed to its nights leaves each night's own (`_feat` beside `_inv`). The
+  Sessions agenda marks a featured date (`.ssx-feat`, `_sessExtraBits` with `feat`; the Bookings cards and the pickers
+  do not ask for it).
+- Found on the way: the yoga title's Marcellus never applied on a rider's page (the customer system's one-family rule
+  outranks a plain class); `.yg-card-title` and `.yg-flow-name` now name it under `body:not(.view-staff)`.
+  And the session forms' "Lockers offered" switch drew nothing (a bare checkbox has no look of its own on the staff
+  forms; its spec read the markup, never the page): it is a `web-toggle` now, like its neighbours.
+- Styles under `FEATURED` in styles.css, after `YOGA` and outside the customer system's banners (the kind's `--ev-rgb`).
+  Tests: `tests/featured.spec.ts`. Customer half 331.2 -> 332.2 KB locally (about 334.4 on the runner); budget 334 -> 337.
+
 ## Blood Donation event (2026-11-03)
 - **Blood Donor badge (2026-11-05):** `blood_donor`, the drop on the red medal, earned from staff's Donated mark (`donatedAt`), so taking the mark back takes the badge; shown only once held. **Volunteer badge:** `volunteer`, the raised hand on its own blue special medal (`BDG_SPECIAL.volunteer`, `.sp-volunteer`), given by staff from Community > Badges. Catalogue rows: migration 20261105100000. Mirrored in the website's `lib/ride-record.ts`.
 - **Blood Donation Visitor badge (2026-11-06):** `blood_visitor`, the drop's outline with a heart inside on the teal medal (glyph `dropo`), earned by everyone who came, donors and visitors alike: any booking on a `blood` session that staff checked out (status done), or one marked Donated (the owner, 2026-11-06: "the blood donation visitor badge give it to donors and visitors"); Blood Donor stays with those marked Donated only. Shown only once held. Catalogue row in migration 20261106100000.

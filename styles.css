@@ -11439,6 +11439,9 @@ body .sess-card.yg-card:focus-visible{outline:2px solid var(--yg-clay);outline-o
 .yg-card-mark{height:30px;width:auto;display:block;flex:none;}
 .yg-card-title{font-family:'Marcellus','Space Grotesk','Noto Sans Devanagari','Noto Sans Bengali',Georgia,serif;font-size:21px;font-weight:400;letter-spacing:.3px;line-height:1.2;color:var(--yg-clay);overflow-wrap:anywhere;}
 :is(html[lang="ar"],html[lang="ur"]) .yg-card-title{font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:600;letter-spacing:0;}
+/* on a rider's page the customer system's one-family rule outranks a plain class, and the title read in Rubik (found 2026-11-13) */
+body:not(.view-staff) :is(.yg-card-title,.yg-flow-name){font-family:'Marcellus','Space Grotesk','Noto Sans Devanagari','Noto Sans Bengali',Georgia,serif;}
+:is(html[lang="ar"],html[lang="ur"]) body:not(.view-staff) :is(.yg-card-title,.yg-flow-name){font-family:'IBM Plex Sans Arabic',sans-serif;}
 .yg-card-meta{display:flex;flex-wrap:wrap;align-items:center;gap:3px 9px;font-size:13px;font-weight:600;color:var(--yg-ink-2);min-width:0;}
 .yg-card-meta i{width:1px;height:12px;background:rgba(180,83,47,.35);display:inline-block;flex:none;}
 .yg-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;min-width:0;}
@@ -11483,6 +11486,67 @@ html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-yoga .sess-c
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-yoga{--rq-ev:#b4532f;}
 html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-yoga{--rq-ev:#e8916a;}
 @media(max-width:400px){.yg-card-title{font-size:19px;}.yg-card-mark{height:26px;}.yg-flow-mark{height:34px;}.yg-know-k{min-width:0;width:100%;}.yg-scene{width:140px;height:70px;}}
+/* ════════════════════════════════════════════════════════════════════════
+   FEATURED (the user, 2026-11-13) - a date inside MicroMobility Experiences that staff feature (_featured):
+   it leads the list of dates under a heading of its own, and the event picker shows it as a card that opens
+   it. The heading wears the star on a neon disc (neon as a fill, ink on it); a card is the day as a tile in
+   the kind's colour, the name, when and where. Yoga's card keeps its own sand, clay and low sun.
+   ════════════════════════════════════════════════════════════════════════ */
+body:not(.view-staff) :is(.sess-sec-h,.feat-h) .cu-ic{box-sizing:content-box;flex:none;padding:5px;border-radius:50%;background:var(--neon);color:var(--ink);vertical-align:0;}
+/* the list of dates: Featured first, then the rest under their own heading */
+body:not(.view-staff) .sess-feat{display:grid;gap:10px;min-width:0;}
+body:not(.view-staff) .sess-feat>.sess-day+.sess-day{margin-top:10px;}
+body:not(.view-staff) .sess-sec-h{display:flex;align-items:center;gap:10px;margin:0;font-size:var(--fs-17);font-weight:700;line-height:1.3;color:var(--ink);text-align:start;}
+body:not(.view-staff) .sess-sec-rest{margin-top:6px;}
+/* the event picker: the heading as the page's others, the cards in a row where there is room */
+body:not(.view-staff) #landing-body .landing-events-title.feat-h{gap:10px;margin-top:6px;}
+body:not(.view-staff) .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px;} /* auto-fill: one card keeps a column's width, beside the event tiles' */
+body:not(.view-staff) .feat-card{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:14px;width:100%;min-width:0;margin:0;padding:14px 16px;
+  text-align:start;color:var(--ink);background:var(--card);border:0;border-radius:var(--r-card);box-shadow:var(--pl-1);cursor:pointer;
+  transition:transform .32s var(--ease-spring),box-shadow .2s var(--ease-out);}
+body:not(.view-staff) .feat-card:hover{box-shadow:var(--pl-2);}
+body:not(.view-staff) .feat-card:active{transform:scale(.98);}
+body:not(.view-staff) .feat-card:focus-visible{outline:2px solid var(--go);outline-offset:2px;}
+@supports (corner-shape:squircle){body:not(.view-staff) .feat-card{corner-shape:squircle;}}
+@media (prefers-reduced-motion:reduce){body:not(.view-staff) .feat-card{transition:none;}body:not(.view-staff) .feat-card:active{transform:none;}}
+/* the day as a calendar leaf: the weekday on the kind's colour (white on it reads at 4.5:1 or more for every kind), the date under it */
+.feat-date{flex:none;display:grid;justify-items:center;align-content:start;gap:5px;min-width:56px;padding:0 0 8px;overflow:hidden;border-radius:16px;background:var(--card-2);line-height:1;}
+.feat-date b{font-size:22px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+.feat-date span{padding:0 6px;font-size:var(--fs-12);font-weight:600;color:var(--ink-2);white-space:nowrap;}
+.feat-date .feat-wd{justify-self:stretch;margin-bottom:2px;padding:5px 6px;text-align:center;font-weight:700;color:#fff;background:var(--ev);}
+.feat-copy{flex:1 1 auto;display:grid;gap:4px;min-width:0;overflow:hidden;}
+.feat-name{font-size:var(--fs-17);font-weight:700;line-height:1.25;overflow-wrap:anywhere;}
+/* a rule between the parts of a line, drawn before each part: the one a wrapped line would start with falls outside
+   .feat-copy and is cut, so no line begins or ends on a rule */
+.feat-meta{display:flex;flex-wrap:wrap;align-items:center;gap:2px 0;min-width:0;margin-inline-start:-17px;font-size:var(--fs-13);font-weight:500;color:var(--ink-2);}
+.feat-meta>*{position:relative;padding-inline-start:17px;}
+.feat-meta>span:not(.sess-card-spots)::before{content:'';position:absolute;inset-inline-start:8px;top:50%;width:1px;height:12px;margin-top:-6px;background:var(--line-2);}
+.feat-foot .sess-card-spots{margin-inline-start:17px;} /* the status keeps its own padding off (the system's rule), so it stands off by a margin */
+.feat-go{flex:none;display:inline-flex;color:var(--ink-3);}
+/* yoga's card: cream, the low sun's glow from the far corner, clay and sage */
+body:not(.view-staff) .feat-card.feat-yg{color:var(--yg-ink);background-color:var(--yg-cream);
+  background-image:radial-gradient(110% 130% at 100% 100%,rgba(var(--yg-glow),.30) 0%,rgba(var(--yg-glow),.12) 38%,rgba(255,251,245,0) 66%);
+  box-shadow:0 0 0 1px rgba(180,83,47,.22),0 1px 2px rgba(64,52,44,.08),0 8px 20px -8px rgba(64,52,44,.16);}
+html[dir="rtl"] body:not(.view-staff) .feat-card.feat-yg{background-image:radial-gradient(110% 130% at 0% 100%,rgba(var(--yg-glow),.30) 0%,rgba(var(--yg-glow),.12) 38%,rgba(255,251,245,0) 66%);}
+body:not(.view-staff) .feat-card.feat-yg:focus-visible{outline-color:var(--yg-clay);}
+.feat-yg .feat-date{background:var(--yg-sand);box-shadow:inset 0 0 0 1px rgba(180,83,47,.18);}
+.feat-yg .feat-date b{color:var(--yg-ink);}
+.feat-yg .feat-date span{color:var(--yg-ink-2);}
+.feat-yg .feat-date .feat-wd{color:#fff;background:var(--yg-clay);}
+.feat-yg .feat-name.yg-card-title{font-size:20px;font-weight:400;}
+.feat-yg .feat-meta{font-weight:600;color:var(--yg-ink-2);}
+.feat-yg .feat-meta>span:not(.sess-card-spots)::before{background:rgba(180,83,47,.35);}
+.feat-yg .feat-foot>span:nth-child(2):not(.sess-card-spots){color:var(--yg-sage-ink);font-weight:700;}
+.feat-yg .feat-go{color:var(--yg-clay);}
+/* a phone with two or more: one row that scrolls sideways, the next card showing at the edge, so the event tiles stay in view */
+@media(max-width:767px){
+  body:not(.view-staff) .feat-grid.feat-rail{display:flex;margin:-4px -16px -8px;padding:4px 16px 12px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:16px;scrollbar-width:none;}
+  body:not(.view-staff) .feat-rail::-webkit-scrollbar{display:none;}
+  body:not(.view-staff) .feat-rail>.feat-card{flex:0 0 86%;scroll-snap-align:start;}
+}
+@media(max-width:400px){body:not(.view-staff) .feat-card{gap:12px;padding:12px 14px;}.feat-date{min-width:50px;}.feat-date b{font-size:20px;}.feat-yg .feat-name.yg-card-title{font-size:18px;}}
+/* staff: the mark beside a featured date in every session list */
+body.view-staff .ssx-feat{font-weight:600;color:var(--sf-green-ink,var(--green));}
 /* STAFF COMMENTS (2026-10-23): a staff-only thread on a booking or an application (_scOpen, staff_comments) */
 .sc-chip{display:flex;align-items:center;gap:4px;margin-top:3px;max-width:24ch;padding:1px 6px;border:1px solid var(--border);background:var(--surface,transparent);color:var(--text);font:inherit;font-size:var(--staff-fs-sm,12px);cursor:pointer;border-radius:0;}
 .sc-chip .sc-chip-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-weight:500;}

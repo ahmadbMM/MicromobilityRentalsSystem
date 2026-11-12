@@ -8527,5 +8527,8 @@
   "zbRatedYes": "Nag-rate",
   "zbRatedNo": "Hindi nag-rate",
   "zbAvg": "Average na rating",
-  "zbTallyNote": "Binibilang ng buod, Bawat pagkakataon at Bawat tungkulin ang bawat status na iniiwan ng ibang filter. Sinusunod din ng mga sukat ng T-shirt, ng feedback at ng listahan ang filter ng Status."
+  "zbTallyNote": "Binibilang ng buod, Bawat pagkakataon at Bawat tungkulin ang bawat status na iniiwan ng ibang filter. Sinusunod din ng mga sukat ng T-shirt, ng feedback at ng listahan ang filter ng Status.",
+  "featTitle": "Tampok",
+  "featRest": "Mga paparating",
+  "ssFeatHint": "Unang makikita ng mga kalahok ang petsang ito sa MicroMobility Experiences, at bilang card sa pahina ng pagpili ng event."
 }

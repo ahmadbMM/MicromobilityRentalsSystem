@@ -8527,5 +8527,8 @@
   "zbRatedYes": "Ont noté",
   "zbRatedNo": "N'ont pas noté",
   "zbAvg": "Note moyenne",
-  "zbTallyNote": "Le résumé, Chaque opportunité et Chaque rôle comptent tous les statuts que gardent les autres filtres. Les tailles de T-shirt, les avis et la liste suivent aussi le filtre Statut."
+  "zbTallyNote": "Le résumé, Chaque opportunité et Chaque rôle comptent tous les statuts que gardent les autres filtres. Les tailles de T-shirt, les avis et la liste suivent aussi le filtre Statut.",
+  "featTitle": "À la une",
+  "featRest": "À venir",
+  "ssFeatHint": "Les participants voient cette date en premier dans Expériences MicroMobility, et comme carte sur la page de choix de l'événement."
 }

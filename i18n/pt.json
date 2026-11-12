@@ -8527,5 +8527,8 @@
   "zbRatedYes": "Avaliaram",
   "zbRatedNo": "Não avaliaram",
   "zbAvg": "Avaliação média",
-  "zbTallyNote": "O resumo, Cada oportunidade e Cada função contam todos os estados que os outros filtros mantêm. Os tamanhos de camiseta, as opiniões e a lista também seguem o filtro de estado."
+  "zbTallyNote": "O resumo, Cada oportunidade e Cada função contam todos os estados que os outros filtros mantêm. Os tamanhos de camiseta, as opiniões e a lista também seguem o filtro de estado.",
+  "featTitle": "Destaques",
+  "featRest": "Próximas datas",
+  "ssFeatHint": "Os participantes veem esta data primeiro em Experiências MicroMobility, e como cartão na página de escolha do evento."
 }
