@@ -723,6 +723,47 @@ Back on it, and the old `member_directory` check is gone: `hub_feed` answers `er
   the volunteer portal's address, so the build's split keeps them on the riders' side.
 - `club_card` (the website's email + mobile lookup) is revoked from everyone; the website shows a signed-in member their card from `member_area`.
 
+## Community reaches members where they already are (2026-11-13)
+
+Migrations 20261113120000 (community reach) and 20261113130000 (push consent); reports/Community tab reach after launch.md, R1-R22
+(all Build now but R19, WhatsApp Business: no). The tab's reach was the problem (6% of members opened it in its first two days),
+so its pieces now live outside it too.
+- **The database makes the backbone itself.** `_hub_tick` (pg_cron `mm-hub-tick`, every 15 minutes) makes every active member's
+  monthly challenge, gives Community badges to members who rode in the last two days (everyone who rode this month or last at
+  00:00 and Saturday 12:00, so a club goal reached by others still reaches all who rode toward it) and writes the Saturday recap
+  (`_hub_auto_post`, `hub_posts.auto`, about two hours after the ride closes). `hub_feed` still does all of this on a read.
+- **Seen is on the server.** `customer_badges.seen_at` (`hub_seen`); `hub_tab_seen.tab_at` (set by every `hub_feed` read) clears the
+  tab's dot. `hub_pulse` is the light read for the rest of the app (dot, `fresh` badges, `me`, season `goals`).
+- **Rider side (app.src.html):** `_pulse` on open, on return (at most every 10 minutes), after a rating and a booking; the dot is a
+  `has-dot` class on `#customer-tab-nav [data-ctab="members"]` and `#bnav-members` ("Community, new" to screen readers); fresh
+  badges open `_mrBadgeInfo(i, true, true)` (Community + Done) on any tab, never over a gate or the rating; the rating pop-up's last
+  screen shows one thing (badge, else challenge, else season); "You're booked" carries `#bk-ok-hub` (challenge dots, this booking
+  outlined) and `#bk-rm` ("Remind me", push). Every way into the tab sets `S._hubSrc` (tab, dot, rating, booked, badge, wa, push,
+  link; `?src=` read once at boot by `_readHubSrc` and dropped from the address), and member-hub.js sends it as `hub_feed`'s
+  `p_src` on an open's first read only (`hub_open_log`; refreshes send none).
+- **The tab:** the hero gives the session's two times as the ticket names them, where it meets (`meet_name`/`meet_name_ar`, else the
+  ticket's `_venueName`) and one Map button (`meet_lat`/`meet_lng`, else the ticket's link); tomorrow / today (from 3 h before:
+  place first, Show ticket scrolls Bookings to that ticket) / finished (an hour after the start) states; `ride_status` as a chip. The
+  Saturday report is number tiles (each only at 10 or more) plus the member's own Saturdays that month. A reached club goal shows
+  `club.next`, the next Saturday's own target.
+- **Goals:** the suggested level is capped one below the month's Saturdays unless the member rode every Saturday of one of the last
+  three months, and a challenge made after the 1st asks no more than done plus Saturdays left. The club target as members see it is
+  `_hub_club_eff`: a staff target (`hub_club_goals.manual`) as set, else the stored one lowered for Saturdays lost
+  (`_hub_club_lost`: cancelled, or passed with no ride). From a year of history a month is sized from the same month a year earlier.
+  `hub_ramadan` (staff, Community > Activities > Club goal) holds Ramadan's dates; a `hub_goals.ramadan_any` challenge (Cool Season)
+  counts any session in Ramadan (`_hub_goal_n`).
+- **Staff:** Numbers show opens by entry point and a six-week funnel; the Saturday report list shows automatic posts (edit line and
+  photo, Hide/Show, Copy WhatsApp link `/members?src=wa-recap`); the session editor has the meeting point's name and coordinate
+  (pasted "lat, lng" or a map link) and the ride status; `reminded_kind` `push` counts as the day-before reminder.
+- **Push (dormant until the owner sets the Cloudflare secrets and `VAPID_PUBLIC_KEY` ships):** Account has two switches, My rides and
+  Community, stored by `customer_push_prefs_set` with a consent record (`push_consents`: the words shown, `PRIVACY_VERSION`, a device
+  label). `push_outbox.cat` and `_push_outbox_gate` drop what a rider switched off (Community needs an explicit yes); `lang` is the
+  rider's. `_hub_push_tick` (`mm-hub-push`, every 10 minutes) queues the reminder the evening before (21:00 KSA, marks
+  `reminded_kind = 'push'`), the new challenge on the 1st (10:00) and the recap to members who rode; `session_change_push` tells a
+  booked session's riders when its time, meeting point or status changes (passes in Wallet never update). Texts are `push_words`
+  (ten languages, `{0}` placeholders, `kind:<ride_kind>` names). The client re-checks its subscription on every open (`_pushCheck`,
+  `cq_push_ep`), unsubscribes on sign-out, and push-send.js sends the Declarative Web Push shape the service worker also reads.
+
 ## The 2026-09-27 feature round (blocks 1-13)
 
 Built from the owner's answers on 2026-09-27/28; the source of each is in the commit messages.
