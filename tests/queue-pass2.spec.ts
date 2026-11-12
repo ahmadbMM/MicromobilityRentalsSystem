@@ -71,7 +71,9 @@ test('closing a future free ride leaves its riders as they are (sign-ups only pa
 test('closing a free session on its day leaves every rider as they are; only Close out settles them', async ({ page }) => {
   // the owner, 2026-10-09: "dont mark all bookings no show or completed unless the close out button is clicked"
   const TODAY = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
-  const free = { id: TODAY + '-sat', day: 'Saturday', session_date: TODAY, capacity: 20, status: 'open', created_at: 3, event_kind: 'community', ride_kind: 'saturday', paid_ride: false, needs_approval: true, spots: 20 };
+  // Started at midnight, so the night is always under way and Close always asks about Close out (_coXStarted): the
+  // night had no time, read as 09:00, so this went red every day from 09:00 in Riyadh until midnight (2026-11-12).
+  const free = { id: TODAY + '-sat', day: 'Saturday', session_date: TODAY, capacity: 20, status: 'open', created_at: 3, event_kind: 'community', ride_kind: 'saturday', paid_ride: false, needs_approval: true, spots: 20, bike_slots: JSON.stringify({ _time: '00:00 - 23:59' }) };
   const fr = (id: string, status: string, approval: string | null) => row(id, { session_id: free.id, session_date: free.session_date, session_day: 'Saturday', status, approval, price: 0 });
   await stubSupabase(page, { sessions: [...sessions, free], bikes, queue_entries: [fr('a1', 'waiting', 'approved'), fr('a2', 'active', 'approved'), fr('a3', 'waiting', 'pending'), fr('a4', 'waiting', null)] });
   await unlockStaff(page);
@@ -82,6 +84,10 @@ test('closing a free session on its day leaves every rider as they are; only Clo
   await page.evaluate(`toggleSession('${free.id}','closed')`);
   await page.waitForTimeout(600);
   expect(patches).toEqual([]);                                                            // closing is only a status change
+  // riders still open on a night under way: Close asks about Close out, and Just close leaves them as they are (2026-10-28)
+  await page.locator('#co-x-ask').getByRole('button', { name: 'Just close' }).click();
+  await expect(page.locator('#co-x-ask')).toHaveCount(0);
+  expect(patches).toEqual([]);
   await page.evaluate(`closeOutSession('${free.id}')`);
   await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
   await page.locator('.confirm-box button').filter({ hasText: /close out/i }).click();
