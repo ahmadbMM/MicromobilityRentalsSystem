@@ -8530,5 +8530,18 @@
   "zbTallyNote": "Le résumé, Chaque opportunité et Chaque rôle comptent tous les statuts que gardent les autres filtres. Les tailles de T-shirt, les avis et la liste suivent aussi le filtre Statut.",
   "featTitle": "À la une",
   "featRest": "À venir",
-  "ssFeatHint": "Les participants voient cette date en premier dans Expériences MicroMobility, et comme carte sur la page de choix de l'événement."
+  "ssFeatHint": "Les participants voient cette date en premier dans Expériences MicroMobility, et comme carte sur la page de choix de l'événement.",
+  "infoAboutShort": "À propos",
+  "infoSeeDates": "Voir les dates",
+  "rideNoLbl": "Sortie {0}",
+  "sunriseLbl": "Lever du soleil",
+  "sunriseAt": "Lever du soleil {0}",
+  "kfLbl": "Afficher",
+  "kfAll": "Tout",
+  "kfSat": "Samedi",
+  "kfSwim": "Piscine",
+  "kfPetro": "Petromin",
+  "regProgDate": "Date",
+  "regStep1TitleDate": "Choisissez une date",
+  "sessTitleArLbl": "Nom en arabe"
 }

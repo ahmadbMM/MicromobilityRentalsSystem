@@ -8530,5 +8530,18 @@
   "zbTallyNote": "O resumo, Cada oportunidade e Cada função contam todos os estados que os outros filtros mantêm. Os tamanhos de camiseta, as opiniões e a lista também seguem o filtro de estado.",
   "featTitle": "Destaques",
   "featRest": "Próximas datas",
-  "ssFeatHint": "Os participantes veem esta data primeiro em Experiências MicroMobility, e como cartão na página de escolha do evento."
+  "ssFeatHint": "Os participantes veem esta data primeiro em Experiências MicroMobility, e como cartão na página de escolha do evento.",
+  "infoAboutShort": "Sobre",
+  "infoSeeDates": "Ver datas",
+  "rideNoLbl": "Passeio {0}",
+  "sunriseLbl": "Nascer do sol",
+  "sunriseAt": "Nascer do sol {0}",
+  "kfLbl": "Mostrar",
+  "kfAll": "Tudo",
+  "kfSat": "Sábado",
+  "kfSwim": "Piscina",
+  "kfPetro": "Petromin",
+  "regProgDate": "Data",
+  "regStep1TitleDate": "Escolha uma data",
+  "sessTitleArLbl": "Nome em árabe"
 }

@@ -209,19 +209,21 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect(page.locator('.bld-wrap')).toBeVisible();
     let cards = await sizes();
     expect(cards.length).toBeGreaterThan(1);
-    // a phone shows the event card and the start of the next one on one screen
-    expect(cards[0].blood).toBe(true);
-    expect(cards[0].h).toBeLessThan(440);
+    // MicroMobility Experiences leads (the owner's pick Q3 a, 2026-11-13); the event card comes next, at its own height
+    expect(cards[0].blood).toBe(false);
+    let bd = cards.find((x) => x.blood)!;
+    expect(bd.h).toBeLessThan(440);
     for (const c of cards.filter((x) => !x.blood)) expect(c.h).toBeLessThan(260);
-    // a wide screen gives it the row, and the row below keeps its own height
+    // a wide screen gives it the row, and the rows above and below keep their own height
     await page.setViewportSize({ width: 1280, height: 844 });
     await page.evaluate('goLanding()');
     await expect(page.locator('.bld-wrap')).toBeVisible();
     cards = await sizes();
+    bd = cards.find((x) => x.blood)!;
     const grid = await page.locator('.landing-events-grid').boundingBox();
-    expect(cards[0].w).toBe(Math.round(grid!.width));
-    expect(cards[0].h).toBeLessThan(400);
-    for (const c of cards.filter((x) => !x.blood)) { expect(c.top).toBeGreaterThan(cards[0].top); expect(c.h).toBeLessThan(260); }
+    expect(bd.w).toBe(Math.round(grid!.width));
+    expect(bd.h).toBeLessThan(400);
+    for (const c of cards.filter((x) => !x.blood)) { expect(c.top).not.toBe(bd.top); expect(c.h).toBeLessThan(260); }
   });
 
   test('an account under 18 is told and cannot go on', async ({ page }) => {

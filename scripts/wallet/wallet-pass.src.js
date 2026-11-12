@@ -797,8 +797,8 @@ const RIDES = {
   // Dukan's employees on the same nights (2026-11-12, micromobility.sa/dukan): Dukan's own green (#1b7563, dukan.me), labels
   // in its pale mint (4.9:1 on the green), the near-white text (5.1:1): both clear AA. Never named after Petromin: the night is theirs too.
   dukan:    { bg: "rgb(27,117,99)", label: "rgb(214,247,238)", venue: "Dukan Ride Night" },
-  // the pool (2026-10-12): its ticket's pool blue on the labels (5.6:1 on white)
-  swim:     { ...EXP, label: "rgb(11,111,164)", venue: "Triathlon Pool Session" },
+  // the pool: the kind's own accent on the labels (styles.css --k-pool, 2026-11-13; 4.8:1 on white), as its row and ticket
+  swim:     { ...EXP, label: "rgb(13,125,143)", venue: "Triathlon Pool Session" },
   workshop: { ...EXP, venue: "T100 Triathlon Prep" },
   // Saudi National Day 96 - the guideline's deep green field, with the lime tint on labels.
   snd96:    { bg: "rgb(0,38,40)",  label: "rgb(140,220,70)", venue: "Jeddah Corniche Circuit" },

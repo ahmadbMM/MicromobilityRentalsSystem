@@ -9568,6 +9568,71 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) :is(.ticket-num,.cu-tr-num
 /* a pass out of the stack morphs from its strip (_wlToggle, a View Transition, Baseline since October 2025) */
 ::view-transition-group(mr-pass){animation-duration:.36s;animation-timing-function:cubic-bezier(.2,.8,.2,1);}
 @media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important;}}
+/* ── The Experiences card, its list and the Saturday ride (the owner's picks on the theming page, 2026-11-13) ──────────
+   C1, one colour set per kind, defined here once and read wherever the kind shows (the row's tile and motif, the kind
+   switch, the card's marks, the Details sheet, the ticket): an accent that reads 4.5:1 or more on white, a tint, an ink
+   that reads 4.5:1 or more on that tint (the build checks both: scripts/split-staff.mjs, checkKindContrast), the kind's
+   drawing and its motif. The pool's accent is 4.2:1 on its own tint, so its ink there is a shade deeper. The drawings are
+   inline SVG, a few hundred bytes each, and turn round for Arabic with the element that wears them (.k-art). */
+body:not(.view-staff){
+  --k-sat:#077A4B; --k-sat-tint:#E6F2EC; --k-sat-ink:#077A4B;
+  --k-pool:#0D7D8F; --k-pool-tint:#E3F2F4; --k-pool-ink:#0A6573;
+  --k-pm:#A33B2E; --k-pm-tint:#F8E8E5; --k-pm-ink:#A33B2E;
+  --dawn-deep:#1D2740; --dawn-chip:#F6D7C8; --veil:rgba(255,255,255,.86); --veil-0:rgba(255,255,255,0);
+  --art-dawn:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 200' preserveAspectRatio='xMidYMax slice'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0' y1='0' x2='0' y2='140' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%23232D4B'/%3E%3Cstop offset='.4' stop-color='%233B4870'/%3E%3Cstop offset='.64' stop-color='%238B7C9E'/%3E%3Cstop offset='.8' stop-color='%23E2AEAF'/%3E%3Cstop offset='.91' stop-color='%23C9B3BD'/%3E%3Cstop offset='1' stop-color='%23A7B2C8'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' x1='0' y1='140' x2='0' y2='180' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%237E7F9E'/%3E%3Cstop offset='.3' stop-color='%234A6382'/%3E%3Cstop offset='1' stop-color='%2327405A'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='360' height='140' fill='url(%23a)'/%3E%3Crect y='140' width='360' height='40' fill='url(%23b)'/%3E%3Cpath d='M0 140.5H360' stroke='%23F3D3C9' stroke-opacity='.55' stroke-width='.8'/%3E%3Cpath d='M188 147h22M232 147h10M150 153h14M262 152h26M206 158h30M120 160h12M300 160h18M170 167h20M250 168h14' stroke='%23F1C4BA' stroke-opacity='.5' stroke-width='1.2' stroke-linecap='round'/%3E%3Cg fill='none' stroke='%23F7E6DE' stroke-linecap='round'%3E%3Cpath d='M296 140C295 122 294.5 104 296 84' stroke-width='1.7' stroke-opacity='.9'/%3E%3Cpath d='M296 84c-6 4-10 13-12 24M296 84c6 4 10 13 12 24M296 84c-3 6-5 16-5 26M296 84c3 6 5 16 5 26' stroke-width='.9' stroke-opacity='.5'/%3E%3C/g%3E%3Crect y='178' width='360' height='22' fill='%231D2740'/%3E%3Cpath d='M0 179.5H360' stroke='%233A4766' stroke-width='1.4'/%3E%3Cpath d='M20 179V157M80 179V157M140 179V157M200 179V157M260 179V157M320 179V157' stroke='%232E3A5A' stroke-width='1.6'/%3E%3Cg fill='%23F6D7A8'%3E%3Ccircle cx='20' cy='156' r='2.3'/%3E%3Ccircle cx='80' cy='156' r='2.3'/%3E%3Ccircle cx='140' cy='156' r='2.3'/%3E%3Ccircle cx='200' cy='156' r='2.3'/%3E%3Ccircle cx='260' cy='156' r='2.3'/%3E%3Ccircle cx='320' cy='156' r='2.3'/%3E%3C/g%3E%3C/svg%3E") center bottom/cover no-repeat #1D2740;
+  --art-pool:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='72' viewBox='0 0 120 72'%3E%3Cg fill='none' stroke='%230D7D8F' stroke-linecap='round' stroke-width='2'%3E%3Cpath d='M0 22c15 0 15-7 30-7s15 7 30 7 15-7 30-7 15 7 30 7' stroke-opacity='.25'/%3E%3Cpath d='M0 40c15 0 15-7 30-7s15 7 30 7 15-7 30-7 15 7 30 7' stroke-opacity='.42'/%3E%3Cpath d='M0 58c15 0 15-7 30-7s15 7 30 7 15-7 30-7 15 7 30 7' stroke-opacity='.62'/%3E%3C/g%3E%3C/svg%3E") left 0 center/120px 72px repeat-x,linear-gradient(to bottom,#F4FAFB,#E3F2F4) #E3F2F4;
+  --art-pm:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='26' viewBox='0 0 96 26'%3E%3Cg fill='%23A33B2E'%3E%3Cpath d='M10 0h86v5H6z'/%3E%3Cpath d='M18 10h78v5H14z' opacity='.7'/%3E%3Cpath d='M26 20h70v5H22z' opacity='.45'/%3E%3C/g%3E%3C/svg%3E") right 20px center/96px 26px no-repeat,linear-gradient(to right,#FFFFFF 0 38%,#F8E8E5 100%) #FFFFFF;
+  --motif-sat:linear-gradient(to bottom,#E2AEAF 0 50%,#A7B2C8 50% 100%);
+  --motif-pool:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='8' viewBox='0 0 60 8'%3E%3Cpath d='M0 5c10-3 20-3 30 0s20 3 30 0' fill='none' stroke='%230D7D8F' stroke-width='1.4'/%3E%3C/svg%3E") left 0 bottom 0/60px 8px repeat-x,#E3F2F4;
+  --motif-pm:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='8' viewBox='0 0 48 8'%3E%3Cpath d='M0 8l6-8h8l-6 8zM16 8l6-8h8l-6 8zM32 8l6-8h8l-6 8z' fill='%23A33B2E'/%3E%3C/svg%3E") right 14px bottom 0/48px 8px no-repeat;
+}
+body:not(.view-staff) .ev-saturday{--k:var(--k-sat);--k-tint:var(--k-sat-tint);--k-ink:var(--k-sat-ink);--k-art:var(--art-dawn);--k-motif:var(--motif-sat);}
+body:not(.view-staff) .ev-swim{--k:var(--k-pool);--k-tint:var(--k-pool-tint);--k-ink:var(--k-pool-ink);--k-art:var(--art-pool);--k-motif:var(--motif-pool);}
+body:not(.view-staff) .ev-petromin{--k:var(--k-pm);--k-tint:var(--k-pm-tint);--k-ink:var(--k-pm-ink);--k-art:var(--art-pm);--k-motif:var(--motif-pm);}
+/* the drawing is an empty element, so Arabic turns it round without turning a word */
+html[dir="rtl"] body:not(.view-staff) .k-art{transform:scaleX(-1);}
+/* the card: the pattern stays, the lockup goes, and what it holds shows as marks on their tints (Q1 c, Q2 c) */
+body:not(.view-staff) .ev-community .lec-marks{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+body:not(.view-staff) .lec-mk{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--k-tint,var(--card-2));color:var(--k-ink,var(--ink-2));box-shadow:0 0 0 1px var(--line);}
+/* the list's heading in the card's pattern, under the card's name (B1); it takes the heading's place */
+body:not(.view-staff) .reg-band{margin-top:4px;padding:14px 18px 16px;border-radius:var(--r-card);box-shadow:var(--pl-1);
+  background-color:var(--card);background-image:linear-gradient(to bottom right,var(--card) 0 34%,var(--veil) 62%,var(--veil-0) 100%),var(--mm-pattern);
+  background-size:100% 100%,112px auto;background-position:0 0,right -16px top -12px;background-repeat:no-repeat,repeat;}
+html[dir="rtl"] body:not(.view-staff) .reg-band{background-image:linear-gradient(to bottom left,var(--card) 0 34%,var(--veil) 62%,var(--veil-0) 100%),var(--mm-pattern);background-position:0 0,left -16px top -12px;}
+body:not(.view-staff) .reg-band-k{display:block;margin-bottom:2px;font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) .reg-band .page-title{margin:0;}
+/* the kind switch (B5): All, then each kind; the pick in ink */
+body:not(.view-staff) .reg-kinds{display:flex;gap:8px;margin:0 0 14px;padding:2px;overflow-x:auto;scrollbar-width:none;}
+body:not(.view-staff) .reg-kinds::-webkit-scrollbar{display:none;}
+body:not(.view-staff) .reg-kind{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);font-size:var(--fs-13);font-weight:600;cursor:pointer;}
+body:not(.view-staff) .reg-kind .cu-ic{color:var(--k-ink,var(--ink-2));}
+body:not(.view-staff) .reg-kind.on{background:var(--ink);border-color:var(--ink);color:var(--paper);}
+body:not(.view-staff) .reg-kind.on .cu-ic{color:currentColor;}
+/* a row: the kind's mark on its tint, the ride's number, and its ticket's motif along the foot (B2, Q6) */
+body:not(.view-staff) .sess-comm-chip .k-tile{flex:none;width:26px;height:26px;border-radius:9px;display:inline-grid;place-items:center;
+  background:var(--k-tint,color-mix(in srgb,var(--ev,var(--go)) 12%,var(--card)));color:var(--k-ink,var(--ev,var(--go)));}
+body:not(.view-staff) .sess-ride-no{font-size:var(--fs-12);font-weight:600;color:var(--ink-3);}
+body:not(.view-staff) .sess-card:has(>.sess-motif){position:relative;overflow:hidden;padding-bottom:20px;}
+body:not(.view-staff) .sess-card>.k-art.sess-motif{position:absolute;inset:auto 0 0 0;height:7px;background:var(--k-motif);pointer-events:none;}
+/* the Continue bar's time keeps a second line rather than lose its end (B6) */
+body:not(.view-staff) .reg-foot-sum>bdi{white-space:normal;text-overflow:clip;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+/* a date's Details sheet: the kind's drawing across its top (C3), the ride's number by its name (Q6), the route (D1) */
+body:not(.view-staff) .ev-info>.ev-info-art{display:block;height:72px;background:var(--k-art);border-start-start-radius:inherit;border-start-end-radius:inherit;}
+body:not(.view-staff) .ev-info.ev-saturday>.ev-info-art{background-position:center 80%;} /* the pink band, the sea and the lamps, not the promenade alone */
+body:not(.view-staff) .ev-info-no{font-weight:600;color:var(--ink-3);}
+body:not(.view-staff) .sr-route{display:block;width:100%;height:auto;margin:14px 0 2px;overflow:visible;}
+body:not(.view-staff) #reg-group-wrap .sr-route{margin:4px 0 12px;}
+body:not(.view-staff) .sr-ln{fill:none;stroke:var(--k-sat);stroke-width:3;stroke-linecap:round;}
+body:not(.view-staff) .sr-back{fill:none;stroke:var(--k-sat);stroke-width:1.4;stroke-dasharray:2 5;stroke-linecap:round;opacity:.55;}
+body:not(.view-staff) .sr-st{fill:var(--card);stroke:var(--k-sat);stroke-width:2.4;}
+body:not(.view-staff) .sr-tn,body:not(.view-staff) .sr-pill rect{fill:var(--k-sat);}
+body:not(.view-staff) .sr-pill text{fill:var(--card);font-size:10px;font-weight:600;}
+body:not(.view-staff) .sr-lb{fill:var(--ink-2);font-size:10px;font-weight:500;}
+/* the Saturday ticket's top (C4): the dawn, and the ride's number on its sky */
+body:not(.view-staff) .ticket-card>.tk-art{position:relative;height:92px;overflow:hidden;}
+body:not(.view-staff) .ticket-card>.tk-art>.k-art{position:absolute;inset:0;background:var(--art-dawn);}
+body:not(.view-staff) .ticket-card>.tk-art>.tk-ride-no{position:absolute;top:14px;inset-inline-start:20px;padding:5px 11px;border-radius:999px;background:var(--dawn-deep);color:var(--dawn-chip);font-size:var(--fs-13);font-weight:600;line-height:1.15;}
+
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).
@@ -10411,7 +10476,7 @@ html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-ca
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc{padding-bottom:30px;}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc .ticket-num{font-family:'Chakra Petch','IBM Plex Sans Arabic',sans-serif;}
 /* the light cards: ink on white, the event's own accent where the night ticket has its neon */
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim){
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim){
   --night:#fff;--night-ink:#1A1919;--night-ink-2:rgba(26,25,25,.62);--night-line:rgba(26,25,25,.12);
   --night-amber:#8A5300;--night-red:#B42318;--night-red-line:rgba(180,35,24,.35);color:var(--night-ink);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-comm{
@@ -10420,6 +10485,10 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-comm
   border:1px solid rgba(3,255,137,.34);}
 html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-comm{
   background:linear-gradient(to bottom right,rgba(255,255,255,0) 0,rgba(255,255,255,.8) 150px,#fff 280px) no-repeat,var(--mm-pattern) left -16px top -12px/112px auto repeat #fff;}
+/* The Saturday Social Ride (the owner's pick C4, 2026-11-13): white and the brand green, the dawn on the Corniche across its
+   top with the ride's number on it (.tk-art); the pattern stays the other Experiences tickets'. */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-saturday{
+  --night-2:#F1F8F4;--neon:var(--k-sat);background:#fff;border:1px solid rgba(7,122,75,.3);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-runher{
   --night-2:#FDF0F5;--night-ink:#14304D;--night-ink-2:rgba(20,48,77,.66);--night-line:rgba(217,79,126,.22);--neon:#C2416E;
   background:radial-gradient(120% 60% at 100% 100%,rgba(242,120,159,.26) 0%,rgba(242,120,159,.1) 38%,rgba(255,255,255,0) 66%) #fff;
@@ -10433,7 +10502,7 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-even
   background:linear-gradient(to bottom right,#fff 0 55%,rgba(140,59,110,.07) 100%) #fff;border:1px solid rgba(140,59,110,.3);}
 /* A Petromin night (2026-10-12): Petromin's red, its three speed stripes in the bottom corner, its logo as the mark. */
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-petromin{
-  --night-2:#FDF1F1;--night-line:rgba(214,32,42,.18);--neon:#C41E26;
+  --night-2:#FDF1F1;--night-line:rgba(214,32,42,.18);--neon:var(--k-pm);
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='26' viewBox='0 0 96 26'%3E%3Cg fill='%23d6202a'%3E%3Cpath d='M10 0h86v5H6z'/%3E%3Cpath d='M18 10h78v5H14z' opacity='.7'/%3E%3Cpath d='M26 20h70v5H22z' opacity='.45'/%3E%3C/g%3E%3C/svg%3E") right 0 bottom 12px/96px 26px no-repeat,
     radial-gradient(110% 55% at 0% 100%,rgba(214,32,42,.09) 0%,rgba(214,32,42,0) 70%) #fff;
   border:1px solid rgba(214,32,42,.32);padding-bottom:40px;}
@@ -10444,7 +10513,7 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-petr
 .ticket-card .tk-logo-ev .tk-logo-petromin{height:30px;}
 /* The Triathlon Pool Session (2026-10-12): pool blue, the water's lines along the foot of the card. */
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-swim{
-  --night-2:#EAF6FB;--night-line:rgba(11,111,164,.16);--neon:#0B6FA4;
+  --night-2:#EAF6FB;--night-line:rgba(11,111,164,.16);--neon:var(--k-pool);
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='26' viewBox='0 0 80 26'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M0 6c10 0 10-5 20-5s10 5 20 5 10-5 20-5 10 5 20 5' stroke='%2338B6E6' stroke-width='2' opacity='.55'/%3E%3Cpath d='M-10 18c10 0 10-5 20-5s10 5 20 5 10-5 20-5 10 5 20 5 10-5 20-5' stroke='%230B6FA4' stroke-width='2' opacity='.35'/%3E%3C/g%3E%3C/svg%3E") left 0 bottom 6px/80px 26px repeat-x,
     linear-gradient(to bottom,#fff 0 52%,rgba(56,182,230,.10) 100%) #fff;
   border:1px solid rgba(11,111,164,.3);padding-bottom:34px;}

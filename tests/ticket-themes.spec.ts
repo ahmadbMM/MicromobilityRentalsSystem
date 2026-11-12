@@ -50,9 +50,13 @@ test.describe('@customer:tickets every ticket in its event’s colours', () => {
     expect(by.jcc).toMatchObject({ th: 'jcc', st: 'live', bg: 'rgb(6, 52, 111)', mark: '/jcc-white.webp' });
     expect(by.jcc.img).toContain('linear-gradient');
     expect(by['jcc-wl']).toMatchObject({ th: 'jcc', bg: 'rgb(6, 52, 111)', border: 'dashed' });
-    // MicroMobility Experiences: the Saturday ride
-    expect(by.saturday).toMatchObject({ th: 'comm', bg: 'rgb(255, 255, 255)', mark: '/logo-dark.webp' });
-    expect(by.saturday.img).toContain('mm-pattern');
+    // the Saturday ride wears its own (the owner's pick C4, 2026-11-13): white, the brand green, the dawn on the Corniche across
+    // its top; the pattern stays the other Experiences tickets' (T100, below)
+    expect(by.saturday).toMatchObject({ th: 'saturday', bg: 'rgb(255, 255, 255)', mark: '/logo-dark.webp' });
+    expect(by.saturday.img).toBe('none');
+    const art = page.locator('#tab-myrides .ticket-card.th-saturday > .tk-art > .k-art');
+    await expect(art).toHaveCount(1);
+    expect(await art.evaluate((el) => getComputedStyle(el).backgroundImage)).toContain('data:image/svg+xml');
     // the pool (a reservation staff have not confirmed yet): pool blue and the water's lines (2026-10-12)
     expect(by.swim).toMatchObject({ th: 'swim', st: 'paper', bg: 'rgb(255, 255, 255)', mark: '/logo-dark.webp' });
     expect(by.swim.img).toContain('56, 182, 230');
@@ -75,7 +79,7 @@ test.describe('@customer:tickets every ticket in its event’s colours', () => {
     expect(ink.jcc.num).toBe('rgb(159, 213, 238)');
     expect(ink.runher.num).toBe('rgb(194, 65, 110)');
     expect(ink.event.num).toBe('rgb(140, 59, 110)');
-    expect(ink.comm.num).toBe('rgb(7, 122, 75)');
+    expect(ink.saturday.num).toBe('rgb(7, 122, 75)');
     // labels: white-ish on the navy, ink on the white cards (never the night ticket's pale ink on white)
     expect(ink.jcc.label).toMatch(/^rgba\(255, 255, 255/);
     expect(ink.event.label).toMatch(/^rgba\(26, 25, 25/);

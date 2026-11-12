@@ -415,8 +415,10 @@ test('the landing card is an umbrella: the shared name, no per-ride blurb', asyn
   const card = page.locator('#land-events .landing-event-card.ev-community');
   // renamed 2026-08-26: the umbrella now covers activities that are not rides at all
   await expect(card).toContainText('MicroMobility Experiences');
-  await expect(card.locator('.lec-meta')).toHaveCount(0); // the description is gone; the logo stays
-  await expect(card.locator('img')).not.toHaveCount(0);
+  await expect(card.locator('.lec-meta')).toHaveCount(0); // the description is gone
+  // no lockup since 2026-11-13 (the owner's pick Q1 c): the pattern and a mark for each kind it holds
+  await expect(card.locator('img')).toHaveCount(0);
+  await expect(card.locator('.lec-marks .lec-mk.ev-petromin')).toHaveCount(1);
 });
 
 test.describe('a Petromin night at capacity', () => {

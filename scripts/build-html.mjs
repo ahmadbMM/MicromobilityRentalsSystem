@@ -13,7 +13,7 @@ import CleanCSS from 'clean-css';
 import {
   splitStaff, resolveIncludes, mainScript, staffOnlyLangKeys, partLangKeys, customerCss, gateHover, splitSections,
   checkHandlerNames, formatHandlerOffenders, checkBareWrites, formatBareWrites, checkSizeBudget, gzipBytes,
-  checkCustomerColors, checkNoEmoji, includedFiles, checkPhoneRulesVersion, checkFieldNames, formatFieldNames,
+  checkCustomerColors, checkKindContrast, checkNoEmoji, includedFiles, checkPhoneRulesVersion, checkFieldNames, formatFieldNames,
 } from './split-staff.mjs';
 import { checkConfirmClass } from './check-confirm-class.mjs';
 import { checkStaffCss, loadAllow } from './check-staff-css.mjs';
@@ -606,6 +606,13 @@ if (headers !== headersBefore) await writeFile(headersUrl, headers);
   if (cs.offenders.length) {
     throw new Error(`build: a raw colour in the customer system (styles.css) - name it in the token list at the top of the block and use var(--name):\n${cs.offenders.map((o) => `  line ${o.line}: ${o.prop}: ${o.value}`).join('\n')}`);
   }
+}
+
+// ── Each kind's colour set reads 4.5:1: its accent on white, its ink on its tint (scripts/split-staff.mjs) ──────
+{
+  const kc = checkKindContrast(await readFile(new URL('../styles.css', import.meta.url), 'utf8'));
+  if (!kc.kinds.length) throw new Error('build: styles.css has no kind colour sets (--k-<kind>, -tint, -ink) in the CUSTOMER SYSTEM block');
+  if (kc.short.length) throw new Error(`build: a kind's colours read under 4.5:1 (styles.css, the --k-* tokens):\n${kc.short.map((x) => `  ${x.what}: ${x.why || x.ratio + ':1'}`).join('\n')}`);
 }
 
 // ── No emoji anywhere in the source: icons are drawn (scripts/split-staff.mjs) ───────────────
