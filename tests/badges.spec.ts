@@ -533,6 +533,39 @@ test.describe('@customer:account badges', () => {
     await chips.filter({ hasText: 'Winter Series' }).click();
     await expect(page.locator('#badge-pop')).toContainText('Opens');
   });
+
+  // Talent Scout (the user, 2026-11-12: "a new badge for helping hire a micromobilian make only visible for its holders").
+  const scoutCat = [
+    { slug: 'marshal', icon: 'shield', color: 'orange', name: 'Marshal', system: true, auto: false, sort: 10 },
+    { slug: 'talent_scout', icon: 'pass', color: 'gold', name: 'Talent Scout', system: true, auto: false, sort: 86 },
+    { slug: 'first_lap', icon: 'flag', color: 'green', name: 'First Lap', system: true, auto: true, sort: 100 },
+  ];
+  const scoutNames = (page: Page) => page.locator('#tab-account .mr-badges .mr-badge').evaluateAll((els) => els.map((e) => e.querySelector('.mr-badge-nm')!.textContent));
+
+  test('Talent Scout is out of sight for a rider who does not hold it: not under Badges to earn, never offered to request', async ({ page }) => {
+    await rider(page, { 'rpc:customer_my_badges': [], 'rpc:badge_catalog': scoutCat });
+    await page.waitForFunction('S._bdgCat&&S._bdgCat.length>0&&S._bdgMine&&!S._bdgMine.busy');
+    await page.locator('#mr-badges-more').click();
+    await expect.poll(() => scoutNames(page)).toEqual(['First Lap', 'Marshal']); // Marshal, given by staff too, still shows greyed
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('1/2');
+    await expect(page.locator('#tab-account')).not.toContainText('Talent Scout');
+    expect(await page.evaluate(`_bdrChoices(_mrBadgeList(S.loggedIn)).map(x=>x.b.slug)`)).toEqual(['marshal']);
+  });
+
+  test('Talent Scout shows to its holder as an earned badge: the team pass on the gold medal, and what it is for', async ({ page }) => {
+    const held = { slug: 'talent_scout', icon: 'pass', color: 'gold', name: 'Talent Scout', system: true, note: null, at: '2026-09-01T10:00:00Z' };
+    await rider(page, { 'rpc:customer_my_badges': [held], 'rpc:badge_catalog': scoutCat });
+    await page.waitForFunction('S._bdgCat&&S._bdgCat.length>0&&S._bdgMine&&!S._bdgMine.busy');
+    await expect.poll(() => scoutNames(page)).toEqual(['Talent Scout', 'First Lap']); // the given one first among the earned
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('2/3');
+    const chip = page.locator('#tab-account .mr-badge', { hasText: 'Talent Scout' });
+    await expect(chip).not.toHaveClass(/locked/);
+    await expect(chip.locator('svg.bdg-m.bdc-gold')).toHaveCount(1);
+    expect(await page.evaluate(`BDG_GLYPH.pass===undefined`)).toBe(false);
+    await chip.click();
+    await expect(page.locator('#badge-pop .badge-pop-about')).toContainText('hire a new Micromobilian');
+    expect(await page.evaluate(`_bdrChoices(_mrBadgeList(S.loggedIn)).map(x=>x.b.slug)`)).toEqual(['marshal']);
+  });
 });
 
 // The ride badges added 2026-09-29, read straight off _mrBadges with made-up rides dated from today.
