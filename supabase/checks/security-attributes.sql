@@ -277,7 +277,14 @@ with expected(fname, want_definer, note) as (values
   ('_session_has_room',      false, 'counts queue_entries, only ever inside customer_booking_update; revoked'),
   ('_session_fill_recount',  false, 'the fill rule for one session, only ever inside the definer trigger; revoked'),
   -- One-step account delete and the narrow profile saves (20260922150000)
-  ('staff_delete_customer',  true,  'unlinks bookings and sales, deletes tags, push rows and the account in one go; admin only'),
+  ('staff_delete_customer',  true,  'archives the account (20261111200000): moves its sign-in addresses and tags into the archive, keeps its history; admin only'),
+  -- Accounts archived, never deleted (20261111200000)
+  ('staff_restore_customer', true,  'gives an archived account back (addresses, tags, codes); admin only'),
+  ('staff_archived_list',    true,  'the Archived accounts list: reads rows the staff policy hides; admin only'),
+  ('staff_archived_account', true,  'one archived account''s history: reads rows the staff policy hides; admin only'),
+  ('_staff_archived_since',  true,  'the ids staff_sync hands over as deleted: reads rows the staff policy hides; staff only'),
+  ('_queue_archived_guard',  true,  'trigger: refuses a booking for an archived account, which the caller cannot read'),
+  ('_customers_no_delete',   false, 'trigger: refuses deleting an account from the app; reads no table'),
   ('customer_set_height',    true,  'writes the caller''s own height; token-checked'),
   ('customer_set_birth_nat', true,  'writes the caller''s own birth date and nationality; token-checked'),
   -- The 2026-09-25 review fixes (20260925140000)
