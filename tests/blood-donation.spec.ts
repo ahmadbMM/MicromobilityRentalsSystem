@@ -1142,6 +1142,6 @@ test.describe('@customer:blood The Blood Donation Visitor badge', () => {
       for (const k of ['bdgBloodVisitor', 'bdgBloodVisitorD', 'bdgBloodVisitorA']) expect(pack[k], `${code} ${k}`).toBeTruthy();
     }
     const sql = readFileSync('supabase/migrations/20261106100000_blood_visitor_badge.sql', 'utf8');
-    expect(sql).toMatch(/'bd_blood_visitor', 'blood_visitor', 'dropo', 'teal'.*true, true, 92\)/);
+    expect(sql).toMatch(/'bd_blood_visitor', 'blood_visitor', 'dropo', 'teal'.*true, true, 92, true\)/); // held_only: seen by holders only (20261112223000)
   });
 });
