@@ -35965,7 +35965,7 @@ function _vlSplitHtml(base){
       <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vlStaffOpen",sid)}">${_artIcon('people',12)} ${t('vlStaffBtn')}</button>
       <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vlCfgOpen",sid)}">${_artIcon('cog',12)} ${t('vlCfgBtn')}</button>
       <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vrbOpen",sid)}">${ICON_PRINT} ${t('vrbBtn')}</button>
-      ${_isArena(_sessGet(sid))?'':`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("printVlReceipts",sid)}">${ICON_PRINT} ${t('vrbRcBtn')}</button>`}
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("printVlReceipts",sid)}">${ICON_PRINT} ${t('vrbRcBtn')}</button>
     </div>`:''}`;
 }
 function _on_renderStaffQueue_16(event,el){S.sfLimit=(S.sfLimit||150)+200;renderStaffQueue()}

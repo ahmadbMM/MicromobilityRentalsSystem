@@ -476,11 +476,13 @@ test.describe('the Apple Wallet pass', () => {
     expect(noCollect.relevantDate).toBe('2099-11-12T19:00:00+03:00');
     expect(noCollect.eventTicket.secondaryFields.find((x: F) => x.key === 'collect')).toBeUndefined();
     // a miss, a lock and a bad body; an unconfigured site says so before reading anything
-    for (const miss of [{ ok: false, error: 'notfound' }, { ok: false, error: 'throttled' }]) {
-      const r = await run(miss);
-      expect(r.status).toBe(404);
-      expect(await r.json()).toEqual({ ok: false, error: 'not found' });
-    }
+    const miss = await run({ ok: false, error: 'notfound' });
+    expect(miss.status).toBe(404);
+    expect(await miss.json()).toEqual({ ok: false, error: 'not found' });
+    // a lock is said as one (429), not as a booking that does not exist (bug hunt 2026-11-11, fn2-1)
+    const lock = await run({ ok: false, error: 'throttled' });
+    expect(lock.status).toBe(429);
+    expect(await lock.json()).toEqual({ ok: false, error: 'throttled' });
     expect((await run(found, { bookingNo: 'P-007' })).status).toBe(400);
     const n = asked.length;
     expect((await run(found, undefined, { SUPABASE_ANON_KEY: 'anon' })).status).toBe(501);

@@ -98,7 +98,7 @@ test('Reschedule is in the row menu of a checked-in rider and opens the editor o
   await expect(menu.getByRole('menuitem', { name: /Undo check-in/i })).toBeVisible(); // the checked-in row's menu
   await menu.getByRole('menuitem', { name: 'Reschedule' }).click();
   await expect.poll(() => page.evaluate('S._beId')).toBe(MOVER);
-  await expect.poll(() => page.evaluate('document.activeElement&&document.activeElement.id')).toBe('be-sess');
+  await expect.poll(() => page.evaluate('document.activeElement&&document.activeElement.id')).toBe('be-sess-spk'); // the visible session picker over the hidden select
 });
 
 test('a paid rider still in line is told their payment travels with them', async ({ page }) => {

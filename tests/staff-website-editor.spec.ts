@@ -193,7 +193,8 @@ test('a large photo also gets the 640 and 1280 px WebP copies the website asks f
   await page.locator('#tab-website .web-ed-img').getByRole('button', { name: 'Upload photo' }).click();
   await (await chooser).setFiles({ name: 'wide.png', mimeType: 'image/png', buffer: solidPng(1500, 800) });
   await expect(page.locator('.toast').last()).toContainText('Photo uploaded');
-  const main = uploads[0].url.match(/site\/(home\/[a-z0-9]+-[a-z0-9]+)\.png$/);
+  // an opaque PNG photo is saved as a JPEG (bug hunt 2026-11-11, app40-2); a real cut-out stays a PNG
+  const main = uploads[0].url.match(/site\/(home\/[a-z0-9]+-[a-z0-9]+)\.jpg$/);
   expect(main).not.toBeNull();
   expect(uploads.slice(1).map(u => u.url.replace(/^.*\/object\/site\//, ''))).toEqual([`${main![1]}.w640.webp`, `${main![1]}.w1280.webp`]);
 });
