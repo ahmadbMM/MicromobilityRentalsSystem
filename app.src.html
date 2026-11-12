@@ -4672,7 +4672,22 @@ function _qrFallback(){
   });
 }
 window.addEventListener('online',()=>{if(!window.qrcode&&document.querySelector('.qr-lazy'))_loadQrcode().then(_fillLazyQR);});
-function _qrBox(payload,px){
+// The ticket code's own colour says where the money stands (the owner, 2026-11-12: "change the qr code of the booking
+// card to orange when its checked in but not paid and green when its paid"): green once every rider with a place has
+// paid (an on-the-house place is marked paid, so it counts), orange once a rider is checked in with money still owed,
+// the usual dark ink otherwise - booked and not yet paid, and a ride that charges nothing. Both inks keep about 5:1
+// against the white tile (the dark one is 16:1), which the desk's scanner and jsQR read like the dark one.
+const _QR_INK={paid:'#077a4b',due:'#c2410c'};
+function _qrTone(sess,g){
+  const due=(g||[]).filter(e=>e&&e.status!=='waitlist'&&e.status!=='cancelled');
+  if(!due.length)return'';
+  if(due.every(e=>e.paid))return'paid';
+  const free=_isFreeRide(sess)||_isBlood(sess);
+  return due.some(e=>(e.status==='active'||e.status==='done')&&!e.paid&&!free&&(e.price??DEFAULT_PRICE)>0)?'due':'';
+}
+function _qrInkOf(b){return(b&&_QR_INK[b.getAttribute('data-tone')])||undefined;}
+function _qrBox(payload,px,tone){
+  tone=_QR_INK[tone]?tone:'';
   // v2 design: QR on a white 6px-padded tile, 1px hairline border, 3px radius (no glow).
   // The white tile is part of the svg (its own background rect, the 6px as `pad`), not a CSS
   // background on the box: a browser that darkens the page for the rider (Samsung Internet's
@@ -4689,13 +4704,13 @@ function _qrBox(payload,px){
   // fallback, and is what shows until the canvas is painted.
   // A ticket's code is named with what it says (MMC-12-ab12cd), so a screen reader gives the rider the words to read
   // to the desk, which can type them into Scan (2026-11-10). Any other code (a locker's link) keeps the plain name.
-  return `<div class="cu-qr-box" data-qr="${esc(String(payload))}" data-px="${px}">${QR.svg(payload,{size:px,margin:4,logo:false,pad:6})}<canvas class="qr-cv" role="img" aria-label="${esc(/^MMC/.test(String(payload))?t('ticketQrLabel')+' '+payload:t('ticketQrLabel'))}"></canvas><svg class="qr-live" aria-hidden="true" focusable="false" viewBox="0 0 100 100"><path d="M8 2H92A6 6 0 0 1 98 8V92A6 6 0 0 1 92 98H8A6 6 0 0 1 2 92V8A6 6 0 0 1 8 2Z" pathLength="100" fill="none" stroke="#077a4b" stroke-width="2.4" stroke-linecap="round"/></svg></div>`;
+  return `<div class="cu-qr-box${tone?' qr-'+tone:''}" data-qr="${esc(String(payload))}" data-px="${px}"${tone?` data-tone="${tone}"`:''}>${QR.svg(payload,{size:px,margin:4,logo:false,pad:6,dark:_QR_INK[tone]})}<canvas class="qr-cv" role="img" aria-label="${esc(/^MMC/.test(String(payload))?t('ticketQrLabel')+' '+payload:t('ticketQrLabel'))}"></canvas><svg class="qr-live" aria-hidden="true" focusable="false" viewBox="0 0 100 100"><path d="M8 2H92A6 6 0 0 1 98 8V92A6 6 0 0 1 92 98H8A6 6 0 0 1 2 92V8A6 6 0 0 1 8 2Z" pathLength="100" fill="none" stroke="#077a4b" stroke-width="2.4" stroke-linecap="round"/></svg></div>`;
 }
 // Fill any QR placeholders left by ticketQR once the library is available.
 function _fillLazyQR(){
   if(!window.qrcode)return;
   document.querySelectorAll('.qr-lazy').forEach(el=>{
-    try{el.outerHTML=_qrBox(el.getAttribute('data-qr')||'',Number(el.getAttribute('data-px'))||112);}catch(e){}
+    try{el.outerHTML=_qrBox(el.getAttribute('data-qr')||'',Number(el.getAttribute('data-px'))||112,el.getAttribute('data-tone')||'');}catch(e){}
   });
 }
 // Paints every ticket code's canvas not yet painted under root, then lets it stand in for the svg
@@ -4707,18 +4722,18 @@ function _qrPaint(root){
   list.forEach(cv=>{
     const b=cv.parentElement;if(!b||cv.hasAttribute('data-p'))return;
     cv.setAttribute('data-p','1');
-    try{if(QR.paint(cv,b.getAttribute('data-qr')||'',{size:Number(b.getAttribute('data-px'))||112,margin:4,pad:6}))b.classList.add('cv');}catch(e){}
+    try{if(QR.paint(cv,b.getAttribute('data-qr')||'',{size:Number(b.getAttribute('data-px'))||112,margin:4,pad:6,dark:_qrInkOf(b)}))b.classList.add('cv');}catch(e){}
   });
 }
 new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1&&(n.firstElementChild||n.tagName==='CANVAS'))_qrPaint(n);}).observe(document.documentElement,{childList:true,subtree:true});
-function ticketQR(payload,px){
-  px=px||112;
-  if(window.qrcode){try{return _qrBox(payload,px);}catch(e){return '';}}
+function ticketQR(payload,px,tone){
+  px=px||112;tone=_QR_INK[tone]?tone:'';
+  if(window.qrcode){try{return _qrBox(payload,px,tone);}catch(e){return '';}}
   // Library not loaded yet: emit a placeholder and fill it in once it loads. Offline, the placeholder says the
   // code in words straight away (it is drawn when the library arrives).
   _loadQrcode().then(_fillLazyQR);
   if(navigator.onLine===false)setTimeout(()=>{if(!window.qrcode)_qrFallback();},0);
-  return `<span class="qr-lazy cu-qr-lazy" data-qr="${esc(String(payload))}" data-px="${px}" data-cssv="${_cssv({'--cu-qr':px+'px'})}"></span>`;
+  return `<span class="qr-lazy cu-qr-lazy" data-qr="${esc(String(payload))}" data-px="${px}"${tone?` data-tone="${tone}"`:''} data-cssv="${_cssv({'--cu-qr':px+'px'})}"></span>`;
 }
 
 function bookingRef(e){
@@ -16686,7 +16701,7 @@ async function _tcShot(root){
       if(src.localName==='canvas'){
         // the ticket's code painted again at the picture's scale (the one on screen is at the screen's)
         const b=src.parentElement,qc=src.classList.contains('qr-cv')&&b?document.createElement('canvas'):null;
-        let u='';try{u=(qc&&QR.paint(qc,b.getAttribute('data-qr')||'',{size:Number(b.getAttribute('data-px'))||112,margin:4,pad:6,k:3}))?qc.toDataURL('image/png'):src.toDataURL('image/png');}catch(_){return null;}
+        let u='';try{u=(qc&&QR.paint(qc,b.getAttribute('data-qr')||'',{size:Number(b.getAttribute('data-px'))||112,margin:4,pad:6,k:3,dark:_qrInkOf(b)}))?qc.toDataURL('image/png'):src.toDataURL('image/png');}catch(_){return null;}
         dst=doc.createElementNS(XH,'img');dst.setAttribute('src',u);
       }
       else dst=src.cloneNode(false);
@@ -18592,7 +18607,7 @@ function renderRegister(){
     // v2 ticket: centered queue number over a dashed perforation rule, 4 detail columns,
     // 124px QR on a white tile captioned "Scan on arrival", ghost calendar + directions actions.
     const _sess=_sessDisp(tkt.sessionId),_hold=_arHold(_sess,tkt);
-    const qrHtml=_hold||_tkPending(tkt)?'':ticketQR(bookingRef(tkt),124); // not sent yet: nothing to scan (row 2)
+    const qrHtml=_hold||_tkPending(tkt)?'':ticketQR(bookingRef(tkt),124,_qrTone(_sess,[tkt])); // not sent yet: nothing to scan (row 2)
     const _commT=_isApprovalRide(_sess); // a reservation-style ticket: no number, meet point instead of directions
     const sessTime=sessionTime(_sess);
     // When to turn up. On a ride that hands out bikes that is when they start going out; on
@@ -20594,10 +20609,10 @@ function renderBookingTicket(entries,opts){
       </div>
       <div class="ticket-right">
         ${(stForBadge==='waiting'||stForBadge==='waitlist'||(_comm&&!_ptn&&!_commPublished(sess)))?'':(stForBadge==='cancelled'?statusBadgeFor(primary):statusBadge(stForBadge,_nc))}
-        ${(past||_bigQr)?'':_qrReady?ticketQR(bookingRef(primary),132):`<div class="qr-hold cu-w132"><span>${t(_arH?'arHoldNote':'ticketQrHold')}</span></div>`}
+        ${(past||_bigQr)?'':_qrReady?ticketQR(bookingRef(primary),132,_qrTone(sess,g)):`<div class="qr-hold cu-w132"><span>${t(_arH?'arHoldNote':'ticketQrHold')}</span></div>`}
       </div>
     </div>
-    ${_bigQr?`<div class="tk-qr-big">${ticketQR(bookingRef(primary),224)}</div>`:''}
+    ${_bigQr?`<div class="tk-qr-big">${ticketQR(bookingRef(primary),224,_qrTone(sess,g))}</div>`:''}
     <div class="cu-tk-when tk-when">
       <div class="tk-when-d">${_dw?`<strong class="tk-dw">${esc(_dw)}</strong><span class="tk-sep" aria-hidden="true">·</span>`:''}<bdi class="tk-seg">${esc(dayLabel(primary.sessionDay))} ${esc(shortDate(primary.sessionDate))}</bdi><span class="tk-sep" aria-hidden="true">·</span><bdi class="tk-seg">${sessTime}</bdi></div>
       ${past?'':`<div class="tk-when-p"><span class="tk-venue">${esc(_venueName(sess))}</span>${(_allWl&&_wlCollectTime(sess))?'':(()=>{const g=_gathersTime(sess);const c=(_needsBike(sess)||g)&&_rideKind(sess)!=='vlap'?fmt12h(sessionCollectTime(sess)):'';return c?`<span class="tk-sep" aria-hidden="true">·</span><span class="cu-c-green tk-collect"><bdi>${esc((g?t('ticketGatherAt'):t('ticketCollectAt')).replace('{0}',c))}</bdi></span>`:'';})()}${_sgChip(sess)?' '+_sgChip(sess):''}</div>`}
