@@ -186,7 +186,7 @@ async function buildPkpass(b, cfg) {
   // (the Victory Lap and the DEFE run too, when staff gave one: they are races, not rides)
   const _loc = String((sess && sess.location) || "").trim();
   const _locName = { JCC: "Jeddah Corniche Circuit", JYC: "Jeddah Yacht Club" }[_loc] || _loc;
-  const venue = ride === "event" || isBlood ? _locName || "Jeddah Corniche Circuit" : (ride === "vlap" || ride === "defe5k") && _locName ? _locName : skin.venue;
+  const venue = ride === "event" || isBlood ? _locName || "Jeddah Corniche Circuit" : (ride === "vlap" || ride === "defe5k" || ride === "yoga") && _locName ? _locName : skin.venue;
   const rideName = (sess && sess.title) || skin.venue;
   const numsDisplay = hideNum ? rideName : _numsDisplay(nums) || (b.queue_num != null ? `#${b.queue_num}` : rideName);
   const time = _sessClock(sess) || b.session_time || "";
@@ -238,7 +238,10 @@ async function buildPkpass(b, cfg) {
     value: collectStr,
   });
   if (startStr && !isBlood) secondary.push({ key: "start", label: isRun ? "RUN STARTS" : isRace ? "RACE STARTS" : bikeRide ? "RIDE STARTS" : "STARTS", value: startStr });
+  // yoga ends at a time of its own (the app's ticket says start and end), and the mat comes with the member
+  if (ride === "yoga" && clock && clock.endMin != null) secondary.push({ key: "end", label: "ENDS", value: _hhmm(clock.endMin) });
   const auxiliary = [];
+  if (ride === "yoga") auxiliary.push({ key: "bring", label: "BRING", value: "Yoga mat" });
   if (isBlood && startStr) auxiliary.push({ key: "hours", label: "HOURS", value: clock && clock.endMin != null ? `${startStr} - ${_hhmm(clock.endMin)}` : startStr });
   if (isBlood && !bloodVis && cfg.bloodType) auxiliary.push({ key: "blood_type", label: "BLOOD TYPE", value: cfg.bloodType === "unknown" ? "Not known" : cfg.bloodType });
   if (bikeType) auxiliary.push({ key: "bike", label: "BIKE", value: bikeType });
@@ -315,7 +318,7 @@ async function buildPkpass(b, cfg) {
         ...addonsBack,
         ...lockersBack,
         ...owes ? [{ key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." }] : [],
-        { key: "help", label: "Good to know", value: bikeRide ? "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." : bloodVis ? "Show this pass at the registration desk." : isBlood ? "Show this pass at the registration desk, with your national ID or Iqama." : "Show this pass on arrival." },
+        { key: "help", label: "Good to know", value: bikeRide ? "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." : bloodVis ? "Show this pass at the registration desk." : isBlood ? "Show this pass at the registration desk, with your national ID or Iqama." : ride === "yoga" ? "Show this pass on arrival. Bring your yoga mat and wear comfortable clothing. All levels are welcome, no yoga experience needed." : "Show this pass on arrival." },
         { key: "ref", label: "Reference", value: barcodeMsg }
       ]
     }
@@ -717,9 +720,9 @@ function _sessClock(sess) {
 // the end time entirely, leaving the pass live for hours after the session was over.
 // The app keys this off KIND_TRAITS.gathering; this is the same table.
 // The Victory Lap gathers (doors open, then the first heat); the DEFE run does not.
-const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, petromin: false, swim: false, workshop: false, jcc: false, defe5k: false };
+const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, petromin: false, swim: false, workshop: false, jcc: false, defe5k: false, yoga: false };
 // The kinds that hand out no bike (the app's KIND_TRAITS bike:false).
-const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true, blood: true };
+const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true, blood: true, yoga: true };
 // Who a booking is for, by kind: riders only where there is a bike.
 function _people(ride) {
   if (ride === "runher" || ride === "defe5k") return { one: "Runner", many: "Runners" };
@@ -776,6 +779,8 @@ const RIDES = {
   blood_visitor: { bg: "rgb(255,255,255)", fg: "rgb(11,31,22)", label: "rgb(8,104,63)", venue: "Micromobility Blood Donation" },
   // The circuit's own card colours: the navy field it is drawn on, white type, and the pale cyan its
   // meta line uses. Both clear AA.
+  // Yoga (2026-11-12, styles.css th-yoga): cream with the deep earth ink and clay labels (4.8:1 on the cream)
+  yoga:     { bg: "rgb(255,251,245)", fg: "rgb(59,42,32)", label: "rgb(180,83,47)", venue: "Hatha Yoga for Cyclists" },
   jcc:      { bg: "rgb(6,52,111)", fg: "rgb(255,255,255)", label: "rgb(159,213,238)", venue: "Jeddah Corniche Circuit" }
 };
 function _rideOf(sess) {
@@ -787,7 +792,7 @@ function _rideOf(sess) {
   if (sess.ride_kind === "snd96") return "snd96";
   if (sess.event_kind !== "community") return "jcc";
   const k = sess.ride_kind;
-  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" || k === "vlap" || k === "defe5k" || k === "blood" ? k : "saturday";
+  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" || k === "vlap" || k === "defe5k" || k === "blood" || k === "yoga" ? k : "saturday";
 }
 function _hhmm(min) {
   if (min == null) return "";

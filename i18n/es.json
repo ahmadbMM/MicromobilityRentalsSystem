@@ -8444,5 +8444,18 @@
   "cfnScRiding": "Montar en bici",
   "cfnScWork": "Trabajo y redes sociales",
   "cfnScXem": "Contacto de emergencia (con sesión iniciada)",
-  "cfnScCheck": "Revisa tus respuestas"
+  "cfnScCheck": "Revisa tus respuestas",
+  "evYogaName": "Hatha yoga para ciclistas",
+  "snYoga": "Yoga",
+  "ygWith": "con Jassim Alsaady",
+  "ygMin": "{0} min",
+  "ygLeadK": "Guía",
+  "ygLeadV": "Jassim Alsaady",
+  "ygDurK": "Duración",
+  "ygLevelK": "Nivel",
+  "ygLevelV": "Todos los niveles, sin experiencia previa en yoga",
+  "ygBringK": "Trae",
+  "ygBringV": "Tu esterilla de yoga, y ven con ropa cómoda",
+  "infoDtYoga": "Noventa minutos de Hatha yoga pensados para ciclistas, con Jassim Alsaady: movimiento consciente, estiramientos profundos, fortalecimiento suave y respiración para las caderas, la zona lumbar y las piernas que el ciclismo deja tensas. Un momento para bajar el ritmo, sentirte en calma y recuperarte con la comunidad. De {start} a {end}. Para todos los niveles, sin experiencia previa. Trae tu esterilla de yoga y ven con ropa cómoda. Gratis para los miembros de la comunidad; plazas limitadas.",
+  "sessEventYogaHint": "Yoga para miembros de la comunidad: gratis, una plaza por persona, por orden de llegada, y lista de espera cuando se ocupan las plazas. Hora de inicio y de fin, sin bicicletas."
 }

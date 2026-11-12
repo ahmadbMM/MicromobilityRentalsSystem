@@ -8444,5 +8444,18 @@
   "cfnScRiding": "Pedalar",
   "cfnScWork": "Trabalho e redes sociais",
   "cfnScXem": "Contato de emergência (conectado)",
-  "cfnScCheck": "Confira suas respostas"
+  "cfnScCheck": "Confira suas respostas",
+  "evYogaName": "Hatha ioga para ciclistas",
+  "snYoga": "Ioga",
+  "ygWith": "com Jassim Alsaady",
+  "ygMin": "{0} min",
+  "ygLeadK": "Conduzido por",
+  "ygLeadV": "Jassim Alsaady",
+  "ygDurK": "Duração",
+  "ygLevelK": "Nível",
+  "ygLevelV": "Todos os níveis, sem experiência prévia em ioga",
+  "ygBringK": "Traga",
+  "ygBringV": "O seu tapete de ioga, e venha com roupa confortável",
+  "infoDtYoga": "Noventa minutos de Hatha ioga pensados para ciclistas, com Jassim Alsaady: movimento consciente, alongamento profundo, fortalecimento suave e respiração para as ancas, a lombar e as pernas que a bicicleta deixa tensas. Um momento para abrandar, sentir-se estável e recuperar com a comunidade. Das {start} às {end}. Todos os níveis, sem experiência prévia. Traga o seu tapete de ioga e venha com roupa confortável. Gratuito para os membros da comunidade; vagas limitadas.",
+  "sessEventYogaHint": "Ioga para membros da comunidade: gratuito, um lugar por pessoa, por ordem de chegada, e a lista de espera quando os lugares acabam. Hora de início e de fim, sem bicicletas."
 }

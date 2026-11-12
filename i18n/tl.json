@@ -8444,5 +8444,18 @@
   "cfnScRiding": "Pagbibisikleta",
   "cfnScWork": "Trabaho at social media",
   "cfnScXem": "Emergency contact (naka-sign in)",
-  "cfnScCheck": "Suriin ang iyong mga sagot"
+  "cfnScCheck": "Suriin ang iyong mga sagot",
+  "evYogaName": "Hatha Yoga para sa mga Siklista",
+  "snYoga": "Yoga",
+  "ygWith": "kasama si Jassim Alsaady",
+  "ygMin": "{0} min",
+  "ygLeadK": "Pinangungunahan ni",
+  "ygLeadV": "Jassim Alsaady",
+  "ygDurK": "Haba",
+  "ygLevelK": "Antas",
+  "ygLevelV": "Lahat ng antas, hindi kailangan ng karanasan sa yoga",
+  "ygBringK": "Dalhin",
+  "ygBringV": "Ang iyong yoga mat, at magsuot ng komportableng damit",
+  "infoDtYoga": "Siyamnapung minuto ng Hatha Yoga na ginawa para sa mga siklista, kasama si Jassim Alsaady: maingat na paggalaw, malalim na pag-unat, banayad na pagpapalakas at paghinga para sa balakang, ibabang likod at binti na naninigas sa pagbibisikleta. Panahon para bumagal, maging panatag at makabawi kasama ang komunidad. {start} hanggang {end}. Bukas sa lahat ng antas, hindi kailangan ng karanasan. Dalhin ang iyong yoga mat at magsuot ng komportableng damit. Libre para sa mga miyembro ng komunidad; limitado ang lugar.",
+  "sessEventYogaHint": "Yoga para sa mga miyembro ng komunidad: libre, isang lugar bawat isa, kung sino ang nauna, at waitlist kapag puno na. May oras ng simula at pagtatapos, walang bisikleta."
 }

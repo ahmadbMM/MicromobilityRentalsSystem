@@ -1397,6 +1397,28 @@ location JCC. It is a date INSIDE MicroMobility Experiences (`_evMatch` communit
   ONE_PER_SESSION, badge row). Session: `supabase/checks/defe-run-session-2026-10-22.sql`, run after the app is live.
   Tests: `tests/defe-run.spec.ts`.
 
+## Yoga (2026-11-12)
+Hatha Yoga for Cyclists with Jassim Alsaady (a collaboration), Sat 21 Nov 2026 16:00-17:30 at SILKDEER, 15 places.
+`ride_kind 'yoga'` (event_kind community, open_to_all false, free, no approval, hide_queue), session id suffix `-yg`
+(NC_ID knows it). A date INSIDE MicroMobility Experiences (`_evMatch` community takes it). KIND_TRAITS: no bike, no
+breakfast, no gathering (start and end, like the pool); activity waiver; one place per account (`_noGroupAdd`, and the
+database's `_yoga_entry_guard` ONE_PER_SESSION). Walk-ins allowed. `_isYoga(s)`.
+- Look "Sunset Hatha" (hatha = ha, the sun + tha, the moon; it ends just before the sun sets): `assets/yoga-mark.svg`
+  (a sun setting on the horizon, a sage crescent moon), tokens `--yg-*` in styles.css (clay #B4532F actions and title,
+  sage #6E8266, cream #FFFBF5, deep earth ink), Marcellus title. `_ygSessCard` (date card with `_ygScene`, the sun and
+  three rings drawn in its far corner), `body.yoga-skin` from the review on and on the booked page (`_syncYgTheme`, also
+  synced in showView and the tab switch), `_ygHeadHtml`, ticket `th-yoga` + `_ygKnowHtml` (Led by / Level / Bring; a free
+  place says Free, `_ygFree`), Details facts in `_infoFacts` and the about text `infoDtYoga` / site key
+  `experiences.dates.aboutYoga`. Staff: mark `lotus` (`_CU.lotus`), short name `snYoga`, chips `th-yoga`, row `rq-ev-yoga`,
+  the new-session picker (15 places by default).
+- Wallet: Apple pass `RIDES.yoga` (cream, clay labels), ENDS time, BRING Yoga mat, strip art `YOGA_IMAGES`
+  (render-art.mjs `yoga`); Google pass knows the kind.
+- Words that name the instructor (`ygWith`, `ygLeadV`) are the kind's, so a later yoga date with someone else needs them
+  changed (or a per-session field).
+- Migration `20261112120000_yoga_kind` (promo kind list, `_session_kind`, `_vol_sess_name`, `staff_record_waiver`
+  activity, `_yoga_entry_guard`). Session: `supabase/checks/yoga-session-2026-11-21.sql`, run after the app is live.
+  Tests: `tests/yoga-session.spec.ts`.
+
 ## Blood Donation event (2026-11-03)
 - **Blood Donor badge (2026-11-05):** `blood_donor`, the drop on the red medal, earned from staff's Donated mark (`donatedAt`), so taking the mark back takes the badge; shown only once held. **Volunteer badge:** `volunteer`, the raised hand on its own blue special medal (`BDG_SPECIAL.volunteer`, `.sp-volunteer`), given by staff from Community > Badges. Catalogue rows: migration 20261105100000. Mirrored in the website's `lib/ride-record.ts`.
 - **Blood Donation Visitor badge (2026-11-06):** `blood_visitor`, the drop's outline with a heart inside on the teal medal (glyph `dropo`), earned by everyone who came, donors and visitors alike: any booking on a `blood` session that staff checked out (status done), or one marked Donated (the owner, 2026-11-06: "the blood donation visitor badge give it to donors and visitors"); Blood Donor stays with those marked Donated only. Shown only once held. Catalogue row in migration 20261106100000.

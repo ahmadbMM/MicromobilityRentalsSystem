@@ -246,6 +246,26 @@ test.describe('the Apple Wallet pass', () => {
     expect(sat.json.eventTicket.secondaryFields.find((f: { key: string }) => f.key === 'start').label).toBe('RIDE STARTS');
   });
 
+  // Yoga (2026-11-12): its own cream and clay, its sunset strip, when it ends and what to bring, the venue staff gave
+  // it, and nothing about riding.
+  test('a yoga pass wears its own look, says when it ends and to bring a mat, and never talks about riding', async () => {
+    const CYCLING = /\b(ride|rides|rider|riders|riding|bike|bikes|cycling|cycle)\b/i;
+    const yg = { ...circuit, event_kind: 'community', ride_kind: 'yoga', location: 'SILKDEER', meet_url: 'https://maps.app.goo.gl/TfCSEPEPxA4C5f7d7', bike_slots: JSON.stringify({ _time: '16:00 - 17:30' }) };
+    const r = await pass({ ...booking, name: 'Sara', price: 0 }, yg);
+    expect(r.status).toBe(200);
+    expect([r.json.backgroundColor, r.json.foregroundColor, r.json.labelColor]).toEqual(['rgb(255,251,245)', 'rgb(59,42,32)', 'rgb(180,83,47)']);
+    const t = r.json.eventTicket, f = (list: { key: string }[], k: string) => list.find((x) => x.key === k) as { label: string; value: string } | undefined;
+    expect(f(t.secondaryFields, 'start')).toMatchObject({ label: 'STARTS', value: '4:00 PM' });
+    expect(f(t.secondaryFields, 'end')).toMatchObject({ label: 'ENDS', value: '5:30 PM' });
+    expect(f(t.auxiliaryFields, 'bring')).toMatchObject({ label: 'BRING', value: 'Yoga mat' });
+    expect(f(t.backFields, 'venue')!.value).toBe('SILKDEER');
+    expect(f(t.primaryFields, 'riders')!.label).toBe('PARTICIPANT');
+    const shown = [r.json.description, r.json.semantics.eventName, ...['headerFields', 'primaryFields', 'secondaryFields', 'auxiliaryFields', 'backFields'].flatMap((k) => t[k].flatMap((x: { label: string; value: unknown }) => [x.label, String(x.value)]))].join('\n');
+    expect(shown).not.toMatch(CYCLING);
+    const P = await import('../scripts/wallet/pass-images.js' as string);
+    expect(Buffer.from(r.files!['strip@2x.png']).toString('base64')).toBe(P.YOGA_IMAGES['strip@2x.png']);
+  });
+
   // The Saturday Social Ride's booking number (the owner, 2026-10-25): its list is out and the rider is on it,
   // so the pass shows the number the app's card shows; the code keeps the ref alone. The pool shows none.
   test('a published Saturday ride shows the booking number on the pass, its code still number-free', async () => {
