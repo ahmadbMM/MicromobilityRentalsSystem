@@ -6373,6 +6373,7 @@
   "vtViewRcpt": "Tingnan ang resibo",
   "vtRcptSave": "I-save ang larawan",
   "vtRcptNone": "Walang nakitang resibo.",
+  "vtRcptGone": "Hindi na aktibo ang booking na ito: hindi makukumpirma ang resibo nito.",
   "snLabel": "Espesyal na pangangailangan",
   "snShareAll": "ng mga nakalistang account",
   "snAmongComm": "Mga miyembro ng komunidad: {0} sa {1}",

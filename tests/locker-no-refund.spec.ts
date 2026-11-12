@@ -90,6 +90,21 @@ test.describe('@staff:lockers cancel with no refund', () => {
     await expect(page.locator('.toast', { hasText: 'no refund' })).toHaveCount(0);
   });
 
+  test('money back is an admin\'s: anyone else is not offered it and cancels a paid locker with no refund', async ({ page }) => {
+    const seen = calls(page);
+    const paid = rent('R7', { customer_id: 'c2', name: 'Omar Other', locker_id: 'L2', on_bill: false, created_by: 'page', pay: 'wallet', receipt_id: 'lk-r7' });
+    await staff(page, { queue_entries: [], locker_rentals: [paid], 'rpc:staff_locker_cancel': { ok: true, kept: true } });
+    await page.evaluate(`S.staffRole='staff';`);
+    await reservations(page);
+    await page.locator('#tab-lockers .lk-res-row', { hasText: 'Omar Other' }).getByRole('button', { name: 'Cancel locker' }).click();
+    const q = cancelQ(page);
+    await expect(q.getByRole('radio')).toHaveCount(0);
+    await expect(q).toContainText('The locker is freed and the');
+    await q.getByRole('button', { name: 'Cancel locker' }).click();
+    await expect.poll(() => sent(seen, 'staff_locker_cancel')).toBeTruthy();
+    expect(sent(seen, 'staff_locker_cancel')).toEqual({ p_rental: 'R7', p_reason: 'staff', p_undo: false, p_no_refund: true });
+  });
+
   test('a locker nothing was paid for asks no question about money', async ({ page }) => {
     await staff(page, {
       queue_entries: [bk('q2', 2, { name: 'Omar Other', customer_id: 'c2' })],

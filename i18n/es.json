@@ -6373,6 +6373,7 @@
   "vtViewRcpt": "Ver comprobante",
   "vtRcptSave": "Guardar imagen",
   "vtRcptNone": "No se encontró ningún comprobante.",
+  "vtRcptGone": "Esta reserva ya no está activa: su comprobante no se puede confirmar.",
   "snLabel": "Necesidades especiales",
   "snShareAll": "de las cuentas listadas",
   "snAmongComm": "Miembros de la comunidad: {0} de {1}",

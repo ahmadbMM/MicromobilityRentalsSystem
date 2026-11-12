@@ -6373,6 +6373,7 @@
   "vtViewRcpt": "Voir le reçu",
   "vtRcptSave": "Enregistrer l'image",
   "vtRcptNone": "Aucun reçu trouvé.",
+  "vtRcptGone": "Cette réservation n'est plus active : son reçu ne peut pas être confirmé.",
   "snLabel": "Besoins particuliers",
   "snShareAll": "des comptes listés",
   "snAmongComm": "Membres de la communauté : {0} sur {1}",
