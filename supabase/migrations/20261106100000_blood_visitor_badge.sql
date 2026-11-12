@@ -12,21 +12,24 @@
 -- Safe before or after the app. Until this runs Community > Badges does not list it; a rider who earned it sees
 -- theirs either way.
 --
+-- Run on prod and staging on 2026-11-12, after 20261112223000 (badge_visibility), so the row is written with
+-- held_only true: the badge's "Customers and members see it" switch starts off, as the app has always shown it.
+--
 -- Undo:
 --   delete from public.badges where id = 'bd_blood_visitor';
 -- ============================================================================
 
 begin;
 
-insert into public.badges (id, slug, icon, color, name, name_ar, description, description_ar, system, auto, sort) values
-  ('bd_blood_visitor', 'blood_visitor', 'dropo', 'teal', 'Blood Donation Visitor', 'زائر حملة التبرع بالدم', 'Visit one of our blood donation events.', 'زُر إحدى فعالياتنا للتبرع بالدم.', true, true, 92)
+insert into public.badges (id, slug, icon, color, name, name_ar, description, description_ar, system, auto, sort, held_only) values
+  ('bd_blood_visitor', 'blood_visitor', 'dropo', 'teal', 'Blood Donation Visitor', 'زائر حملة التبرع بالدم', 'Visit one of our blood donation events.', 'زُر إحدى فعالياتنا للتبرع بالدم.', true, true, 92, true)
 on conflict (slug) do update set icon = excluded.icon, color = excluded.color, name = excluded.name, name_ar = excluded.name_ar,
   description = excluded.description, description_ar = excluded.description_ar, system = true, auto = true, retired = false,
-  sort = excluded.sort;
+  sort = excluded.sort, held_only = true;
 
 do $chk$
 begin
-  if not exists (select 1 from public.badges where slug = 'blood_visitor' and system and auto and not retired) then
+  if not exists (select 1 from public.badges where slug = 'blood_visitor' and system and auto and not retired and held_only) then
     raise exception 'the Blood Donation Visitor badge is missing';
   end if;
 end $chk$;
