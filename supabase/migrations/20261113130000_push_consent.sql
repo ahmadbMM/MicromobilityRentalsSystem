@@ -8,8 +8,8 @@
 --     Regulations Art. 28: documented consent, an easy way out).
 --  2. push_outbox.cat: 'rides' or 'community'. A trigger drops a row the rider has switched off, and a Community row
 --     for a rider who never switched Community on, whoever queues it.
---  3. push_words: the messages in each language, with {0}, {1} placeholders, and the session kinds' names (the app's
---     own words); en and ar here, the other eight in supabase/seeds/push_words_more.sql.
+--  3. push_words: the messages in all ten languages, with {0}, {1} placeholders, and the session kinds' names (the
+--     app's own words).
 --  4. _hub_push_tick (every 10 minutes): the reminder the evening before (from 21:00 KSA, after the evening prayers in
 --     every season, marking reminded_at with kind 'push' so staff skip that rider), the new month's challenge on the 1st
 --     (from 10:00 KSA), and the Saturday recap to the members who rode (between 08:00 and 22:00 KSA).
