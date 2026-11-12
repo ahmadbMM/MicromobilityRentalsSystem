@@ -1614,6 +1614,7 @@ async function petrominPass(request, q, env, passTypeId, teamId) {
   } catch (e) {
     return json({ ok: false, error: "lookup failed" }, 502);
   }
+  if (r && r.ok !== true && r.error === "throttled") return json({ ok: false, error: "throttled" }, 429);
   if (!r || r.ok !== true || !r.booking_no || !r.session || typeof r.session !== "object") {
     _pmMissCount(ip, true);
     return json({ ok: false, error: "not found" }, 404);
@@ -1841,32 +1842,49 @@ function _entryAddons(raw) {
   for (const a of list) {
     const id = a && typeof a === "object" ? a.id : a;
     const qty = a && typeof a === "object" ? Math.max(1, Number(a.qty) || 1) : 1;
-    if (id != null && id !== "") out.push({ id: String(id), qty });
+    const p = a && typeof a === "object" && typeof a.p === "number" && Number.isFinite(a.p) ? a.p : void 0;
+    if (id == null || id === "") continue;
+    const ex = out.find((x) => x.id === String(id) && x.p === p);
+    if (ex) ex.qty += qty;
+    else out.push(p === void 0 ? { id: String(id), qty } : { id: String(id), qty, p });
   }
   return out;
 }
+var LOCKER_LINE = "locker";
 async function _serverAddons(SUPA, ANON, group) {
   const want = /* @__PURE__ */ new Map();
   for (const r of group) {
     const list = _entryAddons(r.addons);
     if (!list) return { addons: [], known: false };
-    for (const a of list) want.set(a.id, (want.get(a.id) || 0) + a.qty);
+    for (const a of list) {
+      const key = a.id + "|" + (a.p === void 0 ? "" : a.p);
+      const w = want.get(key);
+      if (w) w.q += a.qty;
+      else want.set(key, { id: a.id, q: a.qty, p: a.p });
+    }
   }
   if (!want.size) return { addons: [], known: true };
   try {
-    const ids = [...want.keys()].slice(0, 50).map((i) => `"${i.replace(/["\\]/g, "")}"`).join(",");
-    const res = await fetch(`${SUPA}/rest/v1/inventory?select=id,name,price&id=in.(${encodeURIComponent(ids)})`, {
-      headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
-    });
-    if (!res.ok) return { addons: [], known: false };
-    const rows = await res.json();
-    const by = new Map((Array.isArray(rows) ? rows : []).map((x) => [String(x.id), x]));
+    const need = [...new Set([...want.values()].map((w) => w.id).filter((id) => id !== LOCKER_LINE))];
+    let by = /* @__PURE__ */ new Map();
+    if (need.length) {
+      const ids = need.slice(0, 50).map((i) => `"${i.replace(/["\\]/g, "")}"`).join(",");
+      const res = await fetch(`${SUPA}/rest/v1/inventory?select=id,name,price&id=in.(${encodeURIComponent(ids)})`, {
+        headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
+      });
+      if (!res.ok) return { addons: [], known: false };
+      const rows = await res.json();
+      by = new Map((Array.isArray(rows) ? rows : []).map((x) => [String(x.id), x]));
+    }
     const out = [];
-    for (const [id, q] of want) {
+    for (const { id, q, p } of want.values()) {
       const it = by.get(id);
-      if (!it) return { addons: [], known: false };
-      const price = it.price != null && !Number.isNaN(+it.price) ? +it.price : 0;
-      out.push({ n: it.name || id, q, p: Math.round(price * q * 100) / 100 });
+      let price;
+      if (p !== void 0) price = p;
+      else if (it) price = it.price != null && !Number.isNaN(+it.price) ? +it.price : 0;
+      else return { addons: [], known: false };
+      const n = it && it.name || (id === LOCKER_LINE ? "Locker" : "Add-on");
+      out.push({ n, q, p: Math.round(price * q * 100) / 100 });
     }
     return { addons: _cleanAddons(out), known: true };
   } catch (e) {
