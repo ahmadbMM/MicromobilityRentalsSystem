@@ -2300,6 +2300,7 @@ function _prefAll(){
   let o=null;try{o=JSON.parse(localStorage.getItem('cq_prefs')||'null');}catch(_){}
   const ok=o&&o.uid===u&&o.v&&typeof o.v==='object'&&!Array.isArray(o.v);
   S._prefs=ok?o.v:{};S._prefsUid=u;S._prefDirty=ok&&Array.isArray(o.dirty)?Object.fromEntries(o.dirty.map(k=>[k,1])):{};
+  S._prefSeen=ok&&Array.isArray(o.srv)?Object.fromEntries(o.srv.map(k=>[k,1])):null; // the synced keys the server held at the last merge (_prefMerge)
   return S._prefs;
 }
 function _pref(k,fb){const v=_prefAll();return _own(v,k)&&v[k]!=null?v[k]:fb;}
@@ -5156,12 +5157,26 @@ function _bizArr(arr,k,ok){const nv=_bizV(k,arr,ok||_bizStrs);arr.splice(0,arr.l
 function _vatRate(){const v=Number(_biz('vat_pct',15));return v>=0&&v<100?v/100:0.15;}
 // Cancel reasons: the built-in ones less those Settings hides (never Other, always last), and the
 // admins' own, each [code, its words as typed].
+// An admin's own reason's code, as queue_entries' check and the rider's cancel take it (^[a-z_]{1,24}$): a digit (the hash
+// of an Arabic label, a repeat's _2) or a code past 24 failed the desk's cancel and was dropped from the rider's (bug hunt
+// 2026-11-11). The code a label had before stays when the check takes it; else the label's letters cut to 22, or the hash
+// in letters; a repeat _b, _c... 'used' holds the codes taken.
+function _cxOwnCode(label,used){
+  const h0=Math.abs([...label].reduce((h,c)=>(h*31+c.charCodeAt(0))|0,7));
+  let c0='c_'+(label.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,30)||h0.toString(36));
+  if(!/^[a-z_]{1,24}$/.test(c0)){let h=h0,z='';do{z+=String.fromCharCode(97+h%26);h=Math.floor(h/26);}while(h);
+    c0='c_'+(label.toLowerCase().replace(/[^a-z]+/g,'_').replace(/^_+|_+$/g,'').slice(0,22).replace(/_+$/,'')||z);}
+  let c=c0;for(let n=1;used.has(c);n++)c=c0.slice(0,22).replace(/_+$/,'')+'_'+String.fromCharCode(97+n);
+  used.add(c);return c;
+}
 function _bizCancel(){
   if(!_BIZ_DEF.cancel_all)_BIZ_DEF.cancel_all=_bizCp(CANCEL_REASONS);
   const off=_biz('cancel_off',[]),own=_biz('cancel_custom',[]);
   const hide=new Set(Array.isArray(off)?off.filter(x=>x!=='other'):[]);
   const base=_BIZ_DEF.cancel_all.filter(r=>!hide.has(r[0])),other=base.pop();
-  const mine=(Array.isArray(own)?own:[]).filter(x=>x&&/^c_[a-z0-9_]{1,40}$/.test(x.code)&&typeof x.label==='string'&&x.label.trim()).slice(0,20).map(x=>[x.code,x.label.trim().slice(0,60)]);
+  const raw=(Array.isArray(own)?own:[]).filter(x=>x&&/^c_[a-z0-9_]{1,40}$/.test(x.code)&&typeof x.label==='string'&&x.label.trim()).slice(0,20);
+  const used=new Set(raw.map(x=>x.code).filter(c=>/^[a-z_]{1,24}$/.test(c))); // a code saved before the check was met gets one it takes (_cxOwnCode)
+  const mine=raw.map(x=>{const l=x.label.trim().slice(0,60);return[/^[a-z_]{1,24}$/.test(x.code)?x.code:_cxOwnCode(l,used),l];});
   CANCEL_REASONS.splice(0,CANCEL_REASONS.length,...base,...mine,other);
   CANCEL_REASON_KEYS.splice(0,CANCEL_REASON_KEYS.length,...CANCEL_REASONS.map(r=>r[1]));
   _CANCEL_OTHER=CANCEL_REASON_KEYS.length-1;
@@ -37611,7 +37626,7 @@ async function bulkApprovePending(){
     confirmLabel:t('apprApproveBtn'),confirmClass:'btn-green',
     onConfirm:async()=>{
       const r=await sb.from('queue_entries').update({approval:'approved'})
-        .in('id',ids).or('approval.is.null,approval.eq.pending').select('id');
+        .in('id',ids).eq('status','waiting').or('approval.is.null,approval.eq.pending').select('id'); // a request the rider cancelled since this device last synced is not approved (bug hunt 2026-11-11)
       if(_writeErr(r,'bulk approve'))return;
       // The count is the rows this press approved: one another till decided meanwhile is not one.
       const n=_landedIds(r,ids).length;
@@ -37662,6 +37677,10 @@ function _ptnLoad(sid,force){
     Promise.resolve(sb.from('session_partner_codes').select('*').eq('session_id',sid).order('created_at')).catch(()=>null),
     Promise.resolve(sb.from('session_partner_codes').select('name').limit(0)).catch(()=>null)]).then(([r,c,n])=>{
     if(!r||(r.error&&!/^(PGRST205|42P01)$/.test(String(r.error.code||'')))){failed();return;}
+    // The codes and their names the same: only a missing table or column is for good. A read of them that failed put the
+    // ride in the old single-code mode until a reload, and its Save wrote the old columns (bug hunt 2026-11-11).
+    if(!c||(c.error&&!/^(PGRST205|42P01)$/.test(String(c.error.code||'')))){failed();return;}
+    if(!n||(n.error&&!/^(PGRST20[45]|42P01|42703)$/.test(String(n.error.code||'')))){failed();return;}
     S._spcNm=!!(n&&!n.error); // the codes' names (20261023220000): a database without the column answers an error, and no name box shows
     S._spc[sid]=(c&&!c.error&&Array.isArray(c.data))?c.data:null; // null: a database before 20261023120000, the single code
     S._sp[sid]=(!r.error&&Array.isArray(r.data))?r.data:[]; // PGRST205 (no table yet): no panel
@@ -38256,6 +38275,7 @@ function _showOverdue(){S.sfStatus='active';S.sfOverdueFirst=true;S.sfLimit=150;
 function setSfSession(v){
   if(String(v).startsWith('pm:')){openPetrominPage(String(v).slice(3));return;}
   if(S.queueView==='petromin')S.queueView='bookings';
+  if(v!==S.sfSession)S.sfSelected=[]; // ticks made on another ride never ride along into this one's bulk actions (bug hunt 2026-11-11)
   _sfDayGuard(v);S.sfSession=v;S.sfLimit=150;S._sfPicked=true;renderStaffQueue();
 }
 function setSfSort(col){
@@ -38828,7 +38848,7 @@ function _n6uNoTab(tab){
 // function exists the copy is all there is; keys changed meanwhile go up once it does. The server's copy,
 // read with the account's row, wins over this device's for every key not changed here since.
 const PREF_SYNC=/^(start|tabbar|ntread|(state|views)\.[a-z]{1,20})$/; // views.<section>: the account's own saved views (staff round s10)
-function _prefStore(){try{localStorage.setItem('cq_prefs',JSON.stringify({uid:S._prefsUid||'',v:_prefAll(),dirty:Object.keys(S._prefDirty||{})}));}catch(_){}}
+function _prefStore(){try{localStorage.setItem('cq_prefs',JSON.stringify({uid:S._prefsUid||'',v:_prefAll(),dirty:Object.keys(S._prefDirty||{}),srv:S._prefSeen?Object.keys(S._prefSeen):null}));}catch(_){}}
 function _prefSet(k,val){
   const v=_prefAll();if(val===undefined)val=null;
   if(JSON.stringify(_own(v,k)?v[k]:null)===JSON.stringify(val))return;
@@ -38851,12 +38871,14 @@ async function _prefPush(){
   if(r&&r.data&&typeof r.data==='object')_prefMerge(r.data);
 }
 // The server's copy over this device's: a key changed here and not yet sent stays this device's; a key only
-// this device has goes up.
+// this device has goes up, unless the server held it at the last merge: then another device removed it (Reset
+// filters, a cleared start) and it goes here too. It went up again, and the reset never stuck (bug hunt 2026-11-11).
 function _prefMerge(srv){
   if(!srv||typeof srv!=='object'||Array.isArray(srv))return;
-  const v=_prefAll(),d=S._prefDirty;
+  const v=_prefAll(),d=S._prefDirty,seen=S._prefSeen;
   Object.keys(srv).forEach(k=>{if(PREF_SYNC.test(k)&&!d[k])v[k]=srv[k];});
-  Object.keys(v).forEach(k=>{if(PREF_SYNC.test(k)&&!_own(srv,k)&&!d[k])d[k]=1;});
+  Object.keys(v).forEach(k=>{if(PREF_SYNC.test(k)&&!_own(srv,k)&&!d[k]){if(seen&&seen[k])delete v[k];else d[k]=1;}});
+  S._prefSeen=Object.fromEntries(Object.keys(srv).filter(k=>PREF_SYNC.test(k)).map(k=>[k,1]));
   _prefStore();_prefPushSoon();
   try{_ntSync();if(S.view==='staff')_tbRender();}catch(_){}
 }
@@ -38961,7 +38983,7 @@ function _accessSet(row,uid){
 // var and functions: the client is wrapped at boot, before this part of the script has run.
 var _roAllowN=0,_roToastAt=0;
 function _roOkTable(tbl){return tbl==='staff_actions'||tbl==='error_log';}
-function _roOkRpc(fn){return ['staff_archived_list','staff_archived_account','customer_profile','customer_exists','staff_phone_accounts','staff_resolve_bike','staff_sync','staff_people','staff_email_for_phone','staff_inventory_costs','staff_inventory_extras','staff_ambassador_stats','promo_lookup','my_bookings','list_sessions','customer_token_ok','customer_pwd_state','customer_consents','customer_addon_stock','community_member','customer_fix_fields','staff_team_list','staff_team_more','staff_purge_preview','staff_operator_list','staff_check_operator_pin','staff_mark_pwd_changed','staff_sign_in_methods','staff_last_seen','staff_sign_in_lock','staff_audit_search','staff_pii_reveal'].indexOf(fn)>=0;} // staff_pii_reveal is an audit write like staff_actions: refused, a view-only account's reveals and exports went unrecorded behind a read-only toast (bug hunt 2026-10-28)
+function _roOkRpc(fn){return _READ_RPC.has(fn)||['staff_wallet_balances','staff_wallet_moves','staff_part_timer_accounts','staff_store_ready','staff_archived_list','staff_archived_account','customer_profile','customer_exists','staff_phone_accounts','staff_resolve_bike','staff_sync','staff_people','staff_email_for_phone','staff_inventory_costs','staff_inventory_extras','staff_ambassador_stats','promo_lookup','my_bookings','list_sessions','customer_token_ok','customer_pwd_state','customer_consents','customer_addon_stock','community_member','customer_fix_fields','staff_team_list','staff_team_more','staff_purge_preview','staff_operator_list','staff_check_operator_pin','staff_mark_pwd_changed','staff_sign_in_methods','staff_last_seen','staff_sign_in_lock','staff_audit_search','staff_pii_reveal'].indexOf(fn)>=0;} // staff_pii_reveal is an audit write like staff_actions: refused, a view-only account's reveals and exports went unrecorded behind a read-only toast (bug hunt 2026-10-28). Every pure read (_READ_RPC) and the wallet, part-timer and store reads go through too: refused, a view-only or Owner account saw every wallet at 0 and a read-only toast on Analytics every 10 minutes (bug hunt 2026-11-11)
 function _roNow(){try{return !_roAllowN&&S.view==='staff'&&!_editOk(S.staffTab);}catch(_){return false;}}
 // Builds one call the guard lets through (queued work sent from elsewhere, the page's own
 // housekeeping). The guard looks at the moment a write is built, so only that moment is exempt:
@@ -39533,7 +39555,7 @@ function _bizRead(id){
     else if(kind==='cancel'){patch[k]=[...document.querySelectorAll('[data-biz-cancel]')].filter(x=>!x.checked).map(x=>x.getAttribute('data-biz-cancel'));}
     else if(kind==='cancelOwn'){const l=[...new Set(val(fid).split(/[,\n،]+/).map(x=>x.trim().slice(0,60)).filter(Boolean))].slice(0,20);
       // Codes made unique (bug hunt 2026-10-28): 'Weather' and 'weather.' both became c_weather and recorded one reason.
-      const used=new Set();patch[k]=l.map(label=>{const c0='c_'+(label.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,30)||Math.abs([...label].reduce((h,c)=>(h*31+c.charCodeAt(0))|0,7)).toString(36));let c=c0;for(let n=2;used.has(c);n++)c=c0+'_'+n;used.add(c);return{code:c,label};});}
+      const used=new Set();patch[k]=l.map(label=>({code:_cxOwnCode(label,used),label}));}
     else if(kind==='vrs'){patch[k]=[...document.querySelectorAll('[data-biz-vrs]')].filter(x=>x.checked).map(x=>x.getAttribute('data-biz-vrs'));}
     else if(kind==='kpi'){const o={};for(const[kk,,r]of BIZ_KPI){const raw=_asciiDigits(val(`${fid}-${kk}`));if(!raw)continue;const n=Number(raw);if(!isFinite(n)||n<r[0]||n>r[1])return{err:[`${fid}-${kk}`,t('bizRangeErr').replace('{0}',r[0]).replace('{1}',r[1])]};o[kk]=n;}patch[k]=Object.keys(o).length?o:null;}
     else if(kind==='deps'){const o={};for(let i=0;i<DEP_TYPES.length;i++){const raw=_asciiDigits(val(`${fid}-${i}`));if(!raw)continue;const n=Number(raw);if(!Number.isInteger(n)||n<0||n>100000)return{err:[`${fid}-${i}`,t('bizRangeErr').replace('{0}',0).replace('{1}',100000)]};if(n>0)o[DEP_TYPES[i]]=n;}patch[k]=Object.keys(o).length?o:null;}
@@ -39905,9 +39927,10 @@ async function _tmLoad(){
     else{T.moreMissing=false;T.moreErr=false;T.more=Object.fromEntries(((mo&&mo.data)||[]).map(x=>[x.user_id,x]));}
     if(o&&o.error){T.opsMissing=_tmMissing(o.error);T.ops=(S.teamMembers||[]).map(n=>({name:n,has_pin:null}));}
     else{T.opsMissing=false;T.ops=(o&&o.data)||[];}
-    if(a&&a.error){T.acctMissing=_tmMissing(a.error);T.accts=[];}
-    else{T.acctMissing=false;T.accts=(a&&a.data)||[];if(!S._pt||S._pt.people===null)_ptLoad();}
-  }catch(e){T.ops=T.ops||[];T.accts=T.accts||[];T.moreErr=true;}
+    // The accounts the same (bug hunt 2026-11-11): a failed read drew an empty list with no error, as if the team had no accounts.
+    if(a&&a.error){if(_tmMissing(a.error)){T.acctMissing=true;T.acctErr=false;T.accts=[];}else{T.acctErr=true;T.accts=T.accts||[];}}
+    else{T.acctMissing=false;T.acctErr=false;T.accts=(a&&a.data)||[];if(!S._pt||S._pt.people===null)_ptLoad();}
+  }catch(e){T.ops=T.ops||[];T.accts=T.accts||[];T.moreErr=true;T.acctErr=true;}
   finally{T.busy=false;}
   if(S.staffTab==='team')renderTeam();
 }
@@ -39955,7 +39978,7 @@ function renderTeam(){
     </div>`;
   };
   const accts=`<div class="form-section tm-sec"><h2 class="form-title">${t('acctTitle')}</h2>
-    ${T.acctMissing?`<div class="tm-note">${t('dbPending')}</div>`:`<div class="ca-sub">${t('acctSub')}</div>${T.moreErr?`<div class="tm-note" role="alert">${t('errConnection')} <button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_tmLoad')}">${t('retryBtn')}</button></div>`:''}${_tmBar()}${_tmShown().map(acct).join('')||_emptyState(t('catNoMatch'))}`}</div>`;
+    ${T.acctMissing?`<div class="tm-note">${t('dbPending')}</div>`:`<div class="ca-sub">${t('acctSub')}</div>${T.moreErr||T.acctErr?`<div class="tm-note" role="alert">${t('errConnection')} <button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_tmLoad')}">${t('retryBtn')}</button></div>`:''}${_tmBar()}${_tmShown().map(acct).join('')||_emptyState(t('catNoMatch'))}`}</div>`;
   const fq=document.activeElement&&document.activeElement.id==='tm-q';
   el.innerHTML=head+ops+_tmInviteHtml()+accts;
   if(fq){const i=document.getElementById('tm-q');if(i){i.focus();const v=i.value;i.value='';i.value=v;}} // a search in use keeps its place
@@ -40031,7 +40054,7 @@ function _tmCapToggle(uid,k){const d=_tmDraft(uid);if(!d||_tmMoreOff())return;if
 function _tmPreset(uid,k){
   const p=TM_PRESETS[k],d=_tmDraft(uid);if(!p||!d||_tmMoreOff())return;
   if(!d.caps0)d.caps0=_tmCapsOf(uid);
-  d.role=p.role;d.view=null;d.edit=p.edit?[...p.edit]:null;d.caps={...p.caps};_tmNorm(d);renderTeam();
+  d.role=p.role;d.view=null;d.edit=p.edit?[...p.edit]:null;d.caps={...(d.caps||d.caps0),...p.caps};_tmNorm(d);renderTeam(); // a cap the preset does not name (personal data unmasked) keeps its value: it was lost on Save (bug hunt 2026-11-11)
 }
 function _tmAcctActs(a){
   if(_tmMoreOff())return'';
@@ -40143,7 +40166,7 @@ async function _tmPwdCopy(p){
 // staff_pt_unpay()). An entry keeps its own rate and the table computes its amount, so a rate changed later
 // leaves the past as it was; a paid entry is locked by the database until its payment is undone.
 function _pt(){
-  if(!S._pt){const[a,b]=_ptMonth(0);S._pt={people:null,accts:[],kinds:[],shifts:null,payouts:[],missing:false,busy:false,mode:'range',status:'unpaid',from:a,to:b,sel:new Set(),who:'all',pick:'cal',ym:todayStr().slice(0,7),f:{who:'',kind:'',sid:'',date:todayStr(),hours:'',rate:'',note:''},editId:null,addAcct:'',editPerson:null,editKind:null,dr:{},pay:{day:todayStr(),method:'cash',note:''}};}
+  if(!S._pt){const[a,b]=_ptMonth(0);S._pt={people:null,accts:[],kinds:[],shifts:null,payouts:[],missing:false,busy:false,mode:'range',status:'unpaid',from:a,to:b,sel:new Set(),who:'all',pick:'cal',ym:todayStr().slice(0,7),f:{who:'',kind:'',sid:'',date:todayStr(),hours:'',rate:'',note:''},editId:null,addAcct:'',editPerson:null,editKind:null,dr:{},pay:{day:todayStr(),method:'cash',note:''}};} // a date nobody picked is today's at each look (dayAuto/dateAuto): a page left open past midnight dated payments and hours to the day Team was opened (bug hunt 2026-11-11)
   return S._pt;
 }
 function _ptMissing(e){return !!e&&(e.code==='PGRST205'||e.code==='PGRST202'||e.code==='PGRST204'||e.code==='42P01'||e.code==='42703'||/could not find the (table|function|column)|does not exist/i.test(e.message||''));}
@@ -40309,6 +40332,7 @@ async function _ptToggleKind(id){
 // ── Log hours ──
 function _ptLogHtml(){
   const P=_pt(),f=P.f,today=todayStr();
+  if(!f.sid&&!P.editId&&f.dateAuto!==false)f.date=today;
   const ppl=(P.people||[]).filter(p=>p.active||p.user_id===f.who),ks=(P.kinds||[]).filter(k=>k.active||String(k.id)===f.kind);
   const lo=_ksaDaysAgo(120),hi=_ksaDayOf(Date.now()+30*86400000);
   const ss=_ptSessions().filter(s=>{const d=_ptDay(s);return d>=lo&&d<=hi||s.id===f.sid;}).sort((a,b)=>(_ptDay(b)+_sessStart(b)).localeCompare(_ptDay(a)+_sessStart(a)));
@@ -40337,12 +40361,13 @@ function _ptAmtText(f){const h=_ptNum(f.hours),r=_ptNum(f.rate),a=h*r;return isF
 // A field of the form, kept as typed so a redraw (a ride picked below) does not lose it.
 function _ptF(k,v){
   const P=_pt();P.f[k]=String(v==null?'':v);
+  if(k==='date')P.f.dateAuto=false;
   if(k==='hours'||k==='rate'){const el=document.getElementById('pt-amt');if(el)el.textContent=new DOMParser().parseFromString(_ptAmtText(P.f)||'<p></p>','text/html').body.textContent;}
 }
 function _ptPickWho(v){_pt().f.who=v||'';renderTeam();}
 function _ptPickKind(v){const P=_pt(),k=_ptKind(Number(v));P.f.kind=k?String(k.id):'';if(k)P.f.rate=String(Number(k.rate));renderTeam();} // the kind's rate, changeable for this entry
 function _ptPickRide(v){const P=_pt(),s=v?_sessGet(v):null;P.f.sid=s?s.id:'';if(s)P.f.date=_ptDay(s);renderTeam();}
-function _ptCancelEdit(){const P=_pt();P.editId=null;P.f={...P.f,sid:'',hours:'',note:'',date:todayStr()};renderTeam();}
+function _ptCancelEdit(){const P=_pt();P.editId=null;P.f={...P.f,sid:'',hours:'',note:'',date:todayStr(),dateAuto:true};renderTeam();}
 function _ptEditShift(id){
   const P=_pt(),x=(P.shifts||[]).find(s=>s.id===id);if(!x||x.payout_id!=null)return;
   P.editId=id;P.f={who:x.part_timer_id,kind:x.kind_id!=null?String(x.kind_id):'',sid:x.session_id||'',date:x.work_date,hours:String(Number(x.hours)),rate:String(Number(x.rate)),note:x.note||''};
@@ -40578,10 +40603,11 @@ function _ptTotalsHtml(){
   return`<div class="form-section tm-sec pt-owe"><h2 class="form-title">${t('ptOwe')}</h2>${head}${chooser}${tiles}${per}${perK}${list}</div>`;
 }
 // Mark as paid: the unpaid entries of the choice, one payment per part-timer (staff_pt_pay).
-function _ptPayF(k,v){_pt().pay[k]=String(v==null?'':v);}
+function _ptPayF(k,v){const pay=_pt().pay;pay[k]=String(v==null?'':v);if(k==='day')pay.dayAuto=false;}
 function _ptPayAsk(){
   const P=_pt(),U=_ptChosen().filter(x=>x.payout_id==null);if(!U.length)return;
   const s=_ptSum(U),n=new Set(U.map(x=>x.part_timer_id)).size,pay=P.pay;
+  if(pay.dayAuto!==false)pay.day=todayStr();
   const body=`<div class="pt-paydlg"><p>${esc(t('ptPayBody').replace('{0}',_ptH(s.h)).replace('{1}',_money(s.owe,_NOISO)).replace('{2}',String(U.length)).replace('{3}',String(n)))}</p>
     <label for="pt-pay-day">${t('ptPayDay')}</label><input id="pt-pay-day" type="date" value="${esc(pay.day||todayStr())}" data-on-change="${_on('_ptPayF','day',_P('value'))}">
     <label for="pt-pay-how">${t('ptPayHow')}</label><select id="pt-pay-how" class="filter-select" data-on-change="${_on('_ptPayF','method',_P('value'))}">${['cash','transfer','other'].map(m=>`<option value="${m}"${pay.method===m?' selected':''}>${esc(_ptMethod(m))}</option>`).join('')}</select>
@@ -40595,7 +40621,7 @@ async function _ptPay(ids){
   const got=Array.isArray(r.data)?r.data:[];
   got.forEach(po=>logAction(`${t('ptPayDone').replace('{0}',_ptName(po.part_timer_id))} · ${_ptH(po.hours)} · ${_money(po.amount,_NOISO)} · ${_ptMethod(po.method)} · ${po.paid_on}`));
   toast(`✓ ${t('ptPayDone').replace('{0}',got.map(po=>_ptName(po.part_timer_id)).join(', '))}`);
-  pay.note='';P.people=null;_ptLoad(); // the entries now carry their payment
+  pay.note='';pay.day=todayStr();pay.dayAuto=true;P.people=null;_ptLoad(); // the entries now carry their payment; the next one is dated today again
 }
 // ── Payments: one row per payment, with its slip and an undo ──
 function _ptPaymentsHtml(){
@@ -40871,7 +40897,8 @@ function _on_showCancelReasonModal_4(event,el){window._cancelCustomReason=el.val
 function _crPick(i){
   window._cancelReason=i;
   const w=document.getElementById('cancel-other-wrap');if(w)w.style.display=i===_CANCEL_OTHER?'block':'none';
-  if(i!==_CANCEL_OTHER)window._cancelCustomReason='';
+  // Other again: the words still in its box are the reason (bug hunt 2026-11-11): they were cleared, and Confirm asked to write one.
+  window._cancelCustomReason=i===_CANCEL_OTHER?String((document.getElementById('cancel-other-text')||{}).value||''):'';
   _crErr('');
 }
 // A booking is changed or cancelled on the server or not at all: offline, the rider is told at once, in a centred
@@ -41365,7 +41392,9 @@ const _LOG_CATS=[['pay','logCatPay'],['book','logCatBook'],['bike','logCatBike']
 function _undoableFor(item){
   if(!item)return null;
   if(item.cid){const a=(S.actionLog||[]).find(a=>a&&a.cid===item.cid);if(a)return!a.undone&&typeof a.fn==='function'?a:null;} // by its client id (staff round s10)
-  const cands=(S.actionLog||[]).filter(a=>a&&!a.undone&&typeof a.fn==='function'&&a.label===item.label);
+  // Within a minute of the line, as its mirror is matched (renderLogs' _mirrored): the same words from another desk or
+  // day showed Undo too, and it reversed this device's action, not the line tapped (bug hunt 2026-11-11).
+  const cands=(S.actionLog||[]).filter(a=>a&&!a.undone&&typeof a.fn==='function'&&a.label===item.label&&Math.abs((a.timestamp||0)-(item.ts||0))<60000);
   if(!cands.length)return null;
   return cands.reduce((best,a)=>Math.abs((a.timestamp||0)-(item.ts||0))<Math.abs((best.timestamp||0)-(item.ts||0))?a:best);
 }
@@ -41541,9 +41570,12 @@ async function _cactLoad(older){
     const{data,error}=await q;
     if(c.sig!==sig){c.busy=false;return _cactLoad(false);} // the filter moved while this page was out
     if(!error&&Array.isArray(data)){
+      // The rows read before stay under a fresh first page only when it reaches back into them, as the Action Log
+      // (_loadDbLogs): after a busy hour they sat straight under it, the lines between never read (bug hunt 2026-11-11).
+      let kept=false;
       if(older){const ids=new Set(c.rows.map(r=>r.id));c.rows=c.rows.concat(data.filter(r=>!ids.has(r.id)));}
-      else{const ids=new Set(data.map(r=>r.id));const edge=data[data.length-1];const tail=c.rows.filter(r=>!ids.has(r.id)&&last&&edge&&_cactBefore(r,edge));c.rows=data.concat(tail);c.at=Date.now();}
-      if(older||!c.end)c.end=data.length<CACT_PAGE;
+      else{const ids=new Set(data.map(r=>r.id));const edge=data[data.length-1];const tail=edge&&c.rows.some(r=>ids.has(r.id))?c.rows.filter(r=>!ids.has(r.id)&&_cactBefore(r,edge)):[];c.rows=data.concat(tail);c.at=Date.now();kept=tail.length>0;}
+      if(older||!kept||!c.end)c.end=data.length<CACT_PAGE;
       got=true;
     }
   }catch(_){}
