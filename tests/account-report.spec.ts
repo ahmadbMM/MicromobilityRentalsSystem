@@ -138,20 +138,20 @@ test('the printed sheet carries the chosen columns, the chosen summaries as char
   expect(html2).not.toContain('#2a78d6');
 });
 
-test('each summary tile carries its share: of every customer, or of every community member on a community report', async ({ page }) => {
+test('only "Rode this year" carries a share; a tile gives the list\'s rides as a share of every customer\'s rides', async ({ page }) => {
   await staff(page);
-  const pcts = (f: string) => page.evaluate(`(()=>{S._accOpts=null;Object.assign(_accOpts(),${f});return [..._accReportHtml().matchAll(/<span class="total-pct">([^<]*)<\\/span>/g)].map(m=>m[1]);})()`) as Promise<string[]>;
-  // Jeddah: Amal and Dan, 2 of the 4 customers; Amal's 2 rides are every ride there is
-  const all = await pcts(`{fCity:'Jeddah'}`);
-  expect(all[0]).toBe('50% of 4 customers');
-  expect(all[1]).toBe('100% of 2 customers');
-  expect(all).toHaveLength(5);
-  // the Community tag picked: measured against its live members only (Bader's tag has lapsed)
-  const comm = await pcts(`{fTag:'tag_saturday'}`);
-  expect(comm[0]).toBe('100% of 1 community members');
-  // Cara (VIP) never finished a ride: none of the 2
-  const vip = await pcts(`{fTag:'tag_vip'}`);
-  expect(vip[1]).toBe('0% of 2 customers');
+  const tiles = (f: string) => page.evaluate(`(()=>{S._accOpts=null;Object.assign(_accOpts(),${f});const h=_accReportHtml();
+    return {pcts:[...h.matchAll(/<span class="total-pct">([^<]*)<\\/span>/g)].map(m=>m[1]),
+      share:/total-num">([^<]*)<\\/span><span class="total-lbl">Share of all rides completed</.exec(h)?.[1]};})()`) as Promise<{ pcts: string[]; share?: string }>;
+  // Dan finishes a ride too: Amal's 2 and Dan's 1 are every ride the customer database completed
+  await page.evaluate(`S.queue.push({id:'qx',customerId:'c4',sessionId:'2026-08-25',sessionDate:'2026-08-25',sessionDay:'Tuesday',status:'done'})`);
+  // Jeddah: Amal and Dan rode this year, 2 of the 4 customers; their 3 rides are all of them
+  expect(await tiles(`{fCity:'Jeddah'}`)).toEqual({ pcts: ['50% of 4 customers'], share: '100%' });
+  // the Community tag picked: "Rode this year" against its live members only (Bader's tag has lapsed),
+  // the rides against every customer's - Amal's 2 of the 3
+  expect(await tiles(`{fTag:'tag_saturday'}`)).toEqual({ pcts: ['100% of 1 community members'], share: '67%' });
+  // Cara (VIP) never finished a ride: none of the 3
+  expect(await tiles(`{fTag:'tag_vip'}`)).toEqual({ pcts: ['0% of 4 customers'], share: '0%' });
 });
 
 test('the breakdowns count the accounts on the list', async ({ page }) => {

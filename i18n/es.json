@@ -1067,6 +1067,7 @@
   "acrPctComm": "{0} de {1} miembros de la comunidad",
   "acrPctAll": "{0} de {1} clientes",
   "acrStatRides": "Recorridos completados",
+  "acrStatRidesShare": "Parte de todos los recorridos completados",
   "acrStatActive": "Pedalearon este año",
   "acrSortLabel": "Ordenar por",
   "acrSortName": "Nombre",

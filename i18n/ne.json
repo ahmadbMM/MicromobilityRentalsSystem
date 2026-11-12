@@ -1067,6 +1067,7 @@
   "acrPctComm": "{1} समुदाय सदस्यमध्ये {0}",
   "acrPctAll": "{1} ग्राहकमध्ये {0}",
   "acrStatRides": "पूरा भएका राइड",
+  "acrStatRidesShare": "सबै पूरा भएका राइडमा हिस्सा",
   "acrStatActive": "यो वर्ष राइड गरे",
   "acrSortLabel": "क्रम",
   "acrSortName": "नाम",

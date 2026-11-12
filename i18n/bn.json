@@ -1171,6 +1171,7 @@
   "acrPctComm": "{1} কমিউনিটি সদস্যের মধ্যে {0}",
   "acrPctAll": "{1} গ্রাহকের মধ্যে {0}",
   "acrStatRides": "সম্পন্ন রাইড",
+  "acrStatRidesShare": "সব সম্পন্ন রাইডের মধ্যে অংশ",
   "acrStatActive": "এ বছর রাইড করেছেন",
   "acrSortLabel": "সাজান",
   "acrSortName": "নাম",

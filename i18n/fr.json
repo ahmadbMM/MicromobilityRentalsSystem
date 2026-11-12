@@ -1067,6 +1067,7 @@
   "acrPctComm": "{0} sur {1} membres de la communauté",
   "acrPctAll": "{0} sur {1} clients",
   "acrStatRides": "Sorties terminées",
+  "acrStatRidesShare": "Part de toutes les sorties terminées",
   "acrStatActive": "Ont roulé cette année",
   "acrSortLabel": "Trier par",
   "acrSortName": "Nom",
