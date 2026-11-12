@@ -97,6 +97,28 @@ test.describe('@staff:accounts Sports in the account report builder', () => {
     expect(bare).not.toContain('Customers in each sport');
   });
 
+  // the user, 2026-11-12: "an option that has each sport and the names under each sport the same way you do with nationalities"
+  test('each sport with its names under it, the way a nationality lists its accounts', async ({ page }) => {
+    await staff(page);
+    const dlg = await builder(page);
+    await expect(dlg.locator('button.rpt-row-b', { hasText: /^Each sport, names under it$/ })).toHaveCount(1);
+    expect(await page.evaluate(`_accOpts().sections.sportList`)).toBe(0); // off until picked
+    expect(await page.evaluate(`(()=>{S._accOpts=null;return _accReportHtml();})()`)).not.toContain('Each sport, names under it');
+    const html: string = await page.evaluate(`(()=>{S._accOpts=null;Object.assign(_accOpts().sections,{sportList:1});return _accReportHtml();})()`);
+    expect(html).toContain('<h2>Each sport, names under it · 3</h2>');
+    // most first, the names A to Z, each with its phone, under the sport in bold with its count
+    expect(html).toContain('<li class="rp-natgrp"><b>Cycling</b> <span class="rp-c888">2</span><ul class="rp-natppl"><li>Huda Saleh <span class="rp-c888">0500000001</span></li><li>Omar Faris <span class="rp-c888">0500000002</span></li></ul></li>');
+    expect(html).toContain('<b>Kite surfing</b> <span class="rp-c888">2</span><ul class="rp-natppl"><li>Lina Haddad');
+    expect(html.indexOf('<b>Kite surfing</b>')).toBeLessThan(html.indexOf('<b>Triathlon</b>'));
+    expect(html).not.toContain('Sami Noor <span'); // answered No: in no sport
+    // the file: the sport with its count, then each name and phone on a line under it
+    const csv = await page.evaluate(`(async()=>{let out='';const _c=URL.createObjectURL;URL.createObjectURL=()=>'blob:x';
+      const _a=document.createElement.bind(document);document.createElement=(tag)=>{const el=_a(tag);if(tag==='a')el.click=()=>{};return el;};
+      const _B=window.Blob;window.Blob=function(parts,o){out=parts.join('');return new _B(parts,o);};
+      await exportAccountsCsv();window.Blob=_B;document.createElement=_a;URL.createObjectURL=_c;return out;})()`) as string;
+    expect(csv.replace(/\r/g, '')).toContain('"Each sport, names under it",3\nCycling,2\n,Huda Saleh,0500000001\n,Omar Faris,0500000002\nKite surfing,2\n,Lina Haddad,0500000003\n');
+  });
+
   test('the CSV carries the sport columns and blocks', async ({ page }) => {
     await staff(page);
     await builder(page);

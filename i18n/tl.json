@@ -8402,6 +8402,7 @@
   "acrColSportN": "Bilang ng isport",
   "acrSectSports": "Mga isport sa bilang",
   "acrSectSportWho": "Mga customer sa bawat isport, may pangalan",
+  "acrSectSportList": "Bawat isport, may mga pangalan sa ilalim",
   "acrBdSports": "Mga customer sa bawat isport",
   "acrSortSports": "Pinakamaraming isport muna",
   "errPasswordCommon": "Masyadong madaling hulaan ang password na ito. Pumili ng iba.",

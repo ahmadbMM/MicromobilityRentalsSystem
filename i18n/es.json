@@ -8402,6 +8402,7 @@
   "acrColSportN": "Número de deportes",
   "acrSectSports": "Los deportes en cifras",
   "acrSectSportWho": "Clientes en cada deporte, con nombres",
+  "acrSectSportList": "Cada deporte, con los nombres debajo",
   "acrBdSports": "Clientes en cada deporte",
   "acrSortSports": "Más deportes primero",
   "errPasswordCommon": "Esta contraseña es demasiado fácil de adivinar. Elige otra.",
