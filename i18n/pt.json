@@ -7683,6 +7683,7 @@
   "lkAddBad": "Escreva os números de e até (no máximo 200 de cada vez)",
   "lkAddNone": "Esses cacifos já existem",
   "lkRetireQ": "Retirar o cacifo {0}?",
+  "lkRehomed": "Reservas retiradas deste cacifo: {0}",
   "lkLinkCopied": "Ligação copiada",
   "lkHistEmpty": "Nenhum aluguer de cacifos nos últimos 60 dias",
   "lkSearch": "Procurar um nome ou cacifo",

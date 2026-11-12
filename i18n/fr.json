@@ -7683,6 +7683,7 @@
   "lkAddBad": "Saisissez les numéros de début et de fin (200 au plus à la fois)",
   "lkAddNone": "Ces casiers existent déjà",
   "lkRetireQ": "Retirer le casier {0} ?",
+  "lkRehomed": "Réservations déplacées hors de ce casier : {0}",
   "lkLinkCopied": "Lien copié",
   "lkHistEmpty": "Aucune location de casier ces 60 derniers jours",
   "lkSearch": "Chercher un nom ou un casier",

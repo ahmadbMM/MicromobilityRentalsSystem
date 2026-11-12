@@ -150,6 +150,33 @@ test.describe('@customer:account the account menu and its pages', () => {
     await expect(page.locator('#acc-r-contact')).toHaveAttribute('aria-current', 'page');
   });
 
+  test('a wide screen: edits in the Personal details shown with none picked are asked about before another page opens', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'wide screens only');
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await open(page);
+    await expect(page.locator('#acc-first')).toBeVisible();
+    await page.fill('#acc-first', 'Noura');
+    await row(page, 'contact').click();
+    const dlg = page.locator('#confirm-modal');
+    await expect(dlg).toContainText('Discard your changes?');
+    await dlg.getByRole('button', { name: 'Keep editing' }).click();
+    await expect(page.locator('#acc-first')).toHaveValue('Noura');
+  });
+
+  test('an account with no mobile and WhatsApp never answered: Contact saves its email, and leaving asks nothing', async ({ page }) => {
+    const who = { ...profile, phone: '' };
+    const wa = sent(page, 'customer_set_whatsapp');
+    await open(page, { 'rpc:customer_whatsapp': [{ phone: '', whatsapp_same: null, whatsapp: null }] }, '/', who);
+    await row(page, 'contact').click();
+    await expect(page.locator('#acc-email')).toBeVisible();
+    await expect.poll(() => page.evaluate('_accPgDirty("contact")')).toBe(false);
+    await page.fill('#acc-email', 'sara.k@example.com');
+    await page.locator('#acc-save-contact').click();
+    await expect(page.locator('#acc-wa-err')).toHaveText('');
+    await expect.poll(() => page.evaluate('_accPgDirty("contact")')).toBe(false);
+    expect(wa.length).toBe(0);
+  });
+
   test('Arabic: the rows mirror and say their values in Arabic', async ({ page }) => {
     await open(page, {}, '/account?lang=ar');
     await expect(page.locator('#acc-r-personal .acc-row-t')).toHaveText('البيانات الشخصية');

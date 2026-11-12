@@ -117,6 +117,22 @@ test.describe('@staff:lockers Assign a locker', () => {
     expect(sent(seen, 'staff_locker_assign')).toEqual({ p_rental: 'R1', p_code: '3' });
   });
 
+  test('a reservation holding a door, key not given: Move changes its number only (stays reserved, nothing in the till)', async ({ page }) => {
+    const seen = calls(page);
+    const held = [rentals[0], { ...rentals[1], locker_id: 'L2', on_bill: false, pay: 'desk' }];
+    await staff(page, { locker_rentals: held, 'rpc:staff_locker_edit': { ok: true, code: '3' }, 'rpc:staff_locker_assign': { ok: true, code: '3' } });
+    const dlg = await open(page, 'q2', /Assign a locker #2 Omar Other/);
+    await expect(dlg.locator('#lk-as-go')).toHaveText('Give key');
+    await dlg.getByRole('button', { name: 'Locker 3', exact: true }).click();
+    await expect(dlg.locator('#lk-as-go')).toHaveText('Move to locker 3');
+    await dlg.locator('#lk-as-go').click();
+    await expect.poll(() => n(seen, 'staff_locker_edit')).toBe(1);
+    expect(sent(seen, 'staff_locker_edit')).toMatchObject({ p_rental: 'R2', p_code: '3', p_day: null, p_period: null });
+    expect(n(seen, 'staff_locker_assign')).toBe(0);
+    await expect(dlg).toBeVisible(); // Give key stays its own step
+    expect(await page.evaluate(`(S._ctCart||[]).length`)).toBe(0);
+  });
+
   test('a locker\'s tag tapped while the dialog is open gives that locker to the booking waiting for one', async ({ page }) => {
     const seen = calls(page);
     await staff(page, { 'rpc:staff_locker_assign': { ok: true, code: '3' } });
@@ -153,5 +169,7 @@ test.describe('@staff:lockers Assign a locker', () => {
     expect(await page.evaluate(`_lkGive('R7','2',todayStr())`)).toBe(true); // not rung up yet: into the cart, once
     expect(await page.evaluate(`(S._ctCart||[]).filter(l=>l.lk==='R7').length`)).toBe(1);
     expect(await page.evaluate(`_lkTillDue(_lkRows(todayStr()).find(r=>r.id==='R7'))`)).toBe(false); // in the cart now: not twice
+    await page.evaluate(`S._ctHeld=[{custId:'c2',cust:'Omar Other',lines:S._ctCart.filter(l=>l.lk==='R7')}];S._ctCart=[]`);
+    expect(await page.evaluate(`_lkTillDue(_lkRows(todayStr()).find(r=>r.id==='R7'))`)).toBe(false); // waiting as a held sale: not twice either
   });
 });

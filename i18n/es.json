@@ -7683,6 +7683,7 @@
   "lkAddBad": "Escribe los números desde y hasta (200 como máximo a la vez)",
   "lkAddNone": "Esas taquillas ya existen",
   "lkRetireQ": "¿Retirar la taquilla {0}?",
+  "lkRehomed": "Reservas trasladadas fuera de esta taquilla: {0}",
   "lkLinkCopied": "Enlace copiado",
   "lkHistEmpty": "No hay alquileres de taquillas en los últimos 60 días",
   "lkSearch": "Buscar un nombre o una taquilla",

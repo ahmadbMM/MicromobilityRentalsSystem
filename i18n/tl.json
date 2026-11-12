@@ -7683,6 +7683,7 @@
   "lkAddBad": "I-type ang mga numerong mula at hanggang (200 lang ang pinakamarami minsan)",
   "lkAddNone": "Nandiyan na ang mga locker na iyan",
   "lkRetireQ": "I-retire ang locker {0}?",
+  "lkRehomed": "Mga reserbasyong inilipat mula sa locker na ito: {0}",
   "lkLinkCopied": "Nakopya ang link",
   "lkHistEmpty": "Walang naiparentang locker nitong huling 60 araw",
   "lkSearch": "Maghanap ng pangalan o locker",
