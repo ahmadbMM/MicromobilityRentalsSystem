@@ -1112,6 +1112,24 @@ begin
 end $function$;
 
 -- checks ---------------------------------------------------------------------------------------------
+-- 11b. Staff round s10's 20261111180600_type_caps patches _wl_offer_fill in place (one line: a type's own places count
+--    with no bike out too). If that file ran before this one, the whole replacement above undid it: put it back.
+--    If it runs after, the line above is still its anchor and it patches this body as written.
+do $s10$
+declare d text;
+begin
+  if to_regprocedure('public._type_places(text,text)') is null then return; end if; /* 20261111180600 not applied */
+  select pg_get_functiondef('public._wl_offer_fill(text)'::regprocedure) into d;
+  if position('20261111180600' in d) > 0 then return; end if;
+  if (length(d) - length(replace(d, $a$    continue when _out > 0 and not _out_bikes_room(p_session_id, r.type_preference, r.id, true);   /* no working bike of the type */$a$, ''))) <> length($a$    continue when _out > 0 and not _out_bikes_room(p_session_id, r.type_preference, r.id, true);   /* no working bike of the type */$a$) then
+    raise exception '_wl_offer_fill: the type caps line was not found exactly once';
+  end if;
+  d := replace(d,
+$a$    continue when _out > 0 and not _out_bikes_room(p_session_id, r.type_preference, r.id, true);   /* no working bike of the type */$a$,
+$b$    continue when not _out_bikes_room(p_session_id, r.type_preference, r.id, true);   /* no working bike of the type, or its places all taken (20261111180600) */$b$);
+  execute d;
+end $s10$;
+
 do $chk$
 declare fn text;
 begin
