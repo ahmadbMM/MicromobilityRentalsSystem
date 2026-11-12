@@ -10585,6 +10585,15 @@ body.view-staff #tab-community .tg-srch{max-width:420px;margin-bottom:8px;}
 body.view-staff #tab-community .tg-sub{margin:12px 0 4px;font-size:var(--staff-fs-sm,12px);font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted);}
 body.view-staff #tab-community .ac-img{width:96px;height:96px;object-fit:cover;flex:none;background:var(--s2);}
 body.view-staff #tab-community .ac-rep{color:var(--red,inherit);font-weight:600;}
+/* Community reach (2026-11-13): the Saturday report's automatic and hidden marks, the WhatsApp link, the numbers' two tables,
+   a confirmed Ramadan */
+body.view-staff #tab-community .ac-po-chips{display:inline-flex;gap:6px;flex-wrap:wrap;}
+body.view-staff #tab-community .ac-po-hid > strong{color:var(--muted);}
+body.view-staff #tab-community .ac-po-wa{display:flex;margin:0 0 8px;}
+body.view-staff #tab-community .ac-rx-t{margin:0 0 12px;}
+body.view-staff #tab-community .ac-rx-t .ac-rx-tot td{font-weight:600;}
+@media(max-width:767px){body.view-staff #tab-community .ac-rx-t:not(.t-cards) :is(th,td){padding:8px 6px;}}
+body.view-staff #tab-community .ac-ram-ok{color:var(--sf-green-ink,var(--green));font-size:var(--sf-fs-xs);font-weight:600;}
 body.view-staff #tab-community .tg-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
 body.view-staff #tab-community .tg-row:last-child{border-bottom:0;}
 body.view-staff #tab-community .tg-who{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
