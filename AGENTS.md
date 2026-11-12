@@ -524,6 +524,15 @@ make only visible for its holders", then: "its for helping someone from the comm
 him get a job", words in migration 20261112190000): staff-given, a work pass on its lanyard (glyph `pass`) on the gold medal. A rider sees it only
 once they hold it: `BDG_HELD_ONLY` keeps it out of the greyed staff-given badges under Badges to earn, so out of Request a badge
 too (the website's `HELD_ONLY` in `lib/ride-record.ts` the same). A new staff-given badge that should stay out of sight goes in that set.
+Who sees a badge is a switch on every badge (migration 20261112223000; the user, 2026-11-12: "add a switch to all badges that has
+to do with the visibility of the badges to customers and members"): Community > Badges, "Customers and members see it", admins only
+(the catalogue's RLS), `_bdgVisSet`. Off = `badges.held_only` true: only its holders see it (never greyed under Badges to earn,
+never offered to request); badge_catalog carries `held_only`, and `_bdgHeldOnly(b, def)` reads it in `_mrBadgeList` for the ride
+badges and the staff-given ones alike. Where the catalogue has no `held_only` (a database before that migration), `BDG_HELD_ONLY`
+is the start: the event and surprise badges `_mrBadges` marks `hide`, Talent Scout and Swimming Instructor - the same list the
+migration switches off. A held badge always shows to its holder. Swimming Instructor (`swim_instructor`, same migration; the user:
+"create a swimming instructor badge to only be [visible] to it's holders"): staff-given, a swimmer's front crawl (glyph `swim`)
+on the blue medal, switched off from the start.
 2026-10-12 (migration 20261012120000, the owner: "put levels and multiple badges in each one"): the staff badges are ladders
 too, five levels each (raised the same day: "1 5 10 are too low") - Marshal > Senior Marshal > Chief Marshal > Clerk of the
 Course > Race Director, Pit Crew > Pit Boss > Crew Chief > Team Manager > Team Principal, Green Flag > Clear Track > Track

@@ -567,6 +567,52 @@ test.describe('@customer:account badges', () => {
     await expect(page.locator('#badge-pop .badge-pop-about')).toContainText('someone from the MicroMobility community get hired or find a job');
     expect(await page.evaluate(`_bdrChoices(_mrBadgeList(S.loggedIn)).map(x=>x.b.slug)`)).toEqual(['marshal']);
   });
+
+  // Swimming Instructor and each badge's "Customers and members see it" switch (the user, 2026-11-12: "create a swimming
+  // instructor badge to only be [visible] to it's holders, add a switch to all badges that has to do with the visibility
+  // of the badges to customers and members"): badge_catalog's held_only decides, the app's own list where it has none.
+  const visCat = (swim: boolean, extra: Record<string, unknown> = {}) => [
+    { slug: 'marshal', icon: 'shield', color: 'orange', name: 'Marshal', system: true, auto: false, sort: 10, ...('marshal' in extra ? { held_only: extra.marshal } : {}) },
+    { slug: 'swim_instructor', icon: 'swim', color: 'blue', name: 'Swimming Instructor', system: true, auto: false, sort: 87, ...(swim ? { held_only: true } : {}) },
+    { slug: 'run_for_her', icon: 'ribbon', color: 'pink', name: 'Run for Her', system: true, auto: true, sort: 92, ...('run_for_her' in extra ? { held_only: extra.run_for_her } : {}) },
+    { slug: 'first_lap', icon: 'flag', color: 'green', name: 'First Lap', system: true, auto: true, sort: 100, ...('first_lap' in extra ? { held_only: extra.first_lap } : {}) },
+  ];
+
+  test('Swimming Instructor is out of sight for a rider who does not hold it, with the switch and on a database without it', async ({ page }) => {
+    for (const swim of [true, false]) {
+      await rider(page, { 'rpc:customer_my_badges': [], 'rpc:badge_catalog': visCat(swim) });
+      await page.waitForFunction('S._bdgCat&&S._bdgCat.length>0&&S._bdgMine&&!S._bdgMine.busy');
+      await page.locator('#mr-badges-more').click();
+      await expect.poll(() => scoutNames(page)).toEqual(['First Lap', 'Marshal']); // Run for Her stays out too, as before
+      await expect(page.locator('#tab-account')).not.toContainText('Swimming Instructor');
+      expect(await page.evaluate(`_bdrChoices(_mrBadgeList(S.loggedIn)).map(x=>x.b.slug)`)).toEqual(['marshal']);
+    }
+  });
+
+  test('Swimming Instructor shows to its holder: the swimmer on the blue medal, and what it is for', async ({ page }) => {
+    const held = { slug: 'swim_instructor', icon: 'swim', color: 'blue', name: 'Swimming Instructor', system: true, note: null, at: '2026-09-01T10:00:00Z' };
+    await rider(page, { 'rpc:customer_my_badges': [held], 'rpc:badge_catalog': visCat(true) });
+    await page.waitForFunction('S._bdgCat&&S._bdgCat.length>0&&S._bdgMine&&!S._bdgMine.busy');
+    await expect.poll(() => scoutNames(page)).toEqual(['Swimming Instructor', 'First Lap']);
+    const chip = page.locator('#tab-account .mr-badge', { hasText: 'Swimming Instructor' });
+    await expect(chip).not.toHaveClass(/locked/);
+    await expect(chip.locator('svg.bdg-m.bdc-blue')).toHaveCount(1);
+    expect(await page.evaluate(`BDG_GLYPH.swim===undefined`)).toBe(false);
+    await chip.click();
+    await expect(page.locator('#badge-pop .badge-pop-about')).toContainText('who teach others to swim');
+  });
+
+  test('the switch decides for every badge: one switched on shows greyed and can be asked for, one switched off only to its holders', async ({ page }) => {
+    // Run for Her switched on (it starts off), Marshal and First Lap switched off.
+    await rider(page, { 'rpc:customer_my_badges': [], 'rpc:badge_catalog': visCat(true, { run_for_her: false, marshal: true, first_lap: true }) });
+    await page.waitForFunction('S._bdgCat&&S._bdgCat.length>0&&S._bdgMine&&!S._bdgMine.busy');
+    await page.locator('#mr-badges-more').click();
+    // First Lap is switched off but this rider earned it by riding, so it still shows to them.
+    await expect.poll(() => scoutNames(page)).toEqual(['First Lap', 'Run for Her']);
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('1/2');
+    expect(await page.evaluate(`_mrBadgeList(S.loggedIn).filter(x=>x.on).map(x=>x.b.slug)`)).toEqual(['first_lap']);
+    expect(await page.evaluate(`_bdrChoices(_mrBadgeList(S.loggedIn)).map(x=>x.b.slug)`)).toEqual(['run_for_her']);
+  });
 });
 
 // The ride badges added 2026-09-29, read straight off _mrBadges with made-up rides dated from today.
@@ -756,6 +802,62 @@ test.describe('@customer:account ride badges from the research', () => {
     await chip.click();
     await expect(page.locator('#badge-pop')).toContainText('On now, until');
     await expect(page.locator('#badge-pop')).toContainText('Two late rides');
+  });
+});
+
+test.describe('@staff:community badge visibility switch', () => {
+  // Every badge has a "Customers and members see it" switch (the user, 2026-11-12): off, only its holders see it.
+  const withVis = badges.map((b) => ({ ...b, held_only: b.id === 'bd_champion' }));
+  const swim = { id: 'bd_swim_instructor', slug: 'swim_instructor', icon: 'swim', color: 'blue', name: 'Swimming Instructor', system: true, auto: false, retired: false, sort: 87, held_only: true };
+  const sw = (page: Page, id: string) => page.locator(`#tab-community .bdg-row[data-badge="${id}"] .bdg-vis input[role="switch"]`);
+
+  test('each badge row has the switch; an admin turns it off and on, and each write is the badge\'s held_only', async ({ page }) => {
+    await staff(page, { badges: [...withVis, swim] });
+    await community(page, 'badges');
+    await expect(page.locator('#tab-community .bdg-vis')).toHaveCount(5);
+    await expect(page.locator('#tab-community .bdg-row[data-badge="bd_marshal"] .bdg-vis')).toContainText('Customers and members see it');
+    await expect(sw(page, 'bd_marshal')).toBeChecked();
+    await expect(sw(page, 'bd_champion')).not.toBeChecked();
+    await expect(sw(page, 'bd_swim_instructor')).not.toBeChecked();
+    await expect(page.locator('#tab-community .bdg-row[data-badge="bd_swim_instructor"] svg.bdg-m.bdc-blue')).toHaveCount(1);
+    await expect(page.locator('#tab-community .bdg-row[data-badge="bd_swim_instructor"]')).toContainText('Swimming Instructor');
+    await expect(page.locator('#tab-community .bdg-row[data-badge="bd_swim_instructor"]').getByRole('button', { name: 'Give to a rider' })).toHaveCount(1);
+
+    const sent = writes(page, 'badges');
+    await sw(page, 'bd_marshal').click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].method()).toBe('PATCH');
+    expect(sent[0].url()).toContain('id=eq.bd_marshal');
+    expect(sent[0].postDataJSON()).toEqual({ held_only: true });
+    await expect(sw(page, 'bd_marshal')).not.toBeChecked();
+    await expect(page.locator('.toast').last()).toContainText('Marshal: Only its holders see it');
+
+    await sw(page, 'bd_swim_instructor').click();
+    await expect.poll(() => sent.length).toBe(2);
+    expect(sent[1].url()).toContain('id=eq.bd_swim_instructor');
+    expect(sent[1].postDataJSON()).toEqual({ held_only: false });
+    await expect(sw(page, 'bd_swim_instructor')).toBeChecked();
+  });
+
+  test('before the database has the column, the switch shows the app\'s own start and says it is waiting, writing nothing', async ({ page }) => {
+    const noCol: Record<string, unknown> = { ...swim }; delete noCol.held_only;
+    await staff(page, { badges: [...badges, noCol] });
+    await community(page, 'badges');
+    await expect(sw(page, 'bd_marshal')).toBeChecked();
+    await expect(sw(page, 'bd_swim_instructor')).not.toBeChecked(); // BDG_HELD_ONLY
+    const sent = writes(page, 'badges');
+    await sw(page, 'bd_marshal').click();
+    await expect(page.locator('.toast').last()).toContainText('Waiting for the database update');
+    await expect(sw(page, 'bd_marshal')).toBeChecked();
+    expect(sent.length).toBe(0);
+  });
+
+  test('staff who are not admins see the switch but cannot turn it', async ({ page }) => {
+    await staff(page, { badges: [...withVis, swim] });
+    await community(page, 'badges');
+    await page.evaluate(`S.staffRole='frontdesk';renderCommunity()`);
+    await expect(sw(page, 'bd_marshal')).toBeDisabled();
+    await expect(sw(page, 'bd_marshal')).toBeChecked();
   });
 });
 

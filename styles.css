@@ -1515,6 +1515,7 @@
     :is(#tab-community,#tab-customers,#tab-analytics) .bdg-row{padding:10px 0;border-bottom:1px solid var(--border);}
     :is(#tab-community,#tab-customers,#tab-analytics) .bdg-row.retired>.bdg-item>.bdg-m,:is(#tab-community,#tab-customers,#tab-analytics) .bdg-row.retired>.bdg-item>.bdg-txt{opacity:.55;}
     :is(#tab-community,#tab-customers,#tab-analytics) .bdg-acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0;}
+    :is(#tab-community,#tab-customers,#tab-analytics) .bdg-vis{display:inline-flex;align-items:center;gap:6px;margin-inline-end:4px;font-size:var(--sf-fs-sm);color:var(--muted);cursor:pointer;}
     :is(#tab-community,#tab-customers,#tab-analytics) .bdg-panel{margin:10px 0 0;margin-inline-start:46px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--sf-r-ctl);display:flex;flex-direction:column;gap:10px;}
     :is(#tab-community,#tab-customers,#tab-analytics) .bdg-hold{display:flex;align-items:center;gap:10px;}
     :is(#tab-community,#tab-customers,#tab-analytics) .bdg-go{align-self:flex-start;}
