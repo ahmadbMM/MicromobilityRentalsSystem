@@ -62,6 +62,30 @@ test('refuses while the rider is on a live booking', async ({ page }) => {
   await expect(page.locator('#confirm-modal')).toBeHidden();
 });
 
+// Bookings left Waiting, on the waitlist or out on a bike on a night that ended and was closed without a close-out are
+// history, not live (the user, 2026-11-12: "it says he has 2 active sessions while there are none active for him").
+test('bookings left open on a past, closed session do not stop it', async ({ page }) => {
+  const past = { id: '2020-09-30-pw', day: 'Wednesday', session_date: '2020-09-30', capacity: 9, status: 'closed',
+    created_at: 0, bike_slots: '{"_time":"19:00 - 22:00","_total":9}' };
+  const old = (id: string, status: string) => ({ ...booking(id, 'c1', status), session_id: past.id, session_day: 'Wednesday', session_date: past.session_date });
+  await openEditor(page, [old('b1', 'waiting'), old('b2', 'waitlist'), old('b3', 'active'), booking('b4', 'c1', 'done')], true,
+    { sessions: [...sessions, past] });
+  expect(await page.evaluate(`getQueue().filter(e=>e.customerId==='c1'&&_delLiveBk(e)).length`)).toBe(0);
+  const calls = watchWrites(page);
+  await page.getByRole('button', { name: /Delete account/i }).click();
+  await expect(page.locator('#confirm-modal .confirm-box')).toBeVisible();
+  await expect(page.locator('#confirm-modal .confirm-box')).toContainText(/4 past booking/i);
+  await expect(page.locator('.toast')).toHaveCount(0);
+  expect(calls).toHaveLength(0); // only the dialog: nothing is sent until it is confirmed
+});
+
+test('a waitlist place or a bike out on a coming session still stops it', async ({ page }) => {
+  await openEditor(page, [booking('b1', 'c1', 'waitlist'), booking('b2', 'c1', 'active'), booking('b3', 'c1', 'done')]);
+  await page.getByRole('button', { name: /Delete account/i }).click();
+  await expect(page.locator('.toast')).toContainText(/2 live booking/i);
+  await expect(page.locator('#confirm-modal')).toBeHidden();
+});
+
 // There is no Undo: the staff list does not hold the password, the photo or the correction
 // history, so the row it used to re-insert was an account its rider could not sign in to.
 test('offers no undo, and the dialog says so', async ({ page }) => {

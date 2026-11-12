@@ -34363,11 +34363,23 @@ function renderCustFormModal(){
 // a booking made on another device since this one loaded is caught too, it unlinks every booking
 // and sale and deletes the tags and push subscriptions, and a dropped connection cannot leave an
 // account half-archived. There is no Undo bar: an admin restores it from Archived, with its PIN.
+//
+// Live means the ride is still to come or under way (the user, 2026-11-12: a rider's delete was refused for "2 active
+// sessions while there are none active for him"). A booking left Waiting or on the waitlist on
+// a night that ended and was closed without a close-out (closing never settles riders) is history, not a live booking:
+// it counts only until its session's window ends (_sessEnded). A rider out on a bike counts through the day after the
+// session, so a night that runs late still holds them. staff_delete_customer reads it the same way (20261113000500).
+function _delLiveBk(e){
+  if(e.status!=='waiting'&&e.status!=='waitlist'&&e.status!=='active')return false;
+  const s=_sessGet(e.sessionId);if(!s)return false;
+  if(e.status==='active')return String(s.session_date||s.id).slice(0,10)>=_ksaYmd(Date.now()-864e5);
+  return !_sessEnded(s);
+}
 async function deleteCustomerAccount(id){
   if(!isAdmin()){toast(t('errAdminOnly'),'error');return;}
   const c=(S.customers||[]).find(x=>String(x.id)===String(id));
   if(!c){toast(t('errConnection'),'error');return;}
-  const live=getQueue().filter(e=>String(e.customerId||'')===String(id)&&['waiting','waitlist','active'].includes(e.status));
+  const live=getQueue().filter(e=>String(e.customerId||'')===String(id)&&_delLiveBk(e));
   if(live.length){toast(t('naDelLiveMsg').replace('{0}',String(live.length)),'warning');return;}
   const past=getQueue().filter(e=>String(e.customerId||'')===String(id));
   confirmDialog({
