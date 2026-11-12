@@ -5756,8 +5756,11 @@ body.view-staff .q-card.row-reserved{background:rgba(29,78,216,.04);border-color
    the Bookings grid it takes two columns, the night's lines in the first and the tiles two by two in the second, so it
    stands no taller than the cards beside it (a grid row grows every card in it to its tallest: the tiles under the
    lines made the whole row 158px, against the four short lines the user asked for on 2026-11-10). */
-.sess-summary-chip.pm-night{cursor:default;flex-direction:column;align-items:stretch;}
+.sess-summary-chip.pm-night{cursor:pointer;flex-direction:column;align-items:stretch;}
 .sess-summary-chip.pm-night:hover{background:var(--s1);}
+/* The card's lines are a button (2026-11-13): it opens the night's whole list; drawn as the lines were. */
+.pm-night .pm-night-all{appearance:none;-webkit-appearance:none;background:none;border:0;margin:0;padding:0;font:inherit;color:inherit;text-align:start;cursor:pointer;border-radius:var(--sf-r-xs,4px);}
+.pm-night .pm-night-all:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-summary-chip.pm-night{grid-column:span 2;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 10px;align-items:start;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .pm-night .pm-tiles{grid-template-columns:1fr 1fr;gap:4px;margin-top:0;}
 .pm-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:6px;margin-top:6px;}

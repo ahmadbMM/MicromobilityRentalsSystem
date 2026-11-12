@@ -36063,24 +36063,35 @@ function _pmTilesHtml(sid,nWait){
     RIDER_COMPANIES.map(co=>{const n=regs.filter(r=>_riderCo(r)===co).length;
       return tile(onPm&&S.ridersCompany===co,_on("openPetrominPage",sid,co),_riderCoMark(co,'pm-tile-logo'),S.ridersLoaded?`${n} ${esc(t('pmRegistered'))}`:'&nbsp;',co);}).join('')}</span>`;
 }
+// The card itself, anywhere but a tile (the user, 2026-11-13: "when clicking the card itself and not one of the tiles open
+// a table that has them all in one table"): the night's Petromin page with every company, its invitees and its bookings
+// in one list. The card's lines are a button of their own for the keyboard; a click elsewhere on the card lands here too.
+function _pmAllOn(sid){return S.queueView==='petromin'&&S.ridersSession===sid&&(S.ridersCompany||'all')==='all';}
+function _pmNightAll(ev,sid){
+  if(ev&&ev.target&&ev.target.closest&&ev.target.closest('.pm-tile'))return; // a tile opens its own list
+  S.ridersFilter='all';openPetrominPage(sid,'all');
+}
+function _pmCardAttrs(sid){return`data-on-click="${_on("_pmNightAll",_EV,sid)}"`;}
+function _pmAllBtnOpen(sid){return`<button type="button" class="sess-chip-info pm-night-all" aria-pressed="${_pmAllOn(sid)?'true':'false'}">`;}
 // The card of a Petromin night that is not open (the latest one, so its registrations stay in reach): its name, day and
 // status, and the same tiles.
 function _pmNightCardHtml(sid){
   const s=_sessDisp(sid);if(!s)return'';
   const on=S.queueView==='petromin'&&S.ridersSession===sid,ttl=`${esc(_evName(s))} · ${esc(dayLabel(s.day))} ${esc(shortDate(_pmDate(s)))} · ${esc(sessionTime(s))}`;
-  return`<div class="sess-summary-chip th-comm community ${_evClass(s)} ss-${esc(s.status||'closed')} pm-night${on?' active-sess':''}" data-sid="${esc(sid)}" role="group" aria-label="${ttl}" title="${ttl}">
-    <span class="sess-chip-info">
+  return`<div class="sess-summary-chip th-comm community ${_evClass(s)} ss-${esc(s.status||'closed')} pm-night${on?' active-sess':''}" data-sid="${esc(sid)}" role="group" aria-label="${ttl}" title="${ttl}" ${_pmCardAttrs(sid)}>
+    ${_pmAllBtnOpen(sid)}
       <span class="sess-chip-top">${_sessMk(s)}<span class="sess-chip-event ${_evClass(s)}">${esc(_evName(s))}</span><span class="sess-chip-badge"><span class="badge-${esc(s.status)}">${t(SESS_STATUS_KEY[s.status]||'statusClosed')}</span></span></span>
       <span class="sess-chip-date">${esc(_sessDayWord(s))} &nbsp;·&nbsp; <bdi>${esc(sessionTime(s))}</bdi></span>
-    </span>
+    </button>
     ${_pmTilesHtml(sid,null)}</div>`;
 }
 // The phone's picker: a night's registrations, all companies or one (value pm:<night>|<company>).
 function _pmOptHtml(sid){
   const s=_sessDisp(sid);if(!s)return'';
   const regs=(S.riders||[]).filter(r=>r.session_id===sid),cur=S.queueView==='petromin'&&S.ridersSession===sid?(S.ridersCompany||'all'):null;
-  const opt=(co,lbl,n)=>`<option value="pm:${esc(sid)}|${esc(co)}"${cur===co?' selected':''}>${esc(lbl)} · ${esc(_sessDayWord(s))}${S.ridersLoaded?` — ${n} ${t('pmRegistered')}`:''}</option>`;
-  return opt('all',t('pmChipTitle'),regs.length)+RIDER_COMPANIES.map(co=>opt(co,co,regs.filter(r=>_riderCo(r)===co).length)).join('');
+  const opt=(co,lbl,n)=>`<option value="pm:${esc(sid)}|${esc(co)}"${cur===co?' selected':''}>${esc(lbl)} · ${esc(_sessDayWord(s))}${S.ridersLoaded?` — ${n}${co==='all'?'':' '+t('pmRegistered')}`:''}</option>`;
+  // All: the card's own list on a phone - the night's bookings and every company in one (2026-11-13)
+  return opt('all',t('ridersFilterAll'),_pmAllRows().filter(r=>r.session_id===sid).length)+RIDER_COMPANIES.map(co=>opt(co,co,regs.filter(r=>_riderCo(r)===co).length)).join('');
 }
 // co: the company the page shows ('all' for every one); left out, the page keeps the one it had.
 function openPetrominPage(sid,co){
@@ -36287,9 +36298,9 @@ function _sessStripHtml(){
     const _pmN=_rideKind(s)==='petromin',_pmOn=_pmN&&S.queueView==='petromin'&&S.ridersSession===s.id;
     const _cls=`sess-summary-chip th-${_th==='jcc'||_th==='snd96'?'plain':_th} ss-${esc(s.status||'open')}${isCurrent||_pmOn?' active-sess':''}${isToday?' today-sess':''}${_cm?' community '+_evClass(s):''}${_pmN?' pm-night':''}`;
     const _ttl=`${esc(_evName(s))} · ${esc(dayLabel(s.day))} ${esc(shortDate(s.session_date||s.id))} · ${esc(sessionTime(s))}${esc(_sgDot(s))}`;
-    return`${_pmN?`<div class="${_cls}" data-sid="${esc(s.id)}" role="group" aria-label="${_ttl}" title="${_ttl}">`:`<button type="button" class="${_cls}" data-sid="${esc(s.id)}"
+    return`${_pmN?`<div class="${_cls}" data-sid="${esc(s.id)}" role="group" aria-label="${_ttl}" title="${_ttl}" ${_pmCardAttrs(s.id)}>`:`<button type="button" class="${_cls}" data-sid="${esc(s.id)}"
       aria-pressed="${isCurrent?'true':'false'}" data-on-click="${_on("setSfSession",s.id)}" title="${_ttl}">`}
-      <span class="sess-chip-info">
+      ${_pmN?_pmAllBtnOpen(s.id):'<span class="sess-chip-info">'}
         <span class="sess-chip-top">${_sessMk(s)}<span class="sess-chip-event ${_evClass(s)}">${esc(_evName(s))}</span>${_sgChip(s)}<span class="sess-chip-badge"><span class="badge-${esc(s.status)}">${t(SESS_STATUS_KEY[s.status])}</span></span></span>
         <span class="sess-chip-date">${esc(_sessDayWord(s))} &nbsp;·&nbsp; ${_timeHtml}${_wxChip(s.session_date||s.id)}${_xb.length?' '+_xb.join(' · '):''}</span>
         ${_bfAt(s)?`<span class="sess-chip-bf">${_artIcon('cup',12)}<bdi>${esc(_bfAt(s))}</bdi></span>`:''}
@@ -36299,7 +36310,7 @@ function _sessStripHtml(){
           ${sDone?` &middot; <span class="rq-mut">${sDone} ${t('doneSessChip')}</span>`:''}
         </span>
         <span class="sess-chip-foot"><span class="sess-chip-bar"><span class="sess-chip-fill ${fillCls}" data-cssv="${_cssv({'--rq-w':fillPct+'%'})}"></span></span>${_n6cChipLeft(q,cap,_fillN)}</span>
-      </span>
+      ${_pmN?'</button>':'</span>'}
     ${_pmN?`${_pmTilesHtml(s.id,sWait)}</div>`:'</button>'}`;
   }).join('')+(_pmSid&&!openSess.some(s=>s.id===_pmSid)?_pmNightCardHtml(_pmSid):'');
 
@@ -54003,7 +54014,7 @@ function _riderEntry(r){return r&&r.matched_entry_id?_qGet(r.matched_entry_id)||
 // A party: the rows that share a booking number, the employee first (party_no 1), then the
 // companions they registered. One number, one badge, one row per rider.
 // Booking numbers start again at P-001 every night, so a party is the same number on the same night.
-function _riderKey(r){return (r.session_id||'')+'|'+(r.booking_no||('id:'+r.id));}
+function _riderKey(r){return r&&r._inv?'q|'+r._inv:(r.session_id||'')+'|'+(r.booking_no||('id:'+r.id));} // a booking's row is never folded into a party
 function _riderNoNum(r){const m=String(r&&r.booking_no||'').match(/(\d+)\s*$/);return m?Number(m[1]):Infinity;}
 function _riderParty(r){return r&&r.booking_no?(S.riders||[]).filter(x=>x.booking_no===r.booking_no&&(x.session_id||'')===(r.session_id||'')).sort((a,b)=>(Number(a.party_no)||1)-(Number(b.party_no)||1)):[r];}
 function _riderPartyNo(r){return Number(r&&r.party_no)||1;}
@@ -54024,18 +54035,26 @@ function setRidersSort(col){if(S.ridersSort===col)S.ridersSortDir=-(S.ridersSort
 // sessions"): their bookings - walk-ins with an I- number, booked at micromobility.sa/petromin-invite - are rows of the
 // list, company Invitees, beside the registrations, so every night and every company sit in one list. A row stands for
 // its booking ('inv:'+id): checked in and back as the booking is; no badge, no billing (they pay at the desk).
-const INV_CO='Invitees';
+// The night's other bookings are rows too (the user, 2026-11-13: the night's card opens "a table that has them all in one
+// table": its Bookings, Petromin, Petrolube and Dukan), company Bookings, numbered as on Bookings (#7, W2 on the waitlist).
+// A booking a registration stands for (matched_entry_id) is that registration's row, as the roster hides it.
+const INV_CO='Invitees',BK_CO='Bookings';
+function _pmCoLabel(co){return co===INV_CO?t('invCo'):co===BK_CO?t('tabQueue'):co;}
+function _bkNo(e){return e.status==='waitlist'&&e.waitlistNum?'W'+e.waitlistNum:'#'+(e.queueNum||'');}
 function _invRows(){
   const pm=new Set(_pmNights().map(s=>s.id)),done=e=>e.status==='active'||e.status==='done';
-  return getQueue().filter(e=>e.inviteNo&&pm.has(e.sessionId)&&!['cancelled','removed','noshow'].includes(e.status)).map(e=>({id:'inv:'+e.id,_inv:e.id,booking_no:e.inviteNo,badge:'',
-    name:e.name,phone:e.phone,company:INV_CO,height:e.height||null,type_preference:resolvedType(e)||e.typePreference,session_id:e.sessionId,party_no:1,
+  const reg=new Set((S.riders||[]).map(r=>r.matched_entry_id).filter(Boolean));
+  return getQueue().filter(e=>pm.has(e.sessionId)&&(e.inviteNo||!reg.has(e.id))&&!['cancelled','removed','noshow'].includes(e.status)).map(e=>({id:'inv:'+e.id,_inv:e.id,booking_no:e.inviteNo||_bkNo(e),badge:'',
+    name:e.name,phone:e.phone,company:e.inviteNo?INV_CO:BK_CO,height:e.height||null,type_preference:resolvedType(e)||e.typePreference,session_id:e.sessionId,party_no:1,
     checked_in_at:done(e)?(e.checkedInAt||e.registeredAt||''):null,checked_out_at:e.status==='done'?(e.checkedOutAt||e.checkedInAt||''):null}));
 }
 function _pmAllRows(){return[...(S.riders||[]),..._invRows()];}
-// An invitee's number opens their booking on Bookings, found by that number on its night.
+// An invitee's or a booking's number opens it on Bookings, found by that number on its night (the roster's filters off,
+// as the search's jump does, so a saved filter cannot hide it).
 function _invOpen(id){
   const e=_qGet(id);if(!e)return;
-  S.queueView='bookings';S.sfSession=e.sessionId;S.sfSearch=e.inviteNo;S._flashId=e.id;S._flashColor='blue';
+  _dkXClearFilters(true);
+  S.queueView='bookings';S.sfSession=e.sessionId;S.sfSearch=e.inviteNo||(()=>{const n=_rowNum(e,'');return n?(e.status==='waitlist'&&e.waitlistNum?'W'+n:String(n)):(e.name||'');})();S._flashId=e.id;S._flashColor='blue';
   _saveQueueView();renderStaffQueue();
 }
 // The unified list: every Petromin night, every company and the invitees.
@@ -54044,9 +54063,10 @@ function _invRowHtml(r){
   const e=_qGet(r._inv);if(!e)return'';
   const sess=_sessDisp(e.sessionId),b=getAssignedBikes(e)[0];
   const exp=e.status==='waiting'||e.status==='waitlist';
-  return`<tr class="inv-row" data-id="${esc(e.id)}">
-    <td><button type="button" class="status-badge badge-active iv-bno" data-on-click="${_on("_invOpen",e.id)}">${esc(e.inviteNo)}</button>${e.status==='waitlist'?`<div class="iv-sub">${esc(t('statusWaitlist'))}</div>`:''}</td>
-    <td><span class="walk-in-badge inv-badge">${esc(t('invCo'))}</span></td>
+  const inv=!!e.inviteNo;
+  return`<tr class="${inv?'inv-row':'bk-row'}" data-id="${esc(e.id)}">
+    <td><button type="button" class="status-badge badge-active iv-bno" data-on-click="${_on("_invOpen",e.id)}">${esc(r.booking_no)}</button>${e.status==='waitlist'?`<div class="iv-sub">${esc(t('statusWaitlist'))}</div>`:''}</td>
+    <td>${inv?`<span class="walk-in-badge inv-badge">${esc(t('invCo'))}</span>`:`<span class="walk-in-badge bk-badge">${esc(t('tabQueue'))}</span>`}</td>
     <td>${esc(e.name)}${e.phone?`<div class="iv-fs12">${_piiLink('phone',e.phone,null,e.id,'https://wa.me/'+_waDigits(e.phone),'whatsapp','iv-link',' target="_blank" rel="noopener" dir="ltr"')}</div>`:''}</td>
     <td>${e.height?`${esc(String(e.height))} ${t('cmUnit')}`:`<span class="iv-muted">·</span>`}</td>
     <td>${typeBadge(r.type_preference)}</td>
@@ -55370,7 +55390,7 @@ function renderRiders(_resultsOnly){
   ].filter(Boolean);
   host.innerHTML=`
     <div class="section-header iv-mb8">
-      <div><h1 class="page-title pm-title">${(S.ridersCompany&&S.ridersCompany!=='all'?[S.ridersCompany]:RIDER_COMPANIES).filter(co=>co!==INV_CO).map(co=>_riderCoMark(co,'pm-logo-lg')).join('')}<span>${S.ridersCompany===INV_CO?t('invCo'):S.ridersSession==='all'?t('pmAllNights'):t('ridersTitle')}</span></h1><div class="page-sub iv-mb0">${t('ridersSub')}</div></div>
+      <div><h1 class="page-title pm-title">${(S.ridersCompany&&S.ridersCompany!=='all'?[S.ridersCompany]:RIDER_COMPANIES).filter(co=>co!==INV_CO&&co!==BK_CO).map(co=>_riderCoMark(co,'pm-logo-lg')).join('')}<span>${S.ridersCompany===INV_CO||S.ridersCompany===BK_CO?esc(_pmCoLabel(S.ridersCompany)):S.ridersSession==='all'?t('pmAllNights'):t('ridersTitle')}</span></h1><div class="page-sub iv-mb0">${t('ridersSub')}</div></div>
       <div class="iv-pm-btns pm-n${_pmBtns.length}">${_pmBtns.join('')}</div>
     </div>
     ${_qvPillsHtml()}${_strip}
@@ -55382,7 +55402,7 @@ function renderRiders(_resultsOnly){
       ${sessSel?`<label class="filter-sess${_strip?' filter-sess-dup':''}"><span class="filter-field-lbl">${t('colSession')}</span>${sessSel}</label>`:''}
       
       ${pill('all',t('ridersFilterAll'),night.length)}${pill('waiting',t('ridersFilterWaiting'),nWait)}${pill('riding',t('ridersFilterRiding'),nOut)}${pill('returned',t('ridersFilterReturned'),nDone)}
-    ${_fPanel('riders',_fField(t('ridersCompany'),`<select class="filter-select" aria-label="${esc(t('ridersCompany'))}" data-on-change="${_on("_on_renderRiders_1",_EV,_EL)}">${['all',...new Set([...RIDER_COMPANIES,INV_CO,...all.map(r=>String(r.company||'').trim()).filter(Boolean)])].map(v=>`<option value="${esc(v)}"${(S.ridersCompany||'all')===v?' selected':''}>${v==='all'?t('filterAll'):v===INV_CO?esc(t('invCo')):esc(v)}</option>`).join('')}</select>`)
+    ${_fPanel('riders',_fField(t('ridersCompany'),`<select class="filter-select" aria-label="${esc(t('ridersCompany'))}" data-on-change="${_on("_on_renderRiders_1",_EV,_EL)}">${['all',...new Set([...RIDER_COMPANIES,INV_CO,BK_CO,...all.map(r=>String(r.company||'').trim()).filter(Boolean)])].map(v=>`<option value="${esc(v)}"${(S.ridersCompany||'all')===v?' selected':''}>${v==='all'?t('filterAll'):esc(_pmCoLabel(v))}</option>`).join('')}</select>`)
       +_fField(t('bikeTypeLabel'),`<select class="filter-select" aria-label="${esc(t('bikeTypeLabel'))}" data-on-change="${_on("_on_renderRiders_2",_EV,_EL)}">${['all','Road','Hybrid','Mountain','Road Carbon','Kids'].map(v=>`<option value="${esc(v)}"${(S.ridersType||'all')===v?' selected':''}>${v==='all'?t('filterAll'):typeLabel(v)}</option>`).join('')}</select>`),'',_fS(S,'ridersCompany=all ridersType=all'))}
     </div></div>
     <div id="riders-results">${results}</div>`;

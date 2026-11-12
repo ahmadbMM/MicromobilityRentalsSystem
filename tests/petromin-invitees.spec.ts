@@ -25,10 +25,12 @@ const queue_entries = [
   entry({ id: 'invaaaaaaaaaaa3', queue_num: 6, name: 'Gone Guest', phone: '+966500000013', invite_no: 'I-003', status: 'cancelled' }),
   entry({ id: 'invbbbbbbbbbbb1', queue_num: 2, name: 'Rana Later', phone: '+966500000014', invite_no: 'I-001', session_id: N2, session_date: '2099-02-10', session_day: 'Tuesday' }),
   entry({ id: 'wlkcccccccccccc', queue_num: 7, name: 'Plain Walkin', phone: '+966500000015', via: null }),
+  // Amal's own app booking: her registration stands for it (matched_entry_id), so it is not a second row
+  entry({ id: 'mtcdddddddddddd', queue_num: 8, name: 'Amal Employee', phone: '+966500000001', via: null, walk_in: false }),
 ];
 const base = { source: 'petromin', created_at: '2099-02-08T09:00:00Z', updated_at: '2099-02-08T09:00:00Z', price: null, checked_in_by: null, checked_out_by: null, submissions: 1, party_no: 1, matched_entry_id: null, matched_customer_id: null, match_kind: 'none', checked_in_at: null, checked_out_at: null };
 const rider_registrations = [
-  { ...base, id: 1, session_id: N1, booking_no: 'P-001', badge: 'A-12', company: 'Petromin', name: 'Amal Employee', phone: '+966500000001', height: 170, type_preference: 'Hybrid' },
+  { ...base, id: 1, session_id: N1, booking_no: 'P-001', badge: 'A-12', company: 'Petromin', name: 'Amal Employee', phone: '+966500000001', height: 170, type_preference: 'Hybrid', matched_entry_id: 'mtcdddddddddddd' },
   { ...base, id: 2, session_id: N2, booking_no: 'D-001', badge: 'DK500000002', company: 'Dukan', name: 'Badr Dukan', phone: '+966500000002', height: null, type_preference: 'Hybrid' },
 ];
 
@@ -63,8 +65,8 @@ test.describe('@staff:bookings Petromin invitees', () => {
     const errs = await boot(page);
     await page.evaluate(`openPetrominPage(${JSON.stringify(N1)},'all')`);
     const rows = page.locator('#pm-host tbody tr');
-    // the night: its registration and its invitees still booked (the cancelled one is not listed)
-    await expect(rows).toHaveCount(3);
+    // the night: its registration, its invitees still booked (the cancelled one is not listed) and its plain booking
+    await expect(rows).toHaveCount(4);
     await expect(page.locator('#pm-host tr.inv-row')).toHaveCount(2);
     const hala = page.locator('#pm-host tr.inv-row[data-id="invaaaaaaaaaaa1"]');
     await expect(hala).toContainText('I-001');
@@ -78,7 +80,7 @@ test.describe('@staff:bookings Petromin invitees', () => {
     await page.locator('#pm-host button', { hasText: 'All Petromin nights' }).click();
     expect(await page.evaluate('[S.ridersSession,S.ridersCompany]')).toEqual(['all', 'all']);
     await expect(page.locator('#pm-host h1')).toContainText('All Petromin nights');
-    await expect(rows).toHaveCount(5);
+    await expect(rows).toHaveCount(6);
     await expect(page.locator('#pm-host button', { hasText: 'All Petromin nights' })).toHaveCount(0);
 
     // the company filter has Invitees: only the invitees, of every night
@@ -102,6 +104,61 @@ test.describe('@staff:bookings Petromin invitees', () => {
     // the number opens the booking on Bookings, found by that number on its night
     await page.locator('#pm-host tr.inv-row[data-id="invbbbbbbbbbbb1"] .iv-bno').click();
     expect(await page.evaluate('[S.queueView,S.sfSession,S.sfSearch]')).toEqual(['bookings', N2, 'I-001']);
+    expect(errs).toEqual([]);
+  });
+
+  test('a phone reaches the same list from the dropdown: All under the night, with every row counted', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'phones only: wide screens have the card');
+    const errs = await boot(page);
+    await page.evaluate(`(()=>{setStaffTab('queue');S.queueView='bookings';setSfSession(${JSON.stringify(N1)});})()`);
+    const opt = page.locator(`#tab-queue .sess-bar-mobile select option[value="pm:${N1}|all"]`);
+    await expect(opt).toHaveText(/^All · .* — 4$/);
+    await page.locator('#tab-queue .sess-bar-mobile select').selectOption(`pm:${N1}|all`);
+    expect(await page.evaluate('[S.queueView,S.ridersSession,S.ridersCompany]')).toEqual(['petromin', N1, 'all']);
+    await expect(page.locator('#pm-host tbody tr')).toHaveCount(4);
+    await expect(page.locator('#pm-host tr.bk-row')).toHaveCount(1);
+    expect(errs).toEqual([]);
+  });
+
+  test('the night card itself opens the night in one list: its bookings, every company and the invitees', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'wide screens only: a phone has the dropdown');
+    const errs = await boot(page);
+    await page.evaluate(`(()=>{setStaffTab('queue');S.queueView='bookings';setSfSession(${JSON.stringify(N1)});})()`);
+    const CARD = `#tab-queue .sess-bar-desktop .pm-night[data-sid="${N1}"]`;
+    // a tile opens its own list, never the whole one
+    await page.locator(`${CARD} button.pm-tile`).nth(1).click();
+    expect(await page.evaluate('[S.queueView,S.ridersSession,S.ridersCompany]')).toEqual(['petromin', N1, 'Petromin']);
+    await expect(page.locator(`${CARD} .pm-night-all`)).toHaveAttribute('aria-pressed', 'false');
+    // the card's lines (a button, for the keyboard too): every row of the night
+    await page.evaluate(`S.ridersFilter='waiting'`);
+    await page.locator(`${CARD} .pm-night-all`).click();
+    expect(await page.evaluate('[S.queueView,S.ridersSession,S.ridersCompany,S.ridersFilter]')).toEqual(['petromin', N1, 'all', 'all']);
+    await expect(page.locator(`${CARD} .pm-night-all`)).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator(`${CARD} button.pm-tile[aria-pressed="true"]`)).toHaveCount(0);
+    const rows = page.locator('#pm-host tbody tr');
+    await expect(rows).toHaveCount(4);
+    await expect(page.locator('#pm-host tr.inv-row')).toHaveCount(2);
+    const walk = page.locator('#pm-host tr.bk-row');
+    await expect(walk).toHaveCount(1);                                  // Amal's matched booking is her P-001 row
+    await expect(walk).toHaveAttribute('data-id', 'wlkcccccccccccc');
+    await expect(walk).toContainText('#7');
+    await expect(walk).toContainText('Bookings');
+    await expect(walk).toContainText('Plain Walkin');
+    await expect(walk.locator('button', { hasText: 'Check in' })).toHaveCount(1);
+    await expect(rows.filter({ hasText: 'Amal Employee' })).toHaveCount(1);
+    // the padding of the card (not a tile, not its lines) opens the same list
+    await page.locator(`${CARD} button.pm-tile`).nth(0).click();
+    expect(await page.evaluate('S.queueView')).toBe('bookings');
+    await page.locator(CARD).click({ position: { x: 3, y: 3 } });
+    expect(await page.evaluate('[S.queueView,S.ridersSession,S.ridersCompany]')).toEqual(['petromin', N1, 'all']);
+    // the company filter has Bookings: the plain bookings alone
+    await page.locator('[aria-controls="fm-riders"]').click();
+    await page.locator('#pm-host select[aria-label="Company"]').selectOption('Bookings');
+    await expect(rows).toHaveCount(1);
+    await expect(page.locator('#pm-host h1')).toContainText('Bookings');
+    // its number opens it on Bookings, found by that number on its night
+    await page.locator('#pm-host tr.bk-row .iv-bno').click();
+    expect(await page.evaluate('[S.queueView,S.sfSession,S.sfSearch]')).toEqual(['bookings', N1, '7']);
     expect(errs).toEqual([]);
   });
 });
