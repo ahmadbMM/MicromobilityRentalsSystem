@@ -50,6 +50,9 @@ async function staff(page: Page, fx: Fixtures = {}) {
   await stubSupabase(page, { sessions, customers, tags: [], customer_tags: [], queue_entries: queue, bikes: [], staff_options: [],
     'rpc:staff_operator_list': ops, lockers, locker_rentals: rentals, ...fx });
   await unlockStaff(page);
+  // The evening of TODAY's ride, before any locker time ends: from 23:00 in Riyadh a key given for the late time read
+  // Overdue, not Key given, and main went red every night until midnight (2026-11-12, 23:05).
+  await page.clock.setFixedTime(new Date(`${TODAY}T18:00:00+03:00`));
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('S.dataLoaded&&(S.customers||[]).length>0');
