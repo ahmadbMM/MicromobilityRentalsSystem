@@ -68,8 +68,8 @@ test('@staff:bookings the Riders tab lists every registration with its number, c
 
   // The old Riders tab lands on the Petromin page inside Queue, on the open Petromin night.
   expect(await page.evaluate('[S.staffTab,S.queueView,S.ridersSession]')).toEqual(['queue', 'petromin', SESS]);
-  await expect(page.locator('#tab-queue .pm-chip.active-sess')).toHaveCount(1);          // phones get the same page from the dropdown
-  await expect(page.locator('#tab-queue .sess-bar-mobile select')).toHaveValue('pm:' + SESS);
+  await expect(page.locator('#tab-queue .pm-night.active-sess')).toHaveCount(1);         // the night's one card (2026-11-12)
+  await expect(page.locator('#tab-queue .sess-bar-mobile select')).toHaveValue('pm:' + SESS + '|all'); // phones get the same page from the dropdown
   const r0 = rows(page).nth(0), r1 = rows(page).nth(1), r2 = rows(page).nth(2);
   await expect(r0).toContainText('P-001');
   await expect(r0).toContainText('A-12');

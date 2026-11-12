@@ -38,10 +38,15 @@ const STRIPS = {
   // The Blood Donation event (2026-11-05): the word at the strip's end, on the same colours as the booking card's stripe; the
   // number sits over the plain start, and the name is below the strip, so nothing runs over the word.
   blood: `<div class="s" style="background:#0B1F16"><div style="position:absolute;inset:0 0 0 auto;width:178px;display:grid;place-items:center;background:#03FE8A;color:#0B1F16;font:800 30px/1 'Helvetica Neue',Arial,sans-serif;letter-spacing:.04em">DONOR</div></div>`,
+  // Dukan's employees on the Petromin nights (2026-11-12): Dukan's greens (dukan.me) with its mark at the end, the rounded
+  // D faint and the orange diamond inside it.
+  dukan: `<div class="s" style="background:linear-gradient(112deg,#004F3D 0%,#1B7563 58%,#419B89 100%)"><svg viewBox="0 0 120 98" style="position:absolute;right:16px;top:0;width:120px;height:98px"><path d="M16 8h38a41 41 0 0 1 0 82H16a7 7 0 0 1-7-7V15a7 7 0 0 1 7-7z" fill="rgba(255,255,255,.14)"/><rect x="27" y="32" width="34" height="34" rx="8" transform="rotate(45 44 49)" fill="#EC2F04"/></svg></div>`,
   blood_visitor: `<div class="s" style="background:#fff"><div style="position:absolute;inset:0 0 0 auto;width:178px;display:grid;place-items:center;background:#0B1F16;color:#fff;font:800 30px/1 'Helvetica Neue',Arial,sans-serif;letter-spacing:.04em">VISITOR</div></div>`,
 };
 // The logo: at most 160 x 50 points, the mark each event card wears.
-const LOGOS = { jcc: ['jcc-white.webp', 330, 166], comm: ['logo-dark.webp', 241, 256], runher: ['assets/runher-partners.webp', 653, 120] };
+// A logo drawn here is its SVG (Dukan's mark in white, its diamond orange, to read on its green pass).
+const LOGOS = { jcc: ['jcc-white.webp', 330, 166], comm: ['logo-dark.webp', 241, 256], runher: ['assets/runher-partners.webp', 653, 120],
+  dukan: ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><path d="M8 3h17a22 22 0 0 1 0 44H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5z" fill="#fff"/><rect x="15" y="16" width="18" height="18" rx="4.5" transform="rotate(45 24 25)" fill="#EC2F04"/></svg>', 50, 50] };
 const browser = await chromium.launch();
 for (const scale of [1, 2, 3]) {
   const ctx = await browser.newContext({ deviceScaleFactor: scale, viewport: { width: 375, height: 98 } });
@@ -55,7 +60,7 @@ for (const scale of [1, 2, 3]) {
   for (const [k, [src, w, h]] of Object.entries(LOGOS)) {
     const s = Math.min(160 / w, 50 / h), W = Math.round(w * s), H = Math.round(h * s);
     await page.setViewportSize({ width: W, height: H });
-    await page.setContent(`<html><body style="margin:0;background:transparent"><img id="l" src="${f(src)}" style="display:block;width:${W}px;height:${H}px"></body></html>`);
+    await page.setContent(`<html><body style="margin:0;background:transparent"><img id="l" src="${src.startsWith('<svg') ? 'data:image/svg+xml,' + encodeURIComponent(src) : f(src)}" style="display:block;width:${W}px;height:${H}px"></body></html>`);
     await page.waitForFunction(() => document.getElementById('l').complete);
     await page.locator('#l').screenshot({ path: `${OUT}/${k}-logo${scale > 1 ? '@' + scale + 'x' : ''}.png`, omitBackground: true });
     await page.setViewportSize({ width: 375, height: 98 });

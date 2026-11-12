@@ -132,7 +132,7 @@ test.describe('@staff:sessions telling sessions apart', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await boot(page);
     await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${TODAY}';renderStaffQueue()`);
-    const chip = (id: string) => page.locator(`#sess-strip .sess-summary-chip[data-on-click*='"setSfSession","${id}"']`);
+    const chip = (id: string) => page.locator(`#sess-strip .sess-summary-chip[data-sid="${id}"]`); // a Petromin night's card is a group of tiles, not a button (2026-11-12)
     await expect(chip(TODAY).locator('.smk.ev-jcc')).toHaveCount(1);
     await expect(chip(TODAY).locator('.sess-chip-event')).toHaveText('Jeddah Corniche Circuit');
     await expect(chip(TODAY).locator('.sess-chip-date')).toContainText('Today');
@@ -207,7 +207,7 @@ test.describe('@staff:sessions sessions in order and in colour', () => {
     // the Bookings cards, four short lines (2026-11-10): the status on the name's line, the place after the time,
     // the places left and the waitlist ("W 1", said once) beside the fill bar
     await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${TODAY}';renderStaffQueue()`);
-    const card = (id: string) => page.locator(`#sess-strip .sess-bar-desktop .sess-summary-chip[data-on-click*='"${id}"']`);
+    const card = (id: string) => page.locator(`#sess-strip .sess-bar-desktop .sess-summary-chip[data-sid="${id}"]`);
     await expect(card(TODAY).locator('.sess-chip-top .sess-chip-badge .badge-open')).toHaveCount(1);
     await expect(card(TODAY).locator('.sess-chip-date .ssx-place')).toHaveText('JCC');
     await expect(card(TODAY).locator('.sess-chip-date .ssx-ser')).toHaveText('1 of 2');

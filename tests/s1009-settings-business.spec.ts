@@ -34,7 +34,7 @@ test.describe('@staff:settings business settings', () => {
     expect(after).toEqual([4, 6, 2, 30, 90, 7, 150, 120000, 0.1, 'Petromin,Acme', 'Helmet,Gloves', true, 6, false, 'other', 'No parking', '30', 'eid', 'M', 'L', true]);
     // a setting that does not hold (out of range, Petromin dropped) keeps the built-in value
     const bad = await page.evaluate(`(()=>{S.staffOptions={biz:{group_ride_max:99,rider_companies:['Acme'],pin_hold_s:600}};_bizFromOpts();return[GROUP_RIDE_MAX,RIDER_COMPANIES.join(),PIN_HOLD_MS];})()`);
-    expect(bad).toEqual([2, 'Petromin,Petrolube', 270000]);
+    expect(bad).toEqual([2, 'Petromin,Petrolube,Dukan', 270000]); // Dukan joined the built-in list on 2026-11-12
   });
 
   test('an admin saves a card through staff_set_biz; the page then reads the new values', async ({ page }) => {

@@ -4,8 +4,8 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 // A closed party offers what used to need opening it: Return all for the riders on a bike,
 // and, in its menu, Undo check-in and No-show. Several bikes come back through one screen
 // (every bike OK unless tapped otherwise, one question about anyone unpaid), from a party or
-// from riders ticked on the roster. The /petromin form's registrations have their own page in
-// Queue, opened from a chip with the Petromin logo, where the Riders tab used to be.
+// from riders ticked on the roster. The /petromin and /dukan forms' registrations have their own page in
+// Queue, opened from the tiles on the Petromin night's card, where the Riders tab used to be.
 
 const D = '2099-02-10';
 const sessions = [
@@ -33,6 +33,8 @@ const rider_registrations = [
   { ...regBase, id: 1, booking_no: 'MMP-101', party_no: 1, badge: 'A-1', name: 'Emp Lead', phone: '+966500000011', checked_in_at: '2099-02-11T16:00:00Z', checked_out_at: null },
   { ...regBase, id: 2, booking_no: 'MMP-101', party_no: 2, badge: 'A-1', name: 'Emp Guest', phone: '+966500000011', checked_in_at: '2099-02-11T16:00:00Z', checked_out_at: null },
   { ...regBase, id: 3, booking_no: 'MMP-102', party_no: 1, badge: 'B-2', name: 'Emp Solo', phone: '+966500000012', checked_in_at: null, checked_out_at: null },
+  // Dukan's employee (micromobility.sa/dukan, 2026-11-12): no badge of their own, the phone stands in for it
+  { ...regBase, id: 4, booking_no: 'D-001', party_no: 1, badge: 'DK500000013', company: 'Dukan', height: null, type_preference: 'Hybrid', name: 'Dukan Worker', phone: '+966500000013', checked_in_at: null, checked_out_at: null },
 ];
 
 async function queue(page: Page, extra: Record<string, unknown> = {}) {
@@ -131,19 +133,30 @@ test('riders ticked on the roster come back together from the selection bar', as
   await expect.poll(() => page.evaluate('S.sfSelected.length')).toBe(0);
 });
 
-test('the Petromin registrations have their own page in Queue, opened from a logo chip', async ({ page }) => {
+test('a Petromin night is one card: its Bookings and each company\'s registrations are tiles on it', async ({ page }) => {
   await queue(page);
   await expect(page.locator('[data-stab="riders"]')).toHaveCount(0);   // the Riders tab is gone
-  const chip = page.locator('#tab-queue .sess-bar-desktop .pm-chip');
-  await expect(chip).toHaveCount(1);
-  await expect(chip).toHaveAttribute('type', 'button'); // a real button (2026-10-05), not a role=button div
-  await expect(chip.locator('img.pm-logo')).toHaveAttribute('alt', 'Petromin');
-  // Right after that night's own chip.
-  const order = await page.evaluate(`[...document.querySelectorAll('#tab-queue .sess-bar-desktop .sess-summary-chip')].map(c=>c.classList.contains('pm-chip')?'pm':c.getAttribute('data-on-click'))`) as string[];
-  expect(order.indexOf('pm')).toBe(order.findIndex(o => o && o.includes('2099-02-11-pw')) + 1);
-  await expect(chip).toContainText('3 registered');
-  await page.evaluate(`openPetrominPage('2099-02-11-pw')`);
-  await expect(page.locator('#pm-host .pm-logo-lg')).toBeVisible();
+  const strip = page.locator('#tab-queue .sess-bar-desktop');
+  // One card for the night (the user, 2026-11-12): no second card for its registrations beside it.
+  await expect(strip.locator('.pm-chip')).toHaveCount(0);
+  await expect(strip.locator('.sess-summary-chip')).toHaveCount(2);     // the Tuesday ride and the Petromin night
+  const CARD = '#tab-queue .sess-bar-desktop .sess-summary-chip[data-sid="2099-02-11-pw"]';
+  const card = page.locator(CARD), tiles = page.locator(`${CARD} button.pm-tile`);
+  await expect(card).toHaveAttribute('role', 'group');                  // a group of buttons, not a button
+  await expect(tiles).toHaveCount(4);
+  await expect(tiles.nth(0)).toContainText('Bookings');
+  await expect(tiles.nth(1).locator('img')).toHaveAttribute('alt', 'Petromin');
+  await expect(tiles.nth(2).locator('img')).toHaveAttribute('alt', 'Petrolube');
+  await expect(tiles.nth(3).locator('img')).toHaveAttribute('alt', 'Dukan');
+  await expect(tiles.nth(1)).toContainText('3 registered');
+  await expect(tiles.nth(2)).toContainText('0 registered');
+  await expect(tiles.nth(3)).toContainText('1 registered');
+  // Petromin's tile: the night's Petromin registrations alone, under Petromin's mark.
+  await tiles.nth(1).dispatchEvent('click');                            // phones reach the same page from the dropdown
+  expect(await page.evaluate('[S.queueView,S.ridersSession,S.ridersCompany]')).toEqual(['petromin', '2099-02-11-pw', 'Petromin']);
+  await expect(tiles.nth(1)).toHaveAttribute('aria-pressed', 'true');
+  await expect(tiles.nth(0)).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#pm-host .pm-logo-lg')).toHaveAttribute('alt', 'Petromin');
   await expect(page.locator('#pm-host tbody tr')).toHaveCount(2);            // one party folded, one solo
   // The folded party: Return all and Undo check-in, without opening it.
   const party = page.locator('#pm-host tbody tr', { hasText: 'MMP-101' });
@@ -154,18 +167,31 @@ test('the Petromin registrations have their own page in Queue, opened from a log
   await party.getByRole('button', { name: 'Return all (2)' }).click();
   await page.locator('#confirm-modal button', { hasText: 'Return all' }).click();
   await expect.poll(() => regWrites.length).toBe(2);
-  // A session chip leaves the page again.
+  // Dukan's tile: its employee, numbered D-, and no badge shown (the phone stands in for it in the database).
+  await tiles.nth(3).dispatchEvent('click');
+  expect(await page.evaluate('S.ridersCompany')).toBe('Dukan');
+  await expect(page.locator('#pm-host .pm-logo-lg')).toHaveAttribute('alt', 'Dukan');
+  await expect(page.locator('#pm-host tbody tr')).toHaveCount(1);
+  await expect(page.locator('#pm-host tbody tr').first()).toContainText('D-001');
+  await expect(page.locator('#pm-host tbody tr').first()).toContainText('Dukan Worker');
+  await expect(page.locator('#pm-host tbody tr').first()).not.toContainText('DK500000013');
+  // The Bookings tile leaves the page for the night's own queue; another ride's card does too.
+  await tiles.nth(0).dispatchEvent('click');
+  expect(await page.evaluate('[S.queueView,S.sfSession]')).toEqual(['bookings', '2099-02-11-pw']);
+  await expect(page.locator('#pm-host')).toHaveCount(0);
+  await expect(tiles.nth(0)).toHaveAttribute('aria-pressed', 'true');
+  await page.evaluate(`openPetrominPage('2099-02-11-pw')`);
   await page.evaluate(`setSfSession('${D}')`);
   expect(await page.evaluate('S.queueView')).toBe('bookings');
   await expect(page.locator('#pm-host')).toHaveCount(0);
 });
 
-test('with no Petromin night open, the chip opens the latest night that has registrations', async ({ page }) => {
+test('with no Petromin night open, the latest night with registrations keeps its card and its tiles', async ({ page }) => {
   await queue(page, { sessions: [sessions[0], { ...sessions[1], status: 'closed' }] });
-  const chip = page.locator('#tab-queue .sess-bar-desktop .pm-chip');
-  await expect(chip).toHaveCount(1);
-  await chip.dispatchEvent('click');                                    // phones reach it from the dropdown; same page
-  expect(await page.evaluate('[S.queueView,S.ridersSession]')).toEqual(['petromin', '2099-02-11-pw']);
+  const tiles = page.locator('#tab-queue .sess-bar-desktop .pm-night[data-sid="2099-02-11-pw"] button.pm-tile');
+  await expect(tiles).toHaveCount(4);
+  await tiles.nth(3).dispatchEvent('click');
+  expect(await page.evaluate('[S.queueView,S.ridersSession,S.ridersCompany]')).toEqual(['petromin', '2099-02-11-pw', 'Dukan']);
 });
 
 test('a rider cancelling picks from the everyday reasons, and Other asks for their own words', async ({ page }) => {

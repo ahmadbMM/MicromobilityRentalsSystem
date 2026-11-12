@@ -228,13 +228,14 @@ test('@staff:bookings on a phone the Petromin page has one Session picker, and i
   const pickers = page.locator('#tab-queue select[aria-label="Session"]').filter({ visible: true });
   await expect(pickers).toHaveCount(1);
   const pick = pickers.first();
-  await expect(pick).toHaveValue('pm:' + PM);
+  await expect(pick).toHaveValue('pm:' + PM + '|all');
   await expect(pick.locator('option[value="pm:all"]')).toHaveCount(1);
-  await expect(pick.locator(`option[value="pm:${PM2}"]`)).toHaveCount(1); // a closed night with registrations
+  await expect(pick.locator(`option[value="pm:${PM2}|all"]`)).toHaveCount(1); // a closed night with registrations
+  for (const co of ['Petromin', 'Petrolube', 'Dukan']) await expect(pick.locator(`option[value="pm:${PM}|${co}"]`)).toHaveCount(1); // and each company's (2026-11-12)
   await pick.selectOption('pm:all');
   await expect(page.locator('#pm-host tbody tr')).toHaveCount(3);
   expect(await page.evaluate('[S.queueView,S.ridersSession]')).toEqual(['petromin', 'all']);
-  await pick.selectOption('pm:' + PM2);
+  await pick.selectOption('pm:' + PM2 + '|all');
   await expect(page.locator('#pm-host tbody tr')).toHaveCount(1);
   // the page's buttons are equal cells, as the Bookings header's are
   expect(await page.locator('#pm-host .iv-pm-btns').evaluate((e) => getComputedStyle(e).display)).toBe('grid');

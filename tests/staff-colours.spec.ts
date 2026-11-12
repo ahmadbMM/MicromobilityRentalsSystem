@@ -46,7 +46,7 @@ const img = (page: Page, sel: string) => page.locator(sel).first().evaluate((el)
 test.describe('@staff:bookings Bookings in colour', () => {
   test('each ride chip wears its event’s look, with its mark', async ({ page }) => {
     await bookings(page);
-    const chip = (id: string) => `#sess-strip .sess-summary-chip[data-on-click*='"setSfSession","${id}"']`;
+    const chip = (id: string) => `#sess-strip .sess-summary-chip[data-sid="${id}"]`;
     // staff round s10 (item 23): the circuit's navy card is a plain Soft Solid card, white with a 3px edge in its state,
     // its kind's mark and its name in ink
     await expect(page.locator(chip(J))).toHaveClass(/\bth-plain\b/);
@@ -60,8 +60,9 @@ test.describe('@staff:bookings Bookings in colour', () => {
       await expect(page.locator(chip(id))).toHaveClass(/\bth-comm\b/);
       expect(await img(page, chip(id))).toContain('mm-pattern');
     }
-    // and Petromin's registrations chip beside its night
-    await expect(page.locator(`#sess-strip .pm-chip`)).toHaveClass(/\bth-comm\b/);
+    // a Petromin night is one card with its tiles (2026-11-12): Bookings and each company's registrations
+    await expect(page.locator(`${chip('2099-10-22-pm')} .pm-tile`)).toHaveCount(4);
+    await expect(page.locator(`#sess-strip .pm-chip`)).toHaveCount(0);
     // the community rides keep their own name colour: Petromin red, not the staff green
     expect(await page.locator(`${chip('2099-10-22-pm')} .sess-chip-event`).evaluate((el) => getComputedStyle(el).color)).toBe('rgb(163, 59, 46)');
     await expect(page.locator(chip('2099-10-17-rh'))).toHaveClass(/\bth-runher\b/);

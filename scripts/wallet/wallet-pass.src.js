@@ -399,7 +399,7 @@ async function petrominPass(request, q, env, passTypeId, teamId) {
     return new Response(pkpass, {
       headers: {
         "Content-Type": "application/vnd.apple.pkpass",
-        "Content-Disposition": `attachment; filename="petromin-${file}.pkpass"`,
+        "Content-Disposition": `attachment; filename="${_pmText(r.company) === "Dukan" ? "dukan" : "petromin"}-${file}.pkpass"`,
         "Cache-Control": "no-store"
       }
     });
@@ -414,14 +414,17 @@ const _pmIso = (v) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+03:00$/.test(String
 const _pmMin = (hhmm) => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(hhmm || "")); return m && +m[1] < 24 && +m[2] < 60 ? +m[1] * 60 + +m[2] : null; };
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 async function buildPetrominPkpass(r, cfg) {
-  const skin = RIDES.petromin;
+  // A Dukan employee's registration (micromobility.sa/dukan, 2026-11-12) is a Petromin night's too: Dukan's colours, mark
+  // and name, never the night's own title (which names Petromin), and no bike type to arrive early for (they pick none).
+  const dukan = _pmText(r.company) === "Dukan";
+  const skin = dukan ? RIDES.dukan : RIDES.petromin;
   const s = r.session;
   const no = String(r.booking_no).toUpperCase();
   const code = `MMP-${no}`;
   const riders = Array.isArray(r.riders) ? r.riders.filter((x) => x && typeof x === "object") : [];
   const count = 1 + riders.length;
   const name = _pmText(r.name), company = _pmText(r.company);
-  const rideName = _pmText(s.title) || skin.venue;
+  const rideName = (!dukan && _pmText(s.title)) || skin.venue;
   const start = _pmIso(s.start), end = _pmIso(s.end);
   const day = start ? start.slice(0, 10) : "";
   const dow = day ? WEEKDAYS[new Date(`${day}T12:00:00Z`).getUTCDay()] : "";
@@ -446,7 +449,7 @@ async function buildPetrominPkpass(r, cfg) {
     passTypeIdentifier: cfg.passTypeId,
     teamIdentifier: cfg.teamId,
     // Numbers start again every night (P-001 each Wednesday), so the night is part of what makes the pass its own.
-    serialNumber: `petromin-${_pmText(s.id, 64) || day}-${no}`,
+    serialNumber: `${dukan ? "dukan" : "petromin"}-${_pmText(s.id, 64) || day}-${no}`,
     organizationName: "MicroMobility Rentals",
     description: `Booking ${no} - ${rideName}`,
     foregroundColor: skin.fg || "rgb(242,245,242)",
@@ -466,7 +469,7 @@ async function buildPetrominPkpass(r, cfg) {
       ...start && end ? { eventStartDate: start, eventEndDate: end } : {}
     },
     eventTicket: {
-      headerFields: [{ key: "date", label: "SESSION", value: _shortWhen(dow, day) || "Petromin" }],
+      headerFields: [{ key: "date", label: "SESSION", value: _shortWhen(dow, day) || (dukan ? "Dukan" : "Petromin") }],
       // The lead by name, a party by its count: no companion's name on the front.
       primaryFields: [
         { key: "booking", label: "BOOKING NO.", value: no },
@@ -487,12 +490,12 @@ async function buildPetrominPkpass(r, cfg) {
         ...atCircuit ? [{ key: "directions", label: "Directions", value: DIRECTIONS, attributedValue: `<a href="${_attr(DIRECTIONS)}">Open in Maps</a>` }] : [],
         ...company ? [{ key: "company_b", label: "Company", value: company }] : [],
         ...count > 1 ? [{ key: "riders_list", label: "Riders", value: ridersList }] : [],
-        { key: "help", label: "Good to know", value: "Show this pass at the desk when you arrive. Bikes are assigned first come, first served, so arrive a little early to get the type you picked. A helmet comes free with every bike." },
+        { key: "help", label: "Good to know", value: dukan ? "Show this pass at the desk when you arrive. Bikes are assigned first come, first served, so arrive a little early. A helmet comes free with every bike." : "Show this pass at the desk when you arrive. Bikes are assigned first come, first served, so arrive a little early to get the type you picked. A helmet comes free with every bike." },
         { key: "ref", label: "Reference", value: code }
       ]
     }
   };
-  return _seal(pass, { ...PASS_IMAGES, ...RIDE_IMAGES.petromin }, cfg.signer);
+  return _seal(pass, { ...PASS_IMAGES, ...(dukan ? RIDE_IMAGES.dukan : RIDE_IMAGES.petromin) }, cfg.signer);
 }
 function _numsDisplay(nums) {
   if (!nums || !nums.length) return "";
@@ -786,6 +789,9 @@ const RIDES = {
   // near-white foreground (5.9:1) and the field (4.9:1); do not darken the label towards
   // salmon again, it drops to 2.7:1.
   petromin: { bg: "rgb(163,59,46)", label: "rgb(255,214,203)", venue: "Petromin Wednesday Ride" },
+  // Dukan's employees on the same nights (2026-11-12, micromobility.sa/dukan): Dukan's own green (#1b7563, dukan.me), labels
+  // in its pale mint (4.9:1 on the green), the near-white text (5.1:1): both clear AA. Never named after Petromin: the night is theirs too.
+  dukan:    { bg: "rgb(27,117,99)", label: "rgb(214,247,238)", venue: "Dukan Ride Night" },
   // the pool (2026-10-12): its ticket's pool blue on the labels (5.6:1 on white)
   swim:     { ...EXP, label: "rgb(11,111,164)", venue: "Triathlon Pool Session" },
   workshop: { ...EXP, venue: "T100 Triathlon Prep" },

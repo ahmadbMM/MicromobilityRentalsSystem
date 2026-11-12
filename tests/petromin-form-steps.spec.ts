@@ -33,9 +33,6 @@ test.describe('@staff:bookings Petromin form steps', () => {
     await btn.click();
     const dlg = page.getByRole('dialog', { name: 'Form steps' });
     await expect(dlg).toBeVisible();
-    // centred, not a sheet at the bottom
-    const box = (await dlg.boundingBox())!, vp = page.viewportSize()!;
-    expect(Math.abs(box.y + box.height / 2 - vp.height / 2)).toBeLessThan(vp.height * 0.15);
     // 30 days by default, Petromin's rows only, from the KSA day 29 days back
     await expect(dlg.locator('select')).toHaveValue('30');
     const since = await page.evaluate(`_ksaYmd(Date.now()-29*864e5)`);
@@ -46,6 +43,10 @@ test.describe('@staff:bookings Petromin form steps', () => {
     await expect(bar('1. Night')).toHaveText('100 · 100%');
     await expect(bar('4. Check and agree')).toHaveText('40 · 40%');
     await expect(bar('Registered')).toHaveText('36 · 36%');
+    // centred, not a sheet at the bottom: measured once its rows are drawn (the dialog is drawn again when they land, and a
+    // box read in between found the copy just replaced)
+    const box = (await dlg.boundingBox())!, vp = page.viewportSize()!;
+    expect(Math.abs(box.y + box.height / 2 - vp.height / 2)).toBeLessThan(vp.height * 0.15);
     // the field that stopped a Continue, most first, in the desk's words; the server's refusals by code
     await expect(dlg.locator('.pfs-fill-err').first().locator('xpath=../..')).toContainText('Phone');
     await expect(bar('Phone')).toHaveText('9');
@@ -60,6 +61,21 @@ test.describe('@staff:bookings Petromin form steps', () => {
     const since7 = await page.evaluate(`_ksaYmd(Date.now()-6*864e5)`);
     await expect.poll(() => asked.some((u) => u.includes(`day=gte.${since7}`))).toBe(true);
     await expect(bar('Registered')).toHaveText('36 · 36%');
+    // Dukan's form (micromobility.sa/dukan, 2026-11-12): its own rows and its three steps, no bike step
+    const drow = (step: number, event: string, n: number) => ({ day: '2099-02-07', form: 'dukan', step, event, field: '', lang: 'en', n });
+    await page.route(/\/rest\/v1\/form_step_counts.*form=eq\.dukan/, (r) => r.fulfill({
+      status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
+      body: JSON.stringify([drow(1, 'view', 10), drow(2, 'view', 8), drow(3, 'view', 6), drow(3, 'done', 5)]),
+    }));
+    await expect(dlg.locator('.pfs-form')).toHaveCount(2);
+    await expect(dlg.locator('.pfs-form').nth(0)).toHaveAttribute('aria-pressed', 'true');
+    await dlg.locator('.pfs-form').nth(1).click();
+    await expect.poll(() => asked.some((u) => u.includes('form=eq.dukan'))).toBe(true);
+    await expect(dlg.locator('.pfs-form').nth(1)).toHaveAttribute('aria-pressed', 'true');
+    await expect(bar('1. Night')).toHaveText('10 · 100%');
+    await expect(bar('3. Check and agree')).toHaveText('6 · 60%');
+    await expect(dlg.locator('.analytics-bar-row', { hasText: '4. ' })).toHaveCount(0);
+    await expect(bar('Registered')).toHaveText('5 · 50%');
     await page.keyboard.press('Escape');
     await expect(dlg).toHaveCount(0);
   });
