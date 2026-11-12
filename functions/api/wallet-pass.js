@@ -1612,10 +1612,11 @@ async function petrominPass(request, q, env, passTypeId, teamId) {
   if (_pmMissCount(ip) >= PM_MISS_MAX) return json({ ok: false, error: "rate limited" }, 429);
   let r;
   try {
-    const rpc = await fetch(`${SUPA}/rest/v1/rpc/rider_lookup`, {
+    const inv = /^I-\d{3,6}$/i.test(no);
+    const rpc = await fetch(`${SUPA}/rest/v1/rpc/${inv ? "petromin_invite_lookup" : "rider_lookup"}`, {
       method: "POST",
       headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ p_booking_no: no, p_phone: phone, p_session_id: sid })
+      body: JSON.stringify(inv ? { p_invite_no: no, p_phone: phone, p_session_id: sid } : { p_booking_no: no, p_phone: phone, p_session_id: sid })
     });
     if (!rpc.ok) return json({ ok: false, error: "lookup failed" }, 502);
     r = await rpc.json();
@@ -1633,7 +1634,7 @@ async function petrominPass(request, q, env, passTypeId, teamId) {
     return new Response(pkpass, {
       headers: {
         "Content-Type": "application/vnd.apple.pkpass",
-        "Content-Disposition": `attachment; filename="${_pmText(r.company) === "Dukan" ? "dukan" : "petromin"}-${file}.pkpass"`,
+        "Content-Disposition": `attachment; filename="${_pmText(r.company) === "Dukan" ? "dukan" : /^I-/.test(file) ? "petromin-invite" : "petromin"}-${file}.pkpass"`,
         "Cache-Control": "no-store"
       }
     });
@@ -1654,7 +1655,8 @@ async function buildPetrominPkpass(r, cfg) {
   const skin = dukan ? RIDES.dukan : RIDES.petromin;
   const s = r.session;
   const no = String(r.booking_no).toUpperCase();
-  const code = `MMP-${no}`;
+  const invite = /^I-\d{3,6}$/.test(no) && /^MMC-\d+-[0-9a-z]{4,8}$/i.test(String(r.ref || ""));
+  const code = invite ? String(r.ref) : `MMP-${no}`;
   const riders = Array.isArray(r.riders) ? r.riders.filter((x) => x && typeof x === "object") : [];
   const count = 1 + riders.length;
   const name = _pmText(r.name), company = _pmText(r.company);
@@ -1680,7 +1682,7 @@ async function buildPetrominPkpass(r, cfg) {
     passTypeIdentifier: cfg.passTypeId,
     teamIdentifier: cfg.teamId,
     // Numbers start again every night (P-001 each Wednesday), so the night is part of what makes the pass its own.
-    serialNumber: `${dukan ? "dukan" : "petromin"}-${_pmText(s.id, 64) || day}-${no}`,
+    serialNumber: `${dukan ? "dukan" : invite ? "pminvite" : "petromin"}-${_pmText(s.id, 64) || day}-${no}`,
     organizationName: "MicroMobility Rentals",
     description: `Booking ${no} - ${rideName}`,
     foregroundColor: skin.fg || "rgb(242,245,242)",

@@ -472,6 +472,30 @@ tag, never both ("show an error that asks that only one of them must be given pe
   (`tagOneOfTwoN`). `staff_community_approve` hits the trigger too, so the server holds the rule whatever the page.
   `tests/petromin-days.spec.ts`.
 
+## Petromin invitees (2026-11-12, migration 20261112234500)
+
+The user: "create me a webpage for petromin invitees to write their names and phone numbers and bike types and add them
+as walk-ins ... add a unified staff panel dashboard for all petromin sessions, make petromin invitees have a booking
+number that starts with an i". Their answers: a walk-in booking on the night's Bookings list (no registration, no
+account), the invitee pays the standard fare at the desk, micromobility.sa/petromin-invite, one combined list.
+- **The page** is mm-platform `forms/petromin-invite` (night, full name, mobile, Hybrid or Mountain, Check and agree).
+  It calls `petromin_invite_book` / `petromin_invite_lookup` / `petromin_invite_cancel` (anon, definer) and
+  `form_step('pminvite', …)`. Its QR is the booking's own `ref` (`MMC-<number>-<id>`), so the desk scanner opens an
+  invitee as any ticket; Apple Wallet goes through `/api/petromin-pass`, and `petrominPass` here reads an `I-` number
+  with `petromin_invite_lookup` and puts `ref` on the pass.
+- **The booking**: `queue_entries` with `walk_in` true, `via` 'invite', no `customer_id`, the waiver agreed on the page,
+  the standard fare (`_fare_now`: no registration points at it). `invite_no` I-001… per night (`_invite_next`, counter
+  source 'invite' in `rider_night_counters`), unique per night; only the RPC writes it (`_invite_no_guard` checks
+  `mm.invite`), a staff move to another Petromin night takes that night's next number. `_community_booking_gate` lets
+  the RPC's own insert onto its Petromin night (members-only otherwise). One phone is one booking a night: the same
+  phone again updates it; Edit sends `p_from_no`/`p_from_session` (another night books there and cancels the old one).
+- **Staff**: `inviteNo` on the entry; `_kioskTag` draws "Invitee I-001" (`.inv-badge`) where the walk-in mark was, on
+  the roster, the phone cards and History; `_matchesRef` finds I-001 / i1, and Enter keeps to the night shown. The
+  Petromin page lists invitees as rows of company `INV_CO` ('Invitees', `_invRows`, `_invRowHtml`: Check in opens the
+  booking's check-in, Return its return, the number opens it on Bookings via `_invOpen`); the Company filter has
+  Invitees; "All Petromin nights" (`_pmAllNights`) is the unified list of every night, company and invitee. Invitees
+  are never on the billing report (they pay). `tests/petromin-invitees.spec.ts`.
+
 ## Badges staff give (2026-09-29)
 
 Migration 20260929000000: `badges` (the catalogue) and `customer_badges` (who holds which, with a note
