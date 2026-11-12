@@ -12494,6 +12494,9 @@ html[data-staff-theme="booth"] body.view-staff #tab-volunteers .rq-more{border-w
 .vx-why,.vx-mot,.vx-leave{font-size:var(--sf-fs-xs);color:var(--muted);}
 .vx-wait{display:inline-flex;align-items:center;gap:4px;font-size:var(--sf-fs-xs);color:var(--muted);}
 .vx-chip.vx-wait.vx-late{color:var(--vx-r-ink);}
+/* WhatsApp beside a volunteer's number: a round green icon, as the Bookings table's contact cell (2026-11-12) */
+.vx-waic{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;margin-inline-start:6px;vertical-align:middle;border-radius:50%;background:rgba(var(--green-rgb),.1);border:1px solid rgba(var(--green-rgb),.25);color:var(--green);text-decoration:none;transition:background .18s;}
+.vx-waic:hover,.vx-waic:focus-visible{background:rgba(var(--green-rgb),.22);}
 .vx-stars{display:inline-flex;align-items:center;gap:1px;vertical-align:middle;}
 .vx-star{display:inline-flex;color:var(--sf-line2,#d6dad7);}
 .vx-star.on{color:#b07d00;}

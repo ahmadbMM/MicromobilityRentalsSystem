@@ -10285,6 +10285,8 @@ function _vmWa(id,sessId){
   const msg=tpl.replace(/\{name\}/g,c.name||'').replace(/\{session\}/g,s?_evName(s):'').replace(/\{date\}/g,s?shortDate(s.session_date||s.id):'').replace(/\{until\}/g,w?_vmWhen(w.closes_at):'').replace(/\{link\}/g,VOL_PORTAL+(sessId?'/#o/'+encodeURIComponent(sessId):''));
   return`https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
 }
+// WhatsApp beside a volunteer's number is an icon, not the word (the user, 2026-11-12: "in the volunteer staff page let the whatsapp be an icon not hyperlink text")
+function _vmWaIc(u){return u?`<a class="vx-waic" href="${esc(u)}" target="_blank" rel="noopener noreferrer" title="WhatsApp" aria-label="WhatsApp">${_artIcon('whatsapp',14)}</a>`:'';}
 function _vmInterested(){const W=_vm();return(W.shifts||[]).filter(x=>x.status==='interested'&&_vmSwitchOn((W.sess||[]).find(w=>w.session_id===x.session_id)));}
 // Applications (2026-11-09): a profile filled in on the portal (volunteers.profile_at) and staff's yes not given yet. A row read
 // from a database before the rework has no profile_at at all (undefined), and counts as before.
@@ -10386,7 +10388,7 @@ function _vmRosterRow(v){
     {label:esc(t('zvAddHours')),act:()=>_vmHoursOpen(id)},
     {label:esc(t('zvCert')),act:()=>_n6wCertOpen(id)}],nm,nm);
   return`<div class="vm-row vx-row" data-cust="${esc(id)}">
-    <div class="vm-who"><div class="vx-name">${W.sel?`<button type="button" class="am-sel vx-selc" aria-pressed="${on}" aria-label="${esc(t('amSelBtn'))} · ${esc(nm)}" data-on-click="${_on("_vmSelToggle",id)}">${on?'&#10003;':''}</button>`:''}<b>${esc(nm)}</b></div><div class="am-meta"><bdi>${c.phone?_pii('phone',c.phone,id):''}</bdi>${wa?` · <a href="${esc(wa)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:''}</div>${(v.tags||[]).length?`<div class="vx-tags">${v.tags.map(x=>`<span class="vx-chip vm-tag">${esc(x)}</span>`).join('')}</div>`:''}</div>
+    <div class="vm-who"><div class="vx-name">${W.sel?`<button type="button" class="am-sel vx-selc" aria-pressed="${on}" aria-label="${esc(t('amSelBtn'))} · ${esc(nm)}" data-on-click="${_on("_vmSelToggle",id)}">${on?'&#10003;':''}</button>`:''}<b>${esc(nm)}</b></div><div class="am-meta"><bdi>${c.phone?_pii('phone',c.phone,id):''}</bdi>${_vmWaIc(wa)}</div>${(v.tags||[]).length?`<div class="vx-tags">${v.tags.map(x=>`<span class="vx-chip vm-tag">${esc(x)}</span>`).join('')}</div>`:''}</div>
     <div class="vm-st">${_vmStatusChip(v.status)}${v.status==='removed'&&v.decline_reason?`<span class="am-meta vx-why">${esc(_vxDr(v.decline_reason))}</span>`:''}${v.auto_accept?`<span class="vx-chip vx-c-yes">${esc(t('zpTrusted'))}</span>`:''}${v.status==='active'&&!_vmAgreed(v)?`<span class="vx-chip vx-c-no">${esc(t('zvNoAgreement'))}</span>`:''}${exp?`<span class="vx-chip vx-c-no">${esc(t('zvExpired'))}</span>`:''}</div>
     <div class="vm-prof">${prof?`<div>${prof}</div>`:''}${v.skills?`<div class="am-meta"><bdi>${esc(v.skills)}</bdi></div>`:''}${_vxMot(v)?`<div class="am-meta vx-mot">${esc(_vxMot(v))}</div>`:''}</div>
     <div class="vm-num"><b>${n}</b> ${esc(t('zpEventsUnit'))}${last?`<div class="am-meta">${esc(t('zpLast').replace('{0}',shortDate(last)))}</div>`:''}${_n6vRelHtml(v)}</div>
@@ -10545,7 +10547,7 @@ function _vmOpen(id){
   const sh=_vmShiftsOf(id).slice().sort((a,b)=>String(_vmSess(b.session_id)?.session_date||'').localeCompare(String(_vmSess(a.session_id)?.session_date||''))),wa=_vmWa(id);
   const shirt=['','XS','S','M','L','XL','XXL'].map(x=>`<option value="${x}"${(v.shirt||'')===x?' selected':''}>${x||'—'}</option>`).join('');
   const st=['active','paused','removed','applied'].map(x=>`<option value="${x}"${v.status===x?' selected':''}>${esc(_vmStatusLabel(x))}</option>`).join('');
-  _vmDlg(c.name||String(id),`<div class="am-meta"><bdi>${esc(c.phone||'')}</bdi>${c.email?` · <bdi>${esc(c.email)}</bdi>`:''}${wa?` · <a href="${esc(wa)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:''}</div>
+  _vmDlg(c.name||String(id),`<div class="am-meta"><bdi>${esc(c.phone||'')}</bdi>${c.email?` · <bdi>${esc(c.email)}</bdi>`:''}${_vmWaIc(wa)}</div>
     <div class="vx-chips vm-mb">${_vmStatusChip(v.status)}${v.auto_accept?`<span class="vx-chip vx-c-yes">${esc(t('zpTrusted'))}</span>`:''}${ms.top?`<span class="vx-lvl">${_artIcon('medal',12)} ${esc(t('zvMilestone').replace('{0}',String(ms.top)))}</span>`:''}</div>
     ${_vxMot(v)?`<p class="am-meta vm-mb vx-mot">${esc(t('zvMotive'))}: ${esc(_vxMot(v))}</p>`:''}${v.status==='removed'&&v.decline_reason?`<p class="am-meta vm-mb vx-why">${esc(t('zvDrWas').replace('{0}',_vxDr(v.decline_reason)))}</p>`:''}
     <div class="vm-form">
@@ -11197,7 +11199,7 @@ function _vdPendRow(sid,w,x){
   const facts=[x.pref_role?`${esc(t('zvPrefRole'))}: ${esc(x.pref_role)}`:'',v&&Array.isArray(v.days)&&v.days.length?esc(v.days.map(_n6wDay).join(' ')):'',v&&v.skills?`<bdi>${esc(v.skills)}</bdi>`:''].filter(Boolean);
   const b=(cls,fn,lbl)=>`<button type="button" class="btn-sm ${cls}" aria-label="${esc(lbl+' · '+nm)}" data-on-click="${_on(fn,sid,id)}">${esc(lbl)}</button>`;
   return`<div class="vd-row vd-asked" data-cust="${esc(id)}">
-    <div class="vd-who"><div class="vx-name">${D.sel?_vdSelBtn(id,nm,on):''}<b>${esc(nm)}</b></div>${C.phone&&c.phone?`<div class="am-meta"><bdi>${_pii('phone',c.phone,id)}</bdi>${wa?` · <a href="${esc(wa)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:''}</div>`:''}${facts.length?`<div class="am-meta">${facts.join(' · ')}</div>`:''}${x.message?`<div class="vx-msg"><bdi>${esc(x.message)}</bdi></div>`:''}</div>
+    <div class="vd-who"><div class="vx-name">${D.sel?_vdSelBtn(id,nm,on):''}<b>${esc(nm)}</b></div>${C.phone&&c.phone?`<div class="am-meta"><bdi>${_pii('phone',c.phone,id)}</bdi>${_vmWaIc(wa)}</div>`:''}${facts.length?`<div class="am-meta">${facts.join(' · ')}</div>`:''}${x.message?`<div class="vx-msg"><bdi>${esc(x.message)}</bdi></div>`:''}</div>
     <div class="vd-st"><span class="vx-pill vx-p-asked">${esc(t('zdFigAsked'))}</span>${_n6wChips(sid,w,x,v)}</div>
     <div class="vd-times am-meta">${esc(t('zdAskedOn').replace('{0}',_bdgDay(x.created_at)))}<div>${_vxWaitHtml(x.created_at)}</div></div>
     <div class="vd-hrs"></div>
@@ -11227,7 +11229,7 @@ function _vdRowHtml(sid,w,x){
   const times=C.times?`${x.clock_in?`<div>${esc(t('zdInAt').replace('{0}',_vmHm(x.clock_in)))}${by(x.clock_in_by)}</div>`:''}${x.clock_out?`<div>${esc(t('zdOutAt').replace('{0}',_vmHm(x.clock_out)))}${by(x.clock_out_by)}</div>`:''}${_vxLeaveHtml(x)}`:'';
   const hrs=C.hours?`${given?`<div><b>${esc(_vmH(given))}</b> <span class="am-meta">${esc(t('zdGiven'))}</span></div>`:''}${sug&&!done?`<div class="am-meta">${esc(t(st==='in'?'zdSoFar':'zdToGive').replace('{0}',sug))}</div>`:''}`:'';
   return`<div class="vd-row vd-${st}${x.status==='no_show'?' vd-ns':''}" data-cust="${esc(id)}">
-    <div class="vd-who"><div class="vx-name">${D.sel?_vdSelBtn(id,nm,on):''}<b>${esc(nm)}</b>${x.lead?`<span class="vx-lead" title="${esc(t('zdLead'))}">${_vxLeadIc(13)} ${esc(t('zdLead'))}</span>`:''}</div>${C.phone&&c.phone?`<div class="am-meta"><bdi>${_pii('phone',c.phone,id)}</bdi>${wa?` · <a href="${esc(wa)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:''}</div>`:''}${C.tags&&v&&(v.tags||[]).length?`<div class="vx-tags">${v.tags.map(g=>`<span class="vx-chip vm-tag">${esc(g)}</span>`).join('')}</div>`:''}${C.note&&x.note?`<div class="am-meta"><bdi>${esc(x.note)}</bdi></div>`:''}</div>
+    <div class="vd-who"><div class="vx-name">${D.sel?_vdSelBtn(id,nm,on):''}<b>${esc(nm)}</b>${x.lead?`<span class="vx-lead" title="${esc(t('zdLead'))}">${_vxLeadIc(13)} ${esc(t('zdLead'))}</span>`:''}</div>${C.phone&&c.phone?`<div class="am-meta"><bdi>${_pii('phone',c.phone,id)}</bdi>${_vmWaIc(wa)}</div>`:''}${C.tags&&v&&(v.tags||[]).length?`<div class="vx-tags">${v.tags.map(g=>`<span class="vx-chip vm-tag">${esc(g)}</span>`).join('')}</div>`:''}${C.note&&x.note?`<div class="am-meta"><bdi>${esc(x.note)}</bdi></div>`:''}</div>
     <div class="vd-st"><span class="vx-pill vx-p-${x.status==='no_show'?'ns':st}">${esc(_vdStateLabel(x))}</span>${C.role&&x.role?`<span class="vx-role">${esc(x.role)}</span>`:''}${C.role&&!x.role&&x.pref_role?`<span class="am-meta">${esc(t('zvPrefRole'))}: ${esc(x.pref_role)}</span>`:''}${_vxWhyHtml(x)}${_n6wChips(sid,w,x,v)}</div>
     <div class="vd-times am-meta">${times}</div>
     <div class="vd-hrs">${hrs}${_n6vRwChips(sid,id)}${_n6vReachedHtml(id)}</div>
@@ -11365,7 +11367,7 @@ function _vdManage(sid,cid){
   const role=roles.length?`<select id="vd-role" aria-label="${esc(t('zvRole'))}"><option value="">${esc(t('zdNoRole'))}</option>${[...new Set([...roles,...(x.role?[x.role]:[])])].map(r=>`<option value="${esc(r)}"${x.role===r?' selected':''}>${esc(r)}</option>`).join('')}</select>`:`<input id="vd-role" type="text" maxlength="40" aria-label="${esc(t('zvRole'))}" value="${esc(x.role||'')}">`;
   const b=(cls,fn,lbl)=>`<button type="button" class="${cls}" data-on-click="${_on(fn,sid,cid)}">${esc(lbl)}</button>`;
   const by=k=>k==='lead'?` · ${esc(t('zdByLead'))}`:'';
-  _vmDlg(`${c.name||cid} · ${_vmSessLabel(sid)}`,`<div class="am-meta"><bdi>${esc(c.phone||'')}</bdi>${c.email?` · <bdi>${esc(c.email)}</bdi>`:''}${wa?` · <a href="${esc(wa)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:''}</div>
+  _vmDlg(`${c.name||cid} · ${_vmSessLabel(sid)}`,`<div class="am-meta"><bdi>${esc(c.phone||'')}</bdi>${c.email?` · <bdi>${esc(c.email)}</bdi>`:''}${_vmWaIc(wa)}</div>
     <div class="vx-chips vm-mb"><span class="vx-pill vx-p-${x.status==='no_show'?'ns':st}">${esc(_vdStateLabel(x))}</span>${x.lead?`<span class="vx-lead">${_vxLeadIc(13)} ${esc(t('zdLead'))}</span>`:''}${x.clock_in?`<span class="am-meta">${esc(t('zdInAt').replace('{0}',_vmHm(x.clock_in)))}${by(x.clock_in_by)}${x.clock_out?` · ${esc(t('zdOutAt').replace('{0}',_vmHm(x.clock_out)))}${by(x.clock_out_by)}`:''}</span>`:''}</div>
     ${x.message||x.pref_role?`<p class="am-meta">${x.pref_role?`${esc(t('zvPrefRole'))}: ${esc(x.pref_role)}`:''}${x.message?` <bdi>${esc(x.message)}</bdi>`:''}</p>`:''}
     <div class="vm-form">
@@ -12036,7 +12038,7 @@ function _vaRow(v){
   const f=(k,val)=>`<div class="vx-fact"><span class="vx-fact-k">${esc(t(k))}</span><span class="vx-fact-v">${val}</span></div>`;
   const b=(cls,st,trust,lbl)=>`<button type="button" class="btn-sm ${cls}" aria-label="${esc(lbl+' · '+nm)}" data-on-click="${_on("_vaDecide",id,st,trust)}">${esc(lbl)}</button>`;
   return`<div class="vx-app${_vaHasProfile(v)?'':' vx-app-later'}" data-cust="${esc(id)}">
-    <div class="vx-app-who"><div class="vx-name">${W.asel?`<button type="button" class="am-sel vx-selc" aria-pressed="${on}" aria-label="${esc(t('amSelBtn'))} · ${esc(nm)}" data-on-click="${_on("_vaSelToggle",id)}">${on?'&#10003;':''}</button>`:''}<b>${esc(nm)}</b></div><div class="am-meta"><bdi>${c.phone?_pii('phone',c.phone,id):''}</bdi>${wa?` · <a href="${esc(wa)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:''}</div><div class="am-meta">${esc(t('zaAppliedOn').replace('{0}',_bdgDay(v.profile_at||v.applied_at||v.created_at)))}</div><div>${_vxWaitHtml(v.profile_at||v.applied_at||v.created_at)}</div></div>
+    <div class="vx-app-who"><div class="vx-name">${W.asel?`<button type="button" class="am-sel vx-selc" aria-pressed="${on}" aria-label="${esc(t('amSelBtn'))} · ${esc(nm)}" data-on-click="${_on("_vaSelToggle",id)}">${on?'&#10003;':''}</button>`:''}<b>${esc(nm)}</b></div><div class="am-meta"><bdi>${c.phone?_pii('phone',c.phone,id):''}</bdi>${_vmWaIc(wa)}</div><div class="am-meta">${esc(t('zaAppliedOn').replace('{0}',_bdgDay(v.profile_at||v.applied_at||v.created_at)))}</div><div>${_vxWaitHtml(v.profile_at||v.applied_at||v.created_at)}</div></div>
     <div class="vx-facts">${f('zaAge',age!=null?esc(String(age)):'–')}${f('zwDays',Array.isArray(v.days)&&v.days.length?esc(v.days.map(_n6wDay).join(' ')):'–')}${f('zvShirt',esc(v.shirt||'–'))}${f('zaRides',esc(String(rides)))}${f('zaNoShows',esc(String(ns)))}${v.skills?f('zwSkills',`<bdi>${esc(v.skills)}</bdi>`):''}${_vxMot(v)?f('zvMotive',esc(_vxMot(v))):''}</div>
     <div class="vx-app-acts">${b('btn-green','active',false,t('zaApprove'))}${b('btn-secondary','active',true,t('zaTrust'))}${b('btn-muted','removed',false,t('zvDecline'))}</div>
   </div>`;
