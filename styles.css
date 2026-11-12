@@ -10976,6 +10976,8 @@ body.kiosk-on{overflow:hidden;}
 .kiosk-badge{background:rgba(var(--green-rgb),.14);color:var(--sf-green-ink);}
 /* A Petromin invitee's walk-in (micromobility.sa/petromin-invite, 2026-11-12): "Invitee I-001", blue so it reads apart from the kiosk's green */
 .inv-badge{background:rgba(var(--blue-rgb),.14);color:rgb(var(--blue-rgb));white-space:nowrap;}
+/* the company a guest typed at micromobility.sa/petromin, after their I- number: a long one is cut, its title says it whole */
+.inv-co{display:inline-block;max-width:14em;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;}
 #tab-settings .set-kiosk{margin-top:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
 /* ── Deposits (2026-10-09): the check-in's deposit block, the return's, and the settle dialog ── */
 .ci-dep .ci-dep-ref,.ret-dep-keep input{width:100%;box-sizing:border-box;min-height:44px;margin-top:8px;}

@@ -87,6 +87,7 @@ with expected(fname, want_definer, note) as (values
   ('petromin_invite_book', true, 'Petromin invitees: anon, books a walk-in onto a members-only night (20261112234500)'),
   ('petromin_invite_lookup', true, 'Petromin invitees: anon, reads queue_entries no client can read; meters misses (20261112234500)'),
   ('petromin_invite_cancel', true, 'Petromin invitees: anon, cancels its own booking proved by the phone (20261112234500)'),
+  ('petromin_guest_book', true, 'Petromin guests: anon with the account''s token, books through customer_create_booking onto a members-only night and writes the I- number and company (20261113150000)'),
   ('_invite_next', true, 'Petromin invitees: writes rider_night_counters; no client execute (20261112234500)'),
   ('_invite_no_guard', true, 'Petromin invitees: trigger, numbers a booking moved to another night; no client execute (20261112234500)'),
   ('_promo_count',           true,  'writes promo_codes.uses'),

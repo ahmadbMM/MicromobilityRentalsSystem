@@ -511,6 +511,39 @@ account), the invitee pays the standard fare at the desk, micromobility.sa/petro
   Invitees; "All Petromin nights" (`_pmAllNights`) is the unified list of every night, company and invitee. Invitees
   are never on the billing report (they pay). `tests/petromin-invitees.spec.ts`.
 
+## One Petromin page (2026-11-13, migrations 20261113150000 and 20261113150100)
+
+The user: "merge the petromin page with dukan page all under /petromin make the first step to select the company and
+for dukan ask them for their height and bike type too". Their answers: micromobility.sa/dukan and
+micromobility.sa/petromin-invite are turned off (not found, no redirect); Dukan's look after Dukan is picked; Dukan
+picks Hybrid or Mountain and gives a height; a guest is a fourth choice ("Guest/Other") who makes a MicroMobility
+account on the page "and go through the whole process", books through the page each time (no tag, never from the app),
+keeps the I- number and the Invitee mark, and types the company they are from.
+- **The page** is mm-platform `forms/petromin` alone (`forms/dukan` and `forms/petromin-invite` are gone). Step 1 is
+  the company (Petromin, Petrolube, Dukan, Guest/Other); each pick then walks its own steps. Petromin, Petrolube and
+  Dukan send `rider_register` / `rider_edit` as before (Dukan with a height and a bike now: nothing changed in the
+  database for it). A guest signs in or creates an account there (`customer_login`, `customer_signup`,
+  `customer_consents`, `customer_set_emergency`, what `customer_fix_fields` says the account owes), types the company,
+  and books with **`petromin_guest_book(p_id, p_token, p_session_id, p_type, p_company, p_waiver, p_from_no,
+  p_from_session)`**.
+- **A guest's booking** is an ordinary customer booking: the RPC calls `customer_create_booking` under `mm.invite`
+  (which is what lets a non-member onto the members-only night), then writes `invite_no` (I-001… as before),
+  `invite_company` (the company typed, 2 to 120 characters) and `via` 'invite' on the row, and the company on
+  `customers.workplace`. So `customer_id` is set, `walk_in` is false, it is in the account's bookings in the app, and
+  every rule of a rider's own booking holds (`FIX_FIRST` comes back as `{error:'fix', fields}`; the nationality is
+  owed from the second booking on). One guest booking an account a night (again = update); `booked` when the account
+  already rides that night on a booking of its own; Edit by `p_from_no`/`p_from_session` (the account's own booking
+  only). Find and Cancel are still `petromin_invite_lookup` (it now says `company` and `account`) and
+  `petromin_invite_cancel`, by the number and the mobile. The no-account bookings the old page made stay as they are;
+  `petromin_invite_book` is closed to every client by 20261113150100, run once the merged page is live.
+- **Staff**: `inviteCo` on the entry (`invite_company`); the chip reads "Invitee I-001 · Company name" (`.inv-co`, cut at
+  14em, whole in its title); the Petromin page's guest rows say the company under Invitees (`.iv-co`) and the search
+  finds it. **Form steps** reads the merged page: `PFS_FORMS` is petromin (Petromin and Petrolube, steps as before),
+  `pmdukan` (Night, You, Bikes, Check and agree) and `pmguest` (Account, Night, Bikes, Check and agree), and a
+  "Company" section on top counts what step 1 was answered with (form `pmhome`, a 'done' whose field is the pick). The
+  counts of the two pages that were turned off ('dukan', 'pminvite') are no longer shown.
+  `tests/petromin-form-steps.spec.ts`, `tests/petromin-invitees.spec.ts`, `tests/petromin-guest-account.spec.ts`.
+
 ## Badges staff give (2026-09-29)
 
 Migration 20260929000000: `badges` (the catalogue) and `customer_badges` (who holds which, with a note

@@ -1,11 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// Petromin invitees (the user, 2026-11-12): people Petromin invites book a Petromin night themselves at
-// micromobility.sa/petromin-invite (petromin_invite_book, migration 20261112234500). Each is a walk-in booking on the
-// night's Bookings list with a number of its own, I-001 upward every night, and pays at the desk. Staff see that
+// Petromin invitees (the user, 2026-11-12): people Petromin invites book a Petromin night themselves. Each booking is
+// on the night's Bookings list with a number of its own, I-001 upward every night, and pays at the desk. Staff see that
 // number on the booking ("Invitee I-001"), find it by typing it, and see the invitees beside the Petromin, Petrolube
 // and Dukan registrations on the Petromin page, whose "All Petromin nights" is the one list of every night.
+// Since 2026-11-13 a guest books at micromobility.sa/petromin with a MicroMobility account and types their company
+// (petromin_guest_book, migration 20261113150000): the booking is the account's and carries the company, which staff
+// read after the number and on the guest list. A booking from the page before (a walk-in, no account) has none.
 
 const N1 = '2099-02-08-pw', N2 = '2099-02-10-pw';
 const night = (id: string, date: string, day: string) => ({
@@ -23,7 +25,8 @@ const queue_entries = [
   entry({ id: 'invaaaaaaaaaaa1', queue_num: 4, name: 'Hala Invited', phone: '+966500000011', invite_no: 'I-001' }),
   entry({ id: 'invaaaaaaaaaaa2', queue_num: 5, name: 'Omar Guest', phone: '+966500000012', invite_no: 'I-002', status: 'active', type_preference: 'Mountain', checked_in_at: '2099-02-08T16:10:00Z' }),
   entry({ id: 'invaaaaaaaaaaa3', queue_num: 6, name: 'Gone Guest', phone: '+966500000013', invite_no: 'I-003', status: 'cancelled' }),
-  entry({ id: 'invbbbbbbbbbbb1', queue_num: 2, name: 'Rana Later', phone: '+966500000014', invite_no: 'I-001', session_id: N2, session_date: '2099-02-10', session_day: 'Tuesday' }),
+  entry({ id: 'invbbbbbbbbbbb1', queue_num: 2, name: 'Rana Later', phone: '+966500000014', invite_no: 'I-001', session_id: N2, session_date: '2099-02-10', session_day: 'Tuesday',
+    customer_id: 'cust-rana', walk_in: false, invite_company: 'Aramco Trading' }),
   entry({ id: 'wlkcccccccccccc', queue_num: 7, name: 'Plain Walkin', phone: '+966500000015', via: null }),
   // Amal's own app booking: her registration stands for it (matched_entry_id), so it is not a second row
   entry({ id: 'mtcdddddddddddd', queue_num: 8, name: 'Amal Employee', phone: '+966500000001', via: null, walk_in: false }),
@@ -57,6 +60,11 @@ test.describe('@staff:bookings Petromin invitees', () => {
     // the number, typed, leaves that booking alone (as i1 too)
     await page.evaluate(`setSfSearch('I-001')`);
     await expect.poll(() => page.evaluate(`[...document.querySelectorAll('#tab-queue [data-id]')].map(x=>x.dataset.id).filter((v,i,a)=>a.indexOf(v)===i)`)).toEqual(['invaaaaaaaaaaa1']);
+    // a guest with an account (the merged page): the chip says the company after the number, whole in its title
+    await page.evaluate(`(()=>{setSfSearch('');setSfSession(${JSON.stringify(N2)});})()`);
+    const rana = page.locator('#tab-queue [data-id="invbbbbbbbbbbb1"] .inv-badge').first();
+    await expect(rana).toHaveText('Invitee I-001 · Aramco Trading');
+    await expect(rana).toHaveAttribute('title', 'Invitees · Aramco Trading');
     expect(await page.evaluate(`[_matchesRef(_qGet('invaaaaaaaaaaa1'),'i1'),_matchesRef(_qGet('invbbbbbbbbbbb1'),'i-001'),_matchesRef(_qGet('invaaaaaaaaaaa2'),'i-001'),_matchesRef(_qGet('wlkcccccccccccc'),'i-001')]`)).toEqual([true, true, false, false]);
     expect(errs).toEqual([]);
   });
@@ -90,11 +98,15 @@ test.describe('@staff:bookings Petromin invitees', () => {
     await expect(page.locator('#pm-host tr.inv-row')).toHaveCount(3);
     await expect(page.locator('#pm-host h1')).toContainText('Invitees');
 
-    // the search finds an invitee by name
+    // the search finds an invitee by name, and by the company they typed, which their row says under Invitees
     await page.evaluate(`setRidersSearch('rana')`);
     await expect(rows).toHaveCount(1);
     await expect(rows.first()).toContainText('Rana Later');
+    await page.evaluate(`setRidersSearch('aramco')`);
+    await expect(rows).toHaveCount(1);
+    await expect(rows.first().locator('.iv-co')).toHaveText('Aramco Trading');
     await page.evaluate(`setRidersSearch('')`);
+    await expect(page.locator('#pm-host tr.inv-row[data-id="invaaaaaaaaaaa1"] .iv-co')).toHaveCount(0);
 
     // Check in opens the booking's own check-in
     await page.locator('#pm-host tr.inv-row[data-id="invaaaaaaaaaaa1"] button', { hasText: 'Check in' }).click();

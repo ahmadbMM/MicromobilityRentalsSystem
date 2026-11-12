@@ -3208,7 +3208,7 @@
   "settingsLanguage": "भाषा",
   "proteinWord": "प्रोटीन {0}",
   "ridersTitle": "राइडर पंजीकरण",
-  "ridersSub": "micromobility.sa/petromin / micromobility.sa/dukan पर पंजीकृत सवार: उनका सत्र, कंपनी और बुकिंग नंबर।",
+  "ridersSub": "micromobility.sa/petromin पर पंजीकृत सवार: उनका सत्र, कंपनी और बुकिंग नंबर।",
   "ridersEmpty": "अभी कोई पंजीकरण नहीं",
   "ridersRefresh": "रीफ़्रेश",
   "ridersScan": "QR स्कैन करें",

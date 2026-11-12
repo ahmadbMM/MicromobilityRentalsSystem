@@ -17,10 +17,13 @@ const form_step_counts = [
   row(2, 'error', 5, 'phone'), row(2, 'error', 4, 'phone', 'ar'), row(2, 'error', 3, 'badge'), row(4, 'error', 2, 'waiver'),
   row(4, 'fail', 2, 'duplicate'), row(1, 'found', 5), row(1, 'cancel', 1),
 ];
+// The page's first step since 2026-11-13: the company picked ('pmhome', a 'done' names the pick).
+const pick = (field: string, n: number, event = 'done') => ({ day: '2099-02-07', form: 'pmhome', step: 1, event, field, lang: 'en', n });
+const picks = [pick('', 120, 'view'), pick('petromin', 50), pick('petrolube', 20), pick('dukan', 20), pick('guest', 10), pick('company', 3, 'error')];
 
 test.describe('@staff:bookings Petromin form steps', () => {
   test('beside the Billing report: the funnel, the fields, the refusals and the languages, for the period picked', async ({ page }) => {
-    await stubSupabase(page, { sessions, queue_entries: [], rider_registrations: [], form_step_counts });
+    await stubSupabase(page, { sessions, queue_entries: [], rider_registrations: [], form_step_counts: [...form_step_counts, ...picks] });
     const asked: string[] = [];
     page.on('request', (r) => { if (r.url().includes('/rest/v1/form_step_counts')) asked.push(decodeURIComponent(r.url())); });
     await unlockStaff(page);
@@ -37,9 +40,15 @@ test.describe('@staff:bookings Petromin form steps', () => {
     await expect(dlg.locator('select')).toHaveValue('30');
     const since = await page.evaluate(`_ksaYmd(Date.now()-29*864e5)`);
     await expect.poll(() => asked.length).toBeGreaterThan(0);
-    expect(asked[0]).toContain('form=eq.petromin');
+    expect(asked[0]).toContain('form=in.(petromin,pmhome)');
     expect(asked[0]).toContain(`day=gte.${since}`);
     const bar = (label: string) => dlg.locator('.analytics-bar-row', { hasText: label }).locator('.analytics-bar-value');
+    // the company each visitor picked on the page's first step, every company together, above the picked form's steps
+    const picked = (alt: string) => dlg.locator('.analytics-bar-row', { has: page.locator(`img[alt="${alt}"]`) }).locator('.analytics-bar-value');
+    await expect(picked('Petromin')).toHaveText('50 · 50%');
+    await expect(picked('Petrolube')).toHaveText('20 · 20%');
+    await expect(picked('Dukan')).toHaveText('20 · 20%');
+    await expect(bar('Invitees')).toHaveText('10 · 10%');
     await expect(bar('1. Night')).toHaveText('100 · 100%');
     await expect(bar('4. Check and agree')).toHaveText('40 · 40%');
     await expect(bar('Registered')).toHaveText('36 · 36%');
@@ -61,21 +70,31 @@ test.describe('@staff:bookings Petromin form steps', () => {
     const since7 = await page.evaluate(`_ksaYmd(Date.now()-6*864e5)`);
     await expect.poll(() => asked.some((u) => u.includes(`day=gte.${since7}`))).toBe(true);
     await expect(bar('Registered')).toHaveText('36 · 36%');
-    // Dukan's form (micromobility.sa/dukan, 2026-11-12): its own rows and its three steps, no bike step
-    const drow = (step: number, event: string, n: number) => ({ day: '2099-02-07', form: 'dukan', step, event, field: '', lang: 'en', n });
-    await page.route(/\/rest\/v1\/form_step_counts.*form=eq\.dukan/, (r) => r.fulfill({
-      status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
-      body: JSON.stringify([drow(1, 'view', 10), drow(2, 'view', 8), drow(3, 'view', 6), drow(3, 'done', 5)]),
-    }));
-    await expect(dlg.locator('.pfs-form')).toHaveCount(2);
+    // Dukan's steps on the merged page ('pmdukan', 2026-11-13): its own rows, and a bike step like Petromin's
+    const answer = (rows: unknown[]) => ({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(rows) });
+    const drow = (form: string, step: number, event: string, n: number) => ({ day: '2099-02-07', form, step, event, field: '', lang: 'en', n });
+    await page.route(/\/rest\/v1\/form_step_counts.*form=in\.(\(|%28)pmdukan/, (r) => r.fulfill(answer(
+      [drow('pmdukan', 1, 'view', 10), drow('pmdukan', 2, 'view', 8), drow('pmdukan', 3, 'view', 7), drow('pmdukan', 4, 'view', 6), drow('pmdukan', 4, 'done', 5), ...picks])));
+    await page.route(/\/rest\/v1\/form_step_counts.*form=in\.(\(|%28)pmguest/, (r) => r.fulfill(answer(
+      [drow('pmguest', 1, 'view', 20), drow('pmguest', 2, 'view', 12), drow('pmguest', 3, 'view', 11), drow('pmguest', 4, 'view', 10), drow('pmguest', 4, 'done', 9), ...picks])));
+    await expect(dlg.locator('.pfs-form')).toHaveCount(3);
     await expect(dlg.locator('.pfs-form').nth(0)).toHaveAttribute('aria-pressed', 'true');
     await dlg.locator('.pfs-form').nth(1).click();
-    await expect.poll(() => asked.some((u) => u.includes('form=eq.dukan'))).toBe(true);
+    await expect.poll(() => asked.some((u) => u.includes('form=in.(pmdukan,pmhome)'))).toBe(true);
     await expect(dlg.locator('.pfs-form').nth(1)).toHaveAttribute('aria-pressed', 'true');
     await expect(bar('1. Night')).toHaveText('10 · 100%');
-    await expect(bar('3. Check and agree')).toHaveText('6 · 60%');
-    await expect(dlg.locator('.analytics-bar-row', { hasText: '4. ' })).toHaveCount(0);
+    await expect(bar('3. Bikes')).toHaveText('7 · 70%');
+    await expect(bar('4. Check and agree')).toHaveText('6 · 60%');
     await expect(bar('Registered')).toHaveText('5 · 50%');
+    await expect(picked('Dukan')).toHaveText('20 · 20%');
+    // Petromin's guests ('pmguest'): the account comes first, then the night, the bike, Check and agree
+    await expect(dlg.locator('.pfs-form').nth(2)).toHaveText('Invitees');
+    await dlg.locator('.pfs-form').nth(2).click();
+    await expect.poll(() => asked.some((u) => u.includes('form=in.(pmguest,pmhome)'))).toBe(true);
+    await expect(bar('1. Account')).toHaveText('20 · 100%');
+    await expect(bar('2. Night')).toHaveText('12 · 60%');
+    await expect(bar('3. Bikes')).toHaveText('11 · 55%');
+    await expect(bar('Registered')).toHaveText('9 · 45%');
     await page.keyboard.press('Escape');
     await expect(dlg).toHaveCount(0);
   });
