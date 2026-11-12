@@ -6771,6 +6771,8 @@
   "zvNoSessions": "Aún no hay sesiones.",
   "zvVoidedBy": "Cancelado por {0}",
   "zvVoid": "Cancelar",
+  "zvVoidQ": "¿Cancelar estas horas?",
+  "zvVoidQEv": "Si son las últimas horas de ese evento, también se retiran su paseo gratis (si no se ha usado) y su certificado.",
   "zvShInterested": "Interesado",
   "zvShAccepted": "Aceptado",
   "zvShDeclined": "No puede ir",

@@ -6771,6 +6771,8 @@
   "zvNoSessions": "Wala pang session.",
   "zvVoidedBy": "Kinansela ni {0}",
   "zvVoid": "Kanselahin",
+  "zvVoidQ": "Kanselahin ang mga oras na ito?",
+  "zvVoidQEv": "Kung ito ang huling mga oras sa event na iyon, babawiin din ang libreng sakay nito (kung hindi pa nagamit) at ang sertipiko nito.",
   "zvShInterested": "Interesado",
   "zvShAccepted": "Tinanggap",
   "zvShDeclined": "Hindi makakapunta",

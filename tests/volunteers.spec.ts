@@ -99,9 +99,13 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     await page.reload();
     await waitForSb(page);
     await page.locator('#vd-list .vx-pend').getByRole('button', { name: 'Accept all (2)' }).click();
-    await expect.poll(() => sent.length).toBe(3);
-    expect(sent[2]).toMatchObject({ p_session: SID, p_status: 'accepted' });
-    expect((sent[2].p_customers as string[]).sort()).toEqual(['c2', 'c3']);
+    // each on the role they asked for, as one Accept (bug hunt 2026-11-11): one call per role asked
+    await expect.poll(() => sent.length).toBe(4);
+    const all = sent.slice(2);
+    all.forEach((x) => expect(x).toMatchObject({ p_session: SID, p_status: 'accepted' }));
+    expect(all.flatMap((x) => x.p_customers as string[]).sort()).toEqual(['c2', 'c3']);
+    expect(all.find((x) => (x.p_customers as string[]).includes('c2'))).toMatchObject({ p_customers: ['c2'], p_role: 'Guide' });
+    expect(all.find((x) => (x.p_customers as string[]).includes('c3'))!.p_role).toBeUndefined();
   });
 
   test('a refused accept is said, and someone left out is counted', async ({ page }) => {

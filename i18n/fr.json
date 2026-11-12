@@ -6771,6 +6771,8 @@
   "zvNoSessions": "Aucune session pour l'instant.",
   "zvVoidedBy": "Annulé par {0}",
   "zvVoid": "Annuler",
+  "zvVoidQ": "Annuler ces heures ?",
+  "zvVoidQEv": "Si ce sont les dernières heures de cet événement, sa sortie gratuite (si elle n’a pas été utilisée) et son certificat sont aussi repris.",
   "zvShInterested": "Intéressé",
   "zvShAccepted": "Accepté",
   "zvShDeclined": "Ne peut pas venir",

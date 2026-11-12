@@ -519,7 +519,7 @@ export const STAFF_PARTS = {
   catalog: ['renderCatalog', '_catUploadImage', '_catStorageRemove', '_catUploadToast'], inventory: ['renderInventory', '_invMove', '_invSetCount'], website: ['renderWebsite', '_webLoad', '_webRestore'], history: ['renderHistory'],
   wallet: ['_cwOpen', '_cwDeskPay', '_cwDeskRefund'], // 2026-11-02: an account's wallet, and the desk paying from it or refunding into it
   workshop: ['renderWorkshop'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
-  volunteers: ['renderVolunteers', '_vsfMount', '_vsfSave', '_cfVolMount'], // 2026-11-05: the section, the switch in the session form, the hours in the account editor
+  volunteers: ['renderVolunteers', '_vsfMount', '_vsfSave', '_vsfCheck', '_cfVolMount'], // 2026-11-05: the section, the switch in the session form, the hours in the account editor; 2026-11-11: the switch's check before a session form writes
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
   sessions: ['renderSessions'], // 2026-11-06: the Sessions section (its own since then), admins only; its forms, figures, table and Customize
   // 2026-11-10 (s10, item 10): cashier's _ctBook/_ctBooked, the till's receipt write, which the lockers part's Hand the keys sheet
