@@ -445,6 +445,21 @@ two places: the Community grant dialog shows the warning, and `_caApprove` adds 
 and turns Approve red. Granting the blacklist to a Community member offers to drop the Community
 tag (`S._tg.dropComm`, on by default). Nothing is enforced server-side; it is a staff signal.
 
+## The influencer tag (2026-11-12, migration 20261112235800)
+
+`tags` row `tag_influencer` (slug `influencer`, locked, never auto-granted): staff give it by hand and **only staff
+see it** (`customer_tags` is staff-only and no rider-facing function reads it; never add it to a customer screen or
+the website). The owner's picks: a white megaphone on magenta `#c2255c` (`_INF_SVG`, `TAG_BRANDS.influencer` with
+`svg:'inf'`, which `_tagLogo` maps to the megaphone); the mark after the holder's name wherever the special needs
+mark goes, on screen and on the printed sheets (`_infChip`, `.inf-mk` in styles.css and report.css); a magenta band
+down the start edge of the Bookings row, phone card and hand-over row (`_infRow`, class `inf-row`: inside a
+member's green band, outside a partner's rose stripe, under a BD- booking's red), with the name in magenta unless
+green or red already dresses it; the Influencer filter on Bookings (`sfInf`) and People (`amInf`); the account
+report's `infl` column and section (`_accSnParts`/`_accSnHtml`/`_accSnCsv` take a holder test and a label key) and
+the session sheets' tile (`_infTile`). Nothing else: no price, booking or bell change. `_infOn()` is false while
+the tag is missing or hidden on the Tags page, which takes every mark, band, filter and count off.
+tests/influencer-tag.spec.ts.
+
 ## The Petromin tag and Petromin Days (2026-10-12)
 
 The owner: "add a new petromin tag that gives its holders access only to petromin sessions through a new event

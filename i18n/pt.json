@@ -6387,6 +6387,7 @@
   "vtRcptNone": "Nenhum comprovativo encontrado.",
   "vtRcptGone": "Esta reserva já não está ativa: o seu comprovativo não pode ser confirmado.",
   "snLabel": "Necessidades especiais",
+  "infLabel": "Influenciador",
   "snShareAll": "das contas listadas",
   "snAmongComm": "Membros da comunidade: {0} de {1}",
   "snAmongCust": "Outros clientes: {0} de {1}",
