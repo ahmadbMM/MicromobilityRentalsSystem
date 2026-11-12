@@ -3371,6 +3371,7 @@
   "caHasAccount": "A déjà un compte : {0}",
   "caMadeNew": "Nouveau compte créé",
   "caUsedExisting": "Tag ajouté à son compte existant",
+  "caOutside": "Déjà approuvé en dehors des candidatures",
   "caApproveBtn": "Approuver",
   "caRejectBtn": "Refuser",
   "caReopenBtn": "Remettre en attente",

@@ -3371,6 +3371,7 @@
   "caHasAccount": "May account na: {0}",
   "caMadeNew": "Nagawa ang bagong account",
   "caUsedExisting": "Nilagyan ng tag ang dati nilang account",
+  "caOutside": "Naaprubahan na sa labas ng mga aplikasyon",
   "caApproveBtn": "Aprubahan",
   "caRejectBtn": "Tanggihan",
   "caReopenBtn": "Ibalik sa nakabinbin",

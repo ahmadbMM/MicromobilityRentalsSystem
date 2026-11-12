@@ -3371,6 +3371,7 @@
   "caHasAccount": "Já tem uma conta: {0}",
   "caMadeNew": "Nova conta criada",
   "caUsedExisting": "Etiqueta adicionada à conta existente",
+  "caOutside": "Já aprovado fora das candidaturas",
   "caApproveBtn": "Aprovar",
   "caRejectBtn": "Recusar",
   "caReopenBtn": "Voltar para pendentes",

@@ -3371,6 +3371,7 @@
   "caHasAccount": "पहले से खाता है: {0}",
   "caMadeNew": "नया खाता बनाया गया",
   "caUsedExisting": "उनके मौजूदा खाते को टैग किया",
+  "caOutside": "आवेदनों के बाहर पहले ही स्वीकृत",
   "caApproveBtn": "अनुमोदित करें",
   "caRejectBtn": "अस्वीकार करें",
   "caReopenBtn": "वापस लंबित में",
