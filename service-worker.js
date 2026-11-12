@@ -298,12 +298,19 @@ self.addEventListener('fetch', (e) => {
 // phone happened to be awake. This is the other end of that: the rider's own device gets
 // told, whether or not the site is open.
 //
-// The payload is JSON: { title, body, url, tag }. A push that arrives without a decodable
-// payload still shows something rather than nothing — a silent push that shows no
+// The payload is JSON: { title, body, url, tag }, or since 2026-11-13 the Declarative Web Push shape
+// { web_push: 8030, notification: { title, body, navigate, tag, lang, dir } } that functions/api/push-send.js
+// sends every browser (Safari from 18.4 shows that one itself; here it is read as the other). A push that
+// arrives without a decodable payload still shows something rather than nothing — a silent push that shows no
 // notification gets the site's push permission revoked by the browser.
 self.addEventListener('push', (e) => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (_) { /* keep the fallback */ }
+  if (d && d.web_push === 8030 && d.notification && typeof d.notification === 'object') {
+    const n = d.notification;
+    d = { title: n.title, body: n.body, url: n.navigate, tag: n.tag, lang: n.lang, dir: n.dir };
+  }
+  if (!d || typeof d !== 'object') d = {};
   const title = d.title || 'MicroMobility';
   const opts = {
     body: d.body || '',
