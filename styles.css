@@ -9366,12 +9366,15 @@ body:not(.view-staff) #tab-account .acc-id-n{font-size:var(--fs-20);font-weight:
 body:not(.view-staff) #tab-account .acc-id-s{font-size:var(--fs-15);color:var(--ink-2);line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 body:not(.view-staff) #tab-account :is(.acc-id,.acc-row)>.cu-ic:last-child{flex:none;color:var(--ink-3);}
 body:not(.view-staff) #tab-account :is(.acc-split,.acc-tiles,.acc-tile,.acc-row,.acc-grp,.acc-pg)[hidden]{display:none;}
-body:not(.view-staff) #tab-account .acc-tiles{display:flex;gap:12px;margin:0 0 20px;}
+body:not(.view-staff) #tab-account .acc-tiles{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 20px;}
 body:not(.view-staff) #tab-account .acc-tile{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:10px;min-height:88px;padding:14px 16px;border:1px solid transparent;border-radius:var(--r-card);background:var(--card);box-shadow:var(--pl-1);color:var(--ink);font:inherit;text-align:start;cursor:pointer;}
 body:not(.view-staff) #tab-account .acc-tile-k{display:flex;align-items:center;gap:8px;max-width:100%;font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
 body:not(.view-staff) #tab-account .acc-tile-k .cu-ic{flex:none;color:var(--go);}
 body:not(.view-staff) #tab-account .acc-tile-v{max-width:100%;font-size:var(--fs-20);font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 body:not(.view-staff) #tab-account .acc-tile-v:empty{display:none;}
+body:not(.view-staff) #tab-account .acc-tile-inv{flex:1 0 100%;flex-direction:row;align-items:center;min-height:56px;}
+body:not(.view-staff) #tab-account .acc-tile-inv .acc-tile-k{flex:1 1 auto;font-size:var(--fs-15);color:var(--ink);}
+body:not(.view-staff) #tab-account .acc-tile-inv>.cu-ic{flex:none;color:var(--ink-3);}
 body:not(.view-staff) #tab-account .acc-grp+.acc-grp{margin-top:20px;}
 body:not(.view-staff) #tab-account .acc-grp-h{margin:0 0 8px;padding-inline-start:16px;font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
 body:not(.view-staff) #tab-account .acc-list{background:var(--card);border-radius:var(--r-card);box-shadow:var(--pl-1);overflow:hidden;}

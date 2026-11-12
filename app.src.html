@@ -21181,7 +21181,7 @@ function _ttMinePaint(){
 function _invMinePaint(){
   const a=S._ttMine,host=document.getElementById('acc-pg-invite'),c=S.loggedIn||getSession(),old=document.getElementById('inv-mine');
   if(old)old.remove();
-  _accRowsPaint(); // the Invite friends tile shows for a member too
+  _accRowsPaint(); // a member's Saturday invite button under the tiles
   if(!a||!host||!c||a.forId!==c.id)return;
   // The invitation itself lives on the Community tab since 2026-11-11 (M31: "Invite a friend" sits with the club, not the account).
 }
@@ -24330,6 +24330,7 @@ function renderAccount(){
       <div class="acc-tiles" id="acc-tiles" hidden>
         <button type="button" class="acc-tile" id="acc-t-wallet" data-acc-go="wallet" data-on-click="${_on("_accOpen","wallet")}" hidden><span class="acc-tile-k">${_cuIc('wallet',18)}<span>${esc(t('cwTitle'))}</span></span><span class="acc-tile-v" id="acc-tv-wallet"></span></button>
         <button type="button" class="acc-tile" id="acc-t-invite" data-acc-go="invite" data-on-click="${_on("_accOpen","invite")}" hidden><span class="acc-tile-k">${_cuIc('gift',18)}<span>${esc(t('accInviteTile'))}</span></span><span class="acc-tile-v" id="acc-tv-invite"></span></button>
+        <button type="button" class="acc-tile acc-tile-inv" id="acc-t-satinv" data-on-click="${_on("_invShare")}" hidden><span class="acc-tile-k">${_cuIc('bike',18)}<span>${esc(t('invBtn'))}</span></span>${_cuIc('go',16,1)}</button>
       </div>
       <div class="acc-grp"><h2 class="acc-grp-h">${t('profileInfo')}</h2><div class="acc-list">
         ${row('personal','person')}${row('contact','phone')}${row('residence','pin')}${row('emergency','people')}${row('riding','bike')}${row('sport','run')}${row('about','info')}
@@ -24602,12 +24603,15 @@ function _accRowsPaint(){
     {show:!!c.session_token&&!(sp&&sp.id===c.id&&sp.gone),add:!!spv&&spv.competes===null});
   const em=S._em,ev=em&&em.id===c.id&&em.v,has=!!(ev&&ev.name&&ev.phone&&ev.rel);
   put('emergency',ev?(has?`<bdi>${esc(ev.name)}</bdi>`:esc(t('accEmAdd'))):'',{show:!!c.session_token&&!(em&&em.id===c.id&&em.gone),add:!!ev&&!has});
-  // the tiles: the wallet once it has answered, Invite friends while referrals are on or for a community member
+  // the tiles: the wallet once it has answered, Invite friends while referrals are on, and under them a community member's
+  // "Invite a friend to a Saturday social ride" (the user, 2026-11-12: easier to reach than the Community tab; Invite
+  // friends opened an empty page for a member once that invitation left it, 2026-11-11)
   const w=S._cwMine,wOn=!!(w&&w.id===c.id),tw=document.getElementById('acc-t-wallet'),tvw=document.getElementById('acc-tv-wallet');
   if(tw){tw.hidden=!wOn;if(tvw)tvw.innerHTML=wOn?`<bdi>${esc(_sar(w.bal))}</bdi>`:'';}
   const m=S._refMine,refOn=!!(m&&m.id===c.id&&m.on&&m.code),mem=!!(S._ttMine&&S._ttMine.forId===c.id),ti=document.getElementById('acc-t-invite'),tvi=document.getElementById('acc-tv-invite');
-  if(ti){ti.hidden=!(refOn||mem);if(tvi)tvi.innerHTML=refOn?`<bdi dir="ltr">${esc(m.code)}</bdi>`:'';}
-  const tl=document.getElementById('acc-tiles');if(tl)tl.hidden=!wOn&&!(refOn||mem);
+  if(ti){ti.hidden=!refOn;if(tvi)tvi.innerHTML=refOn?`<bdi dir="ltr">${esc(m.code)}</bdi>`:'';}
+  const ts=document.getElementById('acc-t-satinv');if(ts)ts.hidden=!mem;
+  const tl=document.getElementById('acc-tiles');if(tl)tl.hidden=!wOn&&!refOn&&!mem;
   const a=S._ambMine;put('ambassador',a&&a.code?`<bdi dir="ltr">${esc(a.code)}</bdi>`:'',{show:!!(a&&a.ambassador&&a.forId===c.id)});
   const vm=S._accVol,vv=vm&&vm.id===c.id?vm.v:null,hrs=vv?+vv.hours||0:0;
   put('volunteer',hrs?esc(_tn('accVolHrs',Math.round(hrs*100)/100)):'',{show:!!vv&&!!(hrs||vv.status||(vv.promote&&vv.open_count>0))});

@@ -75,6 +75,9 @@ test.describe('@customer:account member titles', () => {
     await page.waitForFunction(`!S._ttMineBusy&&document.querySelector('#tab-account').children.length>0`);
     await expect(page.locator('#tt-mine')).toHaveCount(0);
     await expect(page.locator('#inv-mine')).toHaveCount(0); // nor the invite: it is a member's
+    await page.evaluate(`setCustTab('account')`);
+    await expect(page.locator('#acc-r-personal')).toBeVisible();
+    await expect(page.locator('#acc-t-satinv')).toBeHidden(); // nor the button beside the tiles
   });
 
   test('a database without the function shows no card and no error', async ({ page }) => {
@@ -106,6 +109,23 @@ test.describe('@customer:account friend invite', () => {
     await expect(page.locator('#inv-mine')).toHaveCount(0);
     await page.evaluate(`setCustTab('members')`);
     await expect(invite(page)).toBeVisible();
+  });
+
+  // ... and beside the Account part's tiles too (the user, 2026-11-12: "so its easier to reach").
+  test('a member has the invite button beside the account tiles, and it shares the member\'s link', async ({ page }) => {
+    await rider(page, { 'rpc:member_invite_code': { ok: true, code: 'abcdef0123456789' } });
+    await page.addInitScript(() => { (navigator as unknown as { share: unknown }).share = (d: unknown) => { (window as unknown as { _shared: unknown })._shared = d; return Promise.resolve(); }; });
+    await page.reload();
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('account')`);
+    const btn = page.locator('#acc-tiles #acc-t-satinv');
+    await expect(btn).toBeVisible();
+    await expect(btn).toHaveText('Invite a friend to a Saturday social ride');
+    await expect(page.locator('#acc-tiles')).toBeVisible();
+    await btn.click();
+    await expect.poll(() => page.evaluate('!!window._shared')).toBe(true);
+    expect(await page.evaluate('window._shared.text') as string).toContain('https://micromobility.sa/community/registration?inv=abcdef0123456789&lang=en');
+    await expect(page.locator('#acc-pg-invite')).toBeHidden(); // it shares at once, no page opens
   });
 
   test('the invite shares a message asking the friend to fill in the form, with the member\'s link', async ({ page }) => {

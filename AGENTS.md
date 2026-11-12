@@ -619,7 +619,8 @@ Back on it, and the old `member_directory` check is gone: `hub_feed` answers `er
 - **Order:** next session (booked: Show ticket opens Bookings; else the next community session the rider may book, gender-checked
   with `_sgOk`: Book opens Reserve through `_evOf`), the year card (December and January), Coming up, the member's own challenge,
   staff season challenges, the club goal, the club's numbers, one staff card (Saturday report > the site's first announcement > the
-  tip of the week, `HUB_TIPS`), a volunteer call when `volunteer_sessions` has one open, the invitation (moved here from Account).
+  tip of the week, `HUB_TIPS`), a volunteer call when `volunteer_sessions` has one open, the invitation (moved here from Account;
+  since 2026-11-12 it is also a full-width button under the Account tiles, `#acc-t-satinv`, both calling `_invShare`).
 - **The member's challenge** (`hub_levels`, one row per member per month, made on the month's first read and then kept): first session,
   second session, back this month, or a level from three (`hub_pick_level`). Every kind of session counts; the word is "sessions".
 - **The club goal** (`hub_club_goals`): the members' Saturday rides per Saturday over the two months before x the month's Saturdays
@@ -1043,8 +1044,9 @@ the last row, and menu and page side by side on a wide screen. The website's /ac
 - `renderAccount` draws a sr-only h1, the profile card (`_accIdHtml`: photo, name, tier and rides, or the email before
   a first ride; it opens Personal details), the switch (`_accViewsHtml`, `.acc-views`) and the three parts,
   `#acc-pane-account|stats|badges` (`data-acc-pane`), hiding the unpicked ones.
-- **Account is a menu and its pages.** The menu (`.acc-menu`): the tiles (`#acc-t-wallet`, `#acc-t-invite`, shown once
-  their card has answered), then grouped rows `.acc-row` (`#acc-r-<page>`, value in `#acc-v-<page>`): Your details
+- **Account is a menu and its pages.** The menu (`.acc-menu`): the tiles (`#acc-t-wallet`, `#acc-t-invite` while referrals
+  are on, shown once their card has answered; under them, for a community member, `#acc-t-satinv` "Invite a friend to a
+  Saturday social ride", which shares at once and opens no page), then grouped rows `.acc-row` (`#acc-r-<page>`, value in `#acc-v-<page>`): Your details
   (personal, contact, residence, emergency, riding, sport, about), Activity (ambassador, volunteer, purchases, each
   only for an account that has it), Settings (notifications, Language, Password, Tech support), then Log out and Delete
   my account in red. Every page (`ACC_PAGES`, `section.acc-pg#acc-pg-<page>`, `data-acc-pg`) is drawn and the
