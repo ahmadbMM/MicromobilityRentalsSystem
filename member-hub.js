@@ -7,6 +7,9 @@
 // Everything comes from one read (hub_feed, migration 20261111100000), kept on the phone so the tab paints at once.
 // A file of its own, loaded only on this tab (_hubLoad in app.src.html), with its own words in all ten languages.
 // Hand-written, not generated; the build stamps its address (HUB_V).
+// 2026-11-13 (reports/Community tab reach after launch.md, R3 R9 R10 R13 R20): each open of the tab tells the read where
+// it came from; the next session's card gives its two times, where it meets with one map button, and changes with the
+// time to turn up; the Saturday report is number tiles; a club goal reached names the next Saturday's own target.
 /* global S, sb, esc, _on, getSession, _cssv, shortDate, t, _cuIc, sessionTime, _dayWord, _evName, _evOf, _evKindName, allSessions,
    _isCommunity, _sessPastDay, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
    _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard */
@@ -43,7 +46,19 @@ const HUB_T = {
   numMonth: ['Saturday rides this month', 'رحلات السبت هذا الشهر', 'Sorties du samedi ce mois-ci', 'Salidas de sábado este mes', 'Passeios de sábado este mês', 'اس مہینے ہفتے کی سواریاں', 'इस महीने शनिवार राइड', 'Saturday ride ngayong buwan', 'यो महिना शनिबारे राइड', 'এই মাসে শনিবারের রাইড'],
   numAll: ['Saturday rides since {0}', 'رحلات السبت منذ {0}', 'Sorties du samedi depuis {0}', 'Salidas de sábado desde {0}', 'Passeios de sábado desde {0}', '{0} سے ہفتے کی سواریاں', '{0} से शनिवार राइड', 'Saturday ride mula {0}', '{0} देखि शनिबारे राइड', '{0} থেকে শনিবারের রাইড'],
   report: ['Saturday report', 'تقرير السبت', 'Le samedi en bref', 'Crónica del sábado', 'Resumo de sábado', 'ہفتے کی رپورٹ', 'शनिवार की रिपोर्ट', 'Ulat ng Sabado', 'शनिबारको रिपोर्ट', 'শনিবারের প্রতিবেদন'],
-  riders: ['{0} riders', '{0} راكبًا', '{0} cyclistes', '{0} ciclistas', '{0} ciclistas', '{0} سوار', '{0} राइडर', '{0} rider', '{0} राइडर', '{0} জন রাইডার'],
+  // The Saturday report's tiles, the ride's status chip and the next Saturday's target (2026-11-13, R10 R13 R20).
+  tRiders: ['Riders', 'الراكبون', 'Cyclistes', 'Ciclistas', 'Ciclistas', 'سوار', 'राइडर', 'Rider', 'राइडर', 'রাইডার'],
+  tRides: ['Rides', 'الرحلات', 'Sorties', 'Salidas', 'Passeios', 'سواریاں', 'राइड', 'Ride', 'राइड', 'রাইড'],
+  tFirst: ['First Saturday rides', 'أول رحلة سبت', 'Premières sorties du samedi', 'Primeras salidas de sábado', 'Primeiros passeios de sábado', 'ہفتے کی پہلی سواریاں', 'पहली शनिवार राइड', 'Unang Saturday ride', 'पहिलो शनिबारे राइड', 'প্রথম শনিবারের রাইড'],
+  tLeads: ['Ride leads', 'قادة الرحلة', 'Responsables de sortie', 'Guías de la salida', 'Líderes do passeio', 'رائیڈ لیڈر', 'राइड लीडर', 'Ride leader', 'राइड लिडर', 'রাইড লিডার'],
+  tVols: ['Volunteers', 'المتطوعون', 'Bénévoles', 'Voluntarios', 'Voluntários', 'رضاکار', 'स्वयंसेवक', 'Volunteer', 'स्वयंसेवक', 'স্বেচ্ছাসেবক'],
+  tChange: ['Change from last week', 'التغيّر عن الأسبوع الماضي', 'Par rapport à la semaine dernière', 'Respecto a la semana pasada', 'Face à semana passada', 'پچھلے ہفتے کے مقابلے میں', 'पिछले हफ़्ते से बदलाव', 'Kumpara sa nakaraang linggo', 'गत हप्ताभन्दा फरक', 'গত সপ্তাহের তুলনায়'],
+  tMine: ['Your Saturday rides this month', 'رحلاتك يوم السبت هذا الشهر', 'Vos sorties du samedi ce mois-ci', 'Tus salidas de sábado este mes', 'Os seus passeios de sábado este mês', 'اس مہینے آپ کی ہفتے کی سواریاں', 'इस महीने आपकी शनिवार राइड', 'Ang Saturday ride mo ngayong buwan', 'यो महिना तपाईंका शनिबारे राइड', 'এই মাসে আপনার শনিবারের রাইড'],
+  rsMoved: ['Start moved', 'تغيّر موعد الانطلاق', 'Départ décalé', 'Salida cambiada', 'Partida alterada', 'آغاز کا وقت بدل گیا', 'शुरुआत का समय बदला', 'Inilipat ang simula', 'सुरुवातको समय सारियो', 'শুরুর সময় বদলেছে'],
+  rsShort: ['Shortened', 'تم تقصير المسار', 'Parcours raccourci', 'Recorrido acortado', 'Percurso encurtado', 'راستہ مختصر', 'रास्ता छोटा किया गया', 'Pinaikli', 'बाटो छोटो गरियो', 'পথ ছোট করা হয়েছে'],
+  rsCancel: ['Cancelled', 'ملغاة', 'Annulée', 'Cancelada', 'Cancelada', 'منسوخ', 'रद्द', 'Kanselado', 'रद्द', 'বাতিল'],
+  nextSat: ['Next Saturday', 'السبت القادم', 'Samedi prochain', 'Próximo sábado', 'Próximo sábado', 'اگلا ہفتہ', 'अगला शनिवार', 'Susunod na Sabado', 'अर्को शनिबार', 'পরের শনিবার'],
+  nextTarget: ['Target', 'الهدف', 'Objectif', 'Meta', 'Objetivo', 'ہدف', 'लक्ष्य', 'Target', 'लक्ष्य', 'লক্ষ্য'],
   news: ['News', 'أخبار', 'Actualités', 'Novedades', 'Novidades', 'خبریں', 'समाचार', 'Balita', 'समाचार', 'খবর'],
   tip: ['Tip of the week', 'نصيحة الأسبوع', 'Conseil de la semaine', 'Consejo de la semana', 'Dica da semana', 'ہفتے کا مشورہ', 'हफ़्ते की सलाह', 'Tip ng linggo', 'हप्ताको सुझाव', 'সপ্তাহের পরামর্শ'],
   vol: ['Volunteers needed', 'نحتاج متطوعين', 'Bénévoles recherchés', 'Se buscan voluntarios', 'Procuram-se voluntários', 'رضاکاروں کی ضرورت ہے', 'स्वयंसेवकों की ज़रूरत है', 'Kailangan ng mga volunteer', 'स्वयंसेवक चाहिएको छ', 'স্বেচ্ছাসেবক প্রয়োজন'],
@@ -102,19 +117,42 @@ function _hMonth(ym, withYear) { // "2026-10" -> "October" (or "October 2026") i
 const _HUB_KEY = 'cq_hub_';
 function _hubDisk(c) { try { const x = JSON.parse(localStorage.getItem(_HUB_KEY + c.id) || 'null'); return x && x.d && x.d.ok ? x : null; } catch (_) { return null; } }
 function _hubSave(c, d) { try { localStorage.setItem(_HUB_KEY + c.id, JSON.stringify({ at: Date.now(), d: { ...d, awarded: [] } })); } catch (_) {} }
+// Each open of the tab (R3, 2026-11-13): the tab coming on screen, from the tab bar ('tab') or from a prompt or a link
+// elsewhere that names itself in S._hubSrc first (dot, rating, booked, badge, wa, push, link). The open's first read
+// carries it (hub_feed's p_src), once: the re-reads while the tab stays open, its two-minute refresh and Try again carry
+// none, so they are not counted again. A read that got no answer has counted nothing, so the next one carries it. Leaving
+// the tab, or the rider pages, ends the open.
+function _hubVisitNow() {
+  if (S._hubVisit && !S._hubSrc) return;
+  S._hubVisit = { src: String(S._hubSrc || 'tab').slice(0, 24), due: true };
+  S._hubSrc = null;
+}
+(function _hubVisitWatch() {
+  const tab = document.getElementById('tab-members'), view = document.getElementById('view-customer');
+  if (!tab || typeof MutationObserver !== 'function') return;
+  const off = () => { if (!tab.classList.contains('active') || (view && !view.classList.contains('active'))) S._hubVisit = null; };
+  const mo = new MutationObserver(off);
+  [tab, view].forEach((el) => { if (el) mo.observe(el, { attributes: true, attributeFilter: ['class'] }); });
+})();
 async function _hubFetch(force) {
-  const c = _hCust(); if (!c || !sb || S._hubBusy) return;
+  const c = _hCust(); if (!c || !sb) return;
+  const o = S._hubVisit && S._hubVisit.due ? S._hubVisit : null;
+  if (S._hubBusy) { if (o) S._hubAgain = true; return; }
   const h = S._hub;
-  if (!force && h && h.forId === c.id && h.d && !h.stale && Date.now() - h.at < 12e4) return;
-  S._hubBusy = true;
-  let r; try { r = await sb.rpc('hub_feed', _hTok(c)); } catch (e) { r = { error: e }; }
+  if (!force && !o && h && h.forId === c.id && h.d && !h.stale && Date.now() - h.at < 12e4) return;
+  S._hubBusy = true; S._hubAgain = false; if (o) o.sent = true;
+  let r; try { r = await sb.rpc('hub_feed', o ? { ..._hTok(c), p_src: o.src } : _hTok(c)); } catch (e) { r = { error: e }; }
+  // A database before the entry points (20261113120000) has only the two-argument read: the open is read without its source.
+  if (o && r && r.error && r.error.code === 'PGRST202') { try { r = await sb.rpc('hub_feed', _hTok(c)); } catch (e) { r = { error: e }; } }
   S._hubBusy = false;
+  if (S._hubAgain) { S._hubAgain = false; if (S._hubVisit && S._hubVisit.due && S._hubVisit !== o) setTimeout(() => _hubFetch(true), 0); }
   // Signed out, or another account signed in, while it was asked: the answer is not theirs (a shared phone).
   const now = _hCust();
   if (!now || now.id !== c.id) { if (S.custTab === 'members') _hubRender(); return; }
   const d = r && !r.error && r.data;
   if (d && d.ok === false && d.error === 'member') { S._hub = null; try { localStorage.removeItem(_HUB_KEY + c.id); } catch (_) {} if (S.custTab === 'members') setCustTab('register'); return; }
   if (d && d.ok === true) {
+    if (o) o.due = false;
     S._hub = { forId: c.id, at: Date.now(), d };
     _hubSave(c, d);
     if (Array.isArray(d.awarded) && d.awarded.length) _hubCheer(d.awarded);
@@ -150,10 +188,13 @@ function _hubRender() {
   if (S._hub && (!c || S._hub.forId !== c.id)) S._hub = null;
   if (!S._hub && c) { const disk = _hubDisk(c); if (disk) S._hub = { forId: c.id, at: disk.at, d: disk.d }; }
   const h = S._hub, d = h && h.d;
-  // A failed read (the copy kept and marked stale, or none at all) is tried again two minutes on too, not only by Retry.
-  if (!h || (d && !h.stale && Date.now() - h.at >= 12e4) || ((h.stale || !d) && Date.now() - (h.failAt || 0) >= 12e4)) _hubFetch();
-  // Keep the focused control across a repaint (a pick, a slide), found again by what it does.
-  const was = document.activeElement && body.contains(document.activeElement) ? document.activeElement.getAttribute('data-on-click') : null;
+  _hubVisitNow();
+  // An open's first read goes at once, the copy on the phone painted meanwhile. A failed read (the copy kept and marked
+  // stale, or none at all) is tried again two minutes on too, not only by Retry.
+  if ((S._hubVisit && S._hubVisit.due && !S._hubVisit.sent) || !h || (d && !h.stale && Date.now() - h.at >= 12e4) || ((h.stale || !d) && Date.now() - (h.failAt || 0) >= 12e4)) _hubFetch();
+  // Keep the focused control across a repaint (a pick, a slide), found again by what it does, or a link by where it goes.
+  const _key = (x) => x.getAttribute('data-on-click') || (x.getAttribute('href') ? 'href:' + x.getAttribute('href') : null);
+  const was = document.activeElement && body.contains(document.activeElement) ? _key(document.activeElement) : null;
   if (!d) {
     body.innerHTML = h ? `<div class="hub-card" role="status"><strong class="hub-name">${_hT('err')}</strong><button type="button" class="btn-primary hub-wide" data-on-click="${_on('_hubRetry')}">${_hT('retry')}</button></div>` : _skelHtml(2, 'hub-skel');
     return;
@@ -161,23 +202,26 @@ function _hubRender() {
   body.innerHTML = S._hubView === 'year' && d.year ? _yrHtml(d) : _feedHtml(c, d, h.stale);
   if (S._hubView === 'year' && d.year) _yrPrep(d.year);
   if (d.post && d.post.img) _hubPostImg(d.post.id);
-  if (was) { const el = [...body.querySelectorAll('[data-on-click]')].find((x) => x.getAttribute('data-on-click') === was); if (el) try { el.focus({ preventScroll: true }); } catch (_) {} }
+  if (was) { const el = [...body.querySelectorAll('[data-on-click],a[href]')].find((x) => _key(x) === was); if (el) try { el.focus({ preventScroll: true }); } catch (_) {} }
 }
 
 function _hubInvite() { const dep = window._hubDeps || {}; if (dep.inv) dep.inv(); }
 function _feedHtml(c, d, stale) {
-  const dep = window._hubDeps || {};
+  const dep = window._hubDeps || {}, hero = _heroHtml(c, d);
+  // A ride the member has just finished, with nothing else booked: its recap leads the page, before the next one to book.
+  const staff = _staffHtml(d);
   return [
     stale ? `<div class="hub-card hub-stale" role="status"><span>${_hT('stale')}</span><button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_hubRetry')}">${_hT('retry')}</button></div>` : '',
     d.birthday ? `<div class="hub-card hub-bday">${_cuIc('gift', 20)}<strong>${esc(_hF('bday', String((c && c.name) || '').trim().split(/\s+/)[0] || ''))}</strong></div>` : '',
-    _heroHtml(c),
+    hero.recap ? staff : '',
+    hero.html,
     d.year ? _yrCardHtml(d.year) : '',
-    _soonHtml(c),
+    _soonHtml(c, hero.open),
     _meHtml(d.me),
     (Array.isArray(d.goals) ? d.goals : []).map(_seasonHtml).join(''),
     d.club ? _clubHtml(d.club) : '',
     _numsHtml(d.numbers),
-    _staffHtml(d),
+    hero.recap ? '' : staff,
     d.volunteer && dep.vol ? `<div class="hub-card hub-flat"><span class="hub-k">${_cuIc('people', 16)} ${_hT('vol')}</span><a class="btn-secondary hub-wide hub-link" href="${esc(dep.vol + '/#o/' + encodeURIComponent(d.volunteer))}" target="_blank" rel="noopener">${_hT('volBtn')}</a></div>` : '',
     dep.inv ? `<div class="hub-card hub-flat"><button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_hubInvite')}">${esc(dep.invLabel())}</button></div>` : '',
   ].join('');
@@ -191,21 +235,134 @@ function _hubOpen(c, n, skip) {
     .sort((a, b) => String(a.session_date || a.id).localeCompare(String(b.session_date || b.id))).slice(0, n);
 }
 function _hubWhen(s) { const d = String(s.session_date || s.id).slice(0, 10); return `<bdi>${esc(_dayWord(d) || '')}${_dayWord(d) ? ' · ' : ''}${esc(shortDate(d))}</bdi> · <bdi>${sessionTime(s)}</bdi>`; }
-function _heroHtml(c) {
-  const g = c ? (_myRideGroups(c).current || [])[0] : null, e = g && g[0], bs = e && _sessGet(e.sessionId);
-  if (bs) {
-    return `<div class="hub-hero"><span class="hub-k">${_hT('next')}</span><strong class="hub-hero-t"><bdi>${esc(_evName(bs))}</bdi></strong>
-      <span class="hub-hero-m">${_hubWhen(bs)}</span>${e.status === 'waitlist' ? `<span class="hub-chip">${_hT('wl')}</span>` : ''}
-      <button type="button" class="btn-primary hub-hero-b" data-on-click="${_on('setCustTab', 'myrides')}">${_cuIc('ticket', 18)} ${_hT('ticket')}</button></div>`;
+// Staff's word on the ride (R10): the start moved, the route shortened, or the ride cancelled; a chip, never a sentence.
+const HUB_RS = { moved: 'rsMoved', shortened: 'rsShort', cancelled: 'rsCancel' };
+function _hubRs(s) {
+  const v = s && s.ride_status;
+  return typeof v === 'string' && Object.prototype.hasOwnProperty.call(HUB_RS, v) ? `<span class="hub-chip hub-rs hub-rs-${v}">${esc(_hT(HUB_RS[v]))}</span>` : '';
+}
+// Its two times as the ticket names them for its kind (R9): a ride that gathers, the gathering and the start (Victory
+// Lap: doors open and the first heat); a circuit or Petromin night, bike collection (a waitlisted rider's own) and the
+// start; anything else (the pool, a run, yoga, a workshop) its start and end. With the moments that set the card's state:
+// when to turn up and when it starts (a start past midnight is the next day's).
+function _hubTimes(s, e) {
+  const dep = window._hubDeps || {};
+  if (!s || !dep.slots || !dep.at || !dep.gathers) return null;
+  const ds = String(s.session_date || s.id || '').slice(0, 10);
+  const p = String((dep.slots(s.bike_slots) || {})._time || '').replace(/[<>"'&`]/g, '').split('-').map((x) => x.trim()).filter(Boolean);
+  if (!p.length) return null;
+  const vl = _rideKind(s) === 'vlap', w = _hubW();
+  let f, go, st;
+  if (dep.gathers(s)) { f = [[vl ? w.doors : w.gather, p[0]], [vl ? w.heat : w.start, p[1]]]; go = p[0]; st = p[1] || p[0]; }
+  else if (dep.bike(s)) {
+    const col = (e && e.status === 'waitlist' && dep.wlCollect && dep.wlCollect(s)) || dep.collect(s);
+    f = [[w.collect, col], [w.start, p[0]]]; go = col || p[0]; st = p[0];
+  } else { f = [[w.start, p[0]], [w.end, p[1]]]; go = p[0]; st = p[0]; }
+  const goMs = dep.at(ds, go); let stMs = dep.at(ds, st);
+  if (stMs < goMs) stMs += 864e5;
+  return { f: f.filter((x) => x[0] && x[1]), go: goMs, st: stMs };
+}
+// The ticket's own words (lent by _hubDeps.words: the build keeps a word only where rider code names it).
+function _hubW() { const dep = window._hubDeps || {}; let w = null; try { w = dep.words && dep.words(); } catch (_) {} return w || {}; }
+// R10: from 24 hours before the time to turn up the day heads the card; from 3 hours before, where to go comes first and
+// Show ticket opens the ticket; from an hour after the start the card moves on.
+function _hubState(tm, now) {
+  if (!tm || !Number.isFinite(tm.go)) return '';
+  if (now >= (Number.isFinite(tm.st) ? tm.st : tm.go) + 36e5) return 'done';
+  return now >= tm.go - 108e5 ? 'today' : now >= tm.go - 864e5 ? 'tomorrow' : '';
+}
+function _hubNextAt(tm, now) {
+  if (!tm || !Number.isFinite(tm.go)) return 0;
+  return [tm.go - 864e5, tm.go - 108e5, (Number.isFinite(tm.st) ? tm.st : tm.go) + 36e5].find((x) => x > now) || 0;
+}
+// The page draws itself again when the card's state changes while it is open (within the next twelve hours).
+function _hubArm(at) {
+  if (S._hubT) { clearTimeout(S._hubT); S._hubT = null; }
+  const ms = at - Date.now();
+  if (!(ms > 0) || ms > 432e5) return;
+  S._hubT = setTimeout(() => { S._hubT = null; if (S.view === 'customer' && S.custTab === 'members') _hubRender(); }, ms + 1000);
+}
+// Where it meets (R9): the name staff gave the point (meet_name, in Arabic on an Arabic page), else what the ticket names
+// it; held back as the ticket holds it (a Saturday ride kept without its meeting point names one with no map). One map
+// button: the point's own coordinates when staff set them, else the ticket's own link.
+function _hubPlace(s) {
+  const dep = window._hubDeps || {}, w = _hubW();
+  const nm = String((S.lang === 'ar' && s.meet_name_ar) || s.meet_name || '').trim();
+  const lat = Number(s.meet_lat), lng = Number(s.meet_lng);
+  const ll = s.meet_lat != null && s.meet_lng != null && s.meet_lat !== '' && s.meet_lng !== '' && Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+  if ((!nm && !ll && !dep.venue) || !w.meet) return '';
+  const held = !nm && !ll && !!(dep.held && dep.held(s));
+  const lbl = nm || ll || held || (dep.meets && dep.meets(s)) ? w.meet : w.where;
+  let name = nm || (held || !dep.venue ? '' : String(dep.venue(s) || ''));
+  if (name === lbl) name = ''; // the ticket's stand-in name says no more than the label
+  const map = ll
+    ? `<a class="btn-secondary hub-map" href="${esc('https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng)}" target="_blank" rel="noopener" aria-label="${esc(w.map + (w.newTab || ''))}">${_cuIc('pin', 16)} ${esc(w.map)}</a>`
+    : held || !dep.dir ? '' : _hubMapBtn(dep.dir(s));
+  return `<div class="hub-place"><span class="hub-f"><span class="hub-fk">${esc(lbl)}</span>${name ? `<strong class="hub-fv"><bdi>${esc(name)}</bdi></strong>` : ''}</span>${map}</div>`;
+}
+// The ticket's own map button (_dirBtnHtml: the meeting point's link, the venue searched by name, or the circuit's pin with
+// Apple Maps offered on an iPhone), dressed as this card's and named Map: the field beside it already says where.
+function _hubMapBtn(html) {
+  const tp = document.createElement('template'); tp.innerHTML = String(html || '').trim();
+  const b = tp.content.firstElementChild;
+  if (!b || (b.tagName !== 'A' && b.tagName !== 'BUTTON')) return '';
+  const w = _hubW();
+  b.className = 'btn-secondary hub-map';
+  b.innerHTML = `${_cuIc('pin', 16)} ${esc(w.map || '')}`;
+  if (b.tagName === 'A') b.setAttribute('aria-label', (w.map || '') + (w.newTab || '')); else b.removeAttribute('aria-label');
+  return b.outerHTML;
+}
+function _hubFields(f) {
+  const dep = window._hubDeps || {};
+  return f.length ? `<div class="hub-fields">${f.map(([k, v]) => `<span class="hub-f"><span class="hub-fk">${esc(k)}</span><strong class="hub-fv"><bdi>${esc(dep.hm ? dep.hm(v) : v)}</bdi></strong></span>`).join('')}</div>` : '';
+}
+function _bookedHtml(s, e, tm, st) {
+  const ds = String(s.session_date || s.id).slice(0, 10), dw = _dayWord(ds), soon = st === 'today' || st === 'tomorrow';
+  const f = _hubFields(tm ? tm.f : []), place = _hubPlace(s);
+  const when = `<bdi>${esc(!soon && dw ? dw + ' · ' : '')}${esc(shortDate(ds))}</bdi>${f ? '' : ` · <bdi>${sessionTime(s)}</bdi>`}`;
+  const chips = `${e.status === 'waitlist' ? `<span class="hub-chip">${_hT('wl')}</span>` : ''}${_hubRs(s)}`;
+  return `<div class="hub-hero${st ? ' hub-hero-' + st : ''}"><span class="hub-k">${esc(soon && dw ? dw : _hT('next'))}</span><strong class="hub-hero-t"><bdi>${esc(_evName(s))}</bdi></strong>
+      <span class="hub-hero-m">${when}</span>${chips ? `<span class="hub-chips">${chips}</span>` : ''}
+      ${st === 'today' ? place + f : f + place}
+      <button type="button" class="btn-primary hub-hero-b" data-on-click="${st === 'today' ? _on('_hubTicket', e.id) : _on('setCustTab', 'myrides')}">${_cuIc('ticket', 18)} ${_hT('ticket')}</button></div>`;
+}
+// { html, open: the session offered to book (Coming up leaves it out), recap: the staff card leads the page }. With nothing
+// booked ahead, the recap of the member's own last ride leads the page on its day and the day after.
+function _heroHtml(c, d) {
+  const now = Date.now(), gs = c ? _myRideGroups(c) : {};
+  let last = '';
+  for (const g of gs.current || []) {
+    const e = g[0], s = e && _sessGet(e.sessionId); if (!s) continue;
+    const tm = _hubTimes(s, e), st = _hubState(tm, now);
+    if (st === 'done') { last = String(s.session_date || s.id).slice(0, 10); continue; }
+    _hubArm(_hubNextAt(tm, now));
+    return { html: _bookedHtml(s, e, tm, st) };
   }
+  _hubArm(0);
+  const pg = (gs.past || [])[0], pe = pg && pg[0];
+  if (pe) { const x = String(pe.sessionDate || pe.sessionId || '').slice(0, 10); if (x > last) last = x; }
+  const p = d && d.post, pd = p && p.date ? String(p.date).slice(0, 10) : '';
+  const recap = !!(pd && pd === last && pd >= new Date(now + 108e5 - 864e5).toISOString().slice(0, 10));
   const s = c ? _hubOpen(c, 1)[0] : null;
   if (s) {
-    return `<div class="hub-hero"><span class="hub-k">${_hT('nextOpen')}</span><strong class="hub-hero-t"><bdi>${esc(_evName(s))}</bdi></strong>
-      <span class="hub-hero-m">${_hubWhen(s)}</span>${_sgChip(s)}
-      <button type="button" class="btn-primary hub-hero-b" data-on-click="${_on('_hubBook', s.id)}">${_hT('book')}</button></div>`;
+    return { recap, open: s.id, html: `<div class="hub-hero"><span class="hub-k">${_hT('nextOpen')}</span><strong class="hub-hero-t"><bdi>${esc(_evName(s))}</bdi></strong>
+      <span class="hub-hero-m">${_hubWhen(s)}</span>${_sgChip(s)}${_hubRs(s)}
+      <button type="button" class="btn-primary hub-hero-b" data-on-click="${_on('_hubBook', s.id)}">${_hT('book')}</button></div>` };
   }
-  return `<div class="hub-hero"><strong class="hub-hero-t">${_hT('noneOpen')}</strong>
-    <button type="button" class="btn-primary hub-hero-b" data-on-click="${_on('setCustTab', 'register')}">${_hT('seeAll')}</button></div>`;
+  return { recap, html: `<div class="hub-hero"><strong class="hub-hero-t">${_hT('noneOpen')}</strong>
+    <button type="button" class="btn-primary hub-hero-b" data-on-click="${_on('setCustTab', 'register')}">${_hT('seeAll')}</button></div>` };
+}
+// Show ticket on the day (R10): Bookings, scrolled to that booking's ticket (the one whose Share button names it), its
+// code drawn large there. Bookings has no page of one ticket; before the day the button opens Bookings as before.
+function _hubTicket(id) {
+  setCustTab('myrides');
+  const card = [...document.querySelectorAll('#tab-myrides .ticket-card')].find((x) => [...x.querySelectorAll('[data-on-click]')].some((b) => {
+    try { const v = JSON.parse(b.getAttribute('data-on-click')); return Array.isArray(v) && v[0] === '_tkShare' && v[1] === id; } catch (_) { return false; }
+  }));
+  if (!card) return;
+  const bar = document.getElementById('topbar');
+  const top = card.getBoundingClientRect().top + window.scrollY - ((bar && bar.getBoundingClientRect().height) || 0) - 12;
+  try { window.scrollTo({ top: Math.max(0, top) }); } catch (_) { window.scrollTo(0, Math.max(0, top)); }
 }
 // The way a link to a date opens Reserve (?ev=&session=): the event first (its gates, and a fresh start without the
 // add-ons, locker, promo code, tickets or booking being changed from before), then the date with its own gates (the
@@ -217,9 +374,9 @@ async function _hubBook(id) {
   if (S.selEvent !== ev || S.view !== 'customer' || S.custTab !== 'register') return;
   await selectSessCard(id);
 }
-function _soonHtml(c) {
+function _soonHtml(c, skip) {
   if (!c) return '';
-  const g = (_myRideGroups(c).current || [])[0], skip = g ? null : (_hubOpen(c, 1)[0] || {}).id, list = _hubOpen(c, 3, skip).filter((s) => s.id !== skip).slice(0, 3);
+  const list = _hubOpen(c, 3, skip).slice(0, 3);
   if (!list.length) return '';
   return `<div class="hub-card"><span class="hub-k">${_hT('soon')}</span>${list.map((s) => `<div class="hub-soon">
       <span class="hub-soon-t"><strong><bdi>${esc(_evName(s))}</bdi></strong> ${_sgChip(s)}<small>${_hubWhen(s)}</small></span>
@@ -270,8 +427,12 @@ function _seasonHtml(g) {
 function _clubHtml(g) {
   const n = Number(g.n) || 0, tg = Number(g.target) || 1, name = g.name ? _hPick(g, 'name', 'name_ar') : _hF('clubSat', tg), hit = n >= tg;
   const line = hit ? `<strong>${_hT('clubHit')}</strong>` : esc(n / tg < 2 / 3 ? _hF('soFar', n, _hDate(g.ends_on)) : _hF('toGo', tg - n, _hDate(g.ends_on)));
-  return `<div class="hub-card"><span class="hub-k">${_cuIc('people', 16)} ${_hT('goalAll')}</span><strong class="hub-name"><bdi>${esc(name)}</bdi></strong>
-    ${_hubProg(n, tg, name)}<div class="hub-meta">${line}</div>${Number(g.mine) > 0 ? `<div class="hub-meta">${esc(_hF('clubYou', Number(g.mine)))}</div>` : ''}</div>`;
+  // Reached before the month is out (R20): the next Saturday's own target, as the server sizes it, to aim at next.
+  const nx = hit && g.next && /^\d{4}-\d\d-\d\d$/.test(String(g.next.date || '')) && Number(g.next.target) > 0
+    ? `<div class="hub-fields hub-next"><span class="hub-f"><span class="hub-fk">${esc(_hT('nextSat'))}</span><strong class="hub-fv"><bdi>${esc(_hDate(g.next.date))}</bdi></strong></span><span class="hub-f"><span class="hub-fk">${esc(_hT('nextTarget'))}</span><strong class="hub-fv">${_hN(g.next.target)}</strong></span></div>`
+    : '';
+  return `<div class="hub-card${hit ? ' hub-hit' : ''}"><span class="hub-k">${_cuIc('people', 16)} ${_hT('goalAll')}</span><strong class="hub-name"><bdi>${esc(name)}</bdi></strong>
+    ${_hubProg(n, tg, name)}<div class="hub-meta">${line}</div>${Number(g.mine) > 0 ? `<div class="hub-meta">${esc(_hF('clubYou', Number(g.mine)))}</div>` : ''}${nx}</div>`;
 }
 function _numsHtml(x) {
   if (!x) return '';
@@ -280,13 +441,27 @@ function _numsHtml(x) {
   return cells ? `<div class="hub-card"><span class="hub-k">${_hT('nums')}</span><div class="hub-stats">${cells}</div></div>` : '';
 }
 // One staff card: the Saturday report showing now, else the site's first announcement, else the tip of the week.
+// The report is number tiles (R13, 2026-11-13; the server writes one after each Saturday ride, staff may add a line and a
+// photo): riders, rides when they differ, first Saturday rides, ride leads, volunteers, each only as the server sends it
+// (10 or more), the change from the week before, the month's total toward the club's own goal, and the member's own
+// Saturdays this month when they rode it. No names, no ranking.
+function _hubBig(v) { return v != null && v !== '' && Number.isFinite(Number(v)) && Number(v) >= 10; }
 function _staffHtml(d) {
   const p = d.post;
   if (p) {
-    const line = _hPick(p, 'line', 'line_ar');
-    return `<div class="hub-card hub-flat"><span class="hub-k">${_hT('report')}${p.date ? ` · <bdi>${esc(_hDate(p.date))}</bdi>` : ''}</span>
+    const line = _hPick(p, 'line', 'line_ar'), cl = d.club, cells = [];
+    const tile = (v, k) => cells.push(`<div class="hub-stat"><strong>${v}</strong><span>${esc(_hT(k))}</span></div>`);
+    if (_hubBig(p.riders)) tile(_hN(p.riders), 'tRiders');
+    if (_hubBig(p.rides) && Number(p.rides) !== Number(p.riders)) tile(_hN(p.rides), 'tRides');
+    if (_hubBig(p.first_rides)) tile(_hN(p.first_rides), 'tFirst');
+    if (_hubBig(p.leads)) tile(_hN(p.leads), 'tLeads');
+    if (_hubBig(p.volunteers)) tile(_hN(p.volunteers), 'tVols');
+    if (_hubBig(p.riders) && _hubBig(p.prev_riders)) { const x = Number(p.riders) - Number(p.prev_riders); tile(`<bdi dir="ltr">${x > 0 ? '+' : x < 0 ? '-' : ''}${Math.abs(x)}</bdi>`, 'tChange'); }
+    if (cl && !cl.name && Number(cl.target) > 0 && _hubBig(cl.n) && (!p.date || !cl.from || String(p.date).slice(0, 7) === String(cl.from).slice(0, 7))) tile(`<bdi dir="ltr">${esc(String(Number(cl.n) || 0))} / ${esc(String(Number(cl.target)))}</bdi>`, 'goalAll');
+    const mine = p.mine != null && Number(p.mine) > 0 ? `<div class="hub-mine"><span>${esc(_hT('tMine'))}</span><strong>${_hN(p.mine)}</strong></div>` : '';
+    return `<div class="hub-card hub-flat hub-report"><span class="hub-k">${_hT('report')}${p.date ? ` · <bdi>${esc(_hDate(p.date))}</bdi>` : ''}</span>
       ${p.img ? `<img class="hub-photo" data-hubimg="${esc(p.id)}" alt="">` : ''}
-      ${p.riders != null ? `<strong class="hub-name">${esc(_hF('riders', p.riders))}</strong>` : ''}${line ? `<p class="hub-line"><bdi>${esc(line)}</bdi></p>` : ''}</div>`;
+      ${cells.length ? `<div class="hub-stats">${cells.join('')}</div>` : ''}${mine}${line ? `<p class="hub-line"><bdi>${esc(line)}</bdi></p>` : ''}</div>`;
   }
   const a = Array.isArray(d.announce) ? d.announce.map((m) => (m && m.text ? _hPick(m.text, 'en', 'ar') : '')).find(Boolean) : '';
   if (a) return `<div class="hub-card hub-flat"><span class="hub-k">${_hT('news')}</span><p class="hub-line"><bdi>${esc(a)}</bdi></p></div>`;

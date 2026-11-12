@@ -22069,8 +22069,14 @@ function renderMembers(){
 // The page's activities live in their own file, fetched here, so no other rider carries them.
 function _hubLoad(){
   // What member-hub.js takes from the page, named here so the build's split keeps it on the riders' side: the invitation
-  // (moved from Account, 2026-11-11), its words, and the volunteer portal's address.
-  window._hubDeps={inv:_invShare,invLabel:()=>t('invBtn'),vol:VOL_PORTAL};
+  // (moved from Account, 2026-11-11), its words, and the volunteer portal's address. Since 2026-11-13 (R9, R10) also the
+  // ticket's own reading of a session for the next session's card: its two times, the moments they fall on, where it
+  // meets (held back as the ticket holds it) and the ticket's map button.
+  window._hubDeps={inv:_invShare,invLabel:()=>t('invBtn'),vol:VOL_PORTAL,
+    slots:parseSlots,hm:fmt12h,at:_ksaAt,gathers:_gathersTime,bike:_needsBike,collect:sessionCollectTime,wlCollect:_wlCollectTime,
+    venue:_venueName,held:_meetHeld,meets:_meetsAt,dir:_dirBtnHtml,
+    // the ticket's words for them, named here so the build keeps them on the riders' side (member-hub.js is not read for keys)
+    words:()=>({gather:t('sessGatherTime'),start:t('sessStartTime'),end:t('sessEndTime'),collect:t('sessCollectTime'),doors:t('vlDoorsShort'),heat:t('vlHeatShort'),meet:t('meetPointLbl'),where:t('tkWhereLabel'),map:t('infoMap'),newTab:t('opensNewTab')})};
   if(window._hubRender){window._hubRender();return;}
   if(S._hubLoading)return;S._hubLoading=true;
   const s=document.createElement('script');s.src='/member-hub.js?v='+HUB_V;

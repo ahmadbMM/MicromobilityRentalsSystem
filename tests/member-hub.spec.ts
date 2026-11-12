@@ -109,7 +109,7 @@ test.describe('@customer:members the Community tab', () => {
     await expect(page.locator('#hub-body')).toContainText('Tip of the week');
     await page.evaluate(`S._hub.d.post={id:'post_1',line:'Great ride, thank you all.',line_ar:'رحلة رائعة',riders:88,rides:88,date:'2026-11-07',img:false};_hubRender()`);
     await expect(page.locator('#hub-body')).toContainText('Saturday report');
-    await expect(page.locator('#hub-body')).toContainText('88 riders');
+    await expect(page.locator('#hub-body .hub-report .hub-stat').filter({ has: page.getByText('Riders', { exact: true }) })).toContainText('88'); // tiles since 2026-11-13 (R13)
     await expect(page.locator('#hub-body')).not.toContainText('Tip of the week');
   });
 

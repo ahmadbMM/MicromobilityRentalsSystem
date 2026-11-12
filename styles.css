@@ -9122,6 +9122,27 @@ body:not(.view-staff) .hub-kinds li{display:flex;align-items:center;gap:8px;}
 body:not(.view-staff) .hub-slide-nav{display:flex;gap:10px;margin-top:12px;}
 body:not(.view-staff) .hub-slide-nav button{flex:1;min-height:48px;}
 @media (max-width:340px){body:not(.view-staff) .hub-stats{grid-template-columns:1fr;}}
+/* The next session's card, the Saturday report and a goal reached (2026-11-13, R9 R10 R13 R20): two labelled times and where
+   it meets with one map button, the ride's status chip, the card on the day ringed; the report as tiles with the member's own
+   line; the next Saturday's target under a goal reached. */
+body:not(.view-staff) .hub-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;align-self:stretch;margin-top:8px;}
+body:not(.view-staff) .hub-f{display:flex;flex-direction:column;gap:2px;min-width:0;}
+body:not(.view-staff) .hub-fk{font-size:var(--fs-13);color:var(--muted);}
+body:not(.view-staff) .hub-fv{font-size:var(--fs-17);font-weight:700;overflow-wrap:anywhere;}
+body:not(.view-staff) .hub-hero .hub-fk{color:var(--night-ink-2);}
+body:not(.view-staff) .hub-place{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 14px;align-self:stretch;margin-top:8px;}
+body:not(.view-staff) .hub-place .hub-f{flex:1 1 160px;}
+body:not(.view-staff) .hub-map{flex:none;min-height:44px;padding:0 16px;text-decoration:none;}
+body:not(.view-staff) .hub-hero .hub-map{background:transparent;color:var(--night-ink);border-color:var(--night-line);}
+body:not(.view-staff) .hub-hero .hub-map:hover{background:var(--night-2);border-color:var(--night-ink-2);color:var(--night-ink);}
+body:not(.view-staff) .hub-chips{display:flex;flex-wrap:wrap;gap:6px;}
+body:not(.view-staff) :is(.hub-rs-moved,.hub-rs-shortened){color:var(--night-amber);border-color:var(--night-amber);}
+body:not(.view-staff) .hub-rs-cancelled{color:var(--night-red);border-color:var(--night-red-line);}
+body:not(.view-staff) .hub-hero-today{box-shadow:inset 0 0 0 2px var(--neon),var(--lq-2);}
+body:not(.view-staff) .hub-report .hub-stats{margin:6px 0 10px;}
+body:not(.view-staff) .hub-mine{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-top:10px;border-top:1px solid var(--line);color:var(--ink);}
+body:not(.view-staff) .hub-mine strong{font-size:var(--fs-20);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .hub-next{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);}
 body:not(.view-staff) .mb-new{color:var(--go);font-weight:700;}
 /* ════════════════════════════════════════════════════════════════════════════════════════════════
    LIQUID (2026-11-07, the soft redesign: the user picked "Liquid" for riders). Glass is a material for the
