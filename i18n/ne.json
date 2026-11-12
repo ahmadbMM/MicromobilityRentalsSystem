@@ -8416,6 +8416,8 @@
   "acrSectSports": "अङ्कमा खेलहरू",
   "acrSectSportWho": "हरेक खेलमा ग्राहक, नामसहित",
   "acrSectSportList": "हरेक खेल, तल नामसहित",
+  "acrSpWith": "ग्राहक भएका",
+  "acrSpNone": "अहिलेसम्म कुनै ग्राहक छैन",
   "acrBdSports": "हरेक खेलमा ग्राहक",
   "acrSortSports": "धेरै खेल पहिले",
   "errPasswordCommon": "यो पासवर्ड अनुमान गर्न धेरै सजिलो छ। अर्को छान्नुहोस्।",

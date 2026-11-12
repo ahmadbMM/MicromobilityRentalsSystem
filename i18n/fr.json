@@ -8416,6 +8416,8 @@
   "acrSectSports": "Les sports en chiffres",
   "acrSectSportWho": "Clients par sport, avec les noms",
   "acrSectSportList": "Chaque sport, avec les noms en dessous",
+  "acrSpWith": "Avec des clients",
+  "acrSpNone": "Pas encore de clients",
   "acrBdSports": "Clients par sport",
   "acrSortSports": "Le plus de sports d’abord",
   "errPasswordCommon": "Ce mot de passe est trop facile à deviner. Choisissez-en un autre.",
