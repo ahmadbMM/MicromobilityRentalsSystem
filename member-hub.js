@@ -178,6 +178,8 @@ async function _hubCheer(slugs) {
   if (i < 0) return;
   try { if (g && g.at) localStorage.setItem('cq_bdg_seen_' + c.id, String(Math.max(Date.parse(g.at) || 0, +localStorage.getItem('cq_bdg_seen_' + c.id) || 0))); } catch (_) {}
   _mrBadgeInfo(i, true);
+  // Seen on the server too (hub_seen), so the app's pulse never shows the same badge again on this or another phone.
+  if (typeof _plsSeen === 'function') _plsSeen(c, slugs);
 }
 
 // ── The page ──────────────────────────────────────────────────────────────────────────────────────

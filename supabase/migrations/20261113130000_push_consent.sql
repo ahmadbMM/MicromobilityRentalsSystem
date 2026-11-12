@@ -88,6 +88,8 @@ grant execute on function public.customer_push_prefs_set(text, text, boolean, bo
 
 -- ── 2. a category on every queued message, and the switches applied to it ──────────────────────
 alter table public.push_outbox add column if not exists cat text not null default 'rides' check (cat in ('rides', 'community'));
+-- the rider's language, for the notification's lang and dir (the drain reads it)
+alter table public.push_outbox add column if not exists lang text;
 
 create or replace function public._push_outbox_gate()
 returns trigger
@@ -95,6 +97,7 @@ language plpgsql security definer set search_path to 'public'
 as $$
 begin
   if new.tag like 'hub-%' then new.cat := 'community'; end if;
+  if new.lang is null then select p.lang into new.lang from push_prefs p where p.customer_id = new.customer_id; end if;
   if new.cat = 'community' and not exists (select 1 from push_prefs p where p.customer_id = new.customer_id and p.community) then
     return null;
   end if;
@@ -137,6 +140,133 @@ insert into public.push_words (key, lang, title, body) values
   ('kind:arena',    'en', 'Arena Heros Hybrid Race', ''),        ('kind:arena',    'ar', 'سباق أرينا هيروز الهجين', ''),
   ('kind:blood',    'en', 'Micromobility Blood Donation', ''),   ('kind:blood',    'ar', 'مايكروموبيليتي التبرع بالدم', ''),
   ('kind:defe5k',   'en', 'DEFE 5KM Run', ''),                   ('kind:defe5k',   'ar', 'سباق دفء 5 كم', '')
+on conflict (key, lang) do update set title = excluded.title, body = excluded.body;
+
+-- the same messages and the session kinds' names in the eight other languages (the kinds' names are the app's own,
+-- i18n/<code>.json ev*Name); supabase/seeds/push_words_more.sql keeps the messages alone for a re-run
+insert into public.push_words (key, lang, title, body) values
+  ('remind',    'fr', 'Sortie demain',                     '{0}, rendez-vous à {1}'),
+  ('change',    'fr', 'Votre sortie a changé',             '{0} : ouvrez votre billet pour voir les nouveaux détails'),
+  ('challenge', 'fr', 'Votre nouveau défi est prêt',       'Ouvrez Communauté pour voir le défi du mois'),
+  ('recap',     'fr', 'Le récap du samedi est là',         '{0} cyclistes étaient de sortie ce samedi'),
+
+  ('remind',    'es', 'Salida mañana',                     '{0}, nos vemos a las {1}'),
+  ('change',    'es', 'Tu salida ha cambiado',             '{0}: abre tu entrada para ver los nuevos detalles'),
+  ('challenge', 'es', 'Tu nuevo reto está listo',          'Abre Comunidad para ver el reto de este mes'),
+  ('recap',     'es', 'Ya está el resumen del sábado',     '{0} ciclistas salieron este sábado'),
+
+  ('remind',    'pt', 'Passeio amanhã',                    '{0}, encontro às {1}'),
+  ('change',    'pt', 'O seu passeio mudou',               '{0}: abra o seu ingresso para ver os novos detalhes'),
+  ('challenge', 'pt', 'O seu novo desafio está pronto',    'Abra Comunidade para ver o desafio deste mês'),
+  ('recap',     'pt', 'O resumo de sábado chegou',         '{0} ciclistas saíram neste sábado'),
+
+  ('remind',    'ur', 'کل رائیڈ ہے',                        '{0}، {1} بجے ملیں'),
+  ('change',    'ur', 'آپ کی رائیڈ میں تبدیلی ہوئی ہے',       '{0}: نئی تفصیلات کے لیے اپنا ٹکٹ کھولیں'),
+  ('challenge', 'ur', 'آپ کا نیا چیلنج تیار ہے',              'اس مہینے کا چیلنج دیکھنے کے لیے کمیونٹی کھولیں'),
+  ('recap',     'ur', 'ہفتے کے دن کا خلاصہ آ گیا ہے',          'اس ہفتے کے دن {0} رائیڈرز آئے'),
+
+  ('remind',    'hi', 'कल राइड है',                         '{0}, {1} बजे मिलें'),
+  ('change',    'hi', 'आपकी राइड बदल गई है',                 '{0}: नई जानकारी के लिए अपना टिकट खोलें'),
+  ('challenge', 'hi', 'आपकी नई चुनौती तैयार है',              'इस महीने की चुनौती देखने के लिए समुदाय खोलें'),
+  ('recap',     'hi', 'शनिवार का सार आ गया है',               'इस शनिवार {0} राइडर आए'),
+
+  ('remind',    'tl', 'May ride bukas',                    '{0}, magkita tayo nang {1}'),
+  ('change',    'tl', 'Nagbago ang ride mo',               '{0}: buksan ang ticket mo para sa mga bagong detalye'),
+  ('challenge', 'tl', 'Handa na ang bago mong hamon',      'Buksan ang Komunidad para makita ang hamon ngayong buwan'),
+  ('recap',     'tl', 'Narito na ang recap ng Sabado',     '{0} rider ang sumama ngayong Sabado'),
+
+  ('remind',    'ne', 'भोलि राइड छ',                         '{0}, {1} मा भेटौं'),
+  ('change',    'ne', 'तपाईंको राइड परिवर्तन भएको छ',            '{0}: नयाँ विवरणका लागि आफ्नो टिकट खोल्नुहोस्'),
+  ('challenge', 'ne', 'तपाईंको नयाँ चुनौती तयार छ',              'यो महिनाको चुनौती हेर्न समुदाय खोल्नुहोस्'),
+  ('recap',     'ne', 'शनिबारको सारांश आयो',                  'यो शनिबार {0} राइडर आए'),
+
+  ('remind',    'bn', 'আগামীকাল রাইড',                       '{0}, {1}-এ দেখা হবে'),
+  ('change',    'bn', 'আপনার রাইডে পরিবর্তন হয়েছে',            '{0}: নতুন তথ্যের জন্য আপনার টিকিট খুলুন'),
+  ('challenge', 'bn', 'আপনার নতুন চ্যালেঞ্জ প্রস্তুত',            'এই মাসের চ্যালেঞ্জ দেখতে কমিউনিটি খুলুন'),
+  ('recap',     'bn', 'শনিবারের সারসংক্ষেপ এসে গেছে',          'এই শনিবার {0} জন রাইডার এসেছিলেন')
+on conflict (key, lang) do update set title = excluded.title, body = excluded.body;
+
+insert into public.push_words (key, lang, title, body) values
+  ('kind:jcc', 'fr', 'Circuit de la Corniche de Djeddah', ''),
+  ('kind:saturday', 'fr', 'Sortie sociale du samedi', ''),
+  ('kind:petromin', 'fr', 'Soirée Petromin', ''),
+  ('kind:swim', 'fr', 'Séance piscine triathlon', ''),
+  ('kind:yoga', 'fr', 'Hatha yoga pour cyclistes', ''),
+  ('kind:runher', 'fr', 'Run for Her', ''),
+  ('kind:vlap', 'fr', 'Victory Lap', ''),
+  ('kind:arena', 'fr', 'Arena Heros Hybrid Race', ''),
+  ('kind:blood', 'fr', 'Micromobility Don de sang', ''),
+  ('kind:defe5k', 'fr', 'DEFE 5KM Run', ''),
+  ('kind:jcc', 'es', 'Circuito de la Corniche de Yeda', ''),
+  ('kind:saturday', 'es', 'Recorrido social del sábado', ''),
+  ('kind:petromin', 'es', 'Noche Petromin', ''),
+  ('kind:swim', 'es', 'Sesión de piscina de triatlón', ''),
+  ('kind:yoga', 'es', 'Hatha yoga para ciclistas', ''),
+  ('kind:runher', 'es', 'Run for Her', ''),
+  ('kind:vlap', 'es', 'Victory Lap', ''),
+  ('kind:arena', 'es', 'Arena Heros Hybrid Race', ''),
+  ('kind:blood', 'es', 'Micromobility Donación de sangre', ''),
+  ('kind:defe5k', 'es', 'DEFE 5KM Run', ''),
+  ('kind:jcc', 'pt', 'Circuito da Corniche de Jeddah', ''),
+  ('kind:saturday', 'pt', 'Passeio social de sábado', ''),
+  ('kind:petromin', 'pt', 'Noite Petromin', ''),
+  ('kind:swim', 'pt', 'Sessão de piscina de triatlo', ''),
+  ('kind:yoga', 'pt', 'Hatha ioga para ciclistas', ''),
+  ('kind:runher', 'pt', 'Run for Her', ''),
+  ('kind:vlap', 'pt', 'Victory Lap', ''),
+  ('kind:arena', 'pt', 'Arena Heros Hybrid Race', ''),
+  ('kind:blood', 'pt', 'Micromobility Doação de sangue', ''),
+  ('kind:defe5k', 'pt', 'DEFE 5KM Run', ''),
+  ('kind:jcc', 'ur', 'جدہ کورنیش سرکٹ', ''),
+  ('kind:saturday', 'ur', 'ہفتے کی سوشل رائیڈ', ''),
+  ('kind:petromin', 'ur', 'پیٹرومن کی رات', ''),
+  ('kind:swim', 'ur', 'ٹرائیتھلون پول سیشن', ''),
+  ('kind:yoga', 'ur', 'سائیکل سواروں کے لیے ہٹھ یوگا', ''),
+  ('kind:runher', 'ur', 'Run for Her', ''),
+  ('kind:vlap', 'ur', 'Victory Lap', ''),
+  ('kind:arena', 'ur', 'Arena Heros Hybrid Race', ''),
+  ('kind:blood', 'ur', 'Micromobility خون کا عطیہ', ''),
+  ('kind:defe5k', 'ur', 'DEFE 5KM Run', ''),
+  ('kind:jcc', 'hi', 'जेद्दाह कॉर्निश सर्किट', ''),
+  ('kind:saturday', 'hi', 'शनिवार सोशल राइड', ''),
+  ('kind:petromin', 'hi', 'पेट्रोमिन की रात', ''),
+  ('kind:swim', 'hi', 'ट्रायथलॉन पूल सेशन', ''),
+  ('kind:yoga', 'hi', 'साइकिल चालकों के लिए हठ योग', ''),
+  ('kind:runher', 'hi', 'Run for Her', ''),
+  ('kind:vlap', 'hi', 'Victory Lap', ''),
+  ('kind:arena', 'hi', 'Arena Heros Hybrid Race', ''),
+  ('kind:blood', 'hi', 'Micromobility रक्तदान', ''),
+  ('kind:defe5k', 'hi', 'DEFE 5KM Run', ''),
+  ('kind:jcc', 'tl', 'Jeddah Corniche Circuit', ''),
+  ('kind:saturday', 'tl', 'Saturday Social Ride', ''),
+  ('kind:petromin', 'tl', 'Petromin night', ''),
+  ('kind:swim', 'tl', 'Triathlon Pool Session', ''),
+  ('kind:yoga', 'tl', 'Hatha Yoga para sa mga Siklista', ''),
+  ('kind:runher', 'tl', 'Run for Her', ''),
+  ('kind:vlap', 'tl', 'Victory Lap', ''),
+  ('kind:arena', 'tl', 'Arena Heros Hybrid Race', ''),
+  ('kind:blood', 'tl', 'Micromobility Pagbibigay ng Dugo', ''),
+  ('kind:defe5k', 'tl', 'DEFE 5KM Run', ''),
+  ('kind:jcc', 'ne', 'जेद्दा कोर्निश सर्किट', ''),
+  ('kind:saturday', 'ne', 'शनिबार सामाजिक राइड', ''),
+  ('kind:petromin', 'ne', 'पेट्रोमिन को रात', ''),
+  ('kind:swim', 'ne', 'ट्रायथलन पूल सेसन', ''),
+  ('kind:yoga', 'ne', 'साइकल चालकहरूका लागि हठ योग', ''),
+  ('kind:runher', 'ne', 'Run for Her', ''),
+  ('kind:vlap', 'ne', 'Victory Lap', ''),
+  ('kind:arena', 'ne', 'Arena Heros Hybrid Race', ''),
+  ('kind:blood', 'ne', 'Micromobility रक्तदान', ''),
+  ('kind:defe5k', 'ne', 'DEFE 5KM Run', ''),
+  ('kind:jcc', 'bn', 'জেদ্দা কর্নিশ সার্কিট', ''),
+  ('kind:saturday', 'bn', 'শনিবারের সোশ্যাল রাইড', ''),
+  ('kind:petromin', 'bn', 'Petromin-এর রাত', ''),
+  ('kind:swim', 'bn', 'ট্রায়াথলন পুল সেশন', ''),
+  ('kind:yoga', 'bn', 'সাইক্লিস্টদের জন্য হঠ যোগ', ''),
+  ('kind:runher', 'bn', 'Run for Her', ''),
+  ('kind:vlap', 'bn', 'Victory Lap', ''),
+  ('kind:arena', 'bn', 'Arena Heros Hybrid Race', ''),
+  ('kind:blood', 'bn', 'Micromobility রক্তদান', ''),
+  ('kind:defe5k', 'bn', 'DEFE 5KM Run', '')
 on conflict (key, lang) do update set title = excluded.title, body = excluded.body;
 
 -- A message in the rider's language (English when that language has no row), placeholders filled in order.
@@ -281,7 +411,7 @@ select (select count(*) from pg_class where relnamespace = 'public'::regnamespac
                          '_hub_push_tick', '_session_change_push')) as definer_7,
        has_function_privilege('anon', 'public.customer_push_prefs_set(text,text,boolean,boolean,text,text,text,text)', 'execute') as anon_set_true,
        has_function_privilege('anon', 'public._hub_push_tick()', 'execute') as anon_tick_false,
-       (select count(*) from public.push_words where lang in ('en', 'ar')) as words_28,
+       (select count(*) from public.push_words) as words_140,
        (select count(*) from cron.job where jobname = 'mm-hub-push') as cron_1,
        (select count(*) from pg_trigger where tgname in ('push_outbox_gate', 'session_change_push')) as triggers_2,
        (select version from supabase_migrations.schema_migrations where version = '20261113130000') as ledger;
