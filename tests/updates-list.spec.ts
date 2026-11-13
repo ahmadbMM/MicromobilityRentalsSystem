@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { stubSupabase, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
 
@@ -381,7 +381,13 @@ test.describe('@customer:account the Updates list: the database\'s rules', () =>
     const noBike = [...src.match(/const KIND_TRAITS=\{(.*?)\};/)![1]!.matchAll(/(\w+):\{bike:false/g)].map((m) => m[1]).sort();
     expect(noBike.length).toBeGreaterThan(5);
     const keyFn = sql.slice(sql.indexOf('create or replace function public._updates_key('), sql.indexOf('revoke all on function public._updates_key('));
-    expect([...keyFn.match(/_session_kind\(p_session\) in \(([^)]*)\)/)![1]!.matchAll(/'(\w+)'/g)].map((m) => m[1]).sort()).toEqual(noBike);
+    const kinds = (f: string) => [...f.match(/_session_kind\(p_session\) in \(([^)]*)\)/)![1]!.matchAll(/'(\w+)'/g)].map((m) => m[1]).sort();
+    // the list is the newest migration's that restates the function (20261114130000 added the Farm House Night)
+    const dir = resolve(__dirname, '../supabase/migrations');
+    const newest = readdirSync(dir).filter((f) => f.endsWith('.sql')).sort().map((f) => readFileSync(resolve(dir, f), 'utf8'))
+      .filter((x) => x.includes('create or replace function public._updates_key(')).pop()!;
+    expect(kinds(newest.slice(newest.indexOf('create or replace function public._updates_key(')))).toEqual(noBike);
+    expect(kinds(keyFn).every((k) => noBike.includes(k))).toBe(true);
     expect(keyFn).toMatch(/then p_key \|\| '_s' else p_key end;/);
     expect(keyFn).toMatch(/security definer set search_path to 'public'/);
     expect(sql).toContain('revoke all on function public._updates_key(text, text) from public, anon, authenticated;');
