@@ -99,6 +99,7 @@ test.describe('@customer:bookings Report a bike problem on the ticket', () => {
     await expect(dlg(page).locator('.brp-opt')).toHaveText(['Brakes', 'Gears', 'Tyre', 'Chain', 'Saddle', 'Lights', 'Other']);
     await expect(dlg(page).locator('input[name="brp-bike"]')).toHaveCount(0); // one bike: nothing to choose
     await expect(dlg(page).getByLabel('Note (optional)')).toHaveAttribute('maxlength', '300');
+    await expect(dlg(page).getByLabel('Note (optional)')).toHaveCSS('font-size', '16px'); // the riders' own field size: a phone does not zoom in on it
     // centred at every width, never a sheet at the foot
     const box = (await dlg(page).boundingBox())!, vp = page.viewportSize()!;
     expect(Math.abs(box.x + box.width / 2 - vp.width / 2)).toBeLessThan(2);
@@ -254,7 +255,7 @@ async function workshop(page: Page, fx: Fixtures = {}) {
   return writes;
 }
 const pill = (page: Page) => page.locator('#tab-workshop [data-ws-filter="reports"]');
-const row = (page: Page, id: number) => page.locator(`#ws-list .br-row[data-br-id="${id}"]`);
+const row = (page: Page, id: number) => page.locator(`#ws-list .wsr-row[data-br-id="${id}"]`);
 
 test.describe('@staff:workshop Bike reports in the Workshop list', () => {
   test('a report is a row in the Workshop list: bike, rider, booking, fault, note, time, open or resolved', async ({ page }) => {
@@ -265,12 +266,13 @@ test.describe('@staff:workshop Bike reports in the Workshop list', () => {
     await expect(item).toHaveText('2');
     await expect(item).toHaveAttribute('title', '1 new workshop requests · 1 open bike reports');
     await expect(page.locator('#ws-list .ws-row')).toHaveCount(1); // still the requests until the pill is picked
-    await expect(page.locator('#ws-list .br-row')).toHaveCount(0);
+    await expect(page.locator('#ws-list .wsr-row')).toHaveCount(0);
     await pill(page).click();
     await expect(pill(page)).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('#ws-list .br-row')).toHaveCount(2);
-    await expect(page.locator('#ws-list .br-row').first()).toHaveAttribute('data-br-id', '5'); // open ones lead
+    await expect(page.locator('#ws-list .wsr-row')).toHaveCount(2);
+    await expect(page.locator('#ws-list .wsr-row').first()).toHaveAttribute('data-br-id', '5'); // open ones lead
     const r = row(page, 5);
+    await expect(r).toHaveCSS('display', 'block'); // stacked like every Workshop row (its class is its own: .br-row is the several-bikes return dialog's)
     await expect(r.locator('.ca-name')).toHaveText('H-12 · Brakes');
     await expect(r.locator('.ca-status')).toHaveText('Open');
     await expect(r.locator('.ca-when')).toContainText('Sent');
@@ -292,7 +294,7 @@ test.describe('@staff:workshop Bike reports in the Workshop list', () => {
     const fold = page.locator('[data-srch="ws"] .srch-btn'); // a phone folds the search into a button
     if (await fold.isVisible()) await fold.click();
     await page.locator('#ws-search-input').fill('lights');
-    await expect(page.locator('#ws-list .br-row')).toHaveCount(1);
+    await expect(page.locator('#ws-list .wsr-row')).toHaveCount(1);
     await expect(row(page, 3)).toBeVisible();
     await page.locator('#ws-search-input').fill('nothing like it');
     await expect(page.locator('#ws-list')).toContainText('No request matches your search.');

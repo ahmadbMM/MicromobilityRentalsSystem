@@ -175,6 +175,22 @@ test.describe('@customer:bookings "Still coming?" on the ticket', () => {
     await expect.poll(() => page.evaluate('location.pathname+location.search')).toBe('/my-bookings');
     await expect(still(page)).toBeInViewport();
   });
+
+  test('a booking of several riders gets a reminder for each: a later rider\'s link opens the same ticket', async ({ page }) => {
+    // the ticket is named by the booking's first rider (q8); the link carries the second one's row (q9). It is the later
+    // of two bookings, so the page has to scroll to reach it.
+    const far = { approval: 'approved', price: 0, session_day: 'Saturday' };
+    const rows = [row('q1', NIGHT), row('q8', '2099-01-03', { ...far, queue_num: 8 }), row('q9', '2099-01-03', { ...far, queue_num: 9, name: 'Sara Haddad' })];
+    await page.clock.setFixedTime(new Date('2026-11-20T10:00:00+03:00'));
+    await stubSupabase(page, { sessions: [night(), later], customers: [], queue_entries: rows, bikes: [], 'rpc:my_bookings': rows });
+    await loginCustomer(page, { id: 'c1', name: 'Lina Haddad', gender: 'male' });
+    await page.goto('/my-bookings?tk=q9');
+    await waitForSb(page);
+    const tk = page.locator('#tab-myrides .ticket-card').filter({ has: page.locator('.cu-tk-share[data-on-click*="q8"]') });
+    await expect(tk).toHaveCount(1);
+    await expect.poll(() => page.evaluate('window.scrollY')).toBeGreaterThan(0);
+    await expect(tk).toBeInViewport();
+  });
 });
 
 test.describe('@customer:members "Still coming?" on the Community card', () => {
@@ -286,6 +302,8 @@ test.describe('@customer:bookings the evening-before reminder', () => {
     expect(sql).toContain(`'/my-bookings?tk=' || r.id`);
     expect(sql).toMatch(/case when coalesce\(r\.no_bike, false\) then 'remind:nc' else 'remind' end/);
     expect(sql).toMatch(/reminded_kind in \('24h', '2h', 'push'\)/);
+    // the reach build's seed file (run again by hand) no longer writes the reminder, so it cannot put the older words back
+    expect(readFileSync(resolve(__dirname, '../supabase/seeds/push_words_more.sql'), 'utf8')).not.toMatch(/^\s*\('remind(?::nc)?'/m);
     // the function is the rider's own door and nobody else's
     expect(sql).toMatch(/not _cust_token_ok\(p_id, p_token\)/);
     expect(sql).toMatch(/q\.session_id = p_session and q\.customer_id = p_id and q\.status = 'waiting'/);

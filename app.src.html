@@ -21024,7 +21024,9 @@ function _readStcTk(pn){
   }catch(e){}
 }
 function _stcSeek(id,n){
-  const k=S.view==='customer'&&S.custTab==='myrides'&&S.dataLoaded?[...document.querySelectorAll('#tab-myrides .ticket-card')].find(x=>[...x.querySelectorAll('[data-on-click]')].some(b=>{try{const v=JSON.parse(b.getAttribute('data-on-click'));return v[0]==='_tkShare'&&v[1]===id;}catch(_){return false;}})):null;
+  // A booking of several riders gets one reminder for each, and its ticket is named by the first of them: any rider's row finds it.
+  const e=_qGet(id),mine=x=>x===id||!!(e&&(x=_qGet(x))&&x.customerId===e.customerId&&_wlKey(x)===_wlKey(e));
+  const k=S.view==='customer'&&S.custTab==='myrides'&&S.dataLoaded?[...document.querySelectorAll('#tab-myrides .ticket-card')].find(x=>[...x.querySelectorAll('[data-on-click]')].some(b=>{try{const v=JSON.parse(b.getAttribute('data-on-click'));return v[0]==='_tkShare'&&mine(v[1]);}catch(_){return false;}})):null;
   if(k){const bar=document.getElementById('topbar');window.scrollTo(0,Math.max(0,k.getBoundingClientRect().top+window.scrollY-((bar&&bar.getBoundingClientRect().height)||0)-12));}
   else if(n>0)setTimeout(()=>_stcSeek(id,n-1),500); // not drawn yet (the sign-in, the first read): looked for again, for 20 seconds
 }
@@ -59097,7 +59099,7 @@ function _brRow(r){
   const day=e?e.sessionDate:s?(s.session_date||s.id):'';
   const when=[esc(t('wsSentOn').replace('{0}',fmtStamp(r.created_at)))];
   if(!open&&r.resolved_at)when.push(esc(t('brResolvedOn').replace('{0}',fmtStamp(r.resolved_at)))+(r.resolved_by?' '+esc(t('flgBy').replace('{0}',r.resolved_by)):''));
-  return`<div class="ca-row ws-row br-row" data-br-id="${esc(r.id)}" data-status="${esc(r.status)}">
+  return`<div class="ca-row ws-row wsr-row" data-br-id="${esc(r.id)}" data-status="${esc(r.status)}">
     <div class="ca-head">
       <div class="ws-grow"><div class="ca-name"><bdi>${esc(_brBike(r))}</bdi> · ${esc(_brFault(r))}</div><div class="ca-when">${when.join(' · ')}</div></div>
       <span class="ca-status ${open?'ws-c-orange':'ws-c-muted'}"><span class="ca-dot ${open?'ws-bg-orange':'ws-bg-muted'}"></span>${t(open?'brOpen':'brResolved')}</span>
