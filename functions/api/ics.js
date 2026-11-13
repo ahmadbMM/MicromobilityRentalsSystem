@@ -164,7 +164,7 @@ function feedAnswer(body) {
 export const FEED_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 // Each row is the app's own string of that name, in FEED_LANGS order: ride = icsRideTitle; the kinds = ev...Name;
 // jcc, jyc, gym = evJccName, venueJyc, venueGymnation; meet = meetPointLbl; gather, start = commGatherShort,
-// commStartShort; doors, heat = vlDoorsShort, vlHeatShort; dRide, dMeet, dBike, dVisit = icsDesc...; alarm = icsAlarm.
+// commStartShort; doors, heat = vlDoorsShort, vlHeatShort; arrive, dinner = fhArrive, fhDinner (the Farm House Night); dRide, dMeet, dBike, dVisit = icsDesc...; alarm = icsAlarm.
 export const FEED_WORDS = {
   ride: ['MicroMobility Ride', 'جولة MicroMobility', 'Sortie MicroMobility', 'Recorrido MicroMobility', 'Passeio MicroMobility', 'MicroMobility رائیڈ', 'MicroMobility राइड', 'Ride sa MicroMobility', 'MicroMobility राइड', 'MicroMobility রাইড'],
   petromin: ['Petromin night', 'ليلة بترومين', 'Soirée Petromin', 'Noche Petromin', 'Noite Petromin', 'پیٹرومن کی رات', 'पेट्रोमिन की रात', 'Petromin night', 'पेट्रोमिन को रात', 'Petromin-এর রাত'],
@@ -178,6 +178,7 @@ export const FEED_WORDS = {
   defe5k: ['DEFE 5KM Run', 'سباق دفء 5 كم', 'DEFE 5KM Run', 'DEFE 5KM Run', 'DEFE 5KM Run', 'DEFE 5KM Run', 'DEFE 5KM Run', 'DEFE 5KM Run', 'DEFE 5KM Run', 'DEFE 5KM Run'],
   blood: ['Micromobility Blood Donation', 'مايكروموبيليتي التبرع بالدم', 'Micromobility Don de sang', 'Micromobility Donación de sangre', 'Micromobility Doação de sangue', 'Micromobility خون کا عطیہ', 'Micromobility रक्तदान', 'Micromobility Pagbibigay ng Dugo', 'Micromobility रक्तदान', 'Micromobility রক্তদান'],
   yoga: ['Hatha Yoga for Cyclists', 'هاثا يوغا لراكبي الدراجات', 'Hatha yoga pour cyclistes', 'Hatha yoga para ciclistas', 'Hatha ioga para ciclistas', 'سائیکل سواروں کے لیے ہٹھ یوگا', 'साइकिल चालकों के लिए हठ योग', 'Hatha Yoga para sa mga Siklista', 'साइकल चालकहरूका लागि हठ योग', 'সাইক্লিস্টদের জন্য হঠ যোগ'],
+  farm: ['Farm House Night', 'ليلة المزرعة', 'Soirée à la ferme', 'Noche en la granja', 'Noite na fazenda', 'فارم ہاؤس نائٹ', 'फ़ार्म हाउस नाइट', 'Farm House Night', 'फार्म हाउस नाइट', 'ফার্ম হাউস নাইট'],
   saturday: ['Saturday Social Ride', 'جولة السبت الاجتماعية', 'Sortie sociale du samedi', 'Recorrido social del sábado', 'Passeio social de sábado', 'ہفتے کی سوشل رائیڈ', 'शनिवार सोशल राइड', 'Saturday Social Ride', 'शनिबार सामाजिक राइड', 'শনিবারের সোশ্যাল রাইড'],
   jcc: ['Jeddah Corniche Circuit', 'حلبة كورنيش جدة', 'Circuit de la Corniche de Djeddah', 'Circuito de la Corniche de Yeda', 'Circuito da Corniche de Jeddah', 'جدہ کورنیش سرکٹ', 'जेद्दाह कॉर्निश सर्किट', 'Jeddah Corniche Circuit', 'जेद्दा कोर्निश सर्किट', 'জেদ্দা কর্নিশ সার্কিট'],
   jyc: ['Jeddah Yacht Club', 'نادي جدة لليخوت', 'Jeddah Yacht Club', 'Jeddah Yacht Club', 'Jeddah Yacht Club', 'جدہ یاٹ کلب', 'जेद्दाह यॉट क्लब', 'Jeddah Yacht Club', 'जेद्दा याट क्लब', 'জেদ্দা ইয়ট ক্লাব'],
@@ -186,6 +187,8 @@ export const FEED_WORDS = {
   gather: ['Gathering', 'التجمع', 'Rassemblement', 'Encuentro', 'Encontro', 'اجتماع', 'एकत्रण', 'Pagtitipon', 'भेला', 'জড়ো হওয়া'],
   start: ['Start', 'الانطلاق', 'Départ', 'Salida', 'Saída', 'آغاز', 'शुरू', 'Simula', 'सुरु', 'শুরু'],
   doors: ['Doors open', 'فتح الأبواب', 'Ouverture des portes', 'Apertura de puertas', 'Abertura dos portões', 'دروازے کھلنے کا وقت', 'दरवाज़े खुलेंगे', 'Bukas ang pinto', 'ढोका खुल्ने', 'দরজা খুলবে'],
+  arrive: ['Arrival', 'الوصول', 'Arrivée', 'Llegada', 'Chegada', 'آمد', 'आगमन', 'Pagdating', 'आगमन', 'আগমন'],
+  dinner: ['Dinner', 'العشاء', 'Dîner', 'Cena', 'Jantar', 'رات کا کھانا', 'रात का खाना', 'Hapunan', 'बेलुकीको खाना', 'রাতের খাবার'],
   heat: ['First heat', 'أول دفعة', 'Première vague', 'Primera tanda', 'Primeira bateria', 'پہلی ہیٹ', 'पहली हीट', 'Unang heat', 'पहिलो हिट', 'প্রথম হিট'],
   dRide: ['Your MicroMobility ride. Be at the meeting point by the gathering time and show your ticket there.', 'جولتك مع MicroMobility. كن في نقطة التجمع بحلول وقت التجمع واعرض تذكرتك هناك.', 'Votre sortie MicroMobility. Soyez au point de rendez-vous à l’heure de rassemblement et présentez-y votre billet.', 'Tu recorrido con MicroMobility. Llega al punto de encuentro a la hora de encuentro y muestra allí tu entrada.', 'O seu passeio MicroMobility. Esteja no ponto de encontro no horário de encontro e mostre lá o seu bilhete.', 'آپ کی MicroMobility رائیڈ۔ اجتماع کے وقت تک ملاقات کی جگہ پر پہنچیں اور وہاں اپنا ٹکٹ دکھائیں۔', 'आपकी MicroMobility राइड। एकत्र होने के समय तक मिलने की जगह पर पहुँचें और वहाँ अपना टिकट दिखाएँ।', 'Ang iyong ride sa MicroMobility. Pumunta sa meeting point bago ang oras ng pagtitipon at ipakita roon ang iyong ticket.', 'तपाईंको MicroMobility राइड। भेला हुने समयसम्म भेट्ने ठाउँमा आइपुग्नुहोस् र त्यहाँ आफ्नो टिकट देखाउनुहोस्।', 'আপনার MicroMobility রাইড। জড়ো হওয়ার সময়ের মধ্যে মিলনস্থলে পৌঁছান এবং সেখানে আপনার টিকিট দেখান।'],
   dMeet: ['Your MicroMobility booking. Be at the meeting point by the gathering time and show your ticket there.', 'حجزك مع MicroMobility. كن في نقطة التجمع بحلول وقت التجمع واعرض تذكرتك هناك.', 'Votre réservation MicroMobility. Soyez au point de rendez-vous à l’heure de rassemblement et présentez-y votre billet.', 'Tu reserva de MicroMobility. Llega al punto de encuentro a la hora de encuentro y muestra allí tu entrada.', 'A sua reserva MicroMobility. Esteja no ponto de encontro no horário de encontro e mostre lá o seu bilhete.', 'آپ کی MicroMobility بکنگ۔ اجتماع کے وقت تک ملاقات کی جگہ پر پہنچیں اور وہاں اپنا ٹکٹ دکھائیں۔', 'आपकी MicroMobility बुकिंग। एकत्र होने के समय तक मिलने की जगह पर पहुँचें और वहाँ अपना टिकट दिखाएँ।', 'Ang iyong booking sa MicroMobility. Pumunta sa meeting point bago ang oras ng pagtitipon at ipakita roon ang iyong ticket.', 'तपाईंको MicroMobility बुकिङ। भेला हुने समयसम्म भेट्ने ठाउँमा आइपुग्नुहोस् र त्यहाँ आफ्नो टिकट देखाउनुहोस्।', 'আপনার MicroMobility বুকিং। জড়ো হওয়ার সময়ের মধ্যে মিলনস্থলে পৌঁছান এবং সেখানে আপনার টিকিট দেখান।'],
@@ -193,9 +196,9 @@ export const FEED_WORDS = {
   dVisit: ['Your MicroMobility booking. Arrive 10 minutes early and show your ticket when you arrive.', 'حجزك مع MicroMobility. احضر قبل الموعد بـ 10 دقائق واعرض تذكرتك عند وصولك.', 'Votre réservation MicroMobility. Arrivez 10 minutes en avance et présentez votre billet à votre arrivée.', 'Tu reserva de MicroMobility. Llega 10 minutos antes y muestra tu entrada al llegar.', 'A sua reserva MicroMobility. Chegue 10 minutos antes e mostre o seu bilhete ao chegar.', 'آپ کی MicroMobility بکنگ۔ 10 منٹ پہلے پہنچیں اور پہنچنے پر اپنا ٹکٹ دکھائیں۔', 'आपकी MicroMobility बुकिंग। 10 मिनट पहले पहुँचें और पहुँचने पर अपना टिकट दिखाएँ।', 'Ang iyong booking sa MicroMobility. Dumating nang 10 minuto nang maaga at ipakita ang iyong ticket pagdating mo.', 'तपाईंको MicroMobility बुकिङ। 10 मिनेट अगाडि आइपुग्नुहोस् र आइपुग्दा आफ्नो टिकट देखाउनुहोस्।', 'আপনার MicroMobility বুকিং। 10 মিনিট আগে পৌঁছান এবং পৌঁছে আপনার টিকিট দেখান।'],
   alarm: ['Reminder: {0}', 'تذكير: {0}', 'Rappel : {0}', 'Recordatorio: {0}', 'Lembrete: {0}', 'یاد دہانی: {0}', 'रिमाइंडर: {0}', 'Paalala: {0}', 'सम्झना: {0}', 'অনুস্মারক: {0}'],
 };
-const FEED_KINDS = ['petromin', 'swim', 'workshop', 'runher', 'vlap', 'arena', 'defe5k', 'blood', 'yoga'];
-const FEED_NO_BIKE = new Set(['swim', 'workshop', 'event', 'runher', 'vlap', 'arena', 'defe5k', 'blood', 'yoga']);
-const FEED_GATHERS = new Set(['saturday', 'snd96', 'runher', 'vlap']); // their times are "gathering, then start"
+const FEED_KINDS = ['petromin', 'swim', 'workshop', 'runher', 'vlap', 'arena', 'defe5k', 'blood', 'yoga', 'farm'];
+const FEED_NO_BIKE = new Set(['swim', 'workshop', 'event', 'runher', 'vlap', 'arena', 'defe5k', 'blood', 'yoga', 'farm']);
+const FEED_GATHERS = new Set(['saturday', 'snd96', 'runher', 'vlap', 'farm']); // their times are "gathering, then start" (the Farm House Night: arrival, then dinner)
 const FEED_VENUE = { JCC: 'jcc', JYC: 'jyc', 'Gymnation, Tahlia Street': 'gym' };
 
 // The calendar: one event per row the database answered with, less what has already ended.
@@ -254,14 +257,14 @@ function feedEvent(r, w, lang, origin) {
   // A ride whose spot is not told yet comes without its location (calendar_feed blanks it): it names none.
   const comm = r.ek === 'community' && r.rk !== 'snd96';
   const meetsAt = (comm && r.appr !== false) || kind === 'runher' || kind === 'defe5k' || kind === 'arena';
-  const link = feedUrl(r.meet), meet = (meetsAt || kind === 'yoga') && link ? link : '';
+  const link = feedUrl(r.meet), meet = (meetsAt || kind === 'yoga' || kind === 'farm') && link ? link : '';
   let lo = meet;
   if (!lo && !r.held) {
     const loc = feedText(r.loc) || (kind === 'runher' ? 'JYC' : kind === 'vlap' || kind === 'defe5k' || kind === 'blood' ? 'JCC' : '');
     lo = Object.prototype.hasOwnProperty.call(FEED_VENUE, loc) ? w(FEED_VENUE[loc]) : loc || w('jcc');
   }
   const de = [];
-  if (gathers && m) de.push(`${w(kind === 'vlap' ? 'doors' : 'gather')} ${feedTime(m[1], m[2], lang)} · ${w(kind === 'vlap' ? 'heat' : 'start')} ${feedTime(m[3], m[4], lang)}`);
+  if (gathers && m) de.push(`${w(kind === 'vlap' ? 'doors' : kind === 'farm' ? 'arrive' : 'gather')} ${feedTime(m[1], m[2], lang)} · ${w(kind === 'vlap' ? 'heat' : kind === 'farm' ? 'dinner' : 'start')} ${feedTime(m[3], m[4], lang)}`);
   de.push(w(gathers ? (bike ? 'dRide' : 'dMeet') : bike ? 'dBike' : 'dVisit'));
   if (meet) de.push(`${w('meet')}: ${meet}`);
   const endMs = base + e * 6e4;

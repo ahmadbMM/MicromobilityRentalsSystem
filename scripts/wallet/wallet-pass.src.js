@@ -186,7 +186,7 @@ async function buildPkpass(b, cfg) {
   // (the Victory Lap and the DEFE run too, when staff gave one: they are races, not rides)
   const _loc = String((sess && sess.location) || "").trim();
   const _locName = { JCC: "Jeddah Corniche Circuit", JYC: "Jeddah Yacht Club" }[_loc] || _loc;
-  const venue = ride === "event" || isBlood ? _locName || "Jeddah Corniche Circuit" : (ride === "vlap" || ride === "defe5k" || ride === "yoga") && _locName ? _locName : skin.venue;
+  const venue = ride === "event" || isBlood ? _locName || "Jeddah Corniche Circuit" : (ride === "vlap" || ride === "defe5k" || ride === "yoga" || ride === "farm") && _locName ? _locName : skin.venue;
   const rideName = (sess && sess.title) || skin.venue;
   const numsDisplay = hideNum ? rideName : _numsDisplay(nums) || (b.queue_num != null ? `#${b.queue_num}` : rideName);
   const time = _sessClock(sess) || b.session_time || "";
@@ -234,10 +234,10 @@ async function buildPkpass(b, cfg) {
   // A ride that gathers has no bikes to collect: that time is when to turn up.
   if (collectStr) secondary.push({
     key: "collect",
-    label: _gathersTime(sess) ? "GATHERING TIME" : bikeRide ? "BIKE COLLECTION" : "ARRIVE BY",
+    label: ride === "farm" ? "ARRIVAL" : _gathersTime(sess) ? "GATHERING TIME" : bikeRide ? "BIKE COLLECTION" : "ARRIVE BY", // the Farm House Night: arrival, then dinner (2026-11-13)
     value: collectStr,
   });
-  if (startStr && !isBlood) secondary.push({ key: "start", label: isRun ? "RUN STARTS" : isRace ? "RACE STARTS" : bikeRide ? "RIDE STARTS" : "STARTS", value: startStr });
+  if (startStr && !isBlood) secondary.push({ key: "start", label: ride === "farm" ? "DINNER" : isRun ? "RUN STARTS" : isRace ? "RACE STARTS" : bikeRide ? "RIDE STARTS" : "STARTS", value: startStr });
   // yoga ends at a time of its own (the app's ticket says start and end), and the mat comes with the member
   if (ride === "yoga" && clock && clock.endMin != null) secondary.push({ key: "end", label: "ENDS", value: _hhmm(clock.endMin) });
   const auxiliary = [];
@@ -771,9 +771,9 @@ function _sessClock(sess) {
 // the end time entirely, leaving the pass live for hours after the session was over.
 // The app keys this off KIND_TRAITS.gathering; this is the same table.
 // The Victory Lap gathers (doors open, then the first heat); the DEFE run does not.
-const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, petromin: false, swim: false, workshop: false, jcc: false, defe5k: false, yoga: false };
+const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, petromin: false, swim: false, workshop: false, jcc: false, defe5k: false, yoga: false, farm: true };
 // The kinds that hand out no bike (the app's KIND_TRAITS bike:false).
-const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true, blood: true, yoga: true };
+const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true, blood: true, yoga: true, farm: true };
 // Who a booking is for, by kind: riders only where there is a bike.
 function _people(ride) {
   if (ride === "runher" || ride === "defe5k") return { one: "Runner", many: "Runners" };
@@ -835,6 +835,8 @@ const RIDES = {
   // meta line uses. Both clear AA.
   // Yoga (2026-11-12, styles.css th-yoga): cream with the deep earth ink and clay labels (4.8:1 on the cream)
   yoga:     { bg: "rgb(255,251,245)", fg: "rgb(59,42,32)", label: "rgb(180,83,47)", venue: "Hatha Yoga for Cyclists" },
+  // The Farm House Night (2026-11-13, styles.css th-farm): the venue's cream with its deep ink and rust labels (6.8:1 on the cream)
+  farm:     { bg: "rgb(251,243,234)", fg: "rgb(58,30,20)", label: "rgb(138,63,39)", venue: "Farm House Night" },
   jcc:      { bg: "rgb(6,52,111)", fg: "rgb(255,255,255)", label: "rgb(159,213,238)", venue: "Jeddah Corniche Circuit" }
 };
 function _rideOf(sess) {
@@ -846,7 +848,7 @@ function _rideOf(sess) {
   if (sess.ride_kind === "snd96") return "snd96";
   if (sess.event_kind !== "community") return "jcc";
   const k = sess.ride_kind;
-  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" || k === "vlap" || k === "defe5k" || k === "blood" || k === "yoga" ? k : "saturday";
+  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" || k === "vlap" || k === "defe5k" || k === "blood" || k === "yoga" || k === "farm" ? k : "saturday";
 }
 function _hhmm(min) {
   if (min == null) return "";

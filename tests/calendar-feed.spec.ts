@@ -575,7 +575,7 @@ test.describe('@customer:account the calendar\'s events', () => {
     const m = await freshModule('functions/api/ics.js');
     const langs = m.FEED_LANGS as string[], words = m.FEED_WORDS as Record<string, string[]>;
     expect(langs).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']);
-    const KEY: Record<string, string> = { ride: 'icsRideTitle', petromin: 'evPetroName', swim: 'evSwimName', workshop: 'evWorkshopName', snd96: 'evSnd96Name', event: 'evEventName', runher: 'evRunHerName', vlap: 'evVlapName', arena: 'evArenaName', defe5k: 'evDefeName', blood: 'evBloodName', yoga: 'evYogaName', saturday: 'evSatName', jcc: 'evJccName', jyc: 'venueJyc', gym: 'venueGymnation', meet: 'meetPointLbl', gather: 'commGatherShort', start: 'commStartShort', doors: 'vlDoorsShort', heat: 'vlHeatShort', dRide: 'icsDescRide', dMeet: 'icsDescMeet', dBike: 'icsDescBike', dVisit: 'icsDescVisit', alarm: 'icsAlarm' };
+    const KEY: Record<string, string> = { ride: 'icsRideTitle', petromin: 'evPetroName', swim: 'evSwimName', workshop: 'evWorkshopName', snd96: 'evSnd96Name', event: 'evEventName', runher: 'evRunHerName', vlap: 'evVlapName', arena: 'evArenaName', defe5k: 'evDefeName', blood: 'evBloodName', yoga: 'evYogaName', farm: 'evFarmName', saturday: 'evSatName', jcc: 'evJccName', jyc: 'venueJyc', gym: 'venueGymnation', meet: 'meetPointLbl', gather: 'commGatherShort', start: 'commStartShort', doors: 'vlDoorsShort', heat: 'vlHeatShort', arrive: 'fhArrive', dinner: 'fhDinner', dRide: 'icsDescRide', dMeet: 'icsDescMeet', dBike: 'icsDescBike', dVisit: 'icsDescVisit', alarm: 'icsAlarm' };
     expect(Object.keys(words).sort()).toEqual(Object.keys(KEY).sort());
     for (const [k, row] of Object.entries(words)) {
       expect(row, k).toHaveLength(10);

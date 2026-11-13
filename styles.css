@@ -12132,6 +12132,95 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-yoga{--rq-ev:#b4532f;}
 html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-yoga{--rq-ev:#e8916a;}
 @media(max-width:400px){.yg-card-title{font-size:19px;}.yg-card-mark{height:26px;}.yg-flow-mark{height:34px;}.yg-know-k{min-width:0;width:100%;}.yg-scene{width:140px;height:70px;}}
 /* ════════════════════════════════════════════════════════════════════════
+   FARM HOUSE NIGHT (the user, 2026-11-13) - "Harvest Supper", from the venue's own Instagram (@thefarmhouse.jed):
+   its rust ground deepening to the corner, peach lettering in a heavy rounded face (Rubik 800), and the fanned tail
+   of its turkey, drawn as rounded feathers rising from the far corner. The date card is the venue's rust tile; the
+   flow from the family step on (body.farm-skin), the plate over it, the ticket in cream and rust, staff's chips and rows.
+   Peach on rust 4.8:1 at the title's size, cream on rust 5.1:1 and up.
+   ════════════════════════════════════════════════════════════════════════ */
+:root{--fh-rust:#8A3F27;--fh-rust-dk:#6E2C1C;--fh-rust-lt:#9A5236;--fh-ember:#C9502A;--fh-maroon:#7E2034;--fh-peach:#F3C7A9;--fh-peach-lt:#F6D9C5;--fh-cream:#FBF3EA;--fh-milk:#FBEFE4;--fh-ink:#3A1E14;--fh-ink-2:#6E4A3A;--fh-glow:237,176,145;}
+.ev-farm{--ev:#8A3F27;--ev-rgb:138,63,39;}
+body:not(.view-staff) .ev-farm:not(.landing-event-card){--ev:#8A3F27;--ev-rgb:138,63,39;}
+html[data-staff-theme="dark"] body.view-staff .ev-farm{--ev:#E8A383;--ev-rgb:232,163,131;}
+/* the date's card: the venue's tile */
+body .sess-card.fh-card{
+  position:relative;overflow:hidden;isolation:isolate;gap:6px;padding-top:14px;color:var(--fh-milk);
+  background:linear-gradient(135deg,var(--fh-rust-lt) 0%,var(--fh-rust) 48%,var(--fh-rust-dk) 100%);
+  border:1px solid rgba(110,44,28,.55);border-inline-start:3px solid var(--fh-peach);}
+html[dir="rtl"] body .sess-card.fh-card{background:linear-gradient(225deg,var(--fh-rust-lt) 0%,var(--fh-rust) 48%,var(--fh-rust-dk) 100%);}
+body .sess-card.fh-card:hover:not(.sess-full){filter:brightness(1.04);}
+body .sess-card.fh-card.sess-selected,
+body:not(.view-staff) .sess-day-list .sess-card.fh-card.sess-selected{border-color:var(--fh-peach);border-inline-start-color:var(--fh-peach);box-shadow:inset 0 0 0 2px var(--fh-peach);}
+body:not(.view-staff) .sess-card.fh-card .sess-tick{box-shadow:inset 0 0 0 1.5px rgba(243,199,169,.7);}
+body:not(.view-staff) .sess-card.fh-card.sess-selected .sess-tick{background:var(--fh-peach);color:var(--fh-rust-dk);box-shadow:none;}
+body:not(.view-staff) .sess-card.fh-card.sess-selected .sess-tick path{stroke:var(--fh-rust-dk);}
+body .sess-card.fh-card:focus-visible{outline:2px solid var(--fh-peach);outline-offset:2px;}
+body:not(.view-staff) .sess-wrap:has(>.fh-card) .sess-about.sess-i{color:var(--fh-peach);}
+body:not(.view-staff) .sess-wrap:has(>.fh-card) .sess-about.sess-i:hover{color:var(--fh-milk);}
+body:not(.view-staff) .sess-card.fh-card .sess-card-spots{background:var(--fh-milk);color:var(--fh-rust-dk);padding:2px 8px;border-radius:999px;}
+.fh-scene{position:absolute;z-index:-1;bottom:-1px;inset-inline-end:-22px;width:176px;height:88px;pointer-events:none;}
+.fh-scene .fh-fth{fill:rgba(var(--fh-glow),.26);}
+.fh-scene .fh-ring{fill:none;stroke:rgba(var(--fh-glow),.3);stroke-width:1.2;}
+.fh-scene .fh-core{fill:rgba(126,32,52,.42);}
+.fh-card-top{display:flex;align-items:center;gap:10px;min-width:0;}
+.fh-card-mark{height:30px;width:auto;display:block;flex:none;}
+.fh-card-title{font-family:'Rubik','IBM Plex Sans Arabic','Noto Sans Devanagari','Noto Sans Bengali',sans-serif;font-size:21px;font-weight:800;letter-spacing:.2px;line-height:1.15;color:var(--fh-peach);overflow-wrap:anywhere;}
+body:not(.view-staff) :is(.fh-card-title,.fh-flow-name){font-family:'Rubik','IBM Plex Sans Arabic','Noto Sans Devanagari','Noto Sans Bengali',sans-serif;}
+.fh-card-meta{display:flex;flex-wrap:wrap;align-items:center;gap:3px 9px;font-size:13px;font-weight:600;color:var(--fh-milk);min-width:0;}
+.fh-card-meta i{width:1px;height:12px;background:rgba(243,199,169,.5);display:inline-block;flex:none;}
+.fh-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;min-width:0;}
+.fh-card-with{font-size:12.5px;font-weight:700;color:var(--fh-peach-lt);min-width:0;overflow-wrap:anywhere;}
+/* the flow from the family step on */
+body.farm-skin:not(.view-staff){--go:#8A3F27;--go-2:#6E2C1C;--go-wash:rgba(237,176,145,.18);--neon:#F3C7A9;--green-rgb:138,63,39;--accent2:rgba(138,63,39,.45);}
+body.farm-skin:not(.view-staff) .toggle-btn.active{background:var(--fh-rust);border-color:var(--fh-rust);color:#fff;}
+.fh-flow-head{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;gap:14px;margin:0 0 16px;padding:14px 16px;min-width:0;
+  background:linear-gradient(135deg,var(--fh-rust-lt) 0%,var(--fh-rust) 50%,var(--fh-rust-dk) 100%);
+  border:1px solid rgba(110,44,28,.55);border-inline-start:3px solid var(--fh-peach);color:var(--fh-milk);}
+html[dir="rtl"] .fh-flow-head{background:linear-gradient(225deg,var(--fh-rust-lt) 0%,var(--fh-rust) 50%,var(--fh-rust-dk) 100%);}
+.fh-flow-mark{height:40px;width:auto;flex:none;display:block;}
+.fh-flow-copy{min-width:0;flex:1 1 auto;}
+.fh-flow-name{font-family:'Rubik','IBM Plex Sans Arabic',sans-serif;font-size:19px;font-weight:800;color:var(--fh-peach);line-height:1.2;overflow-wrap:anywhere;}
+.fh-flow-sub{margin-top:3px;font-size:12.5px;font-weight:700;color:var(--fh-milk);}
+/* the ticket, in cream and rust */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-farm{
+  --night:var(--fh-cream);--night-2:#F6E3D4;--night-ink:#3A1E14;--night-ink-2:rgba(58,30,20,.7);--night-line:rgba(138,63,39,.22);--neon:#8A3F27;
+  --night-amber:#8A5300;--night-red:#B42318;--night-red-line:rgba(180,35,24,.35);color:var(--night-ink);
+  background:radial-gradient(120% 55% at 100% 100%,rgba(var(--fh-glow),.34) 0%,rgba(var(--fh-glow),.12) 38%,rgba(251,243,234,0) 66%) var(--fh-cream);
+  border:1px solid rgba(138,63,39,.32);}
+html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-farm{
+  background:radial-gradient(120% 55% at 0% 100%,rgba(var(--fh-glow),.34) 0%,rgba(var(--fh-glow),.12) 38%,rgba(251,243,234,0) 66%) var(--fh-cream);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-farm .ticket-num{font-family:'Rubik',sans-serif;font-weight:800;}
+body:not(.view-staff) .ticket-card.tk-th.th-farm :is(.code-k-rw,.code-k-rf,.code-k-rb,.code-k-bd,.code-k-vl,.code-k-promo,.code-k-sat){--code-k:#8A3F27;}
+.ticket-card .tk-logo-ev .tk-logo-farm{height:30px;}
+/* the featured card on the event picker */
+body:not(.view-staff) .feat-card.feat-fh{color:var(--fh-milk);background:linear-gradient(135deg,var(--fh-rust-lt) 0%,var(--fh-rust) 50%,var(--fh-rust-dk) 100%);}
+html[dir="rtl"] body:not(.view-staff) .feat-card.feat-fh{background:linear-gradient(225deg,var(--fh-rust-lt) 0%,var(--fh-rust) 50%,var(--fh-rust-dk) 100%);}
+body:not(.view-staff) .feat-card.feat-fh:focus-visible{outline-color:var(--fh-peach);}
+.feat-fh .feat-date{background:var(--fh-cream);box-shadow:inset 0 0 0 1px rgba(110,44,28,.3);}
+.feat-fh .feat-date b{color:var(--fh-ink);}
+.feat-fh .feat-date span{color:var(--fh-ink-2);}
+.feat-fh .feat-date .feat-wd{color:#fff;background:var(--fh-rust);}
+.feat-fh .feat-name.fh-card-title{font-size:19px;}
+.feat-fh .feat-meta{font-weight:600;color:var(--fh-milk);}
+.feat-fh .feat-meta>span:not(.sess-card-spots)::before{background:rgba(243,199,169,.5);}
+.feat-fh .feat-foot>span:nth-child(2):not(.sess-card-spots){color:var(--fh-peach-lt);font-weight:700;}
+.feat-fh .sess-card-spots{background:var(--fh-milk);color:var(--fh-rust-dk);padding:2px 8px;border-radius:999px;}
+.feat-fh .feat-go{color:var(--fh-peach);}
+/* staff: the date's chip and the Bookings row's colour */
+body.view-staff :is(.sess-summary-chip,.sess-lc).th-farm{
+  --sf-chip-bg:radial-gradient(120% 160% at 100% 100%,rgba(var(--fh-glow),.3) 0%,rgba(var(--fh-glow),.1) 40%,rgba(251,243,234,0) 70%) var(--fh-cream);
+  --sf-ring:var(--fh-rust);border-color:rgba(138,63,39,.4);color:var(--fh-ink);background:var(--sf-chip-bg);}
+html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-farm{
+  --sf-chip-bg:radial-gradient(120% 160% at 100% 100%,rgba(var(--fh-glow),.2) 0%,rgba(var(--fh-glow),.07) 40%,rgba(16,19,24,0) 70%) #101318;
+  --sf-ring:#E8A383;border-color:rgba(232,163,131,.4);color:var(--text);}
+body.view-staff :is(.sess-summary-chip,.sess-lc).th-farm:hover{border-color:var(--sf-ring);}
+body.view-staff .sess-summary-chip.th-farm.active-sess,body.view-staff .sess-lc.th-farm.selected{border-color:var(--sf-ring);box-shadow:0 0 0 2px var(--sf-ring);}
+body.view-staff .sess-summary-chip.th-farm .sess-chip-event{font-family:'Rubik',sans-serif;font-weight:600;font-size:var(--sf-fs-xs);color:var(--fh-rust);}
+html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-farm .sess-chip-event{color:#E8A383;}
+body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-farm{--rq-ev:#8a3f27;}
+html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-farm{--rq-ev:#e8a383;}
+@media(max-width:400px){.fh-card-title{font-size:19px;}.fh-card-mark{height:26px;}.fh-flow-mark{height:34px;}.fh-scene{width:148px;height:74px;}.feat-fh .feat-name.fh-card-title{font-size:17px;}}
+/* ════════════════════════════════════════════════════════════════════════
    FEATURED (the user, 2026-11-13) - a date inside MicroMobility Experiences that staff feature (_featured):
    it leads the list of dates under a heading of its own, and the event picker shows it as a card that opens
    it. The heading wears the star on a neon disc (neon as a fill, ink on it); a card is the day as a tile in

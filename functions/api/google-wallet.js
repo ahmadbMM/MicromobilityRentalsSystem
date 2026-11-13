@@ -16,11 +16,11 @@
 // Without them the function answers 501 and the app hides its button.
 const SUPA_DEFAULT = "https://qpffkzmsfyilicwcsszz.supabase.co";
 const SAVE_URL = "https://pay.google.com/gp/v/save/";
-const KIND_NAMES = { blood: "Micromobility Blood Donation", yoga: "Hatha Yoga for Cyclists", jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday Social Ride", petromin: "Petromin ride", swim: "Swim session", workshop: "T100 Triathlon Prep", snd96: "Saudi National Day 96 Ride", runher: "Run for Her", event: "Event", vlap: "Victory Lap", defe5k: "DEFE 5KM Run" };
+const KIND_NAMES = { blood: "Micromobility Blood Donation", yoga: "Hatha Yoga for Cyclists", farm: "Farm House Night", jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday Social Ride", petromin: "Petromin ride", swim: "Swim session", workshop: "T100 Triathlon Prep", snd96: "Saudi National Day 96 Ride", runher: "Run for Her", event: "Event", vlap: "Victory Lap", defe5k: "DEFE 5KM Run" };
 // The kinds that hand out no bike (the app's KIND_TRAITS bike:false): their pass names no bike and no
 // riders (the owner, 2026-10-18: "make sure all non-cycling related sessions dont include anything about
 // cycling anywhere").
-const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true, blood: true, yoga: true };
+const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true, blood: true, yoga: true, farm: true };
 function people(kind, n) {
   const [one, many] = kind === "runher" || kind === "defe5k" ? ["Runner", "Runners"] : kind === "vlap" ? ["Athlete", "Athletes"] : NO_BIKE[kind] ? ["Participant", "Participants"] : ["Rider", "Riders"];
   return n > 1 ? `${many} (${n})` : one;
@@ -72,7 +72,7 @@ function rideKind(sess) {
   if (!sess || sess.event_kind !== "community") return "jcc";
   // runher as the app's _rideKind and the Apple pass read it: an untitled Run for Her was named
   // "Saturday Social Ride" here (2026-10-07).
-  return ["petromin", "swim", "workshop", "runher", "event", "vlap", "defe5k", "blood", "yoga"].includes(k) ? k : "saturday";
+  return ["petromin", "swim", "workshop", "runher", "event", "vlap", "defe5k", "blood", "yoga", "farm"].includes(k) ? k : "saturday";
 }
 // The app's own tests (_isCommunity, _isApprovalRide, _commPublished), as the Apple pass reads them:
 // the National Day ride left the community umbrella, and a ride staff approve is one whose

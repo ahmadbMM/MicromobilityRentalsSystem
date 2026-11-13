@@ -265,7 +265,7 @@ function _hubRs(s) {
   return typeof v === 'string' && Object.prototype.hasOwnProperty.call(HUB_RS, v) ? `<span class="hub-chip hub-rs hub-rs-${v}">${esc(_hT(HUB_RS[v]))}</span>` : '';
 }
 // Its two times as the ticket names them for its kind (R9): a ride that gathers, the gathering and the start (Victory
-// Lap: doors open and the first heat); a circuit or Petromin night, bike collection (a waitlisted rider's own) and the
+// Lap: doors open and the first heat; the Farm House Night: arrival and dinner); a circuit or Petromin night, bike collection (a waitlisted rider's own) and the
 // start; anything else (the pool, a run, yoga, a workshop) its start and end. With the moments that set the card's state:
 // when to turn up and when it starts (a start past midnight is the next day's).
 function _hubTimes(s, e) {
@@ -274,9 +274,9 @@ function _hubTimes(s, e) {
   const ds = String(s.session_date || s.id || '').slice(0, 10);
   const p = String((dep.slots(s.bike_slots) || {})._time || '').replace(/[<>"'&`]/g, '').split('-').map((x) => x.trim()).filter(Boolean);
   if (!p.length) return null;
-  const vl = _rideKind(s) === 'vlap', w = _hubW();
+  const vl = _rideKind(s) === 'vlap', fh = _rideKind(s) === 'farm', w = _hubW(); // the Farm House Night: arrival, then dinner (2026-11-13)
   let f, go, st;
-  if (dep.gathers(s)) { f = [[vl ? w.doors : w.gather, p[0]], [vl ? w.heat : w.start, p[1]]]; go = p[0]; st = p[1] || p[0]; }
+  if (dep.gathers(s)) { f = [[vl ? w.doors : fh ? w.arrive : w.gather, p[0]], [vl ? w.heat : fh ? w.dinner : w.start, p[1]]]; go = p[0]; st = p[1] || p[0]; }
   else if (dep.bike(s)) {
     const col = (e && e.status === 'waitlist' && dep.wlCollect && dep.wlCollect(s)) || dep.collect(s);
     f = [[w.collect, col], [w.start, p[0]]]; go = col || p[0]; st = p[0];
