@@ -8945,6 +8945,21 @@ body:not(.view-staff) .myr-bd{display:flex;align-items:center;gap:10px;width:100
 body:not(.view-staff) .myr-bd-t{flex:1;font-size:var(--fs-15);font-weight:700;}
 body:not(.view-staff) .myr-bd-n{font-size:var(--fs-15);font-weight:600;font-variant-numeric:tabular-nums;}
 body:not(.view-staff) .myr-bd .cu-ic{color:var(--ink-2);}
+/* Personal landmarks (new features build F16, 2026-11-13). The first ride's anniversary: a card that leads Stats for
+   its week - the years, the first ride's date, the team's line and the team's name. The kinds tried: a checklist under
+   By event, a tick in the action green on a kind done and an empty ring until then. */
+body:not(.view-staff) .lm-anniv{display:grid;gap:6px;margin:18px 0 -10px;padding:20px 22px;background:var(--card);border:1px solid transparent;border-radius:var(--r-card);box-shadow:var(--pl-1);}
+body:not(.view-staff) .lm-anniv-t{font-size:var(--fs-20);font-weight:700;line-height:1.25;color:var(--ink);}
+body:not(.view-staff) .lm-anniv-d{font-size:var(--fs-15);color:var(--ink-2);}
+body:not(.view-staff) .lm-anniv-l{margin:8px 0 0;font-size:var(--fs-15);line-height:1.5;color:var(--ink);white-space:pre-line;overflow-wrap:anywhere;}
+body:not(.view-staff) .lm-anniv-s{font-size:var(--fs-15);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) .lm-kinds-h{display:flex;justify-content:space-between;gap:16px;}
+body:not(.view-staff) .lm-kinds-h bdi{font-weight:600;font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .lm-kinds ul{display:grid;margin:0;padding:0;list-style:none;}
+body:not(.view-staff) .lm-kinds li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:var(--fs-15);color:var(--ink-2);}
+body:not(.view-staff) .lm-kinds li.on{color:var(--ink);}
+body:not(.view-staff) .lm-kinds li .cu-ic{flex:none;color:var(--go);}
+body:not(.view-staff) .lm-kinds li i{flex:none;box-sizing:border-box;width:16px;height:16px;border:1.75px solid var(--line);border-radius:50%;}
 /* The account page's switch (2026-11-09): Account, Stats, Badges, a soft segmented control like the wide screen's
    section strip; on a phone it spans the page and the three share it. */
 body:not(.view-staff) #tab-account .acc-views{display:flex;gap:2px;width:fit-content;max-width:100%;margin:14px 0 4px;padding:4px;border-radius:999px;background:var(--card-3);}

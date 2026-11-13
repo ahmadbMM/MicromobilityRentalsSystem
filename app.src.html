@@ -1298,6 +1298,8 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   mrStreak_few:'{0} weeks in a row',
   mrStreak_many:'{0} weeks in a row',
   mrStreak_other:'{0} weeks in a row',
+  lmAnniv_zero:'{0} years since your first ride',lmAnniv_one:'{0} year since your first ride',lmAnniv_two:'{0} years since your first ride',lmAnniv_few:'{0} years since your first ride',lmAnniv_many:'{0} years since your first ride',lmAnniv_other:'{0} years since your first ride',
+  lmLine:'Thank you for riding with us. Here is to many more rides together.',lmSign:'The MicroMobility team',lmKinds:'Tried so far',lmDone:'Done',lmNotYet:'Not yet',tplgLm:'Shown in the app',tplLmAnniv:'First ride anniversary message',
   mrNextLine:'Next ride: {0} ({1})',tkStBooked:'Booked',tkStIn:'Checked in',tkStBike:'On the bike',tkStDone:'Done',tkCueNoBike:'Checked in. Your bike is being handed over.',tkCueBike:'On the bike: {0}',tkCueDone:'Ride done: {0} on the bike.',tkCueDoneNoDur:'Ride done.',tkCdCollect:'Bike collection in {0}',tkCdGather:'Gathering in {0}',tkCdStart:'Starts in {0}',myrTitle:'Your rides',myrWeeks:'{0} of the last 26 weeks with a ride',myrFav:'Favourite bike',myrFirst:'First ride',myrTime:'Time on the bike',myrYear:'Rides this year',myrMonths:'Rides by month',myrByBike:'Rides by bike',myrByEvent:'By event',myrBadges:'Badges earned',bdNextTitle:'Closest badges',bdLevelOf:'Level {0} of {1}',bdMaxLevel:'Top level reached',bdLevels:'Levels',bdgViaLevel:'Comes with a higher level',rtTitle:'Route',rtLap:'{0} km a lap',rtCircuitNote:'Flat, smooth tarmac, floodlit at night',rtKm:'{0} km',rtRidden:'Ridden',rtMapLink:'Open the map',rtOsm:'Track: © OpenStreetMap contributors',
   rtOpen:'Route details',sessRouteEmpty:'None yet. Add them in micromobility.sa, Routes.',sessRouteLine:'Line and turn points',
   regStepOf:'Step {0} of {1}',
@@ -1976,6 +1978,8 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   mrStreak_few:'{0} أسابيع متتالية',
   mrStreak_many:'{0} أسبوعاً متتالياً',
   mrStreak_other:'{0} أسبوعاً متتالياً',
+  lmAnniv_zero:'{0} عاماً على أول جولة لك',lmAnniv_one:'عام على أول جولة لك',lmAnniv_two:'عامان على أول جولة لك',lmAnniv_few:'{0} أعوام على أول جولة لك',lmAnniv_many:'{0} عاماً على أول جولة لك',lmAnniv_other:'{0} عام على أول جولة لك',
+  lmLine:'شكراً لمشاركتك الجولات معنا. نتطلع إلى جولات كثيرة قادمة معاً.',lmSign:'فريق مايكروموبيليتي',lmKinds:'ما جرّبته حتى الآن',lmDone:'تمّ',lmNotYet:'ليس بعد',tplgLm:'تظهر في التطبيق',tplLmAnniv:'رسالة ذكرى أول جولة',
   mrNextLine:'جولتك القادمة: {0} ({1})',tkStBooked:'محجوز',tkStIn:'الحضور',tkStBike:'على الدراجة',tkStDone:'انتهت',tkCueNoBike:'تم تسجيل حضورك. يجري تسليمك الدراجة.',tkCueBike:'على الدراجة: {0}',tkCueDone:'انتهت جولتك: {0} على الدراجة.',tkCueDoneNoDur:'انتهت جولتك.',tkCdCollect:'استلام الدراجة بعد {0}',tkCdGather:'التجمع بعد {0}',tkCdStart:'تبدأ بعد {0}',myrTitle:'جولاتك',myrWeeks:'{0} من آخر 26 أسبوعاً فيها جولة',myrFav:'دراجتك المفضلة',myrFirst:'أول جولة',myrTime:'الوقت على الدراجة',myrYear:'جولات هذا العام',myrMonths:'الجولات حسب الشهر',myrByBike:'الجولات حسب الدراجة',myrByEvent:'حسب الفعالية',myrBadges:'الأوسمة التي حصلت عليها',bdNextTitle:'أقرب الأوسمة',bdLevelOf:'المستوى {0} من {1}',bdMaxLevel:'وصلت إلى أعلى مستوى',bdLevels:'المستويات',bdgViaLevel:'ضمن مستوى أعلى',rtTitle:'المسار',rtLap:'{0} كم للفة',rtCircuitNote:'مسطّح وإسفلت ناعم وإضاءة ليلية',rtKm:'{0} كم',rtRidden:'أنجزته',rtMapLink:'افتح الخريطة',rtOsm:'الحلبة: © مساهمو OpenStreetMap',
   rtOpen:'تفاصيل المسار',sessRouteEmpty:'لا توجد مسارات بعد. أضفها من micromobility.sa، المسارات.',sessRouteLine:'الخط ونقاط الانعطاف',
   regStepOf:'الخطوة {0} من {1}',
@@ -22722,6 +22726,7 @@ function _seasonDashboard(cust){
   // next ride, which opens its ticket.
   const nd=nextGroup?(dayLabel(nextGroup[0].sessionDay)||shortDate(nextGroup[0].sessionDate||nextGroup[0].sessionId)):'';
   return`
+    ${_lmAnnivHtml(completed)}
     <div class="mr-season">
       <div class="mr-season-rides"><span class="mr-season-n">${rides}</span><span class="mr-season-w">${esc(_tn('mrRidesU',rides))}</span></div>
       <div class="mr-season-tier"><strong>${esc(tier.name)}</strong>${tier.next?` · ${esc(_tn('mrToNext',tier.next.need).replace('{1}',tier.next.name))}`:''}</div>
@@ -22752,6 +22757,58 @@ function _myrStats(all){
     <div class="myr-wl">${esc(t('myrWeeks').replace('{0}',nW))}</div>
     <dl class="myr-f">${F.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
   </div>`;
+}
+// ── Personal landmarks (new features build F16, 2026-11-13) ──────────────────────────────────────────────────────
+// Two private things on Stats, drawn from the rider's own bookings on this device; nothing is sent as a message.
+// The anniversary of the first ride: for the seven days from its date, every year, Stats opens with a card - the
+// years, the first ride's date, one line from the team and the team's name under it. The first ride is the first
+// completed BIKE ride, the date Your rides calls "First ride" (a pool session or a workshop is not a ride and starts
+// no anniversary). The card shows on the day itself and the six after it, never before; a first ride on 29 February
+// keeps 28 February in a year without one; a week that runs over New Year is last year's date, tried second.
+function _lmAnniv(first,today){
+  const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(first||'')),td=String(today||todayStr()),y0=+td.slice(0,4);if(!m||!y0)return null;
+  const on=y=>y+'-'+m[2]+'-'+(m[2]==='02'&&m[3]==='29'&&new Date(Date.UTC(y,1,29)).getUTCMonth()!==1?'28':m[3]);
+  for(const y of [y0,y0-1]){
+    const n=y-m[1],d=Math.round((Date.parse(td+'T00:00:00Z')-Date.parse(on(y)+'T00:00:00Z'))/864e5);
+    if(n>=1&&d>=0&&d<7)return{years:n,first:m[0]};
+  }
+  return null;
+}
+// The line is the admins' (Settings > Message templates, kept with the other texts in site_content 'msg.templates' as
+// lm_anniv) in the reader's language, else the built-in one in that language. Only that one text is read, and only in
+// a week the card shows; a read that fails keeps the built-in line and is asked again a minute later.
+function _lmLine(){const o=S._lmTpl,v=o&&typeof o==='object'?o[S.lang||'en']:'';return(typeof v==='string'&&v.trim())||t('lmLine');}
+function _lmLineLoad(){
+  if(S._lmTpl!==undefined||!sb||(S._lmTplAt&&Date.now()-S._lmTplAt<60000))return;
+  S._lmTplAt=Date.now();
+  Promise.resolve(sb.from('site_content').select('v:value->lm_anniv').eq('key','msg.templates').maybeSingle()).then(r=>{
+    if(!r||r.error)return;
+    S._lmTpl=(r.data&&r.data.v)||null;
+    const el=document.getElementById('lm-line');if(el)el.textContent=_lmLine();
+  },()=>{});
+}
+function _lmAnnivHtml(rides){
+  const a=_lmAnniv(rides.map(e=>String(e.sessionDate||e.sessionId||'').slice(0,10)).filter(Boolean).sort()[0]);
+  if(!a)return'';
+  _lmLineLoad();
+  return`<div class="lm-anniv" id="lm-anniv">
+      <div class="lm-anniv-t">${esc(_tn('lmAnniv',a.years))}</div>
+      <div class="lm-anniv-d">${esc(t('myrFirst'))} · <bdi>${esc(_bdgDay(a.first))}</bdi></div>
+      <p class="lm-anniv-l" id="lm-line">${esc(_lmLine())}</p>
+      <div class="lm-anniv-s">${esc(t('lmSign'))}</div>
+    </div>`;
+}
+// The kinds tried: a checklist under By event. It lists every kind with a date this rider can still book (the sessions
+// the account is sent, open or full, today or later) and every kind already done, ticked once one was completed
+// (done: the nights by kind, as By event counts them). So an event that is over is listed only for those who did it,
+// and a members' kind only where its sessions arrive. Each row is the kind's own name: a bike-free kind is never
+// called a ride. A list of one is not a checklist.
+const LM_KINDS=['jcc','saturday','petromin','swim','yoga','workshop','event','snd96','runher','defe5k','vlap','arena','blood'];
+function _lmKindsHtml(done){
+  const open={};(S.sessions||[]).forEach(s=>{if(_sessLive(s)&&!_sessPastDay(s))open[_rideKind(s)]=1;});
+  const K=LM_KINDS.filter(k=>done[k]||open[k]);if(K.length<2)return'';
+  return`<div class="myr-c lm-kinds"><div class="myr-h lm-kinds-h"><span>${t('lmKinds')}</span><bdi>${K.filter(k=>done[k]).length}/${K.length}</bdi></div>
+    <ul>${K.map(k=>`<li${done[k]?' class="on"':''}>${done[k]?_cuIc('tick',16):'<i aria-hidden="true"></i>'}<span>${esc(_evKindName(k))}</span><span class="sr-only">${t(done[k]?'lmDone':'lmNotYet')}</span></li>`).join('')}</ul></div>`;
 }
 // The signed-in rider's bookings, one group per session: the rides ahead and the rides done.
 // Rides ahead run soonest first, two on one day by their start, so tonight's ticket is the first card
@@ -27114,6 +27171,7 @@ function _myrMore(all,cust){
   out+=list(t('myrByBike'),Object.keys(tc).sort((a,b)=>tc[b]-tc[a]||String(typeLabel(a)).localeCompare(String(typeLabel(b)),lo)).map(ty=>[typeLabel(ty),tc[ty]]));
   const kc={};_myrNights(all).forEach(e=>{const s=_sessGet(e.sessionId);if(!s)return;const k=_rideKind(s);kc[k]=(kc[k]||0)+1;}); // a session this device does not hold is not guessed at
   out+=list(t('myrByEvent'),Object.keys(kc).sort((a,b)=>kc[b]-kc[a]||_evKindName(a).localeCompare(_evKindName(b),lo)).map(k=>[esc(_evKindName(k)),kc[k]]));
+  out+=_lmKindsHtml(kc); // the kinds tried (F16)
   const L=_mrBadgeList(cust);
   if(L.length)out+=`<button type="button" class="myr-c myr-bd" data-on-click="${_on("_accSetView","badges")}"><span class="myr-bd-t">${t('myrBadges')}</span><bdi class="myr-bd-n">${L.filter(x=>x.on).length}/${L.length}</bdi>${_cuIc('go',16,1)}</button>`;
   return out;
@@ -35869,6 +35927,8 @@ const TPL=[
   ['tplgQuick',[['wa_turn','tplWaTurn',[]],['wa_miss','tplWaMiss',[]],['an_rfm','tplAnRfm',['first_name']],['cn_cancel','tplCnCancel',['when']],['seg_ops','tplSegOps',['first_name']],['seg_news','tplSegNews',['first_name']]]],
   // Ride reminders and the waitlist's offer of a place (2026-10-09, R7); their built-in texts in all ten languages are REM_MSG
   ['tplgRemind',[['remind_24h','tplRemind24',['first_name','ride','date','time','cancel_link']],['remind_2h','tplRemind2',['first_name','ride','date','time','cancel_link']],['remind_late','n6cLateKind',['first_name','ride','time','cancel_link']],['wl_moved','promoNudgeTitle',['first_name','ride','date','time','cancel_link']],['wl_offer','tplWlOffer',['first_name','ride','date','time','minutes','claim_link']]]],
+  // The line on a rider's first-ride anniversary card (new features build F16, 2026-11-13): shown on Stats, never sent; its built-in text in all ten languages is LM_LINE_DEF
+  ['tplgLm',[['lm_anniv','tplLmAnniv',[]]]],
 ];
 function _tplDef(id){for(const[,list]of TPL){const x=list.find(r=>r[0]===id);if(x)return x;}return null;}
 // Read once a staff session is up, and again when Settings saves; the messages that open before it
@@ -35908,6 +35968,13 @@ function _tplUse(id,lang,vars){const o=_tplOver(id,lang)??(lang!=='ar'?_tplOver(
 // language (bug hunt 2026-10-28): t() in a Hindi or French desk sent the rider Hindi or French plus Arabic, and the
 // rider's own pack is not on this device. The admins' Arabic text on an Arabic desk, their English on any other.
 function _waRiderMsg(id,k){const l=S.lang==='ar'?'ar':'en',o=id?_tplUse(id,l,{}):null;if(o!=null)return o;const s=S.lang;try{S.lang=l;return t(k);}finally{S.lang=s;}}
+// The first-ride anniversary card's line as built in (F16), which the editor starts from in each language: the riders'
+// own packs carry the same words as lmLine (a staff device holds one pack, the editor shows all ten; tests/personal-landmarks.spec.ts
+// holds the two equal).
+const LM_LINE_DEF={en:'Thank you for riding with us. Here is to many more rides together.',ar:'شكراً لمشاركتك الجولات معنا. نتطلع إلى جولات كثيرة قادمة معاً.',
+  fr:'Merci de rouler avec nous. À de nombreuses sorties encore, ensemble.',es:'Gracias por rodar con nosotros. Por muchos recorridos más juntos.',pt:'Obrigado por pedalar conosco. Que venham muitos outros passeios juntos.',
+  ur:'ہمارے ساتھ رائیڈ کرنے کا شکریہ۔ آگے بھی بہت سی رائیڈز ایک ساتھ ہوں۔',hi:'हमारे साथ राइड करने के लिए धन्यवाद। आगे भी कई और राइड्स साथ में हों।',tl:'Salamat sa pag-ride kasama namin. Nawa ay marami pa tayong ride na magkasama.',
+  ne:'हामीसँग राइड गर्नुभएकोमा धन्यवाद। अझै धेरै राइडहरू सँगै गरौं।',bn:'আমাদের সঙ্গে রাইড করার জন্য ধন্যবাদ। সামনে আরও অনেক রাইড একসঙ্গে হোক।'};
 // The built-in text with its fill-ins showing, which the editor starts from.
 function _tplDefault(id,lang){
   const L=/^(ca|la)_/.test(id)&&CA_MSG[lang]&&LA_MSG[lang]?lang:lang==='ar'?'ar':'en';
@@ -35937,6 +36004,7 @@ function _tplDefault(id,lang){
   if(id==='sm_reply'){const f=SM_MSG[L];return[hi(f),'',f.thanks,'','','',f.team].join('\n');}
   if(id.startsWith('amb_')){const m=AMB_MSG[L];return[hi(m),'',id==='amb_reject'?m.reject:m.welcome,'',m.team].join('\n');}
   if(id==='bd_wish')return String(BD_MSG[L]||'').replace('{name}','{first_name}');
+  if(id==='lm_anniv')return LM_LINE_DEF[lang]||LM_LINE_DEF.en;
   // REM_MSG lives with the reminders (staff part 'remind'), which every staff device loads once the desk has painted.
   if(/^(remind_|wl_offer|wl_moved)/.test(id)){const f=globalThis['_remDef'+'ault'];return typeof f==='function'?f(id,lang):'';}
   const lk={wa_turn:'waYourTurnMsg',wa_miss:'waMissYouMsg',an_rfm:'anRfmMsg',cn_cancel:'cnMsgDefault',seg_ops:'segOpsMsg',seg_news:'segNewsMsg'}[id];
