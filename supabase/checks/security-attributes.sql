@@ -76,6 +76,7 @@ with expected(fname, want_definer, note) as (values
   ('_updates_note', true, 'the Updates list: the hub_posts trigger writes push_outbox (20261114010300)'),
   ('_updates_sweep', true, 'the Updates list: the daily job (20261114010300)'),
   ('hub_month', true, 'the My month card: reads the caller''s own sessions and badges from tables nobody can read; token-checked (20261114011300)'),
+  ('_hub_going', true, 'going and first-timer counts: totals of 10 or more from tables nobody can read; called by hub_feed only (20261114011900)'),
   ('_wallet_owner', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('_wallet_post', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('_wallet_amount', true, 'the wallet: reaches tables nobody can read (20261102210000)'),

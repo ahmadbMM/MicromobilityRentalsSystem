@@ -27,6 +27,9 @@ const HUB_T = {
   ticket: ['Show ticket', 'عرض التذكرة', 'Voir le billet', 'Ver el billete', 'Ver o bilhete', 'ٹکٹ دکھائیں', 'टिकट दिखाएँ', 'Ipakita ang tiket', 'टिकट देखाउनुहोस्', 'টিকিট দেখান'],
   book: ['Book', 'احجز', 'Réserver', 'Reservar', 'Reservar', 'بک کریں', 'बुक करें', 'Mag-book', 'बुक गर्नुहोस्', 'বুক করুন'],
   wl: ['On the waitlist', 'في قائمة الانتظار', 'En liste d’attente', 'En lista de espera', 'Na lista de espera', 'انتظار کی فہرست میں', 'प्रतीक्षा सूची में', 'Nasa waitlist', 'प्रतीक्षा सूचीमा', 'অপেক্ষার তালিকায়'],
+  // The next session's card: how many are going and how many of them come for the first time (F19, 2026-11-13).
+  going: ['{0} going', '{0} سيحضرون', '{0} participants', '{0} asistentes', '{0} participantes', '{0} آ رہے ہیں', '{0} आ रहे हैं', '{0} ang pupunta', '{0} जना आउँदै', '{0} জন আসছেন'],
+  firstT: ['{0} first-timers', '{0} يشاركون لأول مرة', '{0} nouveaux venus', '{0} por primera vez', '{0} pela primeira vez', '{0} پہلی بار', '{0} पहली बार', '{0} ang first-timer', '{0} जना पहिलो पटक', '{0} জন প্রথমবার'],
   noneOpen: ['No session is open to book right now', 'لا توجد جلسة متاحة للحجز الآن', 'Aucune séance ouverte à la réservation pour le moment', 'Ahora no hay ninguna sesión abierta para reservar', 'De momento não há nenhuma sessão aberta para reservar', 'ابھی بکنگ کے لیے کوئی سیشن کھلا نہیں', 'अभी बुकिंग के लिए कोई सत्र खुला नहीं है', 'Walang bukas na session na mabu-book ngayon', 'अहिले बुक गर्न कुनै सत्र खुला छैन', 'এখন বুক করার মতো কোনো সেশন খোলা নেই'],
   seeAll: ['See all sessions', 'عرض كل الجلسات', 'Voir toutes les séances', 'Ver todas las sesiones', 'Ver todas as sessões', 'تمام سیشن دیکھیں', 'सभी सत्र देखें', 'Tingnan ang lahat ng session', 'सबै सत्र हेर्नुहोस्', 'সব সেশন দেখুন'],
   soon: ['Coming up', 'قريبًا', 'À venir', 'Próximamente', 'Em breve', 'آنے والے', 'आने वाले', 'Paparating', 'आउँदै गरेका', 'আসছে'],
@@ -358,13 +361,28 @@ function _hubStill(s, e) {
     return dep.still(s, g, !_arHold(s, g) && (!_isApprovalRide(s) || ((p || _commPublished(s)) && (p || g.every((x) => x.approval === 'approved')))));
   } catch (_) { return ''; }
 }
+// Going and first-timer counts (new features build F19, 2026-11-13): this card alone says how many are going to its
+// session and how many of them come to the community for the first time. Totals from the tab's one read (hub_feed's
+// going, keyed by session: _hub_going, migration 20261114011900), each only at 10 or more; under 10 that number is absent.
+// Only once the session is published (its list no longer hidden, as _commPublished reads it) and open for booking. The
+// database holds the same rules; the page checks them again on its own copy of the session, so a count kept on the phone
+// never outlives them. No names, no list; a database before the migration sends none and the card is as it was. The
+// owner refused any count on the Experiences card and on Reserve: nothing else reads these numbers.
+function _hubGoing(s) {
+  const g = S._hub && S._hub.d && S._hub.d.going;
+  if (!s || !g || typeof g !== 'object' || !Object.prototype.hasOwnProperty.call(g, s.id)) return '';
+  if (!_isCommunity(s) || s.hide_queue !== false || s.status !== 'open' || _sessPastDay(s) || !_bwOpen(s)) return '';
+  const x = g[s.id] || {}, part = (k, v) => (_hubBig(v) ? `<span data-go="${k}">${esc(_hT(k)).split('{0}').join(_hN(v))}</span>` : '');
+  const p = [part('going', x.n), part('firstT', x.first)].filter(Boolean);
+  return p.length ? `<span class="hub-hero-m hub-going">${p.join(' · ')}</span>` : '';
+}
 function _bookedHtml(s, e, tm, st) {
   const ds = String(s.session_date || s.id).slice(0, 10), dw = _dayWord(ds), soon = st === 'today' || st === 'tomorrow';
   const f = _hubFields(tm ? tm.f : []), place = _hubPlace(s);
   const when = `<bdi>${esc(!soon && dw ? dw + ' · ' : '')}${esc(shortDate(ds))}</bdi>${f ? '' : ` · <bdi>${sessionTime(s)}</bdi>`}`;
   const chips = `${e.status === 'waitlist' ? `<span class="hub-chip">${_hT('wl')}</span>` : ''}${_hubRs(s)}`;
   return `<div class="hub-hero${st ? ' hub-hero-' + st : ''}"><span class="hub-k">${esc(soon && dw ? dw : _hT('next'))}</span><strong class="hub-hero-t"><bdi>${esc(_evName(s))}</bdi></strong>
-      <span class="hub-hero-m">${when}</span>${chips ? `<span class="hub-chips">${chips}</span>` : ''}
+      <span class="hub-hero-m">${when}</span>${chips ? `<span class="hub-chips">${chips}</span>` : ''}${_hubGoing(s)}
       ${st === 'today' ? place + f : f + place}
       ${soon ? _hubStill(s, e) : ''}
       <button type="button" class="btn-primary hub-hero-b" data-on-click="${st === 'today' ? _on('_hubTicket', e.id) : _on('setCustTab', 'myrides')}">${_cuIc('ticket', 18)} ${_hT('ticket')}</button></div>`;
@@ -389,7 +407,7 @@ function _heroHtml(c, d) {
   const s = c ? _hubOpen(c, 1)[0] : null;
   if (s) {
     return { recap, open: s.id, html: `<div class="hub-hero"><span class="hub-k">${_hT('nextOpen')}</span><strong class="hub-hero-t"><bdi>${esc(_evName(s))}</bdi></strong>
-      <span class="hub-hero-m">${_hubWhen(s)}</span>${_sgChip(s)}${_hubRs(s)}
+      <span class="hub-hero-m">${_hubWhen(s)}</span>${_sgChip(s)}${_hubRs(s)}${_hubGoing(s)}
       <button type="button" class="btn-primary hub-hero-b" data-on-click="${_on('_hubBook', s.id)}">${_hT('book')}</button></div>` };
   }
   return { recap, html: `<div class="hub-hero"><strong class="hub-hero-t">${_hT('noneOpen')}</strong>
