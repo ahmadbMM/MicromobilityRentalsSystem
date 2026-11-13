@@ -370,6 +370,74 @@ test.describe('@staff:community badge requests', () => {
     await page.waitForFunction(`S.staffTab==='badgereq'`);
   });
 
+  // Hide (the owner, 2026-11-13: "add an option to hide badge requests in a hidden section"; 20261114120000).
+  test('Hide moves a request under Hidden, out of its pill, All, the rail and the bell; Unhide and Undo bring it back', async ({ page }) => {
+    await staff(page);
+    const hid = calls(page, /\/rest\/v1\/badge_requests$/);
+    await expect(pill(page, /^Hidden/)).toHaveText('Hidden (0)');
+    await row(page, 1).getByRole('button', { name: 'Hide', exact: true }).click();
+    await expect(page.locator('.toast').last()).toContainText('Senior Marshal · Lina Haddad hidden');
+    expect(hid).toHaveLength(1);
+    expect(new URL(hid[0].url()).searchParams.get('id')).toBe('eq.1');
+    expect(hid[0].postDataJSON()).toMatchObject({ hidden_by: 'Spec Staff' });
+    expect(hid[0].postDataJSON().hidden_at).toBeTruthy();
+    await expect(row(page, 1)).toHaveCount(0);
+    await expect(pill(page, /^Waiting/)).toHaveText('Waiting (1)');
+    await expect(pill(page, /^All/)).toHaveText('All (3)');
+    await expect(pill(page, /^Hidden/)).toHaveText('Hidden (1)');
+    await expect(rail(page).locator('.tab-badge')).toHaveText('1');
+    expect(await page.evaluate(`_bdrWaitN()`)).toBe(1);
+
+    // An answered one hides from its own pill too.
+    await pill(page, /^Declined/).click();
+    await row(page, 3).getByRole('button', { name: 'Hide', exact: true }).click();
+    await expect(pill(page, /^Declined/)).toHaveText('Declined (0)');
+    await expect(sec(page).locator('.bdr-st-none')).toBeVisible();
+
+    // Under Hidden: both, each saying when and by whom, a waiting one still answerable but not in the bulk selection.
+    await pill(page, /^Hidden/).click();
+    await expect(pill(page, /^Hidden/)).toHaveText('Hidden (2)');
+    await expect(sec(page).locator('.bdr-row')).toHaveCount(2);
+    await expect(row(page, 1).locator('.bdr-hid')).toContainText(/^Hidden .+ · by Spec Staff$/);
+    await expect(row(page, 1).getByRole('button', { name: 'Give badge' })).toBeVisible();
+    await expect(row(page, 1).locator('.lt-box')).toHaveCount(0);
+
+    // Undo unhides the last one; Unhide the other.
+    await page.evaluate('doUndo()');
+    await expect.poll(() => hid.length).toBe(3);
+    expect(hid[2].postDataJSON()).toEqual({ hidden_at: null, hidden_by: null });
+    await expect(row(page, 3)).toHaveCount(0);
+    await row(page, 1).getByRole('button', { name: 'Unhide' }).click();
+    await expect(page.locator('.toast').last()).toContainText('Senior Marshal · Lina Haddad back in the list');
+    expect(hid[3].postDataJSON()).toEqual({ hidden_at: null, hidden_by: null });
+    await expect(pill(page, /^Hidden/)).toHaveText('Hidden (0)');
+    await expect(rail(page).locator('.tab-badge')).toHaveText('2');
+  });
+
+  test('a refused Hide puts the request back; a database without the columns reads the requests and Hide says so', async ({ page }) => {
+    await staff(page);
+    await page.route(/\/rest\/v1\/badge_requests\?id=eq\.2/, (r) => r.request().method() === 'PATCH'
+      ? r.fulfill({ status: 403, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: '42501', message: 'permission denied' }) })
+      : r.fallback());
+    await row(page, 2).getByRole('button', { name: 'Hide', exact: true }).click();
+    await expect(row(page, 2)).toBeVisible();
+    await expect(pill(page, /^Hidden/)).toHaveText('Hidden (0)');
+    await expect(rail(page).locator('.tab-badge')).toHaveText('2');
+
+    // A database from before 20261114120000: the read naming the columns is refused, the plain one answers.
+    await page.route(/\/rest\/v1\/badge_requests\?select=id%2C/, (r) => /hidden_at/.test(decodeURIComponent(r.request().url()))
+      ? r.fulfill({ status: 400, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: '42703', message: 'column badge_requests.hidden_at does not exist' }) })
+      : r.fallback());
+    await page.evaluate('_bdrLoad(true)');
+    await page.waitForFunction('S._bdrNoHide===true');
+    await expect(sec(page).locator('.bdr-row')).toHaveCount(2);
+    const hid = calls(page, /\/rest\/v1\/badge_requests$/);
+    await row(page, 1).getByRole('button', { name: 'Hide', exact: true }).click();
+    await expect(page.locator('.toast').last()).toContainText('Waiting for the database update');
+    expect(hid).toHaveLength(0);
+    await expect(row(page, 1)).toBeVisible();
+  });
+
   test('without the table the section says so and the rail carries no number', async ({ page }) => {
     await staff(page, {}, true);
     await page.waitForFunction('S._bdrGone===true');

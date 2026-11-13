@@ -17990,7 +17990,7 @@ function _gsGo(kind,id){
 // the section's own search. Their sections' code is called by name: the parts that hold it are in by the time a list is.
 function _gsGoOff(kind,id){
   const fn=(n,...a)=>{const f=globalThis[n];if(typeof f==='function')f(...a);},of=l=>(l||[]).find(x=>x.id===id);
-  if(kind==='bdr'){const c=_custById((of(S._bdrRows)||{}).customer_id);S._bdrV={badge:'',pf:'',sort:'new',...S._bdrV,f:'all',q:(c&&(c.name||c.email))||'',n:40};setStaffTab('badgereq');}
+  if(kind==='bdr'){const x=of(S._bdrRows)||{},c=_custById(x.customer_id);S._bdrV={badge:'',pf:'',sort:'new',...S._bdrV,f:x.hidden_at?'hidden':'all',q:(c&&(c.name||c.email))||'',n:40};setStaffTab('badgereq');}
   else if(kind==='amb'||kind==='sm'){const W=kind==='amb'?S._amb:S._sm,r=W&&of(W.rows);if(r){W.filter='all';W.q=r.email||r.name||'';}setStaffTab(kind==='amb'?'ambassadors':'messages');}
   else if(kind==='pay'){const p=S._pay&&of(S._pay.rows);if(p)S._pay.q=p.ref||'';S.payView='all';setStaffTab('payments');}
   else if(kind==='tag'){setCommTab('tags');fn('openTag'+'Edit',id);}
@@ -18264,7 +18264,7 @@ const NT_GROUPS=[['presetDesk','queue sessions waitlist lockers'],['snavPeople',
 // (_bdrLoad, _stoCounts) and the Flagged list once People has read it; nothing new is read for them.
 function _ntOffice(add){
   const ok=_deskTabOk,nm=id=>{const c=_custById(id);return(c&&(c.name||c.email))||'—';};
-  if(ok('badgereq'))add('bdr',(S._bdrRows||[]).filter(r=>r.status==='pending').map(r=>({id:r.id,txt:t('ntiBdr').replace('{0}',nm(r.customer_id)),at:r.created_at})),'ntBdr','green',['setStaffTab','badgereq'],Array.isArray(S._bdrRows));
+  if(ok('badgereq'))add('bdr',(S._bdrRows||[]).filter(r=>r.status==='pending'&&!r.hidden_at).map(r=>({id:r.id,txt:t('ntiBdr').replace('{0}',nm(r.customer_id)),at:r.created_at})),'ntBdr','green',['setStaffTab','badgereq'],Array.isArray(S._bdrRows));
   if(ok('store'))add('stoord',(S._stoPaid||[]).map(o=>({id:o.id,txt:t('ntiStoOrd').replace('{0}','MM-'+o.no+' · '+(o.name||'')),at:o.paid_at})),'stoWaitBadge','green',['setStaffTab','store'],Array.isArray(S._stoPaid));
   if(ok('payments'))add('refowed',(S._payDue||[]).map(r=>({id:r.id,txt:t('ntiRefOwed').replace('{0}',_money(r.amount,_NOISO)),at:r.created_at})),'payOwedBadge','warn',['_on_goPayRefunds'],Array.isArray(S._payDue));
   if(ok('community'))add('flags',(S._flags||[]).filter(x=>x&&x.status==='pending').map(x=>({id:x.id,txt:t('ntiFlags').replace('{0}',nm(x.customer_id)),at:x.flagged_at})),'ntFlags','warn',['_on_goCommunity','flagged'],Array.isArray(S._flags));
@@ -29172,7 +29172,7 @@ function _dashRole(){
   const ok=_deskTabOk,W=S._ws,out=[],f=(sec,l,v,sub,go)=>{if(ok(sec)&&v!=null)out.push([l,v,sub,go]);};
   f('workshop',t('dashWsQueue'),W&&W.jobs?_dashWsOpen():null,W&&W.jobs?esc(t('ntWs').replace('{0}',_wsNew().length)):'',['setStaffTab','workshop']);
   f('inventory',t('ntkAttn'),_ntLoaded().year?_bkAttnRows(getBikes()).length:null,'',['_on_goInventoryBikes']);
-  f('badgereq',t('ntkBdr'),Array.isArray(S._bdrRows)?S._bdrRows.filter(x=>x.status==='pending').length:null,'',['setStaffTab','badgereq']);
+  f('badgereq',t('ntkBdr'),Array.isArray(S._bdrRows)?S._bdrRows.filter(x=>x.status==='pending'&&!x.hidden_at).length:null,'',['setStaffTab','badgereq']);
   if(S._storeReady)f('store',t('ntkStoOrd'),S._stoWaitN,'',['setStaffTab','store']);
   return out;
 }
@@ -29204,7 +29204,7 @@ function _n6uDashCards(ids){
       r('ntFlags',_pplWaitN(),['_on_goCommunity','flagged']);
       {const f=globalThis['_fup'+'Due'];if(typeof f==='function')r('ntFup',f(),['_on_goCommunity','followups']);} // follow-ups due today or overdue (s10b): People's part, by name
     }
-    if(ok('badgereq'))r('ntBdr',(S._bdrRows||[]).filter(x=>x.status==='pending').length,['setStaffTab','badgereq']);
+    if(ok('badgereq'))r('ntBdr',(S._bdrRows||[]).filter(x=>x.status==='pending'&&!x.hidden_at).length,['setStaffTab','badgereq']);
     if(S._storeReady&&ok('store'))r('stoWaitBadge',S._stoWaitN,['setStaffTab','store']);
     if(S._storeReady&&ok('payments'))r('payOwedBadge',S._payOwedN,['_on_goPayRefunds']);
     if(ok('workshop'))r('dashWsOpen',_dashWsOpen(),['setStaffTab','workshop']);
@@ -67986,20 +67986,27 @@ function _commBadges(){
 // (badge_requests_drop_proof, 20261108230000). An answered row says so; an Undo reopens the request without it.
 const BDR_COLS='id,customer_id,badge_id,comment,proof_kind,proof_name,status,created_at,decided_at,decided_by,reply';
 const BDR_OPEN={status:'pending',decided_at:null,decided_by:null,reply:null};
+// Hidden by staff (the owner, 2026-11-13: "add an option to hide badge requests in a hidden section"): hidden_at and
+// hidden_by (20261114120000). A hidden request leaves its pill, All, the rail's number and the bell, its status kept,
+// and waits under the Hidden pill; Unhide puts it back. A plain staff update, display only: the rider sees nothing of it.
+// Until the database has them the requests are read without them and Hide says so (S._bdrNoHide).
+const BDR_HID=',hidden_at,hidden_by';
 // Every request, newest first, at most every two minutes: the rail's count reads them, on any section (_secPolls).
 async function _bdrLoad(force){
   if(!sb||S._bdrBusy||S._bdrGone||(!force&&S._bdrAt&&Date.now()-S._bdrAt<(S._bdrErr?BDG_RETRY_MS:12e4)))return;
   S._bdrBusy=true;S._bdrAt=Date.now();
   const was=JSON.stringify(S._bdrRows||null);
-  let r;try{r=await sb.from('badge_requests').select(BDR_COLS).order('created_at',{ascending:false}).limit(1000);}catch(e){r={error:e};}
+  const q=c=>sb.from('badge_requests').select(c).order('created_at',{ascending:false}).limit(1000);
+  let r,hid=true;try{r=await q(BDR_COLS+BDR_HID);if(r&&r.error&&/hidden_/.test(String(r.error.message||''))){hid=false;r=await q(BDR_COLS);}}catch(e){r={error:e};}
   S._bdrBusy=false;
-  if(r&&!r.error&&Array.isArray(r.data)){S._bdrRows=r.data;S._bdrErr=false;}
+  if(r&&!r.error&&Array.isArray(r.data)){S._bdrRows=r.data;S._bdrErr=false;S._bdrNoHide=!hid;}
   else if(r&&r.error&&_bdgMissing(r.error))S._bdrGone=true; // a database from before them: the section says so
   else S._bdrErr=true;
   _bdrTabLabelSync();
   if(S.view==='staff'&&S.staffTab==='badgereq'&&(force||S._bdrErr||S._bdrGone||JSON.stringify(S._bdrRows||null)!==was))renderBadgeRequests();
 }
-function _bdrWaitN(){return(S._bdrRows||[]).filter(r=>r.status==='pending').length;}
+function _bdrSt(r){return r.hidden_at?'hidden':r.status;} // the pill it sits under
+function _bdrWaitN(){return(S._bdrRows||[]).filter(r=>_bdrSt(r)==='pending').length;}
 function _bdrTabLabel(){const n=_bdrWaitN();return esc(t('bdrStTitle'))+(n?` <span class="tab-badge" title="${esc(t('bdrStWaitN').replace('{0}',n))}">${n}</span>`:'');}
 function _bdrTabLabelSync(){const l=document.querySelector('#staff-tab-nav .tab-btn[data-stab="badgereq"] .snav-lbl');if(l)l.innerHTML=_bdrTabLabel();}
 function _bdrRow(id){return(S._bdrRows||[]).find(r=>String(r.id)===String(id))||null;}
@@ -68016,7 +68023,7 @@ function _bdrLvl(b){const l=b&&b.system&&BDG_LADDER_OF.get(b.slug);return l?' ·
 function _bdrHay(r){const b=_bdgById(r.badge_id),c=_custById(r.customer_id);return[c&&c.name,c&&c.phone,c&&c.email,b&&_bdgName(b),r.comment,r.reply,r.decided_by].filter(Boolean).join(' ').toLowerCase();}
 function _bdrShown(){
   const W=_bdrV(),P=_sqOf(W.q),ws=(P?P.q:W.q).trim().toLowerCase().split(/\s+/).filter(Boolean); // tag:, phone:, email: through the account (s10b)
-  const L=(S._bdrRows||[]).filter(r=>(!P||P.r({cid:r.customer_id,st:r.status}))&&(W.f==='all'||r.status===W.f)&&(!W.badge||String(r.badge_id)===W.badge)&&(!W.pf||(W.pf==='yes')===!!r.proof_kind)
+  const L=(S._bdrRows||[]).filter(r=>(!P||P.r({cid:r.customer_id,st:r.status}))&&(W.f==='all'?!r.hidden_at:_bdrSt(r)===W.f)&&(!W.badge||String(r.badge_id)===W.badge)&&(!W.pf||(W.pf==='yes')===!!r.proof_kind)
     &&(!ws.length||(h=>ws.every(w=>h.includes(w)))(_bdrHay(r))));
   return W.sort==='old'?L.reverse():L; // they come newest first
 }
@@ -68040,7 +68047,7 @@ function renderBadgeRequests(){
   // Each row is drawn from its badge (bug hunt 2026-11-11, app45-2): without the badges the list said "Showing 5 of 5" over no rows
   else if(rows.length&&!_bdgOk()&&(S._bdgBusy||S._bdgErr))body=S._bdgErr&&!S._bdgBusy?_loadErr(t('errConnection'),_on("_bdgLoad",true)):skeletonList();
   else{
-    const n=k=>k==='all'?rows.length:rows.filter(r=>r.status===k).length;
+    const n=k=>rows.filter(r=>k==='all'?!r.hidden_at:_bdrSt(r)===k).length;
     const pill=(k,label)=>`<button type="button" class="filter-pill${W.f===k?' active':''}" aria-pressed="${W.f===k}" data-on-click="${_on("_bdrStSet","f",k)}">${label} (${n(k)})</button>`;
     const bs=[...new Set(rows.map(r=>r.badge_id))].map(_bdgById).filter(Boolean).sort((x,y)=>_bdgName(x).localeCompare(_bdgName(y))||(x.sort||0)-(y.sort||0));
     const opt=(v,label,on)=>`<option value="${esc(v)}"${on?' selected':''}>${esc(label)}</option>`;
@@ -68048,33 +68055,35 @@ function renderBadgeRequests(){
       +_fField(t('bdrStProofT'),`<select aria-label="${esc(t('bdrStProofT'))}" data-on-change="${_on("_bdrStSet","pf",_P("value"))}">${opt('',t('filterAll'),!W.pf)}${opt('yes',t('bdrStWithPf'),W.pf==='yes')}${opt('no',t('bdrStNoProof'),W.pf==='no')}</select>`)
       +_fField(t('sortBy'),`<select class="bdr-sort" aria-label="${esc(t('sortBy'))}" data-on-change="${_on("_bdrStSet","sort",_P("value"))}">${opt('new',t('caSortNew'),W.sort!=='old')}${opt('old',t('caSortOld'),W.sort==='old')}</select>`);
     body=`<div class="filter-bar">${listToolbar({key:'bdr',q:{v:W.q,fn:_on("_bdrQ",_P("value")),ph:t('bdrStSearch')},
-        pills:pill('pending',t('bdrStFWait'))+pill('given',t('bdrStFGiven'))+pill('declined',t('bdrStFNo'))+pill('all',t('filterAll')),
+        pills:pill('pending',t('bdrStFWait'))+pill('given',t('bdrStFGiven'))+pill('declined',t('bdrStFNo'))+pill('all',t('filterAll'))+pill('hidden',t('apHidden')),
         f:[main,'',_fS(W,'badge pf')],csv:_on("_bdrCsv"),
-        sel:{ids:_bdrShown().filter(r=>r.status==='pending').map(r=>r.id),acts:(n,ids)=>`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_bdrBulk",ids,'given')}">${esc(t('bdrBulkGive').replace('{0}',n))}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_bdrBulk",ids,'declined')}">${esc(t('bdrBulkNo').replace('{0}',n))}</button>`}})}</div>
+        sel:{ids:_bdrShown().filter(r=>_bdrSt(r)==='pending').map(r=>r.id),acts:(n,ids)=>`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_bdrBulk",ids,'given')}">${esc(t('bdrBulkGive').replace('{0}',n))}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_bdrBulk",ids,'declined')}">${esc(t('bdrBulkNo').replace('{0}',n))}</button>`}})}</div>
       <div id="bdr-list">${_bdrListHtml()}</div>`;
   }
   el.innerHTML=`${head}<div class="form-section ws-mt0">${body}</div>`;
   const f=fid&&document.getElementById(fid);if(f){try{f.focus({preventScroll:true});if(pos!=null)f.setSelectionRange(pos,pos);}catch(_){}}
 }
 function _bdrStRow(r){
-  const b=_bdgById(r.badge_id),c=_custById(r.customer_id),p=r.status==='pending';if(!b)return'';
+  const b=_bdgById(r.badge_id),c=_custById(r.customer_id),p=r.status==='pending',hd=!!r.hidden_at;if(!b)return'';
   const held=p&&!!c&&_bdgAllHolders(b).has(c.id),sure=S._bdgSure==='bdr|'+r.id;
   const when=p?t('bdrStAsked').replace('{0}',_bdgDay(r.created_at)):t(r.status==='given'?'bdgGivenLine':'bdrStDeclinedLine').replace('{0}',_bdgDay(r.decided_at)).replace('{1}',r.decided_by||'—');
   const pf=!r.proof_kind?`<span class="am-meta bdr-nopf">${t('bdrStNoProof')}</span>`
     :p?`<button type="button" class="btn-sm btn-secondary bdr-pfb" data-on-click="${_on("_bdrProof",r.id)}">${_cuIc(r.proof_kind==='pdf'?'doc':'eye',14)}<span>${t(r.proof_kind==='pdf'?'bdrStPdf':'bdrStPic')}</span></button>`
     :`<span class="am-meta bdr-nopf">${t('bdrStPfGone')}</span>`; // deleted with the answer
-  return`<div class="bdr-row${p?'':' done'}" data-req="${esc(String(r.id))}">
-    <div class="bdg-item">${p?_lsBox('bdr',r.id,_bdgName(b)+' '+((c&&c.name)||'')):''}${_bdgMedal(b.icon,_bdgCol(b))}<div class="bdg-txt">
+  const hide=`<button type="button" class="btn-sm btn-secondary bdr-hide" data-on-click="${_on("_bdrHide",r.id,!hd)}">${t(hd?'apUnhideBtn':'apHideBtn')}</button>`;
+  return`<div class="bdr-row${p?'':' done'}${hd?' bdr-hidden':''}" data-req="${esc(String(r.id))}">
+    <div class="bdg-item">${p&&!hd?_lsBox('bdr',r.id,_bdgName(b)+' '+((c&&c.name)||'')):''}${_bdgMedal(b.icon,_bdgCol(b))}<div class="bdg-txt">
       <b>${esc(_bdgName(b)+_bdrLvl(b))}</b>
       <span class="am-meta">${c?`<button type="button" class="bdr-who" data-on-click="${_on("openAccountHistory",c.id)}">${esc(c.name||'—')}</button>`:'—'} · ${p?esc(when):`<span class="bdr-chip bdr-${r.status==='given'?'given':'declined'}">${esc(when)}</span>`}</span>
       ${r.comment?`<span class="bdr-cmt"><bdi>${esc(r.comment)}</bdi></span>`:''}
       ${!p&&r.reply?`<span class="am-meta">${t('bdgNoteLabel')}: <bdi>${esc(r.reply)}</bdi></span>`:''}
       ${held?`<span class="am-meta bdr-held">${t('bdrStHolds')}</span>`:''}
+      ${hd?`<span class="am-meta bdr-hid">${t('apHiddenOn').replace('{0}',esc(fmtStamp(r.hidden_at)))+(r.hidden_by?' · '+t('flgBy').replace('{0}',esc(r.hidden_by)):'')}</span>`:''}
     </div>
-    ${pf}</div>
+    <div class="bdr-side">${pf}${p?'':hide}</div></div>
     ${p?`<div class="bdr-dec">
       <div class="form-group"><label for="bdr-n-${esc(String(r.id))}">${t('bdgNoteLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><input id="bdr-n-${esc(String(r.id))}" type="text" maxlength="140" value="${esc((S._bdrNote||{})[r.id]||'')}" placeholder="${esc(t('bdrStNotePh'))}" data-on-input="${_on("_bdrNoteIn",r.id,_EL)}"></div>
-      <div class="bdr-acts">${_bdgCanGive(b)?`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_bdrGive",r.id)}">${t(held?'bdrStClose':'bdgGiveBtn')}</button>`:''}<button type="button" class="btn-sm ${sure?'btn-red':'btn-secondary'}" data-on-click="${_on("_bdrDecline",r.id)}">${t(sure?'bdrStDeclineSure':'bdrStDecline')}</button></div>
+      <div class="bdr-acts">${_bdgCanGive(b)?`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_bdrGive",r.id)}">${t(held?'bdrStClose':'bdgGiveBtn')}</button>`:''}<button type="button" class="btn-sm ${sure?'btn-red':'btn-secondary'}" data-on-click="${_on("_bdrDecline",r.id)}">${t(sure?'bdrStDeclineSure':'bdrStDecline')}</button>${hide}</div>
     </div>`:''}
   </div>`;
 }
@@ -68103,6 +68112,22 @@ async function _bdrAnswer(r,status){
   return o;
 }
 async function _bdrReopen(id){const w=await sb.from('badge_requests').update(BDR_OPEN).eq('id',id);if(_writeErr(w,'reopen badge request'))return false;_bdrPut(id,BDR_OPEN);return true;}
+// Hide and Unhide (painted first, put back when the write is refused), with an Undo; a hidden row leaves the selection.
+async function _bdrHidePut(id,on){
+  const r=_bdrRow(id);if(!r)return false;
+  const upd=on?{hidden_at:new Date().toISOString(),hidden_by:(_opName()||'Staff').slice(0,60)}:{hidden_at:null,hidden_by:null},prev={hidden_at:r.hidden_at||null,hidden_by:r.hidden_by||null};
+  _bdrPut(id,upd);if(on){const s=_lsSel('bdr');if(s)s.delete(id);}_bdrRepaint();
+  if(await _wr(sb.from('badge_requests').update(upd).eq('id',id),'badge request hide')){_bdrPut(id,prev);_bdrRepaint();return false;}
+  return true;
+}
+async function _bdrHide(id,on){
+  const r=_bdrRow(id);if(!r||!!r.hidden_at===!!on)return;
+  if(S._bdrNoHide){toast(t('auNoDb'),'warning');return;}
+  if(!await _bdrHidePut(id,on))return;
+  const b=_bdgById(r.badge_id),c=_custById(r.customer_id),msg=t(on?'apHiddenToast':'apUnhiddenToast').replace('{0}',[b&&_bdgName(b),c&&c.name].filter(Boolean).join(' · '));
+  pushUndo(msg,async()=>{if(!await _bdrHidePut(id,!on))return false;});
+  toast(msg,'success');
+}
 // A request's answer as the database has it ('' when it cannot be read).
 async function _bdrStatus(id){try{const q=await sb.from('badge_requests').select('status').eq('id',id).maybeSingle();return q&&!q.error&&q.data?String(q.data.status||''):'';}catch(_){return'';}}
 async function _bdrGive(id){

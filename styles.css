@@ -13438,6 +13438,10 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
 #tab-badgereq .bdr-chip.bdr-declined{color:var(--red);}
 #tab-badgereq .bdr-pfb{display:inline-flex;align-items:center;gap:6px;flex:none;align-self:flex-start;}
 #tab-badgereq .bdr-nopf{flex:none;align-self:flex-start;}
+/* The proof and, on an answered row, Hide (2026-11-13); a hidden row is dimmed and says when and by whom. */
+#tab-badgereq .bdr-side{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;flex:none;align-self:flex-start;}
+#tab-badgereq .bdr-hide{min-height:var(--sf-ctl-size);}
+#tab-badgereq .bdr-row.bdr-hidden>.bdg-item>:is(.bdg-m,.bdg-txt){opacity:.6;}
 #tab-badgereq .bdr-dec{margin-top:10px;margin-inline-start:46px;display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;}
 #tab-badgereq .bdr-dec .form-group{flex:1 1 240px;margin:0;}
 #tab-badgereq .bdr-acts{display:flex;gap:6px;flex-wrap:wrap;}

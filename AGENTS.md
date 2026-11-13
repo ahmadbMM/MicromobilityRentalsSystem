@@ -692,6 +692,15 @@ offers nothing to open; an Undo reopens the request without it (opening it says 
 deleted as soon as our team answers. `tests/badge-requests.spec.ts`; the stub answers the table and both functions as an
 empty database that has them.
 
+**Hide (2026-11-13, migration 20261114120000).** The owner: "add an option to hide badge requests in a hidden section". Every
+row has Hide (a waiting one beside Give and Decline, an answered one beside its proof line), which sets `hidden_at` and
+`hidden_by` (`_bdrHide`, `_bdrHidePut`: painted first, put back when refused, with an Undo). A hidden request keeps its
+status but leaves its pill, All, the rail's number, the bell and the bulk selection (`_bdrSt` reads `'hidden'` first), and
+waits under the **Hidden** pill, dimmed, with when and by whom; Unhide puts it back. A waiting one can still be answered
+there. Display only: the rider's functions never read the columns. Until the database has them the requests are read
+without them (`S._bdrNoHide`) and Hide says "Waiting for the database update". The words are the application Hide's
+(`apHideBtn`, `apUnhideBtn`, `apHidden`, `apHiddenOn`, `apHiddenToast`, `apUnhiddenToast`).
+
 ## Titles and the Community page (2026-11-02)
 
 Migration 20261102200000. `titles` (admins' catalogue: English and/or Arabic name, a `BDG_COLORS` colour, `auto_rides`; both columns stay NOT NULL, so `_ttSave` stores a name typed in one language in both and `_ttEdit` opens it with only that box filled),
