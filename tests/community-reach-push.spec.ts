@@ -279,7 +279,7 @@ test.describe('@customer:push Account > Notifications', () => {
 test.describe('@customer:push the privacy notice', () => {
   test('names notifications and the two switches; nobody is asked to accept it again', async ({ page }) => {
     await open(page, { key: false });
-    expect(await page.evaluate('PRIVACY_VERSION')).toBe('2026-11-13');
+    expect(await page.evaluate('PRIVACY_VERSION')).toBe('2026-11-14'); // 2026-11-13 for these rows, moved by the new features build's rows
     expect(await page.evaluate('PRIVACY_ASK_FROM')).toBe('2026-10-02'); // the owner, 2026-10-07: never ask current customers again
     await page.evaluate('showPrivacyNotice()');
     const row = page.locator('#privacy-backdrop tr', { hasText: 'Notifications on your phone or computer' });

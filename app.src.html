@@ -4882,7 +4882,7 @@ function _waiverCopy(s,e){const k=_waiverKind(s);return k==='blood'?(_bldVis(e)?
 // Arabic carry the full text; every other language shows the English one under a line that
 // says so. Bump PRIVACY_VERSION with any change to the text - it is the date on the notice -
 // and PRIVACY_ASK_FROM with it when riders must confirm the change.
-const PRIVACY_VERSION='2026-11-13';
+const PRIVACY_VERSION='2026-11-14';
 // The last version riders must confirm. A change the owner decides needs no fresh confirmation
 // (2026-10-03: the breakfast-venue row; the same day, Instagram follower counts; 2026-10-05: the
 // emergency contact, said again where it is asked; 2026-10-06: Run for Her runners' details to Sela
@@ -4906,7 +4906,11 @@ const PRIVACY_VERSION='2026-11-13';
 // micromobility.sa/ask, only by those who choose to answer: others never see who sent one, staff do; the same day,
 // notifications, the My rides and Community switches and their consent record, always optional; the same day, the mentorship
 // programme: a mentee's anonymous profile shown to members, a mentor's registration seen by staff, and the first name and
-// WhatsApp number shared with the one match both accept, the user's own words of 2026-11-13) moves PRIVACY_VERSION,
+// WhatsApp number shared with the one match both accept, the user's own words of 2026-11-13; 2026-11-14: the new
+// features build: the Updates list, kept 90 days; the Saturdays a member plans, deleted when the month ends; bike problem
+// reports and the day-before "I'm coming" on a booking; learn-to-ride progress; circuit laps; company challenges; the
+// calendar address and the calendar service that reads it; staff's note to leave a rider out of the milestones named at
+// a Saturday ride) moves PRIVACY_VERSION,
 // the date shown, but not this one;
 // an account that confirmed this version or any later one is not asked again.
 const PRIVACY_ASK_FROM='2026-10-02';
@@ -4930,6 +4934,7 @@ en:[
     ['Social media handles, and the follower count of the Instagram account you give','Optional; required on a community membership application, and asked on a learn-to-ride sign-up. Seen only by our staff.','So our staff can get to know riders who may be invited to join our riding community. The follower count is read from Instagram, or noted by our staff, from your public profile. We never post, tag or share them.'],
     ['Profession and company','Asked on a community membership application and a learn-to-ride sign-up; optional on your account page. Seen only by our staff.','So our staff can get to know the riders who apply to join our riding community or sign up for a riding lesson. We never share them.'],
     ['Learn-to-ride sign-up: each learner’s name (for a child or another adult), age, gender, height and riding experience','Asked only on a learn-to-ride sign-up. Seen only by our staff.','Arranging the lesson, having a bike of the right size ready and teaching at the right level'],
+    ['Learn-to-ride progress: the skills our instructor ticks for each learner and when, and the instructor’s one line of feedback','Kept for each learner who takes a lesson. Seen by our staff, and on their account by the learner or the adult who signed them up.','Showing each learner their progress, and a certificate for each level they complete'],
     ['How you heard about us','Asked on a community membership application and a learn-to-ride sign-up; optional on your account page','Knowing how riders find us, in totals only'],
     ['A community membership application from someone under 18: the name of their parent or legal guardian, whether that person is a parent or a legal guardian, their mobile number, and their confirmation of this notice','Required on a community membership application from someone under 18. Seen only by our staff.','So a parent or guardian confirms the application of someone under 18, and so our staff can contact them about it'],
     ['Emergency contacts: the name, mobile number and relationship to you of someone we can call, and of a second person if you add one','One is required on every account: asked when you create your account, or before your next booking if your account has none. A second is always optional. Seen only by our staff, and the first also by the hosts of an event you agree to share it with. Please tell each person you gave us their details.','Calling someone for you if you need help during an event, and the second person if we cannot reach the first. We never contact them for anything else. We share only your first contact’s details, and only with the hosts of an event you agree to share them with.'],
@@ -4944,9 +4949,13 @@ en:[
     ['Arena Heros Hybrid Race details: the first and last name, email address and mobile number you enter for the race, your division and your team','Asked only when you book the Arena Heros Hybrid Race. Seen by you, our staff and the race’s organisers (WeSportify, Mile and Gymnation); your team partner sees your first name.','Entering you and your team in the race, and making up teams'],
     ['Referrals: who referred you (if you make your account with a friend’s link or code), your own referral code, any reward a referral earned you before 10 November 2026 (none are given since; one already given stays valid until it expires), and a scrambled code for the browser a friend’s code was used in','Only if you use a friend’s link or code, or share your own. Our staff see who referred whom; a friend who referred you sees only how many friends joined and rode, never your name. The browser code cannot be turned back into anything about you.','Honouring a reward a referral earned before 10 November 2026 until it expires, and stopping misuse (one phone making many accounts)'],
     ['Badge requests: the badge you ask for, your comment and the proof you attach (a picture or a PDF), and our team’s answer','Always optional: only if you ask for a badge from your account page. Seen by you (except the proof, once sent) and our staff.','Deciding whether to give you the badge. The proof is deleted as soon as our team answers.'],
-    ['Bookings and rides: rides booked, when you booked, your party, check-in and return times, bike used, payments, add-ons, waiver agreement, ratings','Created as you use the service','Running your rides, safety, payments and records'],
+    ['Bookings and rides: rides booked, when you booked, your party, check-in and return times, bike used, payments, add-ons, waiver agreement, ratings, whether you said the day before that you are still coming, and any bike problem you report from your ticket (the fault you pick, a short note if you add one, and when)','Created as you use the service','Running your rides, safety, payments and records. Our staff read a bike problem report to fix the bike.'],
     ['Your choice about ride news, and when you made it','Recorded when you choose','Knowing whether we may send you ride news'],
     ['Notifications on your phone or computer: your two switches, My rides (reminders, changes to rides you booked, waitlist places) and Community (a new challenge, the Saturday recap), when and on which device you set them, the words shown and this notice’s version, and the address your browser gives us to reach it','Always optional: only if you turn notifications on, in Account or with Remind me after a booking. Each switch turns off there as easily, and turning both off deletes that address.','Sending the notifications you chose and keeping proof of your choice. Each message passes, encrypted, through your browser’s own notification service, outside Saudi Arabia.'],
+    ['Your Updates list: the messages the app addresses to you (reminders, changes to sessions you booked, waitlist places, booking opening for a Saturday you planned, a new challenge, the Saturday recap, notes from our team), and when you opened the list','Kept for every account, with notifications on or off, for 90 days','Showing you in the app every message we sent you, and which ones you have not read yet'],
+    ['Community plans and challenges: the Saturdays you tick as planning to come (Community members), each lap you scan at a circuit challenge (your account, the challenge, the session and the time), and the company challenge you join with its code, and when you joined','Always optional: only if you tick a Saturday, scan a lap or enter a company code. The Saturdays you tick are seen only by you and deleted when the month ends. Our staff see lap counts, and who joined each company challenge with their name and mobile number. Other riders never see any of it about you: a company challenge shows its riders only totals of 10 people or more.','Sending you one message when booking opens for a Saturday you ticked; counting your laps toward a challenge’s target and its badge; showing your company’s totals and giving the challenge’s badge'],
+    ['Your calendar address: a random key and the language of your calendar, made when you open Calendar in Account, and when it was last read','Always optional: only if you open Calendar. You can replace the address at any time, and the old one stops working.','Putting your upcoming sessions in the calendar you choose. The calendar service you add it to reads them through that address: each session’s name, start and end, gathering time and meeting point, nobody else’s, and no prices.'],
+    ['A note on your account, set by our staff, to leave you out when they name riders’ milestones at a Saturday ride','Set and seen only by our staff','Not naming you at a ride’s briefing when you would rather not be named'],
   ]}},
   {h:'How we collect it'},
   {ul:[
@@ -4999,6 +5008,7 @@ en:[
     ['Supabase','Hosts our database','Frankfurt, Germany (European Union)'],
     ['Cloudflare','Hosts the website and counts visits','Worldwide network'],
     ['WhatsApp','When we message you there','Outside Saudi Arabia'],
+    ['The calendar service you add your calendar address to','Only if you add it: your upcoming bookings (each session’s name, start and end, gathering time and meeting point), which it reads through your calendar address','Wherever that service is, often outside Saudi Arabia'],
     ['Instagram (Meta)','The Instagram handle you gave, to read that account’s public follower count, and nothing else about you','Outside Saudi Arabia'],
     ['Our error-alert service (Discord)','The technical error reports','Outside Saudi Arabia'],
     ['Authorities','Only when Saudi law requires it','Saudi Arabia'],
@@ -5012,6 +5022,8 @@ en:[
     '<strong>Booking and payment records:</strong> kept for 10 years, because the law requires financial records. Then destroyed.',
     '<strong>Technical error reports:</strong> deleted after 90 days.',
     '<strong>The proof you attach to a badge request:</strong> deleted as soon as our team answers the request.',
+    '<strong>Your Updates list:</strong> each message is deleted after 90 days.',
+    '<strong>The Saturdays you plan to come:</strong> deleted when the month ends.',
   ]},
   {p:'To destroy data, we either delete it permanently from our database or remove everything that identifies you, so it can only be used in anonymous totals. Deleted data leaves our backups within 7 days.'},
   {h:'Your rights'},
@@ -5050,6 +5062,7 @@ ar:[
     ['حسابات التواصل الاجتماعي، وعدد متابعي حساب إنستغرام الذي تقدّمه','اختياري؛ وإلزامي في طلب عضوية المجتمع، ونسأل عنها في التسجيل في دروس تعلّم الركوب. لا يطّلع عليها إلا موظفونا.','ليتعرّف موظفونا على الراكبين الذين قد تتم دعوتهم للانضمام إلى مجتمع الركوب لدينا. نأخذ عدد المتابعين من إنستغرام، أو يدوّنه موظفونا، من ملفك العام. لا ننشرها ولا نشير إليها ولا نشاركها إطلاقًا.'],
     ['المهنة والشركة','تُطلبان في طلب عضوية المجتمع وفي التسجيل في دروس تعلّم الركوب، وهما اختياريتان في صفحة حسابك، ولا يطّلع عليهما إلا موظفونا.','ليتعرّف موظفونا على الراكبين المتقدّمين للانضمام إلى مجتمع الركوب لدينا أو المسجّلين في دروس تعلّم الركوب. لا نشاركهما إطلاقًا.'],
     ['التسجيل في دروس تعلّم الركوب: اسم كل متعلّم (للطفل أو لشخص بالغ آخر) وعمره وجنسه وطوله وخبرته في الركوب','يُطلب في التسجيل في دروس تعلّم الركوب فقط، ولا يطّلع عليه إلا موظفونا.','ترتيب الدرس، وتجهيز دراجة بالمقاس المناسب، والتعليم بالمستوى المناسب'],
+    ['تقدّم تعلّم الركوب: المهارات التي يحدّدها مدرّبنا لكل متعلّم ووقت تحديدها، وملاحظة المدرّب في سطر واحد','تُحفظ لكل متعلّم يحضر درسًا. يراها موظفونا، ويراها في حسابه المتعلّم أو البالغ الذي سجّله.','أن نعرض لكل متعلّم تقدّمه، وشهادة لكل مستوى يُكمله'],
     ['كيف عرفت عنا','يُسأل في طلب عضوية المجتمع وفي التسجيل في دروس تعلّم الركوب، وهو اختياري في صفحة حسابك','معرفة كيف يصل إلينا الراكبون، في صورة أعداد إجمالية فقط'],
     ['طلب عضوية المجتمع ممن هم دون 18 عامًا: اسم الوالد أو الولي النظامي، وما إذا كان أحد الوالدين أو وليًّا نظاميًّا، ورقم جواله، وتأكيده لهذا الإشعار','إلزامي في طلب عضوية المجتمع ممن هم دون 18 عامًا، ولا يطّلع عليه إلا موظفونا.','ليؤكّد أحد الوالدين أو الولي طلب من هم دون 18 عامًا، وليتمكن موظفونا من التواصل معه بشأنه'],
     ['جهات اتصال الطوارئ: اسم شخص يمكننا الاتصال به ورقم جواله وصلة قرابته بك، وكذلك لشخص ثانٍ إن أضفته','جهة واحدة مطلوبة في كل حساب: تُطلب عند إنشاء حسابك، أو قبل حجزك التالي إن لم تكن في حسابك. والجهة الثانية اختيارية دائمًا. لا يراهما إلا موظفونا، والجهات المنظِّمة لفعالية توافق على مشاركة الأولى معها. يُرجى إبلاغ كل شخص منهما بأنك أعطيتنا بياناته.','الاتصال بشخص نيابةً عنك إن احتجت إلى مساعدة أثناء إحدى الفعاليات، وبالشخص الثاني إن تعذّر الوصول إلى الأول. لا نتواصل معهما لأي غرض آخر، ولا نشارك إلا بيانات جهة الاتصال الأولى، ومع الجهات المنظِّمة لفعالية توافق على مشاركتها معها فقط.'],
@@ -5064,9 +5077,13 @@ ar:[
     ['تفاصيل سباق أرينا هيروز الهجين: الاسم الأول والأخير والبريد الإلكتروني ورقم الجوال التي تُدخلها للسباق، وفئتك، وفريقك','تُطلب فقط عند حجز سباق أرينا هيروز الهجين. لا يراها إلا أنت وموظفونا ومنظمو السباق (WeSportify وMile وGymnation)؛ ويرى شريكك في الفريق اسمك الأول.','تسجيلك أنت وفريقك في السباق، وتكوين الفرق'],
     ['الإحالات: من أحالك (إذا أنشأت حسابك عبر رابط صديق أو رمزه)، ورمز الإحالة الخاص بك، وأي مكافأة كسبتها لك إحالة قبل 10 نوفمبر 2026 (لا نمنح مكافآت جديدة منذ ذلك اليوم، وتبقى المكافأة الممنوحة صالحة حتى انتهاء مدتها)، ورمز مشفّر للمتصفح الذي استُخدم فيه رمز الصديق','فقط إذا استخدمت رابط صديق أو رمزه، أو شاركت رمزك. يرى موظفونا من أحال من؛ ولا يرى الصديق الذي أحالك إلا عدد الأصدقاء الذين انضموا وركبوا، ولا يرى اسمك أبدًا. ولا يمكن تحويل رمز المتصفح إلى أي معلومة عنك.','الوفاء بمكافأة كسبتها إحالة قبل 10 نوفمبر 2026 حتى انتهاء مدتها، ومنع إساءة الاستخدام (هاتف واحد ينشئ حسابات كثيرة)'],
     ['طلبات الأوسمة: الوسام الذي تطلبه، وتعليقك، والإثبات الذي ترفقه (صورة أو ملف PDF)، وردّ فريقنا','اختيارية دائمًا: فقط إذا طلبت وسامًا من صفحة حسابك. يراها أنت (عدا الإثبات بعد إرساله) وموظفونا.','تحديد ما إذا كنا سنمنحك الوسام. ويُحذف الإثبات فور ردّ فريقنا.'],
-    ['الحجوزات والرحلات: الرحلات المحجوزة، ووقت الحجز، ومرافقوك، وأوقات تسجيل الوصول والإرجاع، والدراجة المستخدمة، والمدفوعات، والإضافات، والموافقة على الإقرار، والتقييمات','تُسجَّل أثناء استخدامك للخدمة','تشغيل رحلاتك، والسلامة، والمدفوعات، والسجلات'],
+    ['الحجوزات والرحلات: الرحلات المحجوزة، ووقت الحجز، ومرافقوك، وأوقات تسجيل الوصول والإرجاع، والدراجة المستخدمة، والمدفوعات، والإضافات، والموافقة على الإقرار، والتقييمات، وما إذا أكّدت في اليوم السابق أنك ما زلت قادمًا، وأي مشكلة في الدراجة تُبلغ عنها من تذكرتك (العطل الذي تختاره، وملاحظة قصيرة إن أضفتها، ووقت البلاغ)','تُسجَّل أثناء استخدامك للخدمة','تشغيل رحلاتك، والسلامة، والمدفوعات، والسجلات. يقرأ موظفونا بلاغ مشكلة الدراجة لإصلاحها.'],
     ['اختيارك بشأن أخبار الرحلات ووقت اختيارك','يُسجَّل عند اختيارك','معرفة ما إذا كان يحق لنا إرسال أخبار الرحلات إليك'],
     ['الإشعارات على هاتفك أو حاسوبك: مفتاحاك، رحلاتي (التذكيرات، والتغييرات على الرحلات التي حجزتها، والأماكن من قائمة الانتظار) والمجتمع (تحدٍّ جديد، وملخص السبت)، ومتى ضبطتهما وعلى أي جهاز، والكلمات المعروضة، وإصدار هذا الإشعار، والعنوان الذي يعطينا إياه متصفحك للوصول إليه','اختيارية دائمًا: فقط إذا فعّلت الإشعارات، من الحساب أو بزر ذكّرني بعد الحجز. ويُطفأ كل مفتاح من هناك بالسهولة نفسها، وإطفاء الاثنين يحذف ذلك العنوان.','إرسال الإشعارات التي اخترتها والاحتفاظ بإثبات اختيارك. تمر كل رسالة مشفّرةً عبر خدمة الإشعارات الخاصة بمتصفحك، خارج المملكة العربية السعودية.'],
+    ['قائمة التحديثات: الرسائل التي يوجّهها إليك التطبيق (التذكيرات، والتغييرات على الجلسات التي حجزتها، والأماكن من قائمة الانتظار، وفتح الحجز ليوم سبت خطّطت له، وتحدٍّ جديد، وملخص السبت، وملاحظات فريقنا)، ووقت فتحك للقائمة','تُحفظ لكل حساب، سواء كانت الإشعارات مفعّلة أم لا، لمدة 90 يومًا','أن نعرض لك داخل التطبيق كل رسالة أرسلناها إليك، وما لم تقرأه منها بعد'],
+    ['خطط المجتمع والتحديات: أيام السبت التي تختار أنك تنوي الحضور فيها (لأعضاء المجتمع)، وكل لفة تمسح رمزها في تحدي الحلبة (حسابك والتحدي والجلسة والوقت)، وتحدي الشركة الذي تنضم إليه برمزه ووقت انضمامك','اختيارية دائمًا: فقط إذا اخترت يوم سبت أو مسحت رمز لفة أو أدخلت رمز شركة. لا يرى أيام السبت التي تختارها إلا أنت، وتُحذف بانتهاء الشهر. يرى موظفونا أعداد اللفات، ومن انضم إلى كل تحدي شركة باسمه ورقم جواله. لا يرى الراكبون الآخرون شيئًا من ذلك عنك: لا يعرض تحدي الشركة لراكبيه إلا أعدادًا إجمالية لا تقل عن 10 أشخاص.','إرسال رسالة واحدة إليك عند فتح الحجز ليوم سبت اخترته؛ واحتساب لفاتك نحو هدف التحدي ووسامه؛ وعرض الأعداد الإجمالية لشركتك ومنح وسام التحدي'],
+    ['عنوان تقويمك: مفتاح عشوائي ولغة تقويمك، يُنشآن عندما تفتح التقويم في الحساب، ووقت آخر قراءة له','اختياري دائمًا: فقط إذا فتحت التقويم. يمكنك استبدال العنوان في أي وقت، فيتوقف العنوان القديم عن العمل.','إضافة جلساتك القادمة إلى التقويم الذي تختاره. تقرأها خدمة التقويم التي تضيفه إليها عبر ذلك العنوان: اسم كل جلسة وبدايتها ونهايتها ووقت التجمّع ومكان اللقاء، دون بيانات أي شخص آخر ودون أسعار.'],
+    ['ملاحظة في حسابك يضعها موظفونا لاستثنائك عند ذكر إنجازات الراكبين في جولة السبت','يضعها ويراها موظفونا فقط','ألّا نذكر اسمك في إحاطة الجولة إن كنت تفضّل ذلك'],
   ]}},
   {h:'كيف نجمعها'},
   {ul:[
@@ -5119,6 +5136,7 @@ ar:[
     ['Supabase','استضافة قاعدة بياناتنا','فرانكفورت، ألمانيا (الاتحاد الأوروبي)'],
     ['Cloudflare','استضافة الموقع وإحصاء الزيارات','شبكة عالمية'],
     ['واتساب','عند مراسلتك عبره','خارج المملكة العربية السعودية'],
+    ['خدمة التقويم التي تضيف إليها عنوان تقويمك','فقط إذا أضفته إليها: حجوزاتك القادمة (اسم كل جلسة وبدايتها ونهايتها ووقت التجمّع ومكان اللقاء)، تقرأها عبر عنوان تقويمك','حيثما توجد تلك الخدمة، وغالبًا خارج المملكة العربية السعودية'],
     ['إنستغرام (Meta)','حساب إنستغرام الذي قدّمته، لقراءة عدد متابعيه العام، ولا شيء آخر عنك','خارج المملكة العربية السعودية'],
     ['خدمة تنبيهات الأخطاء لدينا (Discord)','تقارير الأخطاء التقنية','خارج المملكة العربية السعودية'],
     ['الجهات الرسمية','فقط عندما يوجب النظام السعودي ذلك','المملكة العربية السعودية'],
@@ -5132,6 +5150,8 @@ ar:[
     '<strong>سجلات الحجز والدفع:</strong> نحتفظ بها 10 سنوات لأن النظام يُلزم بحفظ السجلات المالية، ثم نتلفها.',
     '<strong>تقارير الأخطاء التقنية:</strong> تُحذف بعد 90 يومًا.',
     '<strong>الإثبات الذي ترفقه بطلب وسام:</strong> يُحذف فور ردّ فريقنا على الطلب.',
+    '<strong>قائمة التحديثات:</strong> تُحذف كل رسالة بعد 90 يومًا.',
+    '<strong>أيام السبت التي تنوي الحضور فيها:</strong> تُحذف بانتهاء الشهر.',
   ]},
   {p:'لإتلاف البيانات، إما أن نحذفها نهائيًا من قاعدة بياناتنا، أو نزيل كل ما يحدد هويتك بحيث لا تُستخدم إلا في إحصاءات مجهولة الهوية. وتُزال البيانات المحذوفة من نسخنا الاحتياطية خلال 7 أيام.'},
   {h:'حقوقك'},
