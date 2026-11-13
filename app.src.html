@@ -29274,7 +29274,7 @@ function _on_renderSessions_evp(event,el){S.newSessPrice=el.value}
 function _on_renderSessions_esp(event,el){S.editSessPrice=el.value}
 function _esWho(v){S.editSessOpenAll=v===true;renderSessions()}
 function _nsWho(v){S.newSessOpenAll=v!==false&&v!=='members';renderSessions()}
-// The session's Arabic name (sessions.title_ar, 20261113120000; the owner's pick Q9 a, 2026-11-13): typed once, shown on
+// The session's Arabic name (sessions.title_ar, 20261113170000; the owner's pick Q9 a, 2026-11-13): typed once, shown on
 // the Arabic page in place of the name typed in English. Offered once the database has the column (a row carries it).
 function _titleArOk(){return (S.sessions||[]).some(x=>x&&Object.prototype.hasOwnProperty.call(x,'title_ar'));}
 function _titleArHtml(ed,v){return _titleArOk()?`<div class="form-group ss-mb16"><label for="${ed?'es':'ns'}-title-ar">${t('sessTitleArLbl')}</label><input type="text" id="${ed?'es':'ns'}-title-ar" dir="rtl" lang="ar" maxlength="60" value="${esc(v||'')}" data-on-input="${ed?_on('_on_esTitleAr',_EV,_EL):_on('_on_nsTitleAr',_EV,_EL)}" class="ss-mw340"></div>`:'';}

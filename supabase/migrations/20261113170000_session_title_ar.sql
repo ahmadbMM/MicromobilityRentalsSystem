@@ -11,6 +11,10 @@
 -- under the existing "staff insert" / "staff update" policies. The app offers the field only once a row carries the
 -- column, so the order of this script and the app's deploy does not matter. Idempotent.
 --
+-- Numbered 20261113170000: it first went out as 20261113120000, a number another session's reports_rework had already
+-- taken on prod and staging, so its ledger row was skipped there (on conflict do nothing). The column and its check were
+-- applied on both on 2026-11-13; running this again only records the ledger row.
+--
 -- Rollback:
 --   alter table public.sessions drop column if exists title_ar;
 -- ============================================================================
@@ -29,7 +33,7 @@ end $$;
 comment on column public.sessions.title_ar is 'The session''s name in Arabic, shown on Arabic pages in place of title (2026-11-13).';
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261113120000', 'session_title_ar')
+values ('20261113170000', 'session_title_ar')
 on conflict (version) do nothing;
 
 commit;
