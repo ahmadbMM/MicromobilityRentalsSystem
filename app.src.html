@@ -8231,7 +8231,7 @@ function _featCardHtml(s){
   const ds=String(s.session_date||s.id).slice(0,10),yg=_isYoga(s);let wd='',dn=ds.slice(8),mo='';
   try{const d=new Date(ds+'T12:00:00+03:00'),f=o=>d.toLocaleDateString(_locale(),{...o,timeZone:KSA_TZ});wd=f({weekday:'short'});dn=f({day:'numeric'});mo=f({month:'short'});}catch(e){}
   const soon=_bwOpensText(s),full=_sessFull(s),n=spotsLeft(s.id),low=!soon&&!full&&!_isApprovalRide(s)&&n>0&&n<=3;
-  const st=soon?`<span class="sess-card-spots spots-soon"><bdi>${esc(soon)}</bdi></span>`:full?`<span class="sess-card-spots spots-red">${t('waitlistLabel')}</span>`:low?`<span class="sess-card-spots spots-low">${spotsLeftLabel(n)}</span>`:'';
+  const st=_heldHtml(s)||(soon?`<span class="sess-card-spots spots-soon"><bdi>${esc(soon)}</bdi></span>`:full?`<span class="sess-card-spots spots-red">${t('waitlistLabel')}</span>`:low?`<span class="sess-card-spots spots-low">${spotsLeftLabel(n)}</span>`:''); // the rider's own place first (_heldSt)
   const row=l=>l.filter(Boolean).map(x=>`<span><bdi>${_sarA(esc(x))}</bdi></span>`).join(''); // the span takes the page's direction (its rule and room sit on its start side); the bdi keeps the words' own
   return`<button type="button" class="feat-card ${_evClass(s)}${yg?' feat-yg':''}" data-feat="${esc(s.id)}" data-on-click="${_on("_featOpen",s.id)}">
     ${yg?_ygScene():''}
@@ -12823,7 +12823,7 @@ function _defeKitHtml(){
 // name, when, how far and where, and the cause along the foot. Its state (full, few left, turned
 // away) as on every card.
 function _defeSessCard(s,o){
-  const st=o.rej?`<span class="sess-card-spots spots-rej">${t('rejCardNote')}</span>`:o.full?`<span class="sess-card-spots spots-red">${t('waitlistLabel')}</span>`:o.low?`<span class="sess-card-spots spots-low">${spotsLeftLabel(o.n)}</span>`:'';
+  const st=o.rej?`<span class="sess-card-spots spots-rej">${t('rejCardNote')}</span>`:o.held||(o.full?`<span class="sess-card-spots spots-red">${t('waitlistLabel')}</span>`:o.low?`<span class="sess-card-spots spots-low">${spotsLeftLabel(o.n)}</span>`:'');
   return`<div class="sess-wrap${o.dt?' has-about':''}"><button type="button" class="sess-card ${_evClass(s)} defe-card sess-card-comm${o.sel?' sess-selected':''}${o.rej?' sess-card-rej':''}" aria-pressed="${o.sel?'true':'false'}" data-on-click="${_on("selectSessCard",s.id)}">
     <span class="defe-card-top"><span class="sess-card-dot${o.sel?' on':''}"></span>${_defeLogoImg('defe-card-logo')}</span>
     <span class="defe-card-title">${esc(_evName(s))}</span>
@@ -12864,7 +12864,7 @@ function _ygKnowHtml(){
 // The date's card in the Experiences list: warm sand, the sun rising from the far corner, the mark, the name, when, how
 // long and where, and who leads it along the foot. Its state (full, few left, turned away) as on every card.
 function _ygSessCard(s,o){
-  const st=o.rej?`<span class="sess-card-spots spots-rej">${t('rejCardNote')}</span>`:o.full?`<span class="sess-card-spots spots-red">${t('waitlistLabel')}</span>`:o.low?`<span class="sess-card-spots spots-low">${spotsLeftLabel(o.n)}</span>`:'';
+  const st=o.rej?`<span class="sess-card-spots spots-rej">${t('rejCardNote')}</span>`:o.held||(o.full?`<span class="sess-card-spots spots-red">${t('waitlistLabel')}</span>`:o.low?`<span class="sess-card-spots spots-low">${spotsLeftLabel(o.n)}</span>`:'');
   return`<div class="sess-wrap${o.dt?' has-about':''}"><button type="button" id="sc-${esc(s.id)}" role="radio" class="sess-card ${_evClass(s)} yg-card sess-card-comm${o.sel?' sess-selected':''}${o.rej?' sess-card-rej':''}${S._tickFor===s.id?' sess-just':''}" aria-checked="${o.sel?'true':'false'}" tabindex="${o.tab?'0':'-1'}" data-on-click="${_on("selectSessCard",s.id)}">
     ${_ygScene()}
     <span class="yg-card-top">${_ygMarkImg('yg-card-mark')}<span class="sess-tick" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5"/></svg></span></span>
@@ -13884,6 +13884,23 @@ function _infoBook(){
 function _wasRejectedFor(sid){
   const cust=S.loggedIn||getSession();if(!cust||!cust.id||!sid)return false;
   return getQueue().some(e=>e.customerId===cust.id&&e.sessionId===sid&&e.approval==='rejected');
+}
+// A date the signed-in rider already holds says so where its places would be said, on its row in a list of dates and on
+// its Featured card (the user's picks from the Featured follow-ups, 2026-11-13: "do 4 6 7"). 'ok' Booked; 'wl' On the
+// waitlist, when every rider of theirs waits; 'rsv' Reserved, on a ride staff approve until its list is out and every
+// rider of theirs is approved: the ticket's own cue (renderBookingTicket), so a row never tells a verdict before the list does.
+function _heldSt(s){
+  const c=S.loggedIn||getSession();if(!s||!c||!c.id)return'';
+  const g=getQueue().filter(e=>e.customerId===c.id&&e.sessionId===s.id&&['waiting','waitlist','active'].includes(e.status));
+  if(!g.length)return'';
+  if(g.some(e=>e.status==='active'))return'ok';
+  const wl=g.every(e=>e.status==='waitlist');
+  if(_isApprovalRide(s)&&!_ptnAll(g))return !_commPublished(s)?'rsv':wl?'wl':g.every(e=>e.approval==='approved')?'ok':'rsv';
+  return wl?'wl':'ok';
+}
+function _heldHtml(s){
+  const h=_heldSt(s);if(!h)return'';
+  return`<span class="sess-card-spots spots-held ${h==='ok'?'spots-green':'spots-low'}" data-held="${h}">${h==='ok'?_cuIc('tick',13):''}${t(h==='ok'?'tkStBooked':h==='wl'?'wlOnList':'statusReserved')}</span>`;
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showRejectedModal_1(event,el){if(event.target===el)closeConfirm()}
@@ -18427,11 +18444,17 @@ function _on_renderRegister_6(event,el){el.remove()}
 // The session picker is a list of days, not a stack of identical cards (2026-10-10): each day is said
 // once, as a heading (Today / Tomorrow in words), and its sessions are rows under it that lead with
 // the time. A row says its status only when it is news: a few places left, the waitlist, not open yet.
+// The heading's date carries its year only when that is not this year: every date listed is still ahead (the user's pick 7, 2026-11-13).
+function _dayNoYear(ds){
+  const d=String(ds||'').slice(0,10);
+  if(d.slice(0,4)===todayStr().slice(0,4)){try{const x=new Date(d+'T12:00:00+03:00');if(!isNaN(x))return x.toLocaleDateString(_locale(),{day:'numeric',month:'short',timeZone:KSA_TZ});}catch(e){}}
+  return shortDate(d);
+}
 function _sessDays(list,row){
   const days=[];
   list.forEach(s=>{const d=String(s.session_date||s.id).slice(0,10),g=days[days.length-1];if(g&&g.d===d)g.l.push(s);else days.push({d,s,l:[s]});});
   return days.map(g=>{const dw=_dayWord(g.d);
-    return`<section class="sess-day"><h3 class="sess-day-h">${dw?`<strong class="sess-card-dw">${esc(dw)}</strong> &middot; `:''}${esc(dayLabel(g.s.day))} &middot; ${esc(shortDate(g.d))}</h3>
+    return`<section class="sess-day"><h3 class="sess-day-h">${dw?`<strong class="sess-card-dw">${esc(dw)}</strong> &middot; `:''}${esc(dayLabel(g.s.day))} &middot; ${esc(_dayNoYear(g.d))}</h3>
       <div class="sess-day-list">${g.l.map(row).join('')}</div></section>`;}).join('');
 }
 // What the step-1 Continue bar says about the ride picked, so a ride scrolled out of view is still named.
@@ -18530,12 +18553,12 @@ function renderRegister(){
           ${_evNamed(s)?`<span class="sess-card-kicker">${_sessKick(s)}${_sgChip(s)}</span>`:''}
           <span class="sess-card-head">
             <span class="sess-card-time"><bdi>${sessionTime(s)}</bdi></span></span>
-          <span class="sess-card-sub"><span class="sess-card-meta"></span><span class="sess-card-spots spots-soon">${_cuIc('clock',13)}<bdi data-bw="${esc(s.id)}">${esc(_soon)}</bdi></span></span>${_kindArt(s,'sess-motif')}</div>${_dt}</div>`;
+          <span class="sess-card-sub"><span class="sess-card-meta">${_heldHtml(s)}</span><span class="sess-card-spots spots-soon">${_cuIc('clock',13)}<bdi data-bw="${esc(s.id)}">${esc(_soon)}</bdi></span></span>${_kindArt(s,'sess-motif')}</div>${_dt}</div>`;
         const sel=S.selSession===s.id;
         const isFull=_sessFull(s);
-        const _n=spotsLeft(s.id);
-        if(_isDefe(s))return _defeSessCard(s,{sel,full:isFull,n:_n,low:!isFull&&_n>0&&_n<=3,rej:_wasRejectedFor(s.id),dt:_dt}); // Defe's own card (2026-10-18)
-        if(_isYoga(s))return _ygSessCard(s,{sel,full:isFull,n:_n,low:!isFull&&_n>0&&_n<=3,rej:_wasRejectedFor(s.id),dt:_dt,tab:sel||(!S.selSession&&_first===s.id)}); // yoga's own card (2026-11-12)
+        const _n=spotsLeft(s.id),_held=_heldHtml(s); // the rider's own place on it, said where its places would be (_heldSt)
+        if(_isDefe(s))return _defeSessCard(s,{sel,full:isFull,n:_n,low:!isFull&&_n>0&&_n<=3,rej:_wasRejectedFor(s.id),held:_held,dt:_dt}); // Defe's own card (2026-10-18)
+        if(_isYoga(s))return _ygSessCard(s,{sel,full:isFull,n:_n,low:!isFull&&_n>0&&_n<=3,rej:_wasRejectedFor(s.id),held:_held,dt:_dt,tab:sel||(!S.selSession&&_first===s.id)}); // yoga's own card (2026-11-12)
         // A named ride wears its accent and says its name on the card. The circuit is the
         // only unnamed one, so this is where the National Day ride keeps its identity even
         // though it is now ridden on the circuit's terms.
@@ -18565,7 +18588,7 @@ function renderRegister(){
           <span class="sess-card-head">
             <span class="sess-card-time"><bdi>${sessionTime(s)}</bdi></span>${_c?'':_tk}
           </span>
-          ${_meta.length||_rej||isFull||_low?`<span class="sess-card-sub"><span class="sess-card-meta">${_meta.map(x=>`<bdi>${_sarA(esc(x))}</bdi>`).join(' &middot; ')}</span>${_rej||isFull||_low?`<span class="sess-card-spots ${_rej?'spots-rej':isFull?'spots-red':'spots-low'}">${_rej?t('rejCardNote'):isFull?t('waitlistLabel'):spotsLeftLabel(_n)}</span>`:''}</span>`:''}
+          ${_meta.length||_rej||_held||isFull||_low?`<span class="sess-card-sub"><span class="sess-card-meta">${_meta.map(x=>`<bdi>${_sarA(esc(x))}</bdi>`).join(' &middot; ')}</span>${!_rej&&_held?_held:_rej||isFull||_low?`<span class="sess-card-spots ${_rej?'spots-rej':isFull?'spots-red':'spots-low'}">${_rej?t('rejCardNote'):isFull?t('waitlistLabel'):spotsLeftLabel(_n)}</span>`:''}</span>`:''}
           ${_spotHeld(s)?`<span class="sess-card-bf sess-card-reveal">${_cuIc('clock',13)}<bdi>${esc(_revealLine(s))}</bdi></span>`:_bfAt(s)?`<span class="sess-card-bf">${_cuIc('cup',13)}<bdi>${esc(_bfAt(s))}</bdi></span>`:''}
           ${_kindArt(s,'sess-motif')}
         </button>${_dt}</div>`;

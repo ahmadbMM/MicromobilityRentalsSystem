@@ -1537,6 +1537,18 @@ and special events such as hatha yoga class", then "even created one in the main
   forms; its spec read the markup, never the page): it is a `web-toggle` now, like its neighbours.
 - Styles under `FEATURED` in styles.css, after `YOGA` and outside the customer system's banners (the kind's `--ev-rgb`).
   Tests: `tests/featured.spec.ts`. Customer half 331.2 -> 332.2 KB locally (about 334.4 on the runner); budget 334 -> 337.
+- **A date the rider holds, and the day headings (the user's picks 4, 6 and 7 from the follow-ups, 2026-11-13: "do 4 6 7").**
+  `_heldSt(s)` reads the signed-in rider's own live rows on a date (waiting, waitlist, active): `ok` Booked (a tick, the
+  good state's green), `wl` On the waitlist when every rider of theirs waits, `rsv` Reserved on a ride staff approve
+  until its list is out and every rider of theirs approved. That is the ticket's own cue (`renderBookingTicket`), so a
+  row never tells a verdict before the list does; a partner's place and a checked-in one are Booked. `_heldHtml(s)`
+  draws it where a date's places are said, in their place (Waitlist, places left): on every list's rows (`_row`, the
+  circuit's too), on yoga's and Defe's own cards (`o.held`) and on a Featured card. A turned-down rider keeps that note;
+  a date not open to book yet says both. The words are the app's own (`tkStBooked`, `wlOnList`, `statusReserved`), so
+  no new string. The tap is unchanged: the date is picked as before, and Confirm still answers "already booked".
+  The list's day headings (`_sessDays`) say this year's dates without the year (`_dayNoYear`), another year's with it.
+  The kind switch (6) was already on the list (`_regKindsHtml`, the theming picks' B5): nothing built, a spec beside the
+  mark. Tests: `tests/booked-mark.spec.ts`.
 
 ## Blood Donation event (2026-11-03)
 - **Blood Donor badge (2026-11-05):** `blood_donor`, the drop on the red medal, earned from staff's Donated mark (`donatedAt`), so taking the mark back takes the badge; shown only once held. **Volunteer badge:** `volunteer`, the raised hand on its own blue special medal (`BDG_SPECIAL.volunteer`, `.sp-volunteer`), given by staff from Community > Badges. Catalogue rows: migration 20261105100000. Mirrored in the website's `lib/ride-record.ts`.

@@ -11596,6 +11596,10 @@ body:not(.view-staff) .feat-card:focus-visible{outline:2px solid var(--go);outli
 .feat-meta>*{position:relative;padding-inline-start:17px;}
 .feat-meta>span:not(.sess-card-spots)::before{content:'';position:absolute;inset-inline-start:8px;top:50%;width:1px;height:12px;margin-top:-6px;background:var(--line-2);}
 .feat-foot .sess-card-spots{margin-inline-start:17px;} /* the status keeps its own padding off (the system's rule), so it stands off by a margin */
+/* a date the rider already holds (_heldSt, 2026-11-13): Booked with a tick in the good state's green; Reserved and On the
+   waitlist in the amber of a place not settled yet. On a row not open yet it sits where the row's facts would */
+body:not(.view-staff) .spots-held{gap:5px;}
+body:not(.view-staff) .sess-card-meta>.spots-held{vertical-align:top;}
 .feat-go{flex:none;display:inline-flex;color:var(--ink-3);}
 /* yoga's card: cream, the low sun's glow from the far corner, clay and sage */
 body:not(.view-staff) .feat-card.feat-yg{color:var(--yg-ink);background-color:var(--yg-cream);
