@@ -460,6 +460,17 @@ the session sheets' tile (`_infTile`). Nothing else: no price, booking or bell c
 the tag is missing or hidden on the Tags page, which takes every mark, band, filter and count off.
 tests/influencer-tag.spec.ts.
 
+## The IMC tag (2026-11-13, migration 20261114140000)
+
+`tags` row `tag_imc` (slug `imc`, locked, never auto-granted), staff-only like the influencer tag. Its face is IMC's
+arch and letters cut from the owner's logo with the Arabic name left off (`assets/tag-imc.png`, 124x48, on white) on a
+white chip edged in IMC blue `#0e5592` (`TAG_BRANDS.imc`, `img` + `fill:'#fff'`, the Petromin pattern); on a tag
+button the logo keeps a white plate (`.am-pick .tag-img-imc`) so it reads on the dark theme. The owner also asked
+for it "on their bookings": `_imcChip` puts the logo on a white plate edged in blue after the holder's name wherever
+`_infChip` goes (roster rows and cards, edit booking, check-in, hand-over, the scanner's banner, the printed sheets;
+`.imc-mk` in styles.css and report.css; the image's address carries `location.origin` for the print window). Display
+only: no band, filter, count or rule. `_imcOn()` is false while the tag is missing or hidden. tests/imc-tag.spec.ts.
+
 ## The Petromin tag and Petromin Days (2026-10-12)
 
 The owner: "add a new petromin tag that gives its holders access only to petromin sessions through a new event

@@ -1239,6 +1239,8 @@
     /* The Victory Lap tag's logo is white: on a tag button (picked or not) it sits on its own black plate,
        or it vanished on the light theme; on dark the button's edge is lifted off the race's black. */
     .am-pick .tag-img-vl{background:#0d0d0d;padding:2px 5px;box-sizing:content-box;}
+    /* The IMC logo (2026-11-13) keeps its white plate on a tag button, so its blue still reads on the dark theme. */
+    .am-pick .tag-img-imc{background:#fff;padding:2px 4px;border-radius:var(--sf-r-xs);box-sizing:content-box;}
     html[data-staff-theme="dark"] body.view-staff .am-pick:has(.tag-img-vl){border-color:rgba(237,237,234,.55);color:#ededea;}
     html[data-staff-theme="dark"] body.view-staff .am-pick.on:has(.tag-img-vl){border-color:#ededea;background:rgba(237,237,234,.12);}
     /* The blacklist tag (2026-09-27): black, the white mark struck through by a no-entry ring. */
@@ -11828,6 +11830,11 @@ html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.inf-row.cm-row-mark{b
 body.view-staff .queue-mobile-view .q-card.inf-row.cm-row-mark.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #0c7a3d,inset 16px 0 0 #c2255c,inset 20px 0 0 var(--rs-edge,transparent);}
 html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.inf-row.cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #0c7a3d,inset -16px 0 0 #c2255c,inset -20px 0 0 var(--rs-edge,transparent);}
 body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).inf-row:not(.cm-row-mark):not(.bdf-row) .rider-name{color:#a61e4d;}
+/* ══ THE IMC TAG (the owner, 2026-11-13) ═════════════════════════════════════════════════════════════════
+   IMC's arch and letters (assets/tag-imc.png) on a white plate edged in IMC blue, after the holder's name on their
+   bookings (.imc-mk, _imcChip). White in both themes: the blue reads faintly on the dark one without it. */
+.imc-mk{display:inline-flex;align-items:center;flex:none;margin-inline-start:6px;height:18px;padding:0 4px;box-sizing:border-box;background:#fff;border:1px solid #0e5592;border-radius:var(--sf-r-xs);vertical-align:middle;}
+.imc-mk img{display:block;height:12px;width:auto;}
 html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).inf-row:not(.cm-row-mark):not(.bdf-row) .rider-name{color:#f783ac;}
 /* The special needs tag (2026-10-23): a figure in a wheelchair, white on orange (the owner, 2026-10-23; it was blue) - on its tag chip (.tag-svg) and after
    a holder's name wherever staff meet the booking (.sn-mk, _snChip). */

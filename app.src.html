@@ -10356,7 +10356,7 @@ function _doorPaint(){
   put('zg-card',!e?'':`<section class="zg-card" aria-labelledby="zg-card-t"><div class="zg-top"><h2 id="zg-card-t" class="zg-h2">${list.length>1?esc(t('zgParty').replace('{0}',list.length)):T('gsKindBooking')}</h2>
     <button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_doorOpen',null)}">${T('closeBtn')}</button></div>
     ${list.map((m,i)=>{const s=_sessGet(m.sessionId),w=_doorWhy(m),busy=D.busy.has(m.id),ty=_needsBike(s)?resolvedType(m)||'Any':'',fit=_entryFitText(m),rg=!w&&_doorNeedsRg(m);
-      return`<div class="zg-rider" data-id="${esc(m.id)}"><div class="zg-name">${num(m)}${_ptnChip(m)}${_cmChip(m)}${_snChip(m)}${_infChip(m)}${_blkChip(m)}</div>
+      return`<div class="zg-rider" data-id="${esc(m.id)}"><div class="zg-name">${num(m)}${_ptnChip(m)}${_cmChip(m)}${_snChip(m)}${_infChip(m)}${_imcChip(m)}${_blkChip(m)}</div>
         ${s&&m.sessionId!==D.sid?`<div class="zg-sess">${esc(_scanSessLabel(s,m.sessionDate,m.sessionDay))}</div>`:''}${i?'':_n6pNote(m)}
         ${m.height||ty?`<div class="zg-spec">${m.height?`<b><bdi>${esc(m.height+' '+t('cmUnit')+(fit?' · '+fit:''))}</bdi></b>`:''}${ty?typeBadge(ty):''}</div>`:''}
         ${rg?`<div class="zg-spec" role="group" aria-label="${T('rgLabel')}">${RIDE_GROUPS.map(g=>`<button type="button" class="toggle-btn${D.rg[m.id]===g?' active':''}" aria-pressed="${D.rg[m.id]===g}" data-on-click="${_on('_doorRg',m.id,g)}">${esc(_rgName(g))}</button>`).join('')}</div>`:''}
@@ -10364,7 +10364,7 @@ function _doorPaint(){
         ${w?`<div class="zg-why zg-${w.c}" role="status">${esc(w.x)}</div>`:`<button type="button" class="btn-primary zg-in"${busy||rg&&!_rgOk(D.rg[m.id])?' disabled':''} data-on-click="${_on('_doorIn',m.id)}">${T(busy?'ciSending':'zgCheckIn')}</button>`}</div>`;}).join('')}
     ${ready.length>1?`<button type="button" class="btn-primary zg-in" data-on-click="${_on('_doorIn',null)}">${esc(t('zgAll').replace('{0}',ready.length))}</button>`:''}</section>`);
   put('zg-arr',D.sid?`<section aria-labelledby="zg-arr-t"><h2 id="zg-arr-t" class="zg-h2">${T('zgArrivedT')}<span class="ah-n">${inn.length}</span></h2>
-    ${inn.length?`<ul class="zg-list">${inn.slice(0,300).map(e=>`<li><button type="button" class="zg-row" data-on-click="${_on('_doorOpen',e.id)}"><span class="zg-num"><bdi>${esc(e.checkedInAt?_tkHm(e.checkedInAt):'')}</bdi></span><span class="zg-rn">${num(e)}${_snChip(e)}${_infChip(e)}${_blkChip(e)}</span>${e.checkedInBy?`<span class="zg-num"><bdi>${esc(e.checkedInBy)}</bdi></span>`:''}</button></li>`).join('')}</ul>`:_emptyState(T('zgNoneYet'),{icon:'people'})}</section>`:'');
+    ${inn.length?`<ul class="zg-list">${inn.slice(0,300).map(e=>`<li><button type="button" class="zg-row" data-on-click="${_on('_doorOpen',e.id)}"><span class="zg-num"><bdi>${esc(e.checkedInAt?_tkHm(e.checkedInAt):'')}</bdi></span><span class="zg-rn">${num(e)}${_snChip(e)}${_infChip(e)}${_imcChip(e)}${_blkChip(e)}</span>${e.checkedInBy?`<span class="zg-num"><bdi>${esc(e.checkedInBy)}</bdi></span>`:''}</button></li>`).join('')}</ul>`:_emptyState(T('zgNoneYet'),{icon:'people'})}</section>`:'');
   if(window.mmLoading&&S.dataLoaded)window.mmLoading.hide();
 }
 function _doorSess(id){_door().sid=id;_doorPaint();}
@@ -18738,7 +18738,7 @@ function printDaySheet(){
     return `<section><h2>${esc(_evName(x)+_sgDot(x))}${_t?` &middot; ${esc(_t)}`:''}${_bfAt(x)?` &middot; ${esc(_bfAt(x))}`:''}<span class="rp-h2n">${t(run?'repRunners':'daySheetRiders')}: ${rows.length}</span></h2>
       <table><thead><tr><th>#</th><th>${t('colRider')}</th>${run?`<th>${t('runKmLabel')}</th>`:bike?`<th>${t('bikeTypeLabel')}</th>`:''}<th>${t('colStatus')}</th><th>${t('filterPay')}</th></tr></thead><tbody>
       ${rows.map(e=>{const price=e.price??DEFAULT_PRICE;
-        return`<tr><td class="rp-b7">#${e.queueNum}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td class="rp-name">${esc(e.name||'')}${_ptnChip(e)}${_snChip(e)}${_infChip(e)}</td>${third(e)}<td>${run&&e.status==='active'?t('anFunnelCheckedIn'):t(STATUS_KEY[e.status])}</td><td>${!price?t('freeLabel'):e.paid?`${_rpAmt(price)}<span class="rp-pm">&#10003;</span>`:`${_rpAmt(price)}<span class="rp-pm rp-amber">${t('pendingLabel')}</span>`}</td></tr>`;}).join('')
+        return`<tr><td class="rp-b7">#${e.queueNum}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td class="rp-name">${esc(e.name||'')}${_ptnChip(e)}${_snChip(e)}${_infChip(e)}${_imcChip(e)}</td>${third(e)}<td>${run&&e.status==='active'?t('anFunnelCheckedIn'):t(STATUS_KEY[e.status])}</td><td>${!price?t('freeLabel'):e.paid?`${_rpAmt(price)}<span class="rp-pm">&#10003;</span>`:`${_rpAmt(price)}<span class="rp-pm rp-amber">${t('pendingLabel')}</span>`}</td></tr>`;}).join('')
         ||`<tr><td colspan="${run||bike?5:4}">—</td></tr>`}
       </tbody></table></section>`;
   }).join('');
@@ -29309,6 +29309,17 @@ function _infCid(cid){return !!cid&&_infOn()&&_ctRowsFor(cid).some(ct=>ct.tag_id
 function _infOf(e){return !!e&&_infCid(e.customerId);}
 function _infRow(x){return(Array.isArray(x)?x.some(_infOf):_infOf(x))?' inf-row':'';}
 function _infChip(e){if(!_infOf(e))return'';const tg=(S.tags||[]).find(x=>x.id===TAG_INF),w=esc((tg&&tg.name)||t('infLabel'));return`<span class="inf-mk" role="img" title="${w}" aria-label="${w}">${_INF_SVG}</span>`;}
+// The IMC tag (the owner, 2026-11-13: "create a new tag call it IMC and let the attached logo to be what's inside the
+// tag but only the image and IMC letters", then "and show the tag on their bookings"): the International Medical
+// Center's arch and its letters IMC (assets/tag-imc.png, the Arabic name left off) on a white chip edged in IMC blue
+// (TAG_BRANDS.imc), and the same logo on a white plate after the holder's name wherever the influencer mark goes: the
+// roster and its cards, edit booking, check-in, the hand-over, the scanner's banner and the printed sheets. Display
+// only; hiding the tag on the Tags page takes it off. The image's address is absolute because the printed sheets are
+// written into a window of their own.
+const TAG_IMC='tag_imc';
+function _imcOn(){const tg=(S.tags||[]).find(x=>x.id===TAG_IMC);return !!tg&&!_tagHidden(tg);}
+function _imcOf(e){return !!e&&!!e.customerId&&_imcOn()&&_ctRowsFor(e.customerId).some(ct=>ct.tag_id===TAG_IMC&&_tagActive(ct));}
+function _imcChip(e){if(!_imcOf(e))return'';const tg=(S.tags||[]).find(x=>x.id===TAG_IMC),w=esc((tg&&tg.name)||'IMC');return`<span class="imc-mk" title="${w}"><img src="${location.origin}/assets/tag-imc.png" alt="${w}" width="31" height="12" decoding="async"></span>`;}
 // The blacklist tag is for staff to tell its holders apart, never a block (the owner, 2026-11-09: "dont disallow
 // them anything just show it besides their name for their bookings for the staff"): they book any ride and check in
 // as anyone does, and their bookings carry the tag's mark (the white mark struck through, on black) after the name
@@ -31033,7 +31044,7 @@ function _n6rPrintLead(sid){
     ${rota?`<section><h2>${t('n6rRota')}</h2><table><tbody>${rota}</tbody></table></section>`:''}
     <section><h2>${t('n6rLeadSheet')}</h2><table><thead><tr><th>#</th><th>${t('nameLabel')}</th><th>${t('repColPhone')}</th>${bike?`<th>${t('bikeTypeLabel')}</th>`:''}<th>${t('colStatus')}</th><th>${t('n6rHere')}</th></tr></thead><tbody>
     ${rows.map(e=>{const bk=bike?getAssignedBikes(e).map(b=>b.name).join(', '):'',fit=bike?_entryFitText(e):'';
-      return`<tr><td class="rp-b7">#${e.queueNum||''}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td class="rp-name">${esc(e.name||'')}${_snChip(e)}${_infChip(e)}</td><td><bdi>${esc(fmtPhone(e.phone)||'')}</bdi></td>${bike?`<td>${esc(typeLabel(resolvedType(e)))}${fit?' '+esc(fit):''}${bk?' &middot; '+esc(bk):''}</td>`:''}<td>${esc(t(STATUS_KEY[e.status]||'colStatus'))}</td><td></td></tr>`;}).join('')||`<tr><td colspan="${bike?6:5}">—</td></tr>`}
+      return`<tr><td class="rp-b7">#${e.queueNum||''}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td class="rp-name">${esc(e.name||'')}${_snChip(e)}${_infChip(e)}${_imcChip(e)}</td><td><bdi>${esc(fmtPhone(e.phone)||'')}</bdi></td>${bike?`<td>${esc(typeLabel(resolvedType(e)))}${fit?' '+esc(fit):''}${bk?' &middot; '+esc(bk):''}</td>`:''}<td>${esc(t(STATUS_KEY[e.status]||'colStatus'))}</td><td></td></tr>`;}).join('')||`<tr><td colspan="${bike?6:5}">—</td></tr>`}
     </tbody></table></section>`;
   const html=_reportShell({rid:'lead',kind:t('n6rLeadSheet'),title:esc(_evName(s)+_sgDot(s)),subtitle:`${esc(dayLabel(s.day)||'')} &middot; ${esc(shortDate(_ssDay(s)))} &middot; <bdi>${esc(sessionTime(s))}</bdi>`,
     refNo:'MM-LEAD-'+_ssDay(s).slice(2).replace(/-/g,''),body});
@@ -38467,7 +38478,7 @@ function showBookingEditModal(entryId){
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showBookingEditModal_2",_EV,_EL)}">
     <div class="modal-box dk-mw420" role="dialog" aria-modal="true" aria-labelledby="dlgt-editBookingTitle">
-      <div class="modal-title" id="dlgt-editBookingTitle">${t('editBookingTitle')} · <bdi dir="ltr">#${e.queueNum}</bdi>${_ptnChip(e)}${_snChip(e)}${_infChip(e)}${_blkChip(e)}</div>
+      <div class="modal-title" id="dlgt-editBookingTitle">${t('editBookingTitle')} · <bdi dir="ltr">#${e.queueNum}</bdi>${_ptnChip(e)}${_snChip(e)}${_infChip(e)}${_imcChip(e)}${_blkChip(e)}</div>
       <div class="modal-sub">${t('editBookingSub')}</div>
       <div class="mny-aurow">${_auditBtn('queue_entries',e.id,'#'+e.queueNum+' '+(e.name||''))}</div>
       <div class="form-group dk-fg-top"><label for="be-name">${t('nameLabel')} *</label><input id="be-name" type="text" value="${esc(_n)}" maxlength="60" data-on-input="${_on("_nameInput",_EL)}"></div>
@@ -39821,7 +39832,7 @@ function renderQRow(e){
     return`<tr class="${[rowCls,_flashCls].filter(Boolean).join(' ')}${_odCls}${_rowPendCls(e.id)}${_ptnRow(e)}${_cmRow(e)}${_infRow(e)}${_bdfRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
       <td class="rq-sel">${_bulkChk(e)}</td>
       <td class="rq-w52 rq-numc"><div class="rq-n1">${_evMark(e)}${_noNum?`<span class="rq-bkat" title="${t('reservedAtLabel')}">${_resTimeShort(e)}</span>`:`<span class="queue-num-cell">#${e.queueNum}</span>`}</div>${_noNum?'':_bookedAt(e.registeredAt)}</td>
-      <td class="rq-rider${_isSatMember(e)?' cm-cell':''}"><div class="rider-name rq-rn"><span class="rq-nm" title="${esc(e.name)}">${esc(e.name)}</span>${_ptnChip(e,1)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_infChip(e)}${_blkChip(e)}${_leadChip(e)}${_stcChip(e)}${_n6cFirstChip(e)}${_srmChip(e)}${wiTag}${noShowFlag(e)}${_ptChip(e)}${_dqMark(e)}</div><div class="rq-r2"><span class="rider-sub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi>${_dupMark(e)}</span>${_qCc(entryPhone(e),e)}${_rmBtn(e)}</div></td>
+      <td class="rq-rider${_isSatMember(e)?' cm-cell':''}"><div class="rider-name rq-rn"><span class="rq-nm" title="${esc(e.name)}">${esc(e.name)}</span>${_ptnChip(e,1)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_infChip(e)}${_imcChip(e)}${_blkChip(e)}${_leadChip(e)}${_stcChip(e)}${_n6cFirstChip(e)}${_srmChip(e)}${wiTag}${noShowFlag(e)}${_ptChip(e)}${_dqMark(e)}</div><div class="rq-r2"><span class="rider-sub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi>${_dupMark(e)}</span>${_qCc(entryPhone(e),e)}${_rmBtn(e)}</div></td>
       ${_memberCell(e)}
       ${_qc.rc?_codeCell(e,'',_qc.rcSat):''}
       ${_qc.bike?_qTypeCell(e):''}
@@ -39921,7 +39932,7 @@ function renderQRow(e){
           ${primary.groupName?`<div class="rq-gname" title="${esc(primary.groupName)}">${esc(primary.groupName)}</div>`:''}
         </td>
         <td class="rq-vm${group.some(_isSatMember)?' cm-cell':''}">
-          <div class="rider-name">${esc(primary.name)}${_ptnChip(primary,1)}${_cmChip(primary)}${_bdfChip(group.find(_bdfOf))}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${_infChip(group.find(_infOf))}${_blkChip(group.find(_blkOf))}${noShowFlag(primary)}${group.map(x=>_ptChip(x)).join('')}${_dqMark(group)}</div>
+          <div class="rider-name">${esc(primary.name)}${_ptnChip(primary,1)}${_cmChip(primary)}${_bdfChip(group.find(_bdfOf))}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${_infChip(group.find(_infOf))}${_imcChip(group.find(_imcOf))}${_blkChip(group.find(_blkOf))}${noShowFlag(primary)}${group.map(x=>_ptChip(x)).join('')}${_dqMark(group)}</div>
           <div class="rider-sub">${_partyCountsLine(group)}</div>
           ${_qCc(primary.groupPhone||primary.phone,primary)}
           <button type="button" class="party-toggle" aria-expanded="false" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyShowRiders')} ▾</button>
@@ -39957,7 +39968,7 @@ function renderQRow(e){
         :'<span class="rq-mut">—</span>';
       const riderCell=`<div class="rq-rc">
         <span class="rq-num17">${i+1}</span>
-        <span class="rider-name ${isFirst?'rq-rn900':'rq-rn600'}">${esc(e.name)}${_ptnChip(e,1)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_infChip(e)}${_blkChip(e)}${_leadChip(e)}${_stcChip(e)}${_n6cFirstChip(e)}${_srmChip(e)}${_kioskTag(e)}${isFirst?noShowFlag(e):''}${_ptChip(e)}${_dqMark(e)}</span>
+        <span class="rider-name ${isFirst?'rq-rn900':'rq-rn600'}">${esc(e.name)}${_ptnChip(e,1)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_infChip(e)}${_imcChip(e)}${_blkChip(e)}${_leadChip(e)}${_stcChip(e)}${_n6cFirstChip(e)}${_srmChip(e)}${_kioskTag(e)}${isFirst?noShowFlag(e):''}${_ptChip(e)}${_dqMark(e)}</span>
       </div>${e.phone?`<div class="rider-sub rq-rsub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)}</bdi>${_dupMark(e)}</div>`:''}${_qCc(e.phone,e)}${_adChips(e)}`;
       const typeCell=_qTypeCell(e,'rq-vm');
       const groupLine=isFirst?'rq-gtop':'';
@@ -40047,7 +40058,7 @@ function renderQRow(e){
         <div class="rq-sb8">
           <div class="rq-cl">
             ${n>1?`<span class="rq-num16">${i+1}</span>`:''}
-            <span class="rider-name rq-cname">${esc(e.name)}</span>${n>1?_ptnChip(e):''}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_infChip(e)}${_blkChip(e)}${_leadChip(e)}${_stcChip(e)}${_n6cFirstChip(e)}${_srmChip(e)}${i===0?noShowFlag(e):''}${_ptChip(e)}${_dupMark(e)}${_dqMark(e)}
+            <span class="rider-name rq-cname">${esc(e.name)}</span>${n>1?_ptnChip(e):''}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_infChip(e)}${_imcChip(e)}${_blkChip(e)}${_leadChip(e)}${_stcChip(e)}${_n6cFirstChip(e)}${_srmChip(e)}${i===0?noShowFlag(e):''}${_ptChip(e)}${_dupMark(e)}${_dqMark(e)}
             ${e.height?`<span class="q-height rq-fs0"><bdi>${e.height} ${t('cmUnit')}</bdi></span>`:''}
           </div>
           <div class="rq-cr">${e.phone?_contactCell(e.phone,e):''}${_rmBtn(e)}<span class="rq-end">${statusCellHtml(e,n===1?_qPosBit(e,lp,totalW):'')}</span>${payBtn}</div>
@@ -40082,7 +40093,7 @@ function renderQRow(e){
         </div>
         ${sessLabel}
         <div class="rq-sb8">
-          <div class="rq-mw0"><div class="rider-name rq-cname2">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${_bdfChip(group.find(_bdfOf))}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${_infChip(group.find(_infOf))}${_blkChip(group.find(_blkOf))}${noShowFlag(primary)}${group.map(x=>_ptChip(x)).join('')}${_dqMark(group)}</div>
+          <div class="rq-mw0"><div class="rider-name rq-cname2">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${_bdfChip(group.find(_bdfOf))}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${_infChip(group.find(_infOf))}${_imcChip(group.find(_imcOf))}${_blkChip(group.find(_blkOf))}${noShowFlag(primary)}${group.map(x=>_ptChip(x)).join('')}${_dqMark(group)}</div>
             <div class="rq-csub">${_partyCountsLine(group)}</div>
             <button type="button" class="party-toggle" aria-expanded="false" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyShowRiders')} ▾</button></div>
           <div class="rq-cr">${_contactCell(primary.groupPhone||primary.phone,primary)}</div>
@@ -49802,7 +49813,7 @@ function printCommunityRoster(sess){
     const phone=e.phone||(e.customerId?((getCustomers().find(x=>x.id===e.customerId)||{}).phone||''):'')||'';
     return`<tr>
       <td class="rp-seq">${i+1}</td>
-      <td class="rp-name">${esc(e.name||'—')}${_ptnChip(e)}${_snChip(e)}${_infChip(e)}</td>
+      <td class="rp-name">${esc(e.name||'—')}${_ptnChip(e)}${_snChip(e)}${_infChip(e)}${_imcChip(e)}</td>
       ${_showMem?`<td>${t(_isSatMember(e)?'memberYes':'memberNo')}</td>`:''}
       ${_ptn?`<td>${e.partner?esc([_ptnLabel(e.partner),_ptnCodeName(e),_ptnShirt(e)].filter(Boolean).join(' · ')):'—'}</td>`:''}
       <td>${phone?`<a href="tel:${esc(phone)}"><bdi>${esc(phone)}</bdi></a>`:'—'}</td>
@@ -49895,7 +49906,7 @@ function printSessionReport(km){
   const _cell={
     seq:    (e,i)=>`<td class="rp-seq">${i+1}</td>`,
     qnum:   e=>`<td class="rp-b7">#${e.queueNum}</td>`, // "#" sets it apart from the row counter beside it
-    name:   e=>`<td class="rp-name">${esc(e.name)}${_ptnChip(e,_codeOn)}${_snChip(e)}${_infChip(e)}</td>`,
+    name:   e=>`<td class="rp-name">${esc(e.name)}${_ptnChip(e,_codeOn)}${_snChip(e)}${_infChip(e)}${_imcChip(e)}</td>`,
     km:     e=>`<td>${_runKmOk(e.runKm)?esc(_runKmTxt(e.runKm)):'—'}</td>`,
     member: e=>`<td>${t(_isSatMember(e)?'memberYes':'memberNo')}</td>`,
     ptn:    e=>`<td>${e.partner?esc(_ptnLabel(e.partner)):'—'}</td>`,
@@ -51810,6 +51821,7 @@ function _scanTicket(entry,say){
   const nm=entry.name||'';
   if(entry.partner){const s0=say;say=(m,c)=>{s0(m,c);const sp=document.querySelector('#scan-banner .scan-bn-in>span');if(sp&&!sp.querySelector('.ptn-chip'))sp.insertAdjacentHTML('beforeend',_ptnChip(entry));};} // a partner's ticket says so on the banner
   if(_infOf(entry)){const s4=say;say=(m,c)=>{s4(m,c);const sp=document.querySelector('#scan-banner .scan-bn-in>span');if(sp&&!sp.querySelector('.inf-mk'))sp.insertAdjacentHTML('beforeend',_infChip(entry));};} // and an influencer (2026-11-12)
+  if(_imcOf(entry)){const s5=say;say=(m,c)=>{s5(m,c);const sp=document.querySelector('#scan-banner .scan-bn-in>span');if(sp&&!sp.querySelector('.imc-mk'))sp.insertAdjacentHTML('beforeend',_imcChip(entry));};} // and an IMC holder (2026-11-13)
   if(_snOf(entry)){const s1=say;say=(m,c)=>{s1(m,c);const sp=document.querySelector('#scan-banner .scan-bn-in>span');if(sp&&!sp.querySelector('.sn-mk'))sp.insertAdjacentHTML('beforeend',_snChip(entry));};} // and a rider with special needs (2026-10-23)
   if(_blkOf(entry)){const s3=say;say=(m,c)=>{s3(m,c);const sp=document.querySelector('#scan-banner .scan-bn-in>span');if(sp&&!sp.querySelector('.blk-mk'))sp.insertAdjacentHTML('beforeend',_blkChip(entry));};} // and a blacklisted rider: the mark only, the scan goes on (2026-11-09)
   if(_isBlood(_rowSess(entry))){const s2=say;say=(m,c)=>{s2(m,c);const sp=document.querySelector('#scan-banner .scan-bn-in>span');if(sp&&!sp.querySelector('.bld-chip'))sp.insertAdjacentHTML('beforeend',' '+_bldRoleChip(entry));};} // and on the Blood Donation night, donor or visitor (2026-11-05)
@@ -51993,7 +52005,7 @@ function renderHandover(){
   const card=e=>{const sz=_entryFitText(e);const on=!!(sel&&sel.id===e.id);
     return `<button type="button" class="ho-row${on?' sel':''}${_ptnRow(e)}${_cmRow(e)}${_infRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}" aria-pressed="${on?'true':'false'}" data-on-click="${_on("_hoPick",e.id)}">
       <span class="ho-num">#${esc(e.queueNum??'')}</span>
-      <span class="ho-name">${esc(e.name||'')}${_ptnChip(e)}${_snChip(e)}${_infChip(e)}${_blkChip(e)}${e.groupName?`<small>${esc(e.groupName)}</small>`:''}</span>
+      <span class="ho-name">${esc(e.name||'')}${_ptnChip(e)}${_snChip(e)}${_infChip(e)}${_imcChip(e)}${_blkChip(e)}${e.groupName?`<small>${esc(e.groupName)}</small>`:''}</span>
       <span class="ho-spec">${esc(typeLabel(e.typePreference||'Any'))}${sz?' · '+esc(sz):''}</span>
       <span class="ho-since">${_hoSince(e)}</span></button>`;};
   host.innerHTML=`<h1 class="page-title">${t('hoTitle')}</h1><div class="page-sub">${t('hoSub')}</div>
@@ -53766,7 +53778,7 @@ function renderCheckinModal(){
     m.style.display='flex';
     _ciPaint(m,`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_1",_EV,_EL)}">
     <div class="modal-box bkm-cbox" role="dialog" aria-modal="true" aria-labelledby="dlgt-checkin">
-      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · <bdi dir="ltr">#${e.queueNum}</bdi> ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_infChip(e)}${_blkChip(e)}${noShowFlag(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}</div>
+      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · <bdi dir="ltr">#${e.queueNum}</bdi> ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_infChip(e)}${_imcChip(e)}${_blkChip(e)}${noShowFlag(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}</div>
       ${_hBadge}
       ${_stepsHtml}
       <div role="status" class="bkm-nsnote">${t('ciNoShowNote').replace('{0}',String(e.queueNum)).replace('{1}',esc(e.name))}</div>
@@ -53789,7 +53801,7 @@ function renderCheckinModal(){
   m.style.display='flex';
   _ciPaint(m,`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_4",_EV,_EL)}">
     <div class="modal-box bkm-cbox" role="dialog" aria-modal="true" aria-labelledby="dlgt-checkin">
-      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · <bdi dir="ltr">#${e.queueNum}</bdi> ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_infChip(e)}${_blkChip(e)}${noShowFlag(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}${_ciTitleTag(e)}</div>
+      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · <bdi dir="ltr">#${e.queueNum}</bdi> ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_infChip(e)}${_imcChip(e)}${_blkChip(e)}${noShowFlag(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}${_ciTitleTag(e)}</div>
       ${_hBadge}
       ${_ciNoteHtml(e)}${_vtCiHtml(e)}${_dkYWvLine(e)}
       ${_stepsHtml}${_ciAllPaidHtml(e)}
@@ -53846,7 +53858,7 @@ function _ciSatRender(e,m,_hBadge,_stepsHtml){
   m.style.display='flex';
   _ciPaint(m,`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_4",_EV,_EL)}">
     <div class="modal-box bkm-cbox ci-sat" role="dialog" aria-modal="true" aria-labelledby="dlgt-checkin">
-      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_infChip(e)}${_blkChip(e)}${_dkYUnappr(e)?` <span class="ci-ttag">${esc(t('apprPendingChip'))}</span>`:''}</div>
+      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_infChip(e)}${_imcChip(e)}${_blkChip(e)}${_dkYUnappr(e)?` <span class="ci-ttag">${esc(t('apprPendingChip'))}</span>`:''}</div>
       ${_hBadge}
       ${_dkYWvLine(e)}
       ${_stepsHtml}
@@ -67248,7 +67260,7 @@ async function saveTagGrant(){
 // The Petromin tag (2026-10-12) is the fifth: Petromin's own logo, in its colours, on a white chip
 // edged in Petromin's red (the owner: "change the petromin tag to include petromin logo instead"; it
 // was the word PETROMIN in white on red), for a rider who books the Petromin nights through Petromin Days.
-const TAG_BRANDS={jcc:{cls:'jcc',color:'#0466AF'},saturday:{cls:'mm',color:'#0c7a3d'},blacklist:{cls:'mm',color:'#0b0b0b',ban:true},vip:{cls:'vip',color:'#a67c00'},petromin:{cls:'pm',color:'#d6202a',img:'/assets/petromin-logo.png',fill:'#fff'},vlap:{cls:'vl',color:'#0d0d0d',img:'/assets/victory-lap-white.webp',fill:'#0d0d0d'},special_needs:{cls:'sn',color:'#e8590c',svg:1},influencer:{cls:'inf',color:'#c2255c',svg:'inf'}}; // special_needs: a figure in a wheelchair, white on orange (the owner, 2026-10-23; it was blue) (2026-10-23, _SN_SVG); vlap: the race's logo in white on black (the owner picked T1, 2026-10-17)
+const TAG_BRANDS={jcc:{cls:'jcc',color:'#0466AF'},saturday:{cls:'mm',color:'#0c7a3d'},blacklist:{cls:'mm',color:'#0b0b0b',ban:true},vip:{cls:'vip',color:'#a67c00'},petromin:{cls:'pm',color:'#d6202a',img:'/assets/petromin-logo.png',fill:'#fff'},vlap:{cls:'vl',color:'#0d0d0d',img:'/assets/victory-lap-white.webp',fill:'#0d0d0d'},special_needs:{cls:'sn',color:'#e8590c',svg:1},influencer:{cls:'inf',color:'#c2255c',svg:'inf'},imc:{cls:'imc',color:'#0e5592',img:'/assets/tag-imc.png',fill:'#fff'}}; // imc: IMC's arch and letters on white, edged in IMC blue (2026-11-13, _imcChip); special_needs: a figure in a wheelchair, white on orange (the owner, 2026-10-23; it was blue) (2026-10-23, _SN_SVG); vlap: the race's logo in white on black (the owner picked T1, 2026-10-17)
 const TAG_COMMUNITY='tag_saturday',TAG_BLACKLIST='tag_blacklist',TAG_VIP='tag_vip',TAG_PETROMIN='tag_petromin',TAG_VLAP='tag_vlap';
 // The Community tag and the Petromin tag never sit on one account (the owner, 2026-10-12: "when giving a
 // petromin tag to a community member show an error that asks that only one of them must be given per
