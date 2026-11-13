@@ -192,7 +192,7 @@ test.describe('@staff:sessions Farm House Night', () => {
     await page.goto('/');
     await waitForSb(page);
     expect(await page.evaluate(`_apprPartyIds(getQueue().filter(e=>e.sessionId==='${FH}'))`)).toEqual(['q1', 'q2', 'q3']);
-    const items = await page.evaluate(`_partyMenuExtra(getQueue().filter(e=>e.sessionId==='${FH}'),'',0).filter(Boolean).map(x=>x.label)`);
+    const items = await page.evaluate(`_partyMenuExtra(getQueue().filter(e=>e.sessionId==='${FH}'),'',0).filter(Boolean).map(x=>x.label)`) as string[];
     expect(items[0]).toBe('✓ Approve (3)');
     // one family member already approved: the press takes the other two
     const two = await page.evaluate(`(()=>{const g=getQueue().filter(e=>e.sessionId==='${FH}');g[0].approval='approved';return _apprPartyIds(g);})()`);
