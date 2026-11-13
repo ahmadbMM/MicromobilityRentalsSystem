@@ -232,7 +232,7 @@ function _feedHtml(c, d, stale) {
     d.year ? _yrCardHtml(d.year) : '',
     _soonHtml(c, hero.open),
     _akCardHtml(),
-    _meHtml(d.me),
+    _p5Html() || _meHtml(d.me),
     (Array.isArray(d.goals) ? d.goals : []).map(_seasonHtml).join(''),
     d.club ? _clubHtml(d.club) : '',
     _numsHtml(d.numbers),
@@ -420,6 +420,16 @@ function _meHtml(me) {
   return `<div class="hub-card"><span class="hub-k">${_cuIc('flag', 16)} ${_hT('goalYou')}</span><strong class="hub-name"><bdi>${esc(name)}</bdi></strong>
     ${pick ? `<span class="hub-k">${_hT('chPick')}</span>${pick}` : ''}
     ${_hubProg(n, tg, name)}<div class="hub-meta">${done ? `<strong>${_hT('goalDone')}</strong> · ` : ''}${esc(_hF('goalOf', Math.min(n, tg), tg, _hDate(me.ends_on)))}</div></div>`;
+}
+// The first five rides (new features build F1, 2026-11-13): a member with fewer than five rides sees their path of five
+// marks in this slot, in place of the month's challenge, until the fifth ride. The count is the page's own (the ride
+// tier's), lent with its words through _hubDeps.p5; a page from before it lends nothing and the challenge stays.
+function _p5Html() {
+  const dep = window._hubDeps || {}; let p = null;
+  try { p = dep.p5 ? dep.p5() : null; } catch (_) {}
+  if (!p) return '';
+  return `<div class="hub-card hub-p5"><span class="hub-k">${_cuIc('flag', 16)} ${_hT('goalYou')}</span><strong class="hub-name"><bdi>${esc(p.nm)}</bdi></strong>
+    ${_hubProg(p.n, p.tg, p.nm)}<div class="hub-meta"><bdi>${esc(p.of)}</bdi></div></div>`;
 }
 async function _hubPick(k) {
   const c = _hCust(), h = S._hub; if (!c || !h || !h.d || !h.d.me || S._hubPicking) return;

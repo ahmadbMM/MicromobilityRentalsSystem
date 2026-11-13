@@ -26,6 +26,9 @@ const ride = (id: string, date: string, o: Record<string, unknown> = {}) => ({
   id, name: 'Spec Rider', customer_id: 'c1', session_id: 's-' + date, session_day: 'Friday', session_date: date, queue_num: 1,
   status: 'done', paid: true, price: 30, checked_out_at: date + 'T11:00:00Z', registered_at: date + 'T10:00:00Z', ...o,
 });
+// Four rides ridden before the rating page existed: with today's the rider has five, so the rating's last screen is this
+// build's own. Under five rides it is the first-five-rides path (new features build F1, tests/first-five-rides.spec.ts).
+const rode4 = ['2026-09-04', '2026-09-11', '2026-09-18', '2026-09-25'].map((d, i) => ride('o' + i, d));
 
 // Every RPC the page sent, with its body.
 function rpcLog(page: Page) {
@@ -147,7 +150,7 @@ test.describe('@customer:members Community where members are', () => {
   });
 
   test('with a ride to rate, the badge waits for the rating and shows on its last screen, one thing with Community and Done', async ({ page }) => {
-    const q = [ride('q1', today)];
+    const q = [...rode4, ride('q1', today)];
     const log = await boot(page, { sessions: [circuit(today)], queue_entries: q, 'rpc:my_bookings': q, 'rpc:customer_booking_update': true,
       'rpc:hub_pulse': pulse({ fresh: [{ slug: 'challenge_1', at: badge.at }] }), ...badges }, { rate: true });
     const m = page.locator('#rate-modal');
@@ -175,7 +178,7 @@ test.describe('@customer:members Community where members are', () => {
   });
 
   test('the last screen shows the month\'s challenge this ride moved: dots for four, the count written; Done and Escape close it', async ({ page }) => {
-    const q = [ride('q1', today)];
+    const q = [...rode4, ride('q1', today)];
     await boot(page, { sessions: [circuit(today)], queue_entries: q, 'rpc:my_bookings': q, 'rpc:customer_booking_update': true }, { rate: true });
     const m = page.locator('#rate-modal');
     await m.locator('#rgq-service .rg-b[data-v="9"]').click();
@@ -197,7 +200,7 @@ test.describe('@customer:members Community where members are', () => {
   });
 
   test('a ride from another month: the season challenge\'s count instead, as a bar; nothing to show closes as before', async ({ page }) => {
-    const q = [ride('q1', today)];
+    const q = [...rode4, ride('q1', today)];
     await boot(page, { sessions: [circuit(today)], queue_entries: q, 'rpc:my_bookings': q, 'rpc:customer_booking_update': true,
       'rpc:hub_pulse': pulse({ me: me({ ends_on: `${other}-28` }) }) }, { rate: true });
     const m = page.locator('#rate-modal');
@@ -214,7 +217,7 @@ test.describe('@customer:members Community where members are', () => {
 
   for (const [name, fx, member] of [['nothing to show', { 'rpc:hub_pulse': pulse({ me: null, goals: [] }) }, true], ['not a member', {}, false]] as const) {
     test(`${name}: the rating closes with its thank-you, as it always did`, async ({ page }) => {
-      const q = [ride('q1', today)];
+      const q = [...rode4, ride('q1', today)];
       const log = await boot(page, { sessions: [circuit(today)], queue_entries: q, 'rpc:my_bookings': q, 'rpc:customer_booking_update': true, ...fx }, { rate: true, member });
       const m = page.locator('#rate-modal');
       await m.locator('#rgq-service .rg-b[data-v="9"]').click();

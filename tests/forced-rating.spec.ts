@@ -60,6 +60,9 @@ test('a circuit ride: an unskippable page asks service and bike, and why for 6 o
   await expect.poll(() => calls.length).toBe(1);
   expect(calls[0].p_patch).toEqual({ rating_bike: 6, rating_exp: 9, feedback: 'Lovely night', // rating_exp: the service, its headline score
     rating_detail: { form: 'rental', s: { service: 9, bike: 6 }, why: { bike: 'Gears slipped' } } });
+  // a first ride: the last screen is the first-five-rides path (new features build F1, 2026-11-13); Done closes it
+  await expect(m.locator('.rg-fin .rg-fin-n')).toHaveText('1 of 5');
+  await m.locator('.rg-fin .gate-out').click();
   await expect.poll(() => open(page)).toBe(false);
 });
 
@@ -83,6 +86,8 @@ test('a Saturday social ride asks the ride and the breakfast with their parts, a
   expect(calls[0].p_patch).toMatchObject({ rating_bike: null, rating_exp: 10, feedback: null,
     rating_detail: { form: 'social', skip_bf: true, why: { ride_staff: 'Hard to find at the start' },
       s: { ride: 10, ride_checkin: 10, ride_staff: 8, ride_route: 10, overall: 10 } } });
+  await expect(m.locator('.rg-fin .rg-fin-n')).toHaveText('1 of 5'); // a first ride: the path, then Done (F1)
+  await m.locator('.rg-fin .gate-out').click();
   await expect.poll(() => open(page)).toBe(false);
 });
 

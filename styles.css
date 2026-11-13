@@ -9760,6 +9760,9 @@ body:not(.view-staff) #rate-modal .rg-fin-medal{display:block;width:84px;height:
 body:not(.view-staff) #rate-modal .rg-fin-t{margin-top:4px;}
 body:not(.view-staff) #rate-modal .rg-fin-p{display:grid;justify-items:center;gap:8px;margin-top:18px;}
 body:not(.view-staff) #rate-modal .rg-fin-n{font-weight:800;font-size:var(--fs-20);font-variant-numeric:tabular-nums;color:var(--ink);}
+/* under five rides with nothing booked (F1): Book leads, so Community is drawn second, outlined */
+body:not(.view-staff) #rate-modal .rg-fin .pg-btn.rg-fin-2{margin-top:10px;background:transparent;color:var(--go-2);box-shadow:inset 0 0 0 1.5px var(--go);}
+body:not(.view-staff) #rate-modal .rg-fin .pg-btn.rg-fin-2:hover{background:var(--card-3);}
 /* "You're booked": the challenge with this booking, a link to Community; the ticket below is untouched */
 body:not(.view-staff) .bk-ok-hub{width:100%;max-width:320px;}
 body:not(.view-staff) .bk-ok-hub:empty{display:none;}

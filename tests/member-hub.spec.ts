@@ -8,6 +8,9 @@ import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } fr
 
 const sess = (id: string, date: string, o: Record<string, unknown> = {}) => ({ id, day: 'Saturday', session_date: date, capacity: 40, status: 'open', created_at: 1, event_kind: 'community', ride_kind: 'saturday', paid_ride: false, bike_slots: '{"_time":"06:00 - 06:30","_total":40}', ...o });
 const sessions = [sess('2099-01-03', '2099-01-03'), sess('2099-01-10', '2099-01-10'), sess('2099-01-17', '2099-01-17'), sess('sw-9', '2099-01-05', { ride_kind: 'swim', gender_only: 'female', day: 'Monday' })];
+// Five circuit rides ridden: the monthly challenge's slot shows the challenge. Under five rides it shows the
+// first-five-rides path instead (new features build F1, tests/first-five-rides.spec.ts).
+const rode5 = ['2026-08-28', '2026-09-04', '2026-09-11', '2026-09-18', '2026-09-25'].map((d, i) => ({ id: 'o' + i, name: 'Lina Haddad', customer_id: 'c1', session_id: 'j-' + d, session_day: 'Friday', session_date: d, queue_num: 1, status: 'done', paid: true, price: 30 }));
 const feed = (o: Record<string, unknown> = {}) => ({
   ok: true, today: '2026-11-11',
   me: { kind: 'level', levels: [1, 2, 3], target: 2, chosen: false, n: 1, ends_on: '2026-11-30', sats: 4 },
@@ -82,7 +85,7 @@ test.describe('@customer:members the Community tab', () => {
 
   test('the member picks a level; it is sent and the challenge counts it', async ({ page }) => {
     const sent = rpcSent(page);
-    await member(page, { 'rpc:hub_pick_level': { ok: true } });
+    await member(page, { queue_entries: rode5, 'rpc:hub_pick_level': { ok: true } });
     const card = page.locator('#hub-body .hub-card', { hasText: 'Your challenge' });
     await expect(card.locator('.hub-lv')).toHaveCount(3);
     await expect(card.locator('.hub-lv.on')).toHaveText('2');
@@ -94,7 +97,7 @@ test.describe('@customer:members the Community tab', () => {
   });
 
   test('a first-timer sees their first session; the season, the club goal and the club numbers show without names', async ({ page }) => {
-    await member(page, { 'rpc:hub_feed': feed({ me: { kind: 'first', levels: [1], target: 1, chosen: false, n: 0, ends_on: '2026-11-30', sats: 4 } }) });
+    await member(page, { queue_entries: rode5, 'rpc:hub_feed': feed({ me: { kind: 'first', levels: [1], target: 1, chosen: false, n: 0, ends_on: '2026-11-30', sats: 4 } }) });
     await expect(page.locator('#hub-body .hub-card', { hasText: 'Your challenge' })).toContainText('Your first session');
     await expect(page.locator('#hub-body .hub-card', { hasText: 'Season challenge' })).toContainText('2 of 8');
     const club = page.locator('#hub-body .hub-card', { hasText: 'Community goal' });
