@@ -5978,6 +5978,7 @@ function _regRange(s,ty){
 // so a replaced picture gets a new address past the service worker's cache-first store. Until the
 // file exists the sheet draws the bike glyph instead. 'Any' and 'Own' are choices, not bikes: no sheet.
 const HUB_V=''; // build stamps a hash of member-hub.js
+const ASK_HUB_V=''; // build stamps a hash of member-ask.js (an Ask page opened from the Community tab)
 const BIKE_IMG_V=''; // build stamps a hash of assets/bikes/
 // model is the Alvas line the picture shows (the distributor's catalogue, 2026-09-27; shown as the
 // sheet's kicker, untranslated - change it here, not in ten languages); easy marks the beginner pick.
@@ -22329,7 +22330,7 @@ function _hubLoad(){
   // (moved from Account, 2026-11-11), its words, and the volunteer portal's address. Since 2026-11-13 (R9, R10) also the
   // ticket's own reading of a session for the next session's card: its two times, the moments they fall on, where it
   // meets (held back as the ticket holds it) and the ticket's map button.
-  window._hubDeps={inv:_invShare,invLabel:()=>t('invBtn'),vol:VOL_PORTAL,
+  window._hubDeps={inv:_invShare,invLabel:()=>t('invBtn'),vol:VOL_PORTAL,askV:ASK_HUB_V,
     slots:parseSlots,hm:fmt12h,at:_ksaAt,gathers:_gathersTime,bike:_needsBike,collect:sessionCollectTime,wlCollect:_wlCollectTime,
     venue:_venueName,held:_meetHeld,meets:_meetsAt,dir:_dirBtnHtml,
     // the ticket's words for them, named here so the build keeps them on the riders' side (member-hub.js is not read for keys)

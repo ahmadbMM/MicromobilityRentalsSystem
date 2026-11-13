@@ -137,6 +137,9 @@ for (const f of bikeFiles) bikesHasher.update(f).update(await readFile(new URL(f
 // The Community page's own file: its address changes with it, past the cache-first worker.
 if (!src.includes("const HUB_V=''")) throw new Error('build: HUB_V placeholder missing');
 src = src.replace("const HUB_V=''", `const HUB_V='${createHash('sha256').update(await readFile(new URL('../member-hub.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
+// Its Ask pages' own file (member-ask.js, fetched when a member opens one), the same way.
+if (!src.includes("const ASK_HUB_V=''")) throw new Error('build: ASK_HUB_V placeholder missing');
+src = src.replace("const ASK_HUB_V=''", `const ASK_HUB_V='${createHash('sha256').update(await readFile(new URL('../member-ask.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
 if (!src.includes("const BIKE_IMG_V=''")) throw new Error('build: BIKE_IMG_V placeholder missing');
 src = src.replace("const BIKE_IMG_V=''", `const BIKE_IMG_V='${bikeFiles.length ? bikesHasher.digest('hex').slice(0, 10) : ''}'`);
 

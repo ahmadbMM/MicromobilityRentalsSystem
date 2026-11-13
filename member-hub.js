@@ -195,12 +195,19 @@ function _hubRender() {
   const h = S._hub, d = h && h.d;
   _hubVisitNow();
   _mtFetch();
+  _akListFetch();
   // An open's first read goes at once, the copy on the phone painted meanwhile. A failed read (the copy kept and marked
   // stale, or none at all) is tried again two minutes on too, not only by Retry.
   if ((S._hubVisit && S._hubVisit.due && !S._hubVisit.sent) || !h || (d && !h.stale && Date.now() - h.at >= 12e4) || ((h.stale || !d) && Date.now() - (h.failAt || 0) >= 12e4)) _hubFetch();
   // Keep the focused control across a repaint (a pick, a slide), found again by what it does, or a link by where it goes.
   const _key = (x) => x.getAttribute('data-on-click') || (x.getAttribute('href') ? 'href:' + x.getAttribute('href') : null);
   const was = document.activeElement && body.contains(document.activeElement) ? _key(document.activeElement) : null;
+  // An Ask page (member-ask.js) draws itself in parts, keeping what the member is typing; it does not need the feed.
+  if (S._hubView === 'ask' && c) {
+    if (window._akPaint) window._akPaint(body);
+    else { body.innerHTML = _akShellHtml(); _akLoad(); }
+    return;
+  }
   if (!d) {
     body.innerHTML = h ? `<div class="hub-card" role="status"><strong class="hub-name">${_hT('err')}</strong><button type="button" class="btn-primary hub-wide" data-on-click="${_on('_hubRetry')}">${_hT('retry')}</button></div>` : _skelHtml(2, 'hub-skel');
     return;
@@ -224,6 +231,7 @@ function _feedHtml(c, d, stale) {
     hero.html,
     d.year ? _yrCardHtml(d.year) : '',
     _soonHtml(c, hero.open),
+    _akCardHtml(),
     _meHtml(d.me),
     (Array.isArray(d.goals) ? d.goals : []).map(_seasonHtml).join(''),
     d.club ? _clubHtml(d.club) : '',
@@ -955,5 +963,76 @@ async function _mtLeave(id, kind) {
   _mtCall('mentor_leave', { p_offer: kind === 'ask' ? null : id });
 }
 function _mtCheck(id, answer) { _mtCall('mentor_check', { p_offer: id, p_answer: answer }); }
+
+// ── Ask: the questions staff put to members (the user, 2026-11-13: "add the asks questions in the community section in
+// the bookings app") ───────────────────────────────────────────────────────────────────────────────────────────────
+// The feed's "Have your say" card lists the open pages this account may see (ask_list: listed, open, its audience; the
+// same list as micromobility.sa/ask), with how many of their questions the member has answered. A tap opens the page
+// here (S._hubView 'ask', S._akSlug), drawn by member-ask.js, fetched only then (_akLoad, its address stamped by the
+// build as ASK_HUB_V). The list is read when the tab paints, again after two minutes, and after an answer; it is never
+// kept on the phone. A database without Ask hides the card.
+Object.assign(HUB_T, {
+  akTitle: ['Have your say', 'شاركنا رأيك', 'Donnez votre avis', 'Danos tu opinión', 'Dê a sua opinião', 'اپنی رائے دیں', 'अपनी राय दें', 'Ibahagi ang iyong opinyon', 'आफ्नो विचार राख्नुहोस्', 'আপনার মতামত দিন'],
+  akGo: ['Answer', 'أجب', 'Répondre', 'Responder', 'Responder', 'جواب دیں', 'जवाब दें', 'Sumagot', 'जवाफ दिनुहोस्', 'উত্তর দিন'],
+  akOpen: ['Open', 'فتح', 'Ouvrir', 'Abrir', 'Abrir', 'کھولیں', 'खोलें', 'Buksan', 'खोल्नुहोस्', 'খুলুন'],
+  akProg: ['{0} of {1} answered', 'أجبت عن {0} من {1}', 'Répondu : {0} sur {1}', 'Respondidas: {0} de {1}', 'Respondidas: {0} de {1}', '{1} میں سے {0} کا جواب دیا', '{1} में से {0} का जवाब दिया', 'Nasagot ang {0} sa {1}', '{1} मध्ये {0} को जवाफ दिइयो', '{1}টির মধ্যে {0}টির উত্তর দেওয়া হয়েছে'],
+  akUntil: ['Open until {0}', 'مفتوح حتى {0}', 'Ouvert jusqu’au {0}', 'Abierta hasta {0}', 'Aberta até {0}', '{0} تک کھلا ہے', '{0} तक खुला है', 'Bukas hanggang {0}', '{0} सम्म खुला', '{0} পর্যন্ত খোলা'],
+});
+async function _akListFetch(force) {
+  const c = _hCust(); if (!c || !sb || S._akListBusy) return;
+  const l = S._akList;
+  if (l && l.forId === c.id && (l.off || (!force && S._akListAt && Date.now() - S._akListAt < 12e4))) return;
+  S._akListBusy = true; S._akListAt = Date.now();
+  let r; try { r = await sb.rpc('ask_list', _hTok(c)); } catch (e) { r = { error: e }; }
+  S._akListBusy = false;
+  const now = _hCust(); if (!now || now.id !== c.id) return;
+  const e = r && r.error;
+  if (e && (e.code === 'PGRST202' || e.code === '42883')) S._akList = { forId: c.id, off: true, pages: [] };
+  else if (r && !e && r.data && Array.isArray(r.data.pages)) {
+    const pages = r.data.pages.filter((p) => p && typeof p.slug === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.slug) && (String(p.title_en || '').trim() || String(p.title_ar || '').trim()));
+    S._akList = { forId: c.id, pages };
+  } else if (!l || l.forId !== c.id) S._akList = { forId: c.id, pages: [] }; // no answer: what was shown stays
+  if (S.custTab === 'members' && S._hubView !== 'ask') _hubRender();
+}
+function _akCardHtml() {
+  const c = _hCust(), l = S._akList;
+  if (!c || !l || l.forId !== c.id || l.off || !l.pages.length) return '';
+  const when = (iso) => { const t = Date.parse(iso || ''); if (Number.isNaN(t)) return ''; try { return new Intl.DateTimeFormat(_locale(), { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Riyadh' }).format(t); } catch (_) { return ''; } };
+  const rows = l.pages.slice(0, 6).map((p) => {
+    const all = Number(p.questions) || 0, done = Math.min(all, Number(p.answered) || 0), finished = all > 0 && done >= all;
+    const meta = done > 0 ? _hF('akProg', done, all) : p.closes_at && when(p.closes_at) ? _hF('akUntil', when(p.closes_at)) : '';
+    return `<div class="ak-row"><div class="ak-row-t"><strong dir="auto">${esc(_hPick(p, 'title_en', 'title_ar'))}</strong>${meta ? `<span class="hub-meta">${esc(meta)}</span>` : ''}</div>
+      <button type="button" class="${finished ? 'btn-secondary' : 'btn-primary'} btn-sm" data-on-click="${_on('_akOpen', p.slug)}">${_hT(finished ? 'akOpen' : 'akGo')}</button></div>`;
+  }).join('');
+  return `<div class="hub-card ak-card"><span class="hub-k">${_cuIc('chat', 16)} ${_hT('akTitle')}</span>${rows}</div>`;
+}
+function _akOpen(slug) {
+  if (typeof slug !== 'string' || !/^[a-z0-9-]{3,40}$/.test(slug)) return;
+  S._akSlug = slug; S._hubView = 'ask';
+  _hubRender();
+  try { window.scrollTo(0, 0); } catch (_) {}
+}
+function _akClose() {
+  if (window._akStop) window._akStop();
+  S._hubView = null;
+  _hubRender();
+  _akListFetch(true);
+  try { window.scrollTo(0, 0); } catch (_) {}
+}
+// The page's own file, fetched the first time a page opens; until it is here, the page's head and a skeleton.
+function _akLoad() {
+  if (window._akPaint || S._akLoading) return;
+  S._akLoading = true; S._akLoadErr = false;
+  const v = (window._hubDeps || {}).askV;
+  const s = document.createElement('script'); s.src = '/member-ask.js' + (v ? '?v=' + v : '');
+  s.onload = () => { S._akLoading = false; if (S.custTab === 'members' && S._hubView === 'ask') _hubRender(); };
+  s.onerror = () => { S._akLoading = false; S._akLoadErr = true; s.remove(); if (S.custTab === 'members' && S._hubView === 'ask') _hubRender(); };
+  document.head.appendChild(s);
+}
+function _akLoadRetry() { S._akLoadErr = false; _akLoad(); _hubRender(); }
+function _akShellHtml() {
+  return `<div class="hub-card ak-head"><div class="mt-head"><h2 class="mt-h1"></h2><button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_akClose')}">${_hT('close')}</button></div>
+    ${S._akLoadErr ? `<p class="ak-line" role="status">${_hT('err')}</p><button type="button" class="btn-primary hub-wide" data-on-click="${_on('_akLoadRetry')}">${_hT('retry')}</button>` : _skelHtml(2, 'hub-skel')}</div>`;
+}
 
 window._hubRender = _hubRender;

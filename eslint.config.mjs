@@ -12,7 +12,7 @@ export default tseslint.config(
   // design_handoff_erp_reskin/ is the designer's reference bundle (prototype JS, not shipped code).
   // .claude/ holds agent worktrees (whole checkouts of this repo): linted, each brought a second
   // tsconfig root and the parser refused every file ("multiple candidate TSConfigRootDirs").
-  { ignores: ['node_modules/**', 'dist/**', 'test-results/**', 'vendor/**', '**/*.mjs', 'service-worker.js', 'staff.js', 'app.js', 'member-hub.js', 'staff-parts/**', 'functions/api/wallet-pass.js', 'design_handoff_erp_reskin/**', '.claude/**'] },
+  { ignores: ['node_modules/**', 'dist/**', 'test-results/**', 'vendor/**', '**/*.mjs', 'service-worker.js', 'staff.js', 'app.js', 'member-hub.js', 'member-ask.js', 'staff-parts/**', 'functions/api/wallet-pass.js', 'design_handoff_erp_reskin/**', '.claude/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

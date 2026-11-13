@@ -808,6 +808,38 @@ The user, 2026-11-13: "create a mentorship program exclusively for community mem
 - **Staff** (People > Membership > Mentorship, `/people/mentorship`, `_commMentors` in the `peopleapps` part): pills Requests, Open, Matched (a dot when a check said help or a side is a week past due), Closed, Mentors. A profile card shows the student (name, WhatsApp, gender, their preference, a warning when the account is not an active member), Publish / Decline, Look for another mentor, Close (ends its offers and matches), Reopen, Edit; each offer shows the mentor, their chips and note, Propose (the line the student sees; a warning when the mentor's gender is not the one asked for), Decline, Mark accepted (for a student who said yes elsewhere), Take back, End match (the student is open again). Add a mentee (the button was "Add a profile" until 2026-11-13) names the student's account, needs the student's agreement ticked and publishes at once unless unticked. **Added by hand (the user, 2026-11-13: "let the staff be able to add mentors or mentees manually"; no database change):** Add a mentor names the member's account and asks what the app's registration asks (`mentor_join`'s fields), with the member's agreement ticked; an account already registered opens its registration instead (`_mtsMEdit`, insert or update on `mentor_mentors`). Each mentor on Mentors has Edit and Remove from the programme (`_mtsMQuit`: status left, their live offers declined and matches ended by staff, each student left without a mentor open again, as `mentor_quit` does), and one who left has Add again (agreement ticked again). Add an offer on a live profile (`_mtsOfAdd`) records a registered, active mentor's offer made outside the app (the WhatsApp post): how they know the path, the help, the note; it lands as Offered with the mentor's consent time, and Propose works as for any offer. `mentor_mentors` has no column for who added a mentor, so these three writes go to the staff log (`logAction`, kind `mentor`). Copy for WhatsApp copies the open profiles as one message ending with the app's /members address. Writes go straight to the tables.
 - **Privacy:** the notice has the mentorship row and its legal basis (consent, withdrawn by stepping back), same version 2026-11-13, nobody asked again; the website's copies are synced from it.
 
+## Ask in the Community tab (2026-11-13)
+
+The user, 2026-11-13: "add the asks questions in the community section in the bookings app". The pages staff make in
+the staff section Ask (section "Ask") are answered in the app too, as on micromobility.sa/ask. No database change.
+
+- **The card** (`member-hub.js`, its own block above `window._hubRender`): "Have your say" after the sessions coming up,
+  one row per page `ask_list(p_id, p_token)` returns (listed, open, the account's audience: the same list as
+  micromobility.sa/ask), with "N of M answered" or its closing time and Answer (Open once every question has an
+  answer). Read when the tab paints, after two minutes and after an answer (`S._akList`, `_akListFetch`), never kept on
+  the phone; no page or a database without Ask (PGRST202) shows no card. Strings `ak*` in `HUB_T`.
+- **The page** (`member-ask.js`, hand-written like member-hub.js, fetched only when a member opens a page: `_akLoad`,
+  its address `?v=` stamped by the build as `ASK_HUB_V` and handed over in `_hubDeps.askV`; in `scripts/assemble-dist.mjs`
+  FILES and ignored by eslint like member-hub.js). `S._hubView = 'ask'`, `S._akSlug`; `_hubRender` hands the body to
+  `window._akPaint` and returns. It is a port of the website's page (apps/web/src/components/ask, lib/ask.ts,
+  lib/ask-kinds.ts, lib/ask-pace.ts): the same states (soon, closed, audience, signin, none), the same answer states,
+  the same checks before `ask_send`, all 14 kinds (a grid's items are placed by a tap on the square or with each item's
+  two sliders; a pin by a tap on the picture or the arrow keys), `ask_unsend` on a waiting written answer, `ask_vote`
+  on someone else's open or Q&A answer, `ask_react` when the page's look has reactions, the quiz clock against the
+  database's time, the member's own score and place, a page in steps, a page staff pace (only the question on
+  screen). Results are each kind's FIRST chart (`ASK_VIZ`'s default; `look.viz` is not read here) and only where
+  `resultsShown` allows. Polling as the website: `ask_live` every 10 s, every 2 s on a page staff pace, doubled per
+  failure, never while hidden or off the page; the page read again when the live answer says so (at most every 30 s
+  unless it must be now). Its words are the website's own (`AK_T`, taken from Ask.text.ts and the site's tx files for
+  the app's ten languages, Latin digits).
+- **Drawing in parts**: the page is blocks of parts (`_akBlocks`); each part is written again only when its markup
+  changed, so a poll never takes away what the member is typing. A text box's value is never in the markup: the draft
+  (`S._ak.draft`) is put back after every write (`data-ak-d`, `_akFill`), and the focus and caret come back when a
+  part holding them is written again. Run-time positions and widths go through `data-cssv`.
+- **The website** shows the same list in the members' area of micromobility.sa/club ("Have your say", links to
+  /ask/<slug>, `MembersArea.tsx`).
+- **Tests**: `tests/member-ask.spec.ts` (`@customer:members`).
+
 ## The 2026-09-27 feature round (blocks 1-13)
 
 Built from the owner's answers on 2026-09-27/28; the source of each is in the commit messages.
@@ -3749,6 +3781,8 @@ who we want it to be visible for and for how much time". Three parts: the databa
   `status` pending / approved / rejected), `ask_votes`, `ask_reactions`, `ask_secret`. No table is open to anon; staff
   read with `_staff_mod('community', false)` and write with `_staff_mod('community', true)`: whoever opens People opens
   Ask, and no section id was added to `staff_set_access` (it refuses ids it does not know).
+- **In the booking app** (2026-11-13): members answer the same pages in the Community tab (section "Ask in the
+  Community tab", `member-ask.js`).
 - **Riders** call only functions: `ask_list`, `ask_code`, `ask_page`, `ask_live`, `ask_screen`, `ask_send`,
   `ask_unsend`, `ask_vote`, `ask_react` (definer, `_cust_token_ok`). A public result never names anyone and never
   holds a pending or rejected answer. `ask_live` and `ask_screen` take a key: the page's `rk` (given by `ask_page`,
