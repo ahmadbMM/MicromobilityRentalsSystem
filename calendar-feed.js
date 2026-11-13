@@ -13,11 +13,9 @@ const CALF_T = {
   title: ['Your bookings in your calendar', 'حجوزاتك في تقويمك', 'Vos réservations dans votre calendrier', 'Tus reservas en tu calendario', 'As suas reservas no seu calendário', 'آپ کی بکنگز آپ کے کیلنڈر میں', 'आपकी बुकिंग आपके कैलेंडर में', 'Ang mga booking mo sa kalendaryo mo', 'तपाईंका बुकिङहरू तपाईंको पात्रोमा', 'আপনার ক্যালেন্ডারে আপনার বুকিং'],
   add: ['Add to my calendar', 'أضف إلى تقويمي', 'Ajouter à mon calendrier', 'Añadir a mi calendario', 'Adicionar ao meu calendário', 'میرے کیلنڈر میں شامل کریں', 'मेरे कैलेंडर में जोड़ें', 'Idagdag sa kalendaryo ko', 'मेरो पात्रोमा थप्नुहोस्', 'আমার ক্যালেন্ডারে যোগ করুন'],
   copy: ['Copy the address', 'نسخ العنوان', 'Copier l’adresse', 'Copiar la dirección', 'Copiar o endereço', 'پتہ کاپی کریں', 'पता कॉपी करें', 'Kopyahin ang address', 'ठेगाना कपी गर्नुहोस्', 'ঠিকানা কপি করুন'],
-  copied: ['Address copied', 'تم نسخ العنوان', 'Adresse copiée', 'Dirección copiada', 'Endereço copiado', 'پتہ کاپی ہو گیا', 'पता कॉपी हो गया', 'Nakopya ang address', 'ठेगाना कपी भयो', 'ঠিকানা কপি হয়েছে'],
   replace: ['Replace the address', 'استبدال العنوان', 'Remplacer l’adresse', 'Reemplazar la dirección', 'Substituir o endereço', 'پتہ تبدیل کریں', 'पता बदलें', 'Palitan ang address', 'ठेगाना बदल्नुहोस्', 'ঠিকানা বদলান'],
   askTitle: ['Replace the address?', 'استبدال العنوان؟', 'Remplacer l’adresse ?', '¿Reemplazar la dirección?', 'Substituir o endereço?', 'پتہ تبدیل کریں؟', 'पता बदलें?', 'Palitan ang address?', 'ठेगाना बदल्ने?', 'ঠিকানা বদলাবেন?'],
   askBody: ['The old address stops working. A calendar that uses it will no longer update.', 'سيتوقف العنوان القديم عن العمل، ولن يتحدّث أي تقويم يستخدمه بعد الآن.', 'L’ancienne adresse cessera de fonctionner. Un calendrier qui l’utilise ne se mettra plus à jour.', 'La dirección anterior dejará de funcionar. Un calendario que la use ya no se actualizará.', 'O endereço antigo deixa de funcionar. Um calendário que o utilize deixará de ser atualizado.', 'پرانا پتہ کام کرنا بند کر دے گا۔ جو کیلنڈر اسے استعمال کرتا ہے وہ مزید اپ ڈیٹ نہیں ہوگا۔', 'पुराना पता काम करना बंद कर देगा। जो कैलेंडर उसका इस्तेमाल करता है, वह आगे अपडेट नहीं होगा।', 'Hindi na gagana ang lumang address. Hindi na mag-a-update ang kalendaryong gumagamit nito.', 'पुरानो ठेगानाले काम गर्न छोड्नेछ। त्यो प्रयोग गर्ने पात्रो अब अपडेट हुने छैन।', 'পুরোনো ঠিকানা আর কাজ করবে না। যে ক্যালেন্ডার সেটি ব্যবহার করে, তা আর আপডেট হবে না।'],
-  replaced: ['The address is replaced. Add the new one to your calendar.', 'تم استبدال العنوان. أضف العنوان الجديد إلى تقويمك.', 'L’adresse est remplacée. Ajoutez la nouvelle à votre calendrier.', 'La dirección se ha reemplazado. Añade la nueva a tu calendario.', 'O endereço foi substituído. Adicione o novo ao seu calendário.', 'پتہ تبدیل ہو گیا۔ نیا پتہ اپنے کیلنڈر میں شامل کریں۔', 'पता बदल दिया गया। नया पता अपने कैलेंडर में जोड़ें।', 'Napalitan na ang address. Idagdag ang bago sa kalendaryo mo.', 'ठेगाना बदलियो। नयाँ ठेगाना आफ्नो पात्रोमा थप्नुहोस्।', 'ঠিকানা বদলানো হয়েছে। নতুনটি আপনার ক্যালেন্ডারে যোগ করুন।'],
   err: ['We could not do that. Please try again.', 'تعذّر ذلك. يرجى المحاولة مرة أخرى.', 'Action impossible. Veuillez réessayer.', 'No se pudo hacer. Inténtalo de nuevo.', 'Não foi possível. Tente novamente.', 'یہ نہیں ہو سکا۔ دوبارہ کوشش کریں۔', 'यह नहीं हो सका। फिर कोशिश करें।', 'Hindi ito nagawa. Pakisubukang muli.', 'यो हुन सकेन। फेरि प्रयास गर्नुहोस्।', 'এটি করা যায়নি। আবার চেষ্টা করুন।'],
 };
 const CALF_KEY = /^[0-9a-f]{64}$/;
@@ -83,7 +81,8 @@ function _calfClose() {
   S._calfP = null;
   try { const b = document.getElementById('acc-cal-btn'); if (b) b.focus(); } catch (_) {}
 }
-// What an action did, said under the buttons. An address that could not be put on the clipboard is shown instead, to copy by hand.
+// An address that could not be put on the clipboard, shown under the buttons to copy by hand. An action that worked
+// says nothing (the owner's rule: no confirmation after an action); '' clears the line.
 function _calfNote(text, addr) {
   const n = document.getElementById('calf-note'); if (!n) return;
   n.textContent = text || '';
@@ -98,7 +97,7 @@ async function _calfCopy() {
   try { await navigator.clipboard.writeText(url); ok = true; } catch (_) {}
   if (S._calfP !== P) return;
   _calfErr('');
-  _calfNote(ok ? _calfT('copied') : url, !ok);
+  _calfNote(ok ? '' : url, !ok);
 }
 async function _calfNew() {
   const P = S._calfP, d = _calfDep(); if (!P || !P.key || P.busy || !d.ask) return;
@@ -113,7 +112,6 @@ async function _calfNew() {
   if (!key) { _calfErr(_calfT('err')); return; }
   P.key = key;
   const a = document.getElementById('calf-add'); if (a) a.setAttribute('href', 'webcal://' + _calfAddr(key));
-  _calfNote(_calfT('replaced'));
   try { const b = document.getElementById('calf-new'); if (b) b.focus({ preventScroll: true }); } catch (_) {}
 }
 window._calfOpen = _calfOpen;

@@ -152,6 +152,8 @@ begin
      order by s.id, q.queue_num, q.id
      limit 100
   ) t;
+  -- Nothing ahead: the same answer a key nobody holds gets, without the language.
+  if v = '[]'::jsonb then return jsonb_build_object('ok', true, 'items', v); end if;
   return jsonb_build_object('ok', true, 'lang', f.lang, 'items', v);
 end $function$;
 revoke all on function public.calendar_feed(text) from public;

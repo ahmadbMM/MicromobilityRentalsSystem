@@ -137,15 +137,15 @@ test.describe('@customer:account the calendar address', () => {
     await expect(box(page)).toHaveCount(0);
   });
 
-  test('Copy the address puts the https address on the clipboard and says so; a clipboard that refuses shows it instead', async ({ page }) => {
+  test('Copy the address puts the https address on the clipboard and says nothing; a clipboard that refuses shows it instead', async ({ page }) => {
     const d = db();
     await open(page, d);
     await page.evaluate(`window.__clip=[];window.__clipOk=true;Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:t=>window.__clipOk?(window.__clip.push(t),Promise.resolve()):Promise.reject(new Error('no'))}})`);
     await openPop(page);
     const addr = `${new URL(page.url()).origin}/api/ics?k=${KEYS[0]}`;
     await box(page).getByRole('button', { name: 'Copy the address' }).click();
-    await expect(box(page).locator('#calf-note')).toHaveText('Address copied');
-    expect(await page.evaluate(`window.__clip`)).toEqual([addr]);
+    await expect.poll(() => page.evaluate(`window.__clip`)).toEqual([addr]);
+    await expect(box(page).locator('#calf-note')).toBeHidden();
     await expect(page.locator('.toast:not(.quiet)')).toHaveCount(0);
     await page.evaluate(`window.__clipOk=false`);
     await box(page).getByRole('button', { name: 'Copy the address' }).click();
@@ -155,6 +155,10 @@ test.describe('@customer:account the calendar address', () => {
     const n = (await box(page).locator('#calf-note').boundingBox())!, b = (await box(page).boundingBox())!;
     expect(n.x).toBeGreaterThanOrEqual(b.x);
     expect(n.x + n.width).toBeLessThanOrEqual(b.x + b.width + 0.5);
+    // a copy that works again clears the shown address and says nothing
+    await page.evaluate(`window.__clipOk=true`);
+    await box(page).getByRole('button', { name: 'Copy the address' }).click();
+    await expect(box(page).locator('#calf-note')).toBeHidden();
   });
 
   test('Replace asks first; Cancel keeps the address; Replace writes a new key, and the link is the new one', async ({ page }) => {
@@ -173,7 +177,8 @@ test.describe('@customer:account the calendar address', () => {
     await box(page).getByRole('button', { name: 'Replace the address' }).click();
     await ask.getByRole('button', { name: 'Replace the address' }).click();
     await expect(box(page).locator('#calf-add')).toHaveAttribute('href', `webcal://${host(page)}/api/ics?k=${KEYS[1]}`);
-    await expect(box(page).locator('#calf-note')).toHaveText('The address is replaced. Add the new one to your calendar.');
+    await expect(box(page).locator('#calf-note')).toBeHidden(); // no confirmation after an action: the new link is the change
+    await expect(box(page).locator('#calf-err')).toBeEmpty();
     expect(d.calls.filter((c) => c.p_op === 'new')).toEqual([{ p_id: 'c1', p_token: 'tok-spec', p_lang: 'en', p_op: 'new' }]);
     expect(d.key).toBe(KEYS[1]);
     await expect(box(page)).toBeVisible(); // the pop-up stayed open under the question
@@ -210,7 +215,9 @@ test.describe('@customer:account the calendar address', () => {
     await box(page).getByRole('button', { name: 'استبدال العنوان' }).click();
     await expect(page.locator('#confirm-modal #dlgt-confirm')).toHaveText('استبدال العنوان؟');
     await page.locator('#confirm-modal').getByRole('button', { name: 'استبدال العنوان' }).click();
-    await expect(box(page).locator('#calf-note')).toHaveText('تم استبدال العنوان. أضف العنوان الجديد إلى تقويمك.');
+    await expect(box(page).locator('#calf-add')).toHaveAttribute('href', `webcal://${host(page)}/api/ics?k=${KEYS[1]}`);
+    expect(d.calls.find((c) => c.p_op === 'new')!.p_lang).toBe('ar');
+    await expect(box(page).locator('#calf-note')).toBeHidden();
   });
 
   test('every word of the file exists in all ten languages, with Latin digits', async ({ page }) => {
@@ -301,7 +308,7 @@ function standIn(sessionRows: Sess[], bookings: Booking[]) {
           title: (s.title || '').trim() || null, title_ar: (s.title_ar || '').trim() || null, meet: (s.meet_url || '').trim() || null, loc: held ? null : (s.location || '').trim() || null, held });
       }
       const by = (x: Record<string, unknown>) => `${x.date} ${x.time} ${x.id}`; // one row a session (its lowest number), in date order
-      return { ok: true, lang: f.lang, items: items.sort((x, y) => (by(x) < by(y) ? -1 : 1)) };
+      return items.length ? { ok: true, lang: f.lang, items: items.sort((x, y) => (by(x) < by(y) ? -1 : 1)) } : { ok: true, items: [] };
     },
   };
 }
@@ -618,6 +625,7 @@ test('@customer:account the migration: a locked table, the rider\'s own key, and
   expect(feed).not.toMatch(/\bs\.(price|capacity|spots)\b/);
   // a key nobody holds answers as a rider with no bookings does, and the key is metered on its own row
   expect(feed.match(/return jsonb_build_object\('ok', true, 'items', '\[\]'::jsonb\);/g)).toHaveLength(2);
+  expect(feed).toContain("if v = '[]'::jsonb then return jsonb_build_object('ok', true, 'items', v); end if;");
   expect(feed).toContain("return jsonb_build_object('ok', false, 'error', 'busy');");
   expect(feed).not.toMatch(/login_throttle|_ip_gate|raise (notice|log|warning)/);
   // the spot staff have not told yet stays unsaid here too
