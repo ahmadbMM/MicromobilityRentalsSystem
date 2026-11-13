@@ -400,8 +400,8 @@ function _soonHtml(c, skip) {
 }
 
 // Progress: dots for five or fewer, a bar above that; the count always written.
-function _hubProg(n, target, label) {
-  const v = Math.min(n, target), txt = `${v} / ${target}`;
+function _hubProg(n, target, label, text) { // text: the count in words, where the card writes it so ("2 of 5")
+  const v = Math.min(n, target), txt = text || `${v} / ${target}`;
   if (target <= 5) {
     return `<div class="hub-dots" role="progressbar" aria-valuemin="0" aria-valuemax="${target}" aria-valuenow="${v}" aria-valuetext="${esc(txt)}" aria-label="${esc(label)}">${Array.from({ length: target }, (_, i) => `<span class="${i < v ? 'on' : ''}"></span>`).join('')}</div>`;
   }
@@ -429,7 +429,7 @@ function _p5Html() {
   try { p = dep.p5 ? dep.p5() : null; } catch (_) {}
   if (!p) return '';
   return `<div class="hub-card hub-p5"><span class="hub-k">${_cuIc('flag', 16)} ${_hT('goalYou')}</span><strong class="hub-name"><bdi>${esc(p.nm)}</bdi></strong>
-    ${_hubProg(p.n, p.tg, p.nm)}<div class="hub-meta"><bdi>${esc(p.of)}</bdi></div></div>`;
+    ${_hubProg(p.n, p.tg, p.nm, p.of)}<div class="hub-meta"><bdi>${esc(p.of)}</bdi></div></div>`;
 }
 async function _hubPick(k) {
   const c = _hCust(), h = S._hub; if (!c || !h || !h.d || !h.d.me || S._hubPicking) return;

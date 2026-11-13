@@ -194,6 +194,7 @@ test.describe('@customer:members the first five rides in the Community tab', () 
     await expect(card.locator('.hub-dots span')).toHaveCount(5);
     await expect(card.locator('.hub-dots span.on')).toHaveCount(2);
     await expect(card.locator('[role=progressbar]')).toHaveAttribute('aria-label', 'Your first five rides');
+    await expect(card.locator('[role=progressbar]')).toHaveAttribute('aria-valuetext', '2 of 5'); // read out as the card writes it
     await expect(card.locator('.hub-meta')).toHaveText('2 of 5');
     await expect(page.locator('#hub-body')).not.toContainText('4 sessions this month');
     await expect(page.locator('#hub-body .hub-pick')).toHaveCount(0);
@@ -219,6 +220,50 @@ test.describe('@customer:members the first five rides in the Community tab', () 
     await expect(page.locator('#hub-body .hub-p5')).toHaveCount(0);
     await expect(page.locator('#hub-body')).toContainText('4 sessions this month');
   });
+
+  test('a member who comes to the pool and has not ridden keeps the month\'s challenge, which counts those sessions', async ({ page }) => {
+    const swim = (d: string) => ({ id: 's-' + d, day: 'Friday', session_date: d, capacity: 20, status: 'open', created_at: 1, event_kind: 'community', ride_kind: 'swim', hide_queue: true, paid_ride: false, title: 'Pool morning', bike_slots: '{"_time":"07:00 - 08:30"}' });
+    const q = OLD.slice(0, 2).map((d, i) => ride('p' + i, d, { price: 0, paid: false }));
+    await boot(page, 0, { member: true, rate: false, fx: { sessions: OLD.slice(0, 2).map(swim), queue_entries: q, 'rpc:my_bookings': q } });
+    expect(await page.evaluate(`[_p5N(S.loggedIn),getQueue().filter(e=>e.customerId==='c1'&&e.status==='done'&&_ncEntry(e)).length]`)).toEqual([0, 2]);
+    await page.evaluate(`setCustTab('members')`);
+    await expect(page.locator('#hub-body')).toContainText('4 sessions this month');
+    await expect(page.locator('#hub-body .hub-p5')).toHaveCount(0);
+  });
+
+  // The boot paints from the copy saved on the phone, which holds the last two months of bookings: the path is counted
+  // only from the bookings read in this page load, and the tab on screen is drawn again when that read lands.
+  for (const [name, older, after] of [['a long-standing member with six rides keeps the month\'s challenge', [300, 250, 200, 150], 6], ['a newcomer\'s path is drawn when the read lands', [], 2]] as const) {
+    test(`opened on the saved copy while the bookings are slow: ${name}`, async ({ page }) => {
+      const ago = (n: number) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+      const q = [...older, 20, 10].map((n, i) => ride('h' + i, ago(n), { rating_detail: { form: 'rental', s: { service: 9, bike: 9 }, why: {} } }));
+      await boot(page, 0, { member: true, rate: false, fx: { queue_entries: q, 'rpc:my_bookings': q } });
+      const saved = `(JSON.parse(localStorage.getItem('cq_snapshot')||'{}').q||[]).filter(e=>e.customerId==='c1').length`;
+      await expect.poll(() => page.evaluate(saved), { timeout: 15000 }).toBe(2); // the saved copy: the two recent rides only
+      // the next open: the bookings do not answer yet
+      let land!: () => void;
+      const held = new Promise<void>((r) => { land = r; });
+      await page.route(/\/rest\/v1\/(queue_entries|queue_public|rpc\/my_bookings)/, async (r) => { await held; await r.fallback(); });
+      await page.goto('/');
+      await page.waitForFunction('typeof S!=="undefined"&&S.dataLoaded===true&&S._cacheOnly===true&&!!document.querySelector("#view-landing.active,#view-customer.active")'); // painted from the copy
+      const mine = `getQueue().filter(e=>e.customerId==='c1')`;
+      expect(await page.evaluate(`[_p5N(S.loggedIn),_p5Tab(),_p5Fin(S.loggedIn,${mine}[0])]`)).toEqual([2, null, null]); // two rides in the copy, and no path from it
+      await page.evaluate(`setCustTab('members')`);
+      await expect(page.locator('#hub-body')).toContainText('4 sessions this month');
+      await expect(page.locator('#hub-body .hub-p5')).toHaveCount(0);
+      land();
+      await expect.poll(() => page.evaluate(`_p5N(S.loggedIn)`)).toBe(after);
+      if (after < 5) {
+        await expect(page.locator('#hub-body .hub-p5 .hub-meta')).toHaveText(`${after} of 5`); // drawn again, the tab not reopened
+        await expect(page.locator('#hub-body')).not.toContainText('4 sessions this month');
+      } else {
+        await expect.poll(() => page.evaluate(`S._qMine`)).toBe('c1');
+        await page.evaluate(`new Promise(r=>setTimeout(r,50))`); // past the repaint the read asks for
+        await expect(page.locator('#hub-body .hub-p5')).toHaveCount(0);
+        await expect(page.locator('#hub-body')).toContainText('4 sessions this month');
+      }
+    });
+  }
 });
 
 test.describe('@customer:badges the Saturday ladder\'s steps at 2 and 3 rides', () => {

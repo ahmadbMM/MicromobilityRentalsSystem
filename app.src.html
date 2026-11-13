@@ -4430,6 +4430,7 @@ async function _loadDataInner(showLoader){
   // sees the sign-in alone, does not fetch them (goCustomer fetches them on the way in).
   const _optP=(_custOnly()&&!getSession())?Promise.resolve():_optionalFetch();
   const _qs=_qSlice();
+  const _mineOf=(S.loggedIn||getSession()||{}).id; // whose bookings this read asks for (_p5Read)
   try{
     [q,b,ses]=await Promise.all([
       _queueFetch(true,_qs&&_qs.days),
@@ -4468,6 +4469,7 @@ async function _loadDataInner(showLoader){
     S.queue=_qMerge(_qEntries(q),q.whole?null:(q.cut||(_qs&&_qs.cut))); // a synced answer is the whole year: laid over nothing; the live nights of a device still reading it, over what it holds (q.cut)
     _qWholeAt=q.whole?Date.now():q.cut?0:(_qs?(_qs.whole?Date.now():_qWholeAt):0);
     if(_keepPII)S.queue.forEach(e=>_carryKnown(e,_prevPII[e.id]));
+    _p5Read(_mineOf); // the rider's bookings are in whole: the first five rides may be counted (new features build F1)
   }else if(_isNetErr(q.error))await _syncOfflineQ(); // offline: the bookings this device keeps (2026-10-10)
   try{_applyBookOutbox();}catch(_){}_bookOutboxFlush(); // surface + sync any bookings queued while offline
   // Error-guarded like queue/sessions: a transient failed refresh must not blank the bikes
@@ -7628,6 +7630,7 @@ function doLogout(silent){
   // staff device, whose queue is the desk's own full copy.
   let _staffDev=false;try{_staffDev=localStorage.getItem('cq_staff')==='1';}catch(e){}
   if(!_staffDev){S.queue=(S.queue||[]).map(e=>e&&e.customerId?_publicOnly(e):e);_cacheSave();}
+  S._qMine=null; // and the first five rides are counted again only from the next account's own read (_p5Read)
   renderTopbarRight();
   goLanding();
   if(!silent)toast(t('toastLoggedOut')); // silent = caller shows its own message (stale-session check)
@@ -16129,14 +16132,24 @@ function _hpBar(n,tg,plus){
 // button, which opens Reserve with nothing chosen. A badge the server just gave still comes first, with the same Book
 // button. The Community tab draws the path in the challenge's slot (_p5Tab, lent to member-hub.js). From the fifth
 // ride on every screen is as it was.
+// Counted only once this page has read the rider's own bookings whole (S._qMine, whose; _p5Read from the load): the
+// copy the boot paints from holds two months of them, so on a slow or lost connection a long-standing member read as
+// a newcomer and lost the month's challenge (review, 2026-11-13). Until then, and after a sign-out, every screen is as
+// it was; the Community tab on screen is drawn again when the read lands. A member who has not ridden but comes to
+// the pool, yoga or the runs keeps the month's challenge too: it counts those sessions, the path never would.
 const P5=5;
 function _p5N(c){return new Set(getQueue().filter(e=>e.customerId===c.id&&_rideCompleted(e)&&!_ncEntry(e)).map(e=>e.sessionId)).size;}
-function _p5Fin(c,e){const n=_ncEntry(e)?0:_p5N(c);return n>0&&n<P5?{k:'p5',nm:t('p5Title'),n,tg:P5,book:!getQueue().some(x=>x.customerId===c.id&&_bookingAhead(x))}:null;}
-function _p5Tab(){const c=S.loggedIn||getSession(),n=c&&S.dataLoaded?_p5N(c):P5;return n<P5?{n,tg:P5,nm:t('p5Title'),of:t('p5Of').replace('{0}',n).replace('{1}',P5)}:null;}
+function _p5Read(id){if(S._qMine===id)return;S._qMine=id;if(id)setTimeout(()=>{try{if(S.view==='customer'&&S.custTab==='members'&&window._hubRender)window._hubRender();}catch(e){}},0);}
+function _p5Fin(c,e){const n=_ncEntry(e)||S._qMine!==c.id?0:_p5N(c);return n>0&&n<P5?{k:'p5',nm:t('p5Title'),n,tg:P5,book:!getQueue().some(x=>x.customerId===c.id&&_bookingAhead(x))}:null;}
+function _p5Tab(){
+  const c=S.loggedIn||getSession(),n=c&&S._qMine===c.id?_p5N(c):P5;
+  if(n>=P5||(!n&&getQueue().some(e=>e.customerId===c.id&&e.status==='done'&&_ncEntry(e))))return null;
+  return{n,tg:P5,nm:t('p5Title'),of:t('p5Of').replace('{0}',n).replace('{1}',P5)};
+}
 function _rgFinBook(){S._rg=null;renderRateModal();regBookAnother();setCustTab('register');}
-// The rating's last screen (R5), in the same pop-up, once the last ride waiting is rated, for a member and only with
-// something to show: the badge just earned, else the month's challenge this ride moved, else the season challenge.
-// One of them, a Community button and Done, no sentence.
+// The rating's last screen (R5), in the same pop-up, once the last ride waiting is rated, only with something to show.
+// A member: the badge just earned, else the first five rides, else the month's challenge this ride moved, else the
+// season challenge; one of them, a Community button and Done, no sentence. A non-member: the first five rides alone.
 async function _rgFinFor(e){
   const c=S.loggedIn;if(!c||!e||_pendingRatingId())return null;
   const p5=_p5Fin(c,e);
@@ -22153,7 +22166,7 @@ function _mrBadges(allK,completedK,seasons,cust){
     {s:'endurance',on:R.bestS>=12,p:P(R.curS,12)},
     {s:'triple_crown',on:kinds.size>=3,p:P(kinds.size,3)},
     {s:'clean_sheet',on:cleanBest>=10,p:P(clean,10)},
-    // The Saturday social ride ladder (the owner, 2026-10-03): 1, 5, 10, 25, 50, 100 ride days.
+    // The Saturday social ride ladder (the owner, 2026-10-03; 2 and 3 added 2026-11-13): 1, 2, 3, 5, 10, 25, 50, 100 ride days.
     {s:'rolling_start',on:comm>=1,p:P(comm,1)},
     {s:'tailwind',on:comm>=2,p:P(comm,2)}, // the second and third Saturday rides have a step each (new features build F1, 2026-11-13)
     {s:'momentum',on:comm>=3,p:P(comm,3)},
