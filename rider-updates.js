@@ -16,7 +16,7 @@ const INB_T = {
   claim: ['Take your place', 'أكّد مكانك', 'Prendre votre place', 'Toma tu plaza', 'Garantir a sua vaga', 'اپنی جگہ لیں', 'अपनी जगह लें', 'Kunin ang puwesto mo', 'आफ्नो ठाउँ लिनुहोस्', 'আপনার জায়গা নিন'],
 };
 // Each kind of message wears a drawn glyph (the app's own icons).
-const INB_IC = { reminder: 'clock', change: 'again', waitlist: 'ticket', challenge: 'flag', recap: 'chart', note: 'chat', info: 'bell' };
+const INB_IC = { reminder: 'clock', change: 'again', waitlist: 'ticket', challenge: 'flag', recap: 'people', note: 'chat', info: 'bell' }; // each a name in the rider set, _CU
 function _iT(k) {
   const row = INB_T[k] || [''], i = INB_LANGS.indexOf(S.lang);
   return row[i < 0 ? 0 : i] || row[0];

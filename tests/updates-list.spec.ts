@@ -261,6 +261,40 @@ test.describe('@customer:account the Updates list', () => {
     const h = await item(page, 1).locator('.inb-row').evaluate((el) => el.getBoundingClientRect().height);
     expect(h).toBeGreaterThanOrEqual(56);
   });
+
+  test('every kind of message wears a drawn glyph, the recap too', async ({ page }) => {
+    const kinds = ['reminder', 'change', 'waitlist', 'challenge', 'recap', 'note', 'info'];
+    await boot(page, { 'rpc:customer_updates': list(kinds.map((kind, i) => ({ id: 20 - i, kind, title: kind, body: '', at: '2026-11-12T18:00:00Z', url: '', unread: false }))) }, { path: '/account/updates' });
+    await expect(page.locator('#inb-body .inb-list > li')).toHaveCount(kinds.length);
+    // a name the rider icon set lacks draws an empty svg
+    expect(await page.locator('#inb-body .inb-ic svg').evaluateAll((els) => els.map((el) => el.childElementCount > 0))).toEqual(kinds.map(() => true));
+  });
+
+  test('signing out clears the app icon\'s badge and forgets the count and the list: a shared phone starts the next person with none', async ({ page }) => {
+    await boot(page, { 'rpc:customer_updates_unread': unread(3) });
+    await expect.poll(() => badge(page)).toEqual([3]);
+    await page.evaluate('doLogout(true)');
+    await expect.poll(() => badge(page)).toEqual([3, 0]);
+    expect(await page.evaluate('[S._inb, S._inbList]')).toEqual([null, null]);
+  });
+
+  test('two pages deep: Back from the list is Notifications, Back again the menu, and the browser\'s Back then leaves the account', async ({ page }) => {
+    await boot(page, { 'rpc:customer_updates_unread': unread(1) });
+    const start = at(page);
+    await page.evaluate(`setCustTab('account')`);
+    expect(at(page)).toBe('/account');
+    await page.evaluate(`_accOpen('notifications')`);
+    await page.locator('#acc-pg-notifications #acc-r-updates').click();
+    await expect.poll(() => at(page)).toBe('/account/updates');
+    await page.evaluate('custBack()');
+    await expect.poll(() => at(page)).toBe('/account/notifications');
+    await page.evaluate('custBack()');
+    await expect.poll(() => at(page)).toBe('/account');
+    await expect.poll(() => page.evaluate('S.accPage')).toBe(null);
+    // the menu was reached by going back, not by a new entry on top of the two pages
+    await page.goBack();
+    await expect.poll(() => at(page)).toBe(start);
+  });
 });
 
 // ── What only the database can enforce, read in the migration itself ───────────────────────────────
@@ -330,7 +364,47 @@ test.describe('@customer:account the Updates list: the database\'s rules', () =>
     for (const name of ['_hub_push_tick', '_session_change_push']) expect(fn(name), name).not.toContain('push_prefs');
     // the reminder still tells staff to skip a rider only when it really goes out as a push
     const tick = fn('_hub_push_tick');
-    expect(tick).toMatch(/returning sent_at into v_sent;[\s\S]*?if v_sent is null then\s+update queue_entries set reminded_at = now\(\), reminded_kind = 'push'/);
+    // (in a block of its own: a mark the table refuses never undoes the run's rows)
+    expect(tick).toMatch(/returning sent_at into v_sent;[\s\S]*?if v_sent is null then\s+begin\s+update queue_entries set reminded_at = now\(\), reminded_kind = 'push'[^;]*;\s+exception when others then\s+null;/);
+    // and the table takes that mark: its check named staff's two kinds alone and refused 'push', which stopped the whole
+    // run. Widened here, before the function is made.
+    const drop = sql.indexOf('alter table public.queue_entries drop constraint if exists queue_entries_reminded_kind_chk;');
+    const add = sql.indexOf("add constraint queue_entries_reminded_kind_chk\n  check (reminded_kind is null or reminded_kind in ('24h', '2h', 'push'));");
+    expect(drop).toBeGreaterThan(-1);
+    expect(add).toBeGreaterThan(drop);
+    expect(add).toBeLessThan(sql.indexOf('create or replace function public._hub_push_tick('));
+  });
+
+  test('a session with no bike is never called a ride: its reminder and its change notice have words of their own', () => {
+    // the kinds the app gives no bike (KIND_TRAITS) are the kinds the database says "session" for
+    const src = readFileSync(resolve(__dirname, '../app.src.html'), 'utf8');
+    const noBike = [...src.match(/const KIND_TRAITS=\{(.*?)\};/)![1]!.matchAll(/(\w+):\{bike:false/g)].map((m) => m[1]).sort();
+    expect(noBike.length).toBeGreaterThan(5);
+    const keyFn = sql.slice(sql.indexOf('create or replace function public._updates_key('), sql.indexOf('revoke all on function public._updates_key('));
+    expect([...keyFn.match(/_session_kind\(p_session\) in \(([^)]*)\)/)![1]!.matchAll(/'(\w+)'/g)].map((m) => m[1]).sort()).toEqual(noBike);
+    expect(keyFn).toMatch(/then p_key \|\| '_s' else p_key end;/);
+    expect(keyFn).toMatch(/security definer set search_path to 'public'/);
+    expect(sql).toContain('revoke all on function public._updates_key(text, text) from public, anon, authenticated;');
+    expect(readFileSync(resolve(__dirname, '../supabase/checks/security-attributes.sql'), 'utf8')).toContain("('_updates_key', true,");
+    // both writers ask it, write the words it names, and store that key, so the list says the same words
+    const tick = fn('_hub_push_tick'), chg = fn('_session_change_push');
+    expect(tick).toContain("v_key := _updates_key('remind', r.sid);");
+    expect(tick).toContain('_push_text(r.customer_id, v_key,');
+    expect(tick).toContain("'rides', v_key, array[v_sess, v_at]");
+    expect(chg).toContain("v_key := _updates_key('change', new.id);");
+    expect(chg).toContain('_push_text(q.customer_id, v_key,');
+    expect(chg).toMatch(/'rides',\s+v_key, array\[/);
+    for (const f of [tick, chg]) expect(f).not.toMatch(/_push_text\([a-z]\.customer_id, '(remind|change)'/);
+    // the words: all ten languages, the same placeholders as the ride's, and no ride, bike or cycling in any of them
+    for (const [key, holds] of [['remind_s', ['{0}', '{1}']], ['change_s', ['{0}']]] as const) {
+      const found = [...sql.matchAll(new RegExp(`\\('${key}', '([a-z]{2})', '((?:[^']|'')*)', '((?:[^']|'')*)'\\)`, 'g'))];
+      expect(found.map((m) => m[1]).sort(), key).toEqual(['ar', 'bn', 'en', 'es', 'fr', 'hi', 'ne', 'pt', 'tl', 'ur']);
+      for (const m of found) {
+        expect(m[2]!.trim(), `${key} ${m[1]}`).not.toBe('');
+        for (const h of holds) expect(m[3], `${key} ${m[1]}`).toContain(h);
+        expect(`${m[2]} ${m[3]}`, `${key} ${m[1]}`).not.toMatch(/ride|bike|cycl|v[ée]lo|bici|sortie|salida|passeio|رحل|جول|دراج|رائیڈ|سائیکل|राइड|साइकिल|রাইড|সাইকেল/i);
+      }
+    }
   });
 
   test('every kind has a writer, and the three new messages are written in all ten languages', () => {

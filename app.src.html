@@ -7615,6 +7615,7 @@ function doLogout(silent){
   // sign-in check-up (_commAskCheck) was not asked again.
   S._rnFetchedFor=null;S._rnUnavailable=null;S._delFetchedFor=null;S._delUnavailable=null;S._commAskedFor=null;S._perksAsked=null;
   S._hub=null;S._mb=null; // the Community page's challenges and year were the member's own (member-hub.js)
+  S._inb=null;S._inbList=null;_inbBadge(); // their Updates too, and the app icon's badge with them: a shared phone kept the last account's count (F3)
   if(sb&&sb.auth)try{sb.auth.signOut({scope:'local'});}catch(e){} // this device only (2026-10-05): the default, 'global', ended the rider's Google or Apple session on their other devices too
   S._rName='';S._rEmail='';S._rPhone='';S._rHeight='';
   S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regVl=null;S.regBldRole=null;S.regBldClub=null;S.regBldClubNone=false;S.regRiderNames=[];S.regQty=1;S.regType=null;S.selSession=null;S.lastTickets=[];S._alreadyBookedSession=null;S.regSubmitting=false;S.waiverOk=false;S.regShare=null;S.regStep=1;
@@ -27779,8 +27780,9 @@ function _accFromNav(sub){
 function _accOpen(k){
   if(!ACC_PAGES.includes(k)||(_accView()==='account'&&_accPage()===k))return;
   _accLeave(()=>{
+    const deep=_accPage()?+S._accFromMenu||0:0; // pages already open above the menu: Updates opens from Notifications (F3)
     if(!_accPage())S._accMenuY=window.scrollY||0;
-    S.accView='account';S.accPage=k;S._accFromMenu=true;
+    S.accView='account';S.accPage=k;S._accFromMenu=deep+1;
     _accShow();_pushNav();
     try{window.scrollTo({top:0});}catch(_){}
     const h=document.getElementById('acc-pg-'+k+'-h');if(h)try{h.focus({preventScroll:true});}catch(_){}
@@ -27789,7 +27791,7 @@ function _accOpen(k){
 // The page's way back (the app's Back on a phone): the menu, by the browser's own Back when the menu opened the page.
 function _accBack(){
   _accLeave(()=>{
-    if(S._accFromMenu){S._accFromMenu=false;try{history.back();return;}catch(_){}}
+    if(S._accFromMenu){S._accFromMenu=+S._accFromMenu-1;try{history.back();return;}catch(_){}} // one page fewer above the menu; at none, the menu is drawn in place
     S.accPage=null;_accShow();_pushNav();
     if(S._accMenuY!=null){const y=S._accMenuY;S._accMenuY=null;try{window.scrollTo({top:y});}catch(_){}}
   });

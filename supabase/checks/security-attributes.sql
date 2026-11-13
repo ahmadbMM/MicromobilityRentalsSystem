@@ -70,6 +70,7 @@ with expected(fname, want_definer, note) as (values
   ('customer_updates', true, 'the Updates list: reads and marks push_outbox, which nobody can read (20261114010300)'),
   ('customer_updates_unread', true, 'the Updates list: reads push_outbox, which nobody can read (20261114010300)'),
   ('_updates_text', true, 'the Updates list: reads push_words (20261114010300)'),
+  ('_updates_key', true, 'the Updates list: reads a session''s kind through _session_kind; no client execute (20261114010300)'),
   ('_updates_wl_in', true, 'the Updates list: the queue_entries trigger writes push_outbox (20261114010300)'),
   ('_updates_wl_offer', true, 'the Updates list: the waitlist_offers trigger writes push_outbox (20261114010300)'),
   ('_updates_note', true, 'the Updates list: the hub_posts trigger writes push_outbox (20261114010300)'),

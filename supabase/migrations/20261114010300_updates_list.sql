@@ -17,12 +17,17 @@
 --  1. push_outbox.key + args: what the message is, so the list can say it in the language the page is in (the server
 --     knows a rider's language only once they set the push switches). push_outbox.read_at: when the rider opened the list.
 --     Rows already in the table are marked read once, when the column is first added.
+--     queue_entries.reminded_kind may say 'push': its check (20261009225000) named '24h' and '2h' alone, so the
+--     reminder's own mark was refused and, with it, the whole run of _hub_push_tick, as soon as one rider booked for
+--     tomorrow had a working push subscription (found in review, 2026-11-13).
 --  2. push_words: 'note' (a line from staff), 'wlin' (a place given off the waitlist), 'wloffer' (a freed place to
---     take), in all ten languages.
---  3. _updates_text: a stored message in a given language.
+--     take), and 'remind_s' / 'change_s' (the reminder and the change notice of a session with no bike: "session",
+--     never "ride"), in all ten languages.
+--  3. _updates_text: a stored message in a given language. _updates_key: the words' key for a session, the '_s' one
+--     for a pool, yoga, run or event session.
 --  4. _push_outbox_gate, _hub_push_tick, _session_change_push: redefined as above. The evening-before reminder marks
 --     reminded_at (kind 'push') only when it really goes out as a push; a booking staff already reminded by hand gets
---     its row in the list and no push.
+--     its row in the list and no push. A mark the table refuses never undoes the run's rows.
 --  5. Three new writers: _updates_wl_in (a booking leaving the waitlist), _updates_wl_offer (a freed place offered),
 --     _updates_note (the line staff write on a Community post: one row per active member; an edit corrects the rows,
 --     hiding or deleting the post takes them away).
@@ -40,9 +45,10 @@
 --   drop trigger if exists hub_posts_updates_note on public.hub_posts;
 --   drop function if exists public.customer_updates(text, text, text), public.customer_updates_unread(text, text),
 --     public._updates_wl_in(), public._updates_wl_offer(), public._updates_note(), public._updates_sweep(),
---     public._updates_text(text, text[], text);
---   delete from public.push_words where key in ('note', 'wlin', 'wloffer');
+--     public._updates_text(text, text[], text), public._updates_key(text, text);
+--   delete from public.push_words where key in ('note', 'wlin', 'wloffer', 'remind_s', 'change_s');
 --   alter table public.push_outbox drop column if exists key, drop column if exists args, drop column if exists read_at;
+-- queue_entries_reminded_kind_chk stays as widened here: the reach build's own reminder writes 'push' too.
 
 begin;
 
@@ -69,6 +75,15 @@ comment on column public.push_outbox.read_at is
   'When the rider opened their Updates list with this row on it; null = unread (20261114010300).';
 comment on column public.push_outbox.key is
   'The push_words key this message was written from, with args: the Updates list says it in the page''s language; null = title and body as stored (20261114010300).';
+
+-- The evening-before reminder marks its booking reminded_kind = 'push' (_hub_push_tick, below and in 20261113130000).
+-- The check of 20261009225000 allowed '24h' and '2h' alone and refused it, which rolled the whole run back. Dropped and
+-- added again with the three kinds; every value on file is one of the first two.
+alter table public.queue_entries drop constraint if exists queue_entries_reminded_kind_chk;
+alter table public.queue_entries add constraint queue_entries_reminded_kind_chk
+  check (reminded_kind is null or reminded_kind in ('24h', '2h', 'push'));
+comment on column public.queue_entries.reminded_kind is
+  'Which reminder that was: 24h | 2h (staff, by WhatsApp), push (the evening-before reminder, when it went out as a push) (20261009225000, 20261114010300).';
 
 -- ── 2. the words ────────────────────────────────────────────────────────────────────────────────
 insert into public.push_words (key, lang, title, body) values
@@ -101,7 +116,30 @@ insert into public.push_words (key, lang, title, body) values
   ('wloffer', 'hi', 'आपके लिए एक जगह खाली है', '{0}: {1} मिनट के अंदर इसे ले लें'),
   ('wloffer', 'tl', 'May bakanteng puwesto para sa iyo', '{0}: kunin ito sa loob ng {1} minuto'),
   ('wloffer', 'ne', 'तपाईंका लागि एउटा ठाउँ खाली छ', '{0}: {1} मिनेटभित्र लिनुहोस्'),
-  ('wloffer', 'bn', 'আপনার জন্য একটি জায়গা খালি আছে', '{0}: {1} মিনিটের মধ্যে নিয়ে নিন')
+  ('wloffer', 'bn', 'আপনার জন্য একটি জায়গা খালি আছে', '{0}: {1} মিনিটের মধ্যে নিয়ে নিন'),
+  -- A session with no bike (pool, yoga, a run, an event) is never called a ride (the owner's rule, 2026-10-18): the
+  -- reach build's 'remind' and 'change' say "ride", and since this file their rows are on every booked rider's list.
+  -- The same two messages with "session"; the text under the title is the reach build's own.
+  ('remind_s', 'en', 'Session tomorrow', '{0}, meet at {1}'),
+  ('remind_s', 'ar', 'فعاليتك غدًا', '{0}، التجمّع الساعة {1}'),
+  ('remind_s', 'fr', 'Séance demain', '{0}, rendez-vous à {1}'),
+  ('remind_s', 'es', 'Sesión mañana', '{0}, nos vemos a las {1}'),
+  ('remind_s', 'pt', 'Sessão amanhã', '{0}, encontro às {1}'),
+  ('remind_s', 'ur', 'کل سیشن ہے', '{0}، {1} بجے ملیں'),
+  ('remind_s', 'hi', 'कल सत्र है', '{0}, {1} बजे मिलें'),
+  ('remind_s', 'tl', 'May session bukas', '{0}, magkita tayo nang {1}'),
+  ('remind_s', 'ne', 'भोलि सत्र छ', '{0}, {1} मा भेटौं'),
+  ('remind_s', 'bn', 'আগামীকাল সেশন', '{0}, {1}-এ দেখা হবে'),
+  ('change_s', 'en', 'Your session has changed', '{0}: open your ticket for the new details'),
+  ('change_s', 'ar', 'تغيّرت تفاصيل فعاليتك', '{0}: افتح تذكرتك لترى التفاصيل الجديدة'),
+  ('change_s', 'fr', 'Votre séance a changé', '{0} : ouvrez votre billet pour voir les nouveaux détails'),
+  ('change_s', 'es', 'Tu sesión ha cambiado', '{0}: abre tu entrada para ver los nuevos detalles'),
+  ('change_s', 'pt', 'A sua sessão mudou', '{0}: abra o seu ingresso para ver os novos detalhes'),
+  ('change_s', 'ur', 'آپ کے سیشن میں تبدیلی ہوئی ہے', '{0}: نئی تفصیلات کے لیے اپنا ٹکٹ کھولیں'),
+  ('change_s', 'hi', 'आपका सत्र बदल गया है', '{0}: नई जानकारी के लिए अपना टिकट खोलें'),
+  ('change_s', 'tl', 'Nagbago ang session mo', '{0}: buksan ang ticket mo para sa mga bagong detalye'),
+  ('change_s', 'ne', 'तपाईंको सत्र परिवर्तन भएको छ', '{0}: नयाँ विवरणका लागि आफ्नो टिकट खोल्नुहोस्'),
+  ('change_s', 'bn', 'আপনার সেশনে পরিবর্তন হয়েছে', '{0}: নতুন তথ্যের জন্য আপনার টিকিট খুলুন')
 on conflict (key, lang) do update set title = excluded.title, body = excluded.body;
 
 -- ── 3. a stored message in one language ────────────────────────────────────────────────────────
@@ -133,6 +171,18 @@ begin
 end $$;
 revoke all on function public._updates_text(text, text[], text) from public, anon, authenticated;
 
+-- The words' key for a session's message: 'remind' or 'change' as given for a ride, the '_s' one ("session") for a
+-- session with no bike. The kinds are the app's own (KIND_TRAITS with bike: false, read through _session_kind, which
+-- answers as the app's _rideKind does): a new kind without a bike joins this list.
+create or replace function public._updates_key(p_key text, p_session text)
+returns text
+language sql stable security definer set search_path to 'public'
+as $$
+  select case when _session_kind(p_session) in ('swim', 'workshop', 'event', 'runher', 'vlap', 'arena', 'defe5k', 'blood', 'yoga')
+              then p_key || '_s' else p_key end;
+$$;
+revoke all on function public._updates_key(text, text) from public, anon, authenticated;
+
 -- ── 4. the row is always kept; only its push is decided ────────────────────────────────────────
 create or replace function public._push_outbox_gate()
 returns trigger
@@ -162,11 +212,11 @@ language plpgsql volatile security definer set search_path to 'public'
 as $$
 declare v_ksa timestamp := now() at time zone 'Asia/Riyadh'; v_today date := (now() at time zone 'Asia/Riyadh')::date;
   v_month date := date_trunc('month', (now() at time zone 'Asia/Riyadh'))::date; v_n int := 0; r record; t record;
-  v_sess text; v_at text; v_sent timestamptz;
+  v_sess text; v_at text; v_sent timestamptz; v_key text;
 begin
   -- the evening before, from 21:00: every live booking on tomorrow's sessions, with push or without
   if extract(hour from v_ksa) >= 21 then
-    for r in select q.id, q.customer_id, q.reminded_at, s.title, s.ride_kind, w.starts_at
+    for r in select q.id, q.customer_id, q.reminded_at, s.id as sid, s.title, s.ride_kind, w.starts_at
                from queue_entries q join sessions s on s.id = q.session_id
                cross join lateral _session_window(s) w
               where s.session_date = to_char(v_today + 1, 'YYYY-MM-DD') and s.status <> 'deleted' and s.cancelled_at is null
@@ -176,17 +226,22 @@ begin
                 and not exists (select 1 from push_outbox o where o.customer_id = q.customer_id and o.tag = 'rem-' || q.id) loop
       v_sess := coalesce(nullif(trim(r.title), ''), 'kind:' || coalesce(r.ride_kind, 'jcc'));
       v_at := to_char(r.starts_at at time zone 'Asia/Riyadh', 'HH24:MI');
-      select * into t from _push_text(r.customer_id, 'remind', array[_push_sess_name(r.customer_id, r.title, r.ride_kind), v_at]);
+      v_key := _updates_key('remind', r.sid); -- a session with no bike is not a ride
+      select * into t from _push_text(r.customer_id, v_key, array[_push_sess_name(r.customer_id, r.title, r.ride_kind), v_at]);
       -- staff already reminded this booking by hand: its row is for the list only
       insert into push_outbox (customer_id, tag, title, body, url, cat, key, args, sent_at, result)
-      values (r.customer_id, 'rem-' || r.id, left(t.title, 120), left(t.body, 300), '/my-bookings', 'rides', 'remind', array[v_sess, v_at],
+      values (r.customer_id, 'rem-' || r.id, left(t.title, 120), left(t.body, 300), '/my-bookings', 'rides', v_key, array[v_sess, v_at],
               case when r.reminded_at is not null then now() end, case when r.reminded_at is not null then 'inapp' end)
       on conflict (customer_id, tag) do nothing
       returning sent_at into v_sent;
       if found then
         -- going out as a push (the gate left it waiting): staff skip that rider
         if v_sent is null then
-          update queue_entries set reminded_at = now(), reminded_kind = 'push' where id = r.id and reminded_at is null;
+          begin
+            update queue_entries set reminded_at = now(), reminded_kind = 'push' where id = r.id and reminded_at is null;
+          exception when others then
+            null; -- a mark the table refuses never undoes the run's rows
+          end;
         end if;
         v_n := v_n + 1;
       end if;
@@ -231,6 +286,7 @@ create or replace function public._session_change_push()
 returns trigger
 language plpgsql security definer set search_path to 'public'
 as $$
+declare v_key text;
 begin
   begin
     if new.session_date < to_char(_ksa_today(), 'YYYY-MM-DD') or new.session_date > to_char(_ksa_today() + 7, 'YYYY-MM-DD')
@@ -242,15 +298,16 @@ begin
        or new.meet_url is distinct from old.meet_url
        or new.meet_lat is distinct from old.meet_lat or new.meet_lng is distinct from old.meet_lng
        or new.ride_status is distinct from old.ride_status then
+      v_key := _updates_key('change', new.id); -- a session with no bike is not a ride
       -- everyone booked, with push or without (the gate decides the push)
       insert into push_outbox (customer_id, tag, title, body, url, cat, key, args)
       select q.customer_id, left('chg-' || new.id || '-' || to_char(now() at time zone 'Asia/Riyadh', 'YYYYMMDDHH24MI'), 64),
              left(t.title, 120), left(t.body, 300), '/my-bookings', 'rides',
-             'change', array[coalesce(nullif(trim(new.title), ''), 'kind:' || coalesce(new.ride_kind, 'jcc'))]
+             v_key, array[coalesce(nullif(trim(new.title), ''), 'kind:' || coalesce(new.ride_kind, 'jcc'))]
         from (select distinct x.customer_id from queue_entries x
                where x.session_id = new.id and x.status = 'waiting' and x.customer_id is not null
                  and coalesce(x.approval, 'approved') = 'approved') q
-        cross join lateral _push_text(q.customer_id, 'change',
+        cross join lateral _push_text(q.customer_id, v_key,
                      array[_push_sess_name(q.customer_id, new.title, new.ride_kind)]) t
       on conflict (customer_id, tag) do nothing;
     end if;
@@ -460,15 +517,17 @@ notify pgrst, 'reload schema';
 -- Check (read only).
 select (select count(*) from pg_class where relnamespace = 'public'::regnamespace and relkind in ('r', 'p') and not relrowsecurity) as no_rls_0,
        (select count(*) from pg_proc where pronamespace = 'public'::regnamespace and prosecdef
-         and proname in ('_updates_text', '_push_outbox_gate', '_hub_push_tick', '_session_change_push', '_updates_wl_in',
-                         '_updates_wl_offer', '_updates_note', 'customer_updates_unread', 'customer_updates', '_updates_sweep')) as definer_10,
+         and proname in ('_updates_text', '_updates_key', '_push_outbox_gate', '_hub_push_tick', '_session_change_push', '_updates_wl_in',
+                         '_updates_wl_offer', '_updates_note', 'customer_updates_unread', 'customer_updates', '_updates_sweep')) as definer_11,
        has_function_privilege('anon', 'public.customer_updates(text,text,text)', 'execute') as anon_list_true,
        has_function_privilege('anon', 'public.customer_updates_unread(text,text)', 'execute') as anon_unread_true,
        has_function_privilege('anon', 'public._updates_sweep()', 'execute') as anon_sweep_false,
        has_table_privilege('anon', 'public.push_outbox', 'select') as anon_store_false,
        (select count(*) from information_schema.columns where table_schema = 'public' and table_name = 'push_outbox'
          and column_name in ('key', 'args', 'read_at')) as columns_3,
-       (select count(*) from public.push_words where key in ('note', 'wlin', 'wloffer')) as words_30,
+       (select count(*) from public.push_words where key in ('note', 'wlin', 'wloffer', 'remind_s', 'change_s')) as words_50,
+       (select pg_get_constraintdef(oid) like '%push%' from pg_constraint
+         where conname = 'queue_entries_reminded_kind_chk' and conrelid = 'public.queue_entries'::regclass) as reminded_push_true,
        (select count(*) from pg_trigger where tgname in ('push_outbox_gate', 'queue_entries_updates_wl', 'waitlist_offers_updates', 'hub_posts_updates_note')) as triggers_4,
        (select count(*) from cron.job where jobname = 'mm-updates-sweep') as cron_1,
        (select version from supabase_migrations.schema_migrations where version = '20261114010300') as ledger;
