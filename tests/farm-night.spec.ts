@@ -38,6 +38,19 @@ test.describe('@customer:farm Farm House Night', () => {
       waiver: 'activity', nc: true, time: 'Arrival 4:30 PM · Dinner 8:30 PM', featured: true });
   });
 
+  test('the Experiences card shows its mark to members alone', async ({ page }) => {
+    await custBoot(page);
+    await expect.poll(() => page.evaluate(`_commMarks()`)).toContain('ev-farm');
+  });
+
+  test('a rider who is not a member sees no farm mark', async ({ page }) => {
+    await custBoot(page, { 'rpc:community_member': false });
+    await page.evaluate(`_infoMember()`);
+    await expect.poll(() => page.evaluate(`!!(S._infoMem&&!S._infoMem.busy)`)).toBe(true);
+    expect(await page.evaluate(`_commMarks()`)).toContain('ev-saturday');
+    expect(await page.evaluate(`_commMarks()`)).not.toContain('ev-farm');
+  });
+
   test('its date card sits inside Experiences in the venue\'s colours', async ({ page }) => {
     await custBoot(page);
     await page.evaluate(`selectEvent('community')`);
@@ -138,6 +151,8 @@ test.describe('@customer:farm Farm House Night', () => {
     await expect(tk).toHaveClass(/\bth-farm\b/);
     await expect(tk).toContainText('Arrival 4:30 PM · Dinner 8:30 PM');
     await expect(tk).not.toContainText('Gathering');
+    // its countdown runs to arrival, then to dinner
+    expect(await page.evaluate(`_cdAttr(allSessions().find(x=>x.id==='${FH}'),'2099-11-19')`)).toMatch(/:fhCdArrive\|\d+:fhCdDinner$/);
     await expect(tk).not.toContainText(/\bbike\b/i);
     await expect(page.locator('#tab-myrides .cu-act88', { hasText: 'Edit' })).toHaveCount(1);
   });

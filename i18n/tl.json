@@ -8755,6 +8755,8 @@
   "fhYou": "Ikaw",
   "fhFam": "Kapamilya",
   "fhPeople": "Mga darating",
+  "fhCdArrive": "Pagdating sa loob ng {0}",
+  "fhCdDinner": "Hapunan sa loob ng {0}",
   "infoDtFarm": "Isang gabi sa farm para sa mga miyembro ng komunidad at kanilang pamilya. Dumating mula {gather}, mag-enjoy sa farm kasama ang komunidad, at manatili para sa hapunan nang {start}. Idagdag ang bawat kapamilya sa iyong booking ayon sa pangalan. Kinukumpirma ng aming team ang bawat request, gaya sa Saturday Social Ride.",
   "sessEventFarmHint": "Isang gabi para sa mga miyembro ng komunidad at kanilang pamilya: humihingi ang miyembro ng puwesto para sa sarili at sa pamilya, bawat isa ayon sa pangalan, at inaaprubahan ng staff ang bawat puwesto gaya sa Saturday Social Ride. Oras ng pagdating at hapunan, walang bisikleta.",
   "ygWith": "kasama si Jassim Alsaady",

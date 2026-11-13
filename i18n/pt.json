@@ -8755,6 +8755,8 @@
   "fhYou": "Você",
   "fhFam": "Familiar",
   "fhPeople": "Pessoas que vêm",
+  "fhCdArrive": "Chegada em {0}",
+  "fhCdDinner": "Jantar em {0}",
   "infoDtFarm": "Uma noite na fazenda para os membros da comunidade e suas famílias. Chegue a partir das {gather}, aproveite a fazenda com a comunidade e fique para o jantar às {start}. Adicione cada familiar à sua reserva com o nome. Nossa equipe confirma cada pedido, como no passeio social de sábado.",
   "sessEventFarmHint": "Uma noite para os membros da comunidade e suas famílias: cada membro pede lugares para si e para a família, cada um com o nome, e a equipe aprova cada lugar como no passeio social de sábado. Horários de chegada e de jantar, sem bicicletas.",
   "ygWith": "com Jassim Alsaady",
