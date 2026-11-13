@@ -860,6 +860,120 @@ the staff section Ask (section "Ask") are answered in the app too, as on micromo
   /ask/<slug>, `MembersArea.tsx`).
 - **Tests**: `tests/member-ask.spec.ts` (`@customer:members`).
 
+## New features build (2026-11-13/14)
+
+Sixteen items the owner marked "Build now" on 2026-11-13, released together. Specs (`tests/`, `.spec.ts`): first-five-rides, still-coming,
+updates-list, saturday-roster-marks, plan-saturdays, route-page, badge-share, my-month, bike-report, personal-landmarks,
+going-counts, learn-ladder, helper-path, circuit-challenge, company-challenge, calendar-feed.
+Fourteen migrations, `20261114080100` to `20261114082700` (`2026111408xx00` below as `08xx00`), run in number order after
+main's `20261114070000`; F11 and F16 have none. `still_coming` and `updates_list` stop with a plain message without the
+Community reach pair, `updates_list` without `still_coming`, `plan_saturdays` without `updates_list`; `hub_going` needs
+community_reach's `hub_feed`. The Privacy Notice has the build's rows (`PRIVACY_VERSION` 2026-11-14, nobody asked again); the
+website's copy follows through its `sync-privacy-notice.mjs`.
+
+**Nine hand-written lazy rider modules**, each as `member-hub.js` (classic script on the page's globals, in `FILES` and eslint's
+ignores, its `?v=` stamped by `scripts/build-html.mjs`, its own words in ten languages, not read by the build's handler, style
+and emoji checks, so they must hold none of those): `route-page.js` (`RT_V`), `calendar-feed.js` (`CALF_V`), `learn-ladder.js`
+(`LL_V`), `lap-page.js` (`LAP_V`), `bike-report.js` (`BRP_V`), `rider-updates.js` (`INB_V`), `badge-share.js` (`SHR_V`),
+`helper-path.js` (`HP_V`), `company-challenge.js` (`COCH_V`). `tests/helpers/supabase.ts` answers `learn_ladder`,
+`calendar_link` and `circuit_mine` with null unless a spec stubs them (their 404 failed the smoke specs).
+
+- **F1 First five rides** (`P5`, `_p5Read`, `_p5Fin`, `_p5Tab`, `_rgFinBook`; `_p5Html` in member-hub.js; `080100`
+  `saturday_ladder_2_3`, two badge rows). A rider with 1 to 4 bike rides (counted from their own bookings read in this page
+  load) sees five marks on the rating pop-up's last screen in place of the month's challenge, with Book when nothing is
+  booked ahead; a fresh badge still comes first. A member under five sees the path in the tab's challenge slot. The Saturday
+  ladder is 1, 2, 3, 5, 10, 25, 50, 100: the owner's new steps **Tailwind** (`bd_tailwind`, 2) and **Momentum**
+  (`bd_momentum`, 3), also in `N6Q_SAT_LADDER` and F4's milestones. Left for the owner: "You're booked" still shows a member
+  under five the month's challenge.
+- **F2 "Still coming?"** (`_stc*`, `_readStcTk`; `_hubStill`; `080200` `still_coming`: `queue_entries.coming_at`,
+  `booking_coming(p_id, p_token, p_session)`, trigger `_coming_guard`). From 24 h before the time to turn up until the start a
+  held place (never waitlisted; an approval ride only once published) shows I'm coming / Can't come on the ticket and the hub
+  card; the first answer stands for the whole party; a move or cancel clears it. Roster: a green tick. The evening-before
+  reminder asks to cancel so another rider takes the bike and opens `/my-bookings?tk=<booking>`; a session with no bike says
+  `remind:nc`.
+- **F3 Updates list** (`_inb*` in app.src.html, `rider-updates.js`; `080300` `updates_list`). Account > Notifications >
+  Updates (`ACC_PAGES` `updates`), and a button on the Community tab for members; unread rows light the tab's dot and the app
+  icon's badge (`_inbBadge`), opening the page marks them read. `push_outbox` is now written for **every** rider addressed,
+  push on or off: `_push_outbox_gate` keeps every row and marks one it must not push `sent_at = now(), result = 'inapp'`;
+  `push_outbox.key` / `args` let `customer_updates(p_id, p_token, p_lang)` say it in the page's language
+  (`customer_updates_unread`). New writers: `_updates_wl_in`, `_updates_wl_offer`, `_updates_note` (a staff line on a
+  Community post; hiding it removes the rows, showing it again writes them anew). `_updates_sweep` (`mm-updates-sweep`,
+  daily) drops rows after 90 days. Anything queued into `push_outbox` from now on lands in riders' lists.
+- **F4 Saturday roster marks** (`_srm*`, `TAG_NOCALL`, staff only; `080400` `saturday_roster_marks`:
+  `staff_sat_marks(p_session)`, the locked tag `tag_no_callout`). First and second Saturday, back after three or more missed,
+  a ladder step today; "Milestones this Saturday" above the roster leaves out pending approvals and riders given "No call-out
+  at the briefing" on the account window (`_srmNoCallTog`).
+- **F10 Plan my Saturdays** (`_plan*` in member-hub.js; `081000` `plan_saturdays`: `hub_plans`, `hub_plan`, `hub_plan_set`,
+  `_hub_plan_tick` as `mm-hub-plan` every 10 minutes). The month's Saturdays as ticks beside the challenge; a tick books
+  nothing, only its member reads it, rows go when the month ends, and booking opening sends one "booking is open" row
+  (push with Community on), never twice, never when already booked.
+- **F11 Routes** (no migration; `route-page.js`, `_rtBtn`, `_rtOpen(slug)`, `_rtLoad`; staff `_nsRouteHtml` in both session
+  forms, admins' `_rtLineOpen` -> `_rtpEdit`). A ride tied to a route (`sessions.route_slug`) opens the route's page from the
+  ticket and Details: line from stored points (own SVG, north up, no base map), distance, surface, level, turn points, Save
+  GPX file. No elevation (the owner dropped it; nothing outside the app is called). Stored in `site_content`
+  `route.track.<key>` = `{v:1, pts, turns:[{km,en,ar}]}`, admins write, history kept. **Always make the key with
+  `_rtpKey(slug)`** (dashes are not allowed in keys: `obhur-coast` is `obhur_2d_coast`), and never write the website's
+  `routes.routes.items`. `tests/route-page.spec.ts` stubs `site_content` by key.
+- **F12 Share** (`badge-share.js`, `_shrBadge`, `_shrTitle`; `_hubShare` in member-hub.js; `081200` `title_earned_date`
+  redefines `customer_my_titles` with `at`). Share in the badge pop-up, under the title on Account > Badges and on a finished
+  challenge draws a picture on the phone and hands it alone to the share menu, else saves it.
+- **F13 My month** (`_mon*` in member-hub.js; `081300` `hub_month(p_id, p_token)`). From the 26th to the month's end a member
+  with two or more finished sessions that month sees their own month (Saturdays, sessions by kind, badges, one comparison
+  with their month before), private, with Share. Its first day is `site_content` `hub.month.from`, seeded `"2026-12-26"`;
+  an admin moves it there.
+- **F15 Report a bike problem** (`bike-report.js`, `_brpOpen`; staff `_br*` in the Workshop list behind "Bike reports", `_brLoad`
+  in `STAFF_ENTRY`; `081500` `bike_reports`, `queue_entries.bike_report_at`, `bike_report(p_id, p_token, p_booking, p_fault,
+  p_note, p_bike)`). Checked in with a fleet bike, until 3 h after the session: a fault and an optional note of 300. Limits
+  (one per booking per 10 minutes, 5 per booking, 8 per account a day) refuse without a word. Staff mark resolved.
+- **F16 Personal landmarks** (no migration; `_lmAnniv`, `_lmKindsHtml`, `LM_KINDS`). On Stats, for the seven days from the
+  first bike ride's anniversary, a card with the years and a line from the team (`site_content` `msg.templates` `lm_anniv`,
+  edited with the message templates; default `LM_LINE_DEF`); under By event a checklist of the kinds tried.
+- **F19 Going counts** (`_hubGoing` in member-hub.js; `081900` `hub_going`: `_hub_going()`). "34 going · 12 first-timers" on
+  the next-session card, each number only at 10 or more, only on a community session whose list is published and open for
+  booking, never a tag-gated private ride; nowhere else (the owner refused it on Experiences and Reserve).
+- **F21 Learn-to-ride ladder** (`learn-ladder.js`, `_llMineLoad`, `_llOpen`; staff `_lls*` on People > Applications > Learn to
+  ride; `082100` `learn_ladder`: `learn_skills` seeded in ten languages, `learn_progress`, `learn_ladder(p_id, p_token)`,
+  `staff_learn_progress_set`). Four levels of four skills, the instructor's line, a certificate per level, then the way to a
+  Saturday ride. Nothing is "failed": a skill not ticked reads Practising. Owner decision open: an adult the account holder
+  signed up (`who = 'other'`) is shown to the account holder too.
+- **F23 Helper path**: see "Helper path (2026-11-13, new features F23)". Do not delete or retire its three titles in
+  Community > Titles: nothing in the database stops it, and the staff section then disappears.
+- **F25 Circuit challenge** (`lap-page.js`, `_readLapParam`, `_lapLoad`, `_lapStatsHtml`; staff `_acLap*` in Community >
+  Activities; `082500` `circuit_challenge`: `circuit_challenges` (staff write it directly), `circuit_laps`,
+  `circuit_lap(p_id, p_token, p_code, …)`, `circuit_mine`, `staff_circuit_totals`). Staff name a lap target for a season
+  and print the start-line poster, whose address is **`/?lap=<code>`** (an NFC tag may hold it). A lap counts only for a
+  rider checked in on a circuit session running then, outside the challenge's gap; the lap page keeps a refused scan for a
+  retry. Each challenge makes its own held-only badge (`lap_<hex>`, icon `lapring`), English and Arabic names only.
+- **F26 Company challenge** (`company-challenge.js`, `_coch*` on Account > Company challenge; staff People > Recognition >
+  Company challenges, `_commCompanies` / `_cochs*` in `peoplemore`; `082600` `company_challenge`: `company_challenges`,
+  `company_challenge_members`, `badges.held_only`, `company_challenge_mine`, `company_challenge_join`,
+  `staff_company_challenge*`, `mm-company-challenge` gives `bd_company_challenge` after the last day). A rider joins with the
+  code or a link `/?company=CODE` (kept on the device until sign-in; Log out drops it). **Totals reach a rider only from 10
+  taking part**, `greatest(min_team, 10)` in SQL, whatever the staff's minimum team size (10 to 500, default 10).
+- **F27 Calendar feed** (`calendar-feed.js`, `_calfPeek`, `_calfLoad`; `082700` `calendar_feed`: `calendar_feeds`,
+  `calendar_link(p_id, p_token, p_lang, p_op)` with `peek` / `get` / `new`, `calendar_feed(p_key)`). The address is
+  `/api/ics?k=<key>` (`onRequestGet` in `functions/api/ics.js`, beside the per-booking file, sharing `icsEvent`): the
+  bookings held ahead, `waiting` or `active`. The Account row shows only once `peek` answers. **Never log or store the key
+  elsewhere** (no `console.*` there; a spec checks). An unknown key answers as an empty calendar, a database failure a 503,
+  never an empty calendar (it would wipe the rider's events). Limits: 60 per 5 minutes per caller in memory, 60 an hour per
+  key in SQL. `FEED_WORDS` must equal the app's strings (spec); a new ride kind needs rows in `FEED_WORDS` / `FEED_KINDS`.
+  Needs `SUPABASE_ANON_KEY` in Cloudflare Pages.
+
+**Traps.**
+- Functions redefined whole: `_hub_push_tick` (push_consent, then `still_coming`, then `updates_list`, which keeps
+  `still_coming`'s reminder), `_push_outbox_gate` and `_session_change_push` (`updates_list`), `hub_feed` (`hub_going` from
+  community_reach's text: keep `'going', _hub_going()`), `customer_my_titles` (`title_earned_date`). Copy the next change
+  from these files.
+- `queue_entries.reminded_kind` takes `'push'` from `still_coming` (`updates_list` repeats it): the reach build's reminder
+  write was refused under the 2026-10-09 check and stopped the whole run. `supabase/seeds/push_words_more.sql` no longer
+  re-seeds `remind`.
+- The section "Community reaches members" above predates this: the gate no longer drops a switched-off row.
+- Website, still owed (`/Users/malik/dev/mm-platform`): the ladder's 2 and 3 steps (`lib/ride-record.ts`, its texts); the
+  ticket card on `/account` for F2's buttons, F15's report and F11's route; `/club` for F1's path, F10, F13, F19, F23;
+  Share (F12); the badges `company_challenge` and `lap_*` (glyph `lapring`); a Calendar row (F27); F16 on its Stats.
+- For the owner: VAPID keys (push is still dormant), approval of the Privacy Notice words and of the names Tailwind and
+  Momentum.
+
 ## The 2026-09-27 feature round (blocks 1-13)
 
 Built from the owner's answers on 2026-09-27/28; the source of each is in the commit messages.
