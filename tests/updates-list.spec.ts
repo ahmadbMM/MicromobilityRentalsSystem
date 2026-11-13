@@ -395,8 +395,13 @@ test.describe('@customer:account the Updates list: the database\'s rules', () =>
     expect(chg).toContain('_push_text(q.customer_id, v_key,');
     expect(chg).toMatch(/'rides',\s+v_key, array\[/);
     for (const f of [tick, chg]) expect(f).not.toMatch(/_push_text\([a-z]\.customer_id, '(remind|change)'/);
+    // the reminder keeps what 20261114010200_still_coming changed in this function (it runs first, and this file replaces
+    // the whole function): a session with no bike takes that file's 'remind:nc' words, and the reminder opens the ticket
+    expect(tick).toContain("if v_key = 'remind_s' then v_key := 'remind:nc'; end if;");
+    expect(tick).toContain("'/my-bookings?tk=' || r.id, 'rides', v_key");
+    expect(sql).not.toContain("('remind_s',");
     // the words: all ten languages, the same placeholders as the ride's, and no ride, bike or cycling in any of them
-    for (const [key, holds] of [['remind_s', ['{0}', '{1}']], ['change_s', ['{0}']]] as const) {
+    for (const [key, holds] of [['change_s', ['{0}']]] as const) {
       const found = [...sql.matchAll(new RegExp(`\\('${key}', '([a-z]{2})', '((?:[^']|'')*)', '((?:[^']|'')*)'\\)`, 'g'))];
       expect(found.map((m) => m[1]).sort(), key).toEqual(['ar', 'bn', 'en', 'es', 'fr', 'hi', 'ne', 'pt', 'tl', 'ur']);
       for (const m of found) {
