@@ -1472,6 +1472,12 @@
     .rp-kpis{margin-bottom:16px;}
     .rp-check{margin-bottom:16px;}
     .rp-acts{display:flex;gap:6px;flex-wrap:wrap;flex:none;}
+    /* People > Company challenges (F26): New above the list, a row's buttons under its lines on a phone, Delete apart from Save */
+    .cochs-top{margin:0 0 12px;}
+    .cochs-row{flex-wrap:wrap;}
+    .cochs-row .cw-row-m{flex:1 1 260px;}
+    .cochs-row .rp-acts{flex:0 1 auto;}
+    #mny-modal .cochs-del{margin-inline-end:auto;}
     .rp-table{width:100%;max-width:720px;border-collapse:collapse;margin:0 0 18px;font-size:var(--sf-fs-sm);}
     .rp-table th,.rp-table td{text-align:start;padding:7px 8px;border-bottom:1px solid var(--border);}
     .rp-table th{font-weight:600;color:var(--muted);}
@@ -9883,6 +9889,23 @@ body:not(.view-staff) #tab-account .acc-pg-card .form-row>.form-group{margin:0;}
 body:not(.view-staff) #tab-account .acc-pg-card .cu-type-hint{margin-top:8px;}
 body:not(.view-staff) #tab-account .acc-pg-card .cu-acc-err:empty{min-height:0;margin:0;}
 body:not(.view-staff) #tab-account .acc-wa-k{margin:0 0 6px;font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+/* Account > Company challenge (F26): a card per challenge (the company, its days, the numbers, the badge), then the code box */
+body:not(.view-staff) #tab-account .coch-card{margin:0 0 16px;}
+body:not(.view-staff) #tab-account .coch-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+body:not(.view-staff) #tab-account .coch-name{margin:0;font-size:var(--fs-20);font-weight:700;line-height:1.2;color:var(--ink);overflow-wrap:anywhere;}
+body:not(.view-staff) #tab-account .coch-name:focus{outline:none;}
+body:not(.view-staff) #tab-account .coch-st{flex:none;font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) #tab-account .coch-dates{margin:4px 0 14px;font-size:var(--fs-13);color:var(--ink-2);}
+body:not(.view-staff) #tab-account .coch-nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px;}
+body:not(.view-staff) #tab-account .coch-num{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border-radius:var(--r-ctl);background:var(--card-2);}
+body:not(.view-staff) #tab-account .coch-num strong{font-size:var(--fs-26);font-weight:700;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) #tab-account .coch-num span{font-size:var(--fs-13);color:var(--ink-2);overflow-wrap:anywhere;}
+body:not(.view-staff) #tab-account .coch-badge{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:var(--fs-15);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) #tab-account .coch-medal{flex:none;width:40px;height:40px;opacity:.4;}
+body:not(.view-staff) #tab-account .coch-won{color:var(--ink);}
+body:not(.view-staff) #tab-account .coch-won .coch-medal{opacity:1;}
+body:not(.view-staff) #tab-account .coch-badge-ok{display:inline-flex;align-items:center;gap:4px;margin-inline-start:auto;font-size:var(--fs-13);color:var(--go-2);}
+body:not(.view-staff) #tab-account #coch-code{text-transform:uppercase;letter-spacing:.08em;}
 body:not(.view-staff) #tab-account .acc-save{width:100%;margin-top:4px;}
 @media (max-width:899px){
   body:not(.view-staff) #tab-account.acc-in-pg :is(.acc-id,.acc-views,.acc-menu){display:none;}

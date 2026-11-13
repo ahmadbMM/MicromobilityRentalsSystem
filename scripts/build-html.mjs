@@ -157,6 +157,9 @@ src = src.replace("const BIKE_IMG_V=''", `const BIKE_IMG_V='${bikeFiles.length ?
 // The Helper path card's own file (helper-path.js, fetched by members on Account): its address changes with it too.
 if (!src.includes("const HP_V=''")) throw new Error('build: HP_V placeholder missing');
 src = src.replace("const HP_V=''", `const HP_V='${createHash('sha256').update(await readFile(new URL('../helper-path.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
+// Account > Company challenge's own file (new features build F26), stamped the way the Community page's is.
+if (!src.includes("const COCH_V=''")) throw new Error('build: COCH_V placeholder missing');
+src = src.replace("const COCH_V=''", `const COCH_V='${createHash('sha256').update(await readFile(new URL('../company-challenge.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
 
 // The print windows' stylesheets (report.css for every report _openReport writes, receipt.css for
 // the till's receipt) are linked from windows written into about:blank, which run under the page's

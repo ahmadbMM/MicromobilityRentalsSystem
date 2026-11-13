@@ -1115,6 +1115,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   nameLabel:'Name',timeLabel:'Time',
   profileInfo:'Your details',
   accPgPersonal:'Personal details',accPgContact:'Contact',accPgResidence:'Where you live',accPgEmergency:'Emergency contacts',accPgRiding:'Riding',accPgAbout:'About you',accGrpActivity:'Activity',accGrpSettings:'Settings',accInviteTile:'Invite friends',accAddX:'Add {0}',accEmAdd:'Add a contact',accOn:'On',accOff:'Off',accDelPending:'Requested',accDiscardQ:'Discard your changes?',accDiscard:'Discard',accKeepEditing:'Keep editing',
+  cochTitle:'Company challenge',bdgCompanyChallenge:'Company Challenge',bdgCompanyChallengeD:'Finish a session in your company’s challenge',bdgCompanyChallengeA:'For everyone who took part in their company’s challenge and finished at least one session before it ended.',cochsTab:'Company challenges',cochsNew:'New company challenge',cochsCode:'Join code',cochsMin:'Minimum team size',cochsTeam:'Taking part',cochsSessions:'Sessions completed',cochsBadges:'Badges given',cochsRiders:'Riders who joined',cochsNone:'No company challenges yet.',cochsNoRiders:'Nobody has joined yet.',cochsStOn:'Running',cochsStEnded:'Ended',cochsErrFields:'Give the company, a code of 4 to 12 letters or numbers, both dates (the end on or after the start) and a team size of 3 to 500.',cochsErrTaken:'Another challenge already uses this code.',cochsDelAsk:'Delete this company challenge?',cochsRemoveAsk:'Remove {0} from this challenge?',
   siGoogle:'Google sign-in',siApple:'Apple sign-in',
   accProfession:'Profession',accProfessionPh:'e.g. Engineer',accWorkplace:'Company',accWorkplacePh:'The company you work for',accHeardPick:'Choose one',errProfession:'Enter your profession: 2 to 80 characters.',errWorkplace:'Enter your company: 2 to 120 characters.',caLblWork:'Company',
   birthDateLabel:'Birth date',dobDay:'Day',dobMonth:'Month',dobYear:'Year',dobErrYoung:'Riders must be at least 5 years old. Check the birth date.',dobErrFuture:'A birth date can\'t be in the future.',countryLabel:'Country of residence',nationalityLabel:'Nationality',selectNationalityOpt:'Select nationality',acrBdNationality:'Nationality',cityLabel:'City of residence',optionalLabel:'optional',selectCountryOpt:'Select country of residence',selectCityOpt:'Select city of residence',selectCountryFirst:'Select a country first',
@@ -1797,6 +1798,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   nameLabel:'الاسم',timeLabel:'الوقت',
   profileInfo:'بياناتك',
   accPgPersonal:'البيانات الشخصية',accPgContact:'التواصل',accPgResidence:'مكان السكن',accPgEmergency:'جهات اتصال الطوارئ',accPgRiding:'الركوب',accPgAbout:'نبذة عنك',accGrpActivity:'النشاط',accGrpSettings:'الإعدادات',accInviteTile:'دعوة الأصدقاء',accAddX:'أضف {0}',accEmAdd:'أضف جهة اتصال',accOn:'مفعّلة',accOff:'متوقفة',accDelPending:'تم الطلب',accDiscardQ:'تجاهل التغييرات؟',accDiscard:'تجاهل',accKeepEditing:'متابعة التعديل',
+  cochTitle:'تحدي الشركة',bdgCompanyChallenge:'تحدي الشركة',bdgCompanyChallengeD:'أكمل جلسة ضمن تحدي شركتك',bdgCompanyChallengeA:'لكل من شارك في تحدي شركته وأكمل جلسة واحدة على الأقل قبل انتهائه.',cochsTab:'تحديات الشركات',cochsNew:'تحدي شركة جديد',cochsCode:'رمز الانضمام',cochsMin:'الحد الأدنى لحجم الفريق',cochsTeam:'المشاركون',cochsSessions:'الجلسات المكتملة',cochsBadges:'الأوسمة الممنوحة',cochsRiders:'المنضمون',cochsNone:'لا توجد تحديات شركات بعد.',cochsNoRiders:'لم ينضم أحد بعد.',cochsStOn:'جارٍ',cochsStEnded:'انتهى',cochsErrFields:'أدخل اسم الشركة ورمزًا من 4 إلى 12 حرفًا أو رقمًا والتاريخين (النهاية في يوم البداية أو بعده) وحجم فريق من 3 إلى 500.',cochsErrTaken:'هذا الرمز مستخدم في تحدٍّ آخر.',cochsDelAsk:'حذف تحدي الشركة هذا؟',cochsRemoveAsk:'إزالة {0} من هذا التحدي؟',
   siGoogle:'تسجيل الدخول عبر Google',siApple:'تسجيل الدخول عبر Apple',
   accProfession:'المهنة',accProfessionPh:'مثال: مهندس',accWorkplace:'الشركة',accWorkplacePh:'الشركة التي تعمل فيها',accHeardPick:'اختر واحداً',errProfession:'أدخل مهنتك: من 2 إلى 80 حرفاً.',errWorkplace:'أدخل اسم شركتك: من 2 إلى 120 حرفاً.',caLblWork:'الشركة',
   birthDateLabel:'تاريخ الميلاد',dobDay:'اليوم',dobMonth:'الشهر',dobYear:'السنة',dobErrYoung:'يجب ألا يقل عمر الراكب عن 5 سنوات. تحقّق من تاريخ الميلاد.',dobErrFuture:'لا يمكن أن يكون تاريخ الميلاد في المستقبل.',countryLabel:'بلد الإقامة',nationalityLabel:'الجنسية',selectNationalityOpt:'اختر الجنسية',acrBdNationality:'الجنسية',cityLabel:'مدينة الإقامة',optionalLabel:'اختياري',selectCountryOpt:'اختر بلد الإقامة',selectCityOpt:'اختر مدينة الإقامة',selectCountryFirst:'اختر الدولة أولاً',
@@ -7765,7 +7767,7 @@ const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',mem
 // The account page's three parts (the owner, 2026-11-09): Account at /account, then /account/stats and /account/badges.
 const ACC_VIEWS=['account','stats','badges'];
 // The Account part is a menu whose rows open small pages (the user, 2026-11-10), each at /account/<page>.
-const ACC_PAGES=['personal','contact','residence','emergency','riding','sport','about','wallet','invite','ambassador','volunteer','purchases','notifications','delete'];
+const ACC_PAGES=['personal','contact','residence','emergency','riding','sport','about','wallet','invite','ambassador','volunteer','purchases','company','notifications','delete'];
 // A signed-out visitor's two pages: Sign in at /, Create account at /signup (the owner, 2026-09-28),
 // so a link can open the sign-up itself. Signed in, /signup is just /.
 const SIGNUP_PATH='signup';
@@ -7788,7 +7790,7 @@ const SUB_PATHS={
   // Customers and Community are two sections since 2026-10-07 (the owner: "make a separate customer management/dashboard
   // page and a separate community management dashboard page"); the leaderboard and statistics went to Analytics.
   // Community's accounts list is its members: /community/members.
-  community:{overview:'',summary:'summary',accounts:'accounts',applications:'applications',learning:'applications/learning',flagged:'flagged',tags:'tags',badges:'badges',titles:'titles',activities:'activities',birthdays:'birthdays',mentors:'mentorship',wallets:'wallets',referrals:'referrals',activity:'activity',followups:'followups',duplicates:'duplicates'},
+  community:{overview:'',summary:'summary',accounts:'accounts',applications:'applications',learning:'applications/learning',flagged:'flagged',tags:'tags',badges:'badges',titles:'titles',activities:'activities',birthdays:'birthdays',mentors:'mentorship',wallets:'wallets',referrals:'referrals',activity:'activity',followups:'followups',duplicates:'duplicates',companies:'companies'},
   catalog:{models:'',categories:'categories',fields:'fields'},
   vendors:{calendar:'',requests:'requests',venues:'venues',tiers:'tiers',feedback:'feedback'},
   // Analytics' views (the owner, 2026-10-05: "add a url path for ratings and all other clickable buttons"):
@@ -14143,6 +14145,9 @@ function _readEventLink(){
     }
     // A friend's referral link (?ref=CODE): kept on this device until the account exists (_refLoad, doSignup).
     if(q.has('ref')){const r=String(q.get('ref')||'').replace(/[^A-Za-z0-9]/g,'').toUpperCase().slice(0,12);if(r)_refPark(r);q.delete('ref');}
+    // A company challenge's join link (?company=CODE, F26): the code is kept on this device, and Account > Company challenge
+    // opens once the rider is signed in and joins with it (_cochOpen).
+    if(q.has('company')){const k=String(q.get('company')||'').replace(/[^A-Za-z0-9]/g,'').toUpperCase().slice(0,12);if(k){_cochPark(k);sessionStorage.setItem(_TABLINK_KEY,'account/company');sessionStorage.removeItem(_EVLINK_KEY);}q.delete('company');}
     const rest=q.toString();
     if(rest!==was)history.replaceState(history.state,'',location.pathname+(rest?'?'+rest:'')+location.hash);
   }catch(e){}
@@ -21966,7 +21971,7 @@ function _bdgMedal(icon,color,cls){
 const DEFE_RIDE_IDS=['2026-10-24'];
 const BD_SYS={recruiter:['people','green','bdRecruiter'],recruiter_3:['people','teal','bdRecruiter3'],recruiter_5:['people','purple','bdRecruiter5'],recruiter_10:['people','gold','bdRecruiter10'],first_lap:['flag','green','bdFirstLap'],regular:['wheel','teal','bdRegular'],podium:['podium','purple','bdPodium'],front_row:['one','gold','bdFrontRow'],carbon:['bike','silver','bdCarbon'],streak:['flame','orange','bdStreak'],squad:['people','blue','bdSquad'],fuel:['bottle','red','bdFuel'],corniche25:['wave','blue','bd25'],
   marshal:['shield','orange','bdgMarshal'],pit_crew:['wrench','silver','bdgPitCrew'],green_flag:['wflag','green','bdgGreenFlag'],super_licence:['card','purple','bdgSuperLicence'],scrutineer:['search','teal','bdgScrutineer'],champion:['trophy','gold','bdgChampion'],spirit:['heart','red','bdgSpirit'],t100:['t100','gold','bdgT100'],t50:['t50','silver','bdgT50'],t25:['t25','orange','bdgT25'],ironman_703:['ironman_703','silver','bdgIronman703'],ironman_1406:['ironman_1406','gold','bdgIronman1406'],complete_profile:['profile','special','bdgRaceReady'],national_day_96:['n96','national','bdgNationalDay96'],
-  back_on_track:['return','teal','bdgBackOnTrack'],safety_car:['beacon','orange','bdgSafetyCar'],endurance:['clock','purple','bdgEndurance'],triple_crown:['crown','gold','bdgTripleCrown'],slipstream:['wind','green','bdgSlipstream'],paceline:['wind','blue','bdgPaceline'],peloton:['wind','gold','bdgPeloton'],rolling_start:['wind','teal','bdgRollingStart'],grand_tour:['wind','purple','bdgGrandTour'],hall_of_fame:['wind','special','bdgHallOfFame'],km20:['road','green','bdgKm20'],km40:['road','blue','bdgKm40'],km70:['road','purple','bdgKm70'],km100:['road','gold','bdgKm100'],clean_sheet:['calcheck','green','bdgCleanSheet'],works_team:['briefcase','teal','bdgWorksTeam'],perfect_week:['calstar','purple','bdgPerfectWeek'],perfect_month:['calcrown','gold','bdgPerfectMonth'],run_for_her:['ribbon','pink','bdgRunForHer'],defe_5k:['defe','defe','bdgDefe5k'],blood_donor:['drop','red','bdgBloodDonor'],blood_visitor:['dropo','teal','bdgBloodVisitor'],volunteer:['hand','volunteer','bdgVolunteer'],volunteer_10:['hand','teal','bdgVolunteer10'],volunteer_25:['hand','purple','bdgVolunteer25'],volunteer_50:['hand','gold','bdgVolunteer50'],volunteer_100:['hand','blue','bdgVolunteer100'],talent_scout:['pass','gold','bdgTalentScout'],swim_instructor:['swim','blue','bdgSwimInstructor'],victory_lap:['lapring','vlap','bdgVictoryLap'],defe_ride:['defewheel','defe','bdgDefeRide'],
+  back_on_track:['return','teal','bdgBackOnTrack'],safety_car:['beacon','orange','bdgSafetyCar'],endurance:['clock','purple','bdgEndurance'],triple_crown:['crown','gold','bdgTripleCrown'],slipstream:['wind','green','bdgSlipstream'],paceline:['wind','blue','bdgPaceline'],peloton:['wind','gold','bdgPeloton'],rolling_start:['wind','teal','bdgRollingStart'],grand_tour:['wind','purple','bdgGrandTour'],hall_of_fame:['wind','special','bdgHallOfFame'],km20:['road','green','bdgKm20'],km40:['road','blue','bdgKm40'],km70:['road','purple','bdgKm70'],km100:['road','gold','bdgKm100'],clean_sheet:['calcheck','green','bdgCleanSheet'],works_team:['briefcase','teal','bdgWorksTeam'],company_challenge:['briefcase','blue','bdgCompanyChallenge'],perfect_week:['calstar','purple','bdgPerfectWeek'],perfect_month:['calcrown','gold','bdgPerfectMonth'],run_for_her:['ribbon','pink','bdgRunForHer'],defe_5k:['defe','defe','bdgDefe5k'],blood_donor:['drop','red','bdgBloodDonor'],blood_visitor:['dropo','teal','bdgBloodVisitor'],volunteer:['hand','volunteer','bdgVolunteer'],volunteer_10:['hand','teal','bdgVolunteer10'],volunteer_25:['hand','purple','bdgVolunteer25'],volunteer_50:['hand','gold','bdgVolunteer50'],volunteer_100:['hand','blue','bdgVolunteer100'],talent_scout:['pass','gold','bdgTalentScout'],swim_instructor:['swim','blue','bdgSwimInstructor'],victory_lap:['lapring','vlap','bdgVictoryLap'],defe_ride:['defewheel','defe','bdgDefeRide'],
   senior_marshal:['shield','blue','bdgSeniorMarshal'],chief_marshal:['shield','gold','bdgChiefMarshal'],pit_boss:['wrench','teal','bdgPitBoss'],crew_chief:['wrench','gold','bdgCrewChief'],clear_track:['wflag','teal','bdgClearTrack'],track_guardian:['wflag','gold','bdgTrackGuardian'],tech_inspector:['search','blue','bdgTechInspector'],chief_scrutineer:['search','gold','bdgChiefScrutineer'],hat_trick:['trophy','purple','bdgHatTrick'],grand_champion:['trophy','red','bdgGrandChampion'],fair_play:['heart','purple','bdgFairPlay'],heart_of_race:['heart','gold','bdgHeartOfRace'],bike_owner:['bike','green','bdgBikeOwner'],road_owner:['bike','blue','bdgRoadOwner'],carbon_owner:['bike','special','bdgCarbonOwner'],pole_position:['one','purple','bdPolePosition'],pole_master:['one','red','bdPoleMaster'],clerk_of_course:['shield','red','bdgClerkOfCourse'],race_director:['shield','special','bdgRaceDirector'],team_manager:['wrench','red','bdgTeamManager'],team_principal:['wrench','special','bdgTeamPrincipal'],flag_bearer:['wflag','red','bdgFlagBearer'],track_legend:['wflag','special','bdgTrackLegend'],tech_delegate:['search','red','bdgTechDelegate'],chief_engineer:['search','special','bdgChiefEngineer'],dynasty:['trophy','blue','bdgDynasty'],world_champion:['trophy','special','bdgWorldChampion'],ride_ambassador:['heart','red','bdgRideAmbassador'],soul_of_ride:['heart','special','bdgSoulOfRide'],grid_leader:['one','blue','bdGridLeader'],pole_legend:['one','special','bdPoleLegend'],winter_series:['snow','blue','bdgWinterSeries'],ramadan_nights:['lantern','purple','bdgRamadanNights'],founding_day:['fort','orange','bdgFoundingDay']};
 // A badge's name and how-to line in the reader's language: the app's own from its translations, one
 // an admin made from its English or Arabic words.
@@ -22192,7 +22197,7 @@ const BDG_GIVEN_SYS=['marshal','senior_marshal','chief_marshal','clerk_of_course
 // rider who holds it: never greyed under Badges to earn, never offered to request. Here the badges that start that
 // way, which the app keeps to where the catalogue has no such field: the event and surprise badges _mrBadges marks
 // hide, Talent Scout ("only visible for its holders") and Swimming Instructor ("only be [visible] to its holders").
-const BDG_HELD_ONLY=new Set(['talent_scout','swim_instructor','national_day_96','run_for_her','defe_5k','victory_lap','defe_ride','blood_donor','blood_visitor','back_on_track']);
+const BDG_HELD_ONLY=new Set(['company_challenge','talent_scout','swim_instructor','national_day_96','run_for_her','defe_5k','victory_lap','defe_ride','blood_donor','blood_visitor','back_on_track']);
 // Whether only a badge's holders see it: the catalogue's switch, else the app's own start (def).
 function _bdgHeldOnly(b,def){return b&&typeof b.held_only==='boolean'?b.held_only:!!def;}
 // The account's badges as its page shows them (the owner, 2026-09-29: all of them, sorted, the same
@@ -27381,7 +27386,7 @@ function renderAccount(){
         ${row('personal','person')}${row('contact','phone')}${row('residence','pin')}${row('emergency','people')}${row('riding','bike')}${row('sport','run')}${row('about','info')}
       </div></div>
       <div class="acc-grp" id="acc-g-activity"><h2 class="acc-grp-h">${t('accGrpActivity')}</h2><div class="acc-list">
-        ${row('ambassador','flag')}${row('volunteer','clock')}${row('purchases','doc')}
+        ${row('ambassador','flag')}${row('volunteer','clock')}${row('purchases','doc')}${row('company','briefcase')}
         <button type="button" class="acc-row" id="acc-r-learn" data-on-click="${_on("_llOpen")}" hidden><span class="acc-row-ic">${_cuIc('bike',20)}</span><span class="acc-row-t">${t('llRow')}</span><span class="acc-row-v" id="acc-v-learn"></span>${_cuIc('go',16,1)}</button>
       </div></div>
       <div class="acc-grp"><h2 class="acc-grp-h">${t('accGrpSettings')}</h2><div class="acc-list">
@@ -27465,6 +27470,7 @@ function renderAccount(){
     ${page('ambassador','',1)}
     ${page('volunteer',`<div id="acc-vol-host">${_accVolHtml(cust)}</div>`,1)}
     ${page('purchases',`<div id="acc-purch">${(_purchLoad(cust),_purchHtml(cust))}</div>`,1)}
+    ${page('company','<div id="acc-co-host"></div>',1)}
     ${page('notifications',`
     ${(()=>{
       // Ride news: the rider's own yes or no (_consentCheck reads it once per page life). Not shown
@@ -27507,6 +27513,7 @@ function renderAccount(){
     <div id="acc-pane-badges" data-acc-pane="badges"${av==='badges'?'':' hidden'}>${_mrBadgesRow(cust)}</div>`;
   S._accBase={id:cust.id,v:_accFormVals()}; // what the form showed, to tell a rider's edit from a stale box
   _accRowsPaint();
+  _cochLoad(cust);if(pg==='company')_cochOpen(); // the Company challenge row and its page (F26)
 }
 // The account page's parts (the owner, 2026-11-09: "divide the customer my account page into 3 separate pages account
 // stats badges"): the switch above them, Account first. All three are drawn and the others hidden, as the staff account
@@ -27532,7 +27539,7 @@ function _accPage(){return ACC_PAGES.includes(S.accPage)?S.accPage:null;}
 function _accSub(){const v=_accView();return v!=='account'?v:(_accPage()||'');}
 function _accSubSet(sub){S.accView=ACC_VIEWS.includes(sub)?sub:'account';S.accPage=S.accView==='account'&&ACC_PAGES.includes(sub)?sub:null;}
 const _ACC_PG_T={personal:'accPgPersonal',contact:'accPgContact',residence:'accPgResidence',emergency:'accPgEmergency',riding:'accPgRiding',sport:'spTitle',about:'accPgAbout',
-  wallet:'cwTitle',invite:'refTitle',ambassador:'ambMineTitle',volunteer:'accVolTitle',purchases:'custPurchTitle',notifications:'pushTitle',delete:'delTitle'};
+  wallet:'cwTitle',invite:'refTitle',ambassador:'ambMineTitle',volunteer:'accVolTitle',purchases:'custPurchTitle',company:'cochTitle',notifications:'pushTitle',delete:'delTitle'};
 function _accPgTitle(k){return t(_ACC_PG_T[k]||'accountTitle');}
 // The profile columns each page writes (_saveAccount); every other column keeps the value on file.
 const ACC_PG_KEYS={personal:['name','birth_date','nationality','gender'],contact:['email','phone'],residence:['country','city'],riding:['height','type_preference'],about:['socials','profession','workplace','heard_from']};
@@ -27546,6 +27553,7 @@ function _accShow(){
   h.querySelectorAll('.acc-row[data-acc-go]').forEach(r=>{if(r.dataset.accGo===pg)r.setAttribute('aria-current','page');else r.removeAttribute('aria-current');});
   const sp=h.querySelector('.acc-split');if(sp)sp.classList.toggle('acc-has-pg',!!pg);
   h.classList.toggle('acc-in-pg',!!pg);
+  if(pg==='company')_cochOpen();
 }
 // Back and Forward landed on an account address (the tab is already open).
 function _accFromNav(sub){
@@ -27658,12 +27666,13 @@ function _accRowsPaint(){
   put('volunteer',hrs?esc(_tn('accVolHrs',Math.round(hrs*100)/100)):'',{show:!!vv&&!!(hrs||vv.status||(vv.promote&&vv.open_count>0))});
   const pu=_purchList(c);put('purchases',pu&&pu.rows.length?`<bdi>${esc(_sar(pu.tot))}</bdi>`:'',{show:!!pu});
   put('learn','',{show:_llHas(c)}); // the learn-to-ride ladder: only an account whose sign-up has a lesson
+  put('company',_cochOn(c)?`<bdi>${esc(S._coch.rows.map(r=>r.company).join(' · '))}</bdi>`:'',{show:_cochOn(c)}); // the company challenge (F26): once its read has answered
   const rn=!!c.session_token&&S._rnUnavailable!==c.id&&c.ride_news!==undefined;
   put('notifications',rn?esc(t(c.ride_news?'accOn':'accOff')):'',{show:rn||pushSupported()});
   const cf=document.getElementById('acc-cal-btn');if(cf)cf.hidden=!_calfOn(c); // the calendar address (F27): once the database has it
   put('delete',c.deletion_requested_at?esc(t('accDelPending')):'',{show:!!c.session_token&&S._delUnavailable!==c.id&&c.deletion_requested_at!==undefined,add:!!c.deletion_requested_at});
   const g=document.getElementById('acc-g-activity');
-  if(g)g.hidden=!['ambassador','volunteer','purchases','learn'].some(k=>{const r=document.getElementById('acc-r-'+k);return r&&!r.hidden;});
+  if(g)g.hidden=!['ambassador','volunteer','purchases','learn','company'].some(k=>{const r=document.getElementById('acc-r-'+k);return r&&!r.hidden;});
 }
 // The profile columns customer_profile answers with, laid over a signed-in copy; and the ones
 // customer_about answers with (the account page reads both): profession, workplace, how they heard
@@ -28035,6 +28044,43 @@ function _accVolRecLi(r){
   return`<li>${r.session_id?`<bdi>${esc(_evName(r))}</bdi> · `:''}${esc(shortDate(r.on))} · <b>${esc(_tn('accVolHrs',h))}</b></li>`;
 }
 function _accVolOpen(){const c=S.loggedIn||getSession();if(c)_volHandoff(c);}
+// ── Company challenge on My Account (new features build F26, 2026-11-13) ─────────────────────────────────────────
+// A company's people ride towards one number: staff make the challenge and hand out its code, or a link that holds it
+// (/?company=CODE, kept on this device until the rider is signed in). The row shows once company_challenge_mine has
+// answered (migration 20261114012600) that the rider has a challenge or that one can be joined, not at all before. Its
+// page (the code box, and a card per challenge: how many are taking part and their sessions together from the minimum
+// team size up, and the rider's own count; never a colleague) is company-challenge.js, fetched when the page opens.
+// S._coch = {id, at, busy, rows, open}.
+const COCH_V=''; // build stamps a hash of company-challenge.js
+const COCH_KEY='mm_co_code';
+function _cochPark(c){try{if(c)localStorage.setItem(COCH_KEY,JSON.stringify({c,t:Date.now()}));else localStorage.removeItem(COCH_KEY);}catch(_){}}
+function _cochParked(){try{const v=JSON.parse(localStorage.getItem(COCH_KEY)||'null');return v&&v.c&&Date.now()-(Number(v.t)||0)<6048e5?String(v.c):'';}catch(_){return'';}}
+function _cochOn(c){const m=S._coch;return!!(c&&m&&m.id===c.id&&m.rows&&(m.rows.length||m.open));}
+function _cochLoad(cust,force){
+  const m=S._coch;
+  if(!sb||!cust||!cust.session_token||S._cochGone||(!force&&m&&m.id===cust.id&&(m.busy||Date.now()-(m.at||0)<60000)))return;
+  const keep=m&&m.id===cust.id?m.rows:null,was=!!(keep&&m.open),done=(rows,open)=>{S._coch={id:cust.id,busy:false,at:Date.now(),rows,open};_cochPaint();};
+  S._coch={id:cust.id,busy:true,at:Date.now(),rows:keep,open:was};
+  Promise.resolve(sb.rpc('company_challenge_mine',{p_id:cust.id,p_token:cust.session_token})).then(({data,error})=>{
+    if(error&&_rpcAbsent(error))S._cochGone=true; // a database without it: no row
+    if(!error&&data&&data.ok===true&&Array.isArray(data.rows))done(data.rows,data.open===true);else done(S._cochGone?null:keep,was);
+  },()=>done(keep,was));
+}
+function _cochPaint(){if(S.view!=='customer'||S.custTab!=='account')return;_accRowsPaint();if(_accPage()==='company')_cochOpen();}
+// The page is a file of its own, fetched here, so no other rider carries it. With nothing to show (a database without
+// the function, or no answer) the menu takes its place.
+function _cochOpen(){
+  const c=S.loggedIn||getSession(),h=document.getElementById('acc-co-host');if(!c||!h)return;
+  if(!_cochOn(c)){if(S._cochGone||(S._coch&&S._coch.id===c.id&&!S._coch.busy)){S.accPage=null;_accShow();}return;}
+  window._cochDeps={park:_cochPark,parked:_cochParked,rows:_accRowsPaint,badge:()=>t('bdgCompanyChallenge')};
+  if(window._cochRender){window._cochRender();return;}
+  if(S._cochLoading)return;S._cochLoading=true;
+  const s=document.createElement('script');s.src='/company-challenge.js?v='+COCH_V;
+  s.onload=()=>{S._cochLoading=false;if(window._cochRender)window._cochRender();};
+  s.onerror=()=>{S._cochLoading=false;s.remove();const b=document.getElementById('acc-co-host');
+    if(b&&!window._cochRender)b.innerHTML=`<div class="form-section acc-pg-card" role="status"><strong>${t('mbErr')}</strong><button type="button" class="btn-primary acc-save" data-on-click="${_on('_cochOpen')}">${t('mbRetry')}</button></div>`;};
+  document.head.appendChild(s);
+}
 function _accBtHtml(cust){
   if(!cust||!cust.id||!cust.session_token)return'';
   _btLoad(cust);
@@ -28832,6 +28878,7 @@ const _CU={
   close:'<path d="M6.4 6.4l11.2 11.2M17.6 6.4L6.4 17.6"/>',
   doc:'<path d="M14 3.4H7.2a1.8 1.8 0 0 0-1.8 1.8v13.6a1.8 1.8 0 0 0 1.8 1.8h9.6a1.8 1.8 0 0 0 1.8-1.8V8z"/><path d="M14 3.4V8h4.6M8.8 12.6h6.4M8.8 16h4.2"/>', // a badge request's PDF proof (2026-11-08)
   cup:'<path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M6 2v2M10 2v2M14 2v2"/>',
+  briefcase:'<rect x="3" y="7.5" width="18" height="12" rx="2"/><path d="M9 7.5V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v1.5M3 13h18"/>',
   lotus:'<path d="M12 4.6c-2.1 2.8-2.1 7 0 10.4 2.1-3.4 2.1-7.6 0-10.4z"/><path d="M12 15c-1.5-3.3-4.4-5.1-7.8-5.1.2 3.7 3.4 5.6 7.8 5.1zM12 15c1.5-3.3 4.4-5.1 7.8-5.1-.2 3.7-3.4 5.6-7.8 5.1z"/><path d="M4.6 18.6h14.8"/>', // yoga (2026-11-12)
   run:'<circle cx="14.9" cy="4.6" r="1.9"/><path d="M13.9 8.1l-2.5 4.9 3 2.4-.9 4.9M11.4 13l-3 1.6-2.6-1.2M13.6 8.6l-3.1.7-1.6 2.1M13.6 8.6l2.6 2.4 2.6-.6"/>',
   // the Add to Home Screen steps for "Remind me" in a Safari tab (2026-11-13): Share, Add to Home Screen, the app on the Home Screen
@@ -56700,6 +56747,117 @@ async function _refReview(cid,allow){
   S._refAh=null;if(S._ah&&String(S._ah.custId)===String(cid))_refAhLoad(String(cid));
   _refRpLoad(true);
 }
+// ── People > Recognition > Company challenges (new features build F26, 2026-11-13) ────────────────────────────────
+// A company's people ride towards one number. Staff make the challenge (the company, a join code, its first and last
+// day, the minimum team size from which riders see the totals), see each one's totals and the riders who joined, and
+// can take a rider out. All of it goes through functions (staff_company_challenges and its three writes, migration
+// 20261114012600, People's right); a database without them says it is waiting for the update. The company's name is
+// typed, with the corporate nights' companies (RIDER_COMPANIES) offered. In the peoplemore part.
+function _cochs(){return S._cochsS||(S._cochsS={rows:null,busy:false,err:false,at:0,gone:false});}
+function _cochsLink(code){return'__SITE_ORIGIN__/?company='+encodeURIComponent(code);}
+async function _cochsLoad(force){
+  const A=_cochs();
+  if(!sb||A.busy||A.gone||(!force&&A.at&&Date.now()-A.at<(A.err?8000:60000)))return;
+  A.busy=true;A.at=Date.now();
+  let r;try{r=await _roFree(()=>sb.rpc('staff_company_challenges'));}catch(e){r={error:e};}
+  A.busy=false;
+  if(r&&!r.error&&Array.isArray(r.data)){A.rows=r.data;A.err=false;}
+  else if(r&&r.error&&_rpcAbsent(r.error))A.gone=true;
+  else A.err=true;
+  if(S.staffTab==='community'&&S.communityTab==='companies')renderCommunity();
+  if(S._cochsR!=null&&document.getElementById('cochs-r-t'))_cochsRiders(S._cochsR); // the riders' dialog still up: its list as it is now
+}
+function _cochsReload(){const A=_cochs();A.err=false;A.at=0;_cochsLoad(true);if(S.staffTab==='community')renderCommunity();}
+function _commCompanies(){
+  const A=_cochs();_cochsLoad();
+  if(A.gone)return`<div class="mny-empty">${t('dbPending')}</div>`;
+  if(!A.rows)return A.err&&!A.busy?_loadErr(esc(t('errConnection')),_on('_cochsReload')):`<div class="mny-empty">${t('loadingLabel')}</div>`;
+  const ed=_editOk('community'),today=todayStr();
+  const st=c=>t(today<c.starts_on?'ahUpcoming':today>c.ends_on?'cochsStEnded':'cochsStOn');
+  const row=c=>`<div class="cw-row cochs-row" data-cochs="${esc(String(c.id))}"><div class="cw-row-m"><strong><bdi>${esc(c.company)}</bdi></strong>
+      <span class="am-meta">${esc(st(c))} · <bdi>${esc(shortDate(c.starts_on))} – ${esc(shortDate(c.ends_on))}</bdi> · ${esc(t('cochsMin'))} <bdi>${c.min_team|0}</bdi></span>
+      <span class="am-meta">${esc(t('cochsCode'))} <bdi dir="ltr">${esc(c.code)}</bdi> · <bdi dir="ltr">${esc(_cochsLink(c.code).replace(/^https?:\/\//,''))}</bdi></span>
+      <span class="am-meta cochs-tot">${esc(t('cochsTeam'))} <bdi>${c.team|0}</bdi> · ${esc(t('cochsSessions'))} <bdi>${c.sessions|0}</bdi></span></div>
+      <span class="rp-acts"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_cochsCopy',c.code)}">${t('refCopy')}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_cochsRiders',c.id)}">${t('cochsRiders')}</button>${ed?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_cochsEdit',c.id)}">${t('editBtn')}</button>`:''}</span></div>`;
+  return`${ed?`<div class="cochs-top"><button type="button" class="btn-sm btn-primary" id="cochs-new" data-on-click="${_on('_cochsEdit',null)}">${t('cochsNew')}</button></div>`:''}
+    ${A.rows.length?`<div class="cw-rows" id="cochs-list">${A.rows.map(row).join('')}</div>`:`<div class="mny-empty">${t('cochsNone')}</div>`}`;
+}
+async function _cochsCopy(code){const u=_cochsLink(code);try{await navigator.clipboard.writeText(u);toast(t('refCopied'));}catch(e){toast(u,'info');}}
+function _cochsAcct(id){S._cochsR=null;_mnyClose();openAccountHistory(id);}
+// Who joined one challenge, with its totals. Names and numbers in full, as on every staff list.
+function _cochsRiders(id){
+  const c=(_cochs().rows||[]).find(x=>x.id===id);if(!c)return;
+  S._cochsR=id;
+  const ed=_editOk('community'),rs=c.riders||[];
+  // a row per rider, as the list of challenges is: on a phone Remove sits under the rider's lines, with nothing to scroll sideways for
+  const row=r=>`<div class="cw-row cochs-row" data-cochs-r="${esc(String(r.id))}"><div class="cw-row-m"><strong><button type="button" class="ca-link" data-on-click="${_on('_cochsAcct',r.id)}"><bdi>${esc(r.name||r.id)}</bdi></button></strong>
+      <span class="am-meta"><bdi dir="ltr">${_piiTxt('phone',r.phone,r.id)||''}</bdi></span>
+      <span class="am-meta">${esc(t('acrColJoined'))} <bdi>${esc(shortDate(_ksaYmd(r.joined_at)))}</bdi> · ${esc(t('cochsSessions'))} <bdi>${r.n|0}</bdi>${r.badge?` · ${esc(t('bdgCompanyChallenge'))}`:''}</span></div>
+      ${ed?`<span class="rp-acts"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_cochsRemove',c.id,r.id)}">${t('removeBtn')}</button></span>`:''}</div>`;
+  _mnyOpen(_mnyFrame('cochs-r-t',`${esc(t('cochsRiders'))} · <bdi>${esc(c.company)}</bdi>`,
+    `<div class="dash-kpis rp-kpis">${_pplKpi(c.team|0,t('cochsTeam'))}${_pplKpi(c.sessions|0,t('cochsSessions'))}${_pplKpi(rs.filter(r=>r.badge).length,t('cochsBadges'))}</div>
+     ${rs.length?`<div class="cw-rows" id="cochs-r-list">${rs.map(row).join('')}</div>`:`<div class="mny-empty">${t('cochsNoRiders')}</div>`}`,
+    `<button type="button" class="btn-secondary" data-on-click="${_on('_mnyClose')}">${t('closeBtn')}</button>`,true));
+}
+// The question is the app's own confirm, which sits under this part's dialogs: the list closes for it, and comes back
+// with the rider gone once the write is done.
+function _cochsRemove(cid,rid){
+  const c=(_cochs().rows||[]).find(x=>x.id===cid),r=c&&(c.riders||[]).find(x=>x.id===rid);if(!r||!_editOk('community'))return;
+  S._cochsR=null;_mnyClose();
+  confirmDialog({title:t('cochsRemoveAsk').replace('{0}',r.name||rid),body:'',confirmLabel:t('removeBtn'),confirmClass:'btn-red',onConfirm:async()=>{
+    if(_roNow()){_roRefusal();return;}
+    if(await _wr(sb.rpc('staff_company_challenge_remove',{p_challenge:cid,p_customer:rid}),'company challenge remove'))return;
+    logAction(`${t('removeBtn')}: ${r.name||rid} · ${t('cochsTab')} · ${c.company}`);
+    haptic();await _cochsLoad(true);
+    if(S.staffTab==='community'&&S.communityTab==='companies')_cochsRiders(cid);
+  }});
+}
+// A code nobody can guess at a glance and nobody misreads: six of the letters and digits that do not look alike.
+function _cochsNewCode(){const a='ABCDEFGHJKMNPQRSTUVWXYZ23456789',b=new Uint8Array(6);let s='';try{crypto.getRandomValues(b);}catch(_){}b.forEach((x,i)=>{s+=a[(x||Math.floor(Math.random()*251)+i)%a.length];});return s;}
+function _cochsEdit(id){
+  if(!_editOk('community'))return;
+  const c=id==null?null:(_cochs().rows||[]).find(x=>x.id===id);if(id!=null&&!c)return;
+  S._cochsD=c?{id:c.id,was:c.company,company:c.company,code:c.code,from:c.starts_on,to:c.ends_on,min:String(c.min_team),err:'',busy:false}
+    :{id:null,company:'',code:_cochsNewCode(),from:todayStr(),to:'',min:'5',err:'',busy:false};
+  _cochsDraw();
+}
+function _cochsIn(k,v){const d=S._cochsD;if(d)d[k]=String(v==null?'':v);}
+function _cochsDraw(){
+  const d=S._cochsD;if(!d)return;
+  const inp=(k,label,type,more)=>`<label class="mny-lbl" for="cochs-f-${k}">${esc(t(label))}</label><input id="cochs-f-${k}" class="mny-in" type="${type}" value="${esc(d[k])}"${more} data-on-input="${_on('_cochsIn',k,_P('value'))}">`;
+  _mnyOpen(_mnyFrame('cochs-d-t',d.id==null?esc(t('cochsNew')):`${esc(t('editBtn'))} · <bdi>${esc(d.was)}</bdi>`,
+    `${inp('company','ridersCompany','text',' maxlength="80" list="cochs-cos" autocomplete="off"')}<datalist id="cochs-cos">${RIDER_COMPANIES.map(c=>`<option value="${esc(c)}"></option>`).join('')}</datalist>
+     ${inp('code','cochsCode','text',' maxlength="12" dir="ltr" autocapitalize="characters" autocomplete="off" spellcheck="false"')}
+     ${inp('from','tagStartDate','date','')}${inp('to','tagEndDate','date','')}
+     ${inp('min','cochsMin','number',' min="3" max="500" step="1" inputmode="numeric" dir="ltr"')}
+     ${d.err?`<div class="mny-over" role="alert">${esc(d.err)}</div>`:''}`,
+    `${d.id!=null?`<button type="button" class="btn-red cochs-del" data-on-click="${_on('_cochsDel')}">${t('deleteBtn')}</button>`:''}<button type="button" class="btn-secondary" data-on-click="${_on('_mnyClose')}">${t('cancelBtn')}</button><button type="button" class="btn-primary mny-go" id="cochs-save"${d.busy?' disabled':''} data-on-click="${_on('_cochsSave')}">${t('saveBtn')}</button>`),'#cochs-f-company');
+}
+async function _cochsSave(){
+  const d=S._cochsD;if(!d||d.busy)return;
+  if(_roNow()){_roRefusal();return;}
+  const co=d.company.trim().replace(/\s+/g,' '),code=d.code.trim().toUpperCase(),min=Number(d.min),day=/^\d{4}-\d\d-\d\d$/;
+  if(!co||co.length>80||!/^[A-Z0-9]{4,12}$/.test(code)||!day.test(d.from)||!day.test(d.to)||d.to<d.from||!Number.isInteger(min)||min<3||min>500){d.err=t('cochsErrFields');_cochsDraw();return;}
+  d.busy=true;d.err='';_cochsDraw();
+  let r;try{r=await sb.rpc('staff_company_challenge_save',{p_id:d.id,p_company:co,p_code:code,p_starts:d.from,p_ends:d.to,p_min:min});}catch(e){r={error:e};}
+  d.busy=false;
+  const up=S._cochsD===d&&!!document.getElementById('cochs-d-t'); // drawn again only while it is still the dialog on screen
+  if(r&&!r.error&&(!r.data||r.data.ok!==true)){d.err=t(r.data&&r.data.error==='taken'?'cochsErrTaken':'cochsErrFields');if(up)_cochsDraw();else toast(d.err,'error');return;}
+  if(_writeErr(r,'company challenge save')){if(up)_cochsDraw();return;}
+  logAction(`${t('cochsTab')}: ${co} · ${code} · ${d.from} – ${d.to}`);
+  S._cochsD=null;if(up)_mnyClose();haptic();
+  _cochsLoad(true);
+}
+function _cochsDel(){
+  const d=S._cochsD;if(!d||d.id==null||!_editOk('community'))return;
+  S._cochsD=null;_mnyClose(); // the question sits under this dialog, which closes for it
+  confirmDialog({title:t('cochsDelAsk'),body:'',confirmLabel:t('deleteBtn'),confirmClass:'btn-red',onConfirm:async()=>{
+    if(_roNow()){_roRefusal();return;}
+    if(await _wr(sb.rpc('staff_company_challenge_delete',{p_id:d.id}),'company challenge delete'))return;
+    logAction(`${t('deleteBtn')}: ${t('cochsTab')} · ${d.company}`);
+    haptic();_cochsLoad(true);
+  }});
+}
 // A People-part entry: the account window's pieces below ride in the People part, fetched through this function's stand-in.
 function _n6pAhLoad(){return[_n6pAhBar,_n6pAhStage,_n6pDetails,_n6pNotesHtml,_n6pAhSig,_n6qAhExtra,_n6qAhFacts,_n6qTlHost,_refAhSec,_fupAhSec,_walAhSec,_fupBell,_fupDue].length;}
 // ── Follow-ups on a person (staff round s10, second batch "extras", migration 20261111180700) ──
@@ -70010,12 +70168,12 @@ function _mtsCopy(){
   const done=()=>{if(b){b.textContent=t('mtsCopied');setTimeout(()=>{if(b.isConnected)b.textContent=t('mtsCopy');},2000);}};
   try{navigator.clipboard.writeText(txt).then(done,()=>toast(t('errConnection'),'error'));}catch(e){toast(t('errConnection'),'error');}
 }
-const PPL_GROUPS=[['overview','commTabOverview',['overview','summary']],['accounts','commTabAccounts',['accounts','flagged','wallets']],['membership','colMember',['applications','birthdays','mentors']],['recognition','pgRecognition',['badges','titles','activities']],['activity','custTabActivity',['activity','referrals','followups']],['more','tbMore',['tags','duplicates']]];
+const PPL_GROUPS=[['overview','commTabOverview',['overview','summary']],['accounts','commTabAccounts',['accounts','flagged','wallets']],['membership','colMember',['applications','birthdays','mentors']],['recognition','pgRecognition',['badges','titles','activities','companies']],['activity','custTabActivity',['activity','referrals','followups']],['more','tbMore',['tags','duplicates']]];
 function _renderPeople(){
   _stLoad('accounts');
   _n6pCsEnsure(); // the whole riding record, at most every ten minutes (PP02)
   const el=document.getElementById('tab-community');if(!el)return;
-  const subs=['overview','summary','accounts','applications','learning','flagged','tags','badges','titles','activities','birthdays','mentors','wallets','referrals','activity','followups',...(isAdmin()?['duplicates']:[])];
+  const subs=['overview','summary','accounts','applications','learning','flagged','tags','badges','titles','activities','birthdays','mentors','wallets','referrals','activity','followups','companies',...(isAdmin()?['duplicates']:[])];
   let sub=S.communityTab;if(!subs.includes(sub))sub='overview';
   S.communityTab=sub;
   const simple=_simpleOn();if(simple)sub='overview'; // the simple phone view: People is its find box alone (the full view keeps its own view)
@@ -70041,7 +70199,7 @@ function _renderPeople(){
   // (acTab, once "Activities") no longer sits beside Activity. Overview is the first group: its second row is Overview and
   // Summary (/people/summary, the figures, s10 item 16), so Summary is in the nav once.
   const lbl={overview:t('commTabOverview'),summary:t('shSummary'),accounts:t('commTabAccounts'),flagged:t('commTabFlagged')+n(flN),wallets:t('cwTabWallets'),applications:t('commTabApplications'),
-    mentors:t('mtsTitle'),birthdays:t('commTabBirthdays')+(bdN?` <span class="bd-tab-n">${_artIcon('cake',14)}${bdN}</span>`:''),badges:t('mrBadgesTitle'),titles:t('ttTab'),activities:t('acTab'),
+    mentors:t('mtsTitle'),birthdays:t('commTabBirthdays')+(bdN?` <span class="bd-tab-n">${_artIcon('cake',14)}${bdN}</span>`:''),badges:t('mrBadgesTitle'),titles:t('ttTab'),activities:t('acTab'),companies:t('cochsTab'),
     activity:t('custTabActivity'),referrals:t('commTabReferrals')+n((S._refHeld||[]).length),followups:t('afuTab')+n(_fupDue()),tags:t('amTagsTitle'),duplicates:t('commTabDuplicates')+(isAdmin()?n(_dupGroups().length):'')};
   const hide={wallets:!_cwOk(),referrals:!!S._refAhOff,duplicates:!isAdmin()},cur=sub==='learning'?'applications':sub;
   const G=PPL_GROUPS.map(([g,k,vs])=>[g,k,vs.filter(v=>!hide[v])]).filter(g=>g[2].length),grp=G.find(g=>g[2].includes(cur));
@@ -70050,7 +70208,7 @@ function _renderPeople(){
   const _ae=document.activeElement,_appF=_ae&&(_ae.id==='ca-q'||_ae.id==='la-q'||_ae.id==='mg-qa'||_ae.id==='mg-qb'||_ae.id==='tg-q'||_ae.id==='tt-q'||_ae.id==='natnew-q'||_ae.id==='cw-q'||_ae.id==='ppl-q')?_ae.id:''; // a search in use
   // Applications and the rarely opened views are staff parts of their own (item 47): _pplPartHtml stands in until theirs has come
   const body=simple?'':sub==='overview'?_pplOverview():sub==='summary'?_pplOverview(1):sub==='activity'?'<div id="cact-host"></div>':sub==='flagged'?_pplScopeBar()+_commFlagged():sub==='tags'?_pplPartHtml(_commTags()):sub==='titles'?_pplPartHtml(_commTitles()):sub==='activities'?_pplPartHtml(_commActivities())
-    :sub==='applications'?_appsKinds(sub)+_pplPartHtml(_commApplications()):sub==='learning'?_appsKinds(sub)+_pplPartHtml(_learnApplications()):sub==='birthdays'?_pplPartHtml(_commBirthdays()):sub==='mentors'?_pplPartHtml(_commMentors()):sub==='duplicates'?_pplPartHtml(_commDuplicates()):sub==='wallets'?_commWallets():sub==='referrals'?_pplPartHtml(_refRpHtml()):sub==='followups'?_fupList():sub==='badges'?_pplPartHtml(_commBadges()):_pplScopeBar()+_commAccounts();
+    :sub==='applications'?_appsKinds(sub)+_pplPartHtml(_commApplications()):sub==='learning'?_appsKinds(sub)+_pplPartHtml(_learnApplications()):sub==='birthdays'?_pplPartHtml(_commBirthdays()):sub==='mentors'?_pplPartHtml(_commMentors()):sub==='duplicates'?_pplPartHtml(_commDuplicates()):sub==='wallets'?_commWallets():sub==='referrals'?_pplPartHtml(_refRpHtml()):sub==='followups'?_fupList():sub==='badges'?_pplPartHtml(_commBadges()):sub==='companies'?_pplPartHtml(_commCompanies()):_pplScopeBar()+_commAccounts();
   el.innerHTML=`
     <h1 class="page-title">${t('tabPeople')}</h1>
     <div class="page-sub">${t('pplSub')}</div>
