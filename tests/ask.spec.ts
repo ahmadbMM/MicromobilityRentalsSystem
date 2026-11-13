@@ -53,7 +53,7 @@ const questions = () => [
   qRow({ id: 18, pos: 8, kind: 'open', title_en: 'Anything else?', config: { max_len: 200, per_person: 1, votes: false }, answers: 1,
     result: { n: 1, items: [{ id: 107, t: 'Shade for the little ones, please', v: 0 }] } }),
   qRow({ id: 19, pos: 9, kind: 'info', title_en: 'Thank you!', help_en: 'See you on Thursday.', config: {} }),
-  qRow({ id: 20, pos: 10, kind: 'grid', title_en: 'A kind these screens do not draw yet', config: { options: [] }, answers: 1 }), // stage 2: left undrawn
+  qRow({ id: 20, pos: 10, kind: 'later', title_en: 'A kind these screens do not draw yet', config: { options: [] }, answers: 1 }), // a kind from a later version: kept in its place, left undrawn
 ];
 const detail = (): { page: Row; questions: Row[]; board: Row[] } => ({ page: { ...pageRow(), screen_key: 'sk_9f2c7a' }, questions: questions(), board: [] });
 const ans = (id: number, qid: number, name: string, phone: string, value: Row, o: Row = {}): Row => ({ id, question_id: qid, round: 1, customer_id: 'c' + (id % 5),
@@ -92,6 +92,39 @@ const segment = (): Row => ({ by: 'gender', segments: [{ key: 'female', n: 3, re
 const base = (): Fixtures => ({ sessions: [], queue_entries: [], bikes: [], customers: [], tags, customer_tags: [], staff_options: [],
   'rpc:staff_ask_pages': pages(), 'rpc:staff_ask_page': detail(), 'rpc:staff_ask_answers': answers(), 'rpc:staff_ask_pending': 5,
   'rpc:staff_ask_stats': stats(), 'rpc:staff_ask_segment': segment() });
+// Stage 2 (2026-11-13): a page staff lead (pace live), holding the five more kinds, a multiple choice and a number with
+// a right answer, a text slide, and the board staff_ask_page gives a page with quiz questions.
+const PIC = 'https://micromobility.sa/media/ask/tent.jpg';
+const liveQs = (): Row[] => [
+  qRow({ id: 31, pos: 1, kind: 'quiz', title_en: 'Which wheel is a road bike\'s?', config: { options: [opt('a1', '26 inch'), opt('a2', '700c'), opt('a3', '20 inch')], correct: ['a2'], seconds: 20, speed: true }, answers: 9,
+    result: { n: 9, counts: { a1: 2, a2: 6, a3: 1 }, correct: ['a2'] } }),
+  qRow({ id: 32, pos: 2, kind: 'quiz_text', title_en: 'Name the city of the Saturday ride', config: { accept: ['Riyadh', 'الرياض'], seconds: 30, speed: true, max_len: 40 }, answers: 7,
+    result: { n: 7, right: 5, correct: ['Riyadh', 'الرياض'], top: [{ w: 'Riyadh', n: 4 }, { w: 'Jeddah', n: 2 }, { w: 'الرياض', n: 1 }] } }),
+  qRow({ id: 33, pos: 3, kind: 'grid', title_en: 'Place each idea', config: { options: [opt('a1', 'Night ride'), opt('a2', 'Farm day')], x_en: 'Effort', x_ar: '', y_en: 'Fun', y_ar: '', max: 10 }, answers: 5,
+    result: { n: 5, pts: { a1: [3.2, 8.4], a2: [5.5, 9.1] } } }),
+  qRow({ id: 34, pos: 4, kind: 'pin', title_en: 'Where should the tent go?', image: PIC, config: { correct: { x: 0.7, y: 0.35, r: 0.12 } }, answers: 3,
+    result: { n: 3, pins: [[0.2, 0.3], [0.68, 0.33], [0.72, 0.4]], correct: { x: 0.7, y: 0.35, r: 0.12 } } }),
+  qRow({ id: 35, pos: 5, kind: 'form', title_en: 'Your details', config: { fields: [{ id: 'f1', en: 'T-shirt size', ar: '', type: 'choice', required: true, options: [opt('a1', 'S'), opt('a2', 'M')] },
+    { id: 'f2', en: 'Children', ar: '', type: 'number', required: false }, { id: 'f3', en: 'Notes', ar: '', type: 'text', required: false }] }, answers: 2, result: { n: 2 } }),
+  qRow({ id: 36, pos: 6, kind: 'choice', title_en: 'Which day?', config: { options: [opt('a1', 'Thursday'), opt('a2', 'Friday')], max_picks: 1, change: false, correct: ['a1'] }, answers: 4,
+    result: { n: 4, counts: { a1: 3, a2: 1 }, correct: ['a1'] } }),
+  qRow({ id: 37, pos: 7, kind: 'number', title_en: 'Guess the distance', config: { min: 0, max: 100, step: 1, unit_en: 'km', unit_ar: '', correct: 42 }, answers: 2,
+    result: { n: 2, avg: 40, min: 38, max: 42, correct: 42, bins: [{ lo: 30, hi: 40, n: 1 }, { lo: 40, hi: 50, n: 1 }] } }),
+  qRow({ id: 38, pos: 8, kind: 'info', title_en: 'Thank you!', config: {} }),
+];
+const liveDetail = (o: Row = {}): { page: Row; questions: Row[]; board: Row[] } => ({ page: { ...pageRow(), pace: 'live', current_q: null, screen_key: 'sk_9f2c7a', ...o }, questions: liveQs(),
+  board: [{ customer_id: 'c1', name: 'Lina Haddad', score: 1870, answers: 2 }, { customer_id: 'c2', name: 'Sara Ali', score: 1000, answers: 1 }, { customer_id: 'c3', name: 'Omar Saleh', score: 0, answers: 1 }] });
+const liveAnswers = () => [
+  ans(220, 31, 'Lina Haddad', '+966551112222', { o: ['a2'] }, { score: 870, ms: 5200 }),
+  ans(219, 31, 'Omar Saleh', '+966553334444', { o: ['a1'] }, { score: 0, ms: 9100 }),
+  ans(218, 32, 'Sara Ali', '+966555556666', { t: 'Riyadh' }, { score: 1000 }),
+  ans(217, 33, 'Yousef Karim', '+966557778888', { g: { a1: [3, 8], a2: [6, 9] } }),
+  ans(216, 34, 'Noura Fahad', '+966559990000', { x: 0.68, y: 0.33 }),
+  ans(215, 35, 'Lina Haddad', '+966551112222', { f: { f1: 'a2', f2: 2, f3: 'Vegetarian, please' } }),
+  ans(214, 35, 'Omar Saleh', '+966553334444', { f: { f1: 'a1' } }),
+  ans(213, 36, 'Sara Ali', '+966555556666', { o: ['a1'] }),
+  ans(212, 37, 'Yousef Karim', '+966557778888', { n: 42 }),
+];
 const PNG = 'iVBORw0KGgoAAAANSUhEUgAAACgAAAA8AQMAAAAud2qjAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAGUExURf8AAP///0EdNBEAAAABYktHRAH/Ai3eAAAAB3RJTUUH6goXDh05VoIs3QAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyNi0xMC0yM1QxNDoyOTo1NyswMDowMJJ2CgAAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjYtMTAtMjNUMTQ6Mjk6NTcrMDA6MDDjK7K8AAAAKHRFWHRkYXRlOnRpbWVzdGFtcAAyMDI2LTEwLTIzVDE0OjI5OjU3KzAwOjAwtD6TYwAAAA1JREFUGNNjYBgF9AAAAWgAAdm2FbQAAAAASUVORK5CYII='; // a small red picture
 
 const HEAD = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
@@ -287,7 +320,7 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     expect(sent[3].body).toEqual({ p_page: 78, p_action: 'start' });
   });
 
-  test('the question pop-up: nine kinds each with its mark, the settings of a kind, options with their ids, and what a kind needs before Done', async ({ page }) => {
+  test('the question pop-up: fourteen kinds each with its mark, the settings of a kind, options with their ids, and what a kind needs before Done', async ({ page }) => {
     await staff(page);
     const sent = writes(page, /\/rest\/v1\/(ask_pages|ask_questions)$/);
     await page.route(/\/rest\/v1\/ask_pages(\?|$)/, (r) => (r.request().method() === 'POST' ? r.fulfill(json([{ ...(r.request().postDataJSON() as Row), id: 79, code: '111333', round: 1 }], 201)) : r.fallback()));
@@ -299,8 +332,9 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     // centred, never a sheet at the foot of the screen (once its entry animation has played)
     const vp = page.viewportSize()!;
     await expect.poll(async () => { const b = (await pop(page).boundingBox())!; return Math.max(Math.abs(b.x + b.width / 2 - vp.width / 2), Math.abs(b.y + b.height / 2 - vp.height / 2)); }).toBeLessThan(3);
-    await expect(pop(page).locator('.ask-kind')).toHaveText(['Word cloud', 'Open answers', 'Questions from people', 'Multiple choice', 'Scales', 'Ranking', '100 points', 'Number', 'Text slide']);
-    expect(await pop(page).locator('.ask-kind svg').count()).toBe(9);
+    await expect(pop(page).locator('.ask-kind')).toHaveText(['Word cloud', 'Open answers', 'Questions from people', 'Multiple choice', 'Scales', 'Ranking', '100 points', 'Two-axis grid', 'Number',
+      'Pin on a picture', 'Short form', 'Quiz, pick the answer', 'Quiz, type the answer', 'Text slide']); // the database's fourteen, in its order
+    expect(await pop(page).locator('.ask-kind svg').count()).toBe(14);
     await expect(pop(page).locator('.ask-kind[data-ask-kind="cloud"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(pop(page).locator('.ask-kind[data-ask-kind="cloud"]')).toBeFocused();
     // a word cloud: the longest answer, how many each, approval on, who sees the results
@@ -652,7 +686,7 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     expect(sent[0].q).toContain('id=eq.1');
     expect(sent[0].body).toMatchObject({ slug: 'farm-ideas', audience: 'tags', tag_ids: ['tag_saturday', 'tag_team'], opens_at: null, after_close: 'results', listed: true, notes: 'For the farm day', look: {} });
     expect(Object.keys(sent[0].body).sort()).toEqual(['after_close', 'audience', 'block_words', 'closes_at', 'intro_ar', 'intro_en', 'listed', 'look', 'max_age', 'min_age', 'not_tag_ids', 'notes',
-      'only_gender', 'opens_at', 'slug', 'tag_ids', 'title_ar', 'title_en']);
+      'only_gender', 'opens_at', 'pace', 'slug', 'tag_ids', 'title_ar', 'title_en']);
     expect(sent[0].body).toMatchObject({ not_tag_ids: [], only_gender: null, min_age: null, max_age: null, block_words: [] }); // nothing more was asked of the audience
     expect(Math.abs(Date.parse(sent[0].body.closes_at as string) - at)).toBeLessThan(90_000);
     expect(String(sent[0].body.closes_at)).toMatch(/Z$/);
@@ -843,6 +877,10 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     expect(await leftovers('#ask-pop')).toEqual([]);
     await pop(page).locator('.ask-kind[data-ask-kind="number"]').click();
     expect(await leftovers('#ask-pop')).toEqual([]);
+    for (const k of ['grid', 'pin', 'form', 'quiz', 'quiz_text']) { // stage 2's kinds, each with its own settings
+      await pop(page).locator(`.ask-kind[data-ask-kind="${k}"]`).click();
+      expect(await leftovers('#ask-pop'), k).toEqual([]);
+    }
     await pop(page).locator('.chrome-dact .btn-secondary').click();
     await page.evaluate(`_askBackGo()`);
     // a saved page: its setup, its answers, its results
@@ -868,13 +906,18 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await page.locator('#ask-sg-q').selectOption('12');
     await expect(sec(page).locator('.ask-mult-c h3').first()).toContainText('ذكر');
     expect(await leftovers('#tab-ask')).toEqual([]);
+    // a page staff lead: the presenter's strip, in Arabic
+    await page.evaluate(`_askPg().pace='live';_askTab('results')`);
+    await expect(sec(page).locator('.ask-live h2')).toHaveText('على الشاشة الآن');
+    await expect(sec(page).locator('.ask-live .ask-show').first()).toHaveText('اعرض الآن');
+    expect(await leftovers('#tab-ask')).toEqual([]);
   });
 
   test('the part comes only to an account that can open the section, with its strings, and none of it is in the customer half or the desk\'s core', async ({ page }) => {
     // what the build wrote: the section's code and words in staff-parts/ask.js, the rail's number in the desk's core
     const read = (f: string) => readFileSync(resolve(__dirname, '..', f), 'utf8');
     const customer = read('index.html') + read('app.js'), core = read('staff.js'), part = read('staff-parts/ask.js');
-    for (const word of ['staff_ask_pages', 'staff_ask_review', 'staff_ask_control', '_askSave', 'askSlugTaken', 'This link name is taken', 'staff_ask_stats', 'staff_ask_segment', '_askStatsHtml',
+    for (const word of ['staff_ask_pages', 'staff_ask_review', 'staff_ask_control', '_askSave', 'askSlugTaken', 'This link name is taken', 'staff_ask_stats', 'staff_ask_segment', '_askStatsHtml', '_askLiveHtml', '_askDup', 'askKquiz_text',
       'ASK_PALETTES', 'askKindLocked', 'Only an admin can upload pictures.']) {
       expect(customer.includes(word), `customer half: ${word}`).toBe(false);
       expect(core.includes(word), `desk core: ${word}`).toBe(false);
@@ -966,6 +1009,13 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await sec(page).locator('.ask-q').nth(2).locator('.ask-q-ed').click();
     await audit('question pop-up: scales', '#ask-pop');
     await pop(page).locator('.chrome-xt').click();
+    await sec(page).locator('.ask-add').click(); // a new question takes any kind
+    for (const k of ['quiz', 'form']) { // a quiz's right option and seconds; a form's fields, one of them a list
+      await pop(page).locator(`.ask-kind[data-ask-kind="${k}"]`).click();
+      if (k === 'form') await pop(page).locator('#ask-ff-ty-0').selectOption('choice');
+      await audit(`question pop-up: ${k}`, '#ask-pop');
+    }
+    await pop(page).locator('.chrome-xt').click();
     await page.evaluate(`_askBackGo();_askOpen(1,'answers')`);
     await sec(page).locator('.ask-a').first().waitFor();
     await page.evaluate(`_askPg().round=3;renderAsk()`); // a page on its third round: the round picker
@@ -982,6 +1032,19 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await sec(page).locator('.ask-mult-c').first().waitFor();
     await sec(page).locator('.ask-sc[data-ask-s="day"] summary').click();
     await audit('stats');
+    // stage 2: a page staff lead with the five more kinds (the strip, a grid's square, pins on a picture, the board), and a pin's right area
+    await page.route('https://micromobility.sa/media/**', (r) => r.fulfill({ status: 200, contentType: 'image/png', body: Buffer.from(PNG, 'base64') }));
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_page$/, (r) => r.fulfill(json(liveDetail({ current_q: 31 }))));
+    await page.evaluate(`_askBackGo();_askOpen(1,'results')`);
+    await sec(page).locator('.ask-live .ask-run-q').first().waitFor();
+    await sec(page).locator('.ask-board tbody tr').first().waitFor();
+    await audit('results of a page staff lead');
+    await page.evaluate(`_askTab('setup')`);
+    await sec(page).locator('.ask-q').nth(3).locator('.ask-q-ed').click();
+    await pop(page).locator('#ask-pin-x').waitFor();
+    await page.evaluate(`_askTop()`); // the page behind the pop-up back at its top: a row half under the phone's bars is not a target to measure
+    await audit('question pop-up: pin', '#ask-pop');
+    await pop(page).locator('.chrome-xt').click();
   });
 
   // ── The second pass (2026-11-13): the look, pictures, who else a page leaves out, blocked words, Stats, older rounds,
@@ -1096,7 +1159,7 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await page.locator('#ask-l-size').selectOption('l');
     await page.locator('#ask-q-done').click();
     // every kind with results has its charts; a text slide has none
-    expect(await page.evaluate(`JSON.stringify(Object.fromEntries(Object.entries(ASK_VIZ).map(([k,v])=>[k,v.length])))`)).toBe('{"cloud":5,"open":4,"qa":2,"choice":6,"scales":4,"ranking":3,"points":3,"number":3}');
+    expect(await page.evaluate(`JSON.stringify(Object.fromEntries(Object.entries(ASK_VIZ).map(([k,v])=>[k,v.length])))`)).toBe('{"cloud":5,"open":4,"qa":2,"choice":6,"scales":4,"ranking":3,"points":3,"number":3,"grid":1,"pin":2,"quiz":2,"quiz_text":2,"form":0}');
     expect(await page.evaluate(`Object.values(ASK_VIZ).flat().every(v=>_askVizSvg(v,ASK_PALETTES.brand).length>200&&t('askVz'+v)!=='askVz'+v)`)).toBe(true);
     await card(8).locator('.ask-q-ed').click();
     await expect(pop(page).locator('.ask-look')).toHaveCount(0);
@@ -1568,6 +1631,478 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await sec(page).locator('.ask-share').waitFor();
     expect(q()).toBe('3.results');
   });
+
+  // ── Stage 2 (2026-11-13): the five more kinds (grid, pin, form, quiz, quiz_text), a right answer, the pace and the
+  // presenter's strip, the board, the Reactions switch, Duplicate. No change to the database. ──
+
+  test('the pop-up takes the five more kinds: each with its settings, its limits said in words before Done, and what Save writes; a multiple choice and a number may have a right answer', async ({ page }) => {
+    test.setTimeout(120_000); // a long walk through the screens: room for a busy machine
+    await staff(page);
+    const sent = writes(page, /\/rest\/v1\/ask_questions$/);
+    let made = 0;
+    await page.route(/\/rest\/v1\/ask_pages(\?|$)/, (r) => (r.request().method() === 'POST' ? r.fulfill(json([{ ...(r.request().postDataJSON() as Row), id: 80, code: '111444', round: 1 }], 201)) : r.fallback()));
+    await page.route(/\/rest\/v1\/ask_questions(\?|$)/, (r) => (r.request().method() === 'POST' ? r.fulfill(json([{ ...(r.request().postDataJSON() as Row), id: 600 + ++made }], 201)) : r.fallback()));
+    await sec(page).getByRole('button', { name: 'New question' }).click();
+    await page.locator('#ask-title-en').fill('Quiz night');
+    const done = page.locator('#ask-q-done'), err = page.locator('#ask-q-err'), kind = (k: string) => pop(page).locator(`.ask-kind[data-ask-kind="${k}"]`);
+    // a grid: its items, the two axes by name, the highest value
+    await sec(page).locator('.ask-q').first().locator('.ask-q-ed').click();
+    await kind('grid').click();
+    await expect(pop(page).locator('#ask-o-l')).toHaveText('Items');
+    await expect(pop(page).locator('.ask-o')).toHaveCount(2);
+    await page.getByRole('textbox', { name: 'Option 1, English' }).fill('Night ride');
+    await page.getByRole('textbox', { name: 'Option 2, English' }).fill('Farm day');
+    await done.click();
+    await expect(err).toHaveText('Name both axes.');
+    await pop(page).getByLabel('Horizontal axis (English)').fill('Effort');
+    await pop(page).getByLabel('Vertical axis (Arabic)').fill('المتعة');
+    await expect(pop(page).getByLabel('Highest value').locator('option')).toHaveText(['3', '4', '5', '6', '7', '8', '9', '10']);
+    await expect(pop(page).getByLabel('Highest value')).toHaveValue('10');
+    await pop(page).getByLabel('Highest value').selectOption('7');
+    await done.click();
+    await expect(pop(page)).toHaveCount(0);
+    // a quiz: 2 to 6 options, the right one marked (it needs one), the seconds, points for speed
+    const add = sec(page).getByRole('button', { name: 'Add question' });
+    await add.click();
+    await kind('quiz').click();
+    await page.getByRole('textbox', { name: 'Option 1, English' }).fill('Yes');
+    await page.getByRole('textbox', { name: 'Option 2, English' }).fill('No');
+    await pop(page).getByRole('button', { name: 'Add option' }).click();
+    await page.getByRole('textbox', { name: 'Option 3, English' }).fill('Maybe');
+    await expect(pop(page).getByLabel('Seconds to answer')).toHaveValue('20');
+    await expect(pop(page).getByRole('switch', { name: 'More points for a faster answer' })).toBeChecked();
+    await done.click();
+    await expect(err).toHaveText('Mark the right answer.');
+    const right = (n: number) => pop(page).getByRole('button', { name: `Option ${n} is right` });
+    await expect(right(2)).toHaveText('Right');
+    await expect(right(2)).toHaveAttribute('aria-pressed', 'false');
+    await right(2).click();
+    await expect(right(2)).toHaveAttribute('aria-pressed', 'true');
+    await expect(right(2)).toBeFocused();
+    await pop(page).getByLabel('Seconds to answer').fill('15');
+    await pop(page).getByRole('switch', { name: 'More points for a faster answer' }).uncheck();
+    await done.click();
+    await expect(pop(page)).toHaveCount(0);
+    // a typed quiz: the answers it accepts, one a line (1 to 10), its seconds and the longest answer
+    await add.click();
+    await kind('quiz_text').click();
+    const accept = pop(page).getByLabel('Accepted answers, one a line');
+    await done.click();
+    await expect(err).toHaveText('Write at least one accepted answer.');
+    await accept.fill(Array.from({ length: 11 }, (_, i) => `answer ${i + 1}`).join('\n'));
+    await done.click();
+    await expect(err).toHaveText('10 accepted answers at most.');
+    await accept.fill('Riyadh\n riyadh   city \n\nالرياض\nRiyadh');
+    await expect(pop(page).getByLabel('Seconds to answer')).toHaveValue('30');
+    await pop(page).getByLabel('Longest answer, in characters').fill('30');
+    await done.click();
+    await expect(pop(page)).toHaveCount(0);
+    // a short form: 1 to 8 fields, each a label, what it takes and whether it must be filled
+    await add.click();
+    await kind('form').click();
+    await expect(pop(page).locator('#ask-ff-l')).toHaveText('Fields');
+    await expect(pop(page).locator('.ask-ff')).toHaveCount(1);
+    await expect(page.locator('#ask-q-res')).toHaveCount(1);
+    await done.click();
+    await expect(err).toHaveText('Give every field a label, or remove it.');
+    await page.getByRole('textbox', { name: 'Field 1, English' }).fill('T-shirt size');
+    await expect(pop(page).getByLabel('Field 1, what it takes').locator('option')).toHaveText(['Text', 'Number', 'One of a list']);
+    await pop(page).getByLabel('Field 1, what it takes').selectOption('choice');
+    await expect(pop(page).locator('.ask-ffo .ask-o')).toHaveCount(2);
+    await done.click();
+    await expect(err).toHaveText('A list field needs at least 2 options, each filled in.');
+    await page.getByRole('textbox', { name: 'Field 1, option 1, English' }).fill('S');
+    await page.getByRole('textbox', { name: 'Field 1, option 2, English' }).fill('M');
+    await pop(page).getByRole('button', { name: 'Add field' }).click();
+    await expect(page.getByRole('textbox', { name: 'Field 2, English' })).toBeFocused();
+    await page.getByRole('textbox', { name: 'Field 2, English' }).fill('Children');
+    await pop(page).getByLabel('Field 2, what it takes').selectOption('number');
+    await pop(page).locator('.ask-ff').nth(1).getByRole('switch', { name: 'Required' }).uncheck();
+    await expect(pop(page).getByRole('button', { name: 'Remove 2', exact: true })).toBeEnabled();
+    await done.click();
+    await expect(pop(page)).toHaveCount(0);
+    // a multiple choice and a number may say which answer is right
+    await add.click();
+    await kind('choice').click();
+    await page.getByRole('textbox', { name: 'Option 1, English' }).fill('Thursday');
+    await page.getByRole('textbox', { name: 'Option 2, English' }).fill('Friday');
+    await right(1).click();
+    await done.click();
+    await add.click();
+    await kind('number').click();
+    await pop(page).getByLabel('Right answer (optional)').fill('500');
+    await done.click();
+    await expect(err).toHaveText('The right answer must be between the smallest and the largest number.');
+    await pop(page).getByLabel('Right answer (optional)').fill('42');
+    await done.click();
+    await expect(sec(page).locator('.ask-q .ask-q-txt .am-meta')).toHaveText(['Two-axis grid', 'Quiz, pick the answer', 'Quiz, type the answer', 'Short form', 'Multiple choice', 'Number']);
+    // Save: each kind's settings as the database takes them
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(6);
+    const cfg = (i: number) => [sent[i].body.kind, sent[i].body.config];
+    expect(cfg(0)).toEqual(['grid', { options: [{ id: 'a1', en: 'Night ride', ar: '' }, { id: 'a2', en: 'Farm day', ar: '' }], max: 7, x_en: 'Effort', x_ar: '', y_en: '', y_ar: 'المتعة' }]);
+    expect(cfg(1)).toEqual(['quiz', { options: [{ id: 'a1', en: 'Yes', ar: '' }, { id: 'a2', en: 'No', ar: '' }, { id: 'a3', en: 'Maybe', ar: '' }], correct: ['a2'], seconds: 15, speed: false }]);
+    expect(cfg(2)).toEqual(['quiz_text', { accept: ['Riyadh', 'riyadh city', 'الرياض'], seconds: 30, speed: true, max_len: 30 }]);
+    expect(cfg(3)).toEqual(['form', { fields: [{ id: 'f1', en: 'T-shirt size', ar: '', type: 'choice', required: true, options: [{ id: 'a1', en: 'S', ar: '' }, { id: 'a2', en: 'M', ar: '' }] },
+      { id: 'f2', en: 'Children', ar: '', type: 'number', required: false }] }]);
+    expect(cfg(4)).toEqual(['choice', { options: [{ id: 'a1', en: 'Thursday', ar: '' }, { id: 'a2', en: 'Friday', ar: '' }], correct: ['a1'], max_picks: 1, change: false }]);
+    expect(cfg(5)).toEqual(['number', { min: 0, max: 100, step: 1, unit_en: '', unit_ar: '', correct: 42 }]);
+    expect(sent.every((s) => s.body.image === null && s.body.page_id === 80)).toBe(true);
+  });
+
+  test('a pin question needs its picture, and its right area is marked on it: a tap for its centre, sliders to move and size it', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    await staff(page);
+    const sent = writes(page, /\/rest\/v1\/ask_questions$/);
+    const ups: string[] = [], png = Buffer.from(PNG, 'base64');
+    let made = 0;
+    await page.route(/\/storage\/v1\/object\/site\//, (r) => { if (r.request().method() === 'POST') ups.push(new URL(r.request().url()).pathname.replace(/^.*\/object\/site\//, '')); return r.fulfill(json({ Key: 'site/x', Id: 'x' })); });
+    await page.route('https://micromobility.sa/media/**', (r) => r.fulfill({ status: 200, contentType: 'image/png', body: png }));
+    await page.route(/\/rest\/v1\/ask_questions(\?|$)/, (r) => (r.request().method() === 'POST' ? r.fulfill(json([{ ...(r.request().postDataJSON() as Row), id: 650 + ++made }], 201)) : r.fallback()));
+    await openPage(page, 1, 'setup');
+    await sec(page).getByRole('button', { name: 'Add question' }).click();
+    await pop(page).locator('.ask-kind[data-ask-kind="pin"]').click();
+    await page.locator('#ask-q-title-en').fill('Where should the tent go?');
+    // no picture: said before anything is written (the database refuses a pin without one)
+    await expect(pop(page).locator('.ask-pin')).toHaveCount(0);
+    await page.locator('#ask-q-done').click();
+    await expect(page.locator('#ask-q-err')).toHaveText('A pin question needs its picture.');
+    const ch = page.waitForEvent('filechooser');
+    await pop(page).getByRole('group', { name: 'Picture' }).getByRole('button', { name: 'Upload picture' }).click();
+    await (await ch).setFiles({ name: 'field.png', mimeType: 'image/png', buffer: png });
+    await expect.poll(() => ups.length).toBe(1);
+    const url = 'https://micromobility.sa/media/' + ups[0];
+    // the picture, to mark the right area on; none yet, and none is needed
+    const box = pop(page).locator('#ask-pin');
+    await expect(box.locator('img')).toHaveAttribute('src', url + '?w=640');
+    await expect(pop(page).locator('#ask-pin-l')).toHaveText('Right area (optional): tap the picture');
+    await expect(box.locator('.ask-pin-ring')).toHaveCount(0);
+    await pop(page).getByRole('button', { name: 'Mark a right area' }).click();
+    const ring = box.locator('.ask-pin-ring'), at = () => ring.evaluate((e: HTMLElement) => ['--x', '--y', '--d'].map((k) => e.style.getPropertyValue(k)));
+    await expect(ring).toHaveCount(1);
+    expect(await at()).toEqual(['50%', '50%', '20%']);
+    await expect(pop(page).getByLabel('Across')).toBeFocused(); // the sliders are the keyboard's way to the same thing
+    await expect(pop(page).getByLabel('Across')).toHaveValue('50');
+    await expect(pop(page).getByLabel('Size')).toHaveValue('10');
+    // a tap on the picture puts the centre there
+    await expect.poll(() => box.evaluate((e: HTMLElement) => e.style.getPropertyValue('--ar'))).toBe('0.6667'); // the box takes the picture's proportions: 40 by 60
+    const b = (await box.boundingBox())!;
+    expect(Math.abs(b.width / b.height - 2 / 3)).toBeLessThan(0.02);
+    expect(b.height).toBeLessThan(page.viewportSize()!.height * 0.6);
+    await box.click({ position: { x: Math.round(b.width * 0.7), y: Math.round(b.height * 0.35) } });
+    await expect(pop(page).getByLabel('Across')).toHaveValue('70');
+    await expect(pop(page).getByLabel('Down')).toHaveValue('35');
+    // a slider sizes it, and the ring follows without the pop-up being drawn again
+    await pop(page).getByLabel('Size').evaluate((e: HTMLInputElement) => { e.value = '12'; e.dispatchEvent(new Event('input', { bubbles: true })); });
+    expect(await at()).toEqual(['70%', '35%', '24%']);
+    const ringBox = (await ring.boundingBox())!;
+    expect(Math.abs(ringBox.width - ringBox.height)).toBeLessThan(1); // a circle, 24% of the picture's width across
+    expect(Math.abs(ringBox.width / b.width - 0.24)).toBeLessThan(0.02);
+    await page.locator('#ask-q-done').click();
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].body).toMatchObject({ kind: 'pin', pos: 11, title_en: 'Where should the tent go?', image: url, config: { correct: { x: 0.7, y: 0.35, r: 0.12 } } });
+    expect(sent[0].body.config).toEqual({ correct: { x: 0.7, y: 0.35, r: 0.12 } });
+  });
+
+  test('pace: Setup says who leads; on a page staff lead, Results opens with the presenter\'s strip, and every control asks staff_ask_control and is drawn only once the database said yes', async ({ page }) => {
+    test.setTimeout(120_000); // a long walk through the screens: room for a busy machine
+    const db = liveDetail();
+    await staff(page, { 'rpc:staff_ask_answers': liveAnswers() });
+    const sent = writes(page, /\/rest\/v1\/(ask_pages|rpc\/staff_ask_control)$/);
+    // the database: a control changes what staff_ask_page answers next; `gate` holds its answer back, `refuse` refuses it
+    let refuse = false, gate: Promise<void> | null = null, letGo: () => void = () => {};
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_page$/, (r) => r.fulfill(json(db)));
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_control$/, async (r) => {
+      if (gate) await gate;
+      if (refuse) return r.fulfill(json({ code: '42501', message: 'FORBIDDEN', details: null, hint: null }, 403));
+      const c = r.request().postDataJSON() as { p_action: string; p_question: number }, q = db.questions.find((x) => x.id === c.p_question)!;
+      if (c.p_action === 'show') { q.started_at = new Date().toISOString(); q.open = true; q.reveal = false; db.page.current_q = q.id; }
+      else if (c.p_action === 'reveal') { q.reveal = true; q.open = false; }
+      else if (c.p_action === 'hide') q.reveal = false;
+      else q.open = c.p_action === 'open';
+      return r.fulfill(json({ ok: true }));
+    });
+    await openPage(page, 1, 'setup');
+    // Setup: the pace is the page's, written with it
+    const pace = sec(page).getByRole('group', { name: 'Pace' });
+    await expect(pace.locator('.toggle-btn')).toHaveText(['Everyone at their own pace', 'We show one question at a time']);
+    await expect(pace.getByRole('button', { name: 'We show one question at a time' })).toHaveAttribute('aria-pressed', 'true');
+    await pace.getByRole('button', { name: 'Everyone at their own pace' }).click();
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0]).toMatchObject({ m: 'PATCH', path: 'ask_pages', body: { pace: 'self' } });
+    await expect(pace.getByRole('button', { name: 'We show one question at a time' })).toHaveAttribute('aria-pressed', 'true'); // the stubbed database holds the page as it was
+    sent.length = 0;
+    // Results leads with the strip: nothing shown yet, every question with its own Show now
+    await sec(page).locator('.filter-pill[data-ask-tab="results"]').click();
+    const strip = sec(page).locator('.ask-live'), now = strip.locator('.ask-live-now'), run = (id: number) => strip.locator(`.ask-run-q[data-ask-run="${id}"]`);
+    const btn = (name: string) => strip.locator('.ask-live-acts').getByRole('button', { name, exact: true });
+    await expect(strip.locator('h2')).toHaveText('On screen now');
+    expect(await sec(page).locator('.ask-body > *').first().evaluate((e) => e.className)).toContain('ask-live'); // it leads the tab
+    await expect(now).toHaveText('Nothing shown yet');
+    await expect(btn('Previous')).toBeDisabled();
+    await expect(btn('Next')).toBeEnabled();
+    await expect(strip.locator('.ask-run-q')).toHaveCount(8); // the text slide too: it is shown like any other
+    await expect(strip.locator('.ask-run-q .ask-chip')).toHaveText(Array(8).fill('Not shown yet'));
+    await expect(strip.locator('.ask-show')).toHaveCount(8);
+    // Next shows the first question: asked, and drawn only once the database has answered
+    gate = new Promise<void>((go) => { letGo = go; });
+    await btn('Next').click();
+    await expect(btn('Next')).toBeDisabled();
+    await expect(now).toHaveText('Nothing shown yet');
+    await expect(run(31).locator('.ask-chip')).toHaveText('Not shown yet');
+    gate = null; letGo();
+    await expect(now.locator('b')).toHaveText('Which wheel is a road bike\'s?');
+    expect(sent).toHaveLength(1);
+    expect(sent[0]).toMatchObject({ m: 'POST', path: 'rpc/staff_ask_control', body: { p_page: 1, p_action: 'show', p_question: 31 } });
+    await expect(run(31).locator('.ask-chip')).toHaveText('On screen');
+    await expect(run(31).locator('.ask-show')).toHaveCount(0);
+    await expect(run(32).locator('.ask-chip')).toHaveText('Not shown yet');
+    // a quiz on screen: its clock, counted down from the moment it was shown
+    const clock = now.locator('#ask-clock');
+    await expect(clock).toHaveAttribute('role', 'timer');
+    await expect(clock).toHaveText(/^0:(20|1\d)$/);
+    const first = await clock.textContent();
+    await expect.poll(() => clock.textContent(), { timeout: 8000 }).not.toBe(first);
+    // Close and Open, Reveal and Hide: each its own call; revealing also stops the question taking answers
+    await btn('Close answers').click();
+    await expect(btn('Open for answers')).toBeVisible();
+    await btn('Open for answers').click();
+    await expect(btn('Close answers')).toBeVisible();
+    await btn('Reveal the answer').click();
+    await expect(btn('Hide the answer')).toBeVisible();
+    await expect(btn('Open for answers')).toBeVisible();
+    await expect(sec(page).locator('.ask-r[data-ask-r="31"] .am-meta').first()).toContainText('Closed · Answer revealed');
+    await btn('Hide the answer').click();
+    await expect(btn('Reveal the answer')).toBeVisible();
+    expect(sent.slice(1).map((s) => [s.body.p_action, s.body.p_question])).toEqual([['close', 31], ['open', 31], ['reveal', 31], ['hide', 31]]);
+    // Show now on any question; one with no right answer has nothing to reveal, and no clock
+    await run(33).getByRole('button', { name: 'Show now: Place each idea' }).click();
+    await expect(now.locator('b')).toHaveText('Place each idea');
+    await expect(run(31).locator('.ask-chip')).toHaveText('Shown');
+    await expect(run(33).locator('.ask-chip')).toHaveText('On screen');
+    await expect(clock).toHaveCount(0);
+    await expect(btn('Reveal the answer')).toHaveCount(0);
+    await expect(btn('Close answers')).toBeVisible();
+    // Previous and Next go by the questions' places
+    await btn('Previous').click();
+    await expect(now.locator('b')).toHaveText('Name the city of the Saturday ride');
+    await expect(clock).toHaveText(/^0:(30|2\d)$/);
+    await btn('Next').click();
+    await expect(now.locator('b')).toHaveText('Place each idea');
+    expect(sent.slice(5).map((s) => [s.body.p_action, s.body.p_question])).toEqual([['show', 33], ['show', 32], ['show', 33]]);
+    // the last one: a text slide is shown too, with nothing to open, close or reveal; Next has nowhere to go
+    await run(38).getByRole('button', { name: 'Show now: Thank you!' }).click();
+    await expect(now.locator('b')).toHaveText('Thank you!');
+    await expect(btn('Next')).toBeDisabled();
+    await expect(strip.locator('.ask-live-acts .btn-sm')).toHaveText(['Previous', 'Next']);
+    // a refusal is said in words, and the strip stays as the database has it
+    refuse = true;
+    await btn('Previous').click();
+    await expect(page.locator('.toast.error').last()).toHaveText('This account can look at Ask but not change it.');
+    await expect(now.locator('b')).toHaveText('Thank you!');
+    await expect(btn('Previous')).toBeEnabled();
+    refuse = false;
+    await expect(page.locator('#err-bar-el')).toHaveCount(0);
+    // a page at its own pace has no strip; a question with a right answer is still revealed and hidden from its results
+    db.page.pace = 'self';
+    await page.evaluate(`_askDetail()`);
+    await expect(strip).toHaveCount(0);
+    const res = (id: number) => sec(page).locator(`.ask-r[data-ask-r="${id}"]`);
+    await expect(res(33).locator('.ask-reveal')).toHaveCount(0);
+    await expect(res(35).locator('.ask-reveal')).toHaveCount(0);
+    sent.length = 0;
+    await res(36).getByRole('button', { name: 'Reveal the answer' }).click();
+    await expect(res(36).getByRole('button', { name: 'Hide the answer' })).toBeVisible();
+    await expect(res(36).locator('.am-meta').first()).toContainText('Answer revealed');
+    expect(sent.map((s) => s.body)).toEqual([{ p_page: 1, p_action: 'reveal', p_question: 36 }]);
+    await expect(sec(page).locator('.ask-reveal')).toHaveCount(5); // the two quizzes, the pin, the multiple choice and the number with a right answer
+  });
+
+  test('Results and Answers of the five more kinds: a grid\'s square, pins on the picture, a form\'s answers by their labels, a quiz with its right answer, points and time, the board; the CSV carries them', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    await staff(page, { 'rpc:staff_ask_page': liveDetail({ pace: 'self' }), 'rpc:staff_ask_answers': liveAnswers() });
+    await page.route('https://micromobility.sa/media/**', (r) => r.fulfill({ status: 200, contentType: 'image/png', body: Buffer.from(PNG, 'base64') }));
+    await row(page, 1).locator('.ask-pg-t').click();
+    const res = (id: number) => sec(page).locator(`.ask-r[data-ask-r="${id}"]`);
+    await expect(sec(page).locator('.ask-live')).toHaveCount(0);
+    await expect(sec(page).locator('.ask-r')).toHaveCount(7); // the slide has none
+    // a quiz: the right option marked in words, and how many were right
+    await expect(res(31).locator('.am-meta').first()).toContainText('Quiz, pick the answer · Answers 9');
+    await expect(res(31).locator('.ask-r-right')).toHaveText('Right: 6 of 9');
+    await expect(res(31).locator('.ask-bar-l')).toHaveText(['26 inch', '700c Right', '20 inch']);
+    await expect(res(31).locator('.ask-bar-x')).toHaveText(['2 · 22%', '6 · 67%', '1 · 11%']);
+    // a typed quiz: how many were right, what is taken as right, what people typed most
+    await expect(res(32).locator('.ask-r-right')).toHaveText('Right: 5 of 7 · Accepted: Riyadh, الرياض');
+    await expect(res(32).locator('.ask-bar-l')).toHaveText(['Riyadh Right', 'Jeddah', 'الرياض Right']);
+    await expect(res(32).locator('.ask-bar-x')).toHaveText(['4', '2', '1']);
+    // a grid: each item's average place on the square, a numbered mark with the same number in the key
+    await expect(res(33).locator('svg.ask-grid-svg')).toHaveAttribute('aria-label', 'Place each idea');
+    await expect(res(33).locator('circle.ask-grid-dot')).toHaveCount(2);
+    expect(await res(33).locator('circle.ask-grid-dot').first().evaluate((e) => [e.getAttribute('cx'), e.getAttribute('cy')])).toEqual(['34.9', '21.4']); // 3.2 and 8.4 of 10, from the bottom left
+    await expect(res(33).locator('text.ask-grid-n')).toHaveText(['1', '2']);
+    await expect(res(33).locator('.ask-grid-key li')).toHaveText(['Night ride 3.2, 8.4', 'Farm day 5.5, 9.1']);
+    await expect(res(33).locator('.ask-grid-x')).toHaveText('Effort');
+    await expect(res(33).locator('.ask-grid-y')).toHaveText('Fun');
+    // a pin: every pin a dot on the picture, the right area ringed
+    await expect(res(34).locator('.ask-pin img')).toHaveAttribute('src', PIC + '?w=640');
+    await expect(res(34).locator('.ask-pin-dots circle')).toHaveCount(3);
+    expect(await res(34).locator('.ask-pin-dots circle').nth(1).evaluate((e) => [e.getAttribute('cx'), e.getAttribute('cy')])).toEqual(['68.0%', '33.0%']);
+    expect(await res(34).locator('.ask-pin-ring').evaluate((e: HTMLElement) => ['--x', '--y', '--d'].map((k) => e.style.getPropertyValue(k)))).toEqual(['70.0%', '35.0%', '24.0%']);
+    // a multiple choice and a number with a right answer
+    await expect(res(36).locator('.ask-r-right')).toHaveText('Right: 3 of 4');
+    await expect(res(36).locator('.ask-bar-l')).toHaveText(['Thursday Right', 'Friday']);
+    await expect(res(37).locator('.ask-stat')).toHaveText(['Average40', 'Lowest38', 'Highest42', 'Right answer42']);
+    // the board: staff only, by name
+    const board = sec(page).locator('.ask-board');
+    await expect(board.locator('h2')).toHaveText('Board');
+    await expect(board.locator('thead th')).toHaveText(['Place', 'Name', 'Points', 'Answers']);
+    await expect(board.locator('tbody tr')).toHaveCount(3);
+    await expect(board.locator('tbody tr').first().locator('td')).toHaveText(['1', 'Lina Haddad', '1870', '2']);
+    // the CSV: a quiz answer's points and seconds, and a column for each field of the form
+    const [file] = await Promise.all([page.waitForEvent('download'), sec(page).locator('.ask-csv').click()]);
+    const csv = await (await file.createReadStream()).toArray().then((c) => Buffer.concat(c as Buffer[]).toString('utf8'));
+    const lines = csv.trimEnd().split('\n');
+    expect(lines[0].replace(/^[^N]*/, '')).toBe('Name,Mobile,Question,Answer,Status,Time,Points,Seconds,T-shirt size,Children,Notes');
+    expect(lines).toHaveLength(10);
+    expect(lines[1]).toMatch(/^Lina Haddad,\+966551112222,Which wheel is a road bike's\?,700c,Approved,("[^"]*"|[^,]*),870,5\.2,,,$/);
+    expect(lines[2]).toMatch(/^Omar Saleh,\+966553334444,Which wheel is a road bike's\?,26 inch,Approved,("[^"]*"|[^,]*),0,9\.1,,,$/);
+    expect(lines[3]).toMatch(/^Sara Ali,\+966555556666,Name the city of the Saturday ride,Riyadh,Approved,("[^"]*"|[^,]*),1000,,,,$/);
+    expect(lines[6]).toMatch(/^Lina Haddad,\+966551112222,Your details,"T-shirt size: M · Children: 2 · Notes: Vegetarian, please",Approved,("[^"]*"|[^,]*),,,M,2,"Vegetarian, please"$/);
+    expect(lines[7]).toMatch(/^Omar Saleh,\+966553334444,Your details,T-shirt size: S,Approved,("[^"]*"|[^,]*),,,S,,$/);
+    // a form: nothing public but how many, and the way to its answers, read by their labels
+    await expect(res(35).locator('.am-meta').first()).toContainText('Short form · Answers 2');
+    await res(35).getByRole('button', { name: 'See the answers' }).click();
+    await expect(sec(page).locator('.filter-pill[data-ask-tab="answers"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(sec(page).locator('.filter-pill[data-ask-at="all"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(sec(page).locator('.ask-a .ask-a-txt')).toHaveText(['T-shirt size: M · Children: 2 · Notes: Vegetarian, please', 'T-shirt size: S']);
+    // every answer in words: a quiz answer with its points and its time, right or wrong
+    await page.evaluate(`_askAQ('')`);
+    await expect(sec(page).locator('.ask-a')).toHaveCount(9);
+    await expect(answer(page, 220).locator('.ask-a-txt')).toHaveText('700c · 870 points · 5.2 s');
+    await expect(answer(page, 220).locator('.ask-chip')).toHaveText(['Approved', 'Right']);
+    await expect(answer(page, 219).locator('.ask-a-txt')).toHaveText('26 inch · 0 points · 9.1 s');
+    await expect(answer(page, 219).locator('.ask-chip')).toHaveText(['Approved', 'Wrong']);
+    await expect(answer(page, 218).locator('.ask-a-txt')).toHaveText('Riyadh · 1000 points'); // at its own pace: no clock ran
+    await expect(answer(page, 218).getByRole('button', { name: 'Edit text' })).toHaveCount(0); // a quiz answer is not corrected
+    await expect(answer(page, 217).locator('.ask-a-txt')).toHaveText('Night ride: 3, 8 · Farm day: 6, 9');
+    await expect(answer(page, 216).locator('.ask-a-txt')).toHaveText('68%, 33%');
+    await expect(answer(page, 212).locator('.ask-a-txt')).toHaveText('42 km');
+  });
+
+  test('Duplicate makes a draft copy: the page with (copy) and a link name of its own, then every question with its settings, its look and its picture; none of the answers', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    const d = liveDetail({ look: { theme: 'dark', reactions: true }, audience: 'tags', tag_ids: ['tag_saturday'], not_tag_ids: ['tag_vip'], only_gender: 'female', min_age: 16, max_age: null, block_words: ['casino'],
+      title_ar: 'ماذا تود أن ترى؟', notes: 'For the farm day', opens_at: ago(4000), closes_at: inDays(5), listed: false, after_close: 'hidden', round: 3 });
+    d.questions[0].look = { viz: 'columns' };
+    const list = [...pages(), pageRow({ id: 9, slug: 'farm-ideas-copy', title_en: 'An older copy', status: 'draft', open: false, answers: 0, people: 0, pending: 0 })];
+    await staff(page, { 'rpc:staff_ask_pages': list, 'rpc:staff_ask_page': d });
+    const sent = writes(page, /\/rest\/v1\/(ask_pages|ask_questions)$/);
+    let clash = 1, made = 0;
+    await page.route(/\/rest\/v1\/ask_pages(\?|$)/, (r) => {
+      if (r.request().method() !== 'POST') return r.fallback();
+      if (clash-- > 0) return r.fulfill(json({ code: '23505', message: 'duplicate key value violates unique constraint "ask_pages_slug_key"', details: null, hint: null }, 409));
+      return r.fulfill(json([{ ...(r.request().postDataJSON() as Row), id: 90, code: '555666', round: 1 }], 201));
+    });
+    await page.route(/\/rest\/v1\/ask_questions(\?|$)/, (r) => (r.request().method() === 'POST' ? r.fulfill(json([{ id: 700 + ++made }], 201)) : r.fallback()));
+    await openPage(page, 1, 'setup');
+    const dup = sec(page).getByRole('button', { name: 'Duplicate' });
+    // something unsaved: asked to save first, and nothing is sent
+    await page.locator('#ask-notes').fill('changed');
+    await dup.click();
+    await expect(page.locator('.toast.error').last()).toHaveText('Save the page before duplicating it.');
+    expect(sent).toHaveLength(0);
+    await page.locator('#ask-notes').fill('For the farm day');
+    await expect(sec(page).locator('#ask-dirty')).toBeHidden();
+    await dup.click();
+    await expect.poll(() => sent.length).toBe(10);
+    // the link name: -copy is another page's here, -copy-2 the database refused (taken meanwhile), -copy-3 it is
+    expect(sent.slice(0, 2).map((s) => [s.m, s.path, s.body.slug])).toEqual([['POST', 'ask_pages', 'farm-ideas-copy-2'], ['POST', 'ask_pages', 'farm-ideas-copy-3']]);
+    // the page: its titles say (copy), its look, who sees it and its blocked words come too; a draft with no window
+    expect(sent[1].body).toEqual({ title_en: 'What would you like to see at the farm? (copy)', title_ar: 'ماذا تود أن ترى؟ (نسخة)', intro_en: 'A private farm with a big garden.', intro_ar: '', slug: 'farm-ideas-copy-3',
+      audience: 'tags', tag_ids: ['tag_saturday'], not_tag_ids: ['tag_vip'], only_gender: 'female', min_age: 16, max_age: null, opens_at: null, closes_at: null, after_close: 'hidden', listed: false,
+      notes: 'For the farm day', look: { theme: 'dark', reactions: true }, block_words: ['casino'], pace: 'live', status: 'draft' }); // no round, no code, no current question: a new page
+    // then its questions in order, each with its settings, its look and its picture, open and never shown
+    const qs = sent.slice(2), src = liveQs();
+    expect(qs.map((s) => [s.m, s.path, s.body.page_id, s.body.pos, s.body.kind])).toEqual(src.map((q, i) => ['POST', 'ask_questions', 90, i + 1, q.kind]));
+    expect(qs[0].body).toEqual({ page_id: 90, pos: 1, kind: 'quiz', title_en: 'Which wheel is a road bike\'s?', title_ar: '', help_en: '', help_ar: '', config: src[0].config, moderated: true, results: 'live',
+      look: { viz: 'columns' }, image: null, open: true });
+    expect(qs[3].body).toMatchObject({ kind: 'pin', image: PIC, config: { correct: { x: 0.7, y: 0.35, r: 0.12 } } });
+    expect(qs[4].body.config).toEqual(src[4].config);
+    expect(qs.every((s) => !('started_at' in s.body) && !('reveal' in s.body) && !('answers' in s.body))).toBe(true);
+    // it lands on the copy's Setup, quietly
+    await expect.poll(() => new URL(page.url()).searchParams.get('ask')).toBe('90');
+    await expect(sec(page).locator('.filter-pill[data-ask-tab="setup"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#err-bar-el')).toHaveCount(0);
+  });
+
+  test('look, stage two: the Reactions switch is written only when on; the five kinds\' charts and choices are the contract\'s, and a form has no chart', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    await staff(page, { 'rpc:staff_ask_page': liveDetail({ pace: 'self' }) });
+    await page.route('https://micromobility.sa/media/**', (r) => r.fulfill({ status: 200, contentType: 'image/png', body: Buffer.from(PNG, 'base64') }));
+    const sent = writes(page, /\/rest\/v1\/(ask_pages|ask_questions)$/);
+    await openPage(page, 1, 'setup');
+    // the page's Reactions: off when nothing is said, so only "on" is written
+    const react = sec(page).getByRole('switch', { name: 'Reaction buttons under each question' });
+    await expect(react).not.toBeChecked();
+    await react.check();
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0]).toMatchObject({ m: 'PATCH', path: 'ask_pages' });
+    expect(sent[0].body.look).toEqual({ reactions: true });
+    await expect(react).not.toBeChecked(); // the stubbed database holds the page as it was
+    await react.check();
+    await react.uncheck();
+    expect(await page.evaluate(`JSON.stringify(_ask().cur.d.look)`)).toBe('{}');
+    await expect(sec(page).locator('#ask-dirty')).toBeHidden();
+    sent.length = 0;
+    // the lists the website's must equal (contract H4)
+    expect(await page.evaluate(`JSON.stringify([ASK_VIZ.grid,ASK_VIZ.pin,ASK_VIZ.quiz,ASK_VIZ.quiz_text,ASK_VIZ.form,ASK_LOOKS.grid,ASK_LOOKS.pin,ASK_LOOKS.quiz,ASK_LOOKS.quiz_text,ASK_LOOKS.form])`))
+      .toBe('[["scatter"],["dots","heat"],["bars","columns"],["list","cloud"],[],"t","t","vt","tvnc","t"]');
+    const card = (i: number) => sec(page).locator('.ask-q').nth(i), lk = pop(page).locator('.ask-look'), done = page.locator('#ask-q-done');
+    // a quiz: bars or columns, the numbers and the count; never sorted
+    await card(0).locator('.ask-q-ed').click();
+    await expect(lk.locator('.ask-viz')).toHaveText(['Bars', 'Columns']);
+    await expect(pop(page).locator('#ask-l-values, #ask-l-total')).toHaveCount(2);
+    await expect(pop(page).locator('#ask-l-sort, #ask-l-limit, #ask-l-case')).toHaveCount(0);
+    await lk.locator('.ask-viz[data-ask-viz="columns"]').click();
+    await page.locator('#ask-l-values').selectOption('count');
+    await done.click();
+    // a typed quiz: a ranked list or a word cloud of what was typed
+    await card(1).locator('.ask-q-ed').click();
+    await expect(lk.locator('.ask-viz')).toHaveText(['Ranked list', 'Word cloud']);
+    await expect(pop(page).locator('#ask-l-values, #ask-l-total, #ask-l-limit, #ask-l-case')).toHaveCount(4);
+    await pop(page).locator('.chrome-xt').click();
+    // a grid: one chart
+    await card(2).locator('.ask-q-ed').click();
+    await expect(lk.locator('.ask-viz')).toHaveText(['Scatter']);
+    await expect(lk.locator('.ask-viz svg.ask-viz-pic')).toHaveCount(1);
+    await expect(pop(page).locator('#ask-l-total')).toHaveCount(1);
+    await expect(pop(page).locator('#ask-l-values, #ask-l-sort')).toHaveCount(0);
+    await pop(page).locator('.chrome-xt').click();
+    // a pin: dots or a heat map, the dots drawn as pins on a picture
+    await card(3).locator('.ask-q-ed').click();
+    await expect(lk.locator('.ask-viz')).toHaveText(['Dots', 'Heat map']);
+    expect(await lk.locator('.ask-viz[data-ask-viz="dots"] svg circle').count()).toBe(5);
+    expect(await lk.locator('.ask-viz[data-ask-viz="dots"] svg path').count()).toBe(1);
+    await lk.locator('.ask-viz[data-ask-viz="heat"]').click();
+    await done.click();
+    // a form has no chart and no colours: only whether it says how many answered
+    await card(4).locator('.ask-q-ed').click();
+    await expect(lk).toHaveCount(1);
+    await expect(lk.locator('.ask-viz, .ask-swb')).toHaveCount(0);
+    await expect(pop(page).getByRole('switch', { name: 'Show how many answered' })).toBeChecked();
+    await page.locator('#ask-l-total').uncheck();
+    await done.click();
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(3);
+    const by = (id: number) => sent.find((s) => s.q.includes(`id=eq.${id}`))!.body;
+    expect(by(31).look).toEqual({ viz: 'columns', values: 'count' });
+    expect(by(34).look).toEqual({ viz: 'heat' });
+    expect(by(35).look).toEqual({ total: false });
+    expect(by(31).config).toEqual(liveQs()[0].config); // its settings as they were
+  });
 });
 
 // The site's real Content-Security-Policy (no inline script, no inline style) is bypassed by the rest of the suite, whose
@@ -1590,6 +2125,7 @@ test.describe('@staff:ask Ask under the content security policy', () => {
     await pop(page).locator('.ask-kind[data-ask-kind="choice"]').click();
     await pop(page).locator('.ask-kind[data-ask-kind="scales"]').click();
     await pop(page).locator('.ask-kind[data-ask-kind="number"]').click();
+    for (const k of ['grid', 'pin', 'form', 'quiz', 'quiz_text']) await pop(page).locator(`.ask-kind[data-ask-kind="${k}"]`).click(); // stage 2's kinds
     await pop(page).locator('.chrome-xt').click();
     await sec(page).locator('.ask-back').click();
     await row(page, 1).locator('.ask-pg-t').click();

@@ -3716,19 +3716,26 @@ who we want it to be visible for and for how much time". Three parts: the databa
   picker (`#ask-round`) scopes Answers, Results and Stats. Setup is a draft written on Save (the page, then each
   question; table writes through `_wr`); Start, End, Reset results and a question's "Taking answers" go through
   `staff_ask_control`. Setup also holds who a page for accounts leaves out (`not_tag_ids`, `only_gender`, `min_age`,
-  `max_age`), the blocked words (`block_words`, 200 of 40 characters) and the Look. Answers approves, rejects, corrects
-  and deletes (`staff_ask_review`, table updates), reading `ASK_PAGE` (300) answers at a time with the waiting ones
-  always whole. Results draws each kind, "Who answered what" and the CSV, with names and mobile numbers: staff only.
-  Stats is `staff_ask_stats` (tiles, reach, by day and hour, gender, age, community, nationality, language) and one
-  question group by group (`staff_ask_segment`). Strings: 261 keys named `ask*` travel with the part
-  (`lang/staff-ask-<code>.json`).
+  `max_age`), the blocked words (`block_words`, 200 of 40 characters), the Look, the Pace (`self`, or `live`: staff
+  put one question on screen at a time) and Duplicate (a draft copy with every question, its config, look and
+  picture; no answers). The question pop-up offers all 14 kinds; a right answer is set on choice and number
+  (optional), pin (optional, `correct {x, y, r}`: x and y shares of the picture's width and height from its top-left,
+  r a share of its WIDTH), quiz (`correct`, required) and quiz_text (`accept`, required). On a live-paced page Results
+  opens with the presenter's strip (`_askLiveHtml`: the question on screen, its quiz clock, Previous / Next, Close /
+  Open, Reveal / Hide, Show now on each question), every control a `staff_ask_control` call drawn only after the
+  database said yes; Reveal also closes the question (the database's rule). Answers approves, rejects, corrects and
+  deletes (`staff_ask_review`, table updates), reading `ASK_PAGE` (300) answers at a time with the waiting ones always
+  whole. Results draws each kind, the board (`staff_ask_page.board`, names in full: staff only), "Who answered what"
+  and the CSV (points and seconds on a quiz page, a column per form field). Stats is `staff_ask_stats` (tiles, reach,
+  by day and hour, gender, age, community, nationality, language) and one question group by group
+  (`staff_ask_segment`). Strings: 336 keys named `ask*` travel with the part (`lang/staff-ask-<code>.json`).
 - **The look** (second pass, 2026-11-13): `look` is free jsonb on a page (`theme` light / dark / green / sand,
   `palette`, `cover`, `thanks_en`, `thanks_ar`, `layout` steps, `screen` `{qr, count, rotate}`) and on a question
   (`viz`, `palette`, `sort`, `values`, `total`, `limit`, `case`, `angle`, `size`). The website reads it in
   `apps/web/src/lib/ask-look.ts` and takes the FIRST value of each list for one it does not know, so a first value is
   never written and a key these screens do not know is kept. Three lists must stay equal to the website's:
   `ASK_PALETTES` (six palettes of six colours), `ASK_VIZ` (the charts of each kind, the first its default) and
-  `ASK_LOOKS` (which choices a chart takes). A picture (a page's cover, a text slide's) goes into the `site` bucket
+  `ASK_LOOKS` (which choices a chart takes). A page's `look.reactions: true` shows the reaction buttons. A picture (a page's cover, a text slide's) goes into the `site` bucket
   under `ask/` the way the website editor's do and is kept as `https://micromobility.sa/media/ask/<file>`; the bucket
   takes an upload from an admin only.
 - **No code** (the user, 2026-11-13: "i don't want the ask page to need a code to be able to access it"): the 6-digit
