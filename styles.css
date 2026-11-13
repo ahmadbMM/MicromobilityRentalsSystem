@@ -6904,6 +6904,44 @@ button.ca-chk{cursor:pointer;text-decoration:underline;text-underline-offset:2px
 .ca-bk-acts a{text-decoration:none;display:inline-flex;align-items:center}
 .ca-bk-k{font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted)}
 .ca-link{background:none;border:0;padding:0;color:var(--green);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+/* People > Mentorship (2026-11-13) */
+.mts-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 12px}
+.mts-tools{display:flex;gap:8px;flex-wrap:wrap}
+.mts-dot{display:inline-block;width:8px;height:8px;border-radius:var(--sf-r-pill);background:var(--red,#d93636);vertical-align:middle}
+.mts-card{border:1px solid var(--border);border-radius:var(--sf-r-card);padding:12px 14px;margin-bottom:10px;background:var(--sf-card,transparent)}
+.mts-card.warn{border-color:var(--red,#d93636)}
+.mts-card.off{opacity:.7}
+.mts-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}
+.mts-st{font-size:var(--sf-fs-xs);font-weight:600;padding:2px 8px;border-radius:var(--sf-r-pill);background:var(--sf-accent-wash,rgba(0,229,133,.12));color:var(--text)}
+.mts-st-pending,.mts-of-offered{background:rgba(245,166,35,.16)}
+.mts-st-closed,.mts-st-declined,.mts-of-declined,.mts-of-withdrawn,.mts-of-ended,.mts-mt-left{background:rgba(128,128,128,.14);color:var(--muted)}
+.mts-prof{font-size:var(--sf-fs-md);overflow-wrap:anywhere}
+.mts-text{font-size:var(--sf-fs-sm);margin-top:6px;white-space:pre-line;overflow-wrap:anywhere}
+.mts-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.mts-chips span{font-size:var(--sf-fs-xs);padding:2px 8px;border-radius:var(--sf-r-pill);border:1px solid var(--border);color:var(--muted)}
+.mts-who{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;font-size:var(--sf-fs-sm)}
+.mts-k{font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted)}
+.mts-pref{font-size:var(--sf-fs-xs);font-weight:600;padding:2px 8px;border-radius:var(--sf-r-pill);background:rgba(120,90,220,.14)}
+.mts-warn{font-size:var(--sf-fs-xs);font-weight:600;color:var(--red,#d93636)}
+.mts-card .cmy-am-tacts{margin-top:10px}
+.mts-offers{margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.mts-offer{border:1px solid var(--border);border-radius:var(--sf-r-ctl);padding:10px 12px;margin-top:8px}
+.mts-offer.on{border-color:var(--green)}
+.mts-past{margin-top:8px;font-size:var(--sf-fs-sm)}
+.mts-past summary{cursor:pointer;color:var(--muted)}
+.mts-chks{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;font-size:var(--sf-fs-xs)}
+.mts-chk.bad{color:var(--red,#d93636);font-weight:600}
+.mts-form .form-group{margin-bottom:10px}
+.mts-form textarea{width:100%;box-sizing:border-box;resize:vertical}
+.mts-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mts-picks{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.mts-res{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.mts-hit{display:flex;flex-wrap:wrap;align-items:center;gap:8px;text-align:start;padding:8px 10px;border:1px solid var(--border);border-radius:var(--sf-r-ctl);background:transparent;color:inherit;font:inherit;font-size:var(--sf-fs-sm);cursor:pointer}
+.mts-hit.on{border-color:var(--green)}
+.mts-tick{display:flex;align-items:flex-start;gap:8px;margin-top:8px;font-size:var(--sf-fs-sm);cursor:pointer}
+.mts-tick input{margin-top:3px}
+.mts-err{min-height:0;font-size:var(--sf-fs-sm);font-weight:600;color:var(--red,#d93636);padding:0 18px}
+.mts-err:empty{display:none}
 body.view-staff .ca-link{padding-block:4px;margin-block:-4px;} /* 24x24 hit area (WCAG 2.5.8, staff round s10): padding grows it, the negative margin gives the room back, so nothing moves */
 .ca-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .ca-actions a{text-decoration:none;display:inline-flex;align-items:center}
@@ -9121,6 +9159,44 @@ body:not(.view-staff) .hub-kinds{list-style:none;margin:6px 0 0;padding:0;displa
 body:not(.view-staff) .hub-kinds li{display:flex;align-items:center;gap:8px;}
 body:not(.view-staff) .hub-slide-nav{display:flex;gap:10px;margin-top:12px;}
 body:not(.view-staff) .hub-slide-nav button{flex:1;min-height:48px;}
+/* Mentorship (2026-11-13): the feed's card, its page (S._hubView 'mentor') and its two forms in the dialog host */
+body:not(.view-staff) .mt-alert{margin-top:8px;padding:10px 12px;border-radius:var(--r-ctl);background:var(--go-wash);color:var(--go-2);font-weight:600;font-size:var(--fs-15);}
+body:not(.view-staff) .mt-head{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+body:not(.view-staff) .mt-h1{margin:0;font-size:var(--fs-20);font-weight:700;color:var(--ink);}
+body:not(.view-staff) .mt-h2{margin:18px 4px 8px;font-size:var(--fs-15);font-weight:700;color:var(--ink-2);}
+body:not(.view-staff) .mt-line{font-size:var(--fs-15);color:var(--ink-2);}
+body:not(.view-staff) .mt-goal{margin:8px 0 0;font-size:var(--fs-15);line-height:1.45;color:var(--ink);white-space:pre-line;overflow-wrap:anywhere;}
+body:not(.view-staff) .mt-chips{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;}
+body:not(.view-staff) .mt-chips li{padding:4px 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line);font-size:var(--fs-13);color:var(--ink-2);}
+body:not(.view-staff) .mt-pill{display:inline-block;margin:0 0 6px;padding:3px 10px;border-radius:999px;background:var(--go-wash);color:var(--go-2);font-size:var(--fs-13);font-weight:600;}
+body:not(.view-staff) .mt-prof .mt-pill{margin-top:12px;}
+body:not(.view-staff) .mt-sub{margin-top:12px;padding:12px;border-radius:var(--r-ctl);border:1px solid var(--go);background:var(--paper);}
+body:not(.view-staff) .mt-check{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);}
+body:not(.view-staff) .mt-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+body:not(.view-staff) .mt-acts button{flex:1 1 auto;min-height:40px;}
+body:not(.view-staff) .mt-wa{gap:8px;}
+body:not(.view-staff) .mt-list{padding-top:4px;padding-bottom:4px;}
+body:not(.view-staff) .mt-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);}
+body:not(.view-staff) .mt-row:last-child{border-bottom:0;}
+body:not(.view-staff) .mt-row-t{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:var(--fs-15);color:var(--ink);}
+body:not(.view-staff) .mt-row-t .mt-pill{align-self:flex-start;margin:4px 0 0;}
+body:not(.view-staff) .mt-form{max-height:min(62vh,560px);overflow-y:auto;}
+body:not(.view-staff) .mt-form textarea{width:100%;box-sizing:border-box;min-height:88px;padding:10px 14px;border:1px solid var(--line-2);border-radius:8px;font:inherit;font-size:16px;color:var(--ink);background:var(--card);resize:vertical;}
+body:not(.view-staff) .mt-form textarea:focus{border-color:var(--go);outline:none;}
+body:not(.view-staff) .mt-form .pg-field.err textarea{border-color:var(--red);}
+body:not(.view-staff) .mt-sum{display:flex;flex-direction:column;gap:2px;font-size:var(--fs-15);color:var(--ink-2);}
+body:not(.view-staff) .mt-sum strong{color:var(--ink);}
+body:not(.view-staff) .mt-lbl{font-weight:600;font-size:13px;color:var(--ink-2);}
+body:not(.view-staff) .mt-picks{display:flex;flex-wrap:wrap;gap:8px;}
+body:not(.view-staff) .mt-chip{min-height:40px;padding:6px 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);font-size:var(--fs-15);font-weight:500;cursor:pointer;}
+body:not(.view-staff) .mt-chip.on{border-color:var(--go);background:var(--go-wash);color:var(--go-2);font-weight:600;}
+body:not(.view-staff) .pg-field.err .mt-chip{border-color:var(--red);}
+body:not(.view-staff) .mt-rules{margin-top:16px;font-size:var(--fs-15);color:var(--ink-2);}
+body:not(.view-staff) .mt-rules summary{cursor:pointer;font-weight:600;color:var(--go-2);min-height:32px;display:flex;align-items:center;}
+body:not(.view-staff) .mt-rules ul{margin:6px 0 0;padding-inline-start:20px;line-height:1.5;}
+body:not(.view-staff) .mt-tick{display:flex;align-items:flex-start;gap:10px;font-weight:500;font-size:var(--fs-15);line-height:1.4;color:var(--ink);cursor:pointer;}
+body:not(.view-staff) .mt-tick input{width:22px;height:22px;flex:0 0 22px;margin:1px 0 0;padding:0;border:0;border-radius:4px;background:none;appearance:auto;-webkit-appearance:checkbox;accent-color:var(--go);}
+body:not(.view-staff) .pg-field.err .mt-tick{color:var(--red);}
 @media (max-width:340px){body:not(.view-staff) .hub-stats{grid-template-columns:1fr;}}
 /* The next session's card, the Saturday report and a goal reached (2026-11-13, R9 R10 R13 R20): two labelled times and where
    it meets with one map button, the ride's status chip, the card on the day ringed; the report as tiles with the member's own

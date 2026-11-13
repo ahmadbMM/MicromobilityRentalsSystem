@@ -10,9 +10,12 @@
 // 2026-11-13 (reports/Community tab reach after launch.md, R3 R9 R10 R13 R20): each open of the tab tells the read where
 // it came from; the next session's card gives its two times, where it meets with one map button, and changes with the
 // time to turn up; the Saturday report is number tiles; a club goal reached names the next Saturday's own target.
+// 2026-11-13: the Mentorship programme (its card in the feed, its own page S._hubView 'mentor', its read mentor_feed);
+// see the block above window._hubRender.
 /* global S, sb, esc, _on, getSession, _cssv, shortDate, t, _cuIc, sessionTime, _dayWord, _evName, _evOf, _evKindName, allSessions,
    _isCommunity, _sessPastDay, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
-   _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard */
+   _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard,
+   NATIONALITIES, nationalityLabel, _natFor, _selOnce, askConfirm, closeConfirm, _EL, _EV */
 const HUB_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 const HUB_T = {
   err: ['We could not do that. Please try again.', 'تعذّر ذلك. يرجى المحاولة مرة أخرى.', 'Action impossible. Veuillez réessayer.', 'No se pudo hacer. Inténtalo de nuevo.', 'Não foi possível. Tente novamente.', 'یہ نہیں ہو سکا۔ دوبارہ کوشش کریں۔', 'यह नहीं हो सका। फिर कोशिश करें।', 'Hindi ito nagawa. Pakisubukang muli.', 'यो हुन सकेन। फेरि प्रयास गर्नुहोस्।', 'এটি করা যায়নি। আবার চেষ্টা করুন।'],
@@ -191,6 +194,7 @@ function _hubRender() {
   if (!S._hub && c) { const disk = _hubDisk(c); if (disk) S._hub = { forId: c.id, at: disk.at, d: disk.d }; }
   const h = S._hub, d = h && h.d;
   _hubVisitNow();
+  _mtFetch();
   // An open's first read goes at once, the copy on the phone painted meanwhile. A failed read (the copy kept and marked
   // stale, or none at all) is tried again two minutes on too, not only by Retry.
   if ((S._hubVisit && S._hubVisit.due && !S._hubVisit.sent) || !h || (d && !h.stale && Date.now() - h.at >= 12e4) || ((h.stale || !d) && Date.now() - (h.failAt || 0) >= 12e4)) _hubFetch();
@@ -201,7 +205,8 @@ function _hubRender() {
     body.innerHTML = h ? `<div class="hub-card" role="status"><strong class="hub-name">${_hT('err')}</strong><button type="button" class="btn-primary hub-wide" data-on-click="${_on('_hubRetry')}">${_hT('retry')}</button></div>` : _skelHtml(2, 'hub-skel');
     return;
   }
-  body.innerHTML = S._hubView === 'year' && d.year ? _yrHtml(d) : _feedHtml(c, d, h.stale);
+  if (S._hubView === 'mentor' && S._mt && S._mt.off) S._hubView = null;
+  body.innerHTML = S._hubView === 'mentor' ? _mtHtml() : S._hubView === 'year' && d.year ? _yrHtml(d) : _feedHtml(c, d, h.stale);
   if (S._hubView === 'year' && d.year) _yrPrep(d.year);
   if (d.post && d.post.img) _hubPostImg(d.post.id);
   if (was) { const el = [...body.querySelectorAll('[data-on-click],a[href]')].find((x) => _key(x) === was); if (el) try { el.focus({ preventScroll: true }); } catch (_) {} }
@@ -224,6 +229,7 @@ function _feedHtml(c, d, stale) {
     d.club ? _clubHtml(d.club) : '',
     _numsHtml(d.numbers),
     hero.recap ? '' : staff,
+    _mtCardHtml(),
     d.volunteer && dep.vol ? `<div class="hub-card hub-flat"><span class="hub-k">${_cuIc('people', 16)} ${_hT('vol')}</span><a class="btn-secondary hub-wide hub-link" href="${esc(dep.vol + '/#o/' + encodeURIComponent(d.volunteer))}" target="_blank" rel="noopener">${_hT('volBtn')}</a></div>` : '',
     dep.inv ? `<div class="hub-card hub-flat"><button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_hubInvite')}">${esc(dep.invLabel())}</button></div>` : '',
   ].join('');
@@ -555,4 +561,399 @@ async function _yrShare() {
   if (navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
   window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
 }
+// ── Mentorship (2026-11-13) ──────────────────────────────────────────────────────────────────────
+// The user, 2026-11-13: "create a mentorship program exclusively for community members, we put anonymous profiles of
+// students in specific universities and cities worldwide and let community members who have knowledge or can help choose
+// the profile they can help and we match them and make them contact with them" (migration 20261114050000).
+// One card in the feed opens a page of its own (S._hubView 'mentor'): the member's matches (first name, WhatsApp and the
+// "Still in touch?" check two weeks after the match, then monthly), their own request with the offers staff proposed to
+// them (Accept or Not now), their own offers, and the open profiles, which carry no name. A member starting university
+// asks for a mentor here; staff publish it. A name and number cross only an accepted match (the one exception to
+// "members see nobody", the user's own request); the read is mentor_feed, apart from hub_feed, and never kept on the phone.
+// The user's two registrations (the same day: "Mentee registration", "Mentor registration & choosing from mentees list"):
+// a student registers as a mentee (mentor_ask), a member registers once as a mentor (mentor_join, with the rules and the
+// consent), and only a registered mentor offers on a profile from the list; Leave the programme ends it (mentor_quit).
+Object.assign(HUB_T, {
+  mtTitle: ["Mentorship", "الإرشاد", "Mentorat", "Mentoría", "Mentoria", "رہنمائی پروگرام", "मेंटरशिप", "Mentorship", "मेन्टरशिप", "মেন্টরশিপ"],
+  mtHelpName: ["Help a member starting university", "ساعد عضوًا يبدأ دراسته الجامعية", "Aidez un membre qui entre à l'université", "Ayuda a un miembro que empieza la universidad", "Ajude um membro que começa a universidade", "یونیورسٹی شروع کرنے والے رکن کی مدد کریں", "विश्वविद्यालय शुरू करने वाले सदस्य की मदद करें", "Tulungan ang miyembrong magsisimula sa unibersidad", "विश्वविद्यालय सुरु गर्दै गरेको सदस्यलाई सहयोग गर्नुहोस्", "বিশ্ববিদ্যালয় শুরু করা একজন সদস্যকে সাহায্য করুন"],
+  mtOpenN: ["Students looking for a mentor: {0}", "طلاب يبحثون عن مرشد: {0}", "Étudiants qui cherchent un mentor : {0}", "Estudiantes que buscan mentor: {0}", "Estudantes à procura de mentor: {0}", "رہنما کی تلاش میں طلبہ: {0}", "मेंटर ढूँढ रहे छात्र: {0}", "Mga estudyanteng naghahanap ng mentor: {0}", "मेन्टर खोजिरहेका विद्यार्थी: {0}", "মেন্টর খুঁজছে এমন শিক্ষার্থী: {0}"],
+  mtSee: ["See the students", "عرض الطلاب", "Voir les étudiants", "Ver a los estudiantes", "Ver os estudantes", "طلبہ دیکھیں", "छात्र देखें", "Tingnan ang mga estudyante", "विद्यार्थीहरू हेर्नुहोस्", "শিক্ষার্থীদের দেখুন"],
+  mtAsk: ["Register as a mentee", "التسجيل كمسترشد", "S'inscrire comme mentoré", "Inscribirme como mentorizado", "Registar-me como mentorando", "رہنمائی لینے کے لیے رجسٹر کریں", "मेंटी के रूप में पंजीकरण करें", "Magparehistro bilang mentee", "मेन्टीको रूपमा दर्ता गर्नुहोस्", "মেন্টি হিসেবে নিবন্ধন করুন"],
+  mtMatches: ["Your matches", "مطابقاتك", "Vos binômes", "Tus emparejamientos", "Os seus pares", "آپ کے جوڑ", "आपकी जोड़ियाँ", "Ang iyong mga kapareha", "तपाईंका जोडी", "আপনার জুটি"],
+  mtYourAsk: ["Your request", "طلبك", "Votre demande", "Tu solicitud", "O seu pedido", "آپ کی درخواست", "आपका अनुरोध", "Ang iyong hiling", "तपाईंको अनुरोध", "আপনার অনুরোধ"],
+  mtYourOffers: ["Your offers", "عروضك", "Vos propositions", "Tus ofrecimientos", "As suas ofertas", "آپ کی پیشکشیں", "आपके प्रस्ताव", "Ang iyong mga alok", "तपाईंका प्रस्ताव", "আপনার প্রস্তাব"],
+  mtStudents: ["Students looking for a mentor", "طلاب يبحثون عن مرشد", "Étudiants qui cherchent un mentor", "Estudiantes que buscan mentor", "Estudantes à procura de mentor", "رہنما کی تلاش میں طلبہ", "मेंटर ढूँढ रहे छात्र", "Mga estudyanteng naghahanap ng mentor", "मेन्टर खोजिरहेका विद्यार्थी", "মেন্টর খুঁজছে এমন শিক্ষার্থী"],
+  mtNone: ["No student is looking for a mentor right now.", "لا يوجد طالب يبحث عن مرشد حاليًا.", "Aucun étudiant ne cherche de mentor pour le moment.", "Ahora mismo ningún estudiante busca mentor.", "Neste momento nenhum estudante procura mentor.", "اس وقت کوئی طالب علم رہنما نہیں ڈھونڈ رہا۔", "अभी कोई छात्र मेंटर नहीं ढूँढ रहा।", "Walang estudyanteng naghahanap ng mentor ngayon.", "अहिले कुनै विद्यार्थीले मेन्टर खोजिरहेको छैन।", "এই মুহূর্তে কোনো শিক্ষার্থী মেন্টর খুঁজছে না।"],
+  mtProfile: ["Profile {0}", "الملف {0}", "Profil {0}", "Perfil {0}", "Perfil {0}", "پروفائل {0}", "प्रोफ़ाइल {0}", "Profile {0}", "प्रोफाइल {0}", "প্রোফাইল {0}"],
+  mtClass: ["Class of {0}", "دفعة {0}", "Promotion {0}", "Promoción {0}", "Turma de {0}", "بیچ {0}", "{0} बैच", "Batch {0}", "ब्याच {0}", "ব্যাচ {0}"],
+  mtCanHelp: ["I can help", "يمكنني المساعدة", "Je peux aider", "Puedo ayudar", "Posso ajudar", "مدد کی پیشکش کریں", "मदद की पेशकश करें", "Makakatulong ako", "म सहयोग गर्न सक्छु", "আমি সাহায্য করতে পারি"],
+  mtStOffered: ["Offer sent", "تم إرسال العرض", "Proposition envoyée", "Ofrecimiento enviado", "Oferta enviada", "پیشکش بھیج دی گئی", "प्रस्ताव भेजा गया", "Naipadala ang alok", "प्रस्ताव पठाइयो", "প্রস্তাব পাঠানো হয়েছে"],
+  mtStProposed: ["With the student", "لدى الطالب", "Chez l'étudiant", "Con el estudiante", "Com o estudante", "طالب علم کے پاس", "छात्र के पास", "Nasa estudyante", "विद्यार्थीसँग", "শিক্ষার্থীর কাছে"],
+  mtStMatched: ["Matched", "تمت المطابقة", "Binôme formé", "Emparejados", "Par formado", "جوڑ بن گیا", "जोड़ी बनी", "Nagkapareha", "जोडी बन्यो", "জুটি হয়েছে"],
+  mtStDeclined: ["Not this time", "ليس هذه المرة", "Pas cette fois", "Esta vez no", "Desta vez não", "اس بار نہیں", "इस बार नहीं", "Hindi sa ngayon", "यस पटक होइन", "এবার নয়"],
+  mtStEnded: ["Ended", "انتهت", "Terminé", "Terminado", "Terminado", "ختم", "समाप्त", "Natapos", "समाप्त", "শেষ"],
+  mtAskPending: ["Waiting for our team", "بانتظار فريقنا", "En attente de notre équipe", "Esperando a nuestro equipo", "À espera da nossa equipa", "ہماری ٹیم کا انتظار", "हमारी टीम की प्रतीक्षा", "Hinihintay ang aming team", "हाम्रो टोलीको प्रतीक्षामा", "আমাদের দলের অপেক্ষায়"],
+  mtAskOpen: ["Looking for a mentor", "يبحث عن مرشد", "Recherche d'un mentor", "Buscando mentor", "À procura de mentor", "رہنما کی تلاش جاری", "मेंटर की तलाश", "Naghahanap ng mentor", "मेन्टर खोजिँदै", "মেন্টর খোঁজা হচ্ছে"],
+  mtYourMentor: ["Your mentor", "مرشدك", "Votre mentor", "Tu mentor", "O seu mentor", "آپ کا رہنما", "आपके मेंटर", "Ang iyong mentor", "तपाईंको मेन्टर", "আপনার মেন্টর"],
+  mtYourStudent: ["Your student", "طالبك", "Votre étudiant", "Tu estudiante", "O seu estudante", "آپ کا طالب علم", "आपका छात्र", "Ang iyong estudyante", "तपाईंको विद्यार्थी", "আপনার শিক্ষার্থী"],
+  mtWa: ["Message on WhatsApp", "مراسلة عبر واتساب", "Écrire sur WhatsApp", "Escribir por WhatsApp", "Enviar mensagem no WhatsApp", "واٹس ایپ پر پیغام بھیجیں", "WhatsApp पर संदेश भेजें", "Mag-message sa WhatsApp", "WhatsApp मा सन्देश पठाउनुहोस्", "WhatsApp-এ বার্তা পাঠান"],
+  mtStepBack: ["Step back", "الانسحاب", "Me retirer", "Retirarme", "Sair", "الگ ہو جائیں", "पीछे हटें", "Umatras", "पछि हट्नुहोस्", "সরে দাঁড়ান"],
+  mtStepBackQ: ["Step back from this match?", "الانسحاب من هذه المطابقة؟", "Vous retirer de ce binôme ?", "¿Retirarte de este emparejamiento?", "Sair deste par?", "اس جوڑ سے الگ ہو جائیں؟", "इस जोड़ी से पीछे हटें?", "Umatras sa pagpaparehang ito?", "यो जोडीबाट पछि हट्ने?", "এই জুটি থেকে সরে দাঁড়াবেন?"],
+  mtWithdraw: ["Withdraw offer", "سحب العرض", "Retirer la proposition", "Retirar ofrecimiento", "Retirar oferta", "پیشکش واپس لیں", "प्रस्ताव वापस लें", "Bawiin ang alok", "प्रस्ताव फिर्ता लिनुहोस्", "প্রস্তাব প্রত্যাহার করুন"],
+  mtWithdrawQ: ["Withdraw this offer?", "سحب هذا العرض؟", "Retirer cette proposition ?", "¿Retirar este ofrecimiento?", "Retirar esta oferta?", "یہ پیشکش واپس لیں؟", "यह प्रस्ताव वापस लें?", "Bawiin ang alok na ito?", "यो प्रस्ताव फिर्ता लिने?", "এই প্রস্তাব প্রত্যাহার করবেন?"],
+  mtCloseAsk: ["Close my request", "إغلاق طلبي", "Fermer ma demande", "Cerrar mi solicitud", "Fechar o meu pedido", "میری درخواست بند کریں", "मेरा अनुरोध बंद करें", "Isara ang aking hiling", "मेरो अनुरोध बन्द गर्नुहोस्", "আমার অনুরোধ বন্ধ করুন"],
+  mtCloseAskQ: ["Close your request?", "إغلاق طلبك؟", "Fermer votre demande ?", "¿Cerrar tu solicitud?", "Fechar o seu pedido?", "اپنی درخواست بند کریں؟", "अपना अनुरोध बंद करें?", "Isara ang iyong hiling?", "आफ्नो अनुरोध बन्द गर्ने?", "আপনার অনুরোধ বন্ধ করবেন?"],
+  mtEdit: ["Change", "تعديل", "Modifier", "Cambiar", "Alterar", "تبدیل کریں", "बदलें", "Baguhin", "परिवर्तन गर्नुहोस्", "পরিবর্তন করুন"],
+  mtOffered: ["A member offered to help you", "عرض عضو مساعدتك", "Un membre propose de vous aider", "Un miembro se ofrece a ayudarte", "Um membro ofereceu-se para ajudar", "ایک رکن نے آپ کی مدد کی پیشکش کی", "एक सदस्य ने आपकी मदद की पेशकश की", "May miyembrong nag-alok na tumulong sa iyo", "एक सदस्यले तपाईंलाई सहयोग गर्ने प्रस्ताव गरे", "একজন সদস্য আপনাকে সাহায্য করার প্রস্তাব দিয়েছেন"],
+  mtAccept: ["Accept", "قبول", "Accepter", "Aceptar", "Aceitar", "قبول کریں", "स्वीकार करें", "Tanggapin", "स्वीकार गर्नुहोस्", "গ্রহণ করুন"],
+  mtNotNow: ["Not now", "ليس الآن", "Pas maintenant", "Ahora no", "Agora não", "ابھی نہیں", "अभी नहीं", "Hindi muna", "अहिले होइन", "এখন নয়"],
+  mtNotNowQ: ["Turn down this offer?", "رفض هذا العرض؟", "Refuser cette proposition ?", "¿Rechazar este ofrecimiento?", "Recusar esta oferta?", "یہ پیشکش رد کریں؟", "यह प्रस्ताव अस्वीकार करें?", "Tanggihan ang alok na ito?", "यो प्रस्ताव अस्वीकार गर्ने?", "এই প্রস্তাব ফিরিয়ে দেবেন?"],
+  mtCheckQ: ["Still in touch with {0}?", "هل ما زلت على تواصل مع {0}؟", "Toujours en contact avec {0} ?", "¿Sigues en contacto con {0}?", "Ainda em contacto com {0}?", "کیا {0} سے رابطہ ہے؟", "क्या {0} से संपर्क बना है?", "May komunikasyon pa ba kayo ni {0}?", "के {0} सँग सम्पर्क छ?", "{0}-এর সাথে কি যোগাযোগ আছে?"],
+  mtYes: ["Yes", "نعم", "Oui", "Sí", "Sim", "ہاں", "हाँ", "Oo", "हो", "হ্যাঁ"],
+  mtNotYet: ["Not yet", "ليس بعد", "Pas encore", "Todavía no", "Ainda não", "ابھی تک نہیں", "अभी तक नहीं", "Hindi pa", "अहिलेसम्म छैन", "এখনো না"],
+  mtNeedHelp: ["I need help from the team", "أحتاج مساعدة الفريق", "J'ai besoin de l'équipe", "Necesito ayuda del equipo", "Preciso de ajuda da equipa", "مجھے ٹیم کی مدد چاہیے", "मुझे टीम की मदद चाहिए", "Kailangan ko ng tulong ng team", "मलाई टोलीको सहयोग चाहिन्छ", "আমার দলের সাহায্য দরকার"],
+  hpQuestions: ["Questions and coaching", "أسئلة وتوجيه", "Questions et conseils", "Preguntas y orientación", "Perguntas e orientação", "سوالات اور رہنمائی", "सवाल और मार्गदर्शन", "Mga tanong at gabay", "प्रश्न र मार्गदर्शन", "প্রশ্ন ও পরামর্শ"],
+  hpSubjects: ["Choosing subjects", "اختيار المواد", "Choix des matières", "Elegir asignaturas", "Escolher disciplinas", "مضامین کا انتخاب", "विषय चुनना", "Pagpili ng mga subject", "विषय छनोट", "বিষয় বাছাই"],
+  hpCv: ["CV review", "مراجعة السيرة الذاتية", "Relecture du CV", "Revisión del CV", "Revisão do CV", "سی وی کا جائزہ", "CV की समीक्षा", "Pagsusuri ng CV", "CV समीक्षा", "সিভি পর্যালোচনা"],
+  hpInternship: ["Summer internships", "التدريب الصيفي", "Stages d'été", "Prácticas de verano", "Estágios de verão", "گرمیوں کی انٹرن شپ", "ग्रीष्मकालीन इंटर्नशिप", "Summer internship", "ग्रीष्मकालीन इन्टर्नसिप", "গ্রীষ্মকালীন ইন্টার্নশিপ"],
+  hpJob: ["First job", "الوظيفة الأولى", "Premier emploi", "Primer empleo", "Primeiro emprego", "پہلی نوکری", "पहली नौकरी", "Unang trabaho", "पहिलो जागिर", "প্রথম চাকরি"],
+  hpUnilife: ["University life", "الحياة الجامعية", "Vie universitaire", "Vida universitaria", "Vida universitária", "یونیورسٹی کی زندگی", "विश्वविद्यालय जीवन", "Buhay sa unibersidad", "विश्वविद्यालय जीवन", "বিশ্ববিদ্যালয় জীবন"],
+  hpCity: ["Settling into the city", "الاستقرار في المدينة", "S'installer dans la ville", "Instalarse en la ciudad", "Instalar-se na cidade", "شہر میں بسنا", "शहर में बसना", "Pag-aangkop sa lungsod", "सहरमा बसोबास", "শহরে মানিয়ে নেওয়া"],
+  hpTalk: ["Someone to talk to", "شخص للتحدث معه", "Quelqu'un à qui parler", "Alguien con quien hablar", "Alguém com quem falar", "بات کرنے کے لیے کوئی", "बात करने के लिए कोई", "Makakausap", "कुरा गर्ने कोही", "কথা বলার মতো কেউ"],
+  lkUni: ["Same university", "الجامعة نفسها", "Même université", "Misma universidad", "Mesma universidade", "وہی یونیورسٹی", "वही विश्वविद्यालय", "Parehong unibersidad", "उही विश्वविद्यालय", "একই বিশ্ববিদ্যালয়"],
+  lkField: ["Same or a related degree", "التخصص نفسه أو قريب منه", "Diplôme identique ou proche", "Misma carrera o afín", "Mesmo curso ou afim", "وہی یا ملتی جلتی ڈگری", "वही या मिलती-जुलती डिग्री", "Pareho o kaugnay na kurso", "उही वा मिल्दोजुल्दो डिग्री", "একই বা সম্পর্কিত ডিগ্রি"],
+  lkCity: ["Lived or studied in this city", "عشت أو درست في هذه المدينة", "J'ai vécu ou étudié dans cette ville", "Viví o estudié en esta ciudad", "Vivi ou estudei nesta cidade", "اس شہر میں رہائش یا تعلیم", "इस शहर में रहना या पढ़ाई", "Nanirahan o nag-aral sa lungsod na ito", "यो सहरमा बसेको वा पढेको", "এই শহরে থেকেছি বা পড়েছি"],
+  lkIndustry: ["Work in this field", "أعمل في هذا المجال", "Je travaille dans ce domaine", "Trabajo en este campo", "Trabalho nesta área", "اسی شعبے میں کام", "इसी क्षेत्र में काम", "Nagtatrabaho sa larangang ito", "यही क्षेत्रमा काम", "এই ক্ষেত্রে কাজ করি"],
+  lkExperience: ["Other relevant experience", "خبرة أخرى ذات صلة", "Autre expérience utile", "Otra experiencia útil", "Outra experiência relevante", "دیگر متعلقہ تجربہ", "अन्य संबंधित अनुभव", "Ibang kaugnay na karanasan", "अन्य सम्बन्धित अनुभव", "অন্যান্য প্রাসঙ্গিক অভিজ্ঞতা"],
+  mtLinksQ: ["How do you know this path?", "كيف تعرف هذا المسار؟", "Comment connaissez-vous ce parcours ?", "¿Cómo conoces este camino?", "Como conhece este percurso?", "آپ اس راستے کو کیسے جانتے ہیں؟", "आप इस राह को कैसे जानते हैं?", "Paano mo kilala ang landas na ito?", "तपाईं यो बाटो कसरी चिन्नुहुन्छ?", "আপনি এই পথ কীভাবে চেনেন?"],
+  mtHelpsQ: ["How can you help?", "كيف يمكنك المساعدة؟", "Comment pouvez-vous aider ?", "¿Cómo puedes ayudar?", "Como pode ajudar?", "آپ کیسے مدد کر سکتے ہیں؟", "आप कैसे मदद कर सकते हैं?", "Paano ka makakatulong?", "तपाईं कसरी सहयोग गर्न सक्नुहुन्छ?", "আপনি কীভাবে সাহায্য করতে পারেন?"],
+  mtNoteQ: ["How could your experience help?", "كيف يمكن لخبرتك أن تساعد؟", "En quoi votre expérience peut-elle aider ?", "¿Cómo puede ayudar tu experiencia?", "Como pode a sua experiência ajudar?", "آپ کا تجربہ کیسے مدد کر سکتا ہے؟", "आपका अनुभव कैसे मदद कर सकता है?", "Paano makakatulong ang iyong karanasan?", "तपाईंको अनुभवले कसरी सहयोग गर्न सक्छ?", "আপনার অভিজ্ঞতা কীভাবে সাহায্য করতে পারে?"],
+  mtSend: ["Send", "إرسال", "Envoyer", "Enviar", "Enviar", "بھیجیں", "भेजें", "Ipadala", "पठाउनुहोस्", "পাঠান"],
+  mtUni: ["University", "الجامعة", "Université", "Universidad", "Universidade", "یونیورسٹی", "विश्वविद्यालय", "Unibersidad", "विश्वविद्यालय", "বিশ্ববিদ্যালয়"],
+  mtField: ["Field of study", "التخصص", "Domaine d'études", "Carrera", "Curso", "شعبۂ تعلیم", "अध्ययन का क्षेत्र", "Kurso", "अध्ययनको क्षेत्र", "পড়ার বিষয়"],
+  mtCity: ["City", "المدينة", "Ville", "Ciudad", "Cidade", "شہر", "शहर", "Lungsod", "सहर", "শহর"],
+  mtCountry: ["Country", "الدولة", "Pays", "País", "País", "ملک", "देश", "Bansa", "देश", "দেশ"],
+  mtYear: ["Starting year", "سنة البدء", "Année de début", "Año de inicio", "Ano de início", "آغاز کا سال", "शुरुआत का वर्ष", "Taon ng pagsisimula", "सुरु हुने वर्ष", "শুরুর বছর"],
+  mtWantQ: ["What would help you?", "ما الذي سيساعدك؟", "Qu'est-ce qui vous aiderait ?", "¿Qué te ayudaría?", "O que o ajudaria?", "آپ کو کس چیز سے مدد ملے گی؟", "आपको किससे मदद मिलेगी?", "Ano ang makakatulong sa iyo?", "तपाईंलाई केले सहयोग गर्छ?", "কী আপনাকে সাহায্য করবে?"],
+  mtGoal: ["Your goal", "هدفك", "Votre objectif", "Tu objetivo", "O seu objetivo", "آپ کا مقصد", "आपका लक्ष्य", "Ang iyong layunin", "तपाईंको लक्ष्य", "আপনার লক্ষ্য"],
+  mtPref: ["Mentor you prefer", "المرشد الذي تفضّله", "Mentor souhaité", "Mentor que prefieres", "Mentor que prefere", "پسندیدہ رہنما", "पसंदीदा मेंटर", "Mentor na gusto mo", "रुचाइएको मेन्टर", "পছন্দের মেন্টর"],
+  mtPrefAny: ["Either", "لا فرق", "Peu importe", "Me da igual", "Tanto faz", "کوئی بھی", "कोई भी", "Kahit sino", "जो भए पनि", "যে কেউ"],
+  mtPrefF: ["A woman", "امرأة", "Une femme", "Una mujer", "Uma mulher", "خاتون", "महिला", "Babae", "महिला", "নারী"],
+  mtPrefM: ["A man", "رجل", "Un homme", "Un hombre", "Um homem", "مرد", "पुरुष", "Lalaki", "पुरुष", "পুরুষ"],
+  mtRules: ["Mentorship rules", "قواعد الإرشاد", "Règles du mentorat", "Normas de la mentoría", "Regras da mentoria", "رہنمائی کے اصول", "मेंटरशिप के नियम", "Mga patakaran ng mentorship", "मेन्टरशिपका नियम", "মেন্টরশিপের নিয়ম"],
+  mtR1: ["Be kind and respectful, and keep it about study, work and student life.", "اللطف والاحترام، والحديث عن الدراسة والعمل والحياة الجامعية.", "Soyez bienveillant et respectueux, et restez sur les études, le travail et la vie étudiante.", "Sé amable y respetuoso, y habla de estudios, trabajo y vida de estudiante.", "Seja simpático e respeitoso, e fale de estudos, trabalho e vida de estudante.", "مہربان اور باادب رہیں، اور بات تعلیم، کام اور طالب علمی کی زندگی تک رکھیں۔", "विनम्र और सम्मानजनक रहें, और बात पढ़ाई, काम और छात्र जीवन तक रखें।", "Maging mabait at magalang, at panatilihin ang usapan sa pag-aaral, trabaho at buhay-estudyante.", "दयालु र सम्मानजनक हुनुहोस्, र कुरा पढाइ, काम र विद्यार्थी जीवनमै राख्नुहोस्।", "সদয় ও সম্মানজনক থাকুন, এবং আলোচনা পড়াশোনা, কাজ ও ছাত্রজীবনের মধ্যে রাখুন।"],
+  mtR2: ["Never ask for or offer money, gifts or favours.", "لا طلب ولا عرض لمال أو هدايا أو خدمات.", "Ne demandez ni n'offrez jamais d'argent, de cadeaux ou de faveurs.", "Nunca pidas ni ofrezcas dinero, regalos ni favores.", "Nunca peça nem ofereça dinheiro, presentes ou favores.", "کبھی پیسے، تحفے یا احسان نہ مانگیں نہ پیش کریں۔", "कभी पैसे, तोहफ़े या एहसान न माँगें, न दें।", "Huwag humingi o mag-alok ng pera, regalo o pabor.", "पैसा, उपहार वा अनुग्रह कहिल्यै नमाग्नुहोस्, नदिनुहोस्।", "কখনো টাকা, উপহার বা সুবিধা চাইবেন না বা দেবেন না।"],
+  mtR3: ["Keep what you learn about each other private.", "ما تعرفانه عن بعضكما يبقى بينكما.", "Gardez pour vous ce que vous apprenez l'un de l'autre.", "Guarda en privado lo que sepáis el uno del otro.", "Mantenha em privado o que souberem um do outro.", "ایک دوسرے کے بارے میں جو جانیں اسے راز رکھیں۔", "एक-दूसरे के बारे में जो जानें, उसे निजी रखें।", "Panatilihing pribado ang nalalaman ninyo tungkol sa isa't isa.", "एकअर्काबारे थाहा पाएका कुरा गोप्य राख्नुहोस्।", "একে অপরের সম্পর্কে যা জানবেন, তা গোপন রাখুন।"],
+  mtR4: ["Meet online or in a public place.", "اللقاء عبر الإنترنت أو في مكان عام.", "Rencontrez-vous en ligne ou dans un lieu public.", "Quedad en línea o en un lugar público.", "Encontrem-se online ou num local público.", "آن لائن یا کسی عوامی جگہ پر ملیں۔", "ऑनलाइन या किसी सार्वजनिक जगह पर मिलें।", "Magkita online o sa pampublikong lugar.", "अनलाइन वा सार्वजनिक ठाउँमा भेट्नुहोस्।", "অনলাইনে বা জনসমাগমের জায়গায় দেখা করুন।"],
+  mtR5: ["Tell our team if anything feels wrong. You can step back at any time.", "يمكن إبلاغ فريقنا بأي أمر مقلق، والانسحاب متاح في أي وقت.", "Prévenez notre équipe si quelque chose ne va pas. Vous pouvez vous retirer à tout moment.", "Avisa a nuestro equipo si algo no va bien. Puedes retirarte cuando quieras.", "Avise a nossa equipa se algo não estiver bem. Pode sair a qualquer momento.", "اگر کچھ غلط لگے تو ہماری ٹیم کو بتائیں۔ آپ کسی بھی وقت الگ ہو سکتے ہیں۔", "कुछ भी ठीक न लगे तो हमारी टीम को बताएँ। आप कभी भी पीछे हट सकते हैं।", "Sabihan ang aming team kung may hindi tama. Maaari kang umatras anumang oras.", "केही ठीक नलागे हाम्रो टोलीलाई भन्नुहोस्। तपाईं जुनसुकै बेला पछि हट्न सक्नुहुन्छ।", "কিছু ঠিক না লাগলে আমাদের দলকে জানান। আপনি যেকোনো সময় সরে দাঁড়াতে পারেন।"],
+  mtAgree: ["I agree to the mentorship rules and to sharing my first name and WhatsApp number with my match once we both accept.", "أوافق على قواعد الإرشاد وعلى مشاركة اسمي الأول ورقم واتساب الخاص بي مع من تتم مطابقتي معه بعد قبولنا كلينا.", "J'accepte les règles du mentorat et le partage de mon prénom et de mon numéro WhatsApp avec mon binôme une fois que nous aurons tous deux accepté.", "Acepto las normas de la mentoría y compartir mi nombre y mi número de WhatsApp con mi pareja de mentoría cuando ambos aceptemos.", "Aceito as regras da mentoria e a partilha do meu primeiro nome e número de WhatsApp com o meu par quando ambos aceitarmos.", "میں رہنمائی کے اصولوں سے اور دونوں کی منظوری کے بعد اپنا پہلا نام اور واٹس ایپ نمبر اپنے جوڑ کے ساتھ شیئر کرنے پر متفق ہوں۔", "मैं मेंटरशिप के नियमों से और हम दोनों के स्वीकार करने के बाद अपना पहला नाम और WhatsApp नंबर अपनी जोड़ी के साथ साझा करने पर सहमत हूँ।", "Sumasang-ayon ako sa mga patakaran ng mentorship at sa pagbabahagi ng aking unang pangalan at WhatsApp number sa aking kapareha kapag pareho kaming pumayag.", "म मेन्टरशिपका नियम र हामी दुवैले स्वीकार गरेपछि मेरो पहिलो नाम र WhatsApp नम्बर मेरो जोडीसँग साझा गर्न सहमत छु।", "আমি মেন্টরশিপের নিয়ম মানছি এবং আমরা দুজনেই রাজি হলে আমার প্রথম নাম ও WhatsApp নম্বর আমার জুটির সাথে শেয়ার করতে সম্মত।"],
+  mtFill: ["Please fill this in.", "يرجى تعبئة هذا الحقل.", "Veuillez remplir ce champ.", "Rellena este campo.", "Preencha este campo.", "براہ کرم یہ پُر کریں۔", "कृपया इसे भरें।", "Pakipunan ito.", "कृपया यो भर्नुहोस्।", "অনুগ্রহ করে এটি পূরণ করুন।"],
+  mtPickOne: ["Please pick at least one.", "يرجى اختيار واحد على الأقل.", "Choisissez-en au moins un.", "Elige al menos uno.", "Escolha pelo menos um.", "کم از کم ایک چنیں۔", "कम से कम एक चुनें।", "Pumili ng kahit isa.", "कम्तीमा एउटा छान्नुहोस्।", "অন্তত একটি বেছে নিন।"],
+  mtTick: ["Please tick to agree.", "يرجى وضع علامة للموافقة.", "Cochez pour accepter.", "Marca la casilla para aceptar.", "Assinale para aceitar.", "اتفاق کے لیے نشان لگائیں۔", "सहमति के लिए टिक करें।", "Lagyan ng tsek para pumayag.", "सहमतिका लागि टिक लगाउनुहोस्।", "সম্মতি দিতে টিক দিন।"],
+  mtGone: ["This is no longer open.", "لم يعد هذا متاحًا.", "Ce n'est plus ouvert.", "Ya no está abierto.", "Já não está disponível.", "یہ اب دستیاب نہیں۔", "यह अब उपलब्ध नहीं है।", "Hindi na ito bukas.", "यो अब उपलब्ध छैन।", "এটি আর খোলা নেই।"],
+  mtExists: ["You already have a request.", "لديك طلب بالفعل.", "Vous avez déjà une demande.", "Ya tienes una solicitud.", "Já tem um pedido.", "آپ کی ایک درخواست پہلے سے موجود ہے۔", "आपका एक अनुरोध पहले से है।", "Mayroon ka nang hiling.", "तपाईंको अनुरोध पहिले नै छ।", "আপনার একটি অনুরোধ আগে থেকেই আছে।"],
+  mtLimit: ["You have sent many offers today. Please try again tomorrow.", "أرسلت عروضًا كثيرة اليوم. يرجى المحاولة غدًا.", "Vous avez envoyé beaucoup de propositions aujourd'hui. Réessayez demain.", "Has enviado muchos ofrecimientos hoy. Inténtalo mañana.", "Enviou muitas ofertas hoje. Tente amanhã.", "آپ نے آج بہت سی پیشکشیں بھیجی ہیں۔ کل دوبارہ کوشش کریں۔", "आपने आज कई प्रस्ताव भेजे हैं। कल फिर कोशिश करें।", "Marami ka nang naipadalang alok ngayon. Subukan ulit bukas.", "तपाईंले आज धेरै प्रस्ताव पठाउनुभयो। भोलि फेरि प्रयास गर्नुहोस्।", "আপনি আজ অনেক প্রস্তাব পাঠিয়েছেন। আগামীকাল আবার চেষ্টা করুন।"],
+  mtRegMentor: ["Register as a mentor", "التسجيل كمرشد", "S'inscrire comme mentor", "Inscribirme como mentor", "Registar-me como mentor", "بطور رہنما رجسٹر کریں", "मेंटर के रूप में पंजीकरण करें", "Magparehistro bilang mentor", "मेन्टरको रूपमा दर्ता गर्नुहोस्", "মেন্টর হিসেবে নিবন্ধন করুন"],
+  mtYouMentor: ["You as a mentor", "أنت كمرشد", "Vous, mentor", "Tú como mentor", "Você como mentor", "آپ بطور رہنما", "मेंटर के रूप में आप", "Ikaw bilang mentor", "मेन्टरको रूपमा तपाईं", "মেন্টর হিসেবে আপনি"],
+  mtMUni: ["Where you studied", "أين درست", "Où vous avez étudié", "Dónde estudiaste", "Onde estudou", "آپ نے کہاں تعلیم حاصل کی", "आपने कहाँ पढ़ाई की", "Saan ka nag-aral", "तपाईंले कहाँ पढ्नुभयो", "আপনি কোথায় পড়েছেন"],
+  mtMField: ["What you studied", "ماذا درست", "Ce que vous avez étudié", "Qué estudiaste", "O que estudou", "آپ نے کیا پڑھا", "आपने क्या पढ़ा", "Ano ang iyong pinag-aralan", "तपाईंले के पढ्नुभयो", "আপনি কী পড়েছেন"],
+  mtMWork: ["Your work or industry", "عملك أو مجالك", "Votre métier ou secteur", "Tu trabajo o sector", "O seu trabalho ou setor", "آپ کا کام یا شعبہ", "आपका काम या उद्योग", "Ang iyong trabaho o industriya", "तपाईंको काम वा क्षेत्र", "আপনার কাজ বা খাত"],
+  mtMPlaces: ["Cities and countries you lived or studied in", "المدن والدول التي عشت أو درست فيها", "Villes et pays où vous avez vécu ou étudié", "Ciudades y países donde viviste o estudiaste", "Cidades e países onde viveu ou estudou", "وہ شہر اور ممالک جہاں آپ رہے یا پڑھے", "शहर और देश जहाँ आप रहे या पढ़े", "Mga lungsod at bansang tinirhan o pinag-aralan mo", "तपाईं बसेका वा पढेका सहर र देश", "যেসব শহর ও দেশে আপনি থেকেছেন বা পড়েছেন"],
+  mtMAbout: ["How your experience could help students", "كيف يمكن لخبرتك أن تساعد الطلاب", "En quoi votre expérience peut aider des étudiants", "Cómo puede ayudar tu experiencia a los estudiantes", "Como a sua experiência pode ajudar estudantes", "آپ کا تجربہ طلبہ کی کیسے مدد کر سکتا ہے", "आपका अनुभव छात्रों की कैसे मदद कर सकता है", "Paano makakatulong ang karanasan mo sa mga estudyante", "तपाईंको अनुभवले विद्यार्थीलाई कसरी सहयोग गर्न सक्छ", "আপনার অভিজ্ঞতা শিক্ষার্থীদের কীভাবে সাহায্য করতে পারে"],
+  mtLeaveProg: ["Leave the programme", "مغادرة البرنامج", "Quitter le programme", "Dejar el programa", "Sair do programa", "پروگرام چھوڑ دیں", "कार्यक्रम छोड़ें", "Umalis sa programa", "कार्यक्रम छोड्नुहोस्", "প্রোগ্রাম ছেড়ে দিন"],
+  mtLeaveProgQ: ["Leave the programme? Your offers are withdrawn and your matches end.", "مغادرة البرنامج؟ ستُسحب عروضك وتنتهي مطابقاتك.", "Quitter le programme ? Vos propositions sont retirées et vos binômes prennent fin.", "¿Dejar el programa? Tus ofrecimientos se retiran y tus emparejamientos terminan.", "Sair do programa? As suas ofertas são retiradas e os seus pares terminam.", "پروگرام چھوڑیں؟ آپ کی پیشکشیں واپس اور جوڑ ختم ہو جائیں گے۔", "कार्यक्रम छोड़ें? आपके प्रस्ताव वापस और जोड़ियाँ समाप्त हो जाएँगी।", "Umalis sa programa? Babawiin ang iyong mga alok at matatapos ang iyong mga pagpapareha.", "कार्यक्रम छोड्ने? तपाईंका प्रस्ताव फिर्ता हुनेछन् र जोडी अन्त्य हुनेछन्।", "প্রোগ্রাম ছাড়বেন? আপনার প্রস্তাব প্রত্যাহার হবে এবং জুটি শেষ হবে।"],
+});
+const MT_HELPS = ['questions', 'subjects', 'cv', 'internship', 'job', 'unilife', 'city', 'talk'];
+const MT_HELP_K = { questions: 'hpQuestions', subjects: 'hpSubjects', cv: 'hpCv', internship: 'hpInternship', job: 'hpJob', unilife: 'hpUnilife', city: 'hpCity', talk: 'hpTalk' };
+const MT_LINKS = ['uni', 'field', 'city', 'industry', 'experience'];
+const MT_LINK_K = { uni: 'lkUni', field: 'lkField', city: 'lkCity', industry: 'lkIndustry', experience: 'lkExperience' };
+const MT_RULES = ['mtR1', 'mtR2', 'mtR3', 'mtR4', 'mtR5'];
+const MT_CHECKS = [['yes', 'mtYes'], ['not_yet', 'mtNotYet'], ['help', 'mtNeedHelp']];
+
+function _mtData() { const c = _hCust(), m = S._mt; return c && m && m.forId === c.id && !m.off ? m.d : null; }
+function _mtCountry(code) { const r = (typeof NATIONALITIES !== 'undefined' ? NATIONALITIES : []).find((x) => x[0] === code); return r ? nationalityLabel(r[1]) : String(code || ''); }
+function _mtChips(list, K) {
+  const a = (Array.isArray(list) ? list : []).filter((k) => K[k]);
+  return a.length ? `<ul class="mt-chips">${a.map((k) => `<li>${esc(_hT(K[k]))}</li>`).join('')}</ul>` : '';
+}
+function _mtWhere(p) { return `<bdi>${esc(p.city || '')}</bdi>, ${esc(_mtCountry(p.country))} · ${esc(_hF('mtClass', p.class_year))}`; }
+
+// The read: when the tab paints, and again after two minutes or a write. A database without the programme hides it.
+async function _mtFetch(force) {
+  const c = _hCust(); if (!c || !sb || S._mtBusy) return;
+  const m = S._mt;
+  if (!force && m && m.forId === c.id && Date.now() - m.at < 12e4) return;
+  S._mtBusy = true;
+  let r; try { r = await sb.rpc('mentor_feed', _hTok(c)); } catch (e) { r = { error: e }; }
+  S._mtBusy = false;
+  const now = _hCust(); if (!now || now.id !== c.id) return;
+  const e = r && r.error;
+  if (e && (e.code === 'PGRST202' || e.code === '42883')) S._mt = { forId: c.id, at: Date.now(), off: true };
+  else if (r && !e && r.data && r.data.ok === true) S._mt = { forId: c.id, at: Date.now(), d: r.data };
+  else if (m && m.forId === c.id && m.d) m.at = Date.now();
+  else S._mt = { forId: c.id, at: Date.now(), d: null };
+  if (S.custTab === 'members') _hubRender();
+}
+
+// The feed's card: what waits for the member first (an offer to answer, a check due), then the way in.
+function _mtDue(d) {
+  const a = d.ask;
+  return [...((a && a.matches) || []).filter((x) => x.due), ...(d.offers || []).filter((x) => x.status === 'matched' && x.due)];
+}
+function _mtCardHtml() {
+  const d = _mtData(); if (!d) return '';
+  const a = d.ask, n = (d.profiles || []).length, due = _mtDue(d);
+  const line = a && Array.isArray(a.proposed) && a.proposed.length ? _hT('mtOffered') : due.length ? _hF('mtCheckQ', due[0].name || '') : '';
+  return `<div class="hub-card mt-card"><span class="hub-k">${_cuIc('people', 16)} ${_hT('mtTitle')}</span>
+    <strong class="hub-name">${_hT('mtHelpName')}</strong>
+    ${n ? `<div class="hub-meta">${esc(_hF('mtOpenN', n))}</div>` : ''}
+    ${line ? `<div class="mt-alert" role="status"><bdi>${esc(line)}</bdi></div>` : ''}
+    ${d.mentor ? '' : `<button type="button" class="btn-primary hub-wide" data-on-click="${_on('_mtJoinOpen', 0)}">${_hT('mtRegMentor')}</button>`}
+    <button type="button" class="${d.mentor ? 'btn-primary' : 'btn-secondary'} hub-wide" data-on-click="${_on('_mtOpen')}">${_hT('mtSee')}</button>
+    ${a ? '' : `<button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_mtAskOpen')}">${_hT('mtAsk')}</button>`}</div>`;
+}
+function _mtOpen() { S._hubView = 'mentor'; _hubRender(); _mtFetch(true); try { window.scrollTo(0, 0); } catch (_) {} }
+function _mtClose() { S._hubView = null; _hubRender(); }
+
+// The page.
+function _mtHtml() {
+  const d = _mtData();
+  const head = `<div class="hub-card hub-flat mt-head"><h2 class="mt-h1">${_hT('mtTitle')}</h2><button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_mtClose')}">${_hT('close')}</button></div>`;
+  if (!d) {
+    const m = S._mt;
+    return head + (m && m.d === null && !S._mtBusy
+      ? `<div class="hub-card" role="status"><strong class="hub-name">${_hT('err')}</strong><button type="button" class="btn-primary hub-wide" data-on-click="${_on('_mtRetry')}">${_hT('retry')}</button></div>`
+      : _skelHtml(2, 'hub-skel'));
+  }
+  const a = d.ask, offers = Array.isArray(d.offers) ? d.offers : [], profiles = Array.isArray(d.profiles) ? d.profiles : [];
+  const matches = [
+    ...((a && a.matches) || []).map((x) => _mtMatchHtml(x, 'student', null)),
+    ...offers.filter((o) => o.status === 'matched').map((o) => _mtMatchHtml(o, 'mentor', o)),
+  ];
+  const mine = offers.filter((o) => o.status !== 'matched');
+  return [
+    head,
+    matches.length ? `<h3 class="mt-h2">${_hT('mtMatches')}</h3>${matches.join('')}` : '',
+    a ? `<h3 class="mt-h2">${_hT('mtYourAsk')}</h3>${_mtAskHtml(a)}` : '',
+    `<h3 class="mt-h2">${_hT('mtYouMentor')}</h3>${_mtMentorHtml(d.mentor)}`,
+    mine.length ? `<h3 class="mt-h2">${_hT('mtYourOffers')}</h3><div class="hub-card mt-list">${mine.map(_mtOfferRow).join('')}</div>` : '',
+    `<h3 class="mt-h2">${_hT('mtStudents')}</h3>`,
+    profiles.length ? profiles.map(_mtProfHtml).join('') : `<div class="hub-card hub-flat"><span class="hub-meta">${_hT('mtNone')}</span></div>`,
+    a ? '' : `<div class="hub-card hub-flat"><button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_mtAskOpen')}">${_hT('mtAsk')}</button></div>`,
+  ].join('');
+}
+function _mtRetry() { _mtFetch(true); }
+function _mtMentorHtml(m) {
+  if (!m) return `<div class="hub-card hub-flat"><button type="button" class="btn-primary hub-wide" data-on-click="${_on('_mtJoinOpen', 0)}">${_hT('mtRegMentor')}</button></div>`;
+  const line = [m.work, m.places].filter(Boolean).map((x) => `<bdi>${esc(x)}</bdi>`).join(' · ');
+  return `<div class="hub-card mt-me"><strong class="hub-name"><bdi>${esc(m.university || '')}</bdi></strong><div class="mt-line"><bdi>${esc(m.field || '')}</bdi></div>
+    ${line ? `<div class="hub-meta">${line}</div>` : ''}${_mtChips(m.helps, MT_HELP_K)}
+    <button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_mtJoinOpen', 0)}">${_hT('mtEdit')}</button>
+    <button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_mtQuit')}">${_hT('mtLeaveProg')}</button></div>`;
+}
+function _mtMatchHtml(x, side, o) {
+  const wa = String(x.wa || '').replace(/\D/g, '');
+  const chk = x.due ? `<div class="mt-check"><span class="hub-k"><bdi>${esc(_hF('mtCheckQ', x.name || ''))}</bdi></span><div class="mt-acts">${MT_CHECKS.map(([v, k]) => `<button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_mtCheck', x.id, v)}">${_hT(k)}</button>`).join('')}</div></div>` : '';
+  const about = side === 'mentor' && o
+    ? `<div class="mt-line">${esc(_hF('mtProfile', o.num))} · <bdi>${esc(o.university || '')}</bdi></div><div class="hub-meta"><bdi>${esc(o.field || '')}</bdi> · ${_mtWhere(o)}</div>`
+    : `${x.summary ? `<p class="mt-goal"><bdi>${esc(x.summary)}</bdi></p>` : ''}${_mtChips(x.links, MT_LINK_K)}`;
+  return `<div class="hub-card mt-match"><span class="hub-k">${_hT(side === 'student' ? 'mtYourMentor' : 'mtYourStudent')}</span>
+    <strong class="hub-name"><bdi>${esc(x.name || '')}</bdi></strong>${about}
+    ${wa ? `<a class="btn-primary hub-wide hub-link mt-wa" href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener">${_cuIc('chat', 16)} ${_hT('mtWa')}</a>` : ''}
+    ${chk}<button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_mtLeave', x.id, 'match')}">${_hT('mtStepBack')}</button></div>`;
+}
+function _mtAskHtml(a) {
+  const st = a.status === 'pending' ? 'mtAskPending' : a.status === 'matched' ? 'mtStMatched' : 'mtAskOpen';
+  const props = (Array.isArray(a.proposed) ? a.proposed : []).map((p) => `<div class="mt-sub" role="group" aria-label="${esc(_hT('mtOffered'))}">
+      <strong class="mt-line">${_hT('mtOffered')}</strong>${p.summary ? `<p class="mt-goal"><bdi>${esc(p.summary)}</bdi></p>` : ''}
+      ${_mtChips(p.links, MT_LINK_K)}${_mtChips(p.helps, MT_HELP_K)}
+      <div class="hub-slide-nav"><button type="button" class="btn-secondary" data-on-click="${_on('_mtAnswer', p.id, false)}">${_hT('mtNotNow')}</button><button type="button" class="btn-primary" data-on-click="${_on('_mtAnswer', p.id, true)}">${_hT('mtAccept')}</button></div></div>`).join('');
+  return `<div class="hub-card mt-ask"><span class="mt-pill">${_hT(st)}</span>
+    ${a.num ? `<span class="hub-k">${esc(_hF('mtProfile', a.num))}</span>` : ''}
+    <strong class="hub-name"><bdi>${esc(a.university || '')}</bdi></strong><div class="mt-line"><bdi>${esc(a.field || '')}</bdi></div>
+    <div class="hub-meta">${_mtWhere(a)}</div>${_mtChips(a.helps, MT_HELP_K)}${a.goal ? `<p class="mt-goal"><bdi>${esc(a.goal)}</bdi></p>` : ''}
+    ${props}
+    ${a.status === 'pending' ? `<button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_mtAskOpen')}">${_hT('mtEdit')}</button>` : ''}
+    <button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_mtLeave', null, 'ask')}">${_hT('mtCloseAsk')}</button></div>`;
+}
+function _mtOfferRow(o) {
+  const st = o.status === 'proposed' ? 'mtStProposed' : o.status === 'declined' ? 'mtStDeclined' : o.status === 'ended' ? 'mtStEnded' : 'mtStOffered';
+  const live = o.status === 'offered' || o.status === 'proposed';
+  return `<div class="mt-row"><div class="mt-row-t"><strong>${esc(_hF('mtProfile', o.num))}</strong><span><bdi>${esc(o.university || '')}</bdi> · <bdi>${esc(o.field || '')}</bdi></span><span class="mt-pill">${_hT(st)}</span></div>
+    ${live ? `<button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_mtLeave', o.id, 'offer')}">${_hT('mtWithdraw')}</button>` : ''}</div>`;
+}
+function _mtProfHtml(p) {
+  const st = p.offered;
+  return `<div class="hub-card mt-prof"><span class="hub-k">${esc(_hF('mtProfile', p.num))}</span>
+    <strong class="hub-name"><bdi>${esc(p.university || '')}</bdi></strong><div class="mt-line"><bdi>${esc(p.field || '')}</bdi></div>
+    <div class="hub-meta">${_mtWhere(p)}</div>${_mtChips(p.helps, MT_HELP_K)}${p.goal ? `<p class="mt-goal"><bdi>${esc(p.goal)}</bdi></p>` : ''}
+    ${st ? `<span class="mt-pill">${_hT(st === 'matched' ? 'mtStMatched' : st === 'proposed' ? 'mtStProposed' : 'mtStOffered')}</span>`
+      : `<button type="button" class="btn-primary hub-wide" data-on-click="${_on('_mtOfferOpen', p.num)}">${_hT('mtCanHelp')}</button>`}</div>`;
+}
+
+// ── The two forms, centred pop-ups in the app's dialog host ──────────────────────────────────────
+function _mtModal(id, title, body, go) {
+  const m = document.getElementById('confirm-modal'); if (!m) return;
+  m.style.display = 'block';
+  m.innerHTML = `<div class="modal-backdrop" data-on-click="${_on('_mtBack', _EV, _EL)}"><div class="confirm-box mt-box" role="dialog" aria-modal="true" aria-labelledby="${id}-t">
+    <div class="chrome-dh10"><div class="chrome-dt" id="${id}-t">${esc(title)}</div><button type="button" data-on-click="${_on('closeConfirm')}" aria-label="${esc(t('closeBtn'))}" class="chrome-xt x-close">&times;</button></div>
+    <div class="chrome-dbody mt-form" id="${id}">${body}</div>
+    <div class="chrome-dact"><button type="button" class="btn-secondary" data-on-click="${_on('closeConfirm')}">${esc(t('cancelBtn'))}</button><button type="button" class="btn-primary chrome-mw100" id="${id}-go" data-on-click="${_on(go)}">${_hT('mtSend')}</button></div></div></div>`;
+  const f = m.querySelector('.mt-form input, .mt-form .mt-chip'); if (f) try { f.focus({ preventScroll: true }); } catch (_) {}
+}
+function _mtBack(ev, el) { if (ev && ev.target === el) closeConfirm(); }
+function _mtChipGroup(key, keys, K, on, lbl) {
+  return `<div class="pg-field" data-mt="${key}"><span class="mt-lbl" id="mt-${key}-l">${esc(lbl)}</span><div class="mt-picks" role="group" aria-labelledby="mt-${key}-l">${keys.map((k) => `<button type="button" class="mt-chip${on.includes(k) ? ' on' : ''}" aria-pressed="${on.includes(k)}" data-k="${k}" data-on-click="${_on('_mtChip', _EL)}">${esc(_hT(K[k]))}</button>`).join('')}</div></div>`;
+}
+function _mtChip(el) {
+  if (!el) return;
+  const on = el.getAttribute('aria-pressed') !== 'true';
+  el.setAttribute('aria-pressed', String(on)); el.classList.toggle('on', on);
+  _mtClr(el);
+}
+function _mtClr(el) { const f = el && el.closest && el.closest('.pg-field'); if (f) { f.classList.remove('err'); const x = f.querySelector('.pg-msg'); if (x) x.remove(); } }
+function _mtPicked(key) { return [...document.querySelectorAll(`[data-mt="${key}"] .mt-chip[aria-pressed="true"]`)].map((b) => b.getAttribute('data-k')); }
+function _mtField(key, lbl, ctl) { return `<div class="pg-field" data-mt="${key}"><label for="mt-${key}">${esc(lbl)}</label>${ctl}</div>`; }
+function _mtAgreeHtml() {
+  return `<details class="mt-rules"><summary>${_hT('mtRules')}</summary><ul>${MT_RULES.map((k) => `<li>${esc(_hT(k))}</li>`).join('')}</ul></details>
+    <div class="pg-field mt-agree" data-mt="ok"><label class="mt-tick"><input type="checkbox" id="mt-ok" data-on-change="${_on('_mtClr', _EL)}"><span>${esc(_hT('mtAgree'))}</span></label></div>`;
+}
+function _mtErr(box, key, k) {
+  const f = box.querySelector(`[data-mt="${key}"]`); if (!f) return;
+  f.classList.add('err');
+  if (!f.querySelector('.pg-msg')) f.insertAdjacentHTML('beforeend', `<div class="pg-msg" role="alert">${esc(_hT(k))}</div>`);
+}
+function _mtVal(id) { const el = document.getElementById(id); return el ? String(el.value || '').trim() : ''; }
+function _mtErrMsg(res) {
+  const e = res && res.error;
+  return _hT(e === 'gone' || e === 'own' ? 'mtGone' : e === 'exists' ? 'mtExists' : e === 'limit' ? 'mtLimit' : 'err');
+}
+async function _mtSend(boxId, fn, args, after) {
+  const c = _hCust(), go = document.getElementById(boxId + '-go'); if (!c || S._mtSending) return;
+  S._mtSending = true; if (go) go.disabled = true;
+  let r; try { r = await sb.rpc(fn, { ..._hTok(c), ...args }); } catch (e) { r = { error: e }; }
+  S._mtSending = false; if (go) go.disabled = false;
+  const res = r && !r.error && r.data;
+  if (!res || res.ok !== true) {
+    if (typeof toast === 'function') toast(_mtErrMsg(res), 'error');
+    if (res && (res.error === 'gone' || res.error === 'own' || res.error === 'exists')) { closeConfirm(); _mtFetch(true); }
+    return;
+  }
+  closeConfirm();
+  await _mtFetch(true);
+  const d = _mtData();
+  if (after && d && d.mentor && (d.profiles || []).some((x) => x.num === after && !x.offered)) _mtOfferOpen(after);
+}
+function _mtCheckForm(box, fields) {
+  let bad = false;
+  fields.forEach(([key, ok, k]) => { if (!ok) { _mtErr(box, key, k); bad = true; } });
+  if (bad) { const f = box.querySelector('.pg-field.err input, .pg-field.err select, .pg-field.err textarea, .pg-field.err .mt-chip'); if (f) try { f.focus(); } catch (_) {} }
+  return !bad;
+}
+
+// A member offers to help one profile.
+function _mtOfferOpen(num) {
+  const d = _mtData(), p = d && (d.profiles || []).find((x) => x.num === num); if (!p) return;
+  if (!d.mentor) { _mtJoinOpen(num); return; }
+  S._mtNum = num;
+  _mtModal('mt-of', _hF('mtProfile', num), `<div class="mt-sum"><strong><bdi>${esc(p.university || '')}</bdi></strong><span><bdi>${esc(p.field || '')}</bdi></span><span>${_mtWhere(p)}</span></div>
+    ${_mtChipGroup('links', MT_LINKS, MT_LINK_K, [], _hT('mtLinksQ'))}
+    ${_mtChipGroup('helps', MT_HELPS, MT_HELP_K, Array.isArray(d.mentor.helps) ? d.mentor.helps : [], _hT('mtHelpsQ'))}
+    ${_mtField('note', _hT('mtNoteQ'), `<textarea id="mt-note" maxlength="500" rows="4" data-on-input="${_on('_mtClr', _EL)}"></textarea>`)}`, '_mtOfferSend');
+}
+function _mtOfferSend() {
+  const box = document.getElementById('mt-of'); if (!box) return;
+  const links = _mtPicked('links'), helps = _mtPicked('helps'), note = _mtVal('mt-note');
+  if (!_mtCheckForm(box, [['links', links.length, 'mtPickOne'], ['helps', helps.length, 'mtPickOne'], ['note', note, 'mtFill']])) return;
+  _mtSend('mt-of', 'mentor_offer', { p_num: S._mtNum, p_links: links, p_helps: helps, p_note: note });
+}
+
+// A member registers as a mentor (or changes it); from a profile's "I can help", that profile's offer opens next.
+function _mtJoinOpen(after) {
+  const d = _mtData(), m = (d && d.mentor) || {};
+  S._mtAfter = Number(after) || 0;
+  const inp = (key, v, max, ac) => `<input type="text" id="mt-${key}" maxlength="${max}" value="${esc(v || '')}"${ac ? ` autocomplete="${ac}"` : ''} data-on-input="${_on('_mtClr', _EL)}">`;
+  _mtModal('mt-jn', _hT('mtRegMentor'), [
+    _mtField('muni', _hT('mtMUni'), inp('muni', m.university, 160, 'organization')),
+    _mtField('mfield', _hT('mtMField'), inp('mfield', m.field, 120)),
+    _mtField('mwork', _hT('mtMWork'), inp('mwork', m.work, 120, 'organization-title')),
+    _mtField('mplaces', _hT('mtMPlaces'), inp('mplaces', m.places, 160)),
+    _mtChipGroup('mhelps', MT_HELPS, MT_HELP_K, Array.isArray(m.helps) ? m.helps : [], _hT('mtHelpsQ')),
+    _mtField('mabout', _hT('mtMAbout'), `<textarea id="mt-mabout" maxlength="500" rows="4" data-on-input="${_on('_mtClr', _EL)}">${esc(m.about || '')}</textarea>`),
+    _mtAgreeHtml(),
+  ].join(''), '_mtJoinSend');
+}
+function _mtJoinSend() {
+  const box = document.getElementById('mt-jn'); if (!box) return;
+  const v = { uni: _mtVal('mt-muni'), field: _mtVal('mt-mfield'), about: _mtVal('mt-mabout') };
+  const helps = _mtPicked('mhelps'), ok = !!(document.getElementById('mt-ok') || {}).checked;
+  if (!_mtCheckForm(box, [['muni', v.uni.length >= 2, 'mtFill'], ['mfield', v.field.length >= 2, 'mtFill'], ['mhelps', helps.length, 'mtPickOne'], ['mabout', v.about, 'mtFill'], ['ok', ok, 'mtTick']])) return;
+  _mtSend('mt-jn', 'mentor_join', {
+    p_university: v.uni, p_field: v.field, p_work: _mtVal('mt-mwork') || null, p_places: _mtVal('mt-mplaces') || null,
+    p_helps: helps, p_about: v.about, p_ok: true,
+  }, S._mtAfter);
+}
+async function _mtQuit() {
+  if (!(await askConfirm({ title: _hT('mtLeaveProgQ'), confirmLabel: _hT('mtLeaveProg'), confirmClass: 'btn-red' }))) return;
+  _mtCall('mentor_quit', {});
+}
+
+// A member starting university asks for a mentor (or changes a request staff have not published yet).
+function _mtCountryOpts(code) {
+  const r = NATIONALITIES.find((x) => x[0] === code), once = _selOnce(r ? r[1] : '');
+  const codeOf = Object.fromEntries(NATIONALITIES.map(([k, n]) => [n, k]));
+  const m = _natFor(S.lang || 'en');
+  return `<option value=""></option>${m.list.map((n) => `<option value="${esc(codeOf[n] || '')}"${once(n) ? ' selected' : ''}>${esc(m.lab[n] || n)}</option>`).join('')}`;
+}
+function _mtAskOpen() {
+  const d = _mtData(), a = (d && d.ask && d.ask.status === 'pending' && d.ask) || {};
+  const y = new Date().getFullYear(), yr = Number(a.class_year) || y;
+  const years = [y - 1, y, y + 1, y + 2, y + 3].map((v) => `<option value="${v}"${v === yr ? ' selected' : ''}>${v}</option>`).join('');
+  const pref = a.gender_pref || 'any';
+  const prefs = [['any', 'mtPrefAny'], ['female', 'mtPrefF'], ['male', 'mtPrefM']].map(([v, k]) => `<option value="${v}"${v === pref ? ' selected' : ''}>${esc(_hT(k))}</option>`).join('');
+  const inp = (key, v, max, ac) => `<input type="text" id="mt-${key}" maxlength="${max}" value="${esc(v || '')}"${ac ? ` autocomplete="${ac}"` : ''} data-on-input="${_on('_mtClr', _EL)}">`;
+  _mtModal('mt-ak', _hT('mtAsk'), [
+    _mtField('uni', _hT('mtUni'), inp('uni', a.university, 100, 'organization')),
+    _mtField('field', _hT('mtField'), inp('field', a.field, 100)),
+    _mtField('city', _hT('mtCity'), inp('city', a.city, 60, 'address-level2')),
+    _mtField('country', _hT('mtCountry'), `<select id="mt-country" data-on-change="${_on('_mtClr', _EL)}">${_mtCountryOpts(a.country)}</select>`),
+    _mtField('year', _hT('mtYear'), `<select id="mt-year">${years}</select>`),
+    _mtChipGroup('want', MT_HELPS, MT_HELP_K, Array.isArray(a.helps) ? a.helps : [], _hT('mtWantQ')),
+    _mtField('goal', _hT('mtGoal'), `<textarea id="mt-goal" maxlength="200" rows="3">${esc(a.goal || '')}</textarea>`),
+    _mtField('pref', _hT('mtPref'), `<select id="mt-pref">${prefs}</select>`),
+    _mtAgreeHtml(),
+  ].join(''), '_mtAskSend');
+}
+function _mtAskSend() {
+  const box = document.getElementById('mt-ak'); if (!box) return;
+  const v = { uni: _mtVal('mt-uni'), field: _mtVal('mt-field'), city: _mtVal('mt-city'), country: _mtVal('mt-country') };
+  const want = _mtPicked('want'), ok = !!(document.getElementById('mt-ok') || {}).checked;
+  if (!_mtCheckForm(box, [['uni', v.uni.length >= 2, 'mtFill'], ['field', v.field.length >= 2, 'mtFill'], ['city', v.city, 'mtFill'], ['country', v.country, 'mtFill'], ['want', want.length, 'mtPickOne'], ['ok', ok, 'mtTick']])) return;
+  _mtSend('mt-ak', 'mentor_ask', {
+    p_university: v.uni, p_field: v.field, p_city: v.city, p_country: v.country, p_class_year: Number(_mtVal('mt-year')) || new Date().getFullYear(),
+    p_helps: want, p_goal: _mtVal('mt-goal') || null, p_gender_pref: _mtVal('mt-pref') || 'any', p_ok: true,
+  });
+}
+
+// Answers, stepping back and the check: each asks the database, then reads the page again.
+async function _mtCall(fn, args) {
+  const c = _hCust(); if (!c || S._mtSending) return;
+  S._mtSending = true;
+  let r; try { r = await sb.rpc(fn, { ..._hTok(c), ...args }); } catch (e) { r = { error: e }; }
+  S._mtSending = false;
+  const res = r && !r.error && r.data;
+  if ((!res || res.ok !== true) && typeof toast === 'function') toast(_mtErrMsg(res), 'error');
+  _mtFetch(true);
+}
+async function _mtAnswer(id, yes) {
+  if (!yes && !(await askConfirm({ title: _hT('mtNotNowQ'), confirmLabel: _hT('mtNotNow'), confirmClass: 'btn-red' }))) return;
+  _mtCall('mentor_answer', { p_offer: id, p_yes: !!yes });
+}
+async function _mtLeave(id, kind) {
+  const [q, l] = kind === 'ask' ? ['mtCloseAskQ', 'mtCloseAsk'] : kind === 'offer' ? ['mtWithdrawQ', 'mtWithdraw'] : ['mtStepBackQ', 'mtStepBack'];
+  if (!(await askConfirm({ title: _hT(q), confirmLabel: _hT(l), confirmClass: 'btn-red' }))) return;
+  _mtCall('mentor_leave', { p_offer: kind === 'ask' ? null : id });
+}
+function _mtCheck(id, answer) { _mtCall('mentor_check', { p_offer: id, p_answer: answer }); }
+
 window._hubRender = _hubRender;
