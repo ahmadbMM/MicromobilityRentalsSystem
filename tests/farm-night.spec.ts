@@ -11,7 +11,7 @@ const farm = {
   id: FH, session_date: '2099-11-19', day: 'Thursday', status: 'open', capacity: 60, created_at: 1,
   event_kind: 'community', ride_kind: 'farm', needs_approval: true, hide_queue: true, spots: 60, open_to_all: false,
   paid_ride: false, title: 'Nawar Farm House Night', title_ar: 'ليلة مزرعة نوار', location: 'Little Farmhouse, Dhahban',
-  meet_name: 'Little Farmhouse, Dhahban', meet_url: 'https://maps.app.goo.gl/BYteRL5JCueWZUEs6', bike_slots: '{"_time":"16:30 - 20:30"}',
+  meet_name: 'Little Farmhouse, Dhahban', meet_url: 'https://maps.app.goo.gl/BYteRL5JCueWZUEs6', bike_slots: '{"_time":"16:30 - 20:30","_ig":"thefarmhouse.jed"}',
 };
 const sat = {
   id: '2099-11-21-2', session_date: '2099-11-21', day: 'Saturday', status: 'open', capacity: 120, created_at: 1,
@@ -35,7 +35,7 @@ test.describe('@customer:farm Farm House Night', () => {
         steps:_regSteps(s),gathers:_gathersTime(s),waiver:_waiverKind(s),nc:_ncEntry({sessionId:'2099-12-03-fh'}),
         time:sessionTime(s),featured:_featured(s)};})()`);
     expect(k).toEqual({ kind: 'farm', bike: false, approval: true, free: true, party: true, max: 5, steps: [1, 2, 3], gathers: true,
-      waiver: 'activity', nc: true, time: 'Arrival 4:30 PM · Dinner 8:30 PM', featured: true });
+      waiver: 'farm', nc: true, time: 'Arrival 4:30 PM · Dinner 8:30 PM', featured: true });
   });
 
   test('the Experiences card shows its mark to members alone', async ({ page }) => {
@@ -92,7 +92,12 @@ test.describe('@customer:farm Farm House Night', () => {
     await expect(box.locator('.ev-info-text')).toContainText('dinner at 8:30 PM');
     await expect(box.locator('.ev-info-facts')).toContainText('Community members and their families');
     await expect(box.locator('.ev-info-facts')).toContainText('Little Farmhouse, Dhahban');
-    await expect(box.locator('.ev-info-facts a')).toHaveAttribute('href', 'https://maps.app.goo.gl/BYteRL5JCueWZUEs6');
+    await expect(box.locator('.ev-info-facts a', { hasText: 'Map' })).toHaveAttribute('href', 'https://maps.app.goo.gl/BYteRL5JCueWZUEs6');
+    // the farm's Instagram, opening its account
+    const ig = box.locator('.ev-info-facts a.ev-info-ig');
+    await expect(ig).toHaveText('@thefarmhouse.jed');
+    await expect(ig).toHaveAttribute('href', 'https://www.instagram.com/thefarmhouse.jed');
+    await expect(ig).toHaveAttribute('target', '_blank');
   });
 
   test('booking: the member and two family members by name, sent for approval in the farm skin', async ({ page }) => {
@@ -116,11 +121,20 @@ test.describe('@customer:farm Farm House Night', () => {
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
     await expect.poll(() => page.evaluate('S.regStep')).toBe(3);
     await expect(page.locator('#tab-register')).not.toContainText('Bike Type');
+    // the farm night's own waiver: the farm, its animals, the food, and the family on the booking
+    await expect(page.locator('#reg-waiver')).toContainText('Farm House Night waiver');
+    await expect(page.locator('#reg-waiver-lbl')).toHaveText('I have read the waiver and agree for myself and on behalf of everyone on this booking');
+    await page.evaluate('showWaiverText()');
+    const wv = page.locator('#bike-info-modal');
+    await expect(wv).toContainText('animals that can bite, kick or scratch');
+    await expect(wv).toContainText('allergy or dietary need');
+    await expect(wv).toContainText('supervise them at all times');
+    await page.evaluate('closeWaiverText()');
     await page.locator('#reg-waiver-cb').check();
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
     await expect.poll(() => rows.length).toBe(3);
     expect(rows.map((r) => r.name)).toEqual(['Sara Haddad', 'Lina Haddad', 'Omar Haddad']);
-    for (const r of rows) expect(r).toMatchObject({ session_id: FH, type_preference: 'None', price: 0 });
+    for (const r of rows) expect(r).toMatchObject({ session_id: FH, type_preference: 'None', price: 0, waiver_version: 'farm-2026-11-v1' });
     // one booking: the family shares its group
     expect(new Set(rows.map((r) => r.group_id)).size).toBe(1);
     const tk = page.locator('#tab-register .ticket-card').first();
@@ -151,6 +165,8 @@ test.describe('@customer:farm Farm House Night', () => {
     await expect(tk).toHaveClass(/\bth-farm\b/);
     await expect(tk).toContainText('Arrival 4:30 PM · Dinner 8:30 PM');
     await expect(tk).not.toContainText('Gathering');
+    // the farm's Instagram on the ticket
+    await expect(tk.locator('a.tk-ig')).toHaveAttribute('href', 'https://www.instagram.com/thefarmhouse.jed');
     // its countdown runs to arrival, then to dinner
     expect(await page.evaluate(`_cdAttr(allSessions().find(x=>x.id==='${FH}'),'2099-11-19')`)).toMatch(/:fhCdArrive\|\d+:fhCdDinner$/);
     await expect(tk).not.toContainText(/\bbike\b/i);
@@ -177,7 +193,8 @@ test.describe('@staff:sessions Farm House Night', () => {
     // staff's lists name it by its title, its kind's short name when it has none; no walk-ins on it
     expect(await page.evaluate(`_sessShort(allSessions().find(x=>x.id==='${FH}'))`)).toBe('Nawar Farm House Night');
     expect(await page.evaluate(`_sessShort({...allSessions().find(x=>x.id==='${FH}'),title:null})`)).toBe('Farm night');
-    expect(await page.evaluate(`_noWalkin(allSessions().find(x=>x.id==='${FH}'))`)).toBe(true);
+    // staff add people by hand: walk-ins, Add rider, Add group (the user, 2026-11-13)
+    expect(await page.evaluate(`[_noWalkin,_noAddRider,_noGroupAdd].map(f=>f(allSessions().find(x=>x.id==='${FH}')))`)).toEqual([false, false, false]);
     expect(await page.evaluate(`_sfTheme(allSessions().find(x=>x.id==='${FH}'))`)).toBe('farm');
   });
 
@@ -201,5 +218,40 @@ test.describe('@staff:sessions Farm House Night', () => {
     await page.evaluate(`setStaffTab('queue');S.sfSession='${FH}';renderStaffQueue()`);
     await expect(page.locator('#tab-queue')).toContainText('3 participants');
     await expect(page.locator('#tab-queue')).not.toContainText('3 bikes');
+  });
+
+  test('the booking editor adds family members to a farm booking, waiting on the booking\'s own decision', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const one = { session_id: FH, session_day: 'Thursday', session_date: '2099-11-19', phone: '+966500000001', type_preference: 'None',
+      size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-12T10:00:00Z', customer_id: 'c1', approval: 'pending',
+      id: 'q1', queue_num: 4, name: 'Sara Haddad' };
+    const posts: Record<string, unknown>[] = [];
+    await stubSupabase(page, { sessions: [farm, sat], bikes: [], queue_entries: [one] });
+    await page.route('**/rest/v1/queue_entries*', async (route) => {
+      if (route.request().method() === 'POST') { const b = route.request().postDataJSON(); posts.push(...(Array.isArray(b) ? b : [b])); }
+      await route.fallback();
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('queue');S.sfSession='${FH}';renderStaffQueue();showBookingEditModal('q1')`);
+    const modal = page.locator('#booking-edit-modal');
+    await expect(modal.locator('.dk-w100-mt8')).toBeVisible(); // + Add rider
+    await modal.locator('.dk-w100-mt8').click();
+    await modal.locator('#be-nr-name-0').fill('Lina Haddad');
+    await modal.locator('.modal-footer .btn-primary').click();
+    await expect.poll(() => posts.length).toBeGreaterThan(0);
+    expect(posts[0]).toMatchObject({ name: 'Lina Haddad', session_id: FH, approval: 'pending', customer_id: 'c1' });
+  });
+
+  test('the session editor keeps and changes the venue\'s Instagram', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await stubSupabase(page, { sessions: [farm, sat], bikes: [], queue_entries: [] });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('sessions');startEditSession('${FH}')`);
+    await expect(page.locator('#es-ig')).toHaveValue('thefarmhouse.jed');
+    expect(await page.evaluate(`[_igClean('@thefarmhouse.jed'),_igClean('https://www.instagram.com/thefarmhouse.jed/?hl=en'),IG_HANDLE.test('bad handle')]`)).toEqual(['thefarmhouse.jed', 'thefarmhouse.jed', false]);
   });
 });

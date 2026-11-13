@@ -55,9 +55,9 @@ test.describe('@customer:waiver desk-added booking waiver', () => {
     await expect(btn).toBeEnabled();
     await btn.click();
     await expect.poll(() => calls.length).toBe(1);
-    expect(calls[0]).toEqual({ p_id: 'c1', p_token: 'tok-spec', p_session_id: 's-' + FUT, p_version: '2026-10-v3' });
+    expect(calls[0]).toEqual({ p_id: 'c1', p_token: 'tok-spec', p_session_id: 's-' + FUT, p_version: '2026-11-v4' });
     await expect.poll(() => open(page)).toBe(false);
-    expect(await page.evaluate(`getQueue().filter(e=>e.customerId==='c1').map(e=>e.waiverVersion)`)).toEqual(['2026-10-v3', '2026-10-v3']);
+    expect(await page.evaluate(`getQueue().filter(e=>e.customerId==='c1').map(e=>e.waiverVersion)`)).toEqual(['2026-11-v4', '2026-11-v4']);
     // Moving about after agreeing does not ask again
     await page.evaluate(`setCustTab('register');setCustTab('myrides')`);
     expect(await open(page)).toBe(false);
@@ -67,7 +67,7 @@ test.describe('@customer:waiver desk-added booking waiver', () => {
     const { waiver_version: _drop, ...noColumn } = row('q5', FUT, { id: 'q5' });
     void _drop;
     await boot(page, [sess(FUT), sess('2020-01-05')], [
-      row('q1', FUT, { waiver_version: '2026-10-v3', waiver_at: today + 'T09:00:00Z' }),
+      row('q1', FUT, { waiver_version: '2026-11-v4', waiver_at: today + 'T09:00:00Z' }),
       row('q2', '2020-01-05'),
       row('q3', FUT, { status: 'cancelled' }),
       row('q4', FUT, { customer_id: 'c2' }),
@@ -94,12 +94,12 @@ test.describe('@customer:waiver desk-added booking waiver', () => {
     await m.locator('.wg-cb').check();
     await m.locator('.pg-btn').click();
     await expect.poll(() => open(page)).toBe(false);
-    expect(calls.map((c) => [c.p_session_id, c.p_version])).toEqual([['s-2099-01-10', 'swim-2026-10-v3'], ['s-2099-01-20', 'activity-2026-10-v3']]);
+    expect(calls.map((c) => [c.p_session_id, c.p_version])).toEqual([['s-2099-01-10', 'swim-2026-11-v4'], ['s-2099-01-20', 'activity-2026-11-v4']]);
   });
 
   test('the waiver comes before the post-ride rating, which opens once it is agreed', async ({ page }) => {
     await boot(page, [sess(today), sess(FUT)], [
-      row('q1', today, { status: 'done', paid: true, checked_out_at: today + 'T11:00:00Z', waiver_version: '2026-10-v3' }),
+      row('q1', today, { status: 'done', paid: true, checked_out_at: today + 'T11:00:00Z', waiver_version: '2026-11-v4' }),
       row('q2', FUT),
     ]);
     await expect.poll(() => open(page)).toBe(true);
@@ -151,7 +151,7 @@ test.describe('@customer:waiver desk-added booking waiver', () => {
 
   test('the ticket QR has a line running round it, still moving under reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await boot(page, [sess(FUT)], [row('q1', FUT, { waiver_version: '2026-10-v3' })]);
+    await boot(page, [sess(FUT)], [row('q1', FUT, { waiver_version: '2026-11-v4' })]);
     await page.evaluate(`goCustomer('myrides')`);
     const line = page.locator('#tab-myrides .cu-qr-box .qr-live path').first();
     await expect(line).toBeVisible();

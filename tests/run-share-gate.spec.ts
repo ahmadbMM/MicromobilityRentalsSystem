@@ -19,7 +19,7 @@ const jcc = { id: '2099-10-18', session_date: '2099-10-18', day: 'Sunday', statu
 const row = (id: string, x: Record<string, unknown> = {}) => ({
   id, name: 'Spec Runner', customer_id: 'c1', session_id: RUN, session_day: 'Saturday', session_date: '2099-10-17', queue_num: 7,
   type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-10-01T10:00:00Z', run_km: 5,
-  waiver_version: 'activity-2026-10-v3', waiver_at: '2099-10-01T10:00:00Z', data_share_at: null, ...x,
+  waiver_version: 'activity-2026-11-v4', waiver_at: '2099-10-01T10:00:00Z', data_share_at: null, ...x,
 });
 const open = (page: Page) => page.evaluate(`!!S._sg&&document.getElementById('share-gate').style.display==='block'`);
 
@@ -72,7 +72,7 @@ test.describe('@customer:runher a runner agrees to share their details', () => {
       row('q1', { data_share_at: '2099-10-02T08:00:00Z' }),
       row('q2', { status: 'cancelled' }),
       row('q3', { status: 'done' }),
-      row('q4', { session_id: jcc.id, session_day: 'Sunday', session_date: jcc.session_date, type_preference: 'Hybrid', price: 75, run_km: null, waiver_version: '2026-10-v3' }),
+      row('q4', { session_id: jcc.id, session_day: 'Sunday', session_date: jcc.session_date, type_preference: 'Hybrid', price: 75, run_km: null, waiver_version: '2026-11-v4' }),
       row('q6', { session_id: '2020-10-17-rh', session_date: '2020-10-17' }),
       noColumn,
     ]);

@@ -368,7 +368,7 @@ test.describe('@staff:bookings b2-e emergency contact and the waiver at the desk
   test('No waiver yet: the mark on the roster, the chip and the status filter', async ({ page }) => {
     const q = [
       bk('nw1', 'j1', TODAY, 1, { waiver_version: null }),
-      bk('wv1', 'j1', TODAY, 2, { waiver_version: '2026-10-v3' }),
+      bk('wv1', 'j1', TODAY, 2, { waiver_version: '2026-11-v4' }),
       bk('un1', 'j1', TODAY, 3), // read without the column: nothing is known, nothing is said
     ];
     await boot(page, { sessions: [jcc('j1', TODAY)], queue_entries: q });
@@ -416,9 +416,9 @@ test.describe('@staff:bookings b2-e emergency contact and the waiver at the desk
     await go.click();
     await expect(sheet).toHaveCount(0);
     const call = calls.find((c) => c.name === 'staff_record_waiver');
-    expect(call?.body).toMatchObject({ p_entry_ids: ['n1', 'n2'], p_version: '2026-10-v3' });
+    expect(call?.body).toMatchObject({ p_entry_ids: ['n1', 'n2'], p_version: '2026-11-v4' });
     await expect(page.locator('#checkin-modal #ci-wv')).toHaveCount(0);
-    expect(await page.evaluate(`getQueue().filter(x=>['n1','n2'].includes(x.id)).map(x=>x.waiverVersion)`)).toEqual(['2026-10-v3', '2026-10-v3']);
+    expect(await page.evaluate(`getQueue().filter(x=>['n1','n2'].includes(x.id)).map(x=>x.waiverVersion)`)).toEqual(['2026-11-v4', '2026-11-v4']);
   });
 
   test('a pool session\'s sheet shows the swim waiver; a database without the function says so', async ({ page }) => {

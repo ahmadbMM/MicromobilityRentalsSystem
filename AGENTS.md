@@ -1796,6 +1796,18 @@ knows it). KIND_TRAITS: no bike, no breakfast, but it GATHERS: `_time` is "arriv
 - Migration `20261114130000_farm_kind` (promo kind list, `_session_kind`, `_vol_sess_name`, `staff_record_waiver`
   activity, `_updates_key`, `_solo_ride_cap` leaves farm alone, `_group_ride_cap` caps it at event_seat_max, push words).
   Session: `supabase/checks/farm-night-2026-11-19.sql`, run after the app is live. Tests: `tests/farm-night.spec.ts`.
+- **Waivers (2026-11-13, "update all waivers especially the nawar farm house session")**: ride, swim and activity bodies end
+  with the sentence for everyone on a booking (the booker accepts for each, may do so, is the parent/guardian of every
+  child or has the guardian's permission, supervises them): versions `2026-11-v4`, `swim-2026-11-v4`, `activity-2026-11-v4`.
+  The farm night has its own, `farm-2026-11-v1` (`_waiverKind` 'farm', `fhWaiverTitle/Body/Agree`: the farm, its animals,
+  food and allergies, damage, the family). Migration `20261114160000_waivers_for_everyone` (`_waiver_min`, `_waiver_outdated`
+  farm prefix, `staff_record_waiver`, `_farm_waiver_guard`) runs only after this app AND the website's waivers and forms
+  are live. Blood donation agreements unchanged.
+- **Staff**: walk-ins allowed on the farm night; the booking editor's Add riders works on it (the save's solo rule skips
+  farm; an added family member takes the booking's own approval, pending until approved).
+- **Instagram**: `bike_slots._ig` (handle, `IG_HANDLE`, `_igClean`), `_sessIg` / `_sessIgLink`: a row on Details and a link
+  on both tickets; the session editor's Instagram box (`es-ig`, `S.editSessIg`) keeps or changes it (the editor rebuilds
+  slots, so it must be carried there). The first night carries @thefarmhouse.jed.
 
 ## Featured (2026-11-13)
 The user: "create a new featured section under micromobility experiences in the booking app to put featured sessions

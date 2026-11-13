@@ -12226,6 +12226,12 @@ body.view-staff .sess-summary-chip.th-farm .sess-chip-event{font-family:'Rubik',
 html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-farm .sess-chip-event{color:#E8A383;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-farm{--rq-ev:#8a3f27;}
 html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-farm{--rq-ev:#e8a383;}
+/* the venue's Instagram on Details and the ticket (bike_slots._ig, 2026-11-13) */
+.tk-ig-row{margin:10px 0 2px;min-width:0;}
+:is(.tk-ig,.ev-info-ig){display:inline-flex;align-items:center;gap:6px;min-height:32px;font-weight:700;color:var(--neon,var(--go));text-decoration:none;overflow-wrap:anywhere;}
+:is(.tk-ig,.ev-info-ig) svg{width:16px;height:16px;flex:none;}
+:is(.tk-ig,.ev-info-ig):hover{text-decoration:underline;}
+.ev-info-ig{min-height:0;color:inherit;text-decoration:underline;font-weight:600;}
 @media(max-width:400px){.fh-card-title{font-size:19px;}.fh-card-mark{height:26px;}.fh-flow-mark{height:34px;}.fh-scene{width:148px;height:74px;}.feat-fh .feat-name.fh-card-title{font-size:17px;}}
 /* ════════════════════════════════════════════════════════════════════════
    FEATURED (the user, 2026-11-13) - a date inside MicroMobility Experiences that staff feature (_featured):

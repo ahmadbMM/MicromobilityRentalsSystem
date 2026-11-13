@@ -257,7 +257,7 @@ test.describe('@customer:blood Blood Donation registration', () => {
   });
 
   test('My Bookings: the ticket carries the plate, the free ride code and no price, and nothing to edit or move', async ({ page }) => {
-    const row = { id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', waiver_at: '2099-11-01T10:00:00Z', waiver_version: 'activity-2026-10-v3', data_share_at: '2099-11-01T10:00:00Z' };
+    const row = { id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', waiver_at: '2099-11-01T10:00:00Z', waiver_version: 'activity-2026-11-v4', data_share_at: '2099-11-01T10:00:00Z' };
     await stubSupabase(page, custFx({ queue_entries: [row], 'rpc:customer_queue': [row], 'rpc:customer_entries': [row], 'rpc:customer_blood_rewards': [{ entry_id: 'q1', code: 'BD-1A2B3C4D', expires_at: '2099-12-05', used: false }] }));
     await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
     await page.goto('/');

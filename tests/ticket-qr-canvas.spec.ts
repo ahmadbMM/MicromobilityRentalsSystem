@@ -10,7 +10,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb, loadStaffHalf } fr
 test.describe('@customer:ticket the ticket code on a canvas', () => {
   const FUT = '2099-02-01';
   const sess = { id: 's-' + FUT, day: 'Sunday', session_date: FUT, capacity: 12, status: 'open', created_at: 1, location: 'JCC', bike_slots: '{"_time":"21:00 - 23:00","_total":12}' };
-  const row = { id: 'q1abcd', name: 'Spec Rider', customer_id: 'c1', session_id: 's-' + FUT, session_day: 'Sunday', session_date: FUT, queue_num: 3, status: 'waiting', paid: false, price: 75, waiver_version: '2026-10-v3' };
+  const row = { id: 'q1abcd', name: 'Spec Rider', customer_id: 'c1', session_id: 's-' + FUT, session_day: 'Sunday', session_date: FUT, queue_num: 3, status: 'waiting', paid: false, price: 75, waiver_version: '2026-11-v4' };
 
   async function ticket(page: Page) {
     await stubSupabase(page, { sessions: [sess], 'rpc:list_sessions': [sess], queue_entries: [row], 'rpc:my_bookings': [row] });

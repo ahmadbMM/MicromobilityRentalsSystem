@@ -133,7 +133,7 @@ with expected(fname, want_definer, note) as (values
   ('_lk_unit_log', true, 'lockers round two: writes locker_events, which no client writes; no client execute (20261109233000)'),
   ('_enforce_booking_price', true,  'calls _promo_valid, which anon+authenticated cannot execute'),
   ('_group_ride_cap',        true,  'counts queue_entries rows the caller may not be able to see'),
-  ('_solo_ride_cap',         true,  'same: one place per account on an approval session'),
+  ('_solo_ride_cap',         true,  'same: one place per account on an approval session (not the Farm House Night, 20261114130000)'),
   ('_approval_guard',        true,  'reads sessions/staff beyond the caller'),
   ('_community_booking_gate',true,  'reads customer_tags, staff-only'),
   ('saturday_rides', true, 'Saturday ride codes: reads sessions and codes no client can read; meters wrong codes (20261108120000)'),
@@ -476,6 +476,7 @@ with expected(fname, want_definer, note) as (values
   ('customer_set_emergency',    true,  'writes the caller''s own emergency contact; token-checked'),
   ('customer_set_emergency2',   true,  'writes the caller''s own second emergency contact (20261007150000); token-checked'),
   ('_run_entry_guard',          true,  'trigger: reads the session and the customer (RLS) to hold a runner''s row to the run''s rules'),
+  ('_farm_waiver_guard',        true,  'trigger: reads the session (RLS) to hold a farm night''s place to the farm waiver (20261114160000)'),
   -- Men only, women only or mixed (20261027150000)
   ('_gender_entry_guard',       true,  'trigger: reads the session and the customer (RLS) to hold a booking to a men-only or women-only session'),
   -- Fleet condition, maintenance and stock movements (20261009170000)

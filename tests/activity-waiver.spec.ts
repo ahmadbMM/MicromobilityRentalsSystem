@@ -85,7 +85,7 @@ test.describe('@customer:reserve activity waiver', () => {
       await panel.locator('#reg-waiver-cb').check();
       await panel.locator('.mm-reg-foot .btn-primary').click();
       await expect.poll(() => posts.length, { timeout: 6000 }).toBeGreaterThan(0);
-      expect(posts[0][0].waiver_version).toBe('activity-2026-10-v3');
+      expect(posts[0][0].waiver_version).toBe('activity-2026-11-v4');
     });
   }
 
@@ -100,7 +100,7 @@ test.describe('@customer:reserve activity waiver', () => {
     await expect(panel).not.toContainText('Activity waiver');
     await page.evaluate(`toggleWaiver(true);submitReg()`);
     await expect.poll(() => posts.length, { timeout: 6000 }).toBeGreaterThan(0);
-    expect(posts[0][0].waiver_version).toBe('swim-2026-10-v3');
+    expect(posts[0][0].waiver_version).toBe('swim-2026-11-v4');
   });
 
   test('the Arabic activity waiver reads as the owner wrote it', async ({ page }) => {

@@ -83,7 +83,7 @@ test.describe('@customer:reserve an event books participants, not riders', () =>
 });
 
 test.describe('@customer:waiver the waiver of a bike-free session', () => {
-  test('the review step and the desk-added pop-up name no ride, rider or bike, and the booking carries activity-2026-10-v3', async ({ page }) => {
+  test('the review step and the desk-added pop-up name no ride, rider or bike, and the booking carries activity-2026-11-v4', async ({ page }) => {
     const e = ev(d(4));
     await bootCustomer(page, [e], [], false);
     await page.evaluate(`S.selEvent='event';S.selSession=${JSON.stringify(e.id)};S.regStep=3;goCustomer('register')`);
@@ -94,7 +94,7 @@ test.describe('@customer:waiver the waiver of a bike-free session', () => {
     await expect(dlg).toContainText('You cannot book any activity with MicroMobility until you have read and agreed to this waiver.');
     await expect(dlg).not.toContainText(CYCLING);
     await dlg.locator('.btn-secondary').click();
-    expect(await page.evaluate(`_waiverVersionFor(_sessGet(${JSON.stringify(e.id)}))`)).toBe('activity-2026-10-v3');
+    expect(await page.evaluate(`_waiverVersionFor(_sessGet(${JSON.stringify(e.id)}))`)).toBe('activity-2026-11-v4');
     await page.evaluate(`S._wg={sid:${JSON.stringify(e.id)}};renderWaiverGate()`);
     const gate = page.locator('#waiver-gate');
     await expect(gate.locator('#wg-sub')).toHaveText('Our team booked you on this session. Read its waiver and agree to it to continue.');
