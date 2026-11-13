@@ -596,6 +596,12 @@ The T100 race badges (migration 20261008120000, the owner 2026-10-08): `t100` / 
 staff-given only (the races are not ours, so nothing in the bookings says who finished); since 2026-10-09 drawn as finisher
 medals on a ribbon with the race's name struck on them (`BDG_RACE` / `_bdgRace`, gold / silver / bronze whatever the row's colour,
 not in the icon picker), listed in `BDG_GIVEN_SYS` after Race Spirit; the website mirrors them (ride-record.ts GIVEN_SYS, Medal.tsx).
+The Ironman badges (migration 20261114070000; the user, 2026-11-13: "add a new half iron man and full iron man badges", then
+"ironman 70.3 ironman 140.6"): `ironman_703` / `ironman_1406`, staff-given only like the T100 ones, the same `BDG_RACE` medal
+on a red ribbon (its fifth item) with 70.3 in silver and 140.6 in gold, one ladder of two levels (140.6 brings 70.3), catalogue sort
+88 / 89, seen greyed by every rider. Not in `BDG_GIVEN_SYS`: that list only speaks where the database has no badge_catalog,
+which every database has had since October, and leaving it alone keeps the badge-count specs' totals. Website: Medal.tsx RACE,
+ride-record.ts SYS and LADDERS, RideRecord.text.ts and the language files.
 Badge ladders (the owner, 2026-10-09, "the same way it's done in clash of clans achievements"): `BDG_LADDERS` makes
 First Lap > Grid Regular > Podium Pace > Corniche 25, Hot Streak > Safety Car > Endurance, Rolling Start > ... > Hall of Fame,
 Perfect Week > Perfect Month and T25 > T50 > T100 the levels of one badge each. The rider's page folds each into one tile

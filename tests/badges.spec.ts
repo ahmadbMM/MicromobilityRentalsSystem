@@ -456,6 +456,50 @@ test.describe('@customer:account badges', () => {
     expect([ar.bdgT100, ar.bdgT25D]).toEqual(['إنجاز T100', 'أنهيت سباق T25 في جدة']);
   });
 
+  // Ironman 70.3 and 140.6 (the user, 2026-11-13: "add a new half iron man and full iron man badges", then "ironman 70.3
+  // ironman 140.6"): staff-given, the T100 medal on a red ribbon, one badge in two levels.
+  const imCat = [
+    { slug: 'ironman_1406', icon: 'ironman_1406', color: 'gold', name: 'Ironman 140.6 Finisher', system: true, auto: false, sort: 88, held_only: false },
+    { slug: 'ironman_703', icon: 'ironman_703', color: 'silver', name: 'Ironman 70.3 Finisher', system: true, auto: false, sort: 89, held_only: false },
+    { slug: 'first_lap', icon: 'flag', color: 'green', name: 'First Lap', system: true, auto: true, sort: 100 },
+  ];
+
+  test('the Ironman badges: every rider sees 70.3 greyed first, to ask for, as one badge in two levels', async ({ page }) => {
+    await rider(page, { 'rpc:customer_my_badges': [], 'rpc:badge_catalog': imCat });
+    await page.waitForFunction('S._bdgCat&&S._bdgCat.length>0&&S._bdgMine&&!S._bdgMine.busy');
+    await page.locator('#mr-badges-more').click();
+    await expect.poll(() => scoutNames(page)).toEqual(['First Lap', 'Ironman 70.3 Finisher']);
+    const tile = page.locator('#tab-account .mr-badge.ladder', { hasText: 'Ironman 70.3 Finisher' });
+    await expect(tile).toHaveClass(/locked/);
+    await expect(tile.locator('svg.bdg-race text').first()).toHaveText('70.3');
+    await expect(tile.locator('.mr-badge-lv i')).toHaveCount(2);
+    expect(await page.evaluate(`_bdrChoices(_mrBadgeList(S.loggedIn)).map(x=>x.b.slug).sort()`)).toEqual(['ironman_1406', 'ironman_703']);
+  });
+
+  test('the Ironman badges: 140.6 given pops up with 70.3 under it, both medals on the red ribbon, in every language', async ({ page }) => {
+    const held = { slug: 'ironman_1406', icon: 'ironman_1406', color: 'gold', name: 'Ironman 140.6 Finisher', system: true, note: 'Ironman Barcelona', at: new Date(Date.now() - 36e5).toISOString() };
+    await rider(page, { 'rpc:customer_my_badges': [held], 'rpc:badge_catalog': imCat });
+    const pop = page.locator('#badge-pop');
+    await expect(pop).toContainText('Ironman 140.6 Finisher');
+    await expect(pop).toContainText('Finished a full Ironman 140.6 triathlon');
+    await expect(pop.locator('.badge-pop-about')).toContainText('a 3.8 km swim, 180 km on the bike and a 42.2 km run');
+    await expect(pop.locator('svg.badge-pop-ic.bdg-race text').first()).toHaveText('140.6');
+    await expect(pop.locator('svg.badge-pop-ic.bdg-race path').first()).toHaveAttribute('fill', '#c8202f');
+    await expect(pop.locator('.badge-pop-lvn')).toHaveText('Level 2 of 2');
+    await expect(pop.locator('.badge-lvl.on')).toHaveCount(2);
+    await expect(pop.locator('.badge-lvl svg.bdg-race text:first-of-type')).toHaveText(['70.3', '140.6']);
+    await pop.getByRole('button', { name: 'Close' }).click();
+    const tile = page.locator('#tab-account .mr-badges .mr-badge.ladder', { hasText: 'Ironman 140.6 Finisher' });
+    await expect(tile).not.toHaveClass(/locked/);
+    await expect(tile.locator('.mr-badge-lv i.on')).toHaveCount(2);
+    await expect(page.locator('#tab-account .mr-badge', { hasText: 'Ironman 70.3 Finisher' })).toHaveCount(0);
+    // the T100 medals keep their blue ribbon; neither Ironman drawing is offered in the icon picker
+    expect(await page.evaluate(`[_bdgMedal('t100','gold').includes('#1e4f96'),...['ironman_703','ironman_1406'].map(k=>BD_SYS[k][0]===k&&!!BDG_RACE[k]&&!BDG_GLYPH[k])]`)).toEqual([true, true, true]);
+    const langs = ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'].map((l) => JSON.parse(readFileSync(`lang/${l}.json`, 'utf8')));
+    expect(langs[0].bdgIronman703).toBe('إنجاز آيرونمان 70.3');
+    for (const L of langs) for (const k of ['bdgIronman703', 'bdgIronman703D', 'bdgIronman703A', 'bdgIronman1406', 'bdgIronman1406D', 'bdgIronman1406A']) expect(L[k], k).toBeTruthy();
+  });
+
   test('a ladder is one tile at its level reached, with the next level as the closest badge (the owner, 2026-10-09)', async ({ page }) => {
     // A week apart, but never the Defe ride's day (its Rode with Defe pop-up came first, red on 2026-10-31 only): that
     // ride moves a day earlier, the Friday of the same Sunday-to-Saturday week (_bdgWk).

@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-38c426b612';
+const CACHE = 'mmcq-cd1c490612';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -28,7 +28,7 @@ const STAFF_JS = './staff.js?v=d51a003086';
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
 const STAFF_PARTS = ["./staff-parts/analytics.js?v=a15deb50b0","./staff-parts/community.js?v=d47738d36d","./staff-parts/bikes.js?v=eb4f7a42d5","./staff-parts/cashier.js?v=1ee59a7191","./staff-parts/catalog.js?v=b22d890243","./staff-parts/inventory.js?v=d47335b4f9","./staff-parts/website.js?v=fe1ecfdb0e","./staff-parts/history.js?v=2b9eb993e6","./staff-parts/wallet.js?v=4336c7103d","./staff-parts/workshop.js?v=5d12573d2d","./staff-parts/ambassadors.js?v=cc07701264","./staff-parts/messages.js?v=dc2366c923","./staff-parts/volunteers.js?v=cec2031ae9","./staff-parts/vendors.js?v=5f0c892899","./staff-parts/sessions.js?v=a2cd2bfebc","./staff-parts/lockers.js?v=1bf8803d1c","./staff-parts/ask.js?v=92db24ae41","./staff-parts/store.js?v=c4c14947ab","./staff-parts/sela.js?v=a7ece2ddf1","./staff-parts/vlap.js?v=4249e2143c","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=64deeadbfa","./staff-parts/settings.js?v=20650b307c","./staff-parts/fleet.js?v=6c839872d1","./staff-parts/money.js?v=afb89e4522","./staff-parts/desk.js?v=cda8d5c49e","./staff-parts/deskq.js?v=a9c6d97b0d","./staff-parts/kiosk.js?v=8e8f59222c","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=ab5d28317b","./staff-parts/peopleapps.js?v=70af6a5d12","./staff-parts/peoplemore.js?v=6912935c6a","./staff-parts/sessreport.js?v=dba6e2bb9b","./staff-parts/reports.js?v=0dd468f852","./staff-parts/door.js?v=8919999780"];
-const APP_JS = './app.js?v=67503e1af5';
+const APP_JS = './app.js?v=27b0abc5e1';
 const APP_CSS = './app.css?v=cfc020dac3';
 const SHELL = [
   SHELL_KEY,
