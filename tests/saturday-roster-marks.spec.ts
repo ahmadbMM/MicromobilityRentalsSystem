@@ -31,6 +31,8 @@ const people: [string, string, number, number, Record<string, unknown>?][] = [
   ['c9', 'Fadi Fifty', 49, 0, { status: 'cancelled' }],
   ['c10', 'Bana Back', 1, 5],
   ['c11', 'Riad Rejected', 4, 0, { approval: 'rejected' }],
+  ['c12', 'Pia Pending', 4, 0, { approval: 'pending' }], // a request still waiting on Approve
+  ['c13', 'Nour Noverdict', 9, 0, { approval: null }], // and one with no verdict written: pending too
 ];
 const row = (sid: string, n: number, cid: string, name: string, x: Record<string, unknown> = {}) => ({
   id: (sid === SAT ? 'q' : sid === JCC ? 'j' : 'p') + n, session_id: sid, session_day: 'Saturday', session_date: sid, queue_num: n, name, customer_id: cid,
@@ -91,6 +93,8 @@ test.describe('@staff:bookings Marks on the Saturday roster', () => {
     await expect(mk(page, 'q10')).toHaveText(['Second Saturday', 'Back after 5 missed']);
     await expect(tr(page, 'q11')).toHaveCount(1);
     await expect(mk(page, 'q11')).toHaveCount(0); // not selected for the ride
+    await expect(mk(page, 'q12')).toHaveText(['Saturday ride 5']); // waiting on Approve: marked on the roster
+    await expect(mk(page, 'q13')).toHaveText(['Saturday ride 10']);
     await expect(mk(page, 'q9')).toHaveCount(0); // cancelled
     // white on a solid fill, like the First ride chip beside it
     await expect(mk(page, 'q4')).toHaveCSS('background-color', 'rgb(138, 101, 0)');
@@ -101,16 +105,21 @@ test.describe('@staff:bookings Marks on the Saturday roster', () => {
     await boot(page);
     await roster(page);
     await expect(mk(page, 'q1')).toHaveCount(1);
-    expect(await page.evaluate('_srmSteps()')).toEqual([1, 5, 10, 25, 50, 100]);
-    // read off the ladder: the rows of Rolling Start's family in _mrBadges, each with its number
-    expect(await page.evaluate(`(()=>{const L=BDG_LADDER_OF.get('rolling_start')[0];return _mrBadges([],[],[],null).filter(x=>L.includes(x.s)).map(x=>x.s+' '+x.p);})()`))
-      .toEqual(['rolling_start 0/1', 'slipstream 0/5', 'paceline 0/10', 'peloton 0/25', 'grand_tour 0/50', 'hall_of_fame 0/100']);
+    // read off the ladder where it is defined: the rows of Rolling Start's family in _mrBadges, each with its number.
+    // Nothing here pins the ladder's length, so a step added to it (rides 2 and 3, say) is a step here too.
+    const family = await page.evaluate(`BDG_LADDER_OF.get('rolling_start')[0]`) as string[];
+    const ladder = await page.evaluate(`(()=>{const L=BDG_LADDER_OF.get('rolling_start')[0];return _mrBadges([],[],[],null).filter(x=>L.includes(x.s)).map(x=>[x.s,Number(String(x.p).split('/')[1])]);})()`) as [string, number][];
+    expect(ladder.map((x) => x[0]).sort()).toEqual([...family].sort()); // every badge of the family, each with a number
+    const steps = ladder.map((x) => x[1]);
+    for (const n of steps) expect(Number.isInteger(n) && n > 0, `step ${n}`).toBe(true);
+    expect(steps).toEqual(expect.arrayContaining([1, 5, 10, 25, 50, 100]));
+    expect(await page.evaluate('_srmSteps()')).toEqual(steps);
     await expect(tr(page, 'q1').locator('.srm-mile')).toHaveCount(0);
     await expect(tr(page, 'q2').locator('.srm-mile')).toHaveCount(0);
-    // every step past the second ride is a milestone, and no other ride is
+    // every step past the second ride is a milestone, and no other ride is: rides one and two have their own marks
     const stepOf = (n: number) => page.evaluate(`(()=>{S._srm.by.set('c7',{n:${n - 1},miss:0});const m=_srmOf(getQueue().find(e=>e.id==='q7'));return !!(m&&m.mile);})()`);
-    for (const n of [5, 10, 25, 50, 100]) expect(await stepOf(n), `ride ${n}`).toBe(true);
-    for (const n of [1, 2, 3, 4, 6, 9, 11, 24, 26, 49, 51, 99, 101]) expect(await stepOf(n), `ride ${n}`).toBe(false);
+    for (const n of steps.filter((x) => x > 2)) expect(await stepOf(n), `ride ${n}`).toBe(true);
+    for (const n of [1, 2, ...[4, 6, 9, 11, 24, 26, 49, 51, 99, 101].filter((x) => !steps.includes(x))]) expect(await stepOf(n), `ride ${n}`).toBe(false);
   });
 
   test('Milestones this Saturday names each rider reaching a step, highest first, and leaves out a No call-out rider', async ({ page }) => {
@@ -121,8 +130,14 @@ test.describe('@staff:bookings Marks on the Saturday roster', () => {
     await expect(panel(page).locator('.ptn-title')).toHaveText('Milestones this Saturday');
     const items = panel(page).locator('.satc-li');
     await expect(items).toHaveText(['Uma Twentyfive Saturday ride 25', 'Dana Five Saturday ride 5']);
-    // Tariq Ten holds No call-out; Hala Hundred is waitlisted, Fadi Fifty cancelled, Riad Rejected not selected
-    for (const name of ['Tariq Ten', 'Hala Hundred', 'Fadi Fifty', 'Riad Rejected', 'Nada First', 'Sami Second', 'Rana Returns']) await expect(panel(page)).not.toContainText(name);
+    // Tariq Ten holds No call-out; Hala Hundred is waitlisted, Fadi Fifty cancelled, Riad Rejected not selected, and
+    // Pia Pending and Nour Noverdict are requests still waiting on Approve: not riding until they are selected
+    for (const name of ['Tariq Ten', 'Hala Hundred', 'Fadi Fifty', 'Riad Rejected', 'Pia Pending', 'Nour Noverdict', 'Nada First', 'Sami Second', 'Rana Returns']) await expect(panel(page)).not.toContainText(name);
+    // selected, the rider is on the list
+    await page.evaluate(`(()=>{S.queue=S.queue.map(e=>e.id==='q13'?{...e,approval:'approved'}:e);renderStaffQueue();})()`);
+    await expect(items).toHaveText(['Uma Twentyfive Saturday ride 25', 'Nour Noverdict Saturday ride 10', 'Dana Five Saturday ride 5']);
+    await page.evaluate(`(()=>{S.queue=S.queue.map(e=>e.id==='q13'?{...e,approval:null}:e);renderStaffQueue();})()`);
+    await expect(items).toHaveText(['Uma Twentyfive Saturday ride 25', 'Dana Five Saturday ride 5']);
     await expect(mk(page, 'q5')).toHaveText(['Saturday ride 10']);
     // it sits above the roster, on the screen staff already use: no dialog, no button
     await expect(panel(page).locator('button, a')).toHaveCount(0);
@@ -227,7 +242,7 @@ test.describe('@staff:bookings Marks on the Saturday roster', () => {
     expect(seen.n).toBe(1);
   });
 
-  test('one read for a session\'s open, however often the roster repaints; a booking by an account not read yet asks once more', async ({ page }) => {
+  test('one read for a session\'s open, however often the roster repaints; a booking by an account not read yet asks once more, and once again a minute later', async ({ page }) => {
     const seen = reads(page);
     await boot(page);
     await roster(page);
@@ -238,14 +253,27 @@ test.describe('@staff:bookings Marks on the Saturday roster', () => {
     await expect(mk(page, 'q1')).toHaveCount(1);
     expect(seen.n).toBe(1);
     // a new booking lands (as realtime would hand it over): one more read, then none
-    await page.evaluate(`(()=>{const e={...getQueue().find(x=>x.id==='q7'),id:'q12',customerId:'c12',name:'Lina Late',queueNum:12};S.queue=[...S.queue,e];renderStaffQueue();})()`);
+    await page.evaluate(`(()=>{const e={...getQueue().find(x=>x.id==='q7'),id:'q20',customerId:'c20',name:'Lina Late',queueNum:20};S.queue=[...S.queue,e];renderStaffQueue();})()`);
     await expect.poll(() => seen.n).toBe(2);
     for (let i = 0; i < 5; i++) await page.evaluate('renderStaffQueue()');
     await page.waitForTimeout(300);
-    expect(seen.n).toBe(2); // the answer still does not name c12: not asked again for it
-    await expect(tr(page, 'q12')).toHaveCount(1);
-    await expect(mk(page, 'q12')).toHaveCount(0);
+    expect(seen.n).toBe(2); // the answer still does not name c20: not asked again for it on a repaint
+    await expect(tr(page, 'q20')).toHaveCount(1);
+    await expect(mk(page, 'q20')).toHaveCount(0);
     await expect(mk(page, 'q4')).toHaveText(['Saturday ride 5']);
+    // a desk add kept in the outbox is on the roster before its row is in the database: a minute on, one more read
+    const minuteOn = () => page.evaluate('S._srm.at-=61e3;renderStaffQueue()');
+    await expect.poll(() => page.evaluate('S._srm.busy')).toBe(false);
+    await minuteOn();
+    await expect.poll(() => seen.n).toBe(3);
+    await expect.poll(() => page.evaluate('S._srm.busy')).toBe(false);
+    // and then no more until the five minutes are up
+    await minuteOn();
+    for (let i = 0; i < 3; i++) await page.evaluate('renderStaffQueue()');
+    await page.waitForTimeout(300);
+    expect(seen.n).toBe(3);
+    await page.evaluate('S._srm.at-=3e5;renderStaffQueue()');
+    await expect.poll(() => seen.n).toBe(4);
   });
 
   test('a database without the function: the roster is as it was, nothing is said, and it is asked once', async ({ page }) => {

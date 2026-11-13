@@ -40578,7 +40578,8 @@ async function _ptnCapSave(sid){
 // days a Saturday ride was held since their last one) and the ladder step this ride reaches. One read for the session,
 // staff_sat_marks (20261114010400): each account's Saturday rides before this one and the Saturdays held since its last;
 // asked when the session's Bookings is opened, again after five minutes on it, and once for a roster holding an account
-// the answer did not name - never per row or per repaint, and the roster does not wait for it. The steps are read off the
+// the answer did not name (once more a minute later while it still does not: a desk add waiting in the outbox) - never
+// per row or per repaint, and the roster does not wait for it. The steps are read off the
 // ladder itself (_mrBadges' rows of Rolling Start's family), so a step added there is a milestone here; rides one and
 // two have their own marks. "Milestones this Saturday" above the roster names each rider reaching a step, for the
 // briefing, without the accounts staff gave the No call-out tag (tag_no_callout, the account window's switch), who keep
@@ -40597,8 +40598,9 @@ function _srmNoCall(cid){return !!cid&&_ctRowsFor(cid).some(ct=>ct.tag_id===TAG_
 function _srmLoad(sid,need){
   const c=S._srm&&S._srm.sid===sid?S._srm:null;
   if(!sb||S._srmOff||(c&&(c.busy||(Date.now()-c.at<3e5&&(!need||need===c.need)))))return;
-  const cur=S._srm={sid,by:c?c.by:null,need:need||'',busy:true,at:Date.now()};
-  const end=by=>{if(S._srm!==cur)return;cur.busy=false;if(by){cur.by=by;_satcRepaint();}else cur.at=Date.now()-24e4;}; // a read that failed is asked again in a minute
+  const cur=S._srm={sid,by:c?c.by:null,need:need||'',re:!!(c&&need&&need===c.need),busy:true,at:Date.now()};
+  // a read that failed is asked again in a minute; so is, once (re), one that did not name an account it was asked for: a desk add kept in the outbox is on the roster before its row is in the database
+  const end=by=>{if(S._srm!==cur)return;cur.busy=false;if(!by||(!cur.re&&cur.need.split(',').some(id=>id&&!by.has(id))))cur.at=Date.now()-24e4;if(by){cur.by=by;_satcRepaint();}};
   Promise.resolve(sb.rpc('staff_sat_marks',{p_session:sid})).then(({data,error})=>{
     if(error){if(_rpcAbsent(error))S._srmOff=true;end(null);return;} // a database before 20261114010400: nothing shows
     end(new Map((data&&Array.isArray(data.riders)?data.riders:[]).map(r=>[String(r.c),{n:Number(r.n)||0,miss:Number(r.miss)||0}])));
@@ -40628,7 +40630,7 @@ function _srmPanelHtml(sid){
   if(!c||!c.by)return'';
   const seen=new Set(),rows=[];
   L.forEach(e=>{
-    const m=e.status==='waitlist'?null:_srmOf(e); // the riders expected or here: a waitlisted one may not ride
+    const m=e.status==='waitlist'||(e.status==='waiting'&&_apprSessIds.has(sid)&&_apprOf(e)!=='approved')?null:_srmOf(e); // the riders expected or here: a waitlisted one may not ride, nor a request still waiting on Approve (as _coRows and _partyCheckinRows read it); both keep their mark
     if(!m||!m.mile||seen.has(e.customerId)||_srmNoCall(e.customerId))return;
     seen.add(e.customerId);rows.push({e,n:m.nth});
   });

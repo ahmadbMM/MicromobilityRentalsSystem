@@ -11,12 +11,13 @@
 --
 --  2. staff_sat_marks(p_session): the one read a Saturday ride's Bookings makes when it is opened. For every account
 --     on that session's roster: n, the Saturday rides it finished before this session's day (its own bookings and
---     those of accounts merged into it; a ride is a booking with status done, as hub_feed and staff_hub_numbers count
---     it), and miss, the days a Saturday ride was held (somebody finished it) after its last one and before this
---     session. The app draws the marks from those two numbers and the badge ladder's own steps. A session that is not
---     of the Saturday kind (event_kind community, ride_kind saturday or none, as the app's _rideKind) answers no riders.
---     One statement over the roster's accounts, never one per rider. SECURITY DEFINER with is_staff() first, as
---     staff_hub_numbers; stable, it writes nothing.
+--     those of accounts merged into it; a ride is a booking with status done that the badge ladder counts, the app's
+--     _rideCompleted: paid, or on a free ride, or on the rider's own bike - so "Saturday ride N" is never ahead of the
+--     rider's badge on a paid Saturday), and miss, the days a Saturday ride was held (somebody finished it) after its
+--     last one and before this session. The app draws the marks from those two numbers and the badge ladder's own
+--     steps. A session that is not of the Saturday kind (event_kind community, ride_kind saturday or none, as the
+--     app's _rideKind) answers no riders. One statement over the roster's accounts, never one per rider. SECURITY
+--     DEFINER with is_staff() first, as staff_hub_numbers; stable, it writes nothing.
 --
 -- The app works before this runs: without the function it shows no marks and no list, and it offers the No call-out
 -- switch only once the tag row exists. Idempotent.
@@ -67,6 +68,7 @@ begin
       join sessions s on s.id = q.session_id
      where s.event_kind = 'community' and coalesce(s.ride_kind, 'saturday') = 'saturday'
        and s.session_date < v_date
+       and (coalesce(q.paid, false) or not coalesce(s.paid_ride, false) or coalesce(q.type_preference, '') = 'Own')
      group by a.cid, q.session_id
   ), held as (            -- the days a Saturday ride was held: somebody finished it
     select distinct s.session_date as d
