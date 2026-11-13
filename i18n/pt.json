@@ -3386,7 +3386,7 @@
   "cochsNoRiders": "Ninguém entrou ainda.",
   "cochsStOn": "Em andamento",
   "cochsStEnded": "Encerrado",
-  "cochsErrFields": "Informe a empresa, um código de 4 a 12 letras ou números, as duas datas (o fim no dia do início ou depois) e um tamanho de equipe de 3 a 500.",
+  "cochsErrFields": "Informe a empresa, um código de 4 a 12 letras ou números, as duas datas (o fim no dia do início ou depois) e um tamanho de equipe de 10 a 500.",
   "cochsErrTaken": "Outro desafio já usa este código.",
   "cochsDelAsk": "Excluir este desafio de empresa?",
   "cochsRemoveAsk": "Remover {0} deste desafio?",

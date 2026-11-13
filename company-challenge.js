@@ -2,7 +2,7 @@
 // ride towards one number: staff make the challenge and hand out its code, the rider types it here (or opens a link that
 // holds it, /?company=CODE, kept on the device by the page until they are signed in) and sees one card per challenge:
 // how many are taking part and how many sessions they finished together, only once the people taking part reach the
-// challenge's minimum team size (the database sends neither number before, and the sessions total only from 10), and
+// challenge's minimum team size and 10 (the database sends neither number before, and the sessions total only from 10), and
 // their own count. Members see nobody (2026-11-04): nothing here names a colleague or holds one colleague's count,
 // and the database sends none.
 // Everything comes from company_challenge_mine and company_challenge_join (migration 20261114012600), kept in S._coch.

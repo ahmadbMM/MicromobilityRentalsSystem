@@ -4,9 +4,10 @@ import { resolve } from 'node:path';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/supabase';
 
 // Company challenge, totals only (new features build F26; the owner marked it Build now on 2026-11-13). Staff make a
-// company's challenge (its name, a join code, the first and last day, a minimum team size, 5 unless they say
-// otherwise); a rider joins with the code on Account > Company challenge, or with a link that holds it, and sees how
-// many are taking part and their sessions together only from the minimum team size up, and their own count. Nothing a
+// company's challenge (its name, a join code, the first and last day, a minimum team size, 10 unless they say
+// more); a rider joins with the code on Account > Company challenge, or with a link that holds it, and sees how
+// many are taking part and their sessions together only from the minimum team size up, never under 10 (a rider never
+// sees a total under 10 about other people, the owner's rule), and their own count. Nothing a
 // rider reads names a colleague or holds one colleague's count (members see nobody, 2026-11-04). Once the last day has
 // passed, everyone with a finished session holds the Company Challenge badge. Migration 20261114012600.
 
@@ -188,22 +189,22 @@ test.describe('@customer:account company challenge: the row, joining, the card',
   });
 
   test('from the minimum up: how many are taking part, their sessions together, and the rider\'s own', async ({ page }) => {
-    await rider(page, { 'rpc:company_challenge_mine': mine(ch({ team: 6, sessions: 14, mine: 2 })) });
+    await rider(page, { 'rpc:company_challenge_mine': mine(ch({ team: 12, sessions: 14, mine: 2 })) });
     await row(page).click();
     await expect(nums(page)).toHaveCount(3);
-    await expect(page.locator('[data-coch="7"] [data-coch-n="team"]')).toHaveText(/^6\s*Taking part$/);
+    await expect(page.locator('[data-coch="7"] [data-coch-n="team"]')).toHaveText(/^12\s*Taking part$/);
     await expect(page.locator('[data-coch="7"] [data-coch-n="sessions"]')).toHaveText(/^14\s*Sessions together$/);
     await expect(page.locator('[data-coch="7"] [data-coch-n="mine"]')).toHaveText(/^2\s*Your sessions$/);
     // a total sent as anything but a number is not drawn
-    await page.evaluate(`S._coch.rows=[{id:7,company:'Petromin',starts_on:'2026-11-01',ends_on:'2026-11-30',state:'on',team:'6',sessions:'14',mine:2,badge:false}];_cochRender()`);
+    await page.evaluate(`S._coch.rows=[{id:7,company:'Petromin',starts_on:'2026-11-01',ends_on:'2026-11-30',state:'on',team:'12',sessions:'14',mine:2,badge:false}];_cochRender()`);
     await expect(nums(page)).toHaveCount(1);
   });
 
   test('a sessions total under 10 is not sent: the card holds how many are taking part and the rider\'s own count', async ({ page }) => {
-    await rider(page, { 'rpc:company_challenge_mine': mine(ch({ team: 5, sessions: null, mine: 2 })) });
+    await rider(page, { 'rpc:company_challenge_mine': mine(ch({ team: 10, sessions: null, mine: 2 })) });
     await row(page).click();
     await expect(nums(page)).toHaveCount(2);
-    await expect(page.locator('[data-coch="7"] [data-coch-n="team"]')).toHaveText(/^5\s*Taking part$/);
+    await expect(page.locator('[data-coch="7"] [data-coch-n="team"]')).toHaveText(/^10\s*Taking part$/);
     await expect(page.locator('[data-coch="7"] [data-coch-n="mine"]')).toHaveText(/^2\s*Your sessions$/);
     await expect(host(page)).not.toContainText('Sessions together');
   });
@@ -305,13 +306,15 @@ test.describe('@customer:account company challenge: what the database lets a rid
       expect(body).not.toMatch(/\b(name|phone|email|photo|joined_at|riders|to_jsonb|row_to_json)\b/);
       expect(body).not.toMatch(/\.\*\s*\)/); // no whole row built into the answer
     }
-    // both totals only from the minimum team size up, the sessions total only from 10 (at 3 taking part, "mine 2,
+    // both totals only from the minimum team size up and never under 10 taking part, whatever the minimum says (a rider
+    // never sees a total under 10 about other people), the sessions total only from 10 too (at 3 taking part, "mine 2,
     // together 2" would say both colleagues stand at 0), and the count the rider gets is their own person's
-    expect(mineFn).toContain(`'team', case when v_team >= ch.min_team then v_team end`);
-    expect(mineFn).toContain(`'sessions', case when v_team >= ch.min_team and v_sum >= 10 then v_sum end`);    expect(mineFn).toContain('filter (where p.pid = v_me)');
-    // a minimum is never under 3, so a total is never one other person's number; 5 unless staff say otherwise
-    expect(SQL).toContain('min_team    integer not null default 5 check (min_team between 3 and 500)');
-    expect(fnBody('staff_company_challenge_save')).toContain('v_min not between 3 and 500');
+    expect(mineFn).toContain(`'team', case when v_team >= greatest(ch.min_team, 10) then v_team end`);
+    expect(mineFn).toContain(`'sessions', case when v_team >= greatest(ch.min_team, 10) and v_sum >= 10 then v_sum end`);    expect(mineFn).toContain('filter (where p.pid = v_me)');
+    // a minimum is never under 10, and 10 unless staff say more
+    expect(SQL).toContain('min_team    integer not null default 10 check (min_team between 10 and 500)');
+    expect(fnBody('staff_company_challenge_save')).toContain('v_min not between 10 and 500');
+    expect(fnBody('staff_company_challenge_save')).toContain('v_min integer := coalesce(p_min, 10);');
   });
 
   test('the tables are closed to every client, and each function is granted to whom it is for', () => {
@@ -357,9 +360,9 @@ const customers = [
   { id: 'c2', name: 'Omar Zed', email: 'omar@example.com', phone: '+966500000002', created_at: '2026-01-02T10:00:00Z' },
 ];
 const staffRows = [
-  { id: 7, company: 'Petromin', code: 'PETRO26', starts_on: '2026-11-01', ends_on: '2099-11-30', min_team: 5, created_at: '2026-10-28T09:00:00Z', created_by: 'Spec Staff', awarded_at: null, team: 2, sessions: 5,
+  { id: 7, company: 'Petromin', code: 'PETRO26', starts_on: '2026-11-01', ends_on: '2099-11-30', min_team: 12, created_at: '2026-10-28T09:00:00Z', created_by: 'Spec Staff', awarded_at: null, team: 2, sessions: 5,
     riders: [{ id: 'c2', name: 'Omar Zed', phone: '+966500000002', joined_at: '2026-11-02T08:00:00Z', n: 4, badge: false }, { id: 'c1', name: 'Sara Khalid', phone: '+966500000001', joined_at: '2026-11-01T08:00:00Z', n: 1, badge: true }] },
-  { id: 6, company: 'Dukan', code: 'DUKAN25', starts_on: '2025-01-01', ends_on: '2025-01-31', min_team: 3, created_at: '2024-12-20T09:00:00Z', created_by: 'Spec Staff', awarded_at: '2025-02-01T00:20:00Z', team: 0, sessions: 0, riders: [] },
+  { id: 6, company: 'Dukan', code: 'DUKAN25', starts_on: '2025-01-01', ends_on: '2025-01-31', min_team: 10, created_at: '2024-12-20T09:00:00Z', created_by: 'Spec Staff', awarded_at: '2025-02-01T00:20:00Z', team: 0, sessions: 0, riders: [] },
 ];
 async function staff(page: Page, fx: Record<string, unknown> = {}) {
   await stubSupabase(page, { sessions, queue_entries: [], bikes: [], customers, tags: [], customer_tags: [], staff_options: [], 'rpc:staff_company_challenges': staffRows, ...fx });
@@ -382,7 +385,7 @@ test.describe('@staff:people company challenges', () => {
     await expect(view(page).locator('[data-cochs]')).toHaveCount(2);
     await expect(crow(page, 7)).toContainText('Petromin');
     await expect(crow(page, 7)).toContainText('Running');
-    await expect(crow(page, 7)).toContainText('Minimum team size 5');
+    await expect(crow(page, 7)).toContainText('Minimum team size 12');
     await expect(crow(page, 7)).toContainText('Join code PETRO26');
     await expect(crow(page, 7)).toContainText('experiences.micromobility.sa/?company=PETRO26');
     await expect(crow(page, 7).locator('.cochs-tot')).toHaveText('Taking part 2 · Sessions completed 5');
@@ -400,11 +403,11 @@ test.describe('@staff:people company challenges', () => {
     await page.locator('#cochs-new').click();
     await expect(dlg(page).locator('#cochs-d-t')).toHaveText('New company challenge');
     expect(await page.evaluate(`[...document.querySelectorAll('#cochs-cos option')].map(o=>o.value).join()`)).toBe('Petromin,Petrolube,Dukan');
-    await expect(page.locator('#cochs-f-min')).toHaveValue('5');
+    await expect(page.locator('#cochs-f-min')).toHaveValue('10');
     await expect(page.locator('#cochs-f-code')).toHaveValue(/^[A-Z2-9]{6}$/); // a code is offered, staff may type their own
     for (const [id, label] of [['company', 'Company'], ['code', 'Join code'], ['from', 'Start date'], ['to', 'End date'], ['min', 'Minimum team size']]) await expect(page.locator(`label[for="cochs-f-${id}"]`)).toHaveText(label);
     await page.locator('#cochs-save').click(); // no company, no end date
-    await expect(dlg(page).locator('[role="alert"]')).toContainText('a team size of 3 to 500');
+    await expect(dlg(page).locator('[role="alert"]')).toContainText('a team size of 10 to 500');
     expect(calls).toEqual([]);
     await page.locator('#cochs-f-company').fill('  Petromin   Express ');
     await page.locator('#cochs-f-code').fill('pmx2026');
@@ -413,14 +416,14 @@ test.describe('@staff:people company challenges', () => {
     await page.locator('#cochs-save').click(); // the end before the start
     await expect(dlg(page).locator('[role="alert"]')).toBeVisible();
     await page.locator('#cochs-f-to').fill('2026-12-31');
-    await page.locator('#cochs-f-min').fill('2');
-    await page.locator('#cochs-save').click(); // a team of 2 would show one colleague's count
+    await page.locator('#cochs-f-min').fill('9');
+    await page.locator('#cochs-save').click(); // under 10 a total would be about fewer than 10 people
     await expect(dlg(page).locator('[role="alert"]')).toBeVisible();
     expect(calls).toEqual([]);
-    await page.locator('#cochs-f-min').fill('8');
+    await page.locator('#cochs-f-min').fill('12');
     await page.locator('#cochs-save').click();
     await expect(page.locator('#cochs-d-t')).toHaveCount(0);
-    expect(calls).toEqual([{ p_id: null, p_company: 'Petromin Express', p_code: 'PMX2026', p_starts: '2026-12-01', p_ends: '2026-12-31', p_min: 8 }]);
+    expect(calls).toEqual([{ p_id: null, p_company: 'Petromin Express', p_code: 'PMX2026', p_starts: '2026-12-01', p_ends: '2026-12-31', p_min: 12 }]);
   });
 
   test('a code another challenge has is said in the dialog, which stays open', async ({ page }) => {

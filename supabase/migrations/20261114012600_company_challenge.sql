@@ -2,19 +2,20 @@
 -- Company challenge, totals only (new features build F26; the owner marked it Build now on 2026-11-13).
 --
 -- A company's people ride towards one number. Staff make a challenge (the company's name, a join code, a first and a
--- last day, a minimum team size, 5 unless they say otherwise); a rider joins it with the code, typed on Account >
+-- last day, a minimum team size, 10 unless they say more); a rider joins it with the code, typed on Account >
 -- Company challenge or carried by a link (experiences.micromobility.sa/?company=CODE). A rider who joined sees how
 -- many are taking part and how many sessions they finished together, only once the people taking part reach the
--- minimum team size, and their own count. Members see nobody (2026-11-04): nothing a rider can read names a
--- colleague, lists one or holds one colleague's count, and the minimum is never under 3, so a total is never one
--- other person's number. The sessions total is held back as well while it is under 10 (totals under 10 are not
--- shown): at 3 taking part, "mine 2, together 2" would say that both colleagues stand at 0. Once the last day has
+-- minimum team size and never under 10, and their own count. Members see nobody (2026-11-04): nothing a rider can
+-- read names a colleague, lists one or holds one colleague's count, and a rider never sees a total under 10 about
+-- other people (the owner's rule): the read sends how many are taking part only from greatest(min_team, 10), whatever
+-- a challenge's minimum says, and the minimum itself is 10 to 500. The sessions total is held back as well while it
+-- is under 10. Once the last day has
 -- passed, everyone who took part with at least one finished session holds the Company Challenge badge. A reward is
 -- a badge only.
 --
 --  1. Tables, with row level security on and no grant: every read and write goes through the functions below.
 --       company_challenges         one challenge: company, code (4 to 12 capital letters and digits, one challenge
---                                  each), starts_on, ends_on, min_team (3 to 500, default 5), who made it, and when
+--                                  each), starts_on, ends_on, min_team (10 to 500, default 10), who made it, and when
 --                                  its badges were last given (awarded_at).
 --       company_challenge_members  who joined: one row per challenge and account.
 --     Companies are not a table today: the corporate nights name theirs in rider_registrations.company and
@@ -33,8 +34,8 @@
 --  4. For riders (anon key; the account's id and session token, checked by _cust_token_ok):
 --       company_challenge_mine(p_id, p_token)          {ok, open, rows: [{id, company, starts_on, ends_on, state,
 --                                                      team, sessions, mine, badge}]}; team and sessions are null
---                                                      while fewer than min_team are taking part, and sessions
---                                                      also while the total is under 10. A challenge
+--                                                      while fewer than min_team, or fewer than 10, are taking
+--                                                      part, and sessions also while the total is under 10. A challenge
 --                                                      leaves the answer 60 days after its last day. open says
 --                                                      only whether any challenge can still be joined: the app
 --                                                      shows its row then, or when the rider has a challenge.
@@ -76,7 +77,7 @@ create table if not exists public.company_challenges (
   code        text not null check (code ~ '^[A-Z0-9]{4,12}$'),
   starts_on   date not null,
   ends_on     date not null,
-  min_team    integer not null default 5 check (min_team between 3 and 500),
+  min_team    integer not null default 10 check (min_team between 10 and 500),
   created_at  timestamptz not null default now(),
   created_by  text check (char_length(created_by) <= 60),
   awarded_at  timestamptz,
@@ -165,8 +166,8 @@ end $function$;
 revoke all on function public._cc_award(bigint) from public, anon, authenticated;
 
 -- 4. riders ------------------------------------------------------------------------------------------------------
--- What a rider reads: their own challenges, their own count, and the two totals from the minimum team size up
--- (the sessions total only from 10). No name, no list, nobody else's count.
+-- What a rider reads: their own challenges, their own count, and the two totals from the minimum team size up and
+-- never under 10 taking part (the sessions total only from 10 too). No name, no list, nobody else's count.
 
 create or replace function public.company_challenge_mine(p_id text, p_token text)
  returns jsonb
@@ -196,8 +197,8 @@ begin
     v_rows := v_rows || jsonb_build_array(jsonb_build_object(
       'id', ch.id, 'company', ch.company, 'starts_on', ch.starts_on, 'ends_on', ch.ends_on,
       'state', case when v_today < ch.starts_on then 'soon' when v_today > ch.ends_on then 'ended' else 'on' end,
-      'team', case when v_team >= ch.min_team then v_team end,
-      'sessions', case when v_team >= ch.min_team and v_sum >= 10 then v_sum end,
+      'team', case when v_team >= greatest(ch.min_team, 10) then v_team end,
+      'sessions', case when v_team >= greatest(ch.min_team, 10) and v_sum >= 10 then v_sum end,
       'mine', v_mine,
       'badge', v_today > ch.ends_on and v_mine >= 1
                and exists (select 1 from customer_badges b where b.customer_id = any(v_accts) and b.badge_id = 'bd_company_challenge')));
@@ -268,7 +269,7 @@ end $function$;
 revoke all on function public.staff_company_challenges() from public, anon;
 grant execute on function public.staff_company_challenges() to authenticated;
 
-create or replace function public.staff_company_challenge_save(p_id bigint, p_company text, p_code text, p_starts date, p_ends date, p_min integer default 5)
+create or replace function public.staff_company_challenge_save(p_id bigint, p_company text, p_code text, p_starts date, p_ends date, p_min integer default 10)
  returns jsonb
  language plpgsql
  volatile security definer
@@ -277,12 +278,12 @@ as $function$
 declare
   v_co text := btrim(regexp_replace(coalesce(p_company, ''), '\s+', ' ', 'g'));
   v_code text := upper(btrim(coalesce(p_code, '')));
-  v_min integer := coalesce(p_min, 5);
+  v_min integer := coalesce(p_min, 10);
   v_id bigint;
 begin
   if not _staff_mod('community', true) then raise exception 'FORBIDDEN' using errcode = '42501'; end if;
   if v_co = '' or char_length(v_co) > 80 or v_code !~ '^[A-Z0-9]{4,12}$' or p_starts is null or p_ends is null
-     or p_ends < p_starts or v_min not between 3 and 500 then
+     or p_ends < p_starts or v_min not between 10 and 500 then
     return jsonb_build_object('ok', false, 'error', 'fields');
   end if;
   if exists (select 1 from company_challenges c where c.code = v_code and c.id is distinct from p_id) then
