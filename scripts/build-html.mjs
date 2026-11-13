@@ -158,6 +158,9 @@ src = src.replace("const BRP_V=''", `const BRP_V='${createHash('sha256').update(
 // rider-updates.js, the Updates page's own file (new features build F3, 2026-11-13), the same way.
 if (!src.includes("const INB_V=''")) throw new Error('build: INB_V placeholder missing');
 src = src.replace("const INB_V=''", `const INB_V='${createHash('sha256').update(await readFile(new URL('../rider-updates.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
+// The share pop-up's own file (badge-share.js, new features build F12): the same, so a change to it reaches riders.
+if (!src.includes("const SHR_V=''")) throw new Error('build: SHR_V placeholder missing');
+src = src.replace("const SHR_V=''", `const SHR_V='${createHash('sha256').update(await readFile(new URL('../badge-share.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
 if (!src.includes("const BIKE_IMG_V=''")) throw new Error('build: BIKE_IMG_V placeholder missing');
 src = src.replace("const BIKE_IMG_V=''", `const BIKE_IMG_V='${bikeFiles.length ? bikesHasher.digest('hex').slice(0, 10) : ''}'`);
 // The Helper path card's own file (helper-path.js, fetched by members on Account): its address changes with it too.

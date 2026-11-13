@@ -432,6 +432,12 @@ function _hubProg(n, target, label, text) { // text: the count in words, where t
 function _meName(me) {
   return me.kind === 'first' ? _hT('chFirst') : me.kind === 'second' ? _hT('chSecond') : me.kind === 'back' ? _hT('chBack') : _hF('chLevel', me.target);
 }
+// A finished challenge is shared as a picture (new features build F12, 2026-11-13): the page's share pop-up, which
+// lives in badge-share.js and is fetched on the tap (_shrLoad in app.src.html). k: 'me' the member's own, 'goal' a season's.
+function _hubShare(k, id) { if (typeof _shrLoad === 'function') _shrLoad({ kind: 'mile', k, id: id || null }); }
+function _hubShareBtn(k, id) {
+  return typeof _shrLoad === 'function' ? `<button type="button" class="btn-secondary hub-wide shr-btn" data-on-click="${_on('_hubShare', k, id || '')}">${_cuIc('share', 16)}<span>${esc(t('tcShare'))}</span></button>` : '';
+}
 function _meHtml(me) {
   if (!me || !me.kind) return '';
   const n = Number(me.n) || 0, tg = Number(me.target) || 1, done = n >= tg, name = _meName(me);
@@ -440,7 +446,7 @@ function _meHtml(me) {
     : '';
   return `<div class="hub-card"><span class="hub-k">${_cuIc('flag', 16)} ${_hT('goalYou')}</span><strong class="hub-name"><bdi>${esc(name)}</bdi></strong>
     ${pick ? `<span class="hub-k">${_hT('chPick')}</span>${pick}` : ''}
-    ${_hubProg(n, tg, name)}<div class="hub-meta">${done ? `<strong>${_hT('goalDone')}</strong> · ` : ''}${esc(_hF('goalOf', Math.min(n, tg), tg, _hDate(me.ends_on)))}</div></div>`;
+    ${_hubProg(n, tg, name)}<div class="hub-meta">${done ? `<strong>${_hT('goalDone')}</strong> · ` : ''}${esc(_hF('goalOf', Math.min(n, tg), tg, _hDate(me.ends_on)))}</div>${done ? _hubShareBtn('me') : ''}</div>`;
 }
 // The first five rides (new features build F1, 2026-11-13): a member with fewer than five rides sees their path of five
 // marks in this slot, in place of the month's challenge, until the fifth ride. The count is the page's own (the ride
@@ -533,7 +539,7 @@ function _seasonHtml(g) {
   const n = Number(g.n) || 0, tg = Number(g.target) || 1, name = _hPick(g, 'name', 'name_ar');
   const medal = g.badge && typeof _bdgMedal === 'function' ? _bdgMedal(g.badge.icon, g.badge.color, 'hub-medal') : '';
   return `<div class="hub-card"><span class="hub-k">${_hT('season')}</span><div class="hub-row2">${medal}<strong class="hub-name"><bdi>${esc(name)}</bdi></strong></div>
-    ${_hubProg(n, tg, name)}<div class="hub-meta">${n >= tg ? `<strong>${_hT('goalDone')}</strong> · ` : ''}${esc(_hF('goalOf', Math.min(n, tg), tg, _hDate(g.ends_on)))}</div></div>`;
+    ${_hubProg(n, tg, name)}<div class="hub-meta">${n >= tg ? `<strong>${_hT('goalDone')}</strong> · ` : ''}${esc(_hF('goalOf', Math.min(n, tg), tg, _hDate(g.ends_on)))}</div>${n >= tg ? _hubShareBtn('goal', g.id) : ''}</div>`;
 }
 // The club's goal: "so far" while less than two thirds is done, then what is left; the member's own share only to them.
 function _clubHtml(g) {

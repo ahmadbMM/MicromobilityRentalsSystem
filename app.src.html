@@ -6006,6 +6006,7 @@ function _regRange(s,ty){
 const HUB_V=''; // build stamps a hash of member-hub.js
 const ASK_HUB_V=''; // build stamps a hash of member-ask.js (an Ask page opened from the Community tab)
 const LL_V=''; // build stamps a hash of learn-ladder.js
+const SHR_V=''; // build stamps a hash of badge-share.js
 const BIKE_IMG_V=''; // build stamps a hash of assets/bikes/
 // model is the Alvas line the picture shows (the distributor's catalogue, 2026-09-27; shown as the
 // sheet's kicker, untranslated - change it here, not in ten languages); easy marks the beginner pick.
@@ -22568,7 +22569,8 @@ function _ttMinePaint(){
   card.innerHTML=`<div class="amb-mine-title">${t('ttMineTitle')}</div>
     ${a.titles.length?`${a.titles.length>1?`<div class="am-meta">${t('ttMineSub')}</div>`:''}
       <div class="tt-picks">${a.titles.map(x=>`<button type="button" class="tt-pick${x.id===on?' on':''}" aria-pressed="${x.id===on}" data-on-click="${_on('_ttPick',x.id)}">${_ttChip(x)}</button>`).join('')}</div>
-      ${cur&&cur.expires_on?`<div class="am-meta">${esc(t('ttUntil').replace('{0}',shortDate(cur.expires_on)))}</div>`:''}`
+      ${cur&&cur.expires_on?`<div class="am-meta">${esc(t('ttUntil').replace('{0}',shortDate(cur.expires_on)))}</div>`:''}
+      ${cur?`<button type="button" class="btn-secondary tt-shr shr-btn" data-on-click="${_on('_shrTitle')}">${_cuIc('share',16)}<span>${t('tcShare')}</span></button>`:''}`
     :`<div class="am-meta">${t('ttMineNone')}</div>`}`;
   host.insertAdjacentElement('beforeend',card); // under the badges, on the Badges part
 }
@@ -22688,6 +22690,26 @@ function _hubLoad(){
   document.head.appendChild(s);
 }
 function _hubLoadRetry(){S._hubLoading=false;const b=document.getElementById('hub-body');if(b)b.innerHTML='';_hubLoad();}
+// Share a badge, a title or a finished challenge as a picture (new features build F12, 2026-11-13). The pop-up, its words
+// and the drawing live in badge-share.js, fetched on the first tap, so no other rider carries them. S._shr is what to
+// share: {kind:'badge',i} (its place in _mrBadgeList), {kind:'title',id}, or {kind:'mile',k,id} from the Community tab.
+// The pop-up is drawn as the badge pop-up (#badge-pop), so what waits for one to close waits for this too; the focus
+// goes back to what was tapped (_bdgPopFrom, kept when the badge's own pop-up is already up).
+function _shrLoad(job){
+  const c=S.loggedIn||getSession();if(!c||!job)return;
+  if(!document.getElementById('badge-pop')){const a=document.activeElement;_bdgPopFrom=a&&a!==document.body&&a.nodeType===1?a:null;}
+  S._shr={...job,forId:c.id};
+  // What badge-share.js takes from the page's words, named here so the build keeps them on the riders' side.
+  window._shrDeps={words:()=>({share:t('tcShare'),close:t('closeWord'),level:t('bdLevelOf')})};
+  if(window._shrRender){window._shrRender();return;}
+  if(S._shrLoading)return;S._shrLoading=true;
+  const s=document.createElement('script');s.src='/badge-share.js?v='+SHR_V;
+  s.onload=()=>{S._shrLoading=false;if(S._shr&&window._shrRender)window._shrRender();};
+  s.onerror=()=>{S._shrLoading=false;s.remove();S._shr=null;toast(t('mbErr'),'error');}; // not fetched (offline): said, and the next tap asks again
+  document.head.appendChild(s);
+}
+function _shrBadge(i){_shrLoad({kind:'badge',i});}
+function _shrTitle(){const a=S._ttMine,id=a&&_ttShownId(a);if(id)_shrLoad({kind:'title',id});}
 function _bdgPopClose(){
   const p=document.getElementById('badge-pop');if(p)p.remove();
   let b=_bdgPopFrom;_bdgPopFrom=null;
@@ -22723,6 +22745,7 @@ function _mrBadgeInfo(i,fresh,comm){
     ${g&&g.note?`<div class="badge-pop-note"><bdi>${esc(g.note)}</bdi></div>`:''}
     ${g?`<div class="badge-pop-earned">${ICON_TICK} ${esc(t('bdgGivenBy').replace('{0}',_bdgDay(g.at)))}</div>`:x.lv?(x.lvN===x.lv.length?`<div class="badge-pop-earned">${ICON_TICK} ${t('bdMaxLevel')}</div>`:''):x.on?`<div class="badge-pop-earned">${ICON_TICK} ${t('bdEarned')}</div>`:(x.p?`<div class="badge-pop-prog">${x.p}</div>`:'')}
     ${_bdrPopHtml(x)}
+    ${x.on?`<div class="badge-pop-shr"><button type="button" class="${comm?'btn-secondary':'btn-primary'} cu-w100-mt14 shr-btn" data-on-click="${_on('_shrBadge',i)}">${_cuIc('share',16)}<span>${t('tcShare')}</span></button></div>`:''}
     ${comm?`<div class="badge-pop-acts"><button type="button" class="btn-primary" data-on-click="${_on('_bdgPopComm')}">${t('mbTitle')}</button><button type="button" class="btn-secondary" data-on-click="${_on("_on__mrBadgeInfo_1",_EV,_EL)}">${t('doneBtn')}</button></div>`
       :`<button type="button" class="btn-secondary cu-w100-mt14" data-on-click="${_on("_on__mrBadgeInfo_1",_EV,_EL)}">${t('closeWord')||'Close'}</button>`}
   </div>`;

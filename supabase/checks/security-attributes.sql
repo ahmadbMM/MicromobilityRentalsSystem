@@ -228,6 +228,7 @@ with expected(fname, want_definer, note) as (values
   ('customer_consents',      true,  'reads and records the caller''s own privacy confirmation and ride-news answer; token-checked'),
   ('customer_deletion_request', true, 'reads, makes or withdraws the caller''s own deletion request; token-checked'),
   ('customer_my_badges',    true,  'reads the caller''s own badges from customer_badges, which is staff-only; token-checked'),
+  ('customer_my_titles',    true,  'reads the caller''s own titles and the day each was earned, from tables that are staff-only; token-checked (20261114011200)'),
   ('badge_seasons',         true,  'reads the dated badges from badges, which is staff-only; no rider data'),
   ('badge_catalog',         true,  'reads every badge not retired from badges, which is staff-only; no rider data'),
   ('badge_weeks',           true,  'reads the sessions of each week for Perfect Week/Month; the schedule only, no rider data'),

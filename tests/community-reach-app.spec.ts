@@ -126,7 +126,7 @@ test.describe('@customer:members Community where members are', () => {
     const pop = page.locator('#badge-pop');
     await expect(pop).toBeVisible();
     await expect(pop).toContainText('Challenge Met');
-    await expect(pop.locator('button')).toHaveText(['Community', 'Done']);
+    await expect(pop.locator('button')).toHaveText(['Share', 'Community', 'Done']); // Share: an earned badge's picture (F12, tests/badge-share.spec.ts)
     await expect.poll(() => log.filter((x) => x.fn === 'hub_seen').map((x) => x.body)).toEqual([{ p_id: 'c1', p_token: 'tok-spec', p_slugs: ['challenge_1'] }]);
     await expect(pop.locator('button', { hasText: 'Done' })).toBeFocused();
     await pop.locator('button', { hasText: 'Done' }).click();

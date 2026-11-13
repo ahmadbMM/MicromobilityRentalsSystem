@@ -9781,6 +9781,17 @@ body:not(.view-staff) .bk-hub-go{display:flex;align-items:center;gap:4px;font-we
 /* the badge pop-up a pulse opens: Community and Done */
 body:not(.view-staff) #badge-pop .badge-pop-acts{display:grid;gap:10px;margin-top:14px;}
 body:not(.view-staff) #badge-pop .badge-pop-acts>button{width:100%;min-height:44px;}
+/* Share a badge, a title or a finished challenge as a picture (new features build F12, 2026-11-13): the Share buttons,
+   and the pop-up badge-share.js draws - the picture, the first-name switch, one button. .shr-probe holds a medal for the
+   moment its colours are read. */
+body:not(.view-staff) .shr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;}
+body:not(.view-staff) .shr-btn .cu-ic{flex:none;}
+body:not(.view-staff) #tt-mine .tt-shr{width:100%;margin-top:12px;}
+body:not(.view-staff) #badge-pop .shr-view{height:min(46dvh,420px);aspect-ratio:9/16;margin:0 auto;border-radius:var(--r-ctl);overflow:hidden;background:var(--card-2);}
+body:not(.view-staff) #badge-pop .shr-view img{display:block;width:100%;height:100%;}
+body:not(.view-staff) #badge-pop .shr-err{display:grid;align-content:center;gap:12px;height:100%;padding:12px;font-size:var(--fs-13);color:var(--ink);}
+body:not(.view-staff) #badge-pop .shr-sw{margin-top:14px;text-align:start;}
+.shr-probe{position:absolute;inset-inline-start:0;top:0;width:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none;}
 /* the ride's own news on the ticket: start moved or shortened in amber, cancelled in red */
 body:not(.view-staff) .tk-rs{display:inline-block;margin-inline-start:6px;padding:1px 8px;border-radius:var(--r-chip);border:1px solid currentColor;font-size:var(--fs-12);font-weight:700;line-height:1.5;color:var(--amber);vertical-align:middle;}
 body:not(.view-staff) .tk-rs-cancelled{color:var(--red);}
