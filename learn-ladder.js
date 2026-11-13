@@ -53,19 +53,23 @@ function _llLevels(d, L) {
 function _llIdx(d) { return Math.max(0, Math.min(d.learners.length - 1, Number(S._llAt) || 0)); }
 
 // ── The pop-up ────────────────────────────────────────────────────────────────────────────────────
-// keep: a repaint of the pop-up that is already open (a fresh read landed, a learner picked, a certificate drawn).
+// keep: a repaint of the pop-up that is already open (a fresh read landed, a learner picked, a certificate drawn). It
+// changes only what is inside the box: the box stays the same element, so it does not settle in a second time and a
+// rider reading the lower levels keeps their place.
 function _llRender(keep) {
   const host = document.getElementById('confirm-modal'), d = _llD(), open = !!document.getElementById('ll-box');
   if (!host || (keep && !open)) return;
   if (!d || !d.learners.length) { if (open) _llClose(); return; }
   if (!keep) { S._llAt = 0; _llCertDrop(); }
   const i = _llIdx(d), L = d.learners[i], lv = _llLevels(d, L), c = S._llCert && S._llCert.i === i ? S._llCert : null;
+  const body = c ? _llCertHtml(c, lv[c.n - 1]) : _llLadderHtml(d, i, L, lv), at = keep && document.getElementById('ll-body');
+  if (at) { at.innerHTML = body; return; }
   host.style.display = 'block';
   host.innerHTML = `<div class="modal-backdrop" data-on-click="${_on('_llBackdrop', _EV, _EL)}">
     <div class="modal-box ll-box" id="ll-box" role="dialog" aria-modal="true" aria-labelledby="ll-title">
       <div class="ll-head"><h2 class="ll-title" id="ll-title" tabindex="-1">${esc(_lT('title'))}</h2>
         <button type="button" class="chrome-xt x-close ll-x" aria-label="${esc(_lT('close'))}" data-on-click="${_on('_llClose')}">&times;</button></div>
-      ${c ? _llCertHtml(c, lv[c.n - 1]) : _llLadderHtml(d, i, L, lv)}
+      <div id="ll-body">${body}</div>
     </div></div>`;
   if (!keep) { const h = document.getElementById('ll-title'); if (h) try { h.focus({ preventScroll: true }); } catch (_) {} }
   // What staff ticked since the Account page read it: asked again when the copy is older than a moment, painted when it lands.
@@ -96,16 +100,18 @@ function _llInvite() { _llClose(); selectEvent('community'); }
 // Drawn when it opens (sharing a file must follow the tap at once): 1080 x 1350, the learner's own name, the level and the
 // day its last skill was ticked. Arabic and Urdu draw right to left.
 function _llCertDrop() { const c = S._llCert; S._llCert = null; if (c && c.url) try { URL.revokeObjectURL(c.url); } catch (_) {} }
+// A view the rider asked for (a certificate, the ladder again) starts at its top; every other repaint keeps the place.
+function _llTop() { const b = document.getElementById('ll-box'); if (b) b.scrollTop = 0; }
 function _llCertOpen(n) {
   const d = _llD(); if (!d) return;
   const i = _llIdx(d), L = d.learners[i], x = _llLevels(d, L)[n - 1];
   if (!x || !x.done) return;
   _llCertDrop();
   const c = S._llCert = { i, n, file: null, url: '', err: false };
-  _llRender(true);
+  _llRender(true); _llTop();
   _llCertDraw(c, _llName(L, i), x);
 }
-function _llCertBack() { _llCertDrop(); _llRender(true); }
+function _llCertBack() { _llCertDrop(); _llRender(true); _llTop(); }
 function _llCanShare(f) { try { return !!(f && navigator.share && navigator.canShare && navigator.canShare({ files: [f] })); } catch (_) { return false; } }
 function _llCertHtml(c, x) {
   const nm = _lT('lv' + c.n);

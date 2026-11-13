@@ -30,7 +30,7 @@ const rpcCalls = (page: Page, name: string) => {
   return calls;
 };
 
-test.describe('the learn-to-ride ladder: its skills', () => {
+test.describe('@build the learn-to-ride ladder: its skills', () => {
   test('the migration seeds four levels of four skills, each named in the ten languages with Latin digits', () => {
     expect(SKILLS).toHaveLength(16);
     expect(new Set(KEYS).size).toBe(16);
@@ -338,11 +338,28 @@ test.describe('@customer:account the learn-to-ride ladder', () => {
     await expect(page.locator('#ll-box .ll-who-b').first()).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#ll-box .ll-fb')).toContainText('Keep your eyes up');
     await expect(page.locator('#ll-box .ll-cert-b')).toHaveCount(0);
+    await page.evaluate(`window.__llBox=document.getElementById('ll-box')`);
     await page.locator('#ll-box .ll-who-b').nth(1).click();
     await expect(page.locator('#ll-box .ll-who-b').nth(1)).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#ll-box .ll-fb')).toContainText('Sara glides on her own');
     await expect(lv(page, 1).locator('.ll-lv-c')).toHaveText('4/4');
     await expect(page.locator('#ll-box .ll-cert-b')).toHaveCount(1);
     await expect(page.locator('#ll-box .ll-inv')).toHaveCount(0);
+    // a repaint changes what is inside the pop-up, never the pop-up: the box is the element it was, so it does not
+    // settle in a second time
+    expect(await page.evaluate(`window.__llBox===document.getElementById('ll-box')`)).toBe(true);
+    // and a rider reading the lower levels keeps their place when a fresh read lands by itself
+    await page.setViewportSize({ width: 390, height: 600 });
+    expect(await page.evaluate(`(()=>{const b=document.getElementById('ll-box');b.scrollTop=120;return b.scrollTop;})()`)).toBe(120);
+    const reads = rpcCalls(page, 'learn_ladder');
+    await page.evaluate(`_llMineLoad(S.loggedIn||getSession(),true)`);
+    expect(reads).toHaveLength(1);
+    expect(await page.evaluate(`[window.__llBox===document.getElementById('ll-box'),window.__llBox.scrollTop]`)).toEqual([true, 120]);
+    await expect(page.locator('#ll-box .ll-who-b').nth(1)).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#ll-box .ll-fb')).toContainText('Sara glides on her own');
+    // a view the rider asks for (her certificate) opens in the same box, from its top
+    await lv(page, 1).locator('.ll-cert-b').click();
+    await expect(page.locator('#ll-box img.ll-cert-img')).toBeVisible();
+    expect(await page.evaluate(`[window.__llBox===document.getElementById('ll-box'),window.__llBox.scrollTop]`)).toEqual([true, 0]);
   });
 });
