@@ -9251,6 +9251,13 @@ body:not(.view-staff) .hub-dots-sm span{flex:0 0 8px;height:8px;}
 body:not(.view-staff) .hub-pick{display:flex;gap:8px;margin:6px 0 8px;}
 body:not(.view-staff) .hub-lv{flex:1;min-height:48px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);font-weight:700;font-size:var(--fs-17);cursor:pointer;}
 body:not(.view-staff) .hub-lv.on{border-color:var(--go);background:var(--go-wash);color:var(--go-2);}
+/* Plan my Saturdays (new features build F10, 2026-11-13): the month's Saturdays as tick boxes in one row, four or five. */
+body:not(.view-staff) .hub-sats{display:flex;gap:8px;margin-top:2px;}
+body:not(.view-staff) .hub-sat{flex:1 1 0;min-width:0;min-height:68px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 2px;border-radius:var(--r-ctl);border:1px solid var(--line-2);background:var(--card);color:var(--ink);font-weight:700;font-size:var(--fs-17);font-variant-numeric:tabular-nums;cursor:pointer;}
+body:not(.view-staff) .hub-sat-box{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:7px;border:1.5px solid var(--line-2);background:var(--card);color:var(--paper);}
+body:not(.view-staff) .hub-sat.on{border-color:var(--go);background:var(--go-wash);color:var(--go-2);}
+body:not(.view-staff) .hub-sat.on .hub-sat-box{border-color:var(--go);background:var(--go);}
+body:not(.view-staff) .hub-sat:disabled{opacity:.5;cursor:default;}
 body:not(.view-staff) .hub-row2{display:flex;align-items:center;gap:10px;}
 body:not(.view-staff) .hub-medal{width:40px;height:40px;flex:none;}
 body:not(.view-staff) .hub-bday{display:flex;align-items:center;gap:10px;color:var(--go-2);}

@@ -38,6 +38,7 @@ const HUB_T = {
   chPick: ['Pick your challenge', 'اختر تحديك', 'Choisissez votre défi', 'Elige tu reto', 'Escolha o seu desafio', 'اپنا چیلنج چنیں', 'अपनी चुनौती चुनें', 'Piliin ang hamon mo', 'आफ्नो चुनौती छान्नुहोस्', 'আপনার চ্যালেঞ্জ বেছে নিন'],
   goalOf: ['{0} of {1}, until {2}', '{0} من {1}، حتى {2}', '{0} sur {1}, jusqu’au {2}', '{0} de {1}, hasta el {2}', '{0} de {1}, até {2}', '{1} میں سے {0}، {2} تک', '{1} में से {0}, {2} तक', '{0} sa {1}, hanggang {2}', '{1} मध्ये {0}, {2} सम्म', '{1}টির মধ্যে {0}টি, {2} পর্যন্ত'],
   goalDone: ['Done', 'تم', 'Terminé', 'Hecho', 'Concluído', 'مکمل', 'पूरा', 'Tapos na', 'पूरा भयो', 'সম্পন্ন'],
+  plan: ['Plan my Saturdays', 'خطتي لأيام السبت', 'Planifier mes samedis', 'Planificar mis sábados', 'Planejar os meus sábados', 'میرے ہفتے کے دنوں کی منصوبہ بندی', 'मेरे शनिवार की योजना', 'Planuhin ang mga Sabado ko', 'मेरा शनिबारको योजना', 'আমার শনিবারের পরিকল্পনা'],
   season: ['Season challenge', 'تحدي الموسم', 'Défi de la saison', 'Reto de temporada', 'Desafio da época', 'سیزن کا چیلنج', 'सीज़न की चुनौती', 'Hamon ng season', 'मौसमको चुनौती', 'মৌসুমের চ্যালেঞ্জ'],
   goalAll: ['Community goal', 'هدف المجتمع', 'Objectif de la communauté', 'Meta de la comunidad', 'Objetivo da comunidade', 'کمیونٹی کا ہدف', 'समुदाय का लक्ष्य', 'Layunin ng komunidad', 'समुदायको लक्ष्य', 'কমিউনিটির লক্ষ্য'],
   clubSat: ['{0} Saturday rides this month', '{0} رحلة سبت هذا الشهر', '{0} sorties du samedi ce mois-ci', '{0} salidas de sábado este mes', '{0} passeios de sábado este mês', 'اس مہینے ہفتے کی {0} سواریاں', 'इस महीने {0} शनिवार राइड', '{0} Saturday ride ngayong buwan', 'यो महिना {0} शनिबारे राइड', 'এই মাসে শনিবারের {0}টি রাইড'],
@@ -237,6 +238,7 @@ function _feedHtml(c, d, stale) {
     _soonHtml(c, hero.open),
     _akCardHtml(),
     _p5Html() || _meHtml(d.me),
+    _planHtml(),
     (Array.isArray(d.goals) ? d.goals : []).map(_seasonHtml).join(''),
     d.club ? _clubHtml(d.club) : '',
     _numsHtml(d.numbers),
@@ -462,6 +464,71 @@ async function _hubPick(k) {
   if (cur && cur.forId === c.id && cur.d && cur.d.me && cur.d.me.kind === 'level') { cur.d.me.target = k; cur.d.me.chosen = true; _hubSave(c, cur.d); }
   _hubRender();
 }
+// ── Plan my Saturdays (new features build F10, 2026-11-13) ──────────────────────────────────────────
+// Beside the month's challenge: the current month's Saturdays as tick boxes. A tick books nothing and holds no place: it
+// stores that the member plans to come (hub_plans, migration 20261114011000, which only that member's own read returns),
+// and the database sends them one "booking is open" message when that Saturday's ride opens, unless they have booked
+// it. Nothing is ticked for them; a Saturday already gone shows, locked. A read of its own (hub_plan), kept two minutes
+// like the feed and never on the phone, so a database before the migration has no card and no error.
+// S._plan: {id, at, month, days: [{date, on, past}], pend: {date: true}, off}.
+function _planMine() { const c = _hCust(), p = S._plan; return c && p && p.id === c.id ? p : null; }
+async function _planFetch() {
+  const c = _hCust(); if (!c || !c.session_token || !sb || S._planBusy) return;
+  S._planBusy = true;
+  let r; try { r = await sb.rpc('hub_plan', _hTok(c)); } catch (e) { r = { error: e }; }
+  S._planBusy = false;
+  const now = _hCust(); if (!now || now.id !== c.id) return; // signed out, or another account, meanwhile: not theirs
+  const d = r && !r.error && r.data, had = _planMine(), pend = (had && had.pend) || {};
+  if (d && d.ok === true && Array.isArray(d.days)) {
+    // A tick still on its way to the database keeps what the member chose, not what this read saw before it.
+    const days = d.days.filter((x) => x && /^\d{4}-\d\d-\d\d$/.test(String(x.date || ''))).map((x) => {
+      const was = pend[x.date] && had && Array.isArray(had.days) ? had.days.find((y) => y.date === x.date) : null;
+      return { date: String(x.date), on: was ? was.on : x.on === true, past: x.past === true };
+    });
+    S._plan = { id: c.id, at: Date.now(), month: String(d.month || (days[0] && days[0].date) || '').slice(0, 7), days, pend };
+  } else if (r && r.error && (r.error.code === 'PGRST202' || r.error.code === '42883')) {
+    S._plan = { id: c.id, at: Date.now(), off: true }; // a database before the migration: no card, and not asked again
+  } else {
+    S._plan = { ...(had || { id: c.id }), at: Date.now() }; // no answer: what is on screen stays, asked again in two minutes
+  }
+  // Repainted only when there is a card to draw or to bring up to date: a tab without one is left alone.
+  const has = (x) => !!(x && Array.isArray(x.days) && x.days.length);
+  if ((has(had) || has(S._plan)) && S.custTab === 'members') _hubRender();
+}
+function _planHtml() {
+  const c = _hCust(); if (!c) return '';
+  const p = _planMine();
+  if (!p || (!p.off && Date.now() - p.at >= 12e4)) _planFetch();
+  if (!p || p.off || !Array.isArray(p.days) || !p.days.length) return '';
+  const today = todayStr(), name = _hT('plan'), month = /^\d{4}-\d\d$/.test(p.month) ? _hMonth(p.month, false) : '';
+  let fmt = null; try { fmt = new Intl.DateTimeFormat(_locale(), { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }); } catch (_) {}
+  const box = (x) => {
+    const past = x.past || x.date < today, at = new Date(x.date + 'T12:00:00Z');
+    let label = x.date; try { if (fmt) label = fmt.format(at); } catch (_) {}
+    return `<button type="button" role="checkbox" class="hub-sat${x.on ? ' on' : ''}" aria-checked="${x.on ? 'true' : 'false'}" aria-label="${esc(label)}"${past ? ' disabled' : ''} data-on-click="${_on('_planTick', x.date)}"><span class="hub-sat-box">${x.on ? _cuIc('tick', 14) : ''}</span><bdi>${esc(String(Number(x.date.slice(8, 10))))}</bdi></button>`;
+  };
+  return `<div class="hub-card hub-plan"><span class="hub-k">${_cuIc('cal', 16)} ${esc(name)}</span>${month ? `<strong class="hub-name"><bdi>${esc(month)}</bdi></strong>` : ''}
+    <div class="hub-sats" role="group" aria-label="${esc(month ? name + ' · ' + month : name)}">${p.days.map(box).join('')}</div></div>`;
+}
+async function _planTick(date) {
+  const c = _hCust(), p = _planMine(); if (!c || !sb || !p || !Array.isArray(p.days)) return;
+  const d = p.days.find((x) => x.date === date);
+  if (!d || d.past || d.date < todayStr() || (p.pend && p.pend[date])) return; // gone, or its last tap still on its way
+  const want = !d.on;
+  d.on = want; p.pend = p.pend || {}; p.pend[date] = true; _hubRender();
+  let r; try { r = await sb.rpc('hub_plan_set', { ..._hTok(c), p_date: date, p_on: want }); } catch (e) { r = { error: e }; }
+  // Onto the copy on screen now: a read that was in flight may have replaced S._plan (it carries the same pend).
+  const cur = _planMine();
+  if (p.pend) delete p.pend[date];
+  if (!cur || !Array.isArray(cur.days)) return;
+  if (cur.pend) delete cur.pend[date];
+  const x = cur.days.find((y) => y.date === date);
+  if (!r || r.error || !r.data || r.data.ok !== true) { if (x) x.on = !want; if (typeof toast === 'function') toast(_hT('err'), 'error'); }
+  else if (x) x.on = r.data.on === true;
+  if (S.custTab === 'members') _hubRender();
+}
+// This file is fetched as the tab opens: the plan's first read leaves here, beside the feed's own, not a turn after it.
+_planFetch();
 function _seasonHtml(g) {
   const n = Number(g.n) || 0, tg = Number(g.target) || 1, name = _hPick(g, 'name', 'name_ar');
   const medal = g.badge && typeof _bdgMedal === 'function' ? _bdgMedal(g.badge.icon, g.badge.color, 'hub-medal') : '';
