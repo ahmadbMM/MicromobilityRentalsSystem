@@ -928,9 +928,11 @@ and emoji checks, so they must hold none of those): `route-page.js` (`RT_V`), `c
 - **F16 Personal landmarks** (no migration; `_lmAnniv`, `_lmKindsHtml`, `LM_KINDS`). On Stats, for the seven days from the
   first bike ride's anniversary, a card with the years and a line from the team (`site_content` `msg.templates` `lm_anniv`,
   edited with the message templates; default `LM_LINE_DEF`); under By event a checklist of the kinds tried.
-- **F19 Going counts** (`_hubGoing` in member-hub.js; `081900` `hub_going`: `_hub_going()`). "34 going · 12 first-timers" on
-  the next-session card, each number only at 10 or more, only on a community session whose list is published and open for
-  booking, never a tag-gated private ride; nowhere else (the owner refused it on Experiences and Reserve).
+- **F19 Going counts: OFF the page since 2026-11-13** (the user: "dont mention this to customers 216 going · 48
+  first-timers", together with the "club in numbers" card: riders last Saturday, Saturday rides this month, since the
+  start). `_hubGoing` and `_numsHtml` are gone from member-hub.js; `081900` `hub_going` stays applied, so hub_feed still
+  sends `going` and `numbers` and no page reads them. Never show a head count of who is going, first-timers or the club's
+  ride totals to customers again without asking.
 - **F21 Learn-to-ride ladder** (`learn-ladder.js`, `_llMineLoad`, `_llOpen`; staff `_lls*` on People > Applications > Learn to
   ride; `082100` `learn_ladder`: `learn_skills` seeded in ten languages, `learn_progress`, `learn_ladder(p_id, p_token)`,
   `staff_learn_progress_set`). Four levels of four skills, the instructor's line, a certificate per level, then the way to a

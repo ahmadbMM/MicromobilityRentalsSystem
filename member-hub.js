@@ -27,9 +27,6 @@ const HUB_T = {
   ticket: ['Show ticket', 'عرض التذكرة', 'Voir le billet', 'Ver el billete', 'Ver o bilhete', 'ٹکٹ دکھائیں', 'टिकट दिखाएँ', 'Ipakita ang tiket', 'टिकट देखाउनुहोस्', 'টিকিট দেখান'],
   book: ['Book', 'احجز', 'Réserver', 'Reservar', 'Reservar', 'بک کریں', 'बुक करें', 'Mag-book', 'बुक गर्नुहोस्', 'বুক করুন'],
   wl: ['On the waitlist', 'في قائمة الانتظار', 'En liste d’attente', 'En lista de espera', 'Na lista de espera', 'انتظار کی فہرست میں', 'प्रतीक्षा सूची में', 'Nasa waitlist', 'प्रतीक्षा सूचीमा', 'অপেক্ষার তালিকায়'],
-  // The next session's card: how many are going and how many of them come for the first time (F19, 2026-11-13).
-  going: ['{0} going', '{0} سيحضرون', '{0} participants', '{0} asistentes', '{0} participantes', '{0} آ رہے ہیں', '{0} आ रहे हैं', '{0} ang pupunta', '{0} जना आउँदै', '{0} জন আসছেন'],
-  firstT: ['{0} first-timers', '{0} يشاركون لأول مرة', '{0} nouveaux venus', '{0} por primera vez', '{0} pela primeira vez', '{0} پہلی بار', '{0} पहली बार', '{0} ang first-timer', '{0} जना पहिलो पटक', '{0} জন প্রথমবার'],
   noneOpen: ['No session is open to book right now', 'لا توجد جلسة متاحة للحجز الآن', 'Aucune séance ouverte à la réservation pour le moment', 'Ahora no hay ninguna sesión abierta para reservar', 'De momento não há nenhuma sessão aberta para reservar', 'ابھی بکنگ کے لیے کوئی سیشن کھلا نہیں', 'अभी बुकिंग के लिए कोई सत्र खुला नहीं है', 'Walang bukas na session na mabu-book ngayon', 'अहिले बुक गर्न कुनै सत्र खुला छैन', 'এখন বুক করার মতো কোনো সেশন খোলা নেই'],
   seeAll: ['See all sessions', 'عرض كل الجلسات', 'Voir toutes les séances', 'Ver todas las sesiones', 'Ver todas as sessões', 'تمام سیشن دیکھیں', 'सभी सत्र देखें', 'Tingnan ang lahat ng session', 'सबै सत्र हेर्नुहोस्', 'সব সেশন দেখুন'],
   soon: ['Coming up', 'قريبًا', 'À venir', 'Próximamente', 'Em breve', 'آنے والے', 'आने वाले', 'Paparating', 'आउँदै गरेका', 'আসছে'],
@@ -49,10 +46,6 @@ const HUB_T = {
   toGo: ['{0} to go, until {1}', 'بقي {0}، حتى {1}', 'Encore {0}, jusqu’au {1}', 'Faltan {0}, hasta el {1}', 'Faltam {0}, até {1}', '{0} باقی، {1} تک', '{0} बाकी, {1} तक', '{0} pa, hanggang {1}', '{0} बाँकी, {1} सम्म', 'আর {0}, {1} পর্যন্ত'],
   clubYou: ['You: {0} of them', 'أنت: {0} منها', 'Vous : {0} d’entre elles', 'Tú: {0} de ellas', 'Você: {0} delas', 'آپ: ان میں سے {0}', 'आप: इनमें से {0}', 'Ikaw: {0} rito', 'तपाईं: तीमध्ये {0}', 'আপনি: এর মধ্যে {0}টি'],
   clubHit: ['The club reached it', 'حقّق النادي الهدف', 'Le club l’a atteint', 'El club lo logró', 'O clube conseguiu', 'کلب نے ہدف حاصل کر لیا', 'क्लब ने लक्ष्य पा लिया', 'Naabot ito ng club', 'क्लबले लक्ष्य पूरा गर्‍यो', 'ক্লাব লক্ষ্যে পৌঁছেছে'],
-  nums: ['The club in numbers', 'النادي بالأرقام', 'Le club en chiffres', 'El club en cifras', 'O clube em números', 'کلب اعداد میں', 'आँकड़ों में क्लब', 'Ang club sa mga numero', 'अङ्कमा क्लब', 'সংখ্যায় ক্লাব'],
-  numLast: ['Riders last Saturday', 'راكبو السبت الماضي', 'Cyclistes samedi dernier', 'Ciclistas el sábado pasado', 'Ciclistas no sábado passado', 'پچھلے ہفتے کے سوار', 'पिछले शनिवार के राइडर', 'Rider noong nakaraang Sabado', 'गत शनिबारका राइडर', 'গত শনিবারের রাইডার'],
-  numMonth: ['Saturday rides this month', 'رحلات السبت هذا الشهر', 'Sorties du samedi ce mois-ci', 'Salidas de sábado este mes', 'Passeios de sábado este mês', 'اس مہینے ہفتے کی سواریاں', 'इस महीने शनिवार राइड', 'Saturday ride ngayong buwan', 'यो महिना शनिबारे राइड', 'এই মাসে শনিবারের রাইড'],
-  numAll: ['Saturday rides since {0}', 'رحلات السبت منذ {0}', 'Sorties du samedi depuis {0}', 'Salidas de sábado desde {0}', 'Passeios de sábado desde {0}', '{0} سے ہفتے کی سواریاں', '{0} से शनिवार राइड', 'Saturday ride mula {0}', '{0} देखि शनिबारे राइड', '{0} থেকে শনিবারের রাইড'],
   report: ['Saturday report', 'تقرير السبت', 'Le samedi en bref', 'Crónica del sábado', 'Resumo de sábado', 'ہفتے کی رپورٹ', 'शनिवार की रिपोर्ट', 'Ulat ng Sabado', 'शनिबारको रिपोर्ट', 'শনিবারের প্রতিবেদন'],
   // The Saturday report's tiles, the ride's status chip and the next Saturday's target (2026-11-13, R10 R13 R20).
   tRiders: ['Riders', 'الراكبون', 'Cyclistes', 'Ciclistas', 'Ciclistas', 'سوار', 'राइडर', 'Rider', 'राइडर', 'রাইডার'],
@@ -250,7 +243,6 @@ function _feedHtml(c, d, stale) {
     _planHtml(),
     (Array.isArray(d.goals) ? d.goals : []).map(_seasonHtml).join(''),
     d.club ? _clubHtml(d.club) : '',
-    _numsHtml(d.numbers),
     hero.recap ? '' : staff,
     _mtCardHtml(),
     d.volunteer && dep.vol ? `<div class="hub-card hub-flat"><span class="hub-k">${_cuIc('people', 16)} ${_hT('vol')}</span><a class="btn-secondary hub-wide hub-link" href="${esc(dep.vol + '/#o/' + encodeURIComponent(d.volunteer))}" target="_blank" rel="noopener">${_hT('volBtn')}</a></div>` : '',
@@ -361,28 +353,15 @@ function _hubStill(s, e) {
     return dep.still(s, g, !_arHold(s, g) && (!_isApprovalRide(s) || ((p || _commPublished(s)) && (p || g.every((x) => x.approval === 'approved')))));
   } catch (_) { return ''; }
 }
-// Going and first-timer counts (new features build F19, 2026-11-13): this card alone says how many are going to its
-// session and how many of them come to the community for the first time. Totals from the tab's one read (hub_feed's
-// going, keyed by session: _hub_going, migration 20261114081900), each only at 10 or more; under 10 that number is absent.
-// Only once the session is published (its list no longer hidden, as _commPublished reads it) and open for booking. The
-// database holds the same rules; the page checks them again on its own copy of the session, so a count kept on the phone
-// never outlives them. No names, no list; a database before the migration sends none and the card is as it was. The
-// owner refused any count on the Experiences card and on Reserve: nothing else reads these numbers.
-function _hubGoing(s) {
-  const g = S._hub && S._hub.d && S._hub.d.going;
-  if (!s || !g || typeof g !== 'object' || !Object.prototype.hasOwnProperty.call(g, s.id)) return '';
-  if (!_isCommunity(s) || s.hide_queue !== false || s.status !== 'open' || _sessPastDay(s) || !_bwOpen(s)) return '';
-  const x = g[s.id] || {}, part = (k, v) => (_hubBig(v) ? `<span data-go="${k}">${esc(_hT(k)).split('{0}').join(_hN(v))}</span>` : '');
-  const p = [part('going', x.n), part('firstT', x.first)].filter(Boolean);
-  return p.length ? `<span class="hub-hero-m hub-going">${p.join(' · ')}</span>` : '';
-}
+// No head counts on the next-session card (the user, 2026-11-13: "dont mention this to customers 216 going · 48
+// first-timers"): hub_feed's `going` (F19) may still arrive, and nothing on the page reads it.
 function _bookedHtml(s, e, tm, st) {
   const ds = String(s.session_date || s.id).slice(0, 10), dw = _dayWord(ds), soon = st === 'today' || st === 'tomorrow';
   const f = _hubFields(tm ? tm.f : []), place = _hubPlace(s);
   const when = `<bdi>${esc(!soon && dw ? dw + ' · ' : '')}${esc(shortDate(ds))}</bdi>${f ? '' : ` · <bdi>${sessionTime(s)}</bdi>`}`;
   const chips = `${e.status === 'waitlist' ? `<span class="hub-chip">${_hT('wl')}</span>` : ''}${_hubRs(s)}`;
   return `<div class="hub-hero${st ? ' hub-hero-' + st : ''}"><span class="hub-k">${esc(soon && dw ? dw : _hT('next'))}</span><strong class="hub-hero-t"><bdi>${esc(_evName(s))}</bdi></strong>
-      <span class="hub-hero-m">${when}</span>${chips ? `<span class="hub-chips">${chips}</span>` : ''}${_hubGoing(s)}
+      <span class="hub-hero-m">${when}</span>${chips ? `<span class="hub-chips">${chips}</span>` : ''}
       ${st === 'today' ? place + f : f + place}
       ${soon ? _hubStill(s, e) : ''}
       <button type="button" class="btn-primary hub-hero-b" data-on-click="${st === 'today' ? _on('_hubTicket', e.id) : _on('setCustTab', 'myrides')}">${_cuIc('ticket', 18)} ${_hT('ticket')}</button></div>`;
@@ -407,7 +386,7 @@ function _heroHtml(c, d) {
   const s = c ? _hubOpen(c, 1)[0] : null;
   if (s) {
     return { recap, open: s.id, html: `<div class="hub-hero"><span class="hub-k">${_hT('nextOpen')}</span><strong class="hub-hero-t"><bdi>${esc(_evName(s))}</bdi></strong>
-      <span class="hub-hero-m">${_hubWhen(s)}</span>${_sgChip(s)}${_hubRs(s)}${_hubGoing(s)}
+      <span class="hub-hero-m">${_hubWhen(s)}</span>${_sgChip(s)}${_hubRs(s)}
       <button type="button" class="btn-primary hub-hero-b" data-on-click="${_on('_hubBook', s.id)}">${_hT('book')}</button></div>` };
   }
   return { recap, html: `<div class="hub-hero"><strong class="hub-hero-t">${_hT('noneOpen')}</strong>
@@ -576,12 +555,8 @@ function _clubHtml(g) {
   return `<div class="hub-card${hit ? ' hub-hit' : ''}"><span class="hub-k">${_cuIc('people', 16)} ${_hT('goalAll')}</span><strong class="hub-name"><bdi>${esc(name)}</bdi></strong>
     ${_hubProg(n, tg, name)}<div class="hub-meta">${line}</div>${Number(g.mine) > 0 ? `<div class="hub-meta">${esc(_hF('clubYou', Number(g.mine)))}</div>` : ''}${nx}</div>`;
 }
-function _numsHtml(x) {
-  if (!x) return '';
-  const st = (v, l) => (v == null ? '' : `<div class="hub-stat"><strong>${_hN(v)}</strong><span>${esc(l)}</span></div>`);
-  const cells = [st(x.last_riders, _hT('numLast')), st(x.month, _hT('numMonth')), st(x.all, x.since ? _hF('numAll', _hMonth(String(x.since), true)) : '')].join('');
-  return cells ? `<div class="hub-card"><span class="hub-k">${_hT('nums')}</span><div class="hub-stats">${cells}</div></div>` : '';
-}
+// No "club in numbers" card (riders last Saturday, Saturday rides this month and since the start): the user, 2026-11-13,
+// does not want them shown to customers. hub_feed's `numbers` may still arrive, and nothing on the page reads it.
 // One staff card: the Saturday report showing now, else the site's first announcement, else the tip of the week.
 // The report is number tiles (R13, 2026-11-13; the server writes one after each Saturday ride, staff may add a line and a
 // photo): riders, rides when they differ, first Saturday rides, ride leads, volunteers, each only as the server sends it

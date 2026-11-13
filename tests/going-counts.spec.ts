@@ -2,12 +2,11 @@ import { test, expect, type Page } from '@playwright/test';
 import { readFileSync, readdirSync } from 'node:fs';
 import { stubSupabase, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
 
-// Going and first-timer counts (new features build F19, 2026-11-13). The Community tab's next-session card, and only that
-// card, says "N going" and "N first-timers" for the session it shows. Each number only at 10 or more (under 10 it is
-// simply absent), only once the session is published (its list no longer hidden) and open for booking. The numbers ride
-// in the tab's one read (hub_feed's `going`, keyed by session: migration 20261114081900); no names, no list. The owner
-// refused any count on the Experiences card and the Reserve screens. All Supabase traffic is stubbed; the function's own
-// rules are read from the migration's text (no spec reaches a database).
+// Going and first-timer counts (new features build F19, 2026-11-13), then taken off the page the same day (the user:
+// "dont mention this to customers 216 going · 48 first-timers", with the club-in-numbers card: riders last Saturday,
+// Saturday rides this month, Saturday rides since the start). The database may still send hub_feed's `going` and
+// `numbers` (migration 20261114081900 stays applied); the page reads neither, so no customer screen shows a head count.
+// All Supabase traffic is stubbed; the function's own rules are still read from the migration's text below.
 
 const A = '2099-01-03', B = '2099-01-10', C = '2099-01-17';
 // A Saturday Social Ride as staff make it (needs approval, list hidden), here already published: hide_queue false.
@@ -29,119 +28,44 @@ async function member(page: Page, fx: Fixtures = {}) {
   await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
 }
 const hero = (page: Page) => page.locator('#hub-body .hub-hero');
-const line = (page: Page) => page.locator('#hub-body .hub-going');
-// The read's answer swapped on the page and the tab painted again from it (no second read: the copy is fresh).
-const repaint = (page: Page, going: unknown) => page.evaluate(`S._hub.d.going=${JSON.stringify(going)};_hubRender()`);
+// What the read may still carry: head counts for every date, and the club's totals (the user's own figures of 2026-11-13).
+const going = { [A]: { n: 216, first: 48 }, [B]: { n: 216, first: 48 }, [C]: { n: 216, first: 48 } };
+const numbers = { last: '2026-11-08', last_riders: 137, last_rides: 137, month: 137, all: 1712, since: '2026-06' };
+const COUNT = /\b216\b|\b48\b|\b137\b|1712|1,712|\bgoing\b|first-timers|in numbers|Riders last Saturday|Saturday rides since/i;
 
-test.describe('@customer:members F19 going and first-timer counts', () => {
-  test('the next session to book says how many are going and how many come for the first time', async ({ page }) => {
+test.describe('@customer:members no head counts for customers', () => {
+  test('the next session to book carries no going or first-timer count, and the tab has no club-in-numbers card', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', (e) => errors.push(String(e)));
-    await member(page, { 'rpc:hub_feed': feed({ going: { [A]: { n: 34, first: 12 } } }) });
+    await member(page, { 'rpc:hub_feed': feed({ going, numbers }) });
     await expect(hero(page)).toContainText('Next session to book');
-    await expect(line(page)).toHaveCount(1);
-    await expect(hero(page).locator('.hub-going')).toHaveText('34 going · 12 first-timers');
-    await expect(line(page).locator('[data-go="going"]')).toHaveText('34 going');
-    await expect(line(page).locator('[data-go="firstT"]')).toHaveText('12 first-timers');
-    // totals only: nothing to tap, no link, no list, no name
-    await expect(line(page).locator('a, button, li, img')).toHaveCount(0);
-    expect(await page.evaluate('document.documentElement.scrollWidth<=window.innerWidth')).toBe(true);
+    await expect(hero(page).locator('button', { hasText: 'Book' })).toBeVisible();
+    await expect(page.locator('#hub-body .hub-soon')).toHaveCount(2);
+    await expect(page.locator('.hub-going, [data-go]')).toHaveCount(0);
+    await expect(page.locator('#hub-body')).not.toContainText(COUNT);
+    expect(await page.evaluate(`typeof _hubGoing + typeof _numsHtml + ['going','firstT','nums','numLast','numMonth','numAll'].filter(k=>k in HUB_T).join()`)).toBe('undefinedundefined');
     expect(errors).toEqual([]);
   });
 
-  test('the member\'s own booked session carries its counts', async ({ page }) => {
+  test('the member\'s own booked session carries none either', async ({ page }) => {
     const mine = booking('q1', B);
-    await member(page, { queue_entries: [mine], 'rpc:my_bookings': [mine], 'rpc:hub_feed': feed({ going: { [A]: { n: 77, first: 21 }, [B]: { n: 41, first: 15 } } }) });
-    await expect(hero(page)).toContainText('Your next session');
-    await expect(line(page)).toHaveCount(1);
-    await expect(hero(page).locator('.hub-going')).toHaveText('41 going · 15 first-timers'); // the card's own session, not the earlier one
-    await expect(page.locator('#hub-body')).not.toContainText('77');
-  });
-
-  test('each number is hidden under 10', async ({ page }) => {
-    await member(page, { 'rpc:hub_feed': feed({ going: { [A]: { n: 34 } } }) }); // the read left the small one out
-    await expect(line(page)).toHaveText('34 going');
-    await expect(line(page).locator('[data-go="firstT"]')).toHaveCount(0);
-    await expect(hero(page)).not.toContainText('first-timers');
-    // The page holds the rule too: an answer that carried a small number still shows none of it.
-    await repaint(page, { [A]: { n: 34, first: 9 } });
-    await expect(line(page)).toHaveText('34 going');
-    await repaint(page, { [A]: { n: 9, first: 4 } });
-    await expect(line(page)).toHaveCount(0);
-    await expect(hero(page)).not.toContainText(/going|first-timers/);
-    await repaint(page, { [A]: { n: 10, first: 10 } }); // ten is shown
-    await expect(line(page)).toHaveText('10 going · 10 first-timers');
-    await repaint(page, { [A]: { n: 9, first: 12 } });
-    await expect(line(page)).toHaveText('12 first-timers'); // each number on its own
-    for (const bad of [{ [A]: {} }, { [A]: null }, { [A]: { n: '34 riders', first: -20 } }, {}, null, 'x', [34, 12]]) {
-      await repaint(page, bad);
-      await expect(line(page)).toHaveCount(0);
-    }
-    await expect(hero(page)).toBeVisible();
-  });
-
-  test('only a published session that is open for booking shows them', async ({ page }) => {
-    const going = { [A]: { n: 34, first: 12 }, [B]: { n: 41, first: 15 } };
-    const mine = booking('q1', A);
-    // Booked on a Saturday ride staff have not published yet: the read may hold a number, the card shows none.
-    await member(page, { sessions: [sess(A, { hide_queue: true }), sess(B), sess(C)], queue_entries: [mine], 'rpc:my_bookings': [mine], 'rpc:hub_feed': feed({ going }) });
+    await member(page, { queue_entries: [mine], 'rpc:my_bookings': [mine], 'rpc:hub_feed': feed({ going, numbers }) });
     await expect(hero(page)).toContainText('Your next session');
     await expect(hero(page)).toContainText('Show ticket');
-    await expect(line(page)).toHaveCount(0);
-    await expect(page.locator('#hub-body')).not.toContainText(/\d+ going|first-timers/);
-    // The rule itself, state by state, on the page's own copy of a session (the same answer from the read each time).
-    const shown = await page.evaluate(`(()=>{
-      const s=S.sessions.find(x=>x.id==='${B}'),on=(o)=>_hubGoing({...s,...o})!=='';
-      const un={...s};delete un.hide_queue;
-      const out={published:on({}),hidden:on({hide_queue:true}),unsaid:_hubGoing(un)!=='',nullish:on({hide_queue:null}),
-        full:on({status:'full'}),closed:on({status:'closed'}),deleted:on({status:'deleted'}),
-        past:on({session_date:'2020-01-04'}),notCommunity:on({event_kind:null,ride_kind:null}),snd:on({ride_kind:'snd96'}),
-        paidRide:on({needs_approval:false,ride_kind:'petromin',paid_ride:true}),pool:on({ride_kind:'swim'}),none:_hubGoing(null)!==''};
-      const keep=S._bw;S._bw={days:7,at:null};out.windowShut=on({});S._bw=keep;out.windowOpen=on({});
-      return out;})()`);
-    expect(shown).toEqual({
-      published: true, hidden: false, unsaid: false, nullish: false, // published = the list is no longer hidden
-      full: false, closed: false, deleted: false, // open for booking
-      past: false, notCommunity: false, snd: false,
-      paidRide: true, pool: true, // any published community session, by whatever name
-      none: false, windowShut: false, windowOpen: true, // bookings open a week before: 2099 is not open yet
-    });
-  });
-
-  test('a session that is over shows none', async ({ page }) => {
-    const mine = booking('q1', '2026-11-07', { status: 'done', rating_detail: { overall: 5 } });
-    await page.clock.setFixedTime(new Date('2026-11-13T18:00:00+03:00'));
-    await member(page, { sessions: [sess('2026-11-07'), ...open], queue_entries: [mine], 'rpc:my_bookings': [mine], 'rpc:hub_feed': feed({ going: { '2026-11-07': { n: 90, first: 30 }, [A]: { n: 34, first: 12 } } }) });
-    await expect(hero(page)).toContainText('Next session to book');
-    await expect(line(page)).toHaveText('34 going · 12 first-timers');
-    await expect(page.locator('#hub-body')).not.toContainText('90 going');
-    expect(await page.evaluate(`_hubGoing(S.sessions.find(x=>x.id==='2026-11-07'))`)).toBe('');
-  });
-
-  test('only the next-session card: Coming up and the rest of the tab carry none', async ({ page }) => {
-    await member(page, { 'rpc:hub_feed': feed({ going: { [A]: { n: 34, first: 12 }, [B]: { n: 137, first: 113 }, [C]: { n: 137, first: 113 } } }) });
-    await expect(page.locator('#hub-body .hub-soon')).toHaveCount(2);
-    await expect(page.locator('.hub-going')).toHaveCount(1);
-    await expect(page.locator('#hub-body .hub-hero .hub-going')).toHaveCount(1);
-    await expect(page.locator('#hub-body')).not.toContainText(/137|113/);
-    expect(await page.evaluate(`[...document.querySelectorAll('#hub-body *')].filter(x=>!x.closest('.hub-hero')&&/going|first-timers/i.test(x.textContent||'')).length`)).toBe(0);
+    await expect(page.locator('#hub-body')).not.toContainText(COUNT);
   });
 
   test('nothing on the Experiences card, the Reserve screens or Bookings', async ({ page }) => {
     const mine = booking('q1', C);
-    const going = { [A]: { n: 137, first: 113 }, [B]: { n: 137, first: 113 }, [C]: { n: 137, first: 113 } };
-    await member(page, { queue_entries: [mine], 'rpc:my_bookings': [mine], 'rpc:hub_feed': feed({ going }) });
-    await expect(line(page)).toHaveText('137 going · 113 first-timers'); // the read is in and the tab shows it
+    await member(page, { queue_entries: [mine], 'rpc:my_bookings': [mine], 'rpc:hub_feed': feed({ going, numbers }) });
     const clean = async (sel: string) => {
       await expect(page.locator(`${sel} .hub-going, ${sel} [data-go]`)).toHaveCount(0);
-      await expect(page.locator(sel)).not.toContainText(/137|113|\bgoing\b|first-timers/i);
+      await expect(page.locator(sel)).not.toContainText(/\b216\b|\b48\b|\bgoing\b|first-timers/i);
     };
-    // the Experiences cards (the first page's list of what can be booked)
+    await clean('#hub-body');
     await page.evaluate(`goLanding()`);
-    await expect(page.locator('#land-events .landing-event-card').first()).toBeVisible();
     await expect(page.locator('#land-events .landing-event-card.ev-community')).toHaveCount(1);
     await clean('#view-landing');
-    // Reserve: the Saturday ride opened from its card, its dates listed, and one date picked
     await page.locator('#land-events .landing-event-card.ev-community').click();
     await expect.poll(() => page.evaluate('[S.view,S.custTab,S.selEvent]')).toEqual(['customer', 'register', 'community']);
     await expect(page.locator('#tab-register .sess-card').first()).toBeVisible();
@@ -150,52 +74,19 @@ test.describe('@customer:members F19 going and first-timer counts', () => {
     await expect.poll(() => page.evaluate('S.selSession')).toBe(A);
     await clean('#tab-register');
     await clean('#confirm-modal');
-    // Bookings: the ticket of the booked session
     await page.evaluate(`setCustTab('myrides')`);
     await expect(page.locator('#tab-myrides .ticket-card').first()).toBeVisible();
     await clean('#tab-myrides');
-    // and the tab's own line is the only one in the whole page
-    await expect(page.locator('.hub-going')).toHaveCount(1);
-    expect(await page.evaluate(`[...document.querySelectorAll('.hub-going')].every(x=>!!x.closest('#hub-body .hub-hero'))`)).toBe(true);
   });
 
-  test('one read: the counts come with hub_feed and no other request is made for them', async ({ page }) => {
-    const fns: string[] = [];
-    page.on('request', (r) => { const m = /\/rest\/v1\/rpc\/([a-z_0-9]+)/.exec(r.url()); if (m) fns.push(m[1]); });
-    await member(page, { 'rpc:hub_feed': feed({ going: { [A]: { n: 34, first: 12 } } }) });
-    await expect(line(page)).toHaveText('34 going · 12 first-timers');
-    expect(fns.filter((f) => f === 'hub_feed')).toHaveLength(1);
-    expect(fns.filter((f) => /going|first/.test(f))).toEqual([]);
-    // kept on the phone with the rest of the read, so the tab paints with it at once next time
-    expect(await page.evaluate(`JSON.parse(localStorage.getItem('cq_hub_c1')).d.going['${A}']`)).toEqual({ n: 34, first: 12 });
-  });
-
-  test('a database before the migration: the card as it was, no count and no error', async ({ page }) => {
-    const errors: string[] = [];
-    page.on('pageerror', (e) => errors.push(String(e)));
-    await member(page); // hub_feed answers without `going`
-    await expect(hero(page)).toContainText('Next session to book');
-    await expect(hero(page).locator('button', { hasText: 'Book' })).toBeVisible();
-    await expect(line(page)).toHaveCount(0);
-    await expect(page.locator('#hub-body')).not.toContainText(/\d+ going|first-timers/);
-    await expect(page.locator('#hub-body [role="status"]')).toHaveCount(0);
-    expect(errors).toEqual([]);
-  });
-
-  test('all ten languages, Latin digits; Arabic and Urdu read right to left', async ({ page }) => {
-    await member(page, { 'rpc:hub_feed': feed({ going: { [A]: { n: 34, first: 12 } } }) });
-    const rows = await page.evaluate(`['going','firstT'].map(k=>[k,(HUB_T[k]||[]).length,(HUB_T[k]||[]).every(x=>String(x).trim()&&x.includes('{0}')&&!/\\p{Extended_Pictographic}/u.test(x)&&!/[0-9\\u0660-\\u0669\\u06F0-\\u06F9\\u0966-\\u096F\\u09E6-\\u09EF]/.test(x.replace('{0}','')))])`);
-    expect(rows).toEqual([['going', 10, true], ['firstT', 10, true]]);
-    // nine translations, none left in English
-    expect(await page.evaluate(`['going','firstT'].map(k=>new Set(HUB_T[k]).size>=9&&HUB_T[k].slice(1).every(x=>x!==HUB_T[k][0]))`)).toEqual([true, true]);
-    // no count wording says ride, bike or cycling: the card also names the pool, a workshop and other sessions
-    expect(await page.evaluate(`['going','firstT'].every(k=>!/ride|bike|cycl/i.test(HUB_T[k][0]))`)).toBe(true);
-    for (const [lang, a, b] of [['ar', '34 سيحضرون', '12 يشاركون لأول مرة'], ['ur', '34 آ رہے ہیں', '12 پہلی بار'], ['fr', '34 participants', '12 nouveaux venus'], ['bn', '34 জন আসছেন', '12 জন প্রথমবার'], ['ne', '34 जना आउँदै', '12 जना पहिलो पटक']] as const) {
+  test('in every language: no count on the card in Arabic, Urdu, French, Bengali or Nepali', async ({ page }) => {
+    await member(page, { 'rpc:hub_feed': feed({ going, numbers }) });
+    for (const [lang, a, b] of [['ar', 'سيحضرون', 'يشاركون لأول مرة'], ['ur', 'آ رہے ہیں', 'پہلی بار'], ['fr', 'participants', 'nouveaux venus'], ['bn', 'জন আসছেন', 'জন প্রথমবার'], ['ne', 'जना आउँदै', 'जना पहिलो पटक']] as const) {
       await page.evaluate(`setLang('${lang}');setCustTab('members')`);
-      await expect(line(page).locator('[data-go="going"]')).toHaveText(a);
-      await expect(line(page).locator('[data-go="firstT"]')).toHaveText(b);
-      expect(await page.evaluate(`getComputedStyle(document.querySelector('#hub-body .hub-going')).direction`)).toBe(lang === 'ar' || lang === 'ur' ? 'rtl' : 'ltr');
-      expect(await page.evaluate('document.documentElement.scrollWidth<=window.innerWidth')).toBe(true);
+      await expect(hero(page)).toBeVisible();
+      await expect(page.locator('#hub-body')).not.toContainText(a);
+      await expect(page.locator('#hub-body')).not.toContainText(b);
+      await expect(page.locator('#hub-body')).not.toContainText(/216|1712/);
     }
   });
 });

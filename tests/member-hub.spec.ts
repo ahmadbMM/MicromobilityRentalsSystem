@@ -96,7 +96,7 @@ test.describe('@customer:members the Community tab', () => {
     await expect(card.locator('[role=progressbar]')).toHaveAttribute('aria-valuetext', '1 / 3');
   });
 
-  test('a first-timer sees their first session; the season, the club goal and the club numbers show without names', async ({ page }) => {
+  test('a first-timer sees their first session; the season and the club goal show without names, the club numbers not at all', async ({ page }) => {
     await member(page, { queue_entries: rode5, 'rpc:hub_feed': feed({ me: { kind: 'first', levels: [1], target: 1, chosen: false, n: 0, ends_on: '2026-11-30', sats: 4 } }) });
     await expect(page.locator('#hub-body .hub-card', { hasText: 'Your challenge' })).toContainText('Your first session');
     await expect(page.locator('#hub-body .hub-card', { hasText: 'Season challenge' })).toContainText('2 of 8');
@@ -104,7 +104,8 @@ test.describe('@customer:members the Community tab', () => {
     await expect(club).toContainText('380 Saturday rides this month');
     await expect(club).toContainText('120 so far');
     await expect(club).toContainText('You: 1 of them');
-    await expect(page.locator('#hub-body .hub-stats')).toContainText('2104');
+    // The club-in-numbers card is gone (the user, 2026-11-13): the read still carries the totals, the page shows none.
+    await expect(page.locator('#hub-body')).not.toContainText(/2104|2,104|The club in numbers|Riders last Saturday|Saturday rides since/);
   });
 
   test('with nothing staff wrote, the tip of the week shows; a Saturday report takes its place', async ({ page }) => {
