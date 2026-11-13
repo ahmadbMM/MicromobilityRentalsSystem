@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
 
-// The learn-to-ride ladder (new features build F21, 2026-11-13; migration 20261114012100, learn-ladder.js).
+// The learn-to-ride ladder (new features build F21, 2026-11-13; migration 20261114082100, learn-ladder.js).
 // Four levels (balance, pedal, steer and brake, ride the circuit), four skills in each, seeded in the ten languages.
 // Staff: on a scheduled or done sign-up in People > Applications > Learn to ride, each learner has a Skills button;
 // the instructor ticks what the learner can do and writes one line (staff_learn_progress_set). A skill not ticked
@@ -15,7 +15,7 @@ import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } fr
 const LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 type Skill = { key: string; level: number; sort: number; name: Record<string, string>; active: boolean };
 // The skills as the migration seeds them: the fixtures are the seed itself.
-const SQL = readFileSync(resolve(__dirname, '../supabase/migrations/20261114012100_learn_ladder.sql'), 'utf8');
+const SQL = readFileSync(resolve(__dirname, '../supabase/migrations/20261114082100_learn_ladder.sql'), 'utf8');
 const SKILLS: Skill[] = [...SQL.matchAll(/\('([a-z_]+)', (\d), (\d+), '(\{[^']+\})'::jsonb\)/g)]
   .map((m) => ({ key: m[1]!, level: Number(m[2]), sort: Number(m[3]), name: JSON.parse(m[4]!) as Record<string, string>, active: true }));
 const KEYS = SKILLS.map((s) => s.key);

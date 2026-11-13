@@ -63,7 +63,7 @@
 --   drop table if exists public.company_challenge_members, public.company_challenges;
 --   delete from public.customer_badges where badge_id = 'bd_company_challenge';
 --   delete from public.badges where id = 'bd_company_challenge';
---   delete from supabase_migrations.schema_migrations where version = '20261114012600';
+--   delete from supabase_migrations.schema_migrations where version = '20261114082600';
 -- Idempotent.
 -- ============================================================================
 
@@ -386,7 +386,7 @@ begin
 end $chk$;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114012600', 'company_challenge')
+values ('20261114082600', 'company_challenge')
 on conflict (version) do nothing;
 
 commit;
@@ -403,4 +403,4 @@ select
       and p.proname in ('_cc_people', '_cc_award', 'company_challenge_mine', 'company_challenge_join', 'staff_company_challenges',
                         'staff_company_challenge_save', 'staff_company_challenge_delete', 'staff_company_challenge_remove')) as definer_8,
   (select count(*) from public.badges where slug = 'company_challenge' and system and held_only) as badge_1,
-  (select count(*) from supabase_migrations.schema_migrations where version = '20261114012600') as ledger_1;
+  (select count(*) from supabase_migrations.schema_migrations where version = '20261114082600') as ledger_1;

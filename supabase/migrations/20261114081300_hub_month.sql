@@ -90,7 +90,7 @@ revoke all on function public.hub_month(text, text) from public;
 grant execute on function public.hub_month(text, text) to anon, authenticated;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114011300', 'hub_month')
+values ('20261114081300', 'hub_month')
 on conflict (version) do nothing;
 
 commit;
@@ -103,4 +103,4 @@ select (select p.prosecdef from pg_proc p where p.oid = 'public.hub_month(text, 
        has_function_privilege('anon', 'public.hub_month(text, text)', 'execute') as anon_can_run_true,
        (select sc.value #>> '{}' from public.site_content sc where sc.key = 'hub.month.from') as first_day_2026_12_26,
        (select count(*) from pg_class where relnamespace = 'public'::regnamespace and relkind in ('r', 'p') and not relrowsecurity) as no_rls_0,
-       (select version from supabase_migrations.schema_migrations where version = '20261114011300') as ledger;
+       (select version from supabase_migrations.schema_migrations where version = '20261114081300') as ledger;

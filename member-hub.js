@@ -363,7 +363,7 @@ function _hubStill(s, e) {
 }
 // Going and first-timer counts (new features build F19, 2026-11-13): this card alone says how many are going to its
 // session and how many of them come to the community for the first time. Totals from the tab's one read (hub_feed's
-// going, keyed by session: _hub_going, migration 20261114011900), each only at 10 or more; under 10 that number is absent.
+// going, keyed by session: _hub_going, migration 20261114081900), each only at 10 or more; under 10 that number is absent.
 // Only once the session is published (its list no longer hidden, as _commPublished reads it) and open for booking. The
 // database holds the same rules; the page checks them again on its own copy of the session, so a count kept on the phone
 // never outlives them. No names, no list; a database before the migration sends none and the card is as it was. The
@@ -496,7 +496,7 @@ async function _hubPick(k) {
 }
 // ── Plan my Saturdays (new features build F10, 2026-11-13) ──────────────────────────────────────────
 // Beside the month's challenge: the current month's Saturdays as tick boxes. A tick books nothing and holds no place: it
-// stores that the member plans to come (hub_plans, migration 20261114011000, which only that member's own read returns),
+// stores that the member plans to come (hub_plans, migration 20261114081000, which only that member's own read returns),
 // and the database sends them one "booking is open" message when that Saturday's ride opens, unless they have booked
 // it. Nothing is ticked for them; a Saturday already gone shows, locked. A read of its own (hub_plan), kept two minutes
 // like the feed and never on the phone, so a database before the migration has no card and no error.
@@ -627,7 +627,7 @@ async function _hubPostImg(id) {
 // From the 26th to the end of the month, a member with two or more finished sessions that month gets one card: the
 // Saturdays they rode, their sessions by kind, the badges they earned this month, and one comparison with their own month
 // before. Every number is the member's own; nothing compares them with anyone. The numbers come from a read of their own
-// (hub_month, migration 20261114011300), asked only on those days, after the tab's read and by its date (the server's
+// (hub_month, migration 20261114081300), asked only on those days, after the tab's read and by its date (the server's
 // day in Riyadh). The database decides whether the card shows: its first day is site_content 'hub.month.from' (26
 // December 2026), and it answers show false before that day, before the 26th and under two sessions; the page checks the
 // same three on what came back. A database without the function, or a read that fails, shows no card and no error. The

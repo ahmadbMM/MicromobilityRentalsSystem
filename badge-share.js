@@ -101,7 +101,7 @@ function _shrSubject(job, c) {
   if (job.kind === 'title') {
     const a = S._ttMine, x = a && a.forId === c.id && Array.isArray(a.titles) ? a.titles.find((y) => y && y.id === job.id) : null;
     if (!x) return null;
-    // at: the day it was given or reached (customer_my_titles from migration 20261114011200 on; none before it)
+    // at: the day it was given or reached (customer_my_titles from migration 20261114081200 on; none before it)
     return { label: _sT('kTitle'), name: _ttName(x), level: '', date: x.at ? _bdgDay(x.at) : '', club: _shrClub(c), chip: { color: x.color }, file: 'micromobility-title' };
   }
   if (job.kind === 'mile') {

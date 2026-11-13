@@ -1,7 +1,7 @@
 // Report a bike problem (new features build F15, 2026-11-13; the owner marked it Build now). The ticket of a rider who is
 // checked in with a bike carries one button (_brpHtml in app.src.html); this file is its pop-up: a short list of faults
 // as real radios, an optional short note, and Send. A booking with several bikes asks which one first (the account's own
-// riders only). bike_report (migration 20261114011500) takes it for the rider's own booking, from check-in until 3 hours
+// riders only). bike_report (migration 20261114081500) takes it for the rider's own booking, from check-in until 3 hours
 // after the session, and refuses a second one within its limits: the pop-up closes on that refusal exactly as on a report
 // taken, and the ticket shows the same quiet chip. Nothing is said after sending (the owner: no bar after an action).
 // A file of its own, fetched on the first tap (_brpOpen in app.src.html), with its own words in all ten languages.

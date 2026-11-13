@@ -248,7 +248,7 @@ revoke all on function public.hub_feed(text, text, text) from public;
 grant execute on function public.hub_feed(text, text, text) to anon, authenticated;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114011900', 'hub_going')
+values ('20261114081900', 'hub_going')
 on conflict (version) do nothing;
 
 commit;
@@ -268,4 +268,4 @@ select (select p.prosecdef from pg_proc p where p.oid = 'public._hub_going()'::r
        (select count(*) from jsonb_each(public._hub_going()) e
          where coalesce((e.value->>'n')::int, 10) < 10 or coalesce((e.value->>'first')::int, 10) < 10) as under_ten_0,
        (select count(*) from pg_class where relnamespace = 'public'::regnamespace and relkind in ('r', 'p') and not relrowsecurity) as no_rls_0,
-       (select version from supabase_migrations.schema_migrations where version = '20261114011900') as ledger;
+       (select version from supabase_migrations.schema_migrations where version = '20261114081900') as ledger;

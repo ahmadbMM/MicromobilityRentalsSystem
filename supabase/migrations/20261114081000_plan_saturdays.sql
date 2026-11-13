@@ -4,7 +4,7 @@
 -- message through the message store (push_outbox), so it is on their Updates list and, for a member who switched
 -- Community notifications on, goes out as a push. Never for a member who has already booked it; never twice.
 --
--- APPLY AFTER the Community reach migrations (community_reach, push_consent) and the Updates list (20261114010300):
+-- APPLY AFTER the Community reach migrations (community_reach, push_consent) and the Updates list (20261114080300):
 -- this file writes push_outbox.key / args and push_words, and refuses to run without them.
 --
 --  1. hub_plans: one row per member and ticked Saturday. Nobody reads the table: no policy, no grant, staff included.
@@ -40,7 +40,7 @@ begin
   if to_regclass('public.push_words') is null
      or not exists (select 1 from information_schema.columns
                      where table_schema = 'public' and table_name = 'push_outbox' and column_name = 'key') then
-    raise exception 'plan_saturdays: apply the Community reach migrations and the Updates list (20261114010300) first';
+    raise exception 'plan_saturdays: apply the Community reach migrations and the Updates list (20261114080300) first';
   end if;
 end $need$;
 
@@ -53,7 +53,7 @@ create table if not exists public.hub_plans (
   primary key (customer_id, plan_date)
 );
 comment on table public.hub_plans is
-  'Plan my Saturdays (20261114011000): a member ticked this Saturday. It books nothing. told_at: the "booking is open" message was sent, or was not needed (already booked). Read only by hub_plan for the member themselves.';
+  'Plan my Saturdays (20261114081000): a member ticked this Saturday. It books nothing. told_at: the "booking is open" message was sent, or was not needed (already booked). Read only by hub_plan for the member themselves.';
 create index if not exists hub_plans_wait_idx on public.hub_plans (plan_date) where told_at is null;
 alter table public.hub_plans enable row level security;
 revoke all on public.hub_plans from public, anon, authenticated;
@@ -203,7 +203,7 @@ revoke all on function public._hub_plan_tick() from public, anon, authenticated;
 select cron.schedule('mm-hub-plan', '*/10 * * * *', 'select public._hub_plan_tick()');
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114011000', 'plan_saturdays')
+values ('20261114081000', 'plan_saturdays')
 on conflict (version) do nothing;
 
 commit;
@@ -222,4 +222,4 @@ select (select count(*) from pg_class where relnamespace = 'public'::regnamespac
        (select count(*) from pg_policies where schemaname = 'public' and tablename = 'hub_plans') as policies_0,
        (select count(*) from public.push_words where key = 'planopen') as words_10,
        (select count(*) from cron.job where jobname = 'mm-hub-plan') as cron_1,
-       (select version from supabase_migrations.schema_migrations where version = '20261114011000') as ledger;
+       (select version from supabase_migrations.schema_migrations where version = '20261114081000') as ledger;

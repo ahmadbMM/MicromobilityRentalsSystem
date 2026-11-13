@@ -9,13 +9,13 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/s
 // many are taking part and their sessions together only from the minimum team size up, never under 10 (a rider never
 // sees a total under 10 about other people, the owner's rule), and their own count. Nothing a
 // rider reads names a colleague or holds one colleague's count (members see nobody, 2026-11-04). Once the last day has
-// passed, everyone with a finished session holds the Company Challenge badge. Migration 20261114012600.
+// passed, everyone with a finished session holds the Company Challenge badge. Migration 20261114082600.
 
 const sessions = [{ id: '2099-01-01', session_date: '2099-01-01', day: 'Sunday', status: 'open', capacity: 20, created_at: 1 }];
 const profile = { id: 'c1', name: 'Sara Khalid', email: 'sara@example.com', phone: '+966500000001', height: 168, birth_date: '1994-03-02', country: 'Saudi Arabia', city: 'Jeddah', nationality: 'Saudi Arabia', gender: 'female', type_preference: 'Hybrid' };
 const ch = (o: Record<string, unknown> = {}) => ({ id: 7, company: 'Petromin', starts_on: '2026-11-01', ends_on: '2026-11-30', state: 'on', team: 12, sessions: 31, mine: 3, badge: false, ...o });
 const mine = (...rows: Record<string, unknown>[]) => ({ ok: true, open: true, rows });
-const SQL = readFileSync(resolve(__dirname, '../supabase/migrations/20261114012600_company_challenge.sql'), 'utf8');
+const SQL = readFileSync(resolve(__dirname, '../supabase/migrations/20261114082600_company_challenge.sql'), 'utf8');
 // One function's text in the migration, from its "create or replace" to the end of its body.
 const fnBody = (name: string) => {
   const at = SQL.indexOf(`create or replace function public.${name}(`);
@@ -351,7 +351,7 @@ test.describe('@customer:account company challenge: what the database lets a rid
     expect(join).toContain(`_ip_gate('cojoin', 20, interval '10 minutes')`);
     expect(join.indexOf('if v_id is null then')).toBeLessThan(join.indexOf(`_ip_gate('cojoin'`));
     expect(join).toContain(`if v_ends < v_today then return jsonb_build_object('ok', false, 'error', 'ended'); end if;`);
-    expect(SQL).toContain(`values ('20261114012600', 'company_challenge')`);
+    expect(SQL).toContain(`values ('20261114082600', 'company_challenge')`);
   });
 });
 

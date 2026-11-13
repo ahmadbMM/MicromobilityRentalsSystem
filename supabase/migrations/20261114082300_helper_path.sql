@@ -46,7 +46,7 @@ set local lock_timeout = '5s';
 /* -- 1. the steps are titles ------------------------------------------------------------------- */
 alter table public.titles add column if not exists path_step smallint;
 comment on column public.titles.path_step is
-  'Helper path: 1 helper, 2 trainee ride leader, 3 ride leader; null for every other title (20261114012300).';
+  'Helper path: 1 helper, 2 trainee ride leader, 3 ride leader; null for every other title (20261114082300).';
 alter table public.titles drop constraint if exists titles_path_step_check;
 alter table public.titles add constraint titles_path_step_check check (path_step between 1 and 3);
 alter table public.titles drop constraint if exists titles_path_not_auto;
@@ -185,7 +185,7 @@ begin
 end $chk$;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114012300', 'helper_path')
+values ('20261114082300', 'helper_path')
 on conflict (version) do nothing;
 
 commit;
@@ -201,4 +201,4 @@ select (select count(*) from public.titles where path_step is not null) as path_
        has_function_privilege('anon', 'public.staff_helper_days()', 'execute') as staff_read_open_to_anon_false,
        has_function_privilege('anon', 'public.customer_helper_path(text, text)', 'execute') as member_read_open_true,
        (select count(*) from pg_trigger where tgname = 'customer_titles_path_one' and not tgisinternal) as trigger_1,
-       (select version from supabase_migrations.schema_migrations where version = '20261114012300') as ledger;
+       (select version from supabase_migrations.schema_migrations where version = '20261114082300') as ledger;

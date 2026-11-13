@@ -25,7 +25,7 @@ const marshal = { slug: 'marshal', icon: 'shield', color: 'orange', name: 'Marsh
 const met = { slug: 'challenge_1', icon: 'target', color: 'blue', name: 'Challenge Met', system: true, note: null, at: '2026-10-31T20:00:00Z' };
 const catalog = [{ id: 'bd_challenge_1', slug: 'challenge_1', name: 'Challenge Met', icon: 'target', color: 'blue', system: true, auto: true, description: 'Meet your monthly challenge.' }];
 const titles = { ok: true, member: true, hidden: false, shown: 'ttl_leg', titles: [
-  { id: 'ttl_cap', name: 'Ride Captain', name_ar: 'قائد الرحلة', color: 'gold', auto: false, expires_on: '2099-01-31' }, // no day: a database before 20261114011200
+  { id: 'ttl_cap', name: 'Ride Captain', name_ar: 'قائد الرحلة', color: 'gold', auto: false, expires_on: '2099-01-31' }, // no day: a database before 20261114081200
   { id: 'ttl_leg', name: 'Legend', name_ar: 'أسطورة', color: 'purple', auto: true, expires_on: null, at: '2026-11-02' },
 ] };
 const sat = (id: string) => ({ id, day: 'Saturday', session_date: id, capacity: 40, status: 'open', created_at: 1, event_kind: 'community', ride_kind: 'saturday', paid_ride: false, bike_slots: '{"_time":"06:00 - 06:30","_total":40}' });

@@ -45,7 +45,7 @@ revoke execute on function public.customer_my_titles(text, text) from public;
 grant  execute on function public.customer_my_titles(text, text) to anon, authenticated;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114011200', 'title_earned_date')
+values ('20261114081200', 'title_earned_date')
 on conflict (version) do nothing;
 
 commit;
@@ -58,4 +58,4 @@ select (select p.prosecdef from pg_proc p where p.oid = 'public.customer_my_titl
        has_function_privilege('anon', 'public.customer_my_titles(text, text)', 'execute') as anon_can_run_true,
        position('''at''' in pg_get_functiondef('public.customer_my_titles(text, text)'::regprocedure)) > 0 as answers_at_true,
        (select count(*) from pg_class where relnamespace = 'public'::regnamespace and relkind in ('r', 'p') and not relrowsecurity) as no_rls_0,
-       (select version from supabase_migrations.schema_migrations where version = '20261114011200') as ledger;
+       (select version from supabase_migrations.schema_migrations where version = '20261114081200') as ledger;

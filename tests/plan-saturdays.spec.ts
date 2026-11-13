@@ -7,7 +7,7 @@ import { stubSupabase, loginCustomer, waitForSb, type Fixtures } from './helpers
 // month's Saturdays as tick boxes. A tick books nothing and holds no place: it stores that the member plans to come, and
 // the database sends one "booking is open" message when that Saturday's ride opens, unless they have booked it already.
 // Past Saturdays show, locked; nothing is pre-ticked; a member's ticks are read by that member alone. All Supabase traffic
-// is stubbed (hub_plan, hub_plan_set are the contract of migration 20261114011000); what only the database can enforce
+// is stubbed (hub_plan, hub_plan_set are the contract of migration 20261114081000); what only the database can enforce
 // is checked in the migration's own text.
 
 const NOV = ['2026-11-07', '2026-11-14', '2026-11-21', '2026-11-28'];
@@ -236,7 +236,7 @@ test.describe('@customer:members F10 Plan my Saturdays', () => {
 });
 
 test.describe('@customer:members F10 Plan my Saturdays: the database\'s rules', () => {
-  const sql = readFileSync(resolve(__dirname, '../supabase/migrations/20261114011000_plan_saturdays.sql'), 'utf8');
+  const sql = readFileSync(resolve(__dirname, '../supabase/migrations/20261114081000_plan_saturdays.sql'), 'utf8');
   const code = sql.replace(/^\s*--.*$/gm, ''); // the statements, without the comments
   const fn = (name: string) => {
     const a = code.indexOf(`create or replace function public.${name}(`);
@@ -339,7 +339,7 @@ test.describe('@customer:members F10 Plan my Saturdays: the database\'s rules', 
     expect(new Set(langs.map((m) => m[2])).size).toBe(10); // ten titles, each its own
     expect(new Set(langs.map((m) => m[3])).size).toBe(10);
     expect(sql).not.toMatch(new RegExp('[\\u0660-\\u0669\\u06F0-\\u06F9\\u0966-\\u096F\\u09E6-\\u09EF]'));
-    expect(code).toContain("values ('20261114011000', 'plan_saturdays')");
+    expect(code).toContain("values ('20261114081000', 'plan_saturdays')");
     expect(code).toMatch(/^begin;/m);
     expect(code).toMatch(/^commit;/m);
     expect(code).toContain("notify pgrst, 'reload schema';");

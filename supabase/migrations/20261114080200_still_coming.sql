@@ -57,7 +57,7 @@ end $pre$;
 -- ── 1. the answer on the booking ───────────────────────────────────────────────────────────────
 alter table public.queue_entries add column if not exists coming_at timestamptz;
 comment on column public.queue_entries.coming_at is
-  'When the rider answered "I''m coming" to "Still coming?" on their ticket (booking_coming, 20261114010200); cleared when the booking moves to another session or is cancelled.';
+  'When the rider answered "I''m coming" to "Still coming?" on their ticket (booking_coming, 20261114080200); cleared when the booking moves to another session or is cancelled.';
 
 -- ── 2. the rider's own yes ─────────────────────────────────────────────────────────────────────
 create or replace function public.booking_coming(p_id text, p_token text, p_session text)
@@ -216,7 +216,7 @@ end $$;
 revoke all on function public._hub_push_tick() from public, anon, authenticated;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114010200', 'still_coming')
+values ('20261114080200', 'still_coming')
 on conflict (version) do nothing;
 
 commit;
@@ -238,4 +238,4 @@ select (select count(*) from information_schema.columns
        (select count(*) from public.push_words where key = 'remind' and char_length(body) > 40) as remind_with_sentence_10,
        (select pg_get_constraintdef(oid) like '%push%' from pg_constraint where conname = 'queue_entries_reminded_kind_chk') as kind_push_true,
        (select count(*) from public.queue_entries where coming_at is not null) as answers_so_far,
-       (select version from supabase_migrations.schema_migrations where version = '20261114010200') as ledger;
+       (select version from supabase_migrations.schema_migrations where version = '20261114080200') as ledger;

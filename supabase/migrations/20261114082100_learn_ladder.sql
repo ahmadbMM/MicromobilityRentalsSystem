@@ -37,7 +37,7 @@
 --   drop function if exists public.learn_ladder(text, text);
 --   drop table if exists public.learn_progress;
 --   drop table if exists public.learn_skills;
---   delete from supabase_migrations.schema_migrations where version = '20261114012100';
+--   delete from supabase_migrations.schema_migrations where version = '20261114082100';
 -- Idempotent.
 -- ============================================================================
 
@@ -229,7 +229,7 @@ revoke all on function public.staff_learn_progress_set(uuid, integer, text[], te
 grant execute on function public.staff_learn_progress_set(uuid, integer, text[], text, text) to authenticated;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114012100', 'learn_ladder')
+values ('20261114082100', 'learn_ladder')
 on conflict (version) do nothing;
 
 commit;
@@ -249,4 +249,4 @@ select
   has_function_privilege('anon', 'public.learn_ladder(text, text)', 'execute')                         as rider_may_read_true,
   has_function_privilege('anon', 'public.staff_learn_progress_set(uuid, integer, text[], text, text)', 'execute') as anon_may_write_false,
   has_table_privilege('anon', 'public.learn_progress', 'select')                                       as anon_reads_progress_false,
-  (select count(*) from supabase_migrations.schema_migrations where version = '20261114012100')        as ledger_1;
+  (select count(*) from supabase_migrations.schema_migrations where version = '20261114082100')        as ledger_1;

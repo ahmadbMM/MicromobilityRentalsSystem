@@ -5,7 +5,7 @@
 // challenge's minimum team size and 10 (the database sends neither number before, and the sessions total only from 10), and
 // their own count. Members see nobody (2026-11-04): nothing here names a colleague or holds one colleague's count,
 // and the database sends none.
-// Everything comes from company_challenge_mine and company_challenge_join (migration 20261114012600), kept in S._coch.
+// Everything comes from company_challenge_mine and company_challenge_join (migration 20261114082600), kept in S._coch.
 // A file of its own, fetched only when this page opens (_cochOpen in app.src.html), with its own words in all ten
 // languages. Hand-written, not generated; the build stamps its address (COCH_V).
 /* global S, sb, esc, _on, _P, _EV, getSession, shortDate, _bdgMedal, _cuIc */

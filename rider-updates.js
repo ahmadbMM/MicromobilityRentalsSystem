@@ -1,7 +1,7 @@
 // The Updates page (new features build F3, 2026-11-13): every message the app addressed to this rider, newest first - a
 // reminder the evening before, a session that changed, a place off the waitlist, the month's challenge, the Saturday
 // recap, a note from staff - each with a short title, its text, its date and where it leads. It is the in-app half of
-// "in-app and web push only": the rows are there with push on or off (migration 20261114010300), kept 90 days.
+// "in-app and web push only": the rows are there with push on or off (migration 20261114080300), kept 90 days.
 // One read, customer_updates, in the page's language; the read marks every row read, so the rows that were unread show a
 // dot this once. A rider reads only their own rows (the database checks their token). No bar, no toast, no hint line.
 // A file of its own, fetched when Account > Updates opens (_inbShow in app.src.html), with its own words in all ten

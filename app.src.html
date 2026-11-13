@@ -3509,8 +3509,8 @@ function entryFromDB(e){
     inviteNo:e.invite_no||null, // a Petromin invitee's I-001 on its night (petromin_invite_book, 20261112234500)
     inviteCo:e.invite_company||null, // the company the guest typed at micromobility.sa/petromin (petromin_guest_book, 20261113150000)
     remindedAt:e.reminded_at===undefined?undefined:(e.reminded_at||null),remindedKind:e.reminded_kind||null, // the last ride reminder staff sent, and which (20261009225000); undefined: read without the column
-    comingAt:e.coming_at===undefined?undefined:(e.coming_at||null), // "Still coming?": when the rider said they are coming (booking_coming, 20261114010200); undefined: read without the column
-    bikeReportAt:e.bike_report_at===undefined?undefined:(e.bike_report_at||null), // "Report a bike problem": the rider's last report on this booking (bike_report, 20261114011500); undefined: read without the column
+    comingAt:e.coming_at===undefined?undefined:(e.coming_at||null), // "Still coming?": when the rider said they are coming (booking_coming, 20261114080200); undefined: read without the column
+    bikeReportAt:e.bike_report_at===undefined?undefined:(e.bike_report_at||null), // "Report a bike problem": the rider's last report on this booking (bike_report, 20261114081500); undefined: read without the column
     // The waiver the row was agreed under. null when the row says it has none (a rider added at the
     // desk), undefined when the read did not carry the column: only a known null asks (_pendingWaiver).
     waiverVersion:e.waiver_version===undefined?undefined:(e.waiver_version||null),
@@ -16111,7 +16111,7 @@ function _readHubSrc(pn){
 // rider-updates.js (fetched when the page opens, with its own words; it names where each row leads and reads the list,
 // customer_updates, which marks every row read). The ways in: a row on Account > Notifications and, for members, a
 // button at the foot of the Community tab's staff card. One light read here, customer_updates_unread (migration
-// 20261114010300), with the pulse's rhythm, says how many are unread: they light the Community tab's dot, set the app
+// 20261114080300), with the pulse's rhythm, says how many are unread: they light the Community tab's dot, set the app
 // icon's badge where the browser has one, and are counted on the two ways in. A database without it: no row, no button,
 // no dot (S._inbOff). S._inb: {id, ok, n, comm, at} - comm of the n are Community's, and count as read once the tab is
 // opened after the count was asked (the tab's own read clears them on the server).
@@ -21054,7 +21054,7 @@ async function _tkShare(id,el){
 // ── "Still coming?" the day before (new features build F2, 2026-11-13) ───────────────────────────────────
 // From 24 hours before the time to turn up until the session starts, a booking that holds a place shows two buttons, on
 // its ticket and on the Community tab's card for it: "I'm coming" stamps the booking (queue_entries.coming_at through
-// booking_coming, 20261114010200: the rider's own booking, every rider of it, the first answer stands) and "Can't come"
+// booking_coming, 20261114080200: the rider's own booking, every rider of it, the first answer stands) and "Can't come"
 // opens the cancel dialog as it is. After a yes one quiet chip stands where the buttons were. No line of text goes with
 // them (the owner: no hint lines), and never on a waitlisted booking or one staff have not confirmed yet. Until the
 // database has the column no booking carries it and nothing shows; a database without the function hides the buttons
@@ -21119,7 +21119,7 @@ function _stcSeek(id,n){
 // ── Report a bike problem (new features build F15, 2026-11-13) ───────────────────────────────────────────
 // A rider who is checked in with a bike has one button on the ticket, until 3 hours after the session's last time. It
 // opens a centred pop-up (bike-report.js, fetched on the first tap, with its own words): a short list of faults and an
-// optional note, sent through bike_report (20261114011500) to the staff Workshop list. After a report one quiet chip
+// optional note, sent through bike_report (20261114081500) to the staff Workshop list. After a report one quiet chip
 // stands where the button was for the ten minutes in which the server refuses another (a refusal is not said either).
 // A booking row carries bike_report_at only once the database has the migration: until then, and on a database without
 // the function (S._brpOff), nothing shows.
@@ -21448,7 +21448,7 @@ function _icsBody(ev){
 // Replace the address. The address is /api/ics?k=<key> (functions/api/ics.js): the bookings the rider still holds, as
 // calendar events the phone's calendar keeps up to date. The pop-up lives in calendar-feed.js, fetched on the first
 // open, so no other rider carries it. The row shows only once the database says it has the feature (calendar_link
-// 'peek', migration 20261114012700: no key is made or sent by it), so a database without it never offers the row;
+// 'peek', migration 20261114082700: no key is made or sent by it), so a database without it never offers the row;
 // a peek that did not answer is asked again a minute later at the earliest. S._calf = {id, on, busy, at}.
 const CALF_V=''; // build stamps a hash of calendar-feed.js
 function _calfPeek(c){
@@ -22615,7 +22615,7 @@ async function _ttSavePrefs(shown,hidden){
   toast(t('ttSaved'));
 }
 function _ttPick(id){const a=S._ttMine;if(a)_ttSavePrefs(id,a.hidden);}
-// Helper path (new features F23, 2026-11-13; migration 20261114012300): a member's own step on the path rider, helper,
+// Helper path (new features F23, 2026-11-13; migration 20261114082300): a member's own step on the path rider, helper,
 // trainee ride leader, ride leader (the path title staff gave them, titles.path_step) and their helper days (the days of
 // the volunteer shifts they attended), read by customer_helper_path and drawn by helper-path.js: a card on Account >
 // Badges and a line on Account > Stats. That file is hand-written, holds its own words in the ten languages and is
@@ -22657,7 +22657,7 @@ function renderMembers(){
   _hubLoad();
 }
 // The learn-to-ride ladder (new features build F21, 2026-11-13): an account whose learn-to-ride sign-up has a lesson sees its
-// learners' levels, skills and the instructor's line under Account > Learn to ride. One read (learn_ladder, 20261114012100)
+// learners' levels, skills and the instructor's line under Account > Learn to ride. One read (learn_ladder, 20261114082100)
 // says whether there is one: a database without it, or an account with no lesson, shows no row. The pop-up, the certificate
 // and their words are learn-ladder.js, fetched on the first tap.
 function _llHas(c){const m=S._llMine;return !!(c&&m&&m.forId===c.id&&m.d&&m.d.learners.length);}
@@ -22999,7 +22999,7 @@ function _seasonDashboard(cust){
     ${_myrStats(allEntries.filter(e=>!_ncEntry(e)))}
     ${_myrMore(allEntries,cust)}`;
 }
-// ── Circuit challenge laps (new features build F25, 2026-11-13; migration 20261114012500) ───────────────────────
+// ── Circuit challenge laps (new features build F25, 2026-11-13; migration 20261114082500) ───────────────────────
 // Staff name a lap target for a season (Community > Activities > Circuit laps). Its poster at the start line, or a plain
 // NFC tag, holds /?lap=<code>: the code comes off the address at boot as ?claim= does, and the scan is kept in this tab
 // with a key of its own and its time ({c, k, t}) until the database has answered for it. The lap page is a file of its
@@ -28307,7 +28307,7 @@ function _accVolOpen(){const c=S.loggedIn||getSession();if(c)_volHandoff(c);}
 // ── Company challenge on My Account (new features build F26, 2026-11-13) ─────────────────────────────────────────
 // A company's people ride towards one number: staff make the challenge and hand out its code, or a link that holds it
 // (/?company=CODE, kept on this device until the rider is signed in). The row shows once company_challenge_mine has
-// answered (migration 20261114012600) that the rider has a challenge or that one can be joined, not at all before. Its
+// answered (migration 20261114082600) that the rider has a challenge or that one can be joined, not at all before. Its
 // page (the code box, and a card per challenge: how many are taking part and their sessions together from the minimum
 // team size up, that total only from 10, and the rider's own count; never a colleague) is company-challenge.js,
 // fetched when the page opens. A Log out drops a code still kept from a link (doLogout).
@@ -35794,7 +35794,7 @@ async function _laPrio(id,p){
 }
 // ── The learn-to-ride ladder (new features build F21, 2026-11-13) ────────────────────────────────────────────────
 // Four levels (balance, pedal, steer and brake, ride the circuit), four skills in each (learn_skills, named in the ten
-// languages by migration 20261114012100). On a scheduled or done sign-up each learner carries a Skills button: the
+// languages by migration 20261114082100). On a scheduled or done sign-up each learner carries a Skills button: the
 // instructor ticks what the learner can do and writes one line of feedback (staff_learn_progress_set; learn_progress holds
 // one row per learner of a sign-up). A skill not ticked reads "Practising": nothing is marked failed. The learner's account
 // sees its own ladder in the booking app. A database without the tables shows no button.
@@ -41237,7 +41237,7 @@ async function _ptnCapSave(sid){
 // Staff only. On the Bookings roster of a Saturday ride (a session that counts on the Saturday badge ladder: _rideKind
 // 'saturday'), a small mark after a rider's name: First Saturday, Second Saturday, Back after N missed (three or more
 // days a Saturday ride was held since their last one) and the ladder step this ride reaches. One read for the session,
-// staff_sat_marks (20261114010400): each account's Saturday rides before this one and the Saturdays held since its last;
+// staff_sat_marks (20261114080400): each account's Saturday rides before this one and the Saturdays held since its last;
 // asked when the session's Bookings is opened, again after five minutes on it, and once for a roster holding an account
 // the answer did not name (once more a minute later while it still does not: a desk add waiting in the outbox) - never
 // per row or per repaint, and the roster does not wait for it. The steps are read off the
@@ -41263,7 +41263,7 @@ function _srmLoad(sid,need){
   // a read that failed is asked again in a minute; so is, once (re), one that did not name an account it was asked for: a desk add kept in the outbox is on the roster before its row is in the database
   const end=by=>{if(S._srm!==cur)return;cur.busy=false;if(!by||(!cur.re&&cur.need.split(',').some(id=>id&&!by.has(id))))cur.at=Date.now()-24e4;if(by){cur.by=by;_satcRepaint();}};
   Promise.resolve(sb.rpc('staff_sat_marks',{p_session:sid})).then(({data,error})=>{
-    if(error){if(_rpcAbsent(error))S._srmOff=true;end(null);return;} // a database before 20261114010400: nothing shows
+    if(error){if(_rpcAbsent(error))S._srmOff=true;end(null);return;} // a database before 20261114080400: nothing shows
     end(new Map((data&&Array.isArray(data.riders)?data.riders:[]).map(r=>[String(r.c),{n:Number(r.n)||0,miss:Number(r.miss)||0}])));
   },()=>end(null));
 }
@@ -57020,7 +57020,7 @@ async function _refReview(cid,allow){
 // A company's people ride towards one number. Staff make the challenge (the company, a join code, its first and last
 // day, the minimum team size from which riders see the totals), see each one's totals and the riders who joined, and
 // can take a rider out. All of it goes through functions (staff_company_challenges and its three writes, migration
-// 20261114012600, People's right); a database without them says it is waiting for the update. The company's name is
+// 20261114082600, People's right); a database without them says it is waiting for the update. The company's name is
 // typed, with the corporate nights' companies (RIDER_COMPANIES) offered. In the peoplemore part.
 function _cochs(){return S._cochsS||(S._cochsS={rows:null,busy:false,err:false,at:0,gone:false});}
 function _cochsLink(code){return'__SITE_ORIGIN__/?company='+encodeURIComponent(code);}
@@ -59174,7 +59174,7 @@ function _wsShown(){
 }
 function _wsListHtml(){const W=_ws();if(W.filter==='reports')return _brListHtml();return _wsShown().map(_wsRow).join('')||_emptyState(t(W.q&&W.q.trim()?'wsNoMatch':'wsEmpty'));}
 // ── Bike reports (new features build F15, 2026-11-13) ────────────────────────────────────────────
-// A rider's report of a fault on the bike of their booking (bike_report, migration 20261114011500), shown in this list
+// A rider's report of a fault on the bike of their booking (bike_report, migration 20261114081500), shown in this list
 // behind one more pill: bike, rider, booking, fault, note, time, open or resolved. Open ones lead. Staff who may change
 // the Workshop mark one resolved or open it again; the database dates it. The rider is the booking's (or the account's),
 // as this device already holds them: the report keeps no name. The rail's badge counts the open ones with the new
@@ -70834,7 +70834,7 @@ function _commTitles(){
   return`<div class="form-section cmy-mt0"><h2 class="form-title">${t('ttTab')}</h2><div class="cmy-am-sub">${t('ttSub')}</div>${rows}
     ${!adm?'':S._ttEd?_ttEditForm():`<button type="button" class="btn-secondary cmy-mt12" data-on-click="${_on('_ttEdit','')}">+ ${t('ttNew')}</button>`}</div>${_hpStaffHtml()}`;
 }
-// Helper path (new features F23, 2026-11-13; migration 20261114012300): rider, helper, trainee ride leader, ride leader.
+// Helper path (new features F23, 2026-11-13; migration 20261114082300): rider, helper, trainee ride leader, ride leader.
 // The three steps after rider are titles of the catalogue (titles.path_step 1 to 3), so a step is given and taken as any
 // title is, here or from the title's own holders; the database keeps one path title per member (_title_path_one), and a
 // member holding none is a rider. Helper days are the days of the volunteer shifts a member attended (staff_helper_days),
@@ -71208,7 +71208,7 @@ async function _acGoalDel(id){
   S._ac.goals=S._ac.goals.filter(x=>x.id!==id);renderCommunity();
 }
 function _acBadgeName(id){const b=(S._ac&&S._ac.badges||[]).find(x=>x.id===id);return b?((S.lang==='ar'&&b.name_ar)||b.name):id;}
-// ── circuit challenges (new features build F25, 2026-11-13; migration 20261114012500): a named lap target for a season.
+// ── circuit challenges (new features build F25, 2026-11-13; migration 20261114082500): a named lap target for a season.
 // Riders scan its poster at the start line on every lap (the rider app at /?lap=<code>; a plain NFC tag can hold the same
 // address) and see their own count against the target. The database counts a lap only for a rider checked in on a
 // circuit session running then and not inside the challenge's seconds between laps, and gives the challenge's own badge

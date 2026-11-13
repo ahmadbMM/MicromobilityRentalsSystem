@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
 
-// Helper path (new features F23, 2026-11-13; migration 20261114012300): rider, helper, trainee ride leader, ride leader.
+// Helper path (new features F23, 2026-11-13; migration 20261114082300): rider, helper, trainee ride leader, ride leader.
 // The three steps after rider are titles of the catalogue (titles.path_step), given where titles are given; helper days
 // are the days of the volunteer shifts a member attended. A member sees their own step, their helper days, the next
 // step's name and the helper-day ladder (helper-path.js, fetched for members only); staff set the step and see helper
@@ -28,7 +28,7 @@ const PATH_IDS = pathTitles.map((x) => x.id);
 const held = [{ customer_id: 'c1', title_id: 'ttl_path_trainee', expires_on: null, given_by: 'Spec Staff', given_at: '2026-11-01T10:00:00+00:00' }];
 const days = [{ customer_id: 'c1', days: 12 }, { customer_id: 'c3', days: 9 }, { customer_id: 'c2', days: 3 }];
 const STEPS = ['Rider', 'Helper', 'Trainee ride leader', 'Ride leader'];
-const SQL = readFileSync(resolve(__dirname, '../supabase/migrations/20261114012300_helper_path.sql'), 'utf8');
+const SQL = readFileSync(resolve(__dirname, '../supabase/migrations/20261114082300_helper_path.sql'), 'utf8');
 
 const rpcCalls = (page: Page, fn: string) => {
   const out: Record<string, unknown>[] = [];
@@ -413,7 +413,7 @@ test.describe('@staff:community helper path', () => {
   });
 });
 
-test.describe('@staff:community helper path SQL (migration 20261114012300, read as text)', () => {
+test.describe('@staff:community helper path SQL (migration 20261114082300, read as text)', () => {
   const fn = (name: string) => {
     const m = SQL.match(new RegExp(`create or replace function public\\.${name}\\(([^)]*)\\)[\\s\\S]*?\\$function\\$;`));
     expect(m, name).not.toBeNull();
@@ -484,7 +484,7 @@ test.describe('@staff:community helper path SQL (migration 20261114012300, read 
     expect(SQL).toMatch(/create trigger customer_titles_path_one\s+after insert or update on public\.customer_titles\s+for each row execute function public\._title_path_one\(\);/);
     // the file's shape: one transaction, its ledger row, the schema reload, and nothing dropped but its own trigger and constraints
     expect(SQL).toMatch(/\nbegin;\n[\s\S]*\ncommit;\n\nnotify pgrst, 'reload schema';/);
-    expect(SQL).toContain(`values ('20261114012300', 'helper_path')`);
+    expect(SQL).toContain(`values ('20261114082300', 'helper_path')`);
     expect(SQL.replace(/^--.*$/gm, '')).not.toMatch(/drop (table|column|function|policy)|create table|truncate|delete from public\./i);
   });
 });

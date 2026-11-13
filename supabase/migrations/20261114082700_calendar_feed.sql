@@ -181,7 +181,7 @@ begin
 end $chk$;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114012700', 'calendar_feed')
+values ('20261114082700', 'calendar_feed')
 on conflict (version) do nothing;
 
 commit;
@@ -193,4 +193,4 @@ select (select c.relrowsecurity from pg_class c where c.oid = 'public.calendar_f
        has_table_privilege('anon', 'public.calendar_feeds', 'select') as anon_reads_false,
        (select count(*) from pg_proc p where p.pronamespace = 'public'::regnamespace
           and p.proname in ('calendar_link', 'calendar_feed') and p.prosecdef) as definer_2,
-       (select count(*) from supabase_migrations.schema_migrations where version = '20261114012700') as ledger_1;
+       (select count(*) from supabase_migrations.schema_migrations where version = '20261114082700') as ledger_1;

@@ -5,7 +5,7 @@ import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } fr
 
 // "Still coming?" the day before (new features build F2, 2026-11-13). From 24 hours before the time to turn up until the
 // session starts, a booking that holds a place shows "I'm coming" and "Can't come" on its ticket and on the Community
-// tab's card. "I'm coming" stamps the booking (booking_coming, migration 20261114010200) and one quiet chip takes the
+// tab's card. "I'm coming" stamps the booking (booking_coming, migration 20261114080200) and one quiet chip takes the
 // buttons' place; "Can't come" opens the cancel dialog as it is. No line of text goes with them. Staff see a tick on the
 // roster. The evening-before reminder gains one sentence and links to the ticket. All Supabase traffic is stubbed.
 
@@ -267,7 +267,7 @@ test.describe('@staff:bookings "Still coming?" on the roster', () => {
 });
 
 test.describe('@customer:bookings the evening-before reminder', () => {
-  const sql = readFileSync(resolve(__dirname, '../supabase/migrations/20261114010200_still_coming.sql'), 'utf8');
+  const sql = readFileSync(resolve(__dirname, '../supabase/migrations/20261114080200_still_coming.sql'), 'utf8');
   const words = [...sql.matchAll(/^\s*\('(remind(?::nc)?)',\s*'([a-z]{2})',\s*'((?:[^']|'')*)',\s*'((?:[^']|'')*)'\)/gm)].map((m) => ({ key: m[1], lang: m[2], title: m[3], body: m[4].replace(/''/g, "'") }));
 
   test('both messages are written in all ten languages, with the session and the time, and a second sentence', () => {

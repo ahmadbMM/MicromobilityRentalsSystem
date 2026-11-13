@@ -718,7 +718,7 @@ address; `renderMembers`) has its own tab in both menus, shown only to members (
 
 ## Helper path (2026-11-13, new features F23)
 
-Migration 20261114012300. Four steps for community members: rider, helper, trainee ride leader, ride leader. The three after rider are
+Migration 20261114082300. Four steps for community members: rider, helper, trainee ride leader, ride leader. The three after rider are
 titles of the catalogue (`titles.path_step` 1 to 3, seeded as `ttl_path_helper`, `ttl_path_trainee`, `ttl_path_leader` with `sort` 9001
 to 9003, after the catalogue's own, so a step given never goes ahead of another title staff gave the member): a step is given
 and taken as any title is, the trigger `_title_path_one` keeps one path title per member, and a member holding none is a rider. Helper

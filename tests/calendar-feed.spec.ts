@@ -14,7 +14,7 @@ type CspWin = Window & { __cspv: string[] };
 // A calendar address of the rider's own (new features build F27, 2026-11-13). Account, Settings, "Calendar" opens a
 // centred pop-up: Add to my calendar (a webcal link), Copy the address, Replace the address. The address is
 // /api/ics?k=<key> (functions/api/ics.js): the bookings the rider still holds, as calendar events. The row shows only
-// once the database has the feature (calendar_link, migration 20261114012700). All Supabase traffic is stubbed; the
+// once the database has the feature (calendar_link, migration 20261114082700). All Supabase traffic is stubbed; the
 // Pages function is called directly, the way Cloudflare does, with the database stood in for.
 
 const sessions = [{ id: '2099-01-01', session_date: '2099-01-01', day: 'Sunday', status: 'open', capacity: 20, created_at: 1 }];
@@ -596,7 +596,7 @@ test.describe('@customer:account the calendar\'s events', () => {
 });
 
 test('@customer:account the migration: a locked table, the rider\'s own key, and what an address may read', () => {
-  const sql = readFileSync('supabase/migrations/20261114012700_calendar_feed.sql', 'utf8');
+  const sql = readFileSync('supabase/migrations/20261114082700_calendar_feed.sql', 'utf8');
   const fn = (name: string) => { const i = sql.indexOf(`function public.${name}(`); expect(i).toBeGreaterThan(-1); return sql.slice(i, sql.indexOf('$function$;', i)); };
   // nobody reads the table: row level security with no policy, every grant taken away, staff included
   expect(sql).toMatch(/alter table public\.calendar_feeds enable row level security;/);
@@ -633,7 +633,7 @@ test('@customer:account the migration: a locked table, the rider\'s own key, and
   // both reachable with the page's key, as every rider function; both in the drift check's list
   expect(sql).toContain('grant execute on function public.calendar_link(text, text, text, text) to anon, authenticated;');
   expect(sql).toContain('grant execute on function public.calendar_feed(text) to anon, authenticated;');
-  expect(sql).toContain("values ('20261114012700', 'calendar_feed')");
+  expect(sql).toContain("values ('20261114082700', 'calendar_feed')");
   const attrs = readFileSync('supabase/checks/security-attributes.sql', 'utf8');
   for (const f of ['calendar_link', 'calendar_feed']) expect(attrs).toContain(`('${f}',`);
 });

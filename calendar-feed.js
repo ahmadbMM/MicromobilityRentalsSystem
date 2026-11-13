@@ -2,7 +2,7 @@
 // pop-up: Add to my calendar (a webcal link the phone's calendar subscribes to), Copy the address (for a calendar
 // that takes an address by hand) and Replace the address (a new key; the old address then answers with an empty
 // calendar). The address is this site's /api/ics?k=<key> (functions/api/ics.js), which lists the bookings the rider
-// still holds on sessions not yet over; the key is the rider's alone (calendar_link, migration 20261114012700) and
+// still holds on sessions not yet over; the key is the rider's alone (calendar_link, migration 20261114082700) and
 // is never put in the page's own address, in storage or in a log.
 // A file of its own, fetched only when the row is opened (_calfLoad in app.src.html), with its own words in all ten
 // languages. Hand-written, not generated; the build stamps its address (CALF_V). The build's handler, inline-style and

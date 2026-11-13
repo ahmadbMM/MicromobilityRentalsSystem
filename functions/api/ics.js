@@ -91,7 +91,7 @@ function text(msg, status) {
 // ── The rider's own calendar address (new features build F27, 2026-11-13) ────────────────────────────────────
 // GET /api/ics?k=<key>: the bookings a rider still holds on sessions not yet over, as one calendar that a phone or a
 // calendar service subscribes to (the Account row "Calendar" hands out webcal://<this address>, calendar-feed.js).
-// The key is the rider's alone (calendar_feeds, migration 20261114012700); they replace it from the same pop-up, and
+// The key is the rider's alone (calendar_feeds, migration 20261114082700); they replace it from the same pop-up, and
 // the old address finds nobody from then on.
 // - Nothing here writes the address or its key anywhere: no log line, no shared cache (private, no-store), no
 //   redirect that would carry it on.

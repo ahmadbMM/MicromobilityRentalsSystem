@@ -17,7 +17,7 @@
 --
 -- Undo:
 --   delete from public.badges where id in ('bd_tailwind', 'bd_momentum');
---   delete from supabase_migrations.schema_migrations where version = '20261114010100';
+--   delete from supabase_migrations.schema_migrations where version = '20261114080100';
 -- ============================================================================
 
 begin;
@@ -37,7 +37,7 @@ begin
 end $chk$;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114010100', 'saturday_ladder_2_3')
+values ('20261114080100', 'saturday_ladder_2_3')
 on conflict (version) do nothing;
 
 commit;
@@ -50,4 +50,4 @@ select (select count(*) from public.badges where slug in ('tailwind', 'momentum'
          where slug in ('rolling_start', 'tailwind', 'momentum', 'slipstream', 'paceline', 'peloton', 'grand_tour', 'hall_of_fame'))
          as ladder_rolling_start_tailwind_momentum_slipstream_paceline_peloton_grand_tour_hall_of_fame,
        (select count(*) from pg_class where relnamespace = 'public'::regnamespace and relkind in ('r', 'p') and not relrowsecurity) as no_rls_0,
-       (select version from supabase_migrations.schema_migrations where version = '20261114010100') as ledger;
+       (select version from supabase_migrations.schema_migrations where version = '20261114080100') as ledger;

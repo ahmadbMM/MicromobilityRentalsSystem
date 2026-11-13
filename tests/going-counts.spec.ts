@@ -5,7 +5,7 @@ import { stubSupabase, loginCustomer, waitForSb, type Fixtures } from './helpers
 // Going and first-timer counts (new features build F19, 2026-11-13). The Community tab's next-session card, and only that
 // card, says "N going" and "N first-timers" for the session it shows. Each number only at 10 or more (under 10 it is
 // simply absent), only once the session is published (its list no longer hidden) and open for booking. The numbers ride
-// in the tab's one read (hub_feed's `going`, keyed by session: migration 20261114011900); no names, no list. The owner
+// in the tab's one read (hub_feed's `going`, keyed by session: migration 20261114081900); no names, no list. The owner
 // refused any count on the Experiences card and the Reserve screens. All Supabase traffic is stubbed; the function's own
 // rules are read from the migration's text (no spec reaches a database).
 
@@ -202,15 +202,15 @@ test.describe('@customer:members F19 going and first-timer counts', () => {
 
 // The database's side, read from the migration's text: the same rules, held there first.
 test.describe('@customer:members F19 the migration', () => {
-  const FILE = 'supabase/migrations/20261114011900_hub_going.sql';
+  const FILE = 'supabase/migrations/20261114081900_hub_going.sql';
   const sql = readFileSync(FILE, 'utf8');
   const block = (text: string, from: string, to: string) => { const a = text.indexOf(from), b = text.indexOf(to, a); expect(a).toBeGreaterThan(-1); expect(b).toBeGreaterThan(a); return text.slice(a, b + to.length); };
   const going = block(sql, 'create or replace function public._hub_going()', 'revoke all on function public._hub_going() from public, anon, authenticated;');
 
   test('one file with this number; transaction, ledger row, schema reload and a read-only check', () => {
-    expect(readdirSync('supabase/migrations').filter((f) => f.startsWith('20261114011900'))).toEqual(['20261114011900_hub_going.sql']);
+    expect(readdirSync('supabase/migrations').filter((f) => f.startsWith('20261114081900'))).toEqual(['20261114081900_hub_going.sql']);
     expect(sql).toMatch(/\nbegin;\n/);
-    expect(sql).toMatch(/insert into supabase_migrations\.schema_migrations \(version, name\)\s+values \('20261114011900', 'hub_going'\)\s+on conflict \(version\) do nothing;\s+commit;\s+notify pgrst, 'reload schema';/);
+    expect(sql).toMatch(/insert into supabase_migrations\.schema_migrations \(version, name\)\s+values \('20261114081900', 'hub_going'\)\s+on conflict \(version\) do nothing;\s+commit;\s+notify pgrst, 'reload schema';/);
     expect(sql).not.toMatch(/\bcreate table\b|\balter table\b|\binsert into public\.|\bupdate public\.|\bdelete from\b/i); // no table changes, no data written
     expect(readFileSync('supabase/checks/security-attributes.sql', 'utf8')).toContain(`('_hub_going', true,`);
   });

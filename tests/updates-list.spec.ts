@@ -5,7 +5,7 @@ import { stubSupabase, loginCustomer, waitForSb, type Fixtures } from './helpers
 
 // The Updates list (new features build F3, 2026-11-13): a page of Account, /account/updates, listing every message the
 // app addressed to the rider, newest first, each with a title, its text, its date and where it leads. Its rows are in the
-// database with push on or off (migration 20261114010300), a rider reads only their own, and opening the page marks them
+// database with push on or off (migration 20261114080300), a rider reads only their own, and opening the page marks them
 // read. Unread rows light the Community tab's dot (members) and set the app icon's badge. The ways in are a row on
 // Account > Notifications and, for members, a button on the Community tab's staff card. All Supabase traffic is stubbed;
 // what only the database can enforce is checked in the migration's own text.
@@ -299,7 +299,7 @@ test.describe('@customer:account the Updates list', () => {
 
 // ── What only the database can enforce, read in the migration itself ───────────────────────────────
 test.describe('@customer:account the Updates list: the database\'s rules', () => {
-  const sql = readFileSync(resolve(__dirname, '../supabase/migrations/20261114010300_updates_list.sql'), 'utf8');
+  const sql = readFileSync(resolve(__dirname, '../supabase/migrations/20261114080300_updates_list.sql'), 'utf8');
   // One function's text, from its header to its last line.
   const fn = (name: string) => {
     const a = sql.indexOf(`create or replace function public.${name}(`);
@@ -395,7 +395,7 @@ test.describe('@customer:account the Updates list: the database\'s rules', () =>
     expect(chg).toContain('_push_text(q.customer_id, v_key,');
     expect(chg).toMatch(/'rides',\s+v_key, array\[/);
     for (const f of [tick, chg]) expect(f).not.toMatch(/_push_text\([a-z]\.customer_id, '(remind|change)'/);
-    // the reminder keeps what 20261114010200_still_coming changed in this function (it runs first, and this file replaces
+    // the reminder keeps what 20261114080200_still_coming changed in this function (it runs first, and this file replaces
     // the whole function): a session with no bike takes that file's 'remind:nc' words, and the reminder opens the ticket
     expect(tick).toContain("if v_key = 'remind_s' then v_key := 'remind:nc'; end if;");
     expect(tick).toContain("'/my-bookings?tk=' || r.id, 'rides', v_key");

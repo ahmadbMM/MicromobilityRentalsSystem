@@ -6,7 +6,7 @@ import { stubSupabase, unlockStaff, waitForSb, type Fixtures } from './helpers/s
 // On a Saturday ride's Bookings a small mark after a rider's name says First Saturday, Second Saturday, Back after N
 // missed (three or more) or the badge ladder's step this ride reaches; "Milestones this Saturday" above the roster
 // names the riders reaching a step, without the accounts holding the No call-out tag. One read for the session
-// (staff_sat_marks, migration 20261114010400): each account's Saturday rides before this one and the Saturdays held
+// (staff_sat_marks, migration 20261114080400): each account's Saturday rides before this one and the Saturdays held
 // since its last. All Supabase traffic is stubbed.
 
 // the circuit night is the earliest session, so the page's own first Bookings paint opens it and not the Saturday ride

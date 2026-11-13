@@ -320,10 +320,10 @@ test.describe('@customer:badges the Saturday ladder\'s steps at 2 and 3 rides', 
   });
 
   test('the migration adds the two steps to the catalogue between Rolling Start and Slipstream, and nothing else', async () => {
-    const sql = readFileSync('supabase/migrations/20261114010100_saturday_ladder_2_3.sql', 'utf8');
+    const sql = readFileSync('supabase/migrations/20261114080100_saturday_ladder_2_3.sql', 'utf8');
     expect(sql).toMatch(/\('bd_tailwind', 'tailwind', 'wind', 'silver',[^\n]*true, true, 226\)/);
     expect(sql).toMatch(/\('bd_momentum', 'momentum', 'wind', 'orange',[^\n]*true, true, 228\)/);
-    expect(sql).toContain("values ('20261114010100', 'saturday_ladder_2_3')");
+    expect(sql).toContain("values ('20261114080100', 'saturday_ladder_2_3')");
     expect(sql).not.toMatch(/create (table|or replace function)|alter table|drop /i);
   });
 });

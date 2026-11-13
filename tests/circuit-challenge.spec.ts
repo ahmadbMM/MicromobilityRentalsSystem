@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb, type Fixtures } from './helpers/supabase';
 
-// Named circuit challenge (new features build F25, 2026-11-13; migration 20261114012500).
+// Named circuit challenge (new features build F25, 2026-11-13; migration 20261114082500).
 // Staff name a lap target for a season under Community > Activities > Circuit laps; its poster at the start line (or a
 // plain NFC tag) holds /?lap=<code>. A scan opens the lap page (lap-page.js, fetched only then), which sends the scan to
 // circuit_lap: the database counts ONE lap when the rider is signed in, is checked in on a circuit session running then
@@ -511,7 +511,7 @@ test.describe('@staff:community circuit challenge: Community > Activities > Circ
 });
 
 test.describe('@staff:community circuit challenge: the migration', () => {
-  const sql = readFileSync(resolve(ROOT, 'supabase/migrations/20261114012500_circuit_challenge.sql'), 'utf8');
+  const sql = readFileSync(resolve(ROOT, 'supabase/migrations/20261114082500_circuit_challenge.sql'), 'utf8');
   const fn = (name: string) => { const i = sql.indexOf(`create or replace function public.${name}(`); return sql.slice(i, sql.indexOf('end $$;', i)); };
 
   test('circuit_lap counts only a signed-in rider, checked in on a running circuit session, past the interval', () => {

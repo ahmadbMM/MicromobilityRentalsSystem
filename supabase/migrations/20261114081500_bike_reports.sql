@@ -63,7 +63,7 @@ create table if not exists public.bike_reports (
   updated_at  timestamptz not null default now()
 );
 comment on table public.bike_reports is
-  'A rider''s report of a fault on the bike of their own booking (bike_report, 20261114011500). Staff read it in the Workshop section and mark it resolved.';
+  'A rider''s report of a fault on the bike of their own booking (bike_report, 20261114081500). Staff read it in the Workshop section and mark it resolved.';
 create index if not exists bike_reports_status_created on public.bike_reports (status, created_at desc);
 create index if not exists bike_reports_booking on public.bike_reports (booking_id) where booking_id is not null;
 create index if not exists bike_reports_customer_created on public.bike_reports (customer_id, created_at) where customer_id is not null;
@@ -109,7 +109,7 @@ create trigger bike_reports_stamp before update on public.bike_reports
 -- ── 2. the booking remembers its last report ────────────────────────────────────────────────────
 alter table public.queue_entries add column if not exists bike_report_at timestamptz;
 comment on column public.queue_entries.bike_report_at is
-  'When the rider last reported a problem with this booking''s bike (bike_report, 20261114011500). For the ticket''s chip only; the limits are counted from bike_reports.';
+  'When the rider last reported a problem with this booking''s bike (bike_report, 20261114081500). For the ticket''s chip only; the limits are counted from bike_reports.';
 
 -- ── 3. the rider's report ──────────────────────────────────────────────────────────────────────
 create or replace function public.bike_report(p_id text, p_token text, p_booking text, p_fault text,
@@ -170,7 +170,7 @@ revoke all on function public.bike_report(text, text, text, text, text, text) fr
 grant execute on function public.bike_report(text, text, text, text, text, text) to anon, authenticated;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114011500', 'bike_reports')
+values ('20261114081500', 'bike_reports')
 on conflict (version) do nothing;
 
 commit;
@@ -192,4 +192,4 @@ select (select count(*) from pg_class c where c.relnamespace = 'public'::regname
        has_function_privilege('anon', 'public._bike_report_stamp()', 'execute') as anon_stamp_false,
        (select count(*) from pg_trigger where tgname = 'bike_reports_stamp' and not tgisinternal) as trigger_1,
        (select count(*) from public.bike_reports) as reports_so_far,
-       (select version from supabase_migrations.schema_migrations where version = '20261114011500') as ledger;
+       (select version from supabase_migrations.schema_migrations where version = '20261114081500') as ledger;

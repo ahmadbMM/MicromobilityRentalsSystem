@@ -7,7 +7,7 @@
 -- The words are the app's own (i18n/<code>.json: ride, ticket, Community; member-hub.js HUB_T: challenge).
 -- ne and bn use Latin digits only (there are none here beyond the placeholders). Safe to run again.
 -- The evening-before reminder ('remind', and 'remind:nc' for a session with no bike) is no longer in this file:
--- migration 20261114010200_still_coming.sql writes it in all ten languages, with the sentence about cancelling so
+-- migration 20261114080200_still_coming.sql writes it in all ten languages, with the sentence about cancelling so
 -- another rider can take the bike, and owns those words. The rows that stood here were the older ones and a re-run
 -- after that migration would have put them back.
 insert into public.push_words (key, lang, title, body) values

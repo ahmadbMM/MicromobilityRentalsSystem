@@ -26,7 +26,7 @@
 --   drop function if exists public.staff_sat_marks(text);
 --   delete from public.customer_tags where tag_id = 'tag_no_callout';
 --   delete from public.tags where id = 'tag_no_callout';
---   delete from supabase_migrations.schema_migrations where version = '20261114010400';
+--   delete from supabase_migrations.schema_migrations where version = '20261114080400';
 -- ============================================================================
 
 begin;
@@ -92,7 +92,7 @@ revoke all on function public.staff_sat_marks(text) from public, anon;
 grant execute on function public.staff_sat_marks(text) to authenticated;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114010400', 'saturday_roster_marks')
+values ('20261114080400', 'saturday_roster_marks')
 on conflict (version) do nothing;
 
 commit;
@@ -105,4 +105,4 @@ select (select count(*) from public.tags where id = 'tag_no_callout' and locked 
          where n.nspname = 'public' and p.proname = 'staff_sat_marks' and p.prosecdef) as definer_1,
        has_function_privilege('anon', 'public.staff_sat_marks(text)', 'execute') as anon_can_false,
        has_function_privilege('authenticated', 'public.staff_sat_marks(text)', 'execute') as staff_can_true,
-       (select count(*) from supabase_migrations.schema_migrations where version = '20261114010400') as ledger_1;
+       (select count(*) from supabase_migrations.schema_migrations where version = '20261114080400') as ledger_1;

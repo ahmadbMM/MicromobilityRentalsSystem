@@ -3,7 +3,7 @@ import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } fr
 
 // Report a bike problem (new features build F15, 2026-11-13). A rider who is checked in with a bike has one button on the
 // ticket, until 3 hours after the session. It opens a centred pop-up (bike-report.js, fetched on the first tap): a short
-// list of faults and an optional note, sent through bike_report (migration 20261114011500). Staff see the report in the
+// list of faults and an optional note, sent through bike_report (migration 20261114081500). Staff see the report in the
 // Workshop's own list behind a "Bike reports" pill and mark it resolved. A second report inside the limit is refused
 // without a word. All Supabase traffic is stubbed.
 

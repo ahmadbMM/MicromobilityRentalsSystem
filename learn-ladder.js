@@ -3,7 +3,7 @@
 // the account the sign-up landed on sees it here, in a centred pop-up from Account > Learn to ride. A skill not ticked
 // reads "Practising": nothing is marked failed. A complete level gives a certificate drawn on the phone (a PNG to save or
 // share); the whole ladder also shows the way to a Saturday ride (the app's own Saturday gate: a member books, anyone
-// else is shown how to apply). Only this account's own learners are ever read (learn_ladder, migration 20261114012100).
+// else is shown how to apply). Only this account's own learners are ever read (learn_ladder, migration 20261114082100).
 // A file of its own, fetched when the row is tapped (_llOpen in app.src.html), with its own words in all ten languages.
 // Hand-written, not generated; the build stamps its address (LL_V).
 /* global S, esc, _on, _EV, _EL, getSession, _cuIc, toast, closeConfirm, shortDate, _ksaYmd, selectEvent, _llMineLoad */

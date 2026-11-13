@@ -2,7 +2,7 @@
 // named lap target for a season; its poster is a QR code (the same address can sit on a plain NFC tag) that opens
 // experiences.micromobility.sa/?lap=<code>. The app takes the code off the address (_readLapParam in app.src.html), keeps
 // the scan with its own key and time, and fetches this file (_lapLoad) - no other rider carries it.
-// One call does everything (circuit_lap, migration 20261114012500): the database counts the lap only when the rider is
+// One call does everything (circuit_lap, migration 20261114082500): the database counts the lap only when the rider is
 // signed in, has a checked-in booking on a circuit session running then, and the challenge's minimum time since their
 // last lap has passed; otherwise it adds nothing. Either way it answers the rider's OWN count against the target, which
 // is all this page shows: no reason, no times, no speeds, no ranking, nothing about anyone else.

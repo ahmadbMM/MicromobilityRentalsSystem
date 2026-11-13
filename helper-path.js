@@ -1,4 +1,4 @@
-// Helper path (new features F23, 2026-11-13; migration 20261114012300): the member's own step on the path rider, helper,
+// Helper path (new features F23, 2026-11-13; migration 20261114082300): the member's own step on the path rider, helper,
 // trainee ride leader, ride leader, their helper days (the days of the volunteer shifts they attended) and the helper-day
 // ladder, drawn as the badge tiles are. A card on Account > Badges, between the badges and the titles card, and a line on
 // Account > Stats under Rides led. Everything here is the member's own (S._hpMine, the answer of customer_helper_path):

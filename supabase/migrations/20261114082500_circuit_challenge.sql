@@ -36,7 +36,7 @@
 --   drop function if exists public._circuit_badge(), public._circuit_badge_gone(), public._circuit_ts(text);
 --   delete from public.badges b where b.slug like 'lap\_%' and b.icon = 'lapring'
 --     and not exists (select 1 from public.customer_badges cb where cb.badge_id = b.id);   -- a badge someone holds stays
---   delete from supabase_migrations.schema_migrations where version = '20261114012500';
+--   delete from supabase_migrations.schema_migrations where version = '20261114082500';
 -- Idempotent.
 -- ============================================================================
 
@@ -257,7 +257,7 @@ revoke all on function public.staff_circuit_totals() from public, anon;
 grant execute on function public.staff_circuit_totals() to authenticated;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261114012500', 'circuit_challenge')
+values ('20261114082500', 'circuit_challenge')
 on conflict (version) do nothing;
 
 commit;
@@ -278,4 +278,4 @@ select
   has_function_privilege('anon', 'public.staff_circuit_totals()', 'execute') as anon_totals_false,
   has_function_privilege('anon', 'public._circuit_badge()', 'execute') as anon_badge_trigger_false,
   (select count(*) from pg_trigger g where g.tgrelid = 'public.circuit_challenges'::regclass and not g.tgisinternal) as triggers_2,
-  (select count(*) from supabase_migrations.schema_migrations where version = '20261114012500') as ledger_1;
+  (select count(*) from supabase_migrations.schema_migrations where version = '20261114082500') as ledger_1;

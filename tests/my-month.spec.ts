@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { stubSupabase, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
 
 // The "My month" card on the Community tab (new features build F13, 2026-11-13; member-hub.js, migration
-// 20261114011300). From the 26th to the end of the month a member with two or more finished sessions that month sees
+// 20261114081300). From the 26th to the end of the month a member with two or more finished sessions that month sees
 // their own month: Saturdays ridden, sessions by kind, badges earned this month and one comparison with their own month
 // before. Its first day is kept in the database (site_content 'hub.month.from', 26 December 2026). The card has a read
 // of its own (hub_month), asked only from the 26th by the date the tab's own read gives; the database decides whether it
@@ -248,7 +248,7 @@ test.describe('@customer:members the My month card', () => {
 });
 
 test.describe('@customer:members the My month card, in the database', () => {
-  const sql = readFileSync('supabase/migrations/20261114011300_hub_month.sql', 'utf8');
+  const sql = readFileSync('supabase/migrations/20261114081300_hub_month.sql', 'utf8');
   test('the function checks the rider\'s token, the first day, the 26th and two sessions before it answers a number', () => {
     const fn = sql.slice(sql.indexOf('create or replace function public.hub_month'), sql.indexOf('revoke all on function public.hub_month'));
     const at = (s: string) => { const i = fn.indexOf(s); expect(i, s).toBeGreaterThan(-1); return i; };
@@ -267,7 +267,7 @@ test.describe('@customer:members the My month card, in the database', () => {
     expect(sql).toMatch(/insert into public\.site_content \(key, value, updated_by\)\s+values \('hub\.month\.from', '"2026-12-26"'::jsonb, 'migration'\)\s+on conflict \(key\) do nothing;/);
     expect(sql).toContain('revoke all on function public.hub_month(text, text) from public;');
     expect(sql).toContain('grant execute on function public.hub_month(text, text) to anon, authenticated;');
-    expect(sql).toMatch(/values \('20261114011300', 'hub_month'\)/);
+    expect(sql).toMatch(/values \('20261114081300', 'hub_month'\)/);
     expect(readFileSync('supabase/checks/security-attributes.sql', 'utf8')).toContain(`('hub_month', true,`);
   });
 });
