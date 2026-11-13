@@ -367,6 +367,8 @@ with expected(fname, want_definer, note) as (values
   ('staff_learn_schedule',   true,  'finds or makes the account and records the lesson; checks is_staff() itself'),
   ('staff_learn_new_password', true, 'writes customers.password_hash, which no client can select; staff only'),
   ('staff_learn_decide',     true,  'moves a sign-up between its states; checks is_staff() itself'),
+  ('learn_ladder',           true,  'the rider''s own learn-to-ride ladder: reads learn_applications, learn_progress and learn_skills, which no rider can read; token-checked (20261114012100)'),
+  ('staff_learn_progress_set', true, 'writes a learner''s ticked skills and feedback line (learn_progress, which no client writes); checks _staff_mod(''community'', true) itself (20261114012100)'),
   ('_learn_heard_to_account',true,  'trigger: writes customers.heard_from whoever set the sign-up''s account; internal only'),
   -- Workplace and the account page's "about" fields (20260929110000)
   ('community_apply',        true,  'writes community_applications; revoked from anon/authenticated since 20261004100000 (customer_community_apply is the form''s way in)'),

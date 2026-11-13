@@ -7055,6 +7055,17 @@ body.view-staff .apps-srch .search-input{width:100%;box-sizing:border-box;}
 .la-learner-d{color:var(--muted);font-weight:600;margin-inline-start:6px}
 .la-learner[data-who="child"] .la-kid{background:rgba(var(--green-rgb),.12);color:var(--green)}
 .la-learner[data-who="self"] .la-kid,.la-learner[data-who="other"] .la-kid{background:rgba(var(--tint-rgb),.08);color:var(--text)}
+/* The learn-to-ride ladder (F21, 2026-11-13): a learner's Skills button and its dialog - a level is a box of tick rows, and a
+   row not ticked reads "Practising" */
+.la-learner .la-skills{margin-inline-start:6px;vertical-align:1px}
+.lls-lvs{display:flex;flex-direction:column;gap:10px;margin:10px 0 12px}
+.lls-lv{min-width:0;margin:0;padding:6px 12px 8px;border:1px solid var(--border);border-radius:var(--sf-r-ctl)}
+.lls-lv legend{padding:0 6px;font-size:var(--sf-fs-sm);font-weight:600;color:var(--text)}
+.ws-dlg .lls-sk{display:flex;align-items:center;gap:8px;min-height:32px;margin:0;font-size:var(--sf-fs-sm);font-weight:400;letter-spacing:0;text-transform:none;color:var(--text);cursor:pointer}
+.ws-dlg .lls-sk input{-webkit-appearance:checkbox;appearance:checkbox;width:16px;height:16px;min-height:0;margin:0;padding:0;flex:none;accent-color:var(--green)}
+.lls-sk-n{flex:1;min-width:0}
+.lls-st{flex:none;font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted)}
+.lls-sk input:checked~.lls-st{display:none}
 /* A learn-to-ride sign-up's priority (2026-10-04): four choices on the card, the one picked filled
    in its colour; Critical and High also mark the card's edge. */
 :is(#tab-community,#tab-customers,#tab-analytics) .la-prio{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:10px}
@@ -9421,6 +9432,42 @@ body:not(.view-staff) .hub-mine{display:flex;align-items:baseline;justify-conten
 body:not(.view-staff) .hub-mine strong{font-size:var(--fs-20);font-variant-numeric:tabular-nums;}
 body:not(.view-staff) .hub-next{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);}
 body:not(.view-staff) .mb-new{color:var(--go);font-weight:700;}
+/* The learn-to-ride ladder (F21, 2026-11-13, learn-ladder.js): a centred pop-up from Account. Four levels, each a card of its
+   skills: a ticked skill wears the action green, the rest read "Practising". A complete level offers its certificate, the
+   whole ladder the way to a Saturday ride. Nothing moves in by itself. */
+body:not(.view-staff) .ll-box{color:var(--ink);}
+body:not(.view-staff) .ll-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+body:not(.view-staff) .ll-title{margin:0;font-size:var(--fs-20);font-weight:700;line-height:1.2;color:var(--ink);}
+body:not(.view-staff) .ll-title:focus{outline:none;}
+body:not(.view-staff) .ll-x{min-width:44px;min-height:44px;}
+body:not(.view-staff) .ll-who{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+body:not(.view-staff) .ll-who-b{min-height:44px;padding:6px 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);font:inherit;font-weight:600;cursor:pointer;}
+body:not(.view-staff) .ll-who-b.on{border-color:var(--go);background:var(--go-wash);color:var(--go-2);}
+body:not(.view-staff) .ll-fb{padding:12px 14px;margin-bottom:12px;border-radius:var(--r-ctl);background:var(--go-wash);color:var(--ink);}
+body:not(.view-staff) .ll-k{display:block;font-size:var(--fs-13);font-weight:600;color:var(--muted);margin-bottom:2px;}
+body:not(.view-staff) .ll-fb-t{margin:0;line-height:1.5;}
+body:not(.view-staff) .ll-lvs{list-style:none;margin:0;padding:0;display:grid;gap:10px;}
+body:not(.view-staff) .ll-lv{padding:14px 16px;border:1px solid var(--line-2);border-radius:var(--r-card);background:var(--card);}
+body:not(.view-staff) .ll-lv.done{border-color:var(--go);}
+body:not(.view-staff) .ll-lv-h{display:flex;align-items:center;gap:10px;}
+body:not(.view-staff) .ll-lv-n{display:inline-flex;align-items:center;justify-content:center;flex:none;width:28px;height:28px;border-radius:999px;background:var(--card-3);font-weight:700;font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .ll-lv.done .ll-lv-n{background:var(--go);color:var(--paper);}
+body:not(.view-staff) .ll-lv-t{flex:1;min-width:0;font-size:var(--fs-17);}
+body:not(.view-staff) .ll-lv-c{flex:none;color:var(--muted);font-size:var(--fs-13);font-weight:600;font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .ll-sks{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px;}
+body:not(.view-staff) .ll-sk{display:flex;align-items:flex-start;gap:10px;line-height:1.4;}
+body:not(.view-staff) .ll-sk-i{display:inline-flex;align-items:center;justify-content:center;flex:none;width:20px;height:20px;margin-top:1px;border-radius:999px;border:1px solid var(--line-3);}
+body:not(.view-staff) .ll-sk.on .ll-sk-i{border-color:var(--go);background:var(--go);color:var(--paper);}
+body:not(.view-staff) .ll-sk-n{flex:1;min-width:0;}
+body:not(.view-staff) .ll-prac{flex:none;color:var(--muted);font-size:var(--fs-13);font-weight:600;}
+body:not(.view-staff) .ll-cert-b{width:100%;margin-top:12px;gap:8px;}
+body:not(.view-staff) .ll-inv{display:flex;flex-direction:column;gap:12px;margin-top:12px;padding:18px 20px;border-radius:var(--r-card);background:var(--night);color:var(--night-ink);}
+body:not(.view-staff) .ll-inv-t{font-size:var(--fs-17);line-height:1.35;}
+body:not(.view-staff) :is(.ll-cert-img,.ll-cert-ph){display:block;width:100%;height:auto;aspect-ratio:4/5;border-radius:var(--r-ctl);background:var(--card-3);}
+body:not(.view-staff) .ll-cert-acts{display:flex;gap:10px;margin-top:12px;}
+body:not(.view-staff) .ll-cert-acts>*{flex:1;text-decoration:none;}
+body:not(.view-staff) .ll-wide{width:100%;margin-top:10px;}
+body:not(.view-staff) .ll-err{margin:0 0 12px;color:var(--red);}
 /* ════════════════════════════════════════════════════════════════════════════════════════════════
    LIQUID (2026-11-07, the soft redesign: the user picked "Liquid" for riders). Glass is a material for the
    chrome that content scrolls under - the top bar, the floating tab bar, the Continue bar - and a still

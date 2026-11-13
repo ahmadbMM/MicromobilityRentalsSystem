@@ -146,6 +146,9 @@ src = src.replace("const RT_V=''", `const RT_V='${createHash('sha256').update(aw
 // The rider's calendar address (calendar-feed.js, F27): the same, for the file a rider fetches when the Account row is opened.
 if (!src.includes("const CALF_V=''")) throw new Error('build: CALF_V placeholder missing');
 src = src.replace("const CALF_V=''", `const CALF_V='${createHash('sha256').update(await readFile(new URL('../calendar-feed.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
+// The learn-to-ride ladder (learn-ladder.js, F21), stamped the same way: a rider with a lesson fetches it from Account.
+if (!src.includes("const LL_V=''")) throw new Error('build: LL_V placeholder missing');
+src = src.replace("const LL_V=''", `const LL_V='${createHash('sha256').update(await readFile(new URL('../learn-ladder.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
 if (!src.includes("const BIKE_IMG_V=''")) throw new Error('build: BIKE_IMG_V placeholder missing');
 src = src.replace("const BIKE_IMG_V=''", `const BIKE_IMG_V='${bikeFiles.length ? bikesHasher.digest('hex').slice(0, 10) : ''}'`);
 
