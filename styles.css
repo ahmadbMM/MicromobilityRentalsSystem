@@ -2917,6 +2917,17 @@
     #tab-sessions .ss-tcap-over:empty{display:none;}
     #tab-sessions .ss-datewarn{font-size:var(--sf-fs-xs);color:var(--muted-l);margin-top:5px;font-weight:600;}
     #tab-sessions .ss-times{display:flex;align-items:center;gap:8px;margin-top:4px;}
+    /* a route's line and turn points (route-page.js _rtpEdit, F11): opened from the Route step, one row per turn point */
+    .rtp-ed{width:min(96vw,640px);max-width:none;max-height:88vh;overflow-y:auto;}
+    .rtp-ed .rtp-line{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 16px;}
+    .rtp-ed .rtp-row{display:grid;grid-template-columns:84px minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end;margin:8px 0;}
+    .rtp-ed .rtp-row .form-group{margin:0;}
+    .rtp-ed .modal-footer{margin-top:16px;}
+    @media (max-width:560px){
+      .rtp-ed .rtp-row{grid-template-columns:84px minmax(0,1fr) auto;}
+      .rtp-ed .rtp-row>:nth-child(3){grid-column:1/3;}
+      .rtp-ed .rtp-row>:nth-child(4){grid-column:3;grid-row:1;}
+    }
     #tab-sessions .ss-time{background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:var(--sf-r-xs);color:var(--text);font-family:var(--font-body);font-size:var(--sf-fs-sm);font-weight:600;padding:6px 10px;cursor:pointer;}
     #tab-sessions .ss-time2{margin-top:4px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:var(--sf-r-xs);color:var(--text);font-family:var(--font-body);font-size:var(--sf-fs-sm);font-weight:600;padding:6px 10px;cursor:pointer;max-width:140px;display:block;}
     #tab-sessions .ss-collect{margin-top:4px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:var(--sf-r-xs);color:var(--text);padding:8px 10px;font-family:var(--font-body);font-size:var(--sf-fs-sm);}
@@ -8859,6 +8870,24 @@ body:not(.view-staff) .tk-rt-osm{font-size:var(--fs-12);color:var(--ink-2);margi
 body:not(.view-staff) .tk-rt-map{flex:none;width:30px;height:118px;overflow:visible;}
 body:not(.view-staff) .tk-rt-map path{fill:none;stroke:var(--go);stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;}
 body:not(.view-staff) .tk-rt-map circle{fill:var(--card);stroke:var(--ink);stroke-width:1.6;}
+/* the route's own page (route-page.js, new features build F11): the button that opens it from the ticket and from the
+   session card's Details, the line drawn from the stored points (north up, no base map), and the turn points in order */
+body:not(.view-staff) .tk-rt-open{justify-self:start;padding:8px 0 2px;border:0;background:none;font:inherit;font-size:var(--fs-13);font-weight:600;color:var(--go);text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+body:not(.view-staff) .ev-info-facts .tk-rt-open{padding:0;font-size:inherit;font-weight:700;color:inherit;}
+body:not(.view-staff) .rtp-box:focus{outline:none;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-open{color:var(--neon);}
+body:not(.view-staff) .rtp-map{display:block;width:100%;height:auto;max-height:300px;margin:12px 0 4px;border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--card-2);}
+body:not(.view-staff) .rtp-map path{fill:none;stroke:var(--go);stroke-width:3;stroke-linejoin:round;stroke-linecap:round;}
+body:not(.view-staff) .rtp-map .rtp-st{fill:var(--go);stroke:var(--card);stroke-width:2;}
+body:not(.view-staff) .rtp-map .rtp-tn{fill:var(--card);stroke:var(--ink);stroke-width:1.6;}
+body:not(.view-staff) .rtp-map text{fill:var(--ink);font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .rtp-h{margin:16px 0 8px;font-size:var(--fs-15);font-weight:700;color:var(--ink);}
+body:not(.view-staff) .rtp-turns{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:8px;}
+body:not(.view-staff) .rtp-turns li{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:var(--fs-15);color:var(--ink);}
+body:not(.view-staff) .rtp-n{display:grid;place-items:center;width:26px;height:26px;border:1px solid var(--line-2);border-radius:999px;font-size:var(--fs-12);font-weight:700;font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .rtp-km{font-size:var(--fs-13);color:var(--ink-2);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .rtp-box .modal-footer{flex-wrap:wrap;}
+body:not(.view-staff) .rtp-box .modal-footer a{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-stages li{color:var(--night-ink-2);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-stages li::before{background:var(--night-line);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-stages li.on::before{background:var(--neon);}

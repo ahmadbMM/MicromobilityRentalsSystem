@@ -1297,6 +1297,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   mrStreak_many:'{0} weeks in a row',
   mrStreak_other:'{0} weeks in a row',
   mrNextLine:'Next ride: {0} ({1})',tkStBooked:'Booked',tkStIn:'Checked in',tkStBike:'On the bike',tkStDone:'Done',tkCueNoBike:'Checked in. Your bike is being handed over.',tkCueBike:'On the bike: {0}',tkCueDone:'Ride done: {0} on the bike.',tkCueDoneNoDur:'Ride done.',tkCdCollect:'Bike collection in {0}',tkCdGather:'Gathering in {0}',tkCdStart:'Starts in {0}',myrTitle:'Your rides',myrWeeks:'{0} of the last 26 weeks with a ride',myrFav:'Favourite bike',myrFirst:'First ride',myrTime:'Time on the bike',myrYear:'Rides this year',myrMonths:'Rides by month',myrByBike:'Rides by bike',myrByEvent:'By event',myrBadges:'Badges earned',bdNextTitle:'Closest badges',bdLevelOf:'Level {0} of {1}',bdMaxLevel:'Top level reached',bdLevels:'Levels',bdgViaLevel:'Comes with a higher level',rtTitle:'Route',rtLap:'{0} km a lap',rtCircuitNote:'Flat, smooth tarmac, floodlit at night',rtKm:'{0} km',rtRidden:'Ridden',rtMapLink:'Open the map',rtOsm:'Track: © OpenStreetMap contributors',
+  rtOpen:'Route details',sessRouteEmpty:'None yet. Add them in micromobility.sa, Routes.',sessRouteLine:'Line and turn points',
   regStepOf:'Step {0} of {1}',
   wgKicker:'Waiver needed',wgSub:'Our team booked you on this ride. Read its waiver and agree to it to continue.',wgBtn:'Agree and continue',
   tkHelmetFree:'Helmets are required. We provide one for free.',
@@ -1972,6 +1973,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   mrStreak_many:'{0} أسبوعاً متتالياً',
   mrStreak_other:'{0} أسبوعاً متتالياً',
   mrNextLine:'جولتك القادمة: {0} ({1})',tkStBooked:'محجوز',tkStIn:'الحضور',tkStBike:'على الدراجة',tkStDone:'انتهت',tkCueNoBike:'تم تسجيل حضورك. يجري تسليمك الدراجة.',tkCueBike:'على الدراجة: {0}',tkCueDone:'انتهت جولتك: {0} على الدراجة.',tkCueDoneNoDur:'انتهت جولتك.',tkCdCollect:'استلام الدراجة بعد {0}',tkCdGather:'التجمع بعد {0}',tkCdStart:'تبدأ بعد {0}',myrTitle:'جولاتك',myrWeeks:'{0} من آخر 26 أسبوعاً فيها جولة',myrFav:'دراجتك المفضلة',myrFirst:'أول جولة',myrTime:'الوقت على الدراجة',myrYear:'جولات هذا العام',myrMonths:'الجولات حسب الشهر',myrByBike:'الجولات حسب الدراجة',myrByEvent:'حسب الفعالية',myrBadges:'الأوسمة التي حصلت عليها',bdNextTitle:'أقرب الأوسمة',bdLevelOf:'المستوى {0} من {1}',bdMaxLevel:'وصلت إلى أعلى مستوى',bdLevels:'المستويات',bdgViaLevel:'ضمن مستوى أعلى',rtTitle:'المسار',rtLap:'{0} كم للفة',rtCircuitNote:'مسطّح وإسفلت ناعم وإضاءة ليلية',rtKm:'{0} كم',rtRidden:'أنجزته',rtMapLink:'افتح الخريطة',rtOsm:'الحلبة: © مساهمو OpenStreetMap',
+  rtOpen:'تفاصيل المسار',sessRouteEmpty:'لا توجد مسارات بعد. أضفها من micromobility.sa، المسارات.',sessRouteLine:'الخط ونقاط الانعطاف',
   regStepOf:'الخطوة {0} من {1}',
   wgKicker:'إقرار مطلوب',wgSub:'سجّلك فريقنا في هذه الجولة. اقرأ إقرارها ووافق عليه للمتابعة.',wgBtn:'أوافق وأتابع',
   tkHelmetFree:'الخوذة إلزامية، ونوفّرها لك مجانًا.',
@@ -13899,6 +13901,7 @@ function _infoFacts(s,next){
   if(k==='vlap'){const c=_vlCfg(s);rows.push([t('vlRacesLabel'),esc(c.races.map(_vlRaceTxt).join(' · '))]);rows.push([t('vlDivsLabel'),esc(c.divs.map(d=>_vlDivTxt(d)+' '+_vlKmTxt(d)).join(' · '))]);}
   if(k==='arena'){rows.push([t('arFormatLbl'),esc(t('arFormatTxt'))]);rows.push([t('vlDivsLabel'),esc(_vlCfg(s).divs.map(_vlDivTxt).join(' · '))]);rows.push([t('arRulesLbl'),`<a href="${AR_INFO_URL}" target="_blank" rel="noopener">${esc(t('arRulesLink'))}</a>`]);}
   if(_hasRideGroups(s))rows.push([t('infoGroups'),esc(RIDE_GROUPS.map(g=>`${_rgName(g)} ${_rgKmTxt(s,g)}`).join(' · '))]);
+  {const r=_rideRoute(s),b=_rtBtn(r);if(b)rows.push([t('rtTitle'),(Array.isArray(S._routes)?esc(r.name)+' · ':'')+b]);} // the route's own page (F11, 2026-11-13); its name once the Routes list is in
   // Victory Lap says open or waitlist, never how many places (the owner, 2026-10-17: "dont show a specific number of spots")
   if(!_isApprovalRide(s)){const n=spotsLeft(s.id);rows.push([t('infoPlaces'),esc(_sessFull(s)||n<=0?t('waitlistLabel'):k==='vlap'?t('availLabel'):spotsLeftLabel(n))]);}
   {const bf=_spotHeld(s)?_revealLine(s):_bfAt(s);if(bf)rows.push([t('infoAfter'),esc(bf)]);} // the breakfast spot, or when it is told
@@ -20776,7 +20779,7 @@ function _rideRoute(sess){
     if(S._routes===undefined)_routesLoad();
     const r=_routeOf(sess),raw=(Array.isArray(S._routes)?S._routes:[]).find(x=>_routeSlugOf(x)===r.slug)||{};
     const L=v=>String((v&&typeof v==='object')?(v[S.lang]||v.en||''):(v||''));
-    return{name:r.name,km:+r.km||0,note:[L(raw.level),L(raw.surface)].filter(Boolean).join(' · '),href:_safeUrl(raw.href&&typeof raw.href==='object'?raw.href.href:raw.href)};
+    return{slug:r.slug,name:r.name,km:+r.km||0,note:[L(raw.level),L(raw.surface)].filter(Boolean).join(' · '),href:_safeUrl(raw.href&&typeof raw.href==='object'?raw.href.href:raw.href)};
   }
   if(_isApprovalRide(sess)&&_safeUrl(sess.meet_url))return null;
   const loc=String(sess.location||'').trim();if(loc&&!_own(VENUE_KEY,loc))return null;
@@ -20792,11 +20795,30 @@ function _routeHtml(sess,past){
       ${(r.km||r.note)?`<div class="tk-rt-m">${r.km?esc(t(r.lap?'rtLap':'rtKm').replace('{0}',_kmTxt(r.km))):''}${r.km&&r.note?' · ':''}${esc(r.note||'')}</div>`:''}
       ${past?`<div class="tk-rt-done">${_cuIc('tick',14)}<span>${t('rtRidden')}</span></div>`:''}
       ${r.href?`<a class="tk-rt-a" href="${esc(r.href)}" target="_blank" rel="noopener">${t('rtMapLink')}</a>`:''}
+      ${_rtBtn(r)}
       ${r.track?`<div class="tk-rt-osm">${t('rtOsm')}</div>`:''}
     </div>
     ${r.track?`<svg class="tk-rt-map" viewBox="0 0 40 158" aria-hidden="true" focusable="false"><path d="${JCC_TRACK}"/><circle cx="12.9" cy="71.4" r="3.2"/></svg>`:''}
   </div>`;
 }
+// ── The route's own page (new features build F11, 2026-11-13) ─────────────────────────────────────────────────
+// A ride tied to a route opens it from the ticket and from the session card's Details: the line drawn from the stored
+// points, the distance, the surface, the turn points and a GPX file to save. The page lives in route-page.js, fetched
+// here on the first open, so no other rider carries it; staff set a route's line and turn points from the same file
+// (_rtLineOpen). The circuit's built-in drawing has no page, and a rider's button is not drawn on a staff screen.
+const RT_V=''; // build stamps a hash of route-page.js
+function _rtBtn(r){return r&&r.slug&&S.view!=='staff'?`<button type="button" class="tk-rt-open" data-on-click="${_on('_rtOpen',r.slug)}">${t('rtOpen')}</button>`:'';}
+function _rtLoad(run){
+  // What route-page.js takes from the page, named here so the build's split keeps it on the riders' side.
+  window._rtpDeps={slugOf:_routeSlugOf,load:_routesLoad,apple:_isAppleTouch,words:()=>({title:t('rtTitle'),km:t('rtKm'),map:t('rtMapLink'),close:t('closeBtn')})};
+  if(window._rtpOpen){run();return;}
+  if(S._rtLoading)return;S._rtLoading=true;
+  const s=document.createElement('script');s.src='/route-page.js?v='+RT_V;
+  s.onload=()=>{S._rtLoading=false;if(window._rtpOpen)run();};
+  s.onerror=()=>{S._rtLoading=false;s.remove();toast(t('mbErr'),'error');}; // not fetched (offline, a failed request): said, and the next tap asks again
+  document.head.appendChild(s);
+}
+function _rtOpen(slug){_rtLoad(()=>window._rtpOpen(slug));}
 // ── A waitlisted rider is never told their place in line (the owner, 2026-11-10: "don't tell customers how much
 // is their number in line in waiting list or anywhere else"): the ticket says they are on the waitlist, never which
 // number in the line; the place (customer_waitlist_ranks, 2026-10-05) is no longer asked for.
@@ -28039,6 +28061,7 @@ function startEditSession(id){
   S.editSessReveal=_revealLocal(sess.reveal_at); // when riders are told where it meets (_revealFieldHtml)
   // The meeting point by name and coordinate, and the ride's status for riders (20261114000100; _esMeetHtml, _esRsHtml)
   S.editSessMeetName=sess.meet_name||'';S.editSessMeetNameAr=sess.meet_name_ar||'';S.editSessMeetCoord=_meetCoordTxt(sess);S.editSessRideStatus=sess.ride_status||'';
+  S.editSessRoute=sess.route_slug||''; // the route it follows (_nsRouteHtml, F11)
   S.editSessTitle=sess.title||'';S.editSessTitleAr=sess.title_ar||'';S.editSessDesc=sess.description||'';
   // Every field the form shows is set from THIS session. Spots used to keep whatever was last
   // typed into the box for any ride, and a later save wrote that number onto another one.
@@ -28698,19 +28721,32 @@ async function _routesLoad(){
   if(!sb||S._routes!==undefined||S._routesBusy)return;S._routesBusy=true;
   try{const r=await sb.from('site_content').select('value').eq('key','routes.routes.items').maybeSingle();S._routes=(r&&!r.error&&Array.isArray(r.data&&r.data.value))?r.data.value:[];}
   catch(e){S._routes=[];}finally{S._routesBusy=false;}
-  if(!S._routes.length)return; // no routes: the picker stays away, nothing to repaint
+  if(!S._routes.length){try{document.querySelectorAll('.ss-rt-none').forEach(el=>{el.hidden=false;});}catch(_){}return;} // no routes: nothing to repaint; an open session form's Route step now says where they are made, in place (F11)
   if(S.view==='staff'&&S.staffTab==='sessions'&&!_nsFormBusy())try{renderSessions();}catch(_){}
   try{_tkRepaint();}catch(_){} // a ticket's route names itself once the list is in: Bookings, and the tickets just booked (which showed the slug, 2026-10-07)
 }
 // A staffer in the middle of the session form: a background repaint would take their field away.
 function _nsFormBusy(){const a=document.activeElement;return !!(a&&a.closest&&a.closest('#tab-sessions')&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));}
 function _routeOf(s){const k=s&&s.route_slug;if(!k)return null;return _routes().find(r=>r.slug===k)||{slug:k,name:k};}
-function _on__nsRoute(event,el){S.newSessRoute=el.value}
-function _nsRouteHtml(){
+function _on__nsRoute(event,el){if(el.id==='es-route')S.editSessRoute=el.value;else S.newSessRoute=el.value;const b=document.getElementById(el.id+'-line');if(b)b.disabled=!el.value;}
+// The Route step of both session forms (new features build F11, 2026-11-13): the New form's and, with ed, the Edit form's
+// (a ride that exists could not be given a route). It is there on every bike ride, and on any ride once the Routes list
+// holds routes; with none it says where they are made, a line that waits hidden until the list has been read (no repaint
+// of a form in use). A ride tied to a route the list no longer holds keeps it until staff pick another. Admins open the
+// picked route's line and turn points beside it (site_content is theirs to write).
+function _nsRouteHtml(ed,sess){
   if(S._routes===undefined)_routesLoad();
-  const list=_routes();if(!list.length)return'';
-  return `<div class="form-group ss-mb16"><label for="ns-route">${t('sessRouteLabel')}</label>
-    <select id="ns-route" data-on-change="${_on("_on__nsRoute",_EV,_EL)}"><option value=""${S.newSessRoute?'':' selected'}>${t('sessRouteNone')}</option>${list.map(r=>`<option value="${esc(r.slug)}"${S.newSessRoute===r.slug?' selected':''}>${esc(r.name)}${r.km?` · ${esc(r.km)} km`:''}</option>`).join('')}</select></div>`;
+  const list=_routes(),cur=String((ed?S.editSessRoute:S.newSessRoute)||''),id=ed?'es-route':'ns-route';
+  if(!list.length&&!cur&&!(ed?_needsBike(sess):_kindHas(_nsKind(),'bike')))return'';
+  const opts=(ed&&cur&&!list.some(r=>r.slug===cur))?[{slug:cur,name:cur},...list]:list;
+  return `<div class="form-group ss-mb16"><label for="${id}">${t('sessRouteLabel')}${list.length?'':` <span class="label-hint ss-rt-none"${Array.isArray(S._routes)?'':' hidden'}>${t('sessRouteEmpty')}</span>`}</label>
+    <div class="ss-times"><select id="${id}" data-on-change="${_on("_on__nsRoute",_EV,_EL)}"><option value=""${cur?'':' selected'}>${t('sessRouteNone')}</option>${opts.map(r=>`<option value="${esc(r.slug)}"${cur===r.slug?' selected':''}>${esc(r.name)}${r.km?` · ${esc(r.km)} km`:''}</option>`).join('')}</select>
+    ${isAdmin()?`<button type="button" class="btn-sm btn-secondary" id="${id}-line" data-on-click="${_on("_rtLineOpen",id)}"${cur?'':' disabled'}>${t('sessRouteLine')}</button>`:''}</div></div>`;
+}
+// The picked route's line and turn points (route-page.js, _rtpEdit), with the staff page's checked write lent to it.
+function _rtLineOpen(id){
+  const el=document.getElementById(id),k=el&&el.value;if(!k||!isAdmin())return;
+  _rtLoad(()=>window._rtpEdit(k,{wr:_wr,op:_opName,log:logAction,done:()=>{if(S.web&&!S.web.busy)S.web.loaded=false;}})); // the Website editor reads site_content again when next opened
 }
 
 // ── The ride leader's live location (2026-09-28) ────────────────────────────────────────────────
@@ -30736,6 +30772,7 @@ function renderSessions(){
         </div>`}
       </div>
       ${_esMeetHtml(editSess)}${_esRsHtml(editSess)}
+      ${_nsRouteHtml(true,editSess)}
       ${['petromin','swim','workshop','runher','vlap','arena','defe5k','event','snd96','blood','yoga'].includes(_rideKind(editSess))?`
       <div class="form-group ss-mb16">
         <label for="es-title">${t(_needsBike(editSess)?'sessRideNameLabel':'sessSessNameLabel')} &nbsp;<span class="label-hint">${t(_needsBike(editSess)?'sessRideNameHint':'sessSessNameHint')}</span></label>
@@ -31312,7 +31349,7 @@ function _sessRowSnap(id){const r=_sessGet(id);if(!r)return null;const o={...r};
 // the new text on the ride). hide_queue is not: a publish clears it.
 // Who can book (gender_only, 2026-10-27) too; a row read before 20261027150000 has no such key, so its Undo names none.
 // Lockers offered as well (bug hunt 2026-11-10): the edit writes it, and Undo said done while it stayed as edited.
-const SESS_EDIT_COLS=['day','session_date','capacity','status','bike_slots','addons','title','spots','price','meet_url','breakfast_name','breakfast_url','event_kind','needs_approval','ride_kind','paid_ride','open_to_all','required_tag_id','reveal_at','description','gender_only','member_cap','lockers','meet_name','meet_name_ar','meet_lat','meet_lng','ride_status'];
+const SESS_EDIT_COLS=['day','session_date','capacity','status','bike_slots','addons','title','spots','price','meet_url','breakfast_name','breakfast_url','event_kind','needs_approval','ride_kind','paid_ride','open_to_all','required_tag_id','reveal_at','description','gender_only','member_cap','lockers','meet_name','meet_name_ar','meet_lat','meet_lng','ride_status','route_slug'];
 // The meeting point's name and coordinate and the ride's status too (20261114000100): the editor writes them.
 // The members limit too (bug hunt 2026-10-28): the edit writes it, and Undo left a mistyped limit in place.
 // The rides the editor sizes by places, not by bikes: the approval rides, and a ticketed event
@@ -31550,6 +31587,8 @@ async function _saveSessionEdit(){
     // The date's own words (an event's description; a line in any other date's Details), as the box says them
     {const _d=String(document.getElementById('es-desc')?.value??S.editSessDesc??'').trim().slice(0,2000)||null;
     if(_d!==((sess.description||'').trim()||null))_patch.description=_d;}
+    // The route it follows (F11, 2026-11-13), sent only when the pick changed; Undo puts the old one back (SESS_EDIT_COLS).
+    {const _rtN=typeof S.editSessRoute==='string'?(S.editSessRoute||null):(sess.route_slug||null);if(_rtN!==(sess.route_slug||null))_patch.route_slug=_rtN;}
     // Who can book (the owner, 2026-10-27), sent only when the pick changed (Mixed writes null). Null: the picker was never opened.
     {const _sgW=_sessGender(sess),_sgN=typeof S.editSessGender==='string'?(_sgVal(S.editSessGender)||null):_sgW;
     if(_sgN!==_sgW){_patch.gender_only=_sgN;_after.push(()=>{

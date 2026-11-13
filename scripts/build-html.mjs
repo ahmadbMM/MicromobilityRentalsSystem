@@ -140,6 +140,9 @@ src = src.replace("const HUB_V=''", `const HUB_V='${createHash('sha256').update(
 // Its Ask pages' own file (member-ask.js, fetched when a member opens one), the same way.
 if (!src.includes("const ASK_HUB_V=''")) throw new Error('build: ASK_HUB_V placeholder missing');
 src = src.replace("const ASK_HUB_V=''", `const ASK_HUB_V='${createHash('sha256').update(await readFile(new URL('../member-ask.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
+// The route's own page (route-page.js, F11): the same, for the file a rider fetches when a route is opened.
+if (!src.includes("const RT_V=''")) throw new Error('build: RT_V placeholder missing');
+src = src.replace("const RT_V=''", `const RT_V='${createHash('sha256').update(await readFile(new URL('../route-page.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
 if (!src.includes("const BIKE_IMG_V=''")) throw new Error('build: BIKE_IMG_V placeholder missing');
 src = src.replace("const BIKE_IMG_V=''", `const BIKE_IMG_V='${bikeFiles.length ? bikesHasher.digest('hex').slice(0, 10) : ''}'`);
 
