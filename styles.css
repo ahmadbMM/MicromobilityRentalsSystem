@@ -9779,6 +9779,15 @@ body:not(.view-staff) .tk-rs{display:inline-block;margin-inline-start:6px;paddin
 body:not(.view-staff) .tk-rs-cancelled{color:var(--red);}
 body:not(.view-staff) .ticket-card.tk-live:not(.tk-th) .tk-rs,body:not(.view-staff) .ticket-card:is(.th-jcc,.th-arena) .tk-rs{color:var(--night-amber);}
 body:not(.view-staff) .ticket-card.tk-live:not(.tk-th) .tk-rs-cancelled,body:not(.view-staff) .ticket-card:is(.th-jcc,.th-arena) .tk-rs-cancelled{color:var(--night-red);}
+/* "Still coming?" (new features build F2): two buttons side by side on a ticket and on the Community card from 24 hours
+   before, then one quiet outlined chip in the card's own ink. No line of text with them. */
+body:not(.view-staff) .stc-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-self:stretch;margin:10px 0 14px;}
+body:not(.view-staff) .stc-row>button{min-height:48px;min-width:0;padding-inline:10px;}
+body:not(.view-staff) .stc-ok{justify-self:start;display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;border:1px solid var(--line-2);font-size:var(--fs-13);font-weight:600;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .stc-ok,body:not(.view-staff) .hub-hero .stc-ok{border-color:var(--night-line);}
+body:not(.view-staff) .hub-hero .stc-row{margin:10px 0 0;}
+body:not(.view-staff) .hub-hero .stc-no{background:transparent;color:var(--night-ink);border-color:var(--night-line);}
+body:not(.view-staff) .hub-hero .stc-no:hover{background:var(--night-2);border-color:var(--night-ink-2);color:var(--night-ink);}
 
 /* ── The booked moment: a tick drawn in a disc that settles, once, on the booking (.play) ── */
 body:not(.view-staff) .bk-ok{display:grid;justify-items:center;gap:8px;margin:6px 0 24px;text-align:center;}
@@ -11763,6 +11772,8 @@ html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(
 .blk-mk .tag-banned .tag-logo{width:10px;height:8px;}
 /* Ride lead (2026-11-06): the booking staff marked as the ride's lead (_leadChip). */
 .lead-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#1971c2;color:#fff;border-radius:var(--sf-r-xs);vertical-align:middle;}
+/* "Still coming?" (F2): the rider said on their ticket that they are coming (_stcChip); a green tick, staff screens only. */
+.stc-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:var(--vx-g-bg);color:var(--vx-g-ink);border-radius:var(--sf-r-xs);vertical-align:middle;}
 .sn-ico{display:block;width:14px;height:14px;}
 .tag-svg{display:inline-flex;align-items:center;flex-shrink:0;}
 .tag-svg .sn-ico{width:16px;height:16px;}

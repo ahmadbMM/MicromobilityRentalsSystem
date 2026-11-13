@@ -14,7 +14,8 @@
 // see the block above window._hubRender.
 /* global S, sb, esc, _on, getSession, _cssv, shortDate, t, _cuIc, sessionTime, _dayWord, _evName, _evOf, _evKindName, allSessions,
    _isCommunity, _sessPastDay, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
-   _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard,
+   _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard, _bookingAhead, _ptnAll,
+   _arHold, _isApprovalRide, _commPublished,
    NATIONALITIES, nationalityLabel, _natFor, _selOnce, askConfirm, closeConfirm, _EL, _EV */
 const HUB_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 const HUB_T = {
@@ -289,7 +290,8 @@ function _hubState(tm, now) {
 }
 function _hubNextAt(tm, now) {
   if (!tm || !Number.isFinite(tm.go)) return 0;
-  return [tm.go - 864e5, tm.go - 108e5, (Number.isFinite(tm.st) ? tm.st : tm.go) + 36e5].find((x) => x > now) || 0;
+  const st = Number.isFinite(tm.st) ? tm.st : tm.go; // the start itself too: "Still coming?" leaves the card then (F2)
+  return [tm.go - 864e5, tm.go - 108e5, st, st + 36e5].find((x) => x > now) || 0;
 }
 // The page draws itself again when the card's state changes while it is open (within the next twelve hours).
 function _hubArm(at) {
@@ -332,6 +334,19 @@ function _hubFields(f) {
   const dep = window._hubDeps || {};
   return f.length ? `<div class="hub-fields">${f.map(([k, v]) => `<span class="hub-f"><span class="hub-fk">${esc(k)}</span><strong class="hub-fv"><bdi>${esc(dep.hm ? dep.hm(v) : v)}</bdi></strong></span>`).join('')}</div>` : '';
 }
+// "Still coming?" (new features build F2, 2026-11-13): the ticket's own two buttons, "I'm coming" and "Can't come", or its
+// quiet chip after a yes, from 24 hours before the time to turn up until the start (app.src.html _stcHtml, lent as
+// _hubDeps.still, with its words). It takes every row of that booking, as the ticket groups them, and whether the place
+// is held and the rider has been told so: the ticket's own rule for showing its code (renderBookingTicket's _qrReady).
+// Nothing on a waitlisted booking, and no line of text with them.
+function _hubStill(s, e) {
+  const dep = window._hubDeps || {};
+  if (!dep.still) return '';
+  try {
+    const g = getQueue().filter((x) => x.customerId === e.customerId && x.sessionId === e.sessionId && _bookingAhead(x)), p = _ptnAll(g);
+    return dep.still(s, g, !_arHold(s, g) && (!_isApprovalRide(s) || ((p || _commPublished(s)) && (p || g.every((x) => x.approval === 'approved')))));
+  } catch (_) { return ''; }
+}
 function _bookedHtml(s, e, tm, st) {
   const ds = String(s.session_date || s.id).slice(0, 10), dw = _dayWord(ds), soon = st === 'today' || st === 'tomorrow';
   const f = _hubFields(tm ? tm.f : []), place = _hubPlace(s);
@@ -340,6 +355,7 @@ function _bookedHtml(s, e, tm, st) {
   return `<div class="hub-hero${st ? ' hub-hero-' + st : ''}"><span class="hub-k">${esc(soon && dw ? dw : _hT('next'))}</span><strong class="hub-hero-t"><bdi>${esc(_evName(s))}</bdi></strong>
       <span class="hub-hero-m">${when}</span>${chips ? `<span class="hub-chips">${chips}</span>` : ''}
       ${st === 'today' ? place + f : f + place}
+      ${soon ? _hubStill(s, e) : ''}
       <button type="button" class="btn-primary hub-hero-b" data-on-click="${st === 'today' ? _on('_hubTicket', e.id) : _on('setCustTab', 'myrides')}">${_cuIc('ticket', 18)} ${_hT('ticket')}</button></div>`;
 }
 // { html, open: the session offered to book (Coming up leaves it out), recap: the staff card leads the page }. With nothing

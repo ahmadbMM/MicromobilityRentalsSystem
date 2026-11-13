@@ -69,7 +69,10 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   'staff_volunteer_cert_issue', 'staff_volunteer_cert_revoke', 'volunteer_cert_check',
   // The circuit challenge (20261114012500, F25): the lap page says nothing and Community > Activities > Circuit laps keeps its
   // list without the counts; tests/circuit-challenge.spec.ts stubs them by name.
-  'circuit_lap', 'staff_circuit_totals']);
+  'circuit_lap', 'staff_circuit_totals',
+  // "Still coming?" (20261114010200): a ticket shows its two buttons only once a booking row carries coming_at, and a
+  // database without the function hides them; tests/still-coming.spec.ts stubs it by name.
+  'booking_coming']);
 // (staff_pii_reveal and staff_access_reviewed, 20261009220000, are NOT listed: every look at personal data calls the
 // first, so the generic [] answers it; tests/s1010-pii-*.spec.ts give the missing function's answer by name.)
 /** Tables a migration adds that production may not have yet (20261009150000: the till and the receipt

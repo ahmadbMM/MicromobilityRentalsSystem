@@ -59,6 +59,8 @@ with expected(fname, want_definer, note) as (values
   ('staff_company_challenge_remove', true, 'a company challenge: reaches tables nobody can read; _staff_mod(community, edit) (20261114012600)'),
   ('_cc_people', true, 'a company challenge: reaches tables nobody can read; no client executes (20261114012600)'),
   ('_cc_award', true, 'a company challenge: reaches tables nobody can read; no client executes (20261114012600)'),
+  ('booking_coming', true, '"Still coming?": stamps the caller''s own booking past RLS; token-checked (20261114010200)'),
+  ('_coming_guard', false, 'trigger: keeps queue_entries.coming_at off a rider''s direct write and clears it on a move or a cancel; reads no table (20261114010200)'),
   ('_wallet_owner', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('_wallet_post', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('_wallet_amount', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
