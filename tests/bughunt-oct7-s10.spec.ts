@@ -117,7 +117,7 @@ test.describe('@staff:bookings breakfast report venue (s10)', () => {
     await page.waitForFunction(`S.dataLoaded&&getQueue().length===1`);
     const html = await page.evaluate(`(() => {
       S.lang='ar';S.sfSession='satx';let out='';const o=window.open;
-      window.open = () => ({ document: { write: (h) => { out = h; }, close() {}, querySelectorAll: () => [] }, focus() {}, print() {} });
+      S._rxTap=(h)=>{out = h;return true;};
       try{printBreakfastReport();}finally{window.open=o;}
       return out;
     })()`) as string;

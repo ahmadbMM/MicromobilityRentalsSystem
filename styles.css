@@ -14136,3 +14136,182 @@ body.view-staff #ask-pop .ask-o-acts{display:flex;gap:4px;}
   body.view-staff #ask-pop .ask-o input:first-child{grid-column:1/-1;}
   body.view-staff #ask-pop .chrome-dact>button{flex:1 1 0;}
 }
+
+/* ── The chart kit and the tables (2026-11-13, the reports rework; the user: "enhance and improve the way all graphs
+   and tables and visualizations are aligned and their design") ──────────────────────────────────────────────────────
+   Colours by role. --ck-1..6: the series, in a fixed order checked for colour-blind and normal-vision separation on
+   the card in both themes (series 1 the brand green); --ck-cmp: a comparison (last year, capacity, the total billed);
+   --ck-st-*: a status, always with its words beside it. A mark reads its colour from --ck-c, set by its class. */
+body.view-staff{
+  --ck-1:#0c7a3d; --ck-2:#2a6fdb; --ck-3:#e0702a; --ck-4:#8c3b6e; --ck-5:#6250d6; --ck-6:#0b91a8;
+  --ck-cmp:#a3aaa4; --ck-grid:rgba(17,21,18,.07); --ck-base:rgba(17,21,18,.26); --ck-tick:#69716b; --ck-track:rgba(17,21,18,.07);
+  --ck-st-ok:var(--green); --ck-st-warn:#d39b1f; --ck-st-bad:#c9483b; --ck-surface:var(--sf-card,#fff);
+}
+html[data-staff-theme="dark"] body.view-staff{
+  --ck-1:#1a9e5f; --ck-2:#3b80e3; --ck-3:#d4652a; --ck-4:#b85a94; --ck-5:#7c7ce6; --ck-6:#1696a9;
+  --ck-cmp:#5f676d; --ck-grid:rgba(255,255,255,.07); --ck-base:rgba(255,255,255,.22); --ck-tick:#98a2a9; --ck-track:rgba(255,255,255,.08);
+  --ck-st-ok:#25d184; --ck-st-warn:#f2b43f; --ck-st-bad:#ff6f66;
+}
+body.view-staff .ck-c1{--ck-c:var(--ck-1);} body.view-staff .ck-c2{--ck-c:var(--ck-2);} body.view-staff .ck-c3{--ck-c:var(--ck-3);}
+body.view-staff .ck-c4{--ck-c:var(--ck-4);} body.view-staff .ck-c5{--ck-c:var(--ck-5);} body.view-staff .ck-c6{--ck-c:var(--ck-6);}
+body.view-staff .ck-cmp{--ck-c:var(--ck-cmp);} body.view-staff .ck-st-ok{--ck-c:var(--ck-st-ok);}
+body.view-staff .ck-st-warn{--ck-c:var(--ck-st-warn);} body.view-staff .ck-st-bad{--ck-c:var(--ck-st-bad);}
+/* a chart: the legend, the value axis in a gutter as wide as its longest label, the plot, the time axis, the table */
+body.view-staff .ck{margin:0;min-width:0;container-type:inline-size;--ck-g:3em;--ck-h:150px;}
+body.view-staff .ck-body{display:grid;grid-template-columns:var(--ck-g) minmax(0,1fr);height:var(--ck-h);margin-top:12px;}
+body.view-staff .ck-ya{position:relative;}
+body.view-staff .ck-yl{position:absolute;inset-inline-end:8px;top:var(--y);transform:translateY(-50%);font-size:var(--sf-fs-tick);line-height:1;color:var(--ck-tick);font-variant-numeric:tabular-nums;white-space:nowrap;}
+body.view-staff .ck-plot{position:relative;min-width:0;border-radius:var(--sf-r-xs);touch-action:pan-y;}
+body.view-staff .ck-plot:focus-visible{outline:2px solid var(--green);outline-offset:6px;}
+body.view-staff .ck-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;display:block;}
+body.view-staff .ck-gl{stroke:var(--ck-grid);stroke-width:1;}
+body.view-staff .ck-base{stroke:var(--ck-base);stroke-width:1;}
+body.view-staff .ck-line{fill:none;stroke:var(--ck-c);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;}
+body.view-staff .ck-line.ck-cmp{stroke-dasharray:5 4;stroke-width:1.5;}
+body.view-staff .ck-area{fill:var(--ck-c);fill-opacity:.1;stroke:none;}
+body.view-staff :is(.ck-dot,.ck-hd){position:absolute;left:var(--x);top:var(--y);width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--ck-c);box-shadow:0 0 0 2px var(--ck-surface);pointer-events:none;}
+body.view-staff .ck-end{position:absolute;left:var(--x);top:var(--y);transform:translate(-100%,-50%);margin-top:-14px;margin-inline-start:-6px;padding:1px 4px;border-radius:var(--sf-r-xs);background:var(--ck-surface);font-size:var(--sf-fs-xs);font-weight:600;color:var(--text);white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none;}
+body.view-staff .ck-cross{position:absolute;top:0;bottom:0;left:var(--x);width:1px;background:var(--ck-base);pointer-events:none;}
+body.view-staff .ck-cross[hidden]{display:none;}
+body.view-staff .ck-x{position:relative;height:16px;margin-inline-start:var(--ck-g);margin-top:8px;}
+body.view-staff .ck-xl{position:absolute;top:0;left:var(--x);transform:translateX(-50%);font-size:var(--sf-fs-tick);line-height:1.3;color:var(--ck-tick);white-space:nowrap;}
+body.view-staff .ck-xl.ck-x0{transform:none;}
+body.view-staff .ck-xl.ck-xn{transform:translateX(-100%);}
+@container (max-width:460px){body.view-staff .ck-xo{display:none;}}
+/* columns: thin, square at the foot, a 4px rounded top, centred in their slot */
+body.view-staff .ck-cols{position:absolute;inset:0;display:flex;align-items:flex-end;}
+body.view-staff .ck-slot{flex:1 1 0;height:100%;display:flex;align-items:flex-end;justify-content:center;min-width:0;}
+body.view-staff .ck-cb{display:block;width:min(24px,72%);height:var(--h);min-height:1px;border-radius:var(--sf-r-xs) var(--sf-r-xs) 0 0;background:var(--ck-c);}
+body.view-staff .ck-slot.ck-on .ck-cb{filter:brightness(.82);}
+body.view-staff .ck-ref{position:absolute;left:0;right:0;top:var(--y);border-top:1px solid var(--ck-tick);pointer-events:none;}
+body.view-staff .ck-ref span{position:absolute;right:0;bottom:3px;padding:0 4px;background:var(--ck-surface);font-size:var(--sf-fs-tick);color:var(--ck-tick);}
+/* legends: a swatch beside words in the text colours; a comparison is a dashed line */
+body.view-staff .ck-leg{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0;padding:0;list-style:none;font-size:var(--sf-fs-xs);color:var(--muted);}
+body.view-staff .ck-leg li{display:inline-flex;align-items:center;gap:6px;min-width:0;}
+body.view-staff .ck-sw{display:inline-block;flex:none;width:10px;height:10px;border-radius:var(--sf-r-xs);background:var(--ck-c);}
+body.view-staff .ck-leg .ck-sw.ck-cmp{width:14px;height:0;border-radius:0;background:transparent none;border-top:2px dashed var(--ck-c);}
+/* one whole in parts: a 28px bar of blocks 2px apart, the share inside when it fits, a legend in the bar's order */
+body.view-staff .ck-seg{display:flex;flex-direction:column;gap:12px;}
+body.view-staff .ck-segbar{display:flex;gap:2px;height:28px;border-radius:var(--sf-r-xs);overflow:hidden;}
+body.view-staff .ck-sp{flex:var(--w) 1 0;min-width:3px;display:flex;align-items:center;padding-inline-start:8px;background:var(--ck-c);}
+body.view-staff .ck-sp b{font-size:var(--sf-fs-xs);font-weight:600;color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap;}
+body.view-staff .ck-sp.ck-st-warn b{color:#111512;}
+body.view-staff .ck-leg-v{flex-direction:column;flex-wrap:nowrap;gap:8px;}
+body.view-staff .ck-leg-v li{display:grid;grid-template-columns:auto minmax(0,1fr) auto 4.5ch;gap:8px;align-items:center;color:var(--text);font-size:var(--sf-fs-sm);}
+body.view-staff .ck-leg-v .ck-ln{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+body.view-staff .ck-leg-v b{font-weight:600;font-variant-numeric:tabular-nums;text-align:end;}
+body.view-staff .ck-leg-v .ck-lp{color:var(--muted);text-align:end;font-variant-numeric:tabular-nums;}
+body.view-staff .ck-wrap{display:flex;flex-direction:column;gap:14px;}
+body.view-staff .ck-total b{display:block;font-size:var(--sf-fs-xl);font-weight:600;line-height:1.2;}
+body.view-staff .ck-total span{font-size:var(--sf-fs-xs);color:var(--muted);}
+/* a figure with its meter (was a dial) */
+body.view-staff .ck-fig{display:flex;flex-direction:column;gap:6px;width:100%;}
+body.view-staff .ck-fig-l{font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);}
+body.view-staff .ck-fig-v{font-size:var(--sf-fs-2xl);font-weight:600;line-height:1.1;}
+body.view-staff .ck-fig-s{font-size:var(--sf-fs-xs);color:var(--muted);}
+body.view-staff .ck-meter{height:8px;border-radius:var(--sf-r-pill);background:color-mix(in srgb,var(--ck-c) 16%,transparent);overflow:hidden;}
+body.view-staff .ck-meter i{display:block;height:100%;width:var(--w);border-radius:inherit;background:var(--ck-c);}
+/* a sparkline: the trend quiet, the latest point in the series colour */
+body.view-staff .ck-spark{display:block;overflow:visible;max-width:100%;}
+body.view-staff .ck-spl{fill:none;stroke:var(--ck-cmp);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round;}
+body.view-staff .ck-spd{fill:var(--ck-1);stroke:var(--ck-surface);stroke-width:2;}
+/* the numbers under a chart */
+body.view-staff .ck-tv{margin-top:10px;font-size:var(--sf-fs-xs);}
+body.view-staff .ck-tv summary{cursor:pointer;color:var(--muted);font-weight:600;width:max-content;max-width:100%;}
+body.view-staff .ck-tv summary:hover{color:var(--text);}
+body.view-staff .ck-tvw{max-height:260px;overflow:auto;margin-top:8px;border:1px solid var(--sf-line);border-radius:var(--sf-r-ctl);}
+body.view-staff .ck-tvw table{width:100%;border-collapse:collapse;}
+body.view-staff .ck-tvw :is(th,td){padding:6px 12px;text-align:start;border-bottom:1px solid var(--sf-sep);white-space:nowrap;}
+body.view-staff .ck-tvw th{position:sticky;top:0;background:var(--sf-head);font-weight:600;color:var(--muted);}
+/* the read-out beside the pointer */
+body.view-staff .ck-tip{position:fixed;left:0;top:0;transform:translate(var(--tx,0),var(--ty,0));z-index:1000;pointer-events:none;display:grid;gap:4px;min-width:150px;max-width:280px;padding:8px 10px;border-radius:var(--sf-r-ctl);background:var(--sf-card);color:var(--text);box-shadow:var(--sf-sh-2);font-size:var(--sf-fs-xs);}
+body.view-staff .ck-tip[hidden]{display:none;}
+body.view-staff .ck-tl{font-weight:600;}
+body.view-staff .ck-tr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:center;color:var(--muted);}
+body.view-staff .ck-tr b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums;}
+/* chart cards: the chart sits at the foot of its card, so plots side by side share one baseline */
+body.view-staff .chart-card{display:flex;flex-direction:column;min-width:0;}
+body.view-staff .chart-card > .ck,body.view-staff .chart-card > .ck-wrap{margin-top:auto;}
+/* ranked bars: one grid per row - the name, the bar, the value - so every bar of a card starts and ends on the same line;
+   the bar is thin, square at its start and rounded at its end, in the series colour */
+body.view-staff .analytics-bar-row{display:grid;grid-template-columns:minmax(72px,26%) minmax(0,1fr) minmax(56px,max-content);align-items:center;gap:12px;margin-bottom:10px;}
+body.view-staff .analytics-bar-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+body.view-staff .analytics-bar-track{height:8px;background:var(--ck-track);border-radius:var(--sf-r-xs);}
+body.view-staff .analytics-bar-fill{box-shadow:none;border-start-start-radius:0;border-end-start-radius:0;border-start-end-radius:var(--sf-r-xs);border-end-end-radius:var(--sf-r-xs);}
+body.view-staff .analytics-bar-value{min-width:0;text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.35;}
+/* figure tiles: the label first, then the figure, then what it is made of */
+body.view-staff .analytics-kpi-card{display:flex;flex-direction:column;}
+body.view-staff .analytics-kpi-card:hover{transform:none;}
+body.view-staff .analytics-kpi-label{order:-1;margin-bottom:8px;font-weight:500;}
+body.view-staff .analytics-kpi-value{letter-spacing:0;margin-bottom:4px;}
+/* tables: a column of quantities at the end of its cells, figures of one width, the heading over it */
+body.view-staff :is(td,th).ck-num{text-align:end;font-variant-numeric:tabular-nums;}
+body.view-staff th.ck-num > :is(button,span){margin-inline-start:auto;}
+body.view-staff td.ck-num .analytics-occ-bar{justify-content:flex-end;}
+/* the booking funnel: thin bars on the chart track, like every other bar */
+body.view-staff #tab-analytics .an-funnel-track{height:10px;background:var(--ck-track);}
+/* ── The report viewer (S1, 2026-11-13): a report on a sheet over the site, one bar of actions over it ── */
+body.rx-open{overflow:hidden;}
+body.view-staff .rx-modal{position:fixed;inset:0;z-index:950;display:flex;background:var(--sf-scrim);}
+body.view-staff .rx-modal[hidden]{display:none;}
+body.view-staff .rx-view{flex:1;display:flex;flex-direction:column;min-width:0;margin:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));border-radius:var(--sf-r-sheet);overflow:hidden;background:var(--bg);box-shadow:var(--sf-sh-3);}
+@media (max-width:767px){body.view-staff .rx-view{margin:0;border-radius:0;padding-top:env(safe-area-inset-top);}}
+body.view-staff .rx-bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:10px 14px;background:var(--sf-card);border-bottom:1px solid var(--sf-line);}
+body.view-staff .rx-vt{display:flex;flex-direction:column;flex:1 1 180px;min-width:0;}
+body.view-staff .rx-vt b{font-size:var(--sf-fs-md);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+body.view-staff .rx-vt span{font-size:var(--sf-fs-xs);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+body.view-staff .rx-vno{font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+body.view-staff .rx-acts{display:flex;flex-wrap:wrap;gap:6px;}
+body.view-staff .rx-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:var(--sf-ctl-size);padding:0 12px;border:1px solid var(--sf-ctl);border-radius:var(--sf-r-ctl);background:var(--sf-card);color:var(--text);font:inherit;font-size:var(--sf-fs-sm);font-weight:600;cursor:pointer;}
+body.view-staff .rx-btn:hover{border-color:var(--sf-ctl-h);}
+body.view-staff .rx-btn:disabled{opacity:.55;cursor:default;}
+body.view-staff .rx-btn svg{flex:none;}
+body.view-staff .rx-btn.rx-main-act{background:var(--ac-fill);border-color:var(--ac-fill);color:var(--acink);}
+body.view-staff .rx-close{width:var(--sf-ctl-size);padding:0;}
+body.view-staff .rx-stage{flex:1;min-height:0;background:var(--bg);}
+body.view-staff .rx-frame{display:block;width:100%;height:100%;border:0;}
+@media (max-width:560px){body.view-staff .rx-acts{width:100%;}body.view-staff .rx-acts .rx-btn{flex:1 1 0;padding:0 8px;}body.view-staff .rx-acts .rx-btn svg{display:none;}}
+/* ── The Reports section (S5, 2026-11-13): search and areas, cards in a grid, the history ── */
+body.view-staff #tab-reports .rp2-head{margin-bottom:14px;}
+body.view-staff #tab-reports .rp2-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:8px;}
+body.view-staff #tab-reports .rp2-q{flex:1 1 260px;max-width:420px;}
+body.view-staff #tab-reports .rp2-q input{width:100%;}
+body.view-staff #tab-reports .rp2-areas{margin:0;}
+body.view-staff #tab-reports .rp2-h{font-size:var(--sf-fs-sm);font-weight:600;color:var(--muted);margin:22px 0 10px;}
+body.view-staff #tab-reports .rp2-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;}
+body.view-staff #tab-reports .rp2-card{display:flex;flex-direction:column;gap:8px;min-width:0;padding:14px;border-radius:var(--sf-r-card);background:var(--sf-card);box-shadow:var(--sf-sh-1);}
+body.view-staff #tab-reports .rp2-ch{display:flex;align-items:flex-start;gap:8px;}
+body.view-staff #tab-reports .rp2-nm{flex:1;min-width:0;font-size:var(--sf-fs-md);font-weight:600;line-height:1.3;}
+body.view-staff #tab-reports .rp2-tag{flex:none;font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);background:var(--sf-chip);border-radius:var(--sf-r-pill);padding:2px 8px;}
+body.view-staff #tab-reports .rp2-fav{flex:none;display:grid;place-items:center;width:30px;height:30px;margin:-4px -6px 0 0;border:0;border-radius:var(--sf-r-ctl);background:transparent;color:var(--muted-l);cursor:pointer;}
+body.view-staff #tab-reports .rp2-fav:hover{background:var(--sf-hover);}
+body.view-staff #tab-reports .rp2-fav[aria-pressed="true"]{color:var(--ck-st-warn);}
+body.view-staff #tab-reports .rp2-where{font-size:var(--sf-fs-xs);color:var(--muted);}
+body.view-staff #tab-reports .rp2-pick{min-width:0;}
+body.view-staff #tab-reports .rp2-none{font-size:var(--sf-fs-xs);color:var(--muted);}
+body.view-staff #tab-reports .rp2-go{margin-top:auto;align-self:flex-start;}
+body.view-staff #tab-reports .rp2-recent{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;}
+body.view-staff #tab-reports .rp2-rc{display:flex;flex-direction:column;align-items:flex-start;gap:2px;max-width:280px;padding:10px 12px;border:1px solid var(--sf-line2);border-radius:var(--sf-r-ctl);background:var(--sf-card);color:var(--text);font:inherit;text-align:start;cursor:pointer;}
+body.view-staff #tab-reports .rp2-rc b{font-size:var(--sf-fs-sm);font-weight:600;}
+body.view-staff #tab-reports .rp2-rc span{font-size:var(--sf-fs-xs);color:var(--muted);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+body.view-staff #tab-reports .rp2-rc bdi{font-size:var(--sf-fs-xs);color:var(--muted);font-variant-numeric:tabular-nums;}
+body.view-staff #tab-reports .rp2-hist{width:100%;border-collapse:collapse;background:var(--sf-card);}
+body.view-staff #tab-reports .rp2-hist :is(th,td){padding:10px 12px;text-align:start;border-bottom:1px solid var(--sf-sep);font-size:var(--sf-fs-sm);}
+body.view-staff #tab-reports .rp2-hist th{font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);background:var(--sf-head);}
+body.view-staff #tab-reports .rp2-no{font-variant-numeric:tabular-nums;white-space:nowrap;}
+body.view-staff #tab-reports .rp2-ttl{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+body.view-staff #tab-reports .rp2-auto{margin-top:26px;}
+/* ── One report builder (S2, S3, 2026-11-13): the saved setups over the choices, the live preview beside them ── */
+body.view-staff .rb-bar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 10px;margin:8px 0 14px;padding:10px 12px;border-radius:var(--sf-r-ctl);background:var(--sf-chip);}
+body.view-staff .rb-sel{display:flex;flex-direction:column;gap:4px;flex:1 1 220px;min-width:0;font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);}
+body.view-staff .rb-sel select{width:100%;}
+body.view-staff .rb-acts{display:flex;flex-wrap:wrap;gap:6px;}
+body.view-staff .rb-prev{display:none;}
+@media (min-width:1100px){
+  body.view-staff #print-opts-modal .modal-box.rb-on{display:grid;grid-template-columns:minmax(0,1fr) 420px;column-gap:22px;align-content:start;width:min(1200px,96vw);max-width:min(1200px,96vw);}
+  body.view-staff #print-opts-modal .modal-box.rb-on > *{grid-column:1;}
+  body.view-staff #print-opts-modal .modal-box.rb-on > .rb-prev{grid-column:2;grid-row:1 / span 90;align-self:start;position:sticky;top:0;display:flex;flex-direction:column;gap:6px;}
+}
+body.view-staff .rb-prev-h{font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);}
+body.view-staff .rb-prev-f{position:relative;height:min(72vh,660px);overflow:hidden;border-radius:var(--sf-r-ctl);background:var(--bg);box-shadow:var(--sf-sh-1);}
+body.view-staff .rb-frame{position:absolute;top:0;left:0;width:250%;height:250%;border:0;transform:scale(.4);transform-origin:0 0;pointer-events:none;}

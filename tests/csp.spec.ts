@@ -157,10 +157,11 @@ test('the receipt\'s Print button stays off the paper, and the report\'s does to
   await page.emulateMedia({ media: 'print' });
   await expect(page.locator('button')).toBeHidden();
   await page.emulateMedia({ media: 'screen' });
-  await page.setContent('<link rel="stylesheet" href="/report.css"><button class="rep-print">Print</button>', { waitUntil: 'load' });
-  await expect(page.locator('button')).toBeVisible();
+  // A report's own controls are its sort-and-filter line (its Print is on the viewer's bar since 2026-11-13): off the paper too.
+  await page.setContent('<link rel="stylesheet" href="/report.css"><div class="rp-tools"><input class="rp-q" aria-label="q"></div>', { waitUntil: 'load' });
+  await expect(page.locator('.rp-tools')).toBeVisible();
   await page.emulateMedia({ media: 'print' });
-  await expect(page.locator('button')).toBeHidden();
+  await expect(page.locator('.rp-tools')).toBeHidden();
 });
 
 test('a violation the page meets goes into error_log with the element it came from, once, silently', async ({ page }) => {

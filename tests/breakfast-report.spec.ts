@@ -43,7 +43,7 @@ async function printed(page: Page) {
   await page.evaluate(`(() => {
     window.__bfr = '';
     window.__bfrOpen = window.open;
-    window.open = () => ({ document: { write: (h) => { window.__bfr = h; }, close() {}, querySelectorAll: () => [] }, focus() {}, print() {} });
+    S._rxTap=(h)=>{window.__bfr = h;return true;};
   })()`);
   await page.locator('#print-opts-modal .rpt-bf').click();
   await page.waitForFunction(`!!window.__bfr`);

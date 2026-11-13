@@ -35,7 +35,7 @@ async function closeoutHtml(page: import('@playwright/test').Page) {
   return page.evaluate(`(() => {
     let cap = '';
     const orig = window.open;
-    window.open = () => ({ document: { write: (h) => { cap = h; }, close() {} }, focus() {}, print() {} });
+    S._rxTap=(h)=>{cap = h;return true;};
     try { S._ctSession = 's0'; printCloseout(); } finally { window.open = orig; }
     return cap;
   })()`) as Promise<string>;

@@ -31,7 +31,7 @@ async function boot(page: Page, sessId = RUN, extra: Record<string, unknown> = {
 }
 /** Every report the page opens, as written into its window. */
 async function catchReports(page: Page) {
-  await page.evaluate(`window.__rep=[];window.open=()=>{const w={document:{write:(h)=>{window.__rep.push(h);},close(){},querySelectorAll:()=>[],fonts:{ready:Promise.resolve()},images:[]},focus(){},print(){}};return w;}`);
+  await page.evaluate(`window.__rep=[];S._rxTap=(h)=>{window.__rep.push(h);return true;}`);
 }
 /** Every CSV the page hands to the browser: its file name and its text. */
 async function catchCsv(page: Page) {
@@ -68,7 +68,7 @@ test.describe('@staff:bookings Run for Her report per distance', () => {
     const html = (await page.evaluate('window.__rep') as string[])[0];
     const body = text(html);
     expect(body).toContain('Run for Her · 5 km');
-    expect(html).toContain('MM-RPT-991017-5K');
+    expect(html).toContain('data-rx="run"'); // the run sheet for one distance (its number comes when it is printed, 2026-11-13)
     expect(body).toContain('Runner r1');
     expect(body).toContain('Runner r3');
     expect(body).not.toMatch(/Runner r[245]\b/);
@@ -99,7 +99,7 @@ test.describe('@staff:bookings Run for Her report per distance', () => {
     const html = (await page.evaluate('window.__rep') as string[])[0];
     const body = text(html);
     expect(html).toMatch(/<th>Distance<\/th>/);
-    expect(html).toContain('MM-RPT-991017<');
+    expect(html).toContain('data-rx="session"'); // the full report (its number comes when it is printed, 2026-11-13)
     for (const n of ['r1', 'r2', 'r3', 'r4', 'r5']) expect(body).toContain('Runner ' + n);
     expect(body).toMatch(/5 Runners/);
     expect(body).toMatch(/2 3 km/);

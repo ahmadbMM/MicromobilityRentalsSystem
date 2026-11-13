@@ -34,7 +34,7 @@ async function reportHtml(page: import('@playwright/test').Page, opts?: Record<s
   return page.evaluate(`(() => {
     let cap = '';
     const orig = window.open;
-    window.open = () => ({ document: { write: (h) => { cap = h; }, close() {} }, focus() {}, print() {} });
+    S._rxTap=(h)=>{cap = h;return true;};
     try {
       S.sfSession = 's0';
       // _repOpts() memoises into S._repOpts, so set the live object rather than storage.

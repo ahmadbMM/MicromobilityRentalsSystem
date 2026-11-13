@@ -21,7 +21,7 @@ test.describe('@staff:analytics weekly revenue per day', () => {
     await page.goto('/');
     await waitForSb(page);
     await page.evaluate(`window.__opened=[];window.open=(u)=>{window.__opened.push(String(u));return null;};setStaffTab('analytics');setAnView('reports')`);
-    const items = page.locator('#an-rp-host .rpi-item');
+    const items = page.locator('#tab-reports .rpi-item');
     await expect(items).toHaveCount(2);
     await items.nth(0).locator('.rpi-open').click();
     const tbl = items.nth(0).locator('table.rpi-days');

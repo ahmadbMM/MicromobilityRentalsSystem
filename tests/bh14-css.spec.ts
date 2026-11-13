@@ -32,7 +32,7 @@ test.describe('@bh14 stylesheet', () => {
     expect(await bg('tr.rp-wl td')).toBe('rgb(254, 243, 199)');
     expect(await bg('tr.rp-grp td')).toBe('rgb(238, 243, 239)');
     expect(await bg('td.rp-tot')).toBe('rgb(242, 246, 242)');
-    expect(await bg('tbody tr:last-child td')).toBe('rgb(250, 252, 250)'); // the stripe itself is untouched
+    expect(await bg('tbody tr:last-child td')).toBe('rgba(0, 0, 0, 0)'); // rows are ruled, not striped (the reports rework, 2026-11-13)
   });
 
   test('Arabic report: a nationality’s people list is ruled on the start (right) edge', async ({ page }) => {
@@ -42,8 +42,8 @@ test.describe('@bh14 stylesheet', () => {
   });
 
   test('the report’s and the receipt’s buttons and boxes take the staff radius (round two, after the square rule went)', async ({ page }) => {
-    await reportPage(page, 'ltr', '<button class="rep-print">Print</button><input class="rp-q"><select class="rp-in"></select>');
-    for (const sel of ['.rep-print', '.rp-q', '.rp-in']) expect(await page.locator(sel).evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe('8px');
+    await reportPage(page, 'ltr', '<input class="rp-q"><select class="rp-in"></select>'); // the report's own Print button went with the viewer's bar (2026-11-13)
+    for (const sel of ['.rp-q', '.rp-in']) expect(await page.locator(sel).evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe('8px');
     await page.setContent('<!doctype html><html><head><link rel="stylesheet" href="/receipt.css"></head><body><button class="rp-rbtn">Print</button></body></html>');
     await expect.poll(() => page.locator('.rp-rbtn').evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe('8px');
   });

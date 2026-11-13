@@ -225,7 +225,7 @@ test('the desktop keeps the rail and has no bottom bar', async ({ page }) => {
 
 test('the day sheet prints today\'s riders still expected or out', async ({ page }) => {
   await staff(page);
-  await page.evaluate(`window.__sheet='';window.open=()=>({document:{write:h=>{window.__sheet+=h;},close(){}},focus(){},print(){}})`);
+  await page.evaluate(`window.__sheet='';S._rxTap=(h)=>{window.__sheet+=h;return true;}`);
   await page.evaluate(`setStaffTab('queue');setSfSession('all')`);
   await page.locator('#tab-queue .sh-more').click(); // a tile in the header's More (staff round s10)
   await page.getByRole('menuitem', { name: 'Print day sheet' }).click();

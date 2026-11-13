@@ -41,7 +41,7 @@ test.describe('@staff:shell s10', () => {
     expect(await nav.locator('.snav-group').allTextContents()).toEqual(['Today', 'Fleet', 'Money', 'People', 'Partners & web', 'Admin']);
     const order = await nav.locator('.tab-btn[data-stab]').evaluateAll((b) => b.map((x) => (x as HTMLElement).dataset.stab));
     expect(order).toEqual(['dashboard', 'queue', 'waitlist', 'sessions', 'lockers', 'volunteers', 'inventory', 'workshop', 'catalog', 'cashier', 'payments', 'store',
-      'community', 'badgereq', 'ask', 'vendors', 'ambassadors', 'website', 'messages', 'analytics', 'history', 'team', 'settings']); // Ask (2026-11-13), under People
+      'community', 'badgereq', 'ask', 'vendors', 'ambassadors', 'website', 'messages', 'analytics', 'history', 'reports', 'team', 'settings']); // Ask (2026-11-13), under People; Reports after History (2026-11-13)
     await page.evaluate(`setStaffTab('settings')`);
     const inView = () => page.evaluate(`(()=>{const n=document.getElementById('staff-tab-nav'),a=n.querySelector('.tab-btn[data-stab="settings"]').getBoundingClientRect(),b=n.getBoundingClientRect();return a.top>=b.top-1&&a.bottom<=b.bottom+1;})()`);
     await expect.poll(inView).toBe(true);

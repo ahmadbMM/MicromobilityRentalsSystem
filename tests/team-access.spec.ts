@@ -152,7 +152,7 @@ test('an account sees only its sections, and a section it may not change is read
   await page.evaluate(`_accessSet({modules_view:['queue','cashier','community'],modules_edit:['cashier']},'u1')`);
   // the sections the rail offers (on a phone the rail sits behind the menu, so not "visible")
   const offered = () => page.evaluate(`[...document.querySelectorAll('#staff-tab-nav .tab-btn')].filter(b=>b.style.display!=='none').map(b=>b.querySelector('.snav-lbl').textContent.trim())`);
-  await expect.poll(offered).toEqual(['Bookings', 'Waitlist', 'Sessions', 'Lockers', 'Sales', 'People', 'Badge requests', 'Ask', 'Settings']); // a list naming Bookings names Sessions (a view of it until 2026-11-06); Customers and Community are People (2026-11-06), and a list naming People names Badge requests (a part of it until 2026-11-08) and Ask (2026-11-13); Settings is every account's own page (2026-10-02)
+  await expect.poll(offered).toEqual(['Bookings', 'Waitlist', 'Sessions', 'Lockers', 'Sales', 'People', 'Badge requests', 'Ask', 'Reports', 'Settings']); // Reports: every account's (2026-11-13) // a list naming Bookings names Sessions (a view of it until 2026-11-06); Customers and Community are People (2026-11-06), and a list naming People names Badge requests (a part of it until 2026-11-08) and Ask (2026-11-13); Settings is every account's own page (2026-10-02)
   await page.evaluate(`setStaffTab('queue')`);
   await expect(page.locator('#ro-banner')).toHaveText('Read-only mode: no changes allowed');
   const refused = await page.evaluate(`sb.from('queue_entries').update({paid:true}).eq('id','x').select().then(r=>r.error&&r.error.code)`);

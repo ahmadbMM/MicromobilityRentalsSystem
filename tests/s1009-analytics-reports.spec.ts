@@ -27,8 +27,8 @@ test.describe('@staff:analytics reports inbox', () => {
   test('lists the close-outs and KPI weeks; one opens, prints and goes to WhatsApp', async ({ page }) => {
     await boot(page, { report_snapshots: SNAPS });
     await page.evaluate(`window.__opened=[];window.open=(u)=>{window.__opened.push(String(u));return null;};setStaffTab('analytics');setAnView('reports')`);
-    expect(new URL(page.url()).pathname).toBe('/analytics/reports');
-    const items = page.locator('#an-rp-host .rpi-item');
+    expect(new URL(page.url()).pathname).toBe('/reports'); // the automatic reports moved to the Reports section (2026-11-13)
+    const items = page.locator('#tab-reports .rpi-item');
     await expect(items).toHaveCount(2);
     await expect(items.nth(0)).toContainText('Daily close-out');
     await expect(items.nth(1)).toContainText('Weekly KPIs');
@@ -41,7 +41,8 @@ test.describe('@staff:analytics reports inbox', () => {
     const opened = await page.evaluate('window.__opened') as string[];
     expect(opened.some((u) => u.startsWith('https://wa.me/?text=') && decodeURIComponent(u).includes('Close-out'))).toBe(true);
     await items.nth(0).locator('button', { hasText: 'Print' }).click();
-    expect((await page.evaluate('window.__opened') as string[]).length).toBe(2);
+    await expect(page.locator('#rx-modal .rx-frame')).toBeVisible(); // the report opens in the viewer inside the site (2026-11-13), no window
+    expect((await page.evaluate('window.__opened') as string[]).length).toBe(1);
   });
 
   test('the bell says a new close-out is ready, a kind staff can turn off', async ({ page }) => {
@@ -62,8 +63,8 @@ test.describe('@staff:analytics reports inbox', () => {
     await page.route(/\/rest\/v1\/report_snapshots/, (r) => r.fulfill({ status: 404, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
       body: JSON.stringify({ code: 'PGRST205', message: "Could not find the table 'public.report_snapshots' in the schema cache" }) }));
     await page.evaluate(`setStaffTab('analytics');setAnView('reports')`);
-    await expect(page.locator('#an-rp-host')).toContainText('Waiting for the database update.');
-    await expect(page.locator('#an-rp-host button', { hasText: 'Close out today now' })).toHaveCount(0);
+    await expect(page.locator('#tab-reports')).toContainText('Waiting for the database update.');
+    await expect(page.locator('#tab-reports button', { hasText: 'Close out today now' })).toHaveCount(0);
   });
 
   test('an admin can write today\'s close-out now', async ({ page }) => {
@@ -71,8 +72,8 @@ test.describe('@staff:analytics reports inbox', () => {
     page.on('request', (r) => { if (r.url().includes('/rpc/report_snapshot_make')) sent.push(r.postData() || ''); });
     await boot(page, { report_snapshots: [], 'rpc:report_snapshot_make': 7 });
     await page.evaluate(`setStaffTab('analytics');setAnView('reports')`);
-    await expect(page.locator('#an-rp-host')).toContainText('No reports yet.');
-    await page.locator('#an-rp-host button', { hasText: 'Close out today now' }).click();
+    await expect(page.locator('#tab-reports')).toContainText('No reports yet.');
+    await page.locator('#tab-reports button', { hasText: 'Close out today now' }).click();
     await expect.poll(() => sent.length).toBe(1);
     expect(JSON.parse(sent[0])).toEqual({ p_kind: 'daily_closeout', p_day: addDays(ksaToday(), 1) });
   });

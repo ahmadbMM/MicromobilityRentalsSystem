@@ -215,19 +215,19 @@ test.describe('@staff:shell round two outside the roster', () => {
 
   test('the printed report and the receipt: Plex, sentence case, soft heads, rounded screen controls; paper stays light', async ({ page }) => {
     await page.goto('/404.css');
-    await page.setContent('<!doctype html><html><head><link rel="stylesheet" href="/report.css"></head><body><div class="mm-banner">B</div><div class="totals"><div class="total-item"><span class="total-num">1</span><span class="total-lbl">Total riders</span></div></div><h2>Sales</h2><table><thead><tr><th>Name</th></tr></thead><tbody><tr><td>x</td></tr></tbody></table><button class="rep-print">Print</button></body></html>', { waitUntil: 'load' });
+    await page.setContent('<!doctype html><html><head><link rel="stylesheet" href="/report.css"></head><body><header class="rx-hd"><span class="rx-k">K</span></header><div class="totals"><div class="total-item"><span class="total-num">1</span><span class="total-lbl">Total riders</span></div></div><h2>Sales</h2><table><thead><tr><th>Name</th></tr></thead><tbody><tr><td>x</td></tr></tbody></table><button class="rep-print">Print</button></body></html>', { waitUntil: 'load' });
     await page.waitForFunction(() => [...document.styleSheets].some((s) => { try { return s.cssRules.length > 0; } catch { return false; } }));
     expect(await css(page, 'body', 'font-family')).toContain('IBM Plex Sans');
     for (const sel of ['th', 'h2', '.total-lbl']) {
       expect(await css(page, sel, 'text-transform'), sel).toBe('none');
       expect(await css(page, sel, 'letter-spacing'), sel).toBe('normal');
     }
-    expect(await css(page, 'th', 'background-color')).toBe('rgb(244, 244, 240)');
+    expect(await css(page, 'th', 'background-color')).toBe('rgba(0, 0, 0, 0)'); // heads ruled in ink, no fill (the reports rework, 2026-11-13)
     expect(await css(page, 'h2', 'border-left-width')).toBe('0px');
-    expect(await css(page, '.mm-banner', 'background-color')).toBe('rgb(22, 25, 29)');
-    expect(await css(page, '.rep-print', 'border-top-left-radius')).toBe('8px');
+    expect(await css(page, '.rx-hd', 'background-color')).toBe('rgba(0, 0, 0, 0)'); // light on screen (Q8)
     await page.emulateMedia({ media: 'print' });
-    expect(await css(page, '.mm-banner', 'background-color')).toBe('rgb(255, 255, 255)'); // the light print style stays
+    expect(await css(page, '.rx-hd', 'background-color')).toBe('rgba(0, 0, 0, 0)'); // and on paper alike
+    expect(await css(page, '.rx-hd', 'border-bottom-color')).toBe('rgb(20, 24, 21)');
     await page.emulateMedia({ media: 'screen' });
     await page.setContent('<!doctype html><html><head><link rel="stylesheet" href="/receipt.css"></head><body><div class="mm-banner"><span class="doc">Simplified tax invoice</span></div><div class="tot"><span>Total</span><span>SAR 18</span></div></body></html>', { waitUntil: 'load' });
     await expect.poll(() => css(page, 'body', 'font-family')).toContain('IBM Plex Sans');

@@ -110,7 +110,7 @@ test.describe('@staff:history audit trail, action log, exceptions, team', () => 
     const dl = page.waitForEvent('download');
     await host.getByRole('button', { name: /Export CSV/ }).click();
     expect((await dl).suggestedFilename()).toMatch(/^exceptions_/);
-    await page.evaluate(`window.open=()=>({closed:false,document:{write:(h)=>{window.__ex=(window.__ex||'')+h;},close(){},querySelectorAll:()=>[]},focus(){},print(){},close(){}})`);
+    await page.evaluate(`S._rxTap=(h)=>{window.__ex=(window.__ex||'')+h;return true;}`);
     await host.getByRole('button', { name: /Print/ }).click();
     await expect.poll(() => page.evaluate(`window.__ex||''`)).toContain('Wrong item');
   });

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows } from './helpers/supabase';
+import { viewerFrame, closeViewer } from './helpers/reports';
 
 // Victory Lap by Fitness Empire (the owner, 2026-10-14 and 2026-10-17): a hybrid fitness race run by Kamin
 // Sports. Its card (D) shows to every signed-in rider, without a price; Community members and Victory Lap
@@ -415,8 +416,7 @@ test.describe('@staff:bookings Victory Lap', () => {
     await expect(m.locator('#vrb-count')).toContainText('On the report: 4 / 5');
     await m.locator('select[aria-label="Race"]').selectOption('all');
     // the PDF: the team heading line, then its two partners
-    const [pop] = await Promise.all([page.waitForEvent('popup'), m.locator('.rpt-acts .btn-primary').click()]);
-    await pop.waitForLoadState();
+    await m.locator('.rpt-acts .btn-primary').click(); const pop = await viewerFrame(page); // the viewer inside the site (2026-11-13)
     await pop.locator('table tbody tr').first().waitFor(); // the report is written into the window after it opens
     const lines: string[] = await pop.evaluate(() => [...[...document.querySelectorAll('table')].pop()!.querySelectorAll('tbody tr')]
       .map((r) => (r.classList.contains('rp-team') ? 'T:' : '') + [...r.querySelectorAll('td')].map((c) => (c.textContent || '').trim()).join('|')));
@@ -427,7 +427,7 @@ test.describe('@staff:bookings Victory Lap', () => {
     expect(num('#5')).toBe(ix('VL-AAAA') + 2);
     expect(num('#4')).toBe(ix('VL-BBBB') + 1);
     expect(lines[ix('VL-BBBB')]).toContain('Waiting for partner');
-    await pop.close();
+    await closeViewer(page);
     // Excel: Athletes, Teams, Still need a partner and Summary; in the athletes sheet r5 follows r1
     const [dl] = await Promise.all([page.waitForEvent('download'), m.locator('.rpt-acts .btn-secondary', { hasText: 'Excel' }).click()]);
     const buf = readFileSync((await dl.path())!).toString('utf8');
@@ -486,14 +486,13 @@ test.describe('@staff:bookings Victory Lap', () => {
     await expect(page.locator('.toast').filter({ hasText: 'Receipt saved. The place is paid by transfer.' })).toBeAttached();
     // the receipts PDF: a team block with both partners, r2's picture on its card
     await page.evaluate(`_vlClose()`);
-    const [pop] = await Promise.all([page.waitForEvent('popup'), tq.locator('.vl-staff-bar .btn-sm', { hasText: 'PDF with receipts' }).click()]);
-    await pop.waitForLoadState();
+    await tq.locator('.vl-staff-bar .btn-sm', { hasText: 'PDF with receipts' }).click(); const pop = await viewerFrame(page);
     await pop.locator('.vrc-card').first().waitFor();
     await expect(pop.locator('.vrc-team')).toHaveCount(1);
     await expect(pop.locator('.vrc-team-h')).toContainText('Doubles team VL-AAAA');
     await expect(pop.locator('.vrc-team .vrc-card')).toHaveCount(2);
     await expect(pop.locator('.vrc-solo .vrc-card img.vrc-img')).toHaveCount(1);
     await expect(pop.locator('.vrc-solo')).toContainText('Athlete r2');
-    await pop.close();
+    await closeViewer(page);
   });
 });

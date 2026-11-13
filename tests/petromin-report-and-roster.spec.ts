@@ -40,7 +40,7 @@ test('the printed report numbers its rows 1..N and counts every bike type, Mount
   await page.evaluate(`S.ridersSession=${JSON.stringify(SESS)};setStaffTab('riders')`);
   await expect(page.locator('#riders-results tbody tr')).toHaveCount(3);
   // catch what the print window would have been given
-  const html = await page.evaluate(`(()=>{let out='';const real=window.open;window.open=()=>({document:{write:h=>{out=h;},close(){}},focus(){},print(){}});
+  const html = await page.evaluate(`(()=>{let out='';const real=window.open;S._rxTap=(h)=>{out=h;return true;};
     printRidersReport('Petromin');window.open=real;return out;})()`) as string;
 
   const rows = [...html.matchAll(/<tr><td>(\d+)<\/td><td>/g)].map((m) => m[1]);

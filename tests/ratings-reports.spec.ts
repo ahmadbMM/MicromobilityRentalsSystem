@@ -47,7 +47,7 @@ async function printed(page: Page) {
   await page.evaluate(`(() => {
     window.__rr = '';
     window.__rrOpen = window.open;
-    window.open = () => ({ document: { write: (h) => { window.__rr = h; }, close() {}, querySelectorAll: () => [] }, focus() {}, print() {} });
+    S._rxTap=(h)=>{window.__rr = h;return true;};
   })()`);
   await page.locator('#print-opts-modal .rr-print').click();
   await page.waitForFunction(`!!window.__rr`);

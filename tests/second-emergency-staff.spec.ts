@@ -243,7 +243,7 @@ test.describe('@staff:bookings Run for Her report keeps one emergency contact', 
     await page.waitForFunction('getQueue().length>0');
     await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${RUN}';renderStaffQueue();S._repOpts=null;showPrintReportOptions()`);
     // every report the page opens, as written into its window, and every CSV it hands to the browser (as in run-report-per-distance.spec.ts)
-    await page.evaluate(`window.__rep=[];window.open=()=>{const w={document:{write:(h)=>{window.__rep.push(h);},close(){},querySelectorAll:()=>[],fonts:{ready:Promise.resolve()},images:[]},focus(){},print(){}};return w;}`);
+    await page.evaluate(`window.__rep=[];S._rxTap=(h)=>{window.__rep.push(h);return true;}`);
     await page.evaluate(`window.__csv=[];const _B=window.Blob;window.Blob=function(p,o){window.__csv.push(p.join(''));return new _B(p,o);};
       URL.createObjectURL=()=>'blob:x';const _a=document.createElement.bind(document);
       document.createElement=(t)=>{const el=_a(t);if(t==='a')el.click=()=>{};return el;};`);

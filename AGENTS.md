@@ -3670,3 +3670,40 @@ who we want it to be visible for and for how much time". Three parts: the databa
 - **Tests**: `tests/ask.spec.ts` (`@staff:ask`); the functions' attributes are in
   `supabase/checks/security-attributes.sql`. Never write the name of the product it resembles in code, strings or
   commits.
+
+## The reports rework (2026-11-13, migration 20261113120000)
+
+The user's decision page (three looks, Size 3, every piece now; artifact 8xr9EF2tTFGeZwQpN6mr9C) and "enhance and improve
+the way all graphs and tables and visualizations are aligned and their design".
+
+- **One template, three looks** (`_reportShell`, `report.css`): `REPORT_LOOK` gives each report id (`rid`, passed by every
+  caller) look A (refined head), B (statement letterhead: Business settings `seller_name`, `seller_addr`, `vat_no` and the
+  new `cr_no`) or C (summary first: the `.total-item.dark` money tile is the headline). Light on screen and on paper; no
+  signature lines. `RX_SPLIT` reports get their counts under the figures (`_rxSplits`). A partner's report (`REPORT_PARTNER`)
+  is `rx-pt`: the viewer adds each heading's Arabic (`_rxBiDoc`, loading the Arabic pack) and its logo once `PARTNER_LOGO`
+  has a file.
+- **Money for admins** (Q10, F1): `REPORT_MONEY` reports open for admins only (`_rxMoneyOk`, the viewer refuses, their
+  section buttons are admin-only); any other report is stripped of amounts for other staff (`_rxNoMoney`: tiles, columns,
+  lines that say SAR). The server agrees where it can: snapshots and money `report_log` lines and copies are admin-only.
+- **The viewer** (`_rxView`, staff part `reports`): `_openReport` sends every `_reportShell` page there (no pop-up); a
+  certificate or receipt still opens its own window. One bar: Print (the frame prints), PDF and Share (`_rxPdfMake`: vendored
+  jsPDF + IBM Plex Sans Arabic, fetched on the first PDF; Urdu, Hindi, Nepali and Bengali fall back to the browser's Save
+  as PDF), Excel and CSV read from the drawn report (`_rxSheets`, `_rxMainRows`, `_vrbXlsx`). The first output asks
+  `report_log_add` for the number (`MM-<PREFIX>-<year>-<00001>`) and keeps a money report's page (`report_copies`, 12
+  months). A table too wide for portrait turns the page (`_rxFit`). Specs read reports through `S._rxTap`
+  (`tests/helpers/reports.ts`: `tapReports`, `viewerFrame`); a tap that returns true takes the report and the viewer stays shut.
+- **The Reports section** (`renderReports`, `#tab-reports`, `/reports`): open to every staff role but Volunteer and Door
+  (`_deskTabOk`), its catalogue filtered by the sections each person can open (`_rp2Cat`: a card opens the report in its
+  own section through that part's entry, never by calling into another part), favourites in staff prefs `state.repfav`,
+  the history (`report_log`) with Reprint, and for admins the automatic reports (`_rpi*`, moved here from Analytics;
+  `setAnView('reports')` and the bell's close-out land here through `S._rp2Want`). Monthly KPIs and the month-end bill per
+  company come from `report_month_tick` on the 1st (KSA).
+- **One builder frame** (S2, S3): each of the six builders draws `_rbBar(rid,{get,set,print,reopen})` under its title: the
+  team's and one's own saved setups (`report_setups`) and, from 1100px, the live preview (`_rbPreview`: the builder's own
+  print with `_openReport` caught by `S._rxSink` and `S._rxPrev` muting the log, the personal-data export line and toasts).
+- **The chart kit** (`_areaChart`, `_vbars`, `_donut` now a segmented bar, `_ckMeter`, `_anSparkline`): round axis values
+  (`_ckNice`, `_ckNum`), hairline grid, thin marks, `--ck-1..6` colours validated for colour-blind and normal-vision
+  separation in both themes (series 1 the brand green), `--ck-cmp` for a comparison, `--ck-st-*` for a status, a read-out on
+  hover/tap/arrows (`_ckInit`) and "Show the numbers" under each chart. Ranked bars are one colour (`_ckBarC` keeps a red or
+  amber status) on one grid per row. Every staff table lines its quantities up at the end (`_ckAlignTables`, from
+  `goStaff`); a table that lays itself out says `data-noalign`.

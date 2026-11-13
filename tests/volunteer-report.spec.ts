@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { stubSupabase, unlockStaff, waitForSb, goStaffTab } from './helpers/supabase';
+import { viewerFrame, closeViewer } from './helpers/reports';
 
 // The volunteer report builder (the user, 2026-11-12: "create me a report builder for volunteers in the volunteering
 // sessions"): from Shifts, Opportunities and an opportunity's menu, the volunteers of one opportunity or several on a PDF
@@ -85,8 +86,7 @@ test.describe('@staff:volunteers Volunteer report builder (2026-11-12)', () => {
     const label = await page.evaluate(`_vmSessLabel(${JSON.stringify(PAST)})`);
     const hm = await page.evaluate(`[_vmHm('2026-10-20T14:00:00Z'),_vmHm('2026-10-20T16:30:00Z'),_vmHm('2026-10-20T17:00:00Z')]`) as string[];
     // The PDF: the summary, each opportunity, each role, then the list under the opportunity's heading.
-    const [pop] = await Promise.all([page.waitForEvent('popup'), dlg(page).locator('.rpt-acts .btn-primary').click()]);
-    await pop.waitForLoadState();
+    await dlg(page).locator('.rpt-acts .btn-primary').click(); const pop = await viewerFrame(page); // the viewer inside the site (2026-11-13)
     await pop.waitForSelector('h2'); // the window opens on the tap; the sheet is written once the team is read
     const hs = await pop.evaluate(() => [...document.querySelectorAll('h2')].map((h) => (h.textContent || '').trim()));
     expect(hs).toEqual(['Each opportunity', 'Each role', `${label} · 2`]);
@@ -96,7 +96,7 @@ test.describe('@staff:volunteers Volunteer report builder (2026-11-12)', () => {
     expect(await tbl(1)).toEqual(['Gate|2|1|1|0|3', 'Water|1|1|1|0|0', 'No role|—|0|0|1|0']);
     expect(await tbl(2)).toEqual([`1|Omar Saleh|Water|+966500000002|${hm[0]}|${hm[1]}|`, `2|Sara Haddad|Gate|+966500000001|${hm[0]}|${hm[2]}|`]);
     await expect(pop.locator('.total-item')).toHaveCount(7); // the summary's tiles, the rating among them
-    await pop.close();
+    await closeViewer(page);
     // Excel: the list, each opportunity and each role; no Signature column on a sheet.
     const [dl] = await Promise.all([page.waitForEvent('download'), dlg(page).locator('.rpt-acts .btn-secondary', { hasText: 'Excel' }).click()]);
     expect(dl.suggestedFilename()).toBe('volunteers_2026-10-20_signin.xlsx');
@@ -160,12 +160,12 @@ test.describe('@staff:volunteers Volunteer report builder (2026-11-12)', () => {
     await dlg(page).locator('[data-vb-set="feedback"]').click();
     await expect(count(page)).toContainText('On the report: 2 / 3');
     expect(await page.evaluate(`(()=>{const b=_vbBuild(S._vb.d,_vbOpts());return b.rows.map(r=>r.c.name+' '+_vbCell('rating',r)+' '+_vbCell('again',r)).join(',');})()`)).toBe('Sara Haddad 5 Yes,Omar Saleh 4 Maybe');
-    const [pop] = await Promise.all([page.waitForEvent('popup'), dlg(page).locator('.rpt-acts .btn-primary').click()]);
+    await dlg(page).locator('.rpt-acts .btn-primary').click(); const pop = await viewerFrame(page);
     await pop.waitForSelector('h2');
     const hs = await pop.evaluate(() => [...document.querySelectorAll('h2')].map((h) => (h.textContent || '').trim()));
     expect(hs[0]).toBe('Feedback · 2');
     await expect(pop.locator('body')).toContainText('Great team');
-    await pop.close();
+    await closeViewer(page);
     await dlg(page).locator('[data-vb-set="team"]').click();
     expect(await page.evaluate(`(()=>{const o=_vbOpts();return [o.fRated,o.sort,o.secs.fb,o.secs.summary].join(',');})()`)).toBe('all,name,0,1');
   });

@@ -139,7 +139,7 @@ test.describe('@staff:bookings the run report says who agreed to share', () => {
     await page.waitForFunction('getQueue().length>0');
     await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${RUN}';renderStaffQueue();S._repOpts=null;showPrintReportOptions()`);
     await expect(page.locator('#print-opts-modal [data-rep="cols:share"]')).toBeVisible();
-    await page.evaluate(`window.__rep=[];window.open=()=>{const w={document:{write:(h)=>{window.__rep.push(h);},close(){},querySelectorAll:()=>[],fonts:{ready:Promise.resolve()},images:[]},focus(){},print(){}};return w;}`);
+    await page.evaluate(`window.__rep=[];S._rxTap=(h)=>{window.__rep.push(h);return true;}`);
     await page.evaluate('printSessionReport()');
     await expect.poll(() => page.evaluate('window.__rep.length')).toBe(1);
     const html = (await page.evaluate('window.__rep[0]')) as string;

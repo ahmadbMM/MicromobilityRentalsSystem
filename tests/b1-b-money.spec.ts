@@ -42,7 +42,7 @@ async function printed(page: Page, call: string) {
   return page.evaluate(`(async () => {
     let cap = '';
     const orig = window.open;
-    window.open = () => ({ closed: false, document: { write: (h) => { cap += h; }, close() {}, querySelectorAll: () => [], querySelector: () => null }, focus() {}, print() {}, close() {} });
+    S._rxTap=(h)=>{cap += h;return true;};
     try { await (${call}); } finally { window.open = orig; }
     return cap;
   })()`) as Promise<string>;
@@ -131,7 +131,7 @@ test.describe('@staff:money b1 B: money by how it was taken', () => {
     ];
     await boot(page, { report_snapshots: snaps });
     await page.evaluate(`window.__wa=[];window.open=(u)=>{window.__wa.push(String(u));return null;};setStaffTab('analytics');setAnView('reports')`);
-    const items = page.locator('#an-rp-host .rpi-item');
+    const items = page.locator('#tab-reports .rpi-item');
     await expect(items).toHaveCount(2);
     await items.nth(0).locator('.rpi-open').click();
     const warn = items.nth(0).locator('.rpi-line.rpi-warn');

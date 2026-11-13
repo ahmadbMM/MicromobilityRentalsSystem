@@ -39,7 +39,7 @@ function reportHtml(page: Page, co: string) {
   return page.evaluate(`(() => {
     let cap = '';
     const orig = window.open;
-    window.open = () => ({ document: { write: (h) => { cap = h; }, close() {} }, focus() {}, print() {}, close() {} });
+    S._rxTap=(h)=>{cap = h;return true;};
     try { printRidersReport('${co}'); } finally { window.open = orig; }
     return cap;
   })()`) as Promise<string>;
@@ -64,7 +64,7 @@ test('each printed report holds only its own company\'s rides', async ({ page })
   expect(min).not.toContain('Still Riding');
   expect(min).toContain('182.50');
   expect(min).toMatch(/Billing report/);
-  expect(min).toMatch(/<div class="mm-title"><strong>Petromin &middot; /); // the company heads the title line
+  expect(min).toMatch(/<div class="rx-title"><h1>Petromin &middot; /); // the company heads the title line
   // one tile per fare actually charged, not a fixed price per type
   expect(min).toMatch(/Hybrid · <bdi>SAR 57\.50</);
   expect(min).toMatch(/Hybrid · <bdi>SAR 50\.00</);

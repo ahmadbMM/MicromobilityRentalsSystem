@@ -20,7 +20,7 @@ test.describe('@bh14 s18 analytics', () => {
       return r.fulfill({ status: 404, headers: json, body: JSON.stringify({ code: 'PGRST205', message: "Could not find the table 'public.report_snapshots' in the schema cache" }) });
     });
     await page.evaluate(`setStaffTab('analytics');setAnView('reports')`);
-    await expect(page.locator('#an-rp-host')).toContainText('Waiting for the database update.');
+    await expect(page.locator('#tab-reports')).toContainText('Waiting for the database update.'); // Analytics > Reports moved to the Reports section (2026-11-13)
     await page.waitForTimeout(1500);
     expect(reads).toBeLessThanOrEqual(2); // it used to ask again after every answer, dozens a second
   });
@@ -46,9 +46,9 @@ test.describe('@bh14 s18 analytics', () => {
     expect(html).not.toMatch(/\. de</);
   });
 
-  test('a blocked pop-up for the Height & bike report says so', async ({ page }) => {
+  test('with pop-ups blocked the Height & bike report still opens, in the viewer', async ({ page }) => {
     await boot(page);
     await page.evaluate(`window.open=()=>null;_anHeightBikeData=()=>[{sess:{day:'Monday',session_date:'2026-10-12',id:'x'},people:[],typeCounts:{},other:0,rented:0,hSummary:{count:0},hRanges:[]}];printHeightBikeReport()`);
-    await expect(page.locator('.toast').last()).toBeVisible();
+    await expect(page.locator('#rx-modal .rx-frame')).toBeVisible(); // the viewer inside the site (2026-11-13): no window to block
   });
 });

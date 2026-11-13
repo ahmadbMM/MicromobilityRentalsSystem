@@ -87,16 +87,16 @@ test('rides since service count by when the ride happened, not when it was booke
   await expect(tile).toContainText('1');
 });
 
-test('durations are written in the reader\'s units, and the donut total uses the theme ink', async ({ page }) => {
+test('durations are written in the reader\'s units, and a whole in parts writes its numbers in the theme\'s ink', async ({ page }) => {
   await boot(page, { queue_entries: [row('h1', 'Anyone', S_TODAY, TODAY)] });
   expect(await page.evaluate(`fmtDur(95)`)).toBe('1 h 35 min');
   expect(await page.evaluate(`fmtDur(12.4)`)).toBe('12 min');
-  const svg = await page.evaluate(`_donut([{v:3,c:'#000',label:'x'}])`) as string;
-  expect(svg).toContain('class="an-donut-total"');
-  expect(svg).not.toContain('fill="white"');
-  // The total's ink comes from styles.css (#tab-analytics .an-donut-total), not a style attribute:
-  // drawn where Analytics draws it, it is the theme's text colour.
-  const ink = await page.evaluate(`(()=>{const box=document.createElement('div');box.innerHTML=_donut([{v:3,c:'#000',label:'x'}])+'<span style="color:var(--text)"></span>';document.getElementById('tab-analytics').appendChild(box);
-    const r={fill:getComputedStyle(box.querySelector('text')).fill,text:getComputedStyle(box.querySelector('span')).color};box.remove();return r;})()`) as { fill: string; text: string };
-  expect(ink.fill).toBe(ink.text);
+  // The donut became one bar in parts (the chart kit, 2026-11-13): no colour in its markup but a class, and its legend's
+  // figures in the theme's text colour, never the series colour.
+  const html = await page.evaluate(`_donut([{v:3,label:'x'}])`) as string;
+  expect(html).toContain('class="ck-segbar"');
+  expect(html).not.toMatch(/fill="|style="/);
+  const ink = await page.evaluate(`(()=>{const box=document.createElement('div');box.innerHTML=_donut([{v:3,label:'x'}])+'<span class="ck-probe"></span>';document.getElementById('tab-analytics').appendChild(box);
+    const sp=box.querySelector('.ck-probe');sp.style.color='var(--text)';const r={fig:getComputedStyle(box.querySelector('.ck-leg-v b')).color,text:getComputedStyle(sp).color};box.remove();return r;})()`) as { fig: string; text: string };
+  expect(ink.fig).toBe(ink.text);
 });

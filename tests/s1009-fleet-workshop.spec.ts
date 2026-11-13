@@ -75,7 +75,7 @@ test.describe('@staff:workshop money, parts and mechanic', () => {
       workshop_jobs: [job({ id: 42, status: 'completed' }), job({ id: 43, status: 'awaiting_parts', created_at: '2026-10-02T09:00:00Z' })],
       workshop_job_events: [{ job_id: 42, at: '2026-10-04T09:30:00Z', status: 'completed' }],
     });
-    await page.getByRole('button', { name: 'Reports' }).click();
+    await page.locator('#tab-workshop').getByRole('button', { name: 'Reports' }).click(); // the rail has a Reports section too since 2026-11-13
     const d = page.locator('#confirm-modal .ws-dlg');
     await expect(d.locator('.flx-sum')).toContainText('3 days');
     await expect(d).toContainText('W-0043');

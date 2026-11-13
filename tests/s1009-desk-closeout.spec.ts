@@ -118,7 +118,7 @@ test.describe('@staff:bookings s1009 desk: close out', () => {
     const sum = page.locator('#eon-modal [role="dialog"]');
     await expect(sum).toContainText('Damaged bikes');
     await expect(sum).toContainText('Missing bikes');
-    const printed = await page.evaluate(`(()=>{let cap='';const o=window.open;window.open=()=>({document:{write:(h)=>{cap=h;},close(){}},focus(){},print(){}});try{_eonPrint();}finally{window.open=o;}return cap.length>0;})()`);
+    const printed = await page.evaluate(`(()=>{let cap='';const o=window.open;S._rxTap=(h)=>{cap=h;return true;};try{_eonPrint();}finally{window.open=o;}return cap.length>0;})()`);
     expect(printed).toBe(true);
   });
 });

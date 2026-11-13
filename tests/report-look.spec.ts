@@ -25,7 +25,7 @@ async function grab(page: import('@playwright/test').Page, call: string) {
   return page.evaluate(`(() => {
     let cap = '';
     const orig = window.open;
-    window.open = () => ({ document: { write: (h) => { cap = h; }, close() {} }, focus() {}, print() {} });
+    S._rxTap=(h)=>{cap = h;return true;};
     try { ${call} } finally { window.open = orig; }
     return cap;
   })()`) as Promise<string>;
@@ -41,8 +41,8 @@ test.describe('the printed reports', () => {
 
   test('the session report names its ride and day, groups money and says the total once', async ({ page }) => {
     const html = await grab(page, "S.sfSession='s0'; S._repOpts=_repDefaults(); printSessionReport();");
-    const title = html.match(/<div class="mm-title"><strong>([^<]*)<\/strong>/);
-    expect(title, 'a title line under the banner').not.toBeNull();
+    const title = html.match(/<div class="rx-title"><h1>([^<]*)<\/h1>/); // the reports rework (2026-11-13): look A's title line
+    expect(title, 'a title line under the head').not.toBeNull();
     expect(title![1]).toContain('Sunday');
     expect(html).toContain('<bdi>SAR 1,310.00</bdi>'); // Collected: grouped, two decimals
     expect(html).toContain('<bdi>SAR 1,000.00</bdi>'); // the Card tile, a tile of its own
@@ -50,7 +50,8 @@ test.describe('the printed reports', () => {
     expect(html).toContain('#4'); // the booking number, apart from the 1, 2, 3 counter
     expect(html).not.toContain('mm-chip-row'); // the total is not repeated under the table
     expect(html).toContain('class="mm-note"'); // only the VAT inside it is
-    expect(html).toContain('<bdi>Micromobility Co.</bdi>'); // its full stop stays at its end in Arabic
+    expect(html).toContain('class="rx lk-a'); // the session report wears look A (the user's pick, 2026-11-13)
+    expect(html).not.toMatch(/Reviewed by|mm-sign/); // no signature lines (Q6)
   });
 
   test('pages 2 on carry the title and the page number, in the reader\'s language', async ({ page }) => {
@@ -74,6 +75,8 @@ test.describe('the printed reports', () => {
     expect(html).not.toMatch(/rp-(green|blue|violet)/);
     expect(html).not.toContain('rp-warn'); // nothing pending, so nothing amber
     expect(html).toContain('Nothing sold');
-    expect(html).toContain('<div class="mm-title"><strong>Sunday'); // the day it closes
+    expect(html).toContain('<div class="rx-title"><h1>Sunday'); // the day it closes
+    expect(html).toContain('class="rx lk-b'); // a statement: the letterhead (Q4)
+    expect(html).toContain('<bdi>Micromobility Co.</bdi>'); // its full stop stays at its end in Arabic
   });
 });

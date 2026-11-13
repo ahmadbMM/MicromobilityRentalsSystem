@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+import { viewerFrame } from './helpers/reports';
 
 // Sort and filter inside every report (the owner, 2026-10-11: "make me be able to sort and filter whats
 // inside all reports"): _openReport wires each table of the shell - a heading sorts, a filter line narrows
@@ -27,10 +28,8 @@ test.describe('@staff:reports sort and filter inside a report', () => {
   });
 
   test('a heading sorts within each group, a filter narrows, totals stay and the sheet says so', async ({ page }) => {
-    const [pop] = await Promise.all([
-      page.waitForEvent('popup'),
-      page.evaluate(`_openReport(_reportShell({kind:'Test',title:'Test',body:${JSON.stringify(body)}}))`),
-    ]);
+    await page.evaluate(`(async()=>{const h=await _reportShell({kind:'Test',title:'Test',body:${JSON.stringify(body)}});await _openReport(h);})()`);
+    const pop = await viewerFrame(page); // the report opens in the viewer inside the site (2026-11-13)
     const names = () => pop.locator('table').first().locator('tbody tr:not(.rp-hide)').evaluateAll(rs => rs.map(r => [...(r as HTMLTableRowElement).cells].map(c => (c.textContent || '').trim()).join(' ')));
     await expect(pop.locator('.rp-tools')).toHaveCount(1); // five rows: a filter line; the one-row table gets none
     await expect(pop.locator('.rp-cnt')).toHaveText('5 rows');
@@ -67,17 +66,15 @@ test.describe('@staff:reports sort and filter inside a report', () => {
 
   test('on paper the filter line goes and a filtered table says so (report.css)', async () => {
     const css = readFileSync('report.css', 'utf8');
-    const print = css.slice(css.indexOf('@media print{body'));
+    const print = css.slice(css.indexOf('@media print{html')); // the reports rework (2026-11-13): paper and screen share one light look
     expect(print).toMatch(/\.rp-tools\{display:none\}/);
     expect(print).toMatch(/\.rp-fnote:not\(\[hidden\]\)\{display:block\}/);
     expect(css).toMatch(/:root tr\.rp-hide\{display:none\}/);
   });
 
   test('the session report is wired: its headings are buttons', async ({ page }) => {
-    const [pop] = await Promise.all([
-      page.waitForEvent('popup'),
-      page.evaluate(`_openReport(_reportShell({kind:'K',title:'T',body:'<table><thead><tr><th>A</th><th>B</th></tr></thead><tbody><tr><td>2</td><td>x</td></tr><tr><td>10</td><td>y</td></tr></tbody></table>'}))`),
-    ]);
+    await page.evaluate(`(async()=>{const h=await _reportShell({kind:'K',title:'T',body:'<table><thead><tr><th>A</th><th>B</th></tr></thead><tbody><tr><td>2</td><td>x</td></tr><tr><td>10</td><td>y</td></tr></tbody></table>'});await _openReport(h);})()`);
+    const pop = await viewerFrame(page);
     await pop.getByRole('button', { name: 'A' }).click();
     await expect(pop.locator('tbody td:first-child')).toHaveText(['2', '10']); // 2 before 10: numbers, not words
     await expect(pop.locator('.rp-tools')).toHaveCount(0); // two rows: sorting only

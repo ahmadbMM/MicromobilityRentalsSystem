@@ -101,14 +101,14 @@ test.describe('@staff:analytics bug hunt 2026-10-07', () => {
     await expect(page.locator('#confirm-modal .rs-dlg .rs-sub')).toHaveText('One picture for each rating: 2');
   });
 
-  test('a report the browser blocks leaves the ratings report dialog up to tap again', async ({ page }) => {
+  test('with pop-ups blocked the ratings report still opens, in the viewer, the dialog still under it', async ({ page }) => {
     await boot(page, { sessions: rsessions, queue_entries: rqueue }, undefined, '/analytics/ratings');
     await page.waitForFunction(`S.dataLoaded&&getQueue().length===4&&S.staffTab==='analytics'`);
     await page.locator('#tab-analytics .rr-open').click();
     await expect(page.locator('#print-opts-modal .rr-dlg')).toBeVisible();
     await page.evaluate(`window.open=()=>null`);
     await page.locator('#print-opts-modal .rr-print').click();
-    await expect(page.locator('#toast-container')).toContainText('Tap again');
-    await expect(page.locator('#print-opts-modal .rr-dlg')).toBeVisible();
+    await expect(page.locator('#rx-modal .rx-frame')).toBeVisible(); // reports open inside the site since 2026-11-13: nothing to block
+    await expect(page.locator('#toast-container')).not.toContainText('Tap again');
   });
 });

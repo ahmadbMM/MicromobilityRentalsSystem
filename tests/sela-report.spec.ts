@@ -43,7 +43,7 @@ test.describe('@staff:bookings Run for Her report for Sela', () => {
     await boot(page);
     const reads: string[] = [];
     page.on('request', (r) => { if (/\/rest\/v1\/customers\?.*birth_date/.test(r.url())) reads.push(r.url()); });
-    await page.evaluate(`window.__rep=[];window.open=()=>({document:{write:(h)=>{window.__rep.push(h);},close(){},querySelectorAll:()=>[],fonts:{ready:Promise.resolve()},images:[]},focus(){},print(){},close(){}})`);
+    await page.evaluate(`window.__rep=[];S._rxTap=(h)=>{window.__rep.push(h);return true;}`);
     const m = page.locator('#print-opts-modal');
     await expect(m.getByText('Report for Sela')).toBeVisible();
     const line = m.locator('.rpt-sela-row');
@@ -52,7 +52,7 @@ test.describe('@staff:bookings Run for Her report for Sela', () => {
     expect(reads.length).toBe(1);
     const html = (await page.evaluate('window.__rep') as string[])[0];
     const body = text(html);
-    expect(html).toContain('MM-RPT-991017-SELA');
+    expect(html).toContain('class="rx lk-b rx-pt"'); // a statement for a partner (the reports rework, 2026-11-13: its number comes when it is printed)
     // order: #1, #2, then the waitlist by its own order (3 before 5), numbered 1 and 2; the cancelled one is gone
     const names = [...body.matchAll(/Test (Runner|Waiter) (One|Two)/g)].map((x) => x[0]);
     expect(names).toEqual(['Test Runner One', 'Test Runner Two', 'Test Waiter One', 'Test Waiter Two']);

@@ -377,6 +377,7 @@ window.mmLoading=(function(){
     <span class="snav-group" data-group="snavAdmin" role="heading" aria-level="2">Admin</span>
     <button class="tab-btn"        data-stab="analytics" data-on-click='["setStaffTab","analytics"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Analytics</span></button>
     <button class="tab-btn"        data-stab="history"   data-on-click='["setStaffTab","history"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">History</span></button>
+    <button class="tab-btn"        data-stab="reports"   data-on-click='["setStaffTab","reports"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Reports</span></button>
     <button class="tab-btn"        data-stab="team"      data-on-click='["setStaffTab","team"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Team</span></button>
     <button class="tab-btn"        data-stab="settings"  data-on-click='["setStaffTab","settings"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Settings</span></button>
     <!-- at the rail's foot (2026-10-27): it sat above Dashboard and pushed Settings off a laptop's screen -->
@@ -399,6 +400,7 @@ window.mmLoading=(function(){
     <div id="tab-ask"       class="tab-panel"></div>
     <div id="tab-analytics"  class="tab-panel"></div>
     <div id="tab-history"   class="tab-panel"></div>
+    <div id="tab-reports"   class="tab-panel"></div>
     <div id="tab-website"   class="tab-panel"></div>
     <div id="tab-catalog"   class="tab-panel"></div>
     <div id="tab-workshop"  class="tab-panel"></div>
@@ -724,7 +726,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   staffResetTool:'Reset customer password',staffResetDesc:'Set a new password for a customer who is locked out.',
   staffResetEmailLabel:'Customer email',staffResetNewPw:'New password',staffResetSet:'Set password',
   staffResetDone:'Password reset for {0}.',staffResetGiveMsg:'Give them this temporary password:',
-  logsTitle:'Action log',logsPermanentNote:'Shared audit trail - actions from every staff device, synced to the database.',logsSearchPh:'Search actions…',logCatPay:'Payment',logCatBook:'Bookings',logCatBike:'Bikes',logCatInv:'Inventory',logCatAuth:'Access',logCatOther:'Other',logToday:'Today',logYesterday:'Yesterday',logsExportBtn:'Export CSV',bdgIconN:'Icon {0} of {1}',bdgClrGreen:'Green',bdgClrGold:'Gold',bdgClrBlue:'Blue',bdgClrRed:'Red',bdgClrPurple:'Purple',bdgClrOrange:'Orange',bdgClrTeal:'Teal',bdgClrSilver:'Silver',rsSelect:'Select',rsSelN:'{0} selected',rsShareSel:'Share',rsShareOne:'Share this rating',rsPick:'Select this rating',rsTitle:'Share ratings',rsSub:'One picture for each rating: {0}',rsNameLbl:'Name on the picture',rsNameFull:'Full name',rsNameFirst:'First name',rsNameNone:'No name',rsAnon:'A MicroMobility rider',rsMaking:'Making the pictures…',rsFail:'The pictures could not be made on this device.',rsNoShare:'This browser cannot share pictures: save them, then send them from WhatsApp.',rsShare:'Share to WhatsApp',rsShareHint:'The share menu opens: pick WhatsApp, or any other app.',rsSave:'Save to device',rsShareFail:'Sharing did not work. Save the pictures instead.',tcMenu:'Booking card',tcFrameLbl:'The booking card as the customer sees it',tcMaking:'Making the picture…',tcFail:'The picture could not be made on this device.',tcShare:'Share',tcCopy:'Copy picture',tcShared:'Shared the booking card of {0}',tcSaved:'Saved the booking card of {0}',tcCopied:'Copied the booking card of {0}',tcShareFail:'Sharing did not work. Save the picture instead.',tcCopyFail:'Copying did not work. Save the picture instead.',rsSaved:'Saved {0} rating picture(s)',rsShared:'Shared {0} rating picture(s)',rsKind:'Customer rating',rsComment:'Comment',rsImgAlt:'Rating picture {0}',bfRepBtn:'Print breakfast ratings',bfRepKind:'Breakfast ratings',bfRepVenue:'Breakfast: {0}',bfRepRatings:'Ratings',bfRepAvg:'Breakfast average',bfRepSkipped:'Did not stay for breakfast',bfRepPerQ:'Average per question',bfRepColQ:'Question',bfRepColAvg:'Average',bfRepColLow:'Lowest',bfRepColHigh:'Highest',bfRepAll:'Every rating',bfRepWhy:'What riders wrote',bfRepNoWhy:'No rider wrote anything about the breakfast.',bfRepNote:'Anonymous: no names, booking numbers or contact details. Only the breakfast part of each rating is here; the ride, the overall score and the closing comment are left out. Riders give a reason for any score of 8 or under.',bfRepLog:'Printed the breakfast ratings for {0}',cactTitle:'Customer activity',cactNote:'What customers did on the booking app, the website and the forms - recorded by the database, so every device and page is included.',cactSearchPh:'Search name, ride, action…',cactMore:'Load older',cactEmpty:'No customer activity yet',cactCatAccount:'Account',cactCatForms:'Forms',cactA_book:'Booked a ride',cactA_cancel:'Cancelled a booking',cactA_rebook:'Restored a cancelled booking',cactA_reschedule:'Moved a booking to another ride',cactA_booking_edit:'Changed a booking',cactA_rate:'Rated a ride',cactA_waiver:'Signed the waiver',cactA_addons:'Changed add-ons',cactA_signin:'Signed in',cactA_signin_fail:'Wrong password',cactA_pwd_reset:'Reset the password',cactA_pwd_change:'Changed the password',cactA_signup:'Created an account',cactA_profile:'Edited account details',cactA_consent:'Accepted the privacy notice',cactA_ride_news:'Changed ride news',cactA_delete_req:'Asked to delete the account',cactA_push_on:'Turned on notifications',cactA_push_off:'Turned off notifications',cactA_flag_answered:'Fixed the details staff flagged',cactA_message:'Sent a message',cactA_workshop:'Asked for a workshop service',cactA_apply_community:'Applied to the community',cactA_apply_learn:'Signed up to learn to ride',cactA_apply_fix:'Sent the changes staff asked for',cactA_rider_form:'Registered on the rider form',cactA_rider_form_edit:'Edited the rider form',cactA_ambassador:'Applied to be an ambassador',cactA_redeem:'Redeemed ambassador points',histRangeLabel:'Range',histRangeToday:'Today',histRange7:'Last 7 days',histRange30:'Last 30 days',histWindowNote:'Showing the last 12 months',histMarkSelPaid:'Mark {0} paid',invSearchPh:'Search items…',invSortCat:'By category',invSortStock:'Lowest stock',invSortSales:'Best sellers',stStartBtn:'Stock-take',stCancelBtn:'Exit stock-take',stHint:'Type the counted quantity for each item - differences are highlighted.',stApplyBtn:'Apply {0} correction(s)',stNoChanges:'No corrections to apply.',invDelInUse:'On {0} live booking(s) — set its stock to zero instead of deleting it.',logStockAdj:'Stock {0}: {1}',logStockTake:'Stock-take {0}: {1} → {2}',histInLabel:'Check-in',histOutLabel:'Check-out',histTabRides:'Rides',logsColTime:'Time',logsColBy:'By',logsColAction:'Action',logsOperator:'Operator',logsOperatorPh:'Your name (tags the audit log)',opGateTitle:'Who is working?',opGateMsg:'Pick your name — every action is recorded in the log under whoever did it.',opGateBtn:'Continue',logOperatorSet:'Operator changed: {0}',filterRejected:'Rejected',errSessionStale:'You’ve been signed out. Sign in again.',siSwitchT:'Switch account?',siSwitchQ:'You are signed in as {0}. Sign in as {1} instead?',siSwitchGo:'Switch',repPreparedBy:'Prepared by',repReviewedBy:'Reviewed by',repVatIncl:'VAT (15%) incl.',logPrintedReport:'Printed session report',commSoloOnly:'Saturday ride bookings are one rider per customer — extra riders cannot be added.',
+  logsTitle:'Action log',logsPermanentNote:'Shared audit trail - actions from every staff device, synced to the database.',logsSearchPh:'Search actions…',logCatPay:'Payment',logCatBook:'Bookings',logCatBike:'Bikes',logCatInv:'Inventory',logCatAuth:'Access',logCatOther:'Other',logToday:'Today',logYesterday:'Yesterday',logsExportBtn:'Export CSV',bdgIconN:'Icon {0} of {1}',bdgClrGreen:'Green',bdgClrGold:'Gold',bdgClrBlue:'Blue',bdgClrRed:'Red',bdgClrPurple:'Purple',bdgClrOrange:'Orange',bdgClrTeal:'Teal',bdgClrSilver:'Silver',rsSelect:'Select',rsSelN:'{0} selected',rsShareSel:'Share',rsShareOne:'Share this rating',rsPick:'Select this rating',rsTitle:'Share ratings',rsSub:'One picture for each rating: {0}',rsNameLbl:'Name on the picture',rsNameFull:'Full name',rsNameFirst:'First name',rsNameNone:'No name',rsAnon:'A MicroMobility rider',rsMaking:'Making the pictures…',rsFail:'The pictures could not be made on this device.',rsNoShare:'This browser cannot share pictures: save them, then send them from WhatsApp.',rsShare:'Share to WhatsApp',rsShareHint:'The share menu opens: pick WhatsApp, or any other app.',rsSave:'Save to device',rsShareFail:'Sharing did not work. Save the pictures instead.',tcMenu:'Booking card',tcFrameLbl:'The booking card as the customer sees it',tcMaking:'Making the picture…',tcFail:'The picture could not be made on this device.',tcShare:'Share',tcCopy:'Copy picture',tcShared:'Shared the booking card of {0}',tcSaved:'Saved the booking card of {0}',tcCopied:'Copied the booking card of {0}',tcShareFail:'Sharing did not work. Save the picture instead.',tcCopyFail:'Copying did not work. Save the picture instead.',rsSaved:'Saved {0} rating picture(s)',rsShared:'Shared {0} rating picture(s)',rsKind:'Customer rating',rsComment:'Comment',rsImgAlt:'Rating picture {0}',bfRepBtn:'Print breakfast ratings',bfRepKind:'Breakfast ratings',bfRepVenue:'Breakfast: {0}',bfRepRatings:'Ratings',bfRepAvg:'Breakfast average',bfRepSkipped:'Did not stay for breakfast',bfRepPerQ:'Average per question',bfRepColQ:'Question',bfRepColAvg:'Average',bfRepColLow:'Lowest',bfRepColHigh:'Highest',bfRepAll:'Every rating',bfRepWhy:'What riders wrote',bfRepNoWhy:'No rider wrote anything about the breakfast.',bfRepNote:'Anonymous: no names, booking numbers or contact details. Only the breakfast part of each rating is here; the ride, the overall score and the closing comment are left out. Riders give a reason for any score of 8 or under.',bfRepLog:'Printed the breakfast ratings for {0}',cactTitle:'Customer activity',cactNote:'What customers did on the booking app, the website and the forms - recorded by the database, so every device and page is included.',cactSearchPh:'Search name, ride, action…',cactMore:'Load older',cactEmpty:'No customer activity yet',cactCatAccount:'Account',cactCatForms:'Forms',cactA_book:'Booked a ride',cactA_cancel:'Cancelled a booking',cactA_rebook:'Restored a cancelled booking',cactA_reschedule:'Moved a booking to another ride',cactA_booking_edit:'Changed a booking',cactA_rate:'Rated a ride',cactA_waiver:'Signed the waiver',cactA_addons:'Changed add-ons',cactA_signin:'Signed in',cactA_signin_fail:'Wrong password',cactA_pwd_reset:'Reset the password',cactA_pwd_change:'Changed the password',cactA_signup:'Created an account',cactA_profile:'Edited account details',cactA_consent:'Accepted the privacy notice',cactA_ride_news:'Changed ride news',cactA_delete_req:'Asked to delete the account',cactA_push_on:'Turned on notifications',cactA_push_off:'Turned off notifications',cactA_flag_answered:'Fixed the details staff flagged',cactA_message:'Sent a message',cactA_workshop:'Asked for a workshop service',cactA_apply_community:'Applied to the community',cactA_apply_learn:'Signed up to learn to ride',cactA_apply_fix:'Sent the changes staff asked for',cactA_rider_form:'Registered on the rider form',cactA_rider_form_edit:'Edited the rider form',cactA_ambassador:'Applied to be an ambassador',cactA_redeem:'Redeemed ambassador points',histRangeLabel:'Range',histRangeToday:'Today',histRange7:'Last 7 days',histRange30:'Last 30 days',histWindowNote:'Showing the last 12 months',histMarkSelPaid:'Mark {0} paid',invSearchPh:'Search items…',invSortCat:'By category',invSortStock:'Lowest stock',invSortSales:'Best sellers',stStartBtn:'Stock-take',stCancelBtn:'Exit stock-take',stHint:'Type the counted quantity for each item - differences are highlighted.',stApplyBtn:'Apply {0} correction(s)',stNoChanges:'No corrections to apply.',invDelInUse:'On {0} live booking(s) — set its stock to zero instead of deleting it.',logStockAdj:'Stock {0}: {1}',logStockTake:'Stock-take {0}: {1} → {2}',histInLabel:'Check-in',histOutLabel:'Check-out',histTabRides:'Rides',logsColTime:'Time',logsColBy:'By',logsColAction:'Action',logsOperator:'Operator',logsOperatorPh:'Your name (tags the audit log)',opGateTitle:'Who is working?',opGateMsg:'Pick your name — every action is recorded in the log under whoever did it.',opGateBtn:'Continue',logOperatorSet:'Operator changed: {0}',filterRejected:'Rejected',errSessionStale:'You’ve been signed out. Sign in again.',siSwitchT:'Switch account?',siSwitchQ:'You are signed in as {0}. Sign in as {1} instead?',siSwitchGo:'Switch',repPreparedBy:'Prepared by',repVatIncl:'VAT (15%) incl.',logPrintedReport:'Printed session report',commSoloOnly:'Saturday ride bookings are one rider per customer — extra riders cannot be added.',
   rrBfBtn:'Breakfast report for restaurants',rrBuilderBtn:'Report builder',rrTitle:'Ratings report builder',rrBfTitle:'Breakfast report for restaurants',rrFor:'Who the report is for',rrForTeam:'Our team',rrForBf:'A restaurant',rrTeamSub:'Pick which ratings, which questions and what the report shows. Your picks are kept on this device.',rrBfSub:'The breakfast part of the Saturday Social Ride\'s ratings, for the ride you pick.',rrAllRides:'All rides',rrBfLock:'Anonymous and breakfast only: names, booking numbers, bikes, the ride’s questions, overall scores and closing comments are never on it.',rrPresets:'Quick start',rrPresetAll:'Everything',rrPresetLow:'Low scores to follow up',rrPresetBike:'Bike feedback',rrPresetWords:'What riders wrote',rrDates:'Dates',rrRangeAn:'As on the Analytics page',rrRide:'Ride',rrFVenue:'Restaurant',rrAllVenues:'All restaurants',rrFBand:'Overall score',rrBandHigh:'9 to 10',rrBandMid:'7 to 8',rrBandLow:'6 or under',rrFLow:'A score of 8 or under',rrLowAny:'Has one',rrLowNone:'Has none',rrFText:'Reasons or a comment',rrTextWith:'Wrote something',rrTextWithout:'Wrote nothing',rrBfStayed:'Stayed for breakfast',rrFWho:'Rider',rrWhoFirst:'First ride',rrWhoBack:'Returning rider',rrNameLbl:'Names on the report',rrNameInitials:'Initials',rrQuestions:'Questions',rrFormRental:'Circuit and other rides',rrColsLbl:'Columns of “Every rating”',rrColRated:'Rated at',rrColTags:'Quick tags',rrColWhy:'Reasons',rrColLow:'8 or under',rrColScore:'Score',rrColFinished:'Finished',rrColSkipped:'Did not stay',rrSecDist:'Overall scores, 1 to 10',rrSecDistBf:'Breakfast scores, 1 to 10',rrSecTrend:'Overall score over time',rrSecTrendBf:'Breakfast score over time',rrSecVenue:'Breakfast score by restaurant',rrSecType:'Bike score by bike type',rrSecBike:'Bike score by bike',rrSecByDay:'By Saturday',rrSecComments:'Closing comments',rrSortNew:'Newest rating first',rrSortOld:'Oldest rating first',rrSortLow:'Lowest score first',rrSortHigh:'Highest score first',rrSortDay:'By ride date',rrSortBest:'Best breakfast first',rrOnReport:'Ratings on the report',rrBfOnReport:'Breakfast ratings on the report',rrKind:'Ratings report',rrAvgOverall:'Overall average',rrRides:'Rides',rrLowTile:'With a score of 8 or under',rrSaturdays:'Saturdays',rrVenuesN:'Restaurants',rrNoWhy:'No rider wrote a reason.',rrNoComments:'No closing comments.',rrNone:'No ratings match these choices.',rrNote:'Every score is out of 10, and riders give a reason for any score of 8 or under. A group rates its ride once. * Rating time not recorded: the ride’s end stands in.',rrNoteAnon:'Anonymous: no names or booking numbers.',rrLog:'Printed a ratings report ({0} ratings)',rrBfLog:'Printed the breakfast report: {0}',rrWhyCsv:'reason',bfEditBtn:'Edit spot',bfEdName:'Breakfast spot name',bfEdUrl:'Google Maps link',bfApplyN:'Also change it on the {0} upcoming ride(s) that have it',bfSaveSpot:'Save spot',bfDelSpot:'Remove from the list',bfDelQ:'Remove {0} from the list?',bfDelBody:'It will no longer be offered here. Rides already set to it keep it.',bfNameReq:'Give the spot a name.',bfNameTaken:'Another spot on the list already has this name.',bfNotSaved:'The spot was not saved. Try again.',bfSavedLog:'Breakfast spot edited: {0}',bfDelLog:'Breakfast spot removed from the list: {0}',
   authPhone:'Phone number',
   authPassword:'Password',authPasswordHint:'At least 8 characters',authConfirmPassword:'Confirm password',
@@ -794,7 +796,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   anInsightTopType:'Most-requested type: {0}. Ensure fleet stock matches demand.',
   anInsightPendingHigh:'SAR {0} is outstanding ({1}% of billed). Prompt collection recommended.',
   anInsightRetention:'Strong repeat rider rate ({0}%). Loyalty program could further boost returns.',
-  anNoDataTrend:'No sessions with completed rides yet.',anNoData2:'No data',
+  anNoDataTrend:'No sessions with completed rides yet.',anNoData2:'No data',ckTable:'Show the numbers',ckValue:'Value',ckOccHigh:'80% full or more',ckOccMid:'50 to 79% full',ckOccLow:'Under half full',rxPrinted:'Printed',rxNo:'No.',rxDate:'Date',rxCrNo:'CR No.',rxShare:'Share',rxSummary:'Summary',rxItem:'Item',rxTable:'Table',rxPdfPrint:'Choose Save as PDF in the print window',bizCrNo:'CR number',tabReports:'Reports',rp2Sub:'Every report in one place. Each one also stays in its own section.',rp2Search:'Search reports',rp2Areas:'Report areas',rp2Rides:'Rides and bookings',rp2Money:'Money',rp2People:'People',rp2Events:'Events',rp2Auto:'Automatic',rp2Hist:'History',rp2Fav:'Favourites',rp2FavOn:'Add to favourites',rp2FavOff:'Remove from favourites',rp2Recent:'Printed lately',rp2Open:'Open',rp2Pick:'Choose a session',rp2NoSess:'No sessions of this kind yet',rp2None:'No report matches',rp2AdminTag:'Admins',rp2Roster:'Saturday roster',rp2Run:'Run sheet per distance',rp2Pay:'Pay slips and statements',rp2Ptn:'Partner report',rp2HReport:'Report',rp2HTitle:'For',rp2HWhen:'When',rp2HVia:'How',rp2HistNone:'No report has been printed or saved yet',rp2Reprint:'Reprint',rp2Copy:'An exact copy of what was printed',rp2Today:'Made again with today\'s data',rp2NoCopy:'This report can\'t be made again from here; open it in its section',repMonthlyKind:'Monthly KPIs',repMonthlyTitle:'Month of {0}',repMonthBillKind:'Month-end billing',repMonthBillTitle:'Company nights, {0}',repVsPrevMonth:'vs the month before',rp2VsWeekDay:'Same day last week',rp2Compare:'How it compares',rp2This:'This one',rp2Change:'Change',rp2ToBill:'To bill',rp2NoCo:'Rides with no company',rp2Fare:'Fare',rp2Night:'Night',rp2Badge:'Badge',rbSetups:'Saved setups',rbChoose:'Choose a saved setup',rbTeam:'The team',rbMine:'Mine',rbSaveTeam:'Save for the team',rbSaveMine:'Save for me',rbDelete:'Delete setup',rbDelAsk:'Delete the saved setup "{0}"?',rbNameAsk:'A name the team will recognise, like "Kamin start list"',rbName:'Name',rbSaved:'Saved "{0}"',rbApplied:'Using "{0}"',rbPreview:'Preview',
   anAddonsTitle:'Add-on sales',anAddonsSub:'Most-selected booking extras (this range)',anNoAddons:'No add-ons sold in this range.',
   anRetentionTitle:'Retention',anRepeatRate:'Repeat rate (all-time)',anRepeatRateSub:'riders with 2+ rides',
   anLapsedTitle:'Lapsed riders',anLapsedSub:'no ride in 30+ days',
@@ -1394,7 +1396,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   staffResetTool:'إعادة تعيين كلمة مرور العميل',staffResetDesc:'عيّن كلمة مرور جديدة لعميل لا يستطيع الدخول.',
   staffResetEmailLabel:'بريد العميل الإلكتروني',staffResetNewPw:'كلمة المرور الجديدة',staffResetSet:'تعيين كلمة المرور',
   staffResetDone:'تمت إعادة تعيين كلمة المرور لـ {0}.',staffResetGiveMsg:'أعطه كلمة المرور المؤقتة هذه:',
-  logsTitle:'سجل الإجراءات',logsPermanentNote:'سجل تدقيق مشترك - إجراءات كل أجهزة الموظفين، متزامنة مع قاعدة البيانات.',logsSearchPh:'ابحث في الإجراءات…',logCatPay:'الدفع',logCatBook:'الحجوزات',logCatBike:'الدراجات',logCatInv:'المخزون',logCatAuth:'الوصول',logCatOther:'أخرى',logToday:'اليوم',logYesterday:'أمس',logsExportBtn:'تصدير CSV',bdgIconN:'الأيقونة {0} من {1}',bdgClrGreen:'أخضر',bdgClrGold:'ذهبي',bdgClrBlue:'أزرق',bdgClrRed:'أحمر',bdgClrPurple:'بنفسجي',bdgClrOrange:'برتقالي',bdgClrTeal:'أزرق مخضر',bdgClrSilver:'فضي',rsSelect:'تحديد',rsSelN:'المحدد: {0}',rsShareSel:'مشاركة',rsShareOne:'مشاركة هذا التقييم',rsPick:'تحديد هذا التقييم',rsTitle:'مشاركة التقييمات',rsSub:'صورة لكل تقييم: {0}',rsNameLbl:'الاسم على الصورة',rsNameFull:'الاسم الكامل',rsNameFirst:'الاسم الأول',rsNameNone:'بدون اسم',rsAnon:'أحد راكبي مايكروموبيليتي',rsMaking:'جارٍ تجهيز الصور…',rsFail:'تعذّر تجهيز الصور على هذا الجهاز.',rsNoShare:'لا يدعم هذا المتصفح مشاركة الصور: احفظها ثم أرسلها من واتساب.',rsShare:'مشاركة عبر واتساب',rsShareHint:'تفتح قائمة المشاركة: اختر واتساب أو أي تطبيق آخر.',rsSave:'حفظ على الجهاز',rsShareFail:'لم تنجح المشاركة. احفظ الصور بدلًا من ذلك.',tcMenu:'بطاقة الحجز',tcFrameLbl:'بطاقة الحجز كما يراها العميل',tcMaking:'جارٍ تجهيز الصورة…',tcFail:'تعذّر تجهيز الصورة على هذا الجهاز.',tcShare:'مشاركة',tcCopy:'نسخ الصورة',tcShared:'شورِكت بطاقة حجز {0}',tcSaved:'حُفظت بطاقة حجز {0}',tcCopied:'نُسخت بطاقة حجز {0}',tcShareFail:'لم تنجح المشاركة. احفظ الصورة بدلًا من ذلك.',tcCopyFail:'لم ينجح النسخ. احفظ الصورة بدلًا من ذلك.',rsSaved:'حُفظت صور التقييمات: {0}',rsShared:'شوركت صور التقييمات: {0}',rsKind:'تقييم عميل',rsComment:'التعليق',rsImgAlt:'صورة التقييم {0}',bfRepBtn:'طباعة تقييمات الإفطار',bfRepKind:'تقييمات الإفطار',bfRepVenue:'الإفطار: {0}',bfRepRatings:'التقييمات',bfRepAvg:'متوسط تقييم الإفطار',bfRepSkipped:'لم يبقَ للإفطار',bfRepPerQ:'المتوسط لكل سؤال',bfRepColQ:'السؤال',bfRepColAvg:'المتوسط',bfRepColLow:'الأدنى',bfRepColHigh:'الأعلى',bfRepAll:'كل التقييمات',bfRepWhy:'ما كتبه الراكبون',bfRepNoWhy:'لم يكتب أي راكب شيئًا عن الإفطار.',bfRepNote:'دون أسماء: لا أسماء ولا أرقام حجز ولا بيانات تواصل. يضم التقرير جزء الإفطار من كل تقييم فقط، دون الجولة والتقييم العام والتعليق الختامي. يذكر الراكب سببًا لأي درجة من 8 فما دون.',bfRepLog:'طُبعت تقييمات الإفطار ليوم {0}',cactTitle:'نشاط العملاء',cactNote:'ما قام به العملاء في تطبيق الحجز والموقع والنماذج - تسجّله قاعدة البيانات، فيشمل كل جهاز وكل صفحة.',cactSearchPh:'ابحث بالاسم أو الجولة أو الإجراء…',cactMore:'عرض الأقدم',cactEmpty:'لا يوجد نشاط للعملاء بعد',cactCatAccount:'الحساب',cactCatForms:'النماذج',cactA_book:'حجز جولة',cactA_cancel:'ألغى حجزًا',cactA_rebook:'أعاد حجزًا ملغى',cactA_reschedule:'نقل حجزًا إلى جولة أخرى',cactA_booking_edit:'عدّل حجزًا',cactA_rate:'قيّم جولة',cactA_waiver:'وقّع إقرار المسؤولية',cactA_addons:'غيّر الإضافات',cactA_signin:'سجّل الدخول',cactA_signin_fail:'كلمة مرور خاطئة',cactA_pwd_reset:'أعاد تعيين كلمة المرور',cactA_pwd_change:'غيّر كلمة المرور',cactA_signup:'أنشأ حسابًا',cactA_profile:'عدّل بيانات الحساب',cactA_consent:'وافق على إشعار الخصوصية',cactA_ride_news:'غيّر أخبار الجولات',cactA_delete_req:'طلب حذف الحساب',cactA_push_on:'فعّل الإشعارات',cactA_push_off:'أوقف الإشعارات',cactA_flag_answered:'صحّح البيانات التي أشار إليها الموظفون',cactA_message:'أرسل رسالة',cactA_workshop:'طلب خدمة من الورشة',cactA_apply_community:'قدّم على المجتمع',cactA_apply_learn:'سجّل لتعلّم ركوب الدراجة',cactA_apply_fix:'أرسل التعديلات التي طلبها الموظفون',cactA_rider_form:'سجّل في نموذج الراكب',cactA_rider_form_edit:'عدّل نموذج الراكب',cactA_ambassador:'قدّم ليكون سفيرًا',cactA_redeem:'استبدل نقاط السفير',histRangeLabel:'المدة',histRangeToday:'اليوم',histRange7:'آخر 7 أيام',histRange30:'آخر 30 يومًا',histWindowNote:'يعرض آخر 12 شهرًا',histMarkSelPaid:'تحديد {0} كمدفوع',invSearchPh:'ابحث عن العناصر…',invSortCat:'حسب الفئة',invSortStock:'الأقل مخزوناً',invSortSales:'الأكثر مبيعاً',stStartBtn:'جرد المخزون',stCancelBtn:'إنهاء الجرد',stHint:'اكتب الكمية المعدودة لكل عنصر - تُبرز الفروقات.',stApplyBtn:'تطبيق {0} تصحيح',stNoChanges:'لا توجد تصحيحات للتطبيق.',invDelInUse:'مرتبط بـ {0} حجز قائم — اجعل مخزونه صفراً بدلاً من حذفه.',logStockAdj:'المخزون {0}: {1}',logStockTake:'جرد {0}: {1} → {2}',histInLabel:'الدخول',histOutLabel:'الخروج',histTabRides:'الجولات',logsColTime:'الوقت',logsColBy:'بواسطة',logsColAction:'الإجراء',logsOperator:'الموظف',logsOperatorPh:'اسمك (يوسم سجل التدقيق)',opGateTitle:'من يعمل الآن؟',opGateMsg:'اختر اسمك — يُسجَّل كل إجراء في السجل باسم من قام به.',opGateBtn:'متابعة',logOperatorSet:'تغيير المشغّل: {0}',filterRejected:'مرفوض',errSessionStale:'انتهت صلاحية جلستك — يرجى تسجيل الدخول من جديد.',siSwitchT:'تبديل الحساب؟',siSwitchQ:'أنت مسجّل الدخول باسم {0}. هل تريد تسجيل الدخول باسم {1} بدلًا منه؟',siSwitchGo:'تبديل',repPreparedBy:'أعدّه',repReviewedBy:'راجعه',repVatIncl:'شامل ضريبة القيمة المضافة (15%)',logPrintedReport:'طُبع تقرير الجلسة',commSoloOnly:'حجز جولة السبت لراكب واحد فقط لكل عميل — لا يمكن إضافة ركاب آخرين.',
+  logsTitle:'سجل الإجراءات',logsPermanentNote:'سجل تدقيق مشترك - إجراءات كل أجهزة الموظفين، متزامنة مع قاعدة البيانات.',logsSearchPh:'ابحث في الإجراءات…',logCatPay:'الدفع',logCatBook:'الحجوزات',logCatBike:'الدراجات',logCatInv:'المخزون',logCatAuth:'الوصول',logCatOther:'أخرى',logToday:'اليوم',logYesterday:'أمس',logsExportBtn:'تصدير CSV',bdgIconN:'الأيقونة {0} من {1}',bdgClrGreen:'أخضر',bdgClrGold:'ذهبي',bdgClrBlue:'أزرق',bdgClrRed:'أحمر',bdgClrPurple:'بنفسجي',bdgClrOrange:'برتقالي',bdgClrTeal:'أزرق مخضر',bdgClrSilver:'فضي',rsSelect:'تحديد',rsSelN:'المحدد: {0}',rsShareSel:'مشاركة',rsShareOne:'مشاركة هذا التقييم',rsPick:'تحديد هذا التقييم',rsTitle:'مشاركة التقييمات',rsSub:'صورة لكل تقييم: {0}',rsNameLbl:'الاسم على الصورة',rsNameFull:'الاسم الكامل',rsNameFirst:'الاسم الأول',rsNameNone:'بدون اسم',rsAnon:'أحد راكبي مايكروموبيليتي',rsMaking:'جارٍ تجهيز الصور…',rsFail:'تعذّر تجهيز الصور على هذا الجهاز.',rsNoShare:'لا يدعم هذا المتصفح مشاركة الصور: احفظها ثم أرسلها من واتساب.',rsShare:'مشاركة عبر واتساب',rsShareHint:'تفتح قائمة المشاركة: اختر واتساب أو أي تطبيق آخر.',rsSave:'حفظ على الجهاز',rsShareFail:'لم تنجح المشاركة. احفظ الصور بدلًا من ذلك.',tcMenu:'بطاقة الحجز',tcFrameLbl:'بطاقة الحجز كما يراها العميل',tcMaking:'جارٍ تجهيز الصورة…',tcFail:'تعذّر تجهيز الصورة على هذا الجهاز.',tcShare:'مشاركة',tcCopy:'نسخ الصورة',tcShared:'شورِكت بطاقة حجز {0}',tcSaved:'حُفظت بطاقة حجز {0}',tcCopied:'نُسخت بطاقة حجز {0}',tcShareFail:'لم تنجح المشاركة. احفظ الصورة بدلًا من ذلك.',tcCopyFail:'لم ينجح النسخ. احفظ الصورة بدلًا من ذلك.',rsSaved:'حُفظت صور التقييمات: {0}',rsShared:'شوركت صور التقييمات: {0}',rsKind:'تقييم عميل',rsComment:'التعليق',rsImgAlt:'صورة التقييم {0}',bfRepBtn:'طباعة تقييمات الإفطار',bfRepKind:'تقييمات الإفطار',bfRepVenue:'الإفطار: {0}',bfRepRatings:'التقييمات',bfRepAvg:'متوسط تقييم الإفطار',bfRepSkipped:'لم يبقَ للإفطار',bfRepPerQ:'المتوسط لكل سؤال',bfRepColQ:'السؤال',bfRepColAvg:'المتوسط',bfRepColLow:'الأدنى',bfRepColHigh:'الأعلى',bfRepAll:'كل التقييمات',bfRepWhy:'ما كتبه الراكبون',bfRepNoWhy:'لم يكتب أي راكب شيئًا عن الإفطار.',bfRepNote:'دون أسماء: لا أسماء ولا أرقام حجز ولا بيانات تواصل. يضم التقرير جزء الإفطار من كل تقييم فقط، دون الجولة والتقييم العام والتعليق الختامي. يذكر الراكب سببًا لأي درجة من 8 فما دون.',bfRepLog:'طُبعت تقييمات الإفطار ليوم {0}',cactTitle:'نشاط العملاء',cactNote:'ما قام به العملاء في تطبيق الحجز والموقع والنماذج - تسجّله قاعدة البيانات، فيشمل كل جهاز وكل صفحة.',cactSearchPh:'ابحث بالاسم أو الجولة أو الإجراء…',cactMore:'عرض الأقدم',cactEmpty:'لا يوجد نشاط للعملاء بعد',cactCatAccount:'الحساب',cactCatForms:'النماذج',cactA_book:'حجز جولة',cactA_cancel:'ألغى حجزًا',cactA_rebook:'أعاد حجزًا ملغى',cactA_reschedule:'نقل حجزًا إلى جولة أخرى',cactA_booking_edit:'عدّل حجزًا',cactA_rate:'قيّم جولة',cactA_waiver:'وقّع إقرار المسؤولية',cactA_addons:'غيّر الإضافات',cactA_signin:'سجّل الدخول',cactA_signin_fail:'كلمة مرور خاطئة',cactA_pwd_reset:'أعاد تعيين كلمة المرور',cactA_pwd_change:'غيّر كلمة المرور',cactA_signup:'أنشأ حسابًا',cactA_profile:'عدّل بيانات الحساب',cactA_consent:'وافق على إشعار الخصوصية',cactA_ride_news:'غيّر أخبار الجولات',cactA_delete_req:'طلب حذف الحساب',cactA_push_on:'فعّل الإشعارات',cactA_push_off:'أوقف الإشعارات',cactA_flag_answered:'صحّح البيانات التي أشار إليها الموظفون',cactA_message:'أرسل رسالة',cactA_workshop:'طلب خدمة من الورشة',cactA_apply_community:'قدّم على المجتمع',cactA_apply_learn:'سجّل لتعلّم ركوب الدراجة',cactA_apply_fix:'أرسل التعديلات التي طلبها الموظفون',cactA_rider_form:'سجّل في نموذج الراكب',cactA_rider_form_edit:'عدّل نموذج الراكب',cactA_ambassador:'قدّم ليكون سفيرًا',cactA_redeem:'استبدل نقاط السفير',histRangeLabel:'المدة',histRangeToday:'اليوم',histRange7:'آخر 7 أيام',histRange30:'آخر 30 يومًا',histWindowNote:'يعرض آخر 12 شهرًا',histMarkSelPaid:'تحديد {0} كمدفوع',invSearchPh:'ابحث عن العناصر…',invSortCat:'حسب الفئة',invSortStock:'الأقل مخزوناً',invSortSales:'الأكثر مبيعاً',stStartBtn:'جرد المخزون',stCancelBtn:'إنهاء الجرد',stHint:'اكتب الكمية المعدودة لكل عنصر - تُبرز الفروقات.',stApplyBtn:'تطبيق {0} تصحيح',stNoChanges:'لا توجد تصحيحات للتطبيق.',invDelInUse:'مرتبط بـ {0} حجز قائم — اجعل مخزونه صفراً بدلاً من حذفه.',logStockAdj:'المخزون {0}: {1}',logStockTake:'جرد {0}: {1} → {2}',histInLabel:'الدخول',histOutLabel:'الخروج',histTabRides:'الجولات',logsColTime:'الوقت',logsColBy:'بواسطة',logsColAction:'الإجراء',logsOperator:'الموظف',logsOperatorPh:'اسمك (يوسم سجل التدقيق)',opGateTitle:'من يعمل الآن؟',opGateMsg:'اختر اسمك — يُسجَّل كل إجراء في السجل باسم من قام به.',opGateBtn:'متابعة',logOperatorSet:'تغيير المشغّل: {0}',filterRejected:'مرفوض',errSessionStale:'انتهت صلاحية جلستك — يرجى تسجيل الدخول من جديد.',siSwitchT:'تبديل الحساب؟',siSwitchQ:'أنت مسجّل الدخول باسم {0}. هل تريد تسجيل الدخول باسم {1} بدلًا منه؟',siSwitchGo:'تبديل',repPreparedBy:'أعدّه',repVatIncl:'شامل ضريبة القيمة المضافة (15%)',logPrintedReport:'طُبع تقرير الجلسة',commSoloOnly:'حجز جولة السبت لراكب واحد فقط لكل عميل — لا يمكن إضافة ركاب آخرين.',
   rrBfBtn:'تقرير الإفطار للمطاعم',rrBuilderBtn:'منشئ التقارير',rrTitle:'منشئ تقرير التقييمات',rrBfTitle:'تقرير الإفطار للمطاعم',rrFor:'لمن التقرير',rrForTeam:'فريقنا',rrForBf:'مطعم',rrTeamSub:'اختر التقييمات والأسئلة وما يعرضه التقرير. تُحفظ اختياراتك على هذا الجهاز.',rrBfSub:'جزء الإفطار من تقييمات جولة السبت الاجتماعية، للجولة التي تختارها.',rrAllRides:'كل الجولات',rrBfLock:'دون أسماء وللإفطار فقط: لا تظهر فيه أبدًا الأسماء ولا أرقام الحجز ولا الدراجات ولا أسئلة الجولة ولا التقييم العام ولا التعليقات الختامية.',rrPresets:'بداية سريعة',rrPresetAll:'كل شيء',rrPresetLow:'الدرجات المنخفضة للمتابعة',rrPresetBike:'ملاحظات الدراجات',rrPresetWords:'ما كتبه الراكبون',rrDates:'التواريخ',rrRangeAn:'كما في صفحة التحليلات',rrRide:'الجولة',rrFVenue:'المطعم',rrAllVenues:'كل المطاعم',rrFBand:'التقييم العام',rrBandHigh:'من 9 إلى 10',rrBandMid:'من 7 إلى 8',rrBandLow:'6 فما دون',rrFLow:'درجة 8 فما دون',rrLowAny:'توجد',rrLowNone:'لا توجد',rrFText:'أسباب أو تعليق',rrTextWith:'كتب شيئًا',rrTextWithout:'لم يكتب شيئًا',rrBfStayed:'بقي للإفطار',rrFWho:'الراكب',rrWhoFirst:'أول جولة',rrWhoBack:'راكب عائد',rrNameLbl:'الأسماء في التقرير',rrNameInitials:'الأحرف الأولى',rrQuestions:'الأسئلة',rrFormRental:'حلبة الكورنيش والجولات الأخرى',rrColsLbl:'أعمدة «كل التقييمات»',rrColRated:'وقت التقييم',rrColTags:'الوسوم السريعة',rrColWhy:'الأسباب',rrColLow:'8 فما دون',rrColScore:'الدرجة',rrColFinished:'أنهوا الجولة',rrColSkipped:'لم يبقَ',rrSecDist:'التقييمات العامة من 1 إلى 10',rrSecDistBf:'تقييمات الإفطار من 1 إلى 10',rrSecTrend:'التقييم العام عبر الوقت',rrSecTrendBf:'تقييم الإفطار عبر الوقت',rrSecVenue:'تقييم الإفطار حسب المطعم',rrSecType:'تقييم الدراجة حسب نوعها',rrSecBike:'تقييم الدراجة لكل دراجة',rrSecByDay:'حسب يوم السبت',rrSecComments:'التعليقات الختامية',rrSortNew:'الأحدث تقييمًا أولًا',rrSortOld:'الأقدم تقييمًا أولًا',rrSortLow:'الأدنى درجةً أولًا',rrSortHigh:'الأعلى درجةً أولًا',rrSortDay:'حسب تاريخ الجولة',rrSortBest:'الأفضل إفطارًا أولًا',rrOnReport:'التقييمات في التقرير',rrBfOnReport:'تقييمات الإفطار في التقرير',rrKind:'تقرير التقييمات',rrAvgOverall:'متوسط التقييم العام',rrRides:'الجولات',rrLowTile:'فيها درجة 8 فما دون',rrSaturdays:'أيام السبت',rrVenuesN:'المطاعم',rrNoWhy:'لم يكتب أي راكب سببًا.',rrNoComments:'لا توجد تعليقات ختامية.',rrNone:'لا توجد تقييمات تطابق هذه الاختيارات.',rrNote:'كل درجة من 10، ويذكر الراكب سببًا لأي درجة من 8 فما دون. تقيّم المجموعة جولتها مرة واحدة. * وقت التقييم غير مسجّل: يُستخدم وقت انتهاء الجولة بدلًا منه.',rrNoteAnon:'دون أسماء: لا أسماء ولا أرقام حجز.',rrLog:'طُبع تقرير التقييمات ({0} تقييم)',rrBfLog:'طُبع تقرير الإفطار: {0}',rrWhyCsv:'السبب',bfEditBtn:'تعديل المكان',bfEdName:'اسم مكان الفطور',bfEdUrl:'رابط خرائط جوجل',bfApplyN:'غيّره أيضًا في الجولات القادمة التي تستخدمه ({0})',bfSaveSpot:'حفظ المكان',bfDelSpot:'إزالة من القائمة',bfDelQ:'إزالة {0} من القائمة؟',bfDelBody:'لن يظهر بعد الآن في القائمة. الجولات التي اختارته تحتفظ به.',bfNameReq:'اكتب اسمًا للمكان.',bfNameTaken:'يوجد مكان آخر في القائمة بهذا الاسم.',bfNotSaved:'لم يُحفظ المكان. حاول مرة أخرى.',bfSavedLog:'عُدّل مكان الفطور: {0}',bfDelLog:'أُزيل مكان الفطور من القائمة: {0}',
   authPhone:'رقم الهاتف',
   authPassword:'كلمة المرور',authPasswordHint:'8 أحرف على الأقل',authConfirmPassword:'تأكيد كلمة المرور',
@@ -1464,7 +1466,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   anInsightTopType:'الأكثر طلباً: {0}. تأكد من توافر الأسطول بما يتناسب مع الطلب.',
   anInsightPendingHigh:'SAR {0} مستحقة ({1}% من المفوتر). يُنصح بالمتابعة الفورية.',
   anInsightRetention:'معدل عودة العملاء مرتفع ({0}%). برنامج ولاء يمكن أن يعزز العودة أكثر.',
-  anNoDataTrend:'لا توجد جلسات مكتملة بعد.',anNoData2:'لا بيانات',
+  anNoDataTrend:'لا توجد جلسات مكتملة بعد.',anNoData2:'لا بيانات',ckTable:'عرض الأرقام',ckValue:'القيمة',ckOccHigh:'ممتلئة بنسبة 80% أو أكثر',ckOccMid:'ممتلئة من 50% إلى 79%',ckOccLow:'أقل من نصف السعة',rxPrinted:'طُبع في',rxNo:'رقم',rxDate:'التاريخ',rxCrNo:'السجل التجاري',rxShare:'مشاركة',rxSummary:'الملخص',rxItem:'البند',rxTable:'جدول',rxPdfPrint:'اختر «حفظ بتنسيق PDF» في نافذة الطباعة',bizCrNo:'رقم السجل التجاري',tabReports:'التقارير',rp2Sub:'كل التقارير في مكان واحد، وكل تقرير يبقى أيضًا في قسمه.',rp2Search:'ابحث في التقارير',rp2Areas:'أقسام التقارير',rp2Rides:'الرحلات والحجوزات',rp2Money:'المال',rp2People:'الأشخاص',rp2Events:'الفعاليات',rp2Auto:'التلقائية',rp2Hist:'السجل',rp2Fav:'المفضلة',rp2FavOn:'أضف إلى المفضلة',rp2FavOff:'أزل من المفضلة',rp2Recent:'طُبعت مؤخرًا',rp2Open:'فتح',rp2Pick:'اختر جلسة',rp2NoSess:'لا توجد جلسات من هذا النوع بعد',rp2None:'لا يوجد تقرير مطابق',rp2AdminTag:'للمشرفين',rp2Roster:'قائمة رحلة السبت',rp2Run:'كشف الجري لكل مسافة',rp2Pay:'قسائم الرواتب وكشوف الحساب',rp2Ptn:'تقرير الشريك',rp2HReport:'التقرير',rp2HTitle:'عن',rp2HWhen:'متى',rp2HVia:'كيف',rp2HistNone:'لم يُطبع أو يُحفظ أي تقرير بعد',rp2Reprint:'إعادة الطباعة',rp2Copy:'نسخة مطابقة لما طُبع',rp2Today:'يُعاد إعداده ببيانات اليوم',rp2NoCopy:'لا يمكن إعادة هذا التقرير من هنا، افتحه من قسمه',repMonthlyKind:'مؤشرات الشهر',repMonthlyTitle:'شهر {0}',repMonthBillKind:'فوترة نهاية الشهر',repMonthBillTitle:'ليالي الشركات، {0}',repVsPrevMonth:'مقارنة بالشهر السابق',rp2VsWeekDay:'اليوم نفسه من الأسبوع الماضي',rp2Compare:'المقارنة',rp2This:'الحالي',rp2Change:'التغيّر',rp2ToBill:'المطلوب فوترته',rp2NoCo:'رحلات بلا شركة',rp2Fare:'الأجرة',rp2Night:'الليلة',rp2Badge:'الشارة',rbSetups:'الإعدادات المحفوظة',rbChoose:'اختر إعدادًا محفوظًا',rbTeam:'الفريق',rbMine:'الخاصة بي',rbSaveTeam:'احفظ للفريق',rbSaveMine:'احفظ لي',rbDelete:'احذف الإعداد',rbDelAsk:'هل تحذف الإعداد المحفوظ «{0}»؟',rbNameAsk:'اسم يعرفه الفريق، مثل «قائمة انطلاق كامن»',rbName:'الاسم',rbSaved:'حُفظ «{0}»',rbApplied:'يُستخدم «{0}»',rbPreview:'معاينة',
   anAddonsTitle:'مبيعات الإضافات',anAddonsSub:'أكثر الإضافات اختياراً (هذا النطاق)',anNoAddons:'لا توجد إضافات مباعة في هذا النطاق.',
   anRetentionTitle:'الاحتفاظ بالعملاء',anRepeatRate:'نسبة العملاء المتكررين (الإجمالي)',anRepeatRateSub:'راكب لديه جولتان فأكثر',
   anLapsedTitle:'عملاء متوقفون',anLapsedSub:'لم يركبوا منذ أكثر من 30 يوماً',
@@ -2292,13 +2294,13 @@ function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]
 // The Store and Payments (2026-11-10) are sections only where the database has them (staff_store_ready, _stoProbe): not on
 // the rail, not among the Team page's sections, not in "every section" anywhere else.
 function _stoSecOk(k){if(k!=='store'&&k!=='payments')return true;try{return S._storeReady===true;}catch(_){return false;}}
-function _deskTabOk(tab){return tab==='settings'||(_roleTabs(S.staffRole).includes(tab)&&_viewOk(tab));} // Settings is every account's own page // the role's sections, then the account's own list (#8) // Settings is every account's own page // the role's sections, then the account's own list (#8)
+function _deskTabOk(tab){return tab==='settings'||tab==='reports'&&S.staffRole!=='volunteer'&&S.staffRole!=='door'||(_roleTabs(S.staffRole).includes(tab)&&_viewOk(tab));} // Settings is every account's own page // the role's sections, then the account's own list (#8) // Settings is every account's own page // the role's sections, then the account's own list (#8)
 // Which staff parts (scripts/split-staff.mjs, STAFF_PARTS) the desk fetches once it has painted
 // (2026-10-09): the ones whose sections this account can open, and the ones the desk's own actions
 // call into (a return's fleet check, a void's reason, the night summary). Every other part comes the first time something asks for it (its stand-in fetches it).
 // Before the role is known nothing is held back. People's rarely opened views (peopleapps, peoplemore: staff round s10,
 // item 47) come only when one is opened; a session's report (sessreport) with the desk's parts.
-const STAFF_PART_TABS={peopleapps:[],peoplemore:[],sessreport:['queue'],sessions:['sessions'],lockers:['lockers'],store:['store','payments'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],ask:['ask'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist'],door:[]}; // door: fetched by its stand-in when a Door account signs in
+const STAFF_PART_TABS={reports:[],peopleapps:[],peoplemore:[],sessreport:['queue'],sessions:['sessions'],lockers:['lockers'],store:['store','payments'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],ask:['ask'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist'],door:[]}; // door: fetched by its stand-in when a Door account signs in
 function _staffPartWanted(n){const tabs=STAFF_PART_TABS[n];if(!tabs||!S.staffRole)return true;return tabs.some(_deskTabOk);}
 // A staff account's own preferences (2026-10-09): staff.prefs through staff_my_prefs, with this
 // device's copy (cq_prefs, kept per account) read at once so a reload starts as the person left it.
@@ -6660,6 +6662,7 @@ function fmtPhone(p){
 // 'info' - that nothing was done (nothing to export, no rider waiting), text to copy by hand when the
 // clipboard refused, an upload under way.
 function toast(msg,type){
+  if(typeof S!=='undefined'&&S&&S._rxPrev)return; // a builder's live preview says nothing
   const el=document.createElement('div');
   const drawn=type==='error'||type==='warning'||type==='info';
   el.className='toast'+(type?' '+type:'')+(drawn?'':' quiet');el.textContent=msg;
@@ -7703,7 +7706,7 @@ let _navRestoring=false;
 // them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
-const STAFF_PATHS={volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',store:'store',payments:'payments',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ask:'ask',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
+const STAFF_PATHS={reports:'reports',volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',store:'store',payments:'payments',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ask:'ask',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',members:'members'};
 // The account page's three parts (the owner, 2026-11-09): Account at /account, then /account/stats and /account/badges.
 const ACC_VIEWS=['account','stats','badges'];
@@ -11903,11 +11906,11 @@ function _vbWhat(sids){
 }
 async function printVolReport(){
   const st=S._vb;if(!st||!st.sids.size){toast(t('zbPickOpp'),'warning');return;}
-  const win=window.open('','_blank','width=1300,height=760'); // on the tap: a window opened after the read would be blocked
+  const win=null; // the report opens in the viewer inside the site (2026-11-13): no window to open on the tap
   const o=_vbOpts(),d=await _vbLoad([...st.sids]);
   if(!d){try{win&&win.close();}catch(_){}return;}
   const b=_vbBuild(d,o),what=t('zbTitle');
-  const html=_reportShell({kind:esc(what),title:_vbWhat(b.sids),refNo:'MM-RPT-'+_vbDay(b.sids[0]).slice(2,10).replace(/-/g,'')+'-VOL',
+  const html=_reportShell({rid:'vol',kind:esc(what),title:_vbWhat(b.sids),refNo:'MM-RPT-'+_vbDay(b.sids[0]).slice(2,10).replace(/-/g,'')+'-VOL',
     maxWidth:b.cols.length>12?'1500px':'1180px',body:_vbHtml(b,o)});
   logAction(t('logPrintedReport'));_piiExport(what,b.rows.length,_piiCols(b.cols.map(c=>t(c.key))),'print');
   if(_openReport(html,1300,760,win)===null)toast(t('repPopupBlocked'),'info');
@@ -12010,6 +12013,7 @@ function _vbPaint(){
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_vbBd",_EV,_EL)}">
     <div class="modal-box rpt-w640" role="dialog" aria-modal="true" aria-labelledby="dlgt-vb">
       <div class="modal-title" id="dlgt-vb">${esc(t('zbTitle'))}</div>
+      ${_rbBar('vol',{get:()=>_vbOpts(),set:o=>{S._vbO=Object.assign(_vbDefaults(),o);_vbSave();_vbPaint();},print:()=>printVolReport(),reopen:()=>_vbPaint()})}
       <div class="rpt-sub">${esc(t('zbSub'))}</div>
       <div class="rpt-lbl4">${esc(t('zvTabSessions'))}</div>
       <div class="rr-presets"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vbOppAll",1)}">${esc(t('zdPAll'))}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vbOppAll",0)}">${esc(t('zbNone'))}</button></div>
@@ -15684,6 +15688,7 @@ function goStaff(){
   _staffTapCookie(true); // this phone's bike-tag taps come to the staff app, not the bike's page
   _rtEnsureMode(); // a customer's device just unlocked: the live channel joins the staff tables
   showView('staff');
+  _ckAlignOn(); // tables line up one way from here on (the chart kit, 2026-11-13)
   // The signed-out landing keeps the auth page open; entering staff must clear it or the
   // overlay would sit on top of the panel (view is 'staff' now, so the close guard passes).
   try{const m=document.getElementById('auth-modal');if(m){m.style.display='none';m.classList.remove('as-page');}document.body.classList.remove('auth-page');}catch(e){}
@@ -15779,6 +15784,7 @@ function setStaffTab(tab,o){
   else if(tab==='community')renderCommunity();
   else if(tab==='badgereq')renderBadgeRequests();
   else if(tab==='ask')renderAsk();
+  else if(tab==='reports')renderReports(); // every report in one place (the reports rework, 2026-11-13)
   else if(tab==='lockers')renderLockers();
   else if(tab==='store')renderStore();
   else if(tab==='payments')renderPayments();
@@ -15885,7 +15891,7 @@ function _commNavPaint(){
   if(grid)grid.classList.toggle('with-comm',on);
 }
 
-const _SNAV_ICON={store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',ask:'ask',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={reports:'print',store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',ask:'ask',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   if(!_ART.bag)_ART.bag='<path opacity=".35" d="M4 8h16l-1.1 12.2A2 2 0 0 1 16.9 22H7.1a2 2 0 0 1-2-1.8z"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9h-2V6.5a2 2 0 0 0-4 0V9z"/>'; // the Store's mark (2026-11-10), kept here for the same reason
@@ -15988,6 +15994,7 @@ function renderStaffTabs(){
   if(S._storeReady===undefined)_stoProbe();else _stoTabLabelSync(); // the Store and Payments: asked once whether the database has them (2026-11-10)
   document.getElementById('tab-community') .classList.toggle('active',S.staffTab==='community');
   document.getElementById('tab-badgereq')  .classList.toggle('active',S.staffTab==='badgereq');
+  document.getElementById('tab-reports')   .classList.toggle('active',S.staffTab==='reports');
   if(!S._bdrAt&&S._staffAuthed&&_deskTabOk('badgereq'))_bdrLoad(); // the rail's count, from the first paint on (then _secPolls)
   document.getElementById('tab-ask')       .classList.toggle('active',S.staffTab==='ask');
   _askRailSync();if(!S._askCAt&&S._staffAuthed&&_deskTabOk('ask'))_askCount(); // Ask's name, and the answers waiting for approval (then _secPolls)
@@ -17913,7 +17920,7 @@ document.addEventListener('keydown',e=>{
 function _on_goCommunity(tab){setStaffTab('community');setCommTab(tab);}
 function _on_goInventoryBikes(){setStaffTab('inventory');S.invSection='bikes';renderInventory();}
 function _on_goRatings(){S.anView='ratings';setStaffTab('analytics');} // one step, one address: /analytics/ratings
-function _on_goReports(){S.anView='reports';setStaffTab('analytics');} // a close-out in the bell opens Analytics > Reports
+function _on_goReports(){S._rp2Want='auto';setStaffTab('reports');} // a close-out in the bell opens Reports > Automatic (2026-11-13; was Analytics > Reports)
 // The scheduled close-outs of the last day and a half (report_snapshots, 20261009181000): the bell's "Daily
 // close-out ready". A database without the table answers nothing, and the list stays unread (no item).
 async function _rpiSnapPoll(force){
@@ -18265,7 +18272,7 @@ function printDaySheet(){
   const tiles=`<div class="totals"><div class="total-item dark"><span class="total-num">${riders}</span><span class="total-lbl">${t('daySheetRiders')}</span></div>
     <div class="total-item"><span class="total-num">${sess.length}</span><span class="total-lbl">${t('sessionsTitle')}</span></div>
     ${jobs.length?`<div class="total-item"><span class="total-num">${jobs.length}</span><span class="total-lbl">${t('daySheetWs')}</span></div>`:''}</div>`;
-  const html=_reportShell({kind:t('daySheetTitle'),title:`${dayLabel(DAY_NAMES[new Date(today+'T12:00:00').getDay()])} &middot; ${shortDate(today)}`,
+  const html=_reportShell({rid:'day',kind:t('daySheetTitle'),title:`${dayLabel(DAY_NAMES[new Date(today+'T12:00:00').getDay()])} &middot; ${shortDate(today)}`,
     refNo:'MM-DAY-'+today.slice(2).replace(/-/g,''),body:tiles+blocks+wsBlock});
   logAction(t('logPrintedDaySheet'));
   _openReport(html,1100,760);
@@ -29244,7 +29251,7 @@ function _n6rPrintLead(sid){
     ${rows.map(e=>{const bk=bike?getAssignedBikes(e).map(b=>b.name).join(', '):'',fit=bike?_entryFitText(e):'';
       return`<tr><td class="rp-b7">#${e.queueNum||''}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td class="rp-name">${esc(e.name||'')}${_snChip(e)}${_infChip(e)}</td><td><bdi>${esc(fmtPhone(e.phone)||'')}</bdi></td>${bike?`<td>${esc(typeLabel(resolvedType(e)))}${fit?' '+esc(fit):''}${bk?' &middot; '+esc(bk):''}</td>`:''}<td>${esc(t(STATUS_KEY[e.status]||'colStatus'))}</td><td></td></tr>`;}).join('')||`<tr><td colspan="${bike?6:5}">—</td></tr>`}
     </tbody></table></section>`;
-  const html=_reportShell({kind:t('n6rLeadSheet'),title:esc(_evName(s)+_sgDot(s)),subtitle:`${esc(dayLabel(s.day)||'')} &middot; ${esc(shortDate(_ssDay(s)))} &middot; <bdi>${esc(sessionTime(s))}</bdi>`,
+  const html=_reportShell({rid:'lead',kind:t('n6rLeadSheet'),title:esc(_evName(s)+_sgDot(s)),subtitle:`${esc(dayLabel(s.day)||'')} &middot; ${esc(shortDate(_ssDay(s)))} &middot; <bdi>${esc(sessionTime(s))}</bdi>`,
     refNo:'MM-LEAD-'+_ssDay(s).slice(2).replace(/-/g,''),body});
   logAction(t('n6rLeadLog').replace('{0}',shortDate(_ssDay(s))));_piiExport('lead roster '+_ssDay(s),rows.length,['phone'],'print');
   _openReport(html,1100,760);
@@ -32037,7 +32044,7 @@ function _bdWkPrint(){
   const body=`<div class="totals"><div class="total-item"><span class="total-num">${W.rows.length}</span><span class="total-lbl">${esc(t('commTabBirthdays'))}</span></div></div>
     <table><thead><tr><th>${t('colDay')}</th><th>${t('nameLabel')}</th><th>${t('vlShPhone')}</th></tr></thead>
     <tbody>${W.rows.map(r=>`<tr><td>${esc(_bdDate(r.date,{weekday:'short',day:'numeric',month:'short'}))}</td><td class="rp-name">${esc(r.c.name||'')}</td><td><bdi dir="ltr">${esc(r.c.phone?fmtPhone(r.c.phone):'—')}</bdi></td></tr>`).join('')}</tbody></table>`;
-  const win=_openReport(_reportShell({kind:esc(t('bdWkKind')),title:esc(range),docTitle:t('bdWkKind')+' '+W.sun+' – '+W.sat,body,maxWidth:'720px'}));
+  const win=_openReport(_reportShell({rid:'bday',kind:esc(t('bdWkKind')),title:esc(range),docTitle:t('bdWkKind')+' '+W.sun+' – '+W.sat,body,maxWidth:'720px'}));
   if(!win){toast(t('repPopupBlocked'),'warning');return;}
   closeConfirm();
   _piiExport(t('bdWkKind')+' '+W.sun+' – '+W.sat,W.rows.length,['phone'],'print');
@@ -40431,7 +40438,7 @@ async function _pinApprove(what,opt){
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
 function _staffSections(){return['queue','waitlist','sessions','lockers','dashboard','cashier','store','payments','inventory','workshop','community','badgereq','ask','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'].filter(_stoSecOk);}
-const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',store:'tabStore',payments:'tabPayments',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ask:'tabAsk',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+const SECTION_KEY={reports:'tabReports',dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',store:'tabStore',payments:'tabPayments',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ask:'tabAsk',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
 // Customers and Community are one section, People, since 2026-11-06 (id 'community'): a list naming either names it.
@@ -40751,6 +40758,7 @@ function _piiLog(cid,bid,fields,via){
 }
 // A list that leaves the app with personal data in it (CSV, print): one line with the count, any setting.
 function _piiExport(what,n,fields,via){
+  if(S._rxPrev)return; // a preview is not an export
   const f=(fields||[]).filter(x=>PII_FIELDS.includes(x));if(!f.length||!sb)return;
   const line=()=>logAction(t('piiLogLine').replace('{0}',t('piiVia_'+(via||'export'))).replace('{1}',`${what} (${Number(n)||0})`),{k:'pii'});
   if(S._piiNoRpc){line();return;}
@@ -41063,7 +41071,7 @@ function _bizDefOf(k){
 }
 // [card id, title key, hint key, fields]; a field is [key, label key, kind, extra]
 const BIZ_CARDS=[
-  ['details','bizCardDetails','bizCardDetailsSub',[['seller_name','bizSellerName','text'],['seller_addr','bizSellerAddr','text'],['vat_no','bizVatNo','vat'],['vat_pct','bizVatPct','num',[0,50]],['addr','bizAddr','pair'],['hours','bizHours','pair']]],
+  ['details','bizCardDetails','bizCardDetailsSub',[['seller_name','bizSellerName','text'],['seller_addr','bizSellerAddr','text'],['vat_no','bizVatNo','vat'],['cr_no','bizCrNo','text'],['vat_pct','bizVatPct','num',[0,50]],['addr','bizAddr','pair'],['hours','bizHours','pair']]],
   ['limits','bizCardLimits','bizCardLimitsSub',[['group_ride_max','bizGroupMax','int',[1,20]],['event_seat_max','bizEventMax','int',[1,50]],['jcc_account_cap','bizJccCap','int',[1,50]]]],
   ['times','bizCardTimes','bizCardTimesSub',[['collect_before_min','bizCollect','int',[0,240]],['overdue_ride_min','bizOverdue','int',[15,1440]],['idle_lock_min','bizIdle','int',[5,1440]],['pin_hold_s','bizPinHold','int',[30,270]],['rg_low','bizRgLow','int',[1,9]]]],
   ['fit','bizCardFit','bizCardFitSub',[['kids_max_cm','bizKidsMax','int',[80,200]],['size_chart','bizSizeChart','sizes']]],
@@ -42268,7 +42276,7 @@ function _ptSlipDoc(pid,L,po){
     <div class="total-item"><span class="total-num">${s.rides}</span><span class="total-lbl">${t('ptTotRides')}</span></div></div>`;
   const table=`<table><thead><tr><th>${t('colDate')}</th><th>${t('ptRide')}</th><th>${t('ptKind')}</th><th>${t('ptTotHours')}</th><th>${t('ptColRate')}</th><th>${t('ptColAmount')}</th></tr></thead><tbody>${rows||'<tr><td colspan="6">—</td></tr>'}</tbody></table>`;
   const paid=po?esc(t('ptSlipPaid').replace('{0}',shortDate(po.paid_on)).replace('{1}',_ptMethod(po.method)))+(po.note?' · '+esc(po.note):''):(s.paid>0?esc(`${t('ptPaid')}: ${_money(s.paid,_NOISO)} · ${t('ptTotOwed')}: ${_money(s.owe,_NOISO)}`):'');
-  return _reportShell({kind:po?t('ptSlip'):t('ptStatement'),title:esc(_ptName(pid))+(acct&&acct.email?` &middot; ${esc(acct.email)}`:''),subtitle:esc(span),
+  return _reportShell({rid:'pay',kind:po?t('ptSlip'):t('ptStatement'),title:esc(_ptName(pid))+(acct&&acct.email?` &middot; ${esc(acct.email)}`:''),subtitle:esc(span),
     refNo:po?'MM-PAY-'+String(po.id).padStart(5,'0'):'MM-PTS-'+todayStr().slice(2).replace(/-/g,''),
     body:tiles+table,note:`${paid?paid+'<br>':''}${t('ptReceived')}: ______________________`,maxWidth:'820px'});
 }
@@ -42408,6 +42416,7 @@ function _saMeta(m){if(!m)return null;const o={};if(m.k)o.kind=String(m.k).slice
 // Returns the id. A database before the column takes the line without it. _logCid makes one (_ciLogEach uses it too).
 function _logCid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 function logAction(label,meta){
+  if(S._rxPrev)return; // a builder's preview is not a print
   if(!label)return;
   // A rider's device keeps no log (2026-10-05): it was saved to this device's storage with the
   // rider's name, and a shared tablet kept every name. customer_activity records riders' actions.
@@ -45471,49 +45480,110 @@ function _printWhenReady(win,floor,ready_){
   });
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
+// ── The report template (2026-11-13, the reports rework: the user's picks on the decision page) ──────────────────────
+// Three looks, all light on screen and on paper (Q8): A "refined" - a slim ruled head with the report's name and number,
+// the title line, and who printed it, when and with what; B "statement" - a letterhead with the company's name, address,
+// CR and VAT numbers (Business settings), the report's name large and a facts box (number, date, who): the money and
+// what goes to partners (Q4); C "summary first" - the report's first money figure large, the other figures under it,
+// then the detail. Which report wears which is the user's pick, report by report (REPORT_LOOK). No signature lines (Q6).
+// A report's number is given the first time it is printed, saved, shared or exported (report_log_add, S6) and reads as
+// a dash until then. A report that is all money opens for admins only (F1, REPORT_MONEY); in any other, staff who are not
+// admins get the same sheet with every amount taken out (Q10, _rxNoMoney). A partner's report says its headings in
+// English and Arabic (S14, _rxBi) and carries the partner's logo once there is one on file (S13, PARTNER_LOGO).
+// Every report opens in the viewer inside the site (S1, _rxView): no pop-up for a browser to block.
+const REPORT_LOOK={session:'a',roster:'a',lead:'a',run:'a',exc:'a',bday:'a',vol:'a',bfo:'a',close:'b',sela:'b',bill:'b',z:'b',pay:'b',monthbill:'b',vl:'b',vlrc:'b',ptn:'b',day:'c',daily:'c',weekly:'c',monthly:'c',acc:'c',rate:'c',bf:'c',height:'c'};
+const REPORT_MONEY={close:1,bill:1,monthbill:1,z:1,pay:1,exc:1,vlrc:1,daily:1,weekly:1,monthly:1};
+const REPORT_PREFIX={bill:'BIL',monthbill:'BIL',z:'ZR',close:'CLS',pay:'PAY',exc:'EXC',vlrc:'RCT',daily:'KPI',weekly:'KPI',monthly:'KPI'};
+const REPORT_PARTNER={sela:'sela',vl:'kamin',ptn:'defe'};
+const PARTNER_LOGO={}; // a partner's key -> its logo file (/assets/partners/...), added as the owner sends each one (S13)
+function _rxMoneyOk(rid){return !REPORT_MONEY[rid]||isAdmin();}
+// A heading in English and Arabic, for a partner's report (S14): the key's two words, once if they are the same.
+function _rxBi(key){const pick=l=>(typeof LANG==='object'&&LANG&&LANG[l]&&LANG[l][key])||(typeof LANG_STAFF!=='undefined'&&LANG_STAFF[l]&&LANG_STAFF[l][key])||'';const en=pick('en')||t(key),ar=pick('ar');return ar&&ar!==en?`${esc(en)} <span class="rx-ar" lang="ar" dir="rtl">${esc(ar)}</span>`:esc(en);}
+function _rxWhen(d){try{return d.toLocaleString(_locale(),{timeZone:KSA_TZ,day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch(_){return d.toISOString().slice(0,16).replace('T',' ');}}
+// Every amount out of a report body, for staff who are not admins (Q10): a figure tile, a table column or a line that
+// says money (an rp-amt, or SAR/ر.س before a number) goes; the rest of the sheet stays as it is.
+function _rxNoMoney(html){
+  if(!html)return html;
+  let d;try{d=new DOMParser().parseFromString(`<div id="rx-r">${html}</div>`,'text/html');}catch(_){return html;}
+  const r=d.getElementById('rx-r');if(!r)return html;
+  const isM=el=>!!(el&&(el.querySelector&&el.querySelector('.rp-amt')||/(SAR|ر\.س)\s?[-−]?[\d٠-٩]/.test(el.textContent||'')));
+  r.querySelectorAll('.total-item,.rp-row,.rp-salesline,.mm-chip,.rp-grand,.rp-recon-off,.rp-recon-ok,.an-pay-total').forEach(x=>{if(isM(x))x.remove();});
+  r.querySelectorAll('table').forEach(tb=>{
+    const hr=tb.tHead&&tb.tHead.rows[tb.tHead.rows.length-1];if(!hr)return;
+    const n=hr.cells.length,rows=[...tb.rows],drop=[];
+    for(let j=0;j<n;j++){if(rows.some(row=>row.parentElement!==tb.tHead&&row.cells.length===n&&isM(row.cells[j])))drop.push(j);}
+    rows.forEach(row=>{if(row.cells.length!==n&&isM(row))row.remove();});
+    drop.reverse().forEach(j=>[...tb.rows].forEach(row=>{if(row.cells.length===n)row.deleteCell(j);}));
+  });
+  return r.innerHTML;
+}
+// A long list starts with its counts and splits (S12, 2026-11-13): over the report's longest table (8 rows or more), each
+// column of a few repeated values (bike, size, status, party...) counted, in a line under the figures. Names, numbers,
+// amounts and identifiers are not counted.
+const RX_SPLIT=/^(session|roster|run|lead|sela|vl|ptn|vol|bfo|bday)$/;
+function _rxSplits(html){
+  let d;try{d=new DOMParser().parseFromString(`<div id="rx-r">${html}</div>`,'text/html');}catch(_){return html;}
+  const r=d.getElementById('rx-r');if(!r)return html;
+  let best=null;r.querySelectorAll('table').forEach(tb=>{const n=tb.tBodies[0]?tb.tBodies[0].rows.length:0;if(tb.tHead&&n>=8&&(!best||n>best.n))best={tb,n};});
+  if(!best)return html;
+  const tb=best.tb,hr=tb.tHead.rows[tb.tHead.rows.length-1],ths=[...hr.cells],rows=[...tb.tBodies[0].rows].filter(x=>x.cells.length===ths.length);
+  if(rows.length<8||ths.some(c=>c.colSpan>1))return html;
+  const out=[];
+  ths.forEach((th,j)=>{
+    const h=th.textContent.replace(/\s+/g,' ').trim();
+    if(!h||CK_ID_HEAD.test(h))return;
+    const vals=rows.map(x=>x.cells[j]);
+    if(vals.some(c=>c.classList.contains('rp-name')||c.classList.contains('rp-seq')||c.querySelector('.rp-amt')))return;
+    const cnt=new Map();vals.forEach(c=>{const v=c.textContent.replace(/\s+/g,' ').trim();if(v&&!/^[—–-]$/.test(v))cnt.set(v,(cnt.get(v)||0)+1);});
+    if(cnt.size<2||cnt.size>8||cnt.size>rows.length/2||[...cnt.keys()].some(v=>v.length>24||/\d{5,}|@|SAR|ر\.س/.test(v)))return;
+    out.push(`<div class="rx-split"><b>${esc(h)}</b>${[...cnt].sort((a,b)=>b[1]-a[1]).map(([v,n])=>`<span>${esc(v)} <i>${n}</i></span>`).join('')}</div>`);
+  });
+  if(!out.length)return html;
+  const blk=`<div class="rx-splits">${out.slice(0,5).join('')}</div>`,tot=r.querySelector('.totals');
+  if(tot)tot.insertAdjacentHTML('afterend',blk);else r.insertAdjacentHTML('afterbegin',blk);
+  return r.innerHTML;
+}
 function _reportShell(o){
-  // "Report Template B", in the staff site's Soft Solid look since round two (2026-11-08: Plex, sentence case,
-  // a #16191d banner, light heads): the one visual family for every generated
-  // document (session report, roster, close-out, analytics). Dark banner with
-  // the white wordmark, neon doc-type label, gradient rule, the title line (which ride,
-  // which day), stat tiles (dark "Collected" variant via .total-item.dark), dark table
-  // heads with zebra rows, optional total chip (o.chip) or quiet note (o.note) and the
-  // signature row. On paper it prints light (report.css @media print), and from page 2 on
-  // the margins carry the title line and "Page 2 of 3".
-  const ar=_isRtl();
-  const now=new Date();
-  const refNo=o.refNo||('MM-RPT-'+_ksaYmd(now).slice(2).replace(/-/g,''));
-  const op=_opName();
-  // The title line says which ride and which day the sheet is for: without it a close-out found a
-  // week later could not be placed (2026-10-01). A title that only repeats the banner's label is left out.
+  const rid=o.rid||'',look=REPORT_LOOK[rid]||'a',ar=_isRtl(),now=new Date();
+  const kind=o.kind||t('printReportTitle'),pk=o.partner||REPORT_PARTNER[rid]||'';
+  // The title line says which ride and which day the sheet is for: without it a close-out found a week later could not
+  // be placed (2026-10-01). A title that only repeats the report's name is left out.
   const line=[o.title&&o.title!==o.kind?o.title:'',o.subtitle||''].filter(Boolean);
-  const kind=o.kind||t('printReportTitle');
-  // The page margins' words, as plain text: CSS strings, carried in custom properties on <html>
-  // (the page context inherits from it) and set through the CSSOM like every data-cssv value.
+  // The page margins' words, as plain text: CSS strings, carried in custom properties on <html> (the page context
+  // inherits from it) and set through the CSSOM like every data-cssv value. Page 1 has no margin, so the browser adds no
+  // header or footer of its own; pages 2 on carry the title line and "Page 2 of 3".
   const txt=h=>{try{return new DOMParser().parseFromString(`<p>${h}</p>`,'text/html').body.textContent.replace(/\s+/g,' ').trim();}catch(e){return'';}};
   const cssStr=s=>'"'+String(s).replace(/[\\"]/g,'\\$&')+'"';
   const run=txt([kind,...line].join(' &middot; '));
   const pg=t('repPageOf').split(/(\{[01]\})/).filter(Boolean).map(x=>x==='{0}'?'counter(page)':x==='{1}'?'counter(pages)':cssStr(x)).join(' ');
-  return`<!DOCTYPE html><html lang="${S.lang}" dir="${ar?'rtl':'ltr'}" data-cssv="${_cssv({'--rp-run':cssStr(run),'--rp-pg':pg})}"><head><meta charset="UTF-8">
-  <title>${o.docTitle||o.title}</title>
+  const op=_opName(),when=_rxWhen(now),admin=isAdmin();
+  const strip=h=>admin||REPORT_MONEY[rid]?(h||''):_rxNoMoney(h||'');
+  const body=strip(RX_SPLIT.test(rid)?_rxSplits(o.body||''):o.body),chip=o.chip?strip(`<div class="mm-chip-row"><span class="mm-chip">${o.chip}</span></div>`):'',note=o.note?strip(`<div class="mm-note">${o.note}</div>`):'';
+  const no=`<b class="rx-no">${esc(o.no||'—')}</b>`,logo=new URL('/logo-dark.png',location.origin).href;
+  const plogo=pk&&PARTNER_LOGO[pk]?`<img class="rx-plogo" src="${new URL(PARTNER_LOGO[pk],location.origin).href}" alt="">`:'';
+  const meta=[[t('rxPrinted'),when],[t('repPreparedBy'),op||'—'],...(o.meta||[])].map(m=>`<span>${esc(m[0])} <b>${esc(m[1])}</b></span>`).join('');
+  const title=line.length?`<div class="rx-title"><h1>${line[0]}</h1>${line[1]?`<span>${line[1]}</span>`:''}</div>`:'';
+  let head;
+  if(look==='b'){
+    const nm=String(_biz('seller_name','Micromobility Co.')),ad=String(_biz('seller_addr','')||''),vat=String(_biz('vat_no','')||''),cr=String(_biz('cr_no','')||'');
+    const ids=[cr?`${esc(t('rxCrNo'))} <bdi>${esc(cr)}</bdi>`:'',vat?`${esc(t('rcVatNo'))} <bdi>${esc(vat)}</bdi>`:''].filter(Boolean).join(' &middot; ');
+    head=`<header class="rx-lh"><div class="rx-co"><img class="rx-logo" src="${logo}" alt="MicroMobility">${plogo}<div class="rx-coi"><strong><bdi>${esc(nm)}</bdi></strong>${ad?`<span>${esc(ad)}</span>`:''}${ids?`<span>${ids}</span>`:''}</div></div>
+      <div class="rx-doc"><h1 class="rx-k">${kind}</h1><table class="rx-facts"><tr><th>${t('rxNo')}</th><td>${no}</td></tr><tr><th>${t('rxDate')}</th><td>${esc(when)}</td></tr><tr><th>${t('repPreparedBy')}</th><td>${esc(op||'—')}</td></tr></table></div></header>
+      ${title}`;
+  }else{
+    head=`<header class="rx-hd"><img class="rx-logo" src="${logo}" alt="MicroMobility">${plogo}<span class="rx-k">${kind}</span><span class="rx-n">${t('rxNo')} ${no}</span></header>
+      ${title}<div class="rx-meta">${meta}</div>`;
+  }
+  const opts=o.opts||(S.sfSession&&S.sfSession!=='all'&&/^(session|run|roster|sela|vl|vlrc|ptn|lead|close|bfo)$/.test(rid)?{sid:S.sfSession}:{});
+  return`<!DOCTYPE html><html lang="${S.lang}" dir="${ar?'rtl':'ltr'}" class="rx lk-${look}${pk?' rx-pt':''}" data-rx="${esc(rid)}" data-rxo="${_cssv(opts)}" data-cssv="${_cssv({'--rp-run':cssStr(run),'--rp-pg':pg})}"><head><meta charset="UTF-8">
+  <title>${o.docTitle||o.title||kind}</title>
   <link href="/fonts/fonts.css" rel="stylesheet">
   <link href="${location.origin}/report.css?v=${REPORT_CSS_V}" rel="stylesheet">
   </head><body data-cssv="${_cssv({'--rp-mw':o.maxWidth||'940px'})}">
-  <div class="mm-banner">
-    <span class="mm-co">
-      <img class="mm-logo-on-dark" src="${new URL('/logo.png',location.origin).href}" alt="MicroMobility">
-      <img class="mm-logo-on-light" src="${new URL('/logo-dark.png',location.origin).href}" alt="">
-      <span><strong><bdi>Micromobility Co.</bdi></strong></span>
-    </span>
-    <span class="mm-doc"><strong>${kind}</strong><span>${refNo}</span></span>
-  </div>
-  <div class="mm-rule"></div>
-  ${line.length?`<div class="mm-title"><strong>${line[0]}</strong>${line[1]?`<span>${line[1]}</span>`:''}</div>`:''}
-  ${o.body}
-  ${o.chip?`<div class="mm-chip-row"><span class="mm-chip">${o.chip}</span></div>`:''}
-  ${o.note?`<div class="mm-note">${o.note}</div>`:''}
-  <div class="mm-sign"><span>${t('repPreparedBy')}${op?` &middot; ${esc(op)}`:''}</span><span>${t('repReviewedBy')}</span></div>
-  <button class="rep-print">${t('repPrintNow')}</button>
+  ${head}
+  <main class="rx-main">${body}</main>
+  ${chip}${note}
+  <footer class="rx-foot"><span>MicroMobility &middot; ${kind}</span><span>${t('rxNo')} ${no}</span></footer>
   </body></html>`;
 }
 // A sum of money on a printed report: SAR, thousands grouped, always two decimals, so a column of
@@ -45522,22 +45592,384 @@ function _reportShell(o){
 // same in a table cell, right-aligned to its column's other amounts.
 function _rpSar(n){return _money(n,{fixed:true});}
 function _rpAmt(n){return `<span class="rp-amt">${_rpSar(n)}</span>`;}
-// Answers the window, or null when the browser kept it from opening (2026-10-05: a report opened
-// after an awaited PIN can lose the tap that allows a new window).
+// ── One report builder (S2, S3, 2026-11-13, the reports rework) ─────────────────────────────────────────────────────
+// The six builders (a session's report, the account report, the ratings, Victory Lap, the partner report, the volunteers)
+// keep their own choices, but share one frame: a bar of saved setups at the top - the team's, seen by every staff account
+// on any device, and one's own (report_setups, S3) - and, on a wide screen, the report itself beside the choices, drawn
+// again a moment after each change (the live preview). Each builder hands the bar three things: its choices now, how to
+// put a setup's choices in place, and how it makes its report. The preview makes the report the builder's own way, with
+// _openReport caught (S._rxSink) and nothing recorded (S._rxPrev: no action-log line, no personal-data export line, no
+// toast), and draws it small beside the choices.
+function _rbBar(rid,cb){
+  S._rbCur=Object.assign({rid},cb);
+  const L=_rbSets(rid),sel=S._rbSel&&S._rbSel[rid]||'';
+  const opt=x=>`<option value="${esc(x.id)}"${String(x.id)===String(sel)?' selected':''}>${esc(x.name)}${x.scope==='mine'?' · '+esc(t('rbMine')):''}</option>`;
+  const team=(L||[]).filter(x=>x.scope==='team'),mine=(L||[]).filter(x=>x.scope==='mine');
+  const cur=(L||[]).find(x=>String(x.id)===String(sel)),me=_rbMe();
+  setTimeout(()=>{_rbMount();_rbPreview(rid);},0);
+  return`<div class="rb-bar" role="group" aria-label="${esc(t('rbSetups'))}">
+    <label class="rb-sel"><span>${t('rbSetups')}</span><select class="filter-select" data-on-change="${_on('_rbApply',rid,_P('value'))}"><option value="">${esc(L?t('rbChoose'):t('loadingLabel'))}</option>${team.length?`<optgroup label="${esc(t('rbTeam'))}">${team.map(opt).join('')}</optgroup>`:''}${mine.length?`<optgroup label="${esc(t('rbMine'))}">${mine.map(opt).join('')}</optgroup>`:''}</select></label>
+    <span class="rb-acts"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_rbSaveAsk',rid,'team')}">${t('rbSaveTeam')}</button><button type="button" class="btn-sm btn-muted" data-on-click="${_on('_rbSaveAsk',rid,'mine')}">${t('rbSaveMine')}</button>${cur&&(cur.created_by===me||isAdmin())?`<button type="button" class="btn-sm btn-muted" data-on-click="${_on('_rbDelete',rid,cur.id)}">${t('rbDelete')}</button>`:''}</span></div>`;
+}
+function _rbMount(){const b=document.querySelector('#print-opts-modal .rb-bar'),box=b&&b.closest('.modal-box');if(box&&!box.querySelector('.rb-prev')){box.classList.add('rb-on');box.insertAdjacentHTML('beforeend',_rbPrevHtml());}}
+function _rbPrevHtml(){return`<div class="rb-prev" aria-hidden="true"><div class="rb-prev-h">${t('rbPreview')}</div><div class="rb-prev-f"><iframe class="rb-frame" tabindex="-1" title="${esc(t('rbPreview'))}"></iframe></div></div>`;}
+function _rbMe(){try{return localStorage.getItem('cq_role_uid')||'';}catch(_){return'';}}
+function _rbSets(rid){
+  const C=S._rbSets||(S._rbSets={});
+  if(C[rid]&&Date.now()-C[rid].at<60000)return C[rid].list;
+  if(!C[rid]||!C[rid].busy)_rbLoad(rid);
+  return C[rid]?C[rid].list:null;
+}
+async function _rbLoad(rid){
+  const C=S._rbSets||(S._rbSets={});C[rid]=Object.assign(C[rid]||{list:null,at:0},{busy:true});
+  let r;try{r=await sb.from('report_setups').select('id,name,scope,opts,created_by,by_name,updated_at').eq('report',rid).order('name');}catch(e){r={error:e};}
+  C[rid]={list:r&&!r.error?(r.data||[]):(C[rid].list||[]),at:Date.now(),busy:false};
+  const cb=S._rbCur;if(cb&&cb.rid===rid&&cb.reopen)try{cb.reopen();}catch(_){}
+}
+function _rbApply(rid,id){
+  const cb=S._rbCur;if(!cb||cb.rid!==rid)return;
+  (S._rbSel||(S._rbSel={}))[rid]=id||'';
+  const x=((S._rbSets&&S._rbSets[rid]&&S._rbSets[rid].list)||[]).find(v=>String(v.id)===String(id));
+  if(!x){if(cb.reopen)cb.reopen();return;}
+  try{cb.set(JSON.parse(JSON.stringify(x.opts||{})));}catch(_){}
+  toast(t('rbApplied').replace('{0}',x.name),'success');
+}
+async function _rbSaveAsk(rid,scope){
+  const cb=S._rbCur;if(!cb||cb.rid!==rid)return;
+  const name=String(await promptDialog({title:t(scope==='team'?'rbSaveTeam':'rbSaveMine'),body:t('rbNameAsk'),placeholder:t('rbName'),confirmLabel:t('saveBtn')})||'').trim().slice(0,60);
+  if(!name)return;
+  const list=(S._rbSets&&S._rbSets[rid]&&S._rbSets[rid].list)||[],me=_rbMe();
+  const same=list.find(x=>x.scope===scope&&x.name.toLocaleLowerCase()===name.toLocaleLowerCase()&&(scope==='team'||x.created_by===me));
+  let opts={};try{opts=JSON.parse(JSON.stringify(cb.get()||{}));}catch(_){}
+  let r;
+  try{r=same?await sb.from('report_setups').update({opts,updated_at:new Date().toISOString()}).eq('id',same.id).select('id').single()
+    :await sb.from('report_setups').insert({report:rid,name,scope,opts,by_name:_opName()||null}).select('id').single();}catch(e){r={error:e};}
+  if(_writeErr(r,'report setup save'))return;
+  (S._rbSel||(S._rbSel={}))[rid]=r&&r.data?r.data.id:'';
+  toast(t('rbSaved').replace('{0}',name),'success');
+  await _rbLoad(rid);
+}
+function _rbDelete(rid,id){
+  const x=((S._rbSets&&S._rbSets[rid]&&S._rbSets[rid].list)||[]).find(v=>String(v.id)===String(id));if(!x)return;
+  confirmDialog({title:t('rbDelete'),body:esc(t('rbDelAsk').replace('{0}',x.name)),confirmLabel:t('rbDelete'),confirmClass:'btn-danger',onConfirm:async()=>{
+    let r;try{r=await sb.from('report_setups').delete().eq('id',x.id);}catch(e){r={error:e};}
+    if(_writeErr(r,'report setup delete'))return;
+    if(S._rbSel)S._rbSel[rid]='';
+    await _rbLoad(rid);
+  }});
+}
+// The preview: the builder's own report, made a moment after the last change and drawn small. Only on a screen wide enough
+// to hold it beside the choices; nothing is made while the builder is closed.
+let _rbPT=0,_rbPN=0;
+function _rbPreview(rid){
+  clearTimeout(_rbPT);
+  const f=document.querySelector('.rb-frame');if(!f||!f.offsetParent)return;
+  if(S._rbLast&&S._rbLast.rid===rid&&!f.srcdoc)f.srcdoc=S._rbLast.html; // the last one at once, the new one after a pause
+  _rbPT=setTimeout(async()=>{
+    const cb=S._rbCur;if(!cb||cb.rid!==rid||!cb.print)return;
+    const n=++_rbPN;let html='';
+    S._rxPrev=true;S._rxSink=h=>{html=h;};
+    try{await Promise.resolve(cb.print());}catch(_){}finally{S._rxPrev=false;S._rxSink=null;}
+    if(n!==_rbPN||!html)return;
+    S._rbLast={rid,html};
+    const fr=document.querySelector('.rb-frame');if(!fr)return;
+    fr.addEventListener('load',()=>{try{const d=fr.contentDocument;_cssvApply(d);_ckAlignTables(d.body,true);d.documentElement.classList.add('rx-prev');}catch(_){}},{once:true});
+    fr.srcdoc=html;
+  },_rbWait(rid));
+}
+function _rbWait(rid){return/^(vl|ptn|vol|acc)$/.test(rid)?700:260;} // the builders that read the server for each report wait longer
+// Answers the window, or null when the browser kept it from opening (2026-10-05: a report opened after an awaited PIN can
+// lose the tap that allows a new window). A report from _reportShell opens in the viewer inside the site instead (S1,
+// 2026-11-13): nothing to block, and the answer is a stand-in that reads as opened. A caller that opened a window on the
+// tap for it no longer needs that window.
 function _openReport(html,w,h,win,ready_){
+  if(S._rxSink){const f=S._rxSink;S._rxSink=null;if(win&&!win.closed)try{win.close();}catch(e){}f(html);return{rx:true};} // a builder's live preview (_rbPreview)
+  if(/<html[^>]*\sclass="rx[\s"]/.test(String(html||'').slice(0,600))){
+    // The specs read each report as it opens; a listener that answers true takes the report and the viewer stays shut
+    // (as the stand-in windows the specs once gave window.open did).
+    if(typeof S._rxTap==='function'){let took=false;try{took=S._rxTap(String(html))===true;}catch(e){}if(took){if(win&&!win.closed)try{win.close();}catch(e){}return{rx:true};}}
+    if(win&&!win.closed)try{win.close();}catch(e){}
+    _rxView(html);
+    return{rx:true};
+  }
   if(win&&win.closed)win=null; // closed by the staffer while the caller read: writing to it threw and nothing was said
   win=win||window.open('','_blank',`width=${w||1100},height=${h||760}`); // a caller that reads first opens the window on the tap and passes it
   if(!win)return null;
   win.document.write(html);win.document.close();win.focus();
-  // The report is its own document under the page's policy: no inline script runs in it and no
-  // handler dispatcher listens there, so its Print button is wired here, from the opener, and its
-  // run-time values (data-cssv: the sheet's width, a chart swatch's colour) are set from here too,
-  // through the CSSOM, before it first draws.
+  // A window the page writes is its own document under the page's policy: no inline script runs in it and no handler
+  // dispatcher listens there, so its run-time values (data-cssv) are set from here, through the CSSOM.
   try{_cssvApply(win.document);}catch(e){}
   try{win.document.querySelectorAll('.rep-print').forEach(b=>b.addEventListener('click',()=>{try{win.print();}catch(e){}}));}catch(e){} // specs stand in a bare window
-  try{if(win.document.querySelector('.mm-banner'))_rpLive(win.document);}catch(e){}
   _printWhenReady(win,400,ready_);
   return win;
+}
+// ── The report viewer (S1, 2026-11-13) ──────────────────────────────────────────────────────────────────────────────
+// A report opens on a sheet over the staff site, not in a window of its own: nothing for a browser to block after a PIN
+// or a slow read, and the same on a phone. The report is drawn in a frame (its own document under the page's policy:
+// report.css, no script; its sort and filter are wired from here, _rpLive), with one bar over it: Print, PDF, Excel, CSV
+// and, where the device can, Share. The first of those gives the report its number (_rxNumber -> report_log_add, S6),
+// and a money report's page is kept as printed (F4). A table too wide for a portrait page turns the page (Q7, S11).
+function _rxDoc(){const f=document.querySelector('#rx-modal .rx-frame');try{return f&&f.contentDocument;}catch(_){return null;}}
+function _rxView(html,pre){
+  const rid=(String(html).match(/data-rx="([^"]*)"/)||[])[1]||'';
+  if(!_rxMoneyOk(rid)){toast(t('adminOnlyMsg'),'error');return;}
+  let m=document.getElementById('rx-modal');
+  if(!m){m=document.createElement('div');m.id='rx-modal';m.className='rx-modal';document.body.appendChild(m);}
+  let kind='',sub='',title='';
+  try{const d=new DOMParser().parseFromString(String(html),'text/html'),tl=d.querySelector('.rx-title');kind=(d.querySelector('.rx-k')||{}).textContent||'';sub=tl?[...tl.children].map(e=>e.textContent).join(' · '):'';title=d.title||kind;}catch(_){}
+  kind=kind.replace(/\s+/g,' ').trim();sub=sub.replace(/\s+/g,' ').trim();
+  let o0=null;try{o0=JSON.parse(_spkUnEsc((String(html).match(/data-rxo="([^"]*)"/)||[])[1]||'null'));}catch(_){}
+  S._rxv={rid,html,no:(pre&&pre.no)||'',money:!!REPORT_MONEY[rid],prefix:REPORT_PREFIX[rid]||'RPT',title:String(title).replace(/\s+/g,' ').trim(),kind,opts:(pre&&pre.opts)||o0||null,back:document.activeElement};
+  const share=!!(navigator.share&&navigator.canShare);
+  m.innerHTML=`<div class="rx-view" role="dialog" aria-modal="true" aria-labelledby="rx-vt">
+    <div class="rx-bar">
+      <button type="button" class="rx-btn rx-close" aria-label="${esc(t('closeBtn'))}">${_artIcon('close',16)}</button>
+      <div class="rx-vt" id="rx-vt"><b>${esc(kind)}</b><span>${esc(sub)}</span></div>
+      <span class="rx-vno" aria-live="polite">${S._rxv.no?esc(t('rxNo')+' '+S._rxv.no):''}</span>
+      <div class="rx-acts">
+        <button type="button" class="rx-btn rx-main-act" data-rx-act="print">${ICON_PRINT}<span>${esc(t('repPrintNow'))}</span></button>
+        <button type="button" class="rx-btn" data-rx-act="pdf">${ICON_EXPORT}<span>PDF</span></button>
+        <button type="button" class="rx-btn" data-rx-act="xlsx">${ICON_EXPORT}<span>Excel</span></button>
+        <button type="button" class="rx-btn" data-rx-act="csv">${ICON_EXPORT}<span>CSV</span></button>
+        ${share?`<button type="button" class="rx-btn" data-rx-act="share"><span>${esc(t('rxShare'))}</span></button>`:''}
+      </div>
+    </div>
+    <div class="rx-stage"><iframe class="rx-frame" title="${esc(kind||title)}"></iframe></div>
+  </div>`;
+  m.hidden=false;document.body.classList.add('rx-open');
+  const fr=m.querySelector('.rx-frame');
+  fr.addEventListener('load',async()=>{const d=_rxDoc();if(!d)return;try{_cssvApply(d);}catch(_){}try{_ckAlignTables(d.body,true);}catch(_){}try{await _rxBiDoc(d);}catch(_){}try{_rpLive(d);}catch(_){}if(S._rxv&&S._rxv.no)_rxSetNo(S._rxv.no);_rxFit(d);},{once:true});
+  fr.srcdoc=html;
+  m.querySelector('.rx-close').addEventListener('click',_rxClose);
+  m.querySelectorAll('[data-rx-act]').forEach(b=>b.addEventListener('click',()=>_rxAct(b.dataset.rxAct,b)));
+  if(!_rxView._k){_rxView._k=1;document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S._rxv&&!document.getElementById('rx-modal').hidden){e.preventDefault();_rxClose();}});}
+  try{m.querySelector('.rx-close').focus();}catch(_){}
+}
+async function _rxBiDoc(d){
+  if(!d||!d.documentElement.classList.contains('rx-pt')||(S.lang||'en')==='ar')return;
+  try{await loadLangPack('ar');}catch(_){}
+  const SL=typeof LANG_STAFF!=='undefined'?LANG_STAFF:{},cur=S.lang||'en';
+  const src=Object.assign({},LANG.en||{},SL.en||{},LANG[cur]||{},SL[cur]||{}),ar=Object.assign({},LANG.ar||{},SL.ar||{});
+  const rev=new Map();for(const k in src){const v=String(src[k]||'').trim();if(v&&v.length<60&&ar[k]&&!rev.has(v))rev.set(v,ar[k]);}
+  d.querySelectorAll('.rx-k,.rx-main th,.rx-main h2,.rx-main .total-lbl').forEach(el=>{
+    if(el.querySelector('.rx-ar'))return;
+    const tx=el.textContent.replace(/\s+/g,' ').trim(),a=rev.get(tx);
+    if(a&&a!==tx){const sp=d.createElement('span');sp.className='rx-ar';sp.lang='ar';sp.dir='rtl';sp.textContent=a;el.appendChild(sp);}
+  });
+}
+function _rxClose(){
+  const m=document.getElementById('rx-modal');if(!m)return;
+  m.hidden=true;m.innerHTML='';document.body.classList.remove('rx-open');
+  const b=S._rxv&&S._rxv.back;S._rxv=null;try{if(b&&b.focus)b.focus();}catch(_){}
+}
+// A table wider than a portrait page turns the page to landscape (Q7: chosen for you); one wider still sets its type a
+// step smaller. Measured at the printed page's width (A4 less the margins, about 718px), then put back.
+function _rxFit(d){
+  try{
+    const b=d.body,w0=b.style.width,m0=b.style.maxWidth;b.style.width='718px';b.style.maxWidth='718px';
+    let wide=false;d.querySelectorAll('.rx-main table').forEach(tb=>{if(tb.scrollWidth>722){wide=true;if(tb.scrollWidth>1050)tb.classList.add('rx-dense');}});
+    b.style.width=w0;b.style.maxWidth=m0;
+    if(wide){d.documentElement.classList.add('rx-land');const sh=[...d.styleSheets].find(x=>String(x.href||'').includes('report.css'));if(sh)sh.insertRule('@page{size:A4 landscape}',sh.cssRules.length);}
+  }catch(_){}
+}
+function _rxSetNo(no){
+  const d=_rxDoc();
+  if(d){d.querySelectorAll('.rx-no').forEach(e=>{e.textContent=no;});
+    try{const h=d.documentElement,cur=h.style.getPropertyValue('--rp-run');if(cur&&!cur.includes(no))h.style.setProperty('--rp-run',cur.replace(/"\s*$/,' · '+no.replace(/["\\]/g,'')+'"'));}catch(_){}}
+  const v=document.querySelector('#rx-modal .rx-vno');if(v)v.textContent=t('rxNo')+' '+no;
+}
+// The report's number, asked once per report on the sheet: the first print, save, share or export.
+function _rxNumber(via){
+  const V=S._rxv;if(!V)return Promise.resolve('');
+  if(V.no)return Promise.resolve(V.no);
+  if(V.busy)return V.busy;
+  V.busy=(async()=>{
+    const d=_rxDoc(),rows=d?d.querySelectorAll('.rx-main tbody tr').length:null;
+    const copy=V.money&&d?'<!DOCTYPE html>'+d.documentElement.outerHTML:null;
+    let r;try{r=await sb.rpc('report_log_add',{p_report:/^[a-z][a-z0-9_]{0,39}$/.test(V.rid)?V.rid:'report',p_prefix:V.prefix,p_title:String(V.title||V.kind).slice(0,200),p_opts:V.opts||{},p_money:V.money,p_via:via,p_rows:rows,p_copy:copy});}catch(e){r={error:e};}
+    if(r&&!r.error&&r.data&&r.data.no){V.no=r.data.no;_rxSetNo(V.no);}
+    V.busy=null;return V.no;
+  })();
+  return V.busy;
+}
+function _rxFile(ext){
+  const V=S._rxv||{},base=[V.kind,V.no||_ksaYmd(new Date())].filter(Boolean).join(' ');
+  return base.replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,90)+'.'+ext;
+}
+async function _rxAct(act,btn){
+  const V=S._rxv;if(!V)return;
+  if(btn){btn.disabled=true;setTimeout(()=>{btn.disabled=false;},1200);}
+  if(act==='print'){
+    await _rxNumber('print');
+    const f=document.querySelector('#rx-modal .rx-frame');
+    try{f.contentWindow.focus();f.contentWindow.print();}catch(e){toast(t('errSomethingWrong'),'error');}
+    return;
+  }
+  if(act==='xlsx'){await _rxNumber('xlsx');const d=_rxDoc();if(d)_vrbXlsx(_rxSheets(d),_rxFile('xlsx'));return;}
+  if(act==='csv'){await _rxNumber('csv');const d=_rxDoc();if(!d)return;const rows=_rxMainRows(d);if(!rows.length){toast(t('anNoData2'),'info');return;}_downloadCsv(_rxFile('csv'),rows,V.kind);return;}
+  if(act==='pdf'||act==='share'){await _rxNumber(act==='share'?'share':'pdf');return _rxPdfOut(act==='share');}
+}
+// ── The PDF (S10, F2: a real PDF with every page, its text searchable, made on the device) ────────────────────────────
+// jsPDF (vendor/, 115 KB gzipped) and the IBM Plex Sans Arabic faces (its Latin is Plex Sans) are fetched the first time
+// a PDF is asked for, never before. The PDF is drawn from the report as it is on the sheet - its head, figures, headings,
+// tables (the heading row again on every page, quantities at the end of their column), lines and notes - with the
+// report's name, number and "Page 2 of 3" at the foot of every page. Arabic is joined by jsPDF; Urdu's own letters,
+// Hindi, Nepali and Bengali need shaping it does not do, so in those languages the button opens the browser's own Save
+// as PDF instead, which draws them right.
+let _rxPdfLib=null;
+function _rxPdfLoad(){
+  if(_rxPdfLib)return _rxPdfLib;
+  _rxPdfLib=(async()=>{
+    if(!window.jspdf)await new Promise((res,rej)=>{const sc=document.createElement('script');sc.src='/vendor/jspdf-2.5.2.umd.min.js';sc.addEventListener('load',res);sc.addEventListener('error',rej);document.head.appendChild(sc);});
+    const b64=async u=>{const r=await fetch(u);if(!r.ok)throw new Error(u);const b=new Uint8Array(await r.arrayBuffer());let s='';for(let i=0;i<b.length;i+=32768)s+=String.fromCharCode.apply(null,b.subarray(i,i+32768));return btoa(s);};
+    const [reg,semi,logo]=await Promise.all([b64('/vendor/pdf/IBMPlexSansArabic-Regular.ttf'),b64('/vendor/pdf/IBMPlexSansArabic-SemiBold.ttf'),b64('/logo-dark.png').catch(()=>null)]);
+    return{reg,semi,logo:logo?'data:image/png;base64,'+logo:null};
+  })();
+  _rxPdfLib.catch(()=>{_rxPdfLib=null;});
+  return _rxPdfLib;
+}
+async function _rxPdfOut(share){
+  const V=S._rxv,d=_rxDoc();if(!V||!d)return;
+  if(/^(ur|hi|ne|bn)$/.test(S.lang||'')){toast(t('rxPdfPrint'),'info');try{const f=document.querySelector('#rx-modal .rx-frame');f.contentWindow.focus();f.contentWindow.print();}catch(_){}return;}
+  let lib;try{lib=await _rxPdfLoad();}catch(_){toast(t('errConnection'),'error');return;}
+  let blob;try{blob=_rxPdfMake(d,lib);}catch(e){toast(t('errSomethingWrong'),'error');try{_writeLog(e,'rx pdf');}catch(_){}return;}
+  const name=_rxFile('pdf');
+  if(share&&typeof File==='function'){
+    const file=new File([blob],name,{type:'application/pdf'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:V.kind});}catch(_){}return;}
+  }
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.rel='noopener';
+  document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(url);},4000);
+}
+function _rxPdfMake(d,lib){
+  const land=d.documentElement.classList.contains('rx-land'),rtl=d.documentElement.dir==='rtl',look=(d.documentElement.className.match(/lk-([abc])/)||[])[1]||'a';
+  const P=new window.jspdf.jsPDF({orientation:land?'landscape':'portrait',unit:'pt',format:'a4',compress:true});
+  P.addFileToVFS('rxr.ttf',lib.reg);P.addFont('rxr.ttf','Plex','normal');P.addFileToVFS('rxb.ttf',lib.semi);P.addFont('rxb.ttf','Plex','bold');
+  const W=P.internal.pageSize.getWidth(),H=P.internal.pageSize.getHeight(),M=40,FOOT=34,x0=M,x1=W-M,CW=x1-x0;
+  const INK=[20,24,21],MUT=[90,99,92],LINE=[217,220,213],GRN=[12,122,61],SOFT=[233,245,238];
+  let y=M;
+  const tx=e=>e?_rpCellTxt(e):'';
+  const font=(b,sz,c)=>{P.setFont('Plex',b?'bold':'normal');P.setFontSize(sz);P.setTextColor(...(c||INK));};
+  // a logical x (from the reading start) to the page, and the alignment with it
+  const X=lx=>rtl?W-lx:lx,AL=a=>rtl?(a==='left'?'right':a==='right'?'left':a):a;
+  const put=(s,lx,yy,a)=>{if(s)P.text(String(s),X(lx),yy,{align:AL(a||'left')});};
+  const need=h=>{if(y+h>H-FOOT){P.addPage();y=M;return true;}return false;};
+  const wrap=(s,w)=>P.splitTextToSize(String(s||''),Math.max(10,w));
+  const rule=(yy,c,wd)=>{P.setDrawColor(...(c||LINE));P.setLineWidth(wd||.6);P.line(x0,yy,x1,yy);};
+  // the head
+  const kind=tx(d.querySelector('.rx-k')),no=tx(d.querySelector('.rx-no')),noTxt=no&&no!=='—'?t('rxNo')+' '+no:'';
+  if(look==='b'){
+    if(lib.logo)try{P.addImage(lib.logo,'PNG',rtl?x1-36:x0,y,36,38);}catch(_){}
+    const co=d.querySelectorAll('.rx-coi > *');let cy=y+10;
+    [...co].forEach((e,i)=>{font(i===0,i===0?10:7.5,i===0?INK:MUT);put(tx(e),x0+46,cy);cy+=i===0?12:10;});
+    font(true,17);put(kind,CW+M,y+14,'right');
+    let fy=y+30;d.querySelectorAll('.rx-facts tr').forEach(r=>{font(false,7.5,MUT);put(tx(r.cells[0]),CW+M-90,fy,'right');font(true,7.5);put(tx(r.cells[1]),CW+M,fy,'right');fy+=10;});
+    y=Math.max(cy,fy,y+42)+4;rule(y,INK,.8);y+=16;
+  }else{
+    if(lib.logo)try{P.addImage(lib.logo,'PNG',rtl?x1-22:x0,y-2,22,23);}catch(_){}
+    font(true,10.5);put(kind,x0+32,y+14);
+    if(noTxt){font(false,8,MUT);put(noTxt,CW+M,y+14,'right');}
+    y+=24;rule(y,INK,1.4);y+=18;
+  }
+  const tl=d.querySelector('.rx-title');
+  if(tl){const h=tl.querySelector('h1'),sp=tl.querySelector('span');font(true,15);wrap(tx(h),CW).forEach(l=>{need(18);put(l,x0,y);y+=18;});if(sp){font(false,9.5,MUT);put(tx(sp),x0,y-2);y+=12;}}
+  const meta=[...d.querySelectorAll('.rx-meta > span')].map(tx).filter(Boolean).join('   ·   ');
+  if(meta){font(false,7.5,MUT);wrap(meta,CW).forEach(l=>{put(l,x0,y);y+=10;});}
+  y+=8;
+  // the figures
+  const tiles=el=>{
+    const items=[...el.querySelectorAll('.total-item')].map(i=>({v:tx(i.querySelector('.total-num')),l:tx(i.querySelector('.total-lbl')),hero:i.classList.contains('dark')})).filter(i=>i.v||i.l);
+    if(!items.length)return;
+    if(look==='c'){const hi=items.findIndex(i=>i.hero),h=items.splice(hi>=0?hi:0,1)[0];need(52);P.setFillColor(...SOFT);P.rect(x0,y,CW,46,'F');P.setFillColor(...GRN);P.rect(rtl?x1-3:x0,y,3,46,'F');font(true,20,GRN);put(h.v,x0+14,y+24);font(false,8,MUT);put(h.l,x0+14,y+37);y+=56;}
+    const per=Math.max(1,Math.min(items.length,Math.floor(CW/110))),w=CW/per;
+    for(let i=0;i<items.length;i+=per){need(38);const row=items.slice(i,i+per);
+      row.forEach((it,j)=>{const lx=x0+j*w+8;font(true,look==='b'?11:12.5);put(it.v,lx,y+16);font(false,7.5,MUT);put(it.l,lx,y+28);});
+      P.setDrawColor(...(look==='b'?INK:LINE));P.setLineWidth(.6);if(look==='b')P.rect(x0,y,CW,36);else{P.line(x0,y,x1,y);P.line(x0,y+36,x1,y+36);}
+      y+=44;}
+    y+=4;
+  };
+  // a table, its heading row again on every page
+  const table=tb=>{
+    const hr=tb.tHead&&tb.tHead.rows[tb.tHead.rows.length-1];if(!hr)return;
+    const n=hr.cells.length,head=[...hr.cells].map(tx),num=[...hr.cells].map(c=>c.classList.contains('ck-num')||c.classList.contains('rp-te'));
+    const rows=[];[...tb.tBodies].concat(tb.tFoot?[tb.tFoot]:[]).forEach(b=>[...b.rows].forEach(r=>{if(r.classList.contains('rp-hide'))return;rows.push(r.cells.length===n?{c:[...r.cells].map(tx),tot:b===tb.tFoot||r.classList.contains('rp-b8')}:{g:tx(r)});}));
+    const fs=n>9?6.8:n>6?7.4:8;font(false,fs);
+    const wd=head.map((h,j)=>{let m=P.getTextWidth(h)+10;for(const r of rows.slice(0,300))if(r.c)m=Math.max(m,Math.min(P.getTextWidth(r.c[j])+10,CW*0.45));return Math.max(26,m);});
+    const sum=wd.reduce((a,b)=>a+b,0),k=CW/sum,ws=wd.map(w=>w*k);
+    const lh=fs*1.25,pad=4;
+    const cellX=j=>x0+ws.slice(0,j).reduce((a,b)=>a+b,0);
+    const drawHead=()=>{font(true,fs-.4,MUT);const lines=head.map((h,j)=>wrap(h,ws[j]-pad*2));const hh=Math.max(...lines.map(l=>l.length))*lh+pad*2;need(hh+lh*2);
+      lines.forEach((ls,j)=>ls.forEach((l,i)=>put(l,num[j]?cellX(j)+ws[j]-pad:cellX(j)+pad,y+pad+lh*(i+.8),num[j]?'right':'left')));y+=hh;rule(y,INK,.9);};
+    drawHead();
+    for(const r of rows){
+      if(r.g!=null){if(need(lh+pad*2+4))drawHead();P.setFillColor(238,243,239);P.rect(x0,y,CW,lh+pad*2,'F');font(true,fs);put(r.g,x0+pad,y+pad+lh*.8);y+=lh+pad*2;continue;}
+      font(r.tot,fs);const lines=r.c.map((c,j)=>wrap(c,ws[j]-pad*2));const rh=Math.max(1,...lines.map(l=>l.length))*lh+pad*2;
+      if(need(rh))drawHead();
+      lines.forEach((ls,j)=>ls.forEach((l,i)=>put(l,num[j]?cellX(j)+ws[j]-pad:cellX(j)+pad,y+pad+lh*(i+.8),num[j]?'right':'left')));
+      y+=rh;if(r.tot&&look==='b'){rule(y,INK,.6);rule(y+2,INK,.6);y+=3;}else rule(y,[230,232,227],.4);
+    }
+    y+=10;
+  };
+  const para=(s,b,sz,c,a)=>{if(!s)return;font(b,sz,c);wrap(s,CW).forEach(l=>{need(sz*1.4);put(l,a==='right'?x1:x0,y+sz,a);y+=sz*1.4;});};
+  const walk=el=>{
+    for(const e of el.children){
+      if(e.hidden||getComputedStyle(e).display==='none'||e.classList.contains('rp-tools'))continue;
+      const tg=e.tagName;
+      if(e.classList.contains('totals')){tiles(e);continue;}
+      if(tg==='TABLE'){table(e);continue;}
+      if(/^H[1-4]$/.test(tg)||e.classList.contains('rp-nath')){need(30);y+=6;para(tx(e),true,10.5);y+=2;continue;}
+      if(e.classList.contains('rp-row')){const v=e.querySelector('strong,b');need(13);font(e.classList.contains('rp-sub'),8.5,e.classList.contains('rp-sub')?MUT:INK);put(tx(e).replace(v?tx(v):'','').trim(),x0+(e.classList.contains('rp-sub')?12:0),y+9);font(true,8.5);put(v?tx(v):'',x1-x0+M,y+9,'right');y+=13;continue;}
+      if(tg==='svg'||tg==='IMG'||tg==='CANVAS'||tg==='SCRIPT')continue;
+      if(tg==='UL'||tg==='OL'){[...e.children].forEach(li=>para('•  '+tx(li),false,8.5));y+=4;continue;}
+      const blocks=[...e.children].some(c=>/^(DIV|TABLE|SECTION|UL|OL|H[1-4]|P)$/.test(c.tagName)||c.classList.contains('totals'));
+      if(blocks){walk(e);continue;}
+      const s=tx(e);if(s)para(s,false,8.5,INK);
+    }
+  };
+  const main=d.querySelector('.rx-main');if(main)walk(main);
+  d.querySelectorAll('.mm-chip,.mm-note').forEach(e=>para(tx(e),e.classList.contains('mm-chip'),9,INK,'right'));
+  // the foot of every page
+  const pages=P.getNumberOfPages(),foot='MicroMobility · '+kind+(noTxt?' · '+noTxt:'');
+  for(let i=1;i<=pages;i++){P.setPage(i);rule(H-FOOT+6,LINE,.5);font(false,7,MUT);put(foot,x0,H-FOOT+18);put(t('repPageOf').replace('{0}',i).replace('{1}',pages),x1-x0+M,H-FOOT+18,'right');}
+  return P.output('blob');
+}
+// ── A report as cells: the Excel workbook and the CSV read the drawn report, so every report exports the same way ──
+function _rxVal(td){
+  const tx=_rpCellTxt(td);
+  if(!tx||/%/.test(tx))return tx;
+  const n=_rpNum(tx);return n!=null&&/^[^\p{L}]*(SAR|ر\.س)?[^\p{L}]*$/u.test(tx)?n:tx;
+}
+function _rxTableRows(tb){
+  const hr=tb.tHead&&tb.tHead.rows[tb.tHead.rows.length-1];if(!hr)return null;
+  const n=hr.cells.length,head=[...hr.cells].map(_rpCellTxt),rows=[],st=[];
+  [...tb.tBodies].concat(tb.tFoot?[tb.tFoot]:[]).forEach(b=>[...b.rows].forEach(r=>{
+    if(r.classList.contains('rp-hide'))return;
+    if(r.cells.length===n){rows.push([...r.cells].map(_rxVal));st.push(b===tb.tFoot||r.classList.contains('rp-b8')||r.querySelector('.rp-tot')?5:0);}
+    else{const tx=_rpCellTxt(r);if(tx){rows.push([tx,...Array(n-1).fill('')]);st.push(5);}}
+  }));
+  return{head,rows,st,n};
+}
+function _rxMainRows(d){
+  let best=null;d.querySelectorAll('.rx-main table').forEach(tb=>{if(tb.closest('.rx-facts'))return;const x=_rxTableRows(tb);if(x&&(!best||x.rows.length>best.rows.length))best=x;});
+  return best?[best.head,...best.rows]:[];
+}
+function _rxSheets(d){
+  const V=S._rxv||{},sum=[],sumSt=[];
+  const add=(a,b,st)=>{sum.push([a,b==null?'':b]);sumSt.push(st||0);};
+  add(V.kind||'',V.no||'',5);
+  const tl=d.querySelector('.rx-title');if(tl)add(_rpCellTxt(tl),'');
+  d.querySelectorAll('.rx-meta > span').forEach(x=>{const b=x.querySelector('b');add(_rpCellTxt(x).replace(b?_rpCellTxt(b):'','').trim(),b?_rpCellTxt(b):'');});
+  d.querySelectorAll('.rx-main .total-item').forEach(x=>{const l=x.querySelector('.total-lbl'),v=x.querySelector('.total-num');if(l&&v)add(_rpCellTxt(l),_rxVal(v));});
+  d.querySelectorAll('.rx-main .rp-row').forEach(x=>{const v=x.querySelector('strong,b');if(v)add(_rpCellTxt(x).replace(_rpCellTxt(v),'').trim(),_rxVal(v),x.classList.contains('rp-sub')?0:0);});
+  const sheets=[{name:t('rxSummary'),head:[t('rxItem'),t('ckValue')],rows:sum,st:sumSt,widths:[34,22]}];
+  let i=0;
+  d.querySelectorAll('.rx-main table').forEach(tb=>{
+    if(tb.closest('.rx-facts'))return;const x=_rxTableRows(tb);if(!x||!x.rows.length)return;i++;
+    let h=tb.previousElementSibling;while(h&&!/^H[1-4]$/.test(h.tagName)&&!h.classList.contains('rp-nath'))h=h.previousElementSibling;
+    const widths=x.head.map((c,j)=>Math.max(8,Math.min(40,Math.max(String(c).length,...x.rows.slice(0,200).map(r=>String(r[j]==null?'':r[j]).length))+2)));
+    sheets.push({name:(h?_rpCellTxt(h):'')||(t('rxTable')+' '+i),head:x.head,rows:x.rows,st:x.st,widths,filter:true});
+  });
+  return sheets;
 }
 // ── Sort and filter inside a report (the owner, 2026-10-11: "make me be able to sort and filter whats
 // inside all reports") ──
@@ -45548,7 +45980,8 @@ function _openReport(html,w,h,win,ready_){
 // A group heading (rp-grp) keeps its rows under it, sorted among themselves and gone when none is left;
 // a total line, an empty line or any row with a merged cell stays where it is, unfiltered.
 const _RP_DIGITS={'٠':0,'١':1,'٢':2,'٣':3,'٤':4,'٥':5,'٦':6,'٧':7,'٨':8,'٩':9,'۰':0,'۱':1,'۲':2,'۳':3,'۴':4,'۵':5,'۶':6,'۷':7,'۸':8,'۹':9};
-function _rpCellTxt(td){return td?String(td.textContent||'').replace(/\s+/g,' ').trim():'';}
+// a cell's words, a space between the pieces it is drawn in ("SAR 60.00 Card", not "SAR 60.00Card": 2026-11-13, the PDF and the workbook read it too)
+function _rpCellTxt(td){if(!td)return'';let s='';const w=n=>{for(const c of n.childNodes){if(c.nodeType===3)s+=c.nodeValue;else if(c.nodeType===1){s+=' ';w(c);s+=' ';}}};w(td);return s.replace(/\s+/g,' ').trim();}
 function _rpBlank(v){return v===''||v==='—'||v==='-'||v==='–';}
 // A cell as a number when it holds exactly one, beside nothing but a unit or a currency ("SAR 1,310.00",
 // "12%", "3 km"); else null, and the column sorts as words. Two numbers (18:30, 12 / 600) are words too.
@@ -45901,6 +46334,7 @@ function showPrintReportOptions(){
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showPrintReportOptions_1",_EV,_EL)}">
     <div class="modal-box rpt-w520" role="dialog" aria-modal="true" aria-labelledby="dlgt-expTitle">
       <div class="modal-title" id="dlgt-expTitle">${t('expTitle')}</div>
+      ${_rbBar('session',{get:()=>_repOpts(),set:o=>{S._repOpts=Object.assign(_repDefaults(),o);_repSave();showPrintReportOptions();},print:()=>printSessionReport(),reopen:()=>showPrintReportOptions()})}
       <div class="rpt-sub">${t('expChoose')}</div>
 
       <div class="rpt-lbl4">${t('repOptCols')}</div>
@@ -46741,6 +47175,7 @@ function showAccountReportOptions(){
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showAccountReportOptions_1",_EV,_EL)}">
     <div class="modal-box rpt-w640" role="dialog" aria-modal="true" aria-labelledby="dlgt-acrTitle">
       <div class="modal-title" id="dlgt-acrTitle">${t(_def?'acrEditDefTitle':'acrTitle')}</div>
+      ${_rbBar('acc',{get:()=>_accOpts(),set:o=>{S._accOpts=Object.assign(_accDefaults(),o);_accSave();showAccountReportOptions();},print:()=>{_openReport(_accReportHtml(),1200,800);},reopen:()=>showAccountReportOptions()})}
       <div class="rpt-sub">${t(_def?'acrEditDefSub':'acrSub')}</div>
 
       <div class="rpt-lbl4">${t('repOptCols')}</div>
@@ -46910,7 +47345,7 @@ function _accReportHtml(title){
     <table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
     ${(o.sections.tags&&tagRows)?`<h2>${t('acrSectTags')}</h2>
     <table><thead><tr><th>${t('acrFilterTag')}</th><th>${t('acrHolders')}</th><th>${t('acrOnList')}</th></tr></thead><tbody>${tagRows}</tbody></table>`:''}`;
-  return _reportShell({kind:title,title,docTitle:title,body:html,maxWidth:'1100px'});
+  return _reportShell({rid:'acc',kind:title,title,docTitle:title,body:html,maxWidth:'1100px'});
 }
 // Every account's details on paper: the same gate as the file below (2026-10-05) - admins only, with
 // the operator's PIN - since the printed report carries the same names, phones and emails.
@@ -47151,7 +47586,7 @@ function printCloseout(){
     :`<div class="rp-none">${t('coNoSales')}</div>`}
     <div class="rp-grand">${row('<strong>'+t('coGrand')+' &middot; '+t('printCollected')+'</strong>',grandCollected)}${grandCollected>0?split(grandCard,grandCash,rentUnk,r2(rentWal+coWal),rentOnl):''}${row('<strong>'+t('coGrand')+' &middot; '+t('printPending')+'</strong>',grandPending,{warn:1})}
     ${Math.abs(reconDelta)>=0.01?`<div class="rp-recon-off"><span>${t('coReconOff')}</span><span>${_rpSar(reconDelta)}</span></div>`:`<div class="rp-recon-ok">${t('coReconOk')} &#x2713;</div>`}</div>`;
-  const html=_reportShell({kind:t('closeoutTitle'),title:t('closeoutTitle'),subtitle:`${dayLabel(sel.day)} &middot; ${shortDate(date)}${_bfAt(sel)?` &middot; ${esc(_bfAt(sel))}`:''}`,body,maxWidth:'560px'});
+  const html=_reportShell({rid:'close',kind:t('closeoutTitle'),title:t('closeoutTitle'),subtitle:`${dayLabel(sel.day)} &middot; ${shortDate(date)}${_bfAt(sel)?` &middot; ${esc(_bfAt(sel))}`:''}`,body,maxWidth:'560px'});
   _openReport(html,620,800);
 }
 // Saturday Social Ride roster: every live rider with the details staff need on the ground —
@@ -47209,7 +47644,7 @@ function printCommunityRoster(sess){
       <thead><tr><th>#</th><th>${t('nameLabel')}</th>${_showMem?`<th>${t('colMember')}</th>`:''}${_ptn?`<th>${t('colPartner')}</th>`:''}<th>${t('repColPhone')}</th>${_bike?`<th>${t('heightLabel')}</th><th>${t('repColType')}</th>`:''}<th>${t('colStatus')}</th>${_ig?`<th>${t('igTitle')}</th>`:''}</tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
-  const html=_reportShell({
+  const html=_reportShell({rid:'roster',
     kind:t('printReportTitle'),
     title:esc(_evName(sess)+_sgDot(sess)), // what staff called it, else the ride's own name - never the umbrella one now that unnamed rides store no title; and who can book it (2026-10-27)
     subtitle:`${dayLabel(sess.day)} &middot; ${shortDate(sess.session_date||sess.id)}${_bfAt(sess)?` &middot; ${esc(_bfAt(sess))}`:''}`,
@@ -47348,7 +47783,7 @@ function printSessionReport(km){
     </table>
     <div class="rp-salesline">${t('printCollected')}: <strong>${_rpSar(sessPurch.collected)}</strong>${sessPurch.pending>0?` &nbsp;·&nbsp; ${t('printPending')}: <strong class="rp-amber">${_rpSar(sessPurch.pending)}</strong>`:''}${sessPurch.team>0?` &nbsp;·&nbsp; ${t('payTeam')}: <strong>${_rpSar(sessPurch.team)}</strong>`:''}${sessPurch.free>0?` &nbsp;·&nbsp; ${t('onTheHouseLabel')}: <strong>${_rpSar(sessPurch.free)}</strong>`:''}</div>`:''}`;
   const _sTime=(()=>{try{return sessionTime(sess);}catch(_){return'';}})();
-  const html=_reportShell({
+  const html=_reportShell({rid:km?'run':'session',
     kind:t('printReportTitle'),
     title:`${dayLabel(sess.day)} &middot; ${shortDate(sess.session_date||sess.sessionDate||sess.id)}${_sTime?` &middot; ${_sTime}`:''} &middot; ${esc(_evName(sess)+_sgDot(sess))}${_km!=null?` &middot; ${esc(_repKmName(_km))}`:''}`, // the ride's name in the reader's language: a Petromin, workshop or swim sheet no longer says Corniche Circuit in English
     subtitle:_bfAt(sess)?esc(_bfAt(sess)):'',
@@ -47389,7 +47824,7 @@ async function _selaRows(){
   return{sess,rows,head:[t('repColSeq'),t('runNumLabel'),t('colStatus'),t('nameLabel'),t('repColEmail'),t('birthDateLabel'),t('runKmLabel'),t('emTitle'),t('emPhone'),t('selaColRel')]};
 }
 async function printSelaReport(){
-  const win=window.open('','_blank','width=1200,height=760'); // on the tap: a window opened after the read would be blocked
+  const win=null; // the report opens in the viewer inside the site (2026-11-13): no window to open on the tap
   const d=await _selaRows();
   if(!d){try{win&&win.close();}catch(_){}return;}
   const b=d.rows.filter(r=>!r.wl),tile=(n,l)=>`<div class="total-item"><span class="total-num">${n}</span><span class="total-lbl">${esc(l)}</span></div>`;
@@ -47398,7 +47833,7 @@ async function printSelaReport(){
     <table><thead><tr>${d.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
     <tbody>${d.rows.map(r=>`<tr${r.wl?' class="rp-wl"':''}>${r.cells.map((v,i)=>`<td${i===0?' class="rp-seq"':i===1?' class="rp-b7"':i===3?' class="rp-name"':''}><bdi>${esc(v)||'—'}</bdi></td>`).join('')}</tr>`).join('')}</tbody></table>`;
   const s=d.sess;
-  const html=_reportShell({kind:t('selaRepBtn'),title:`${shortDate(s.session_date||s.id)} &middot; ${esc(_evName(s))}`,
+  const html=_reportShell({rid:'sela',kind:t('selaRepBtn'),title:`${shortDate(s.session_date||s.id)} &middot; ${esc(_evName(s))}`,
     refNo:'MM-RPT-'+String(s.session_date||s.id).slice(2,10).replace(/-/g,'')+'-SELA',maxWidth:'1180px',body});
   logAction(t('logPrintedReport'));_piiExport(t('selaRepBtn'),d.rows.length,_piiCols(d.head),'print');
   if(_openReport(html,1200,760,win)===null)toast(t('repPopupBlocked'),'info');
@@ -47973,12 +48408,12 @@ function _vrbXlsx(sheets,fname){
   document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(url);},4000);
 }
 async function printVlReport(sid,opts){
-  const win=window.open('','_blank','width=1300,height=760'); // on the tap: a window opened after the read would be blocked
+  const win=null; // the report opens in the viewer inside the site (2026-11-13): no window to open on the tap
   if(!opts)_vrbDropStale(sid||S.sfSession);
   const o=opts||_vrbOpts(),d=await _vrbLoad(sid);
   if(!d){try{win&&win.close();}catch(_){}return;}
   const b=_vrbBuild(d,o),s=d.sess,what=_vrbLabel(o,s);
-  const html=_reportShell({kind:esc(what),title:`${shortDate(s.session_date||s.id)} &middot; ${esc(_evName(s))}`,
+  const html=_reportShell({rid:'vl',kind:esc(what),title:`${shortDate(s.session_date||s.id)} &middot; ${esc(_evName(s))}`,
     refNo:'MM-RPT-'+String(s.session_date||s.id).slice(2,10).replace(/-/g,'')+'-VL',maxWidth:b.cols.length>12?'1500px':'1180px',body:_vrbHtml(d,o,b)});
   logAction(t('logPrintedReport'));_piiExport(what,b.rows.length,_piiCols(b.cols.map(c=>t(c.key))),'print');
   if(_openReport(html,1300,760,win)===null)toast(t('repPopupBlocked'),'info');
@@ -48025,7 +48460,7 @@ async function exportVlXlsx(sid,opts){
 // athlete with the ticked details, the payment and the receipt picture (vl_receipts, read here, 20 at a time);
 // a Doubles team is one block headed Doubles team with its code, the partners side by side.
 async function printVlReceipts(sid){
-  const win=window.open('','_blank','width=1100,height=760');
+  const win=null; // the report opens in the viewer inside the site (2026-11-13)
   _vrbDropStale(sid||S.sfSession); // the Bookings bar prints without opening the builder: a pick saved for the other race kind goes too
   const o=_vrbOpts(),d=await _vrbLoad(sid);
   if(!d){try{win&&win.close();}catch(_){}return;}
@@ -48048,7 +48483,7 @@ async function printVlReceipts(sid){
     ${b.groups.map(g=>`${g.lbl?`<h2>${esc(g.lbl)}</h2>`:''}${g.units.map(u=>u.team
       ?`<div class="vrc-team"><div class="vrc-team-h"><bdi>${esc(_vrbTeamHead(u))}</bdi></div><div class="vrc-pair">${u.rows.map(r=>card(r,u)).join('')}</div></div>`
       :`<div class="vrc-solo">${card(u.rows[0],u)}</div>`).join('')}`).join('')||`<div class="rp-none">${t('vrbNoRows')}</div>`}`;
-  const html=_reportShell({kind:esc(t('vrbRcTitle')),title:`${shortDate(s.session_date||s.id)} &middot; ${esc(_evName(s))}`,
+  const html=_reportShell({rid:'vlrc',kind:esc(t('vrbRcTitle')),title:`${shortDate(s.session_date||s.id)} &middot; ${esc(_evName(s))}`,
     refNo:'MM-RPT-'+String(s.session_date||s.id).slice(2,10).replace(/-/g,'')+'-VLR',maxWidth:'1100px',body});
   logAction(t('logPrintedReport'));_piiExport(t('vrbRcTitle'),n,_piiCols(cols.map(c=>t(c.key))),'print');
   if(_openReport(html,1100,760,win)===null)toast(t('repPopupBlocked'),'info');
@@ -48102,6 +48537,7 @@ function _vrbPaint(){
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_vrb_bd",_EV,_EL)}">
     <div class="modal-box rpt-w640" role="dialog" aria-modal="true" aria-labelledby="dlgt-vrb">
       <div class="modal-title" id="dlgt-vrb">${_vrbAr()?`${esc(_evName(s))} · ${t('vrbBtn')}`:t('vrbTitle')}</div>
+      ${_rbBar('vl',{get:()=>_vrbOpts(),set:o=>{S._vrbO=Object.assign(_vrbDefaults(),o);_vrbSave();_vrbPaint();},print:()=>printVlReport(st.sid),reopen:()=>_vrbPaint()})}
       <div class="rpt-sub">${esc(_evName(s))} · ${esc(shortDate(s.session_date||s.id))}. ${t('vrbSub')}</div>
       <div class="rpt-lbl4">${t('vrbStartFrom')}</div>
       <div class="rr-presets">${Object.keys(VRB_SETS).filter(k=>_vrbAr()?!VRB_AR_OFF.includes(k):k!=='org').map(k=>`<button type="button" data-vrb-set="${k}" class="btn-sm ${o.set===k?'btn-primary':'btn-secondary'}" aria-pressed="${o.set===k?'true':'false'}" data-on-click="${_on("_vrbUseSet",k)}">${esc(t(VRB_SETKEYS[k]))}</button>`).join('')}</div>
@@ -48368,11 +48804,11 @@ function _prbHtml(d,o,b){
   return out.join('\n')||`<div class="rp-none">${t('vrbNoRows')}</div>`;
 }
 async function printPtnReport(sid){
-  const win=window.open('','_blank','width=1300,height=760'); // on the tap: a window opened after the read would be blocked
+  const win=null; // the report opens in the viewer inside the site (2026-11-13): no window to open on the tap
   const o=_prbOpts(),d=await _prbLoad(sid);
   if(!d){try{win&&win.close();}catch(_){}return;}
   const b=_prbBuild(d,o),s=d.sess,what=_prbTitle(s.id);
-  const html=_reportShell({kind:esc(what),title:`${shortDate(s.session_date||s.id)} &middot; ${esc(_evName(s))}`,
+  const html=_reportShell({rid:'ptn',kind:esc(what),title:`${shortDate(s.session_date||s.id)} &middot; ${esc(_evName(s))}`,
     refNo:'MM-RPT-'+String(s.session_date||s.id).slice(2,10).replace(/-/g,'')+'-PT',maxWidth:b.cols.length>12?'1500px':'1180px',body:_prbHtml(d,o,b)});
   logAction(t('logPrintedReport'));_piiExport(what,b.rows.length,_piiCols(b.cols.map(c=>t(c.key))),'print');
   if(_openReport(html,1300,760,win)===null)toast(t('repPopupBlocked'),'info');
@@ -48459,6 +48895,7 @@ function _prbPaint(){
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_vrb_bd",_EV,_EL)}">
     <div class="modal-box rpt-w640" role="dialog" aria-modal="true" aria-labelledby="dlgt-prb">
       <div class="modal-title" id="dlgt-prb">${esc(_prbTitle(st.sid))}</div>
+      ${_rbBar('ptn',{get:()=>_prbOpts(),set:o=>{S._prbO=Object.assign(_prbDefaults(),o);_prbSave();_prbPaint();},print:()=>printPtnReport(st.sid),reopen:()=>_prbPaint()})}
       <div class="rpt-sub">${esc(_evName(s))} · ${esc(shortDate(s.session_date||s.id))}. ${t('prbSub')}</div>
       <div class="rpt-lbl4">${t('prbGroups')}</div>
       <div class="rpt-gridf2">${gl.map(([k,l,p])=>{const n=cnt(k);return row('gOff',k,`${l}${n!=null?` · ${n}${p!=null&&k!=='mem'?' / '+p:''}`:''}`,!o.gOff[k]);}).join('')}</div>
@@ -48542,7 +48979,7 @@ function printBreakfastReport(){
       :`<div class="rp-none">${t('bfRepNoWhy')}</div>`}`
     :`<div class="rp-none">${t('vndRgNone')}</div>`}`;
   const venues=[...new Set(day.map(_bfName).filter(Boolean))].join(', '); // in the reader's language, as every other report names it (2026-10-07)
-  const html=_reportShell({
+  const html=_reportShell({rid:'bfo',
     kind:t('bfRepKind'),
     title:esc(_evName(sess)),
     subtitle:`${dayLabel(sess.day)} &middot; ${shortDate(ds)}${venues?` &middot; ${esc(t('bfRepVenue').replace('{0}',venues))}`:''}`,
@@ -55454,7 +55891,7 @@ function printRidersReport(co){
   // The total is the dark tile and the table's last row; the chip under it said it a third time.
   // Its rows are numbered 1, 2, 3 (an invoice line-up; the P-number is on the badge), so the column
   // says No., not the Booking No. it was headed with.
-  _openReport(_reportShell({kind:t('ridersReport'),title:`${esc(co)} &middot; ${esc(sessLabel)}`,docTitle:co+' '+sessLabel,body}));
+  _openReport(_reportShell({rid:'bill',kind:t('ridersReport'),title:`${esc(co)} &middot; ${esc(sessLabel)}`,docTitle:co+' '+sessLabel,body}));
 }
 
 // ── Form steps (2026-11-11) ───────────────────────────────────────────────────
@@ -60025,81 +60462,222 @@ function _cssvApply(root){
   });
 }
 
+// ── The chart kit (2026-11-13, the reports rework; the user: "enhance and improve the way all graphs and tables and
+// visualizations are aligned and their design and how they look like") ──────────────────────────────────────────────
+// One drawing for the staff site's charts and the printed reports' charts:
+// - axis values are round (_ckNice), in full under 10,000 and short above it (_ckNum: 12.5K, 1.2M);
+// - grid and baseline are solid hairlines; lines are 2px; one series gets a 10% wash under it; bars are thin, at most
+//   24px, with a 4px rounded end and a square foot;
+// - the end of each line is marked and the main one says its last value; nothing else is labelled point by point;
+// - colours come by role from tokens (styles.css, body.view-staff): --ck-1..--ck-6 in a fixed order checked for
+//   colour-blind and normal-vision separation in light and dark (series 1 is the brand green), --ck-cmp for a
+//   comparison (last year, capacity, the total billed), --ck-st-ok/warn/bad for a status; text never wears a series
+//   colour;
+// - two series or more get a legend; hover, a tap or the arrow keys read a point out (_ckInit), and every chart has its
+//   numbers in a table under it (ck-tv, closed until opened).
+// The plot is SVG stretched to its card (preserveAspectRatio none, strokes that keep their width); the words and dots
+// around it are HTML placed by percent (data-cssv), so text never stretches and a chart fills its card at any width.
+// Time runs left to right in every language (the plot is dir="ltr"); the value axis sits on the reading side.
+const CK_W=1000,CK_H=300;
+function _ckNice(max,count){
+  if(!(max>0))return{top:1,ticks:[0,1]};
+  const raw=max/(count||4),mag=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/mag;
+  const step=(f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*mag,top=Math.ceil(max/step-1e-9)*step,ticks=[];
+  for(let i=0;i*step<=top+step/2;i++)ticks.push(Math.round(i*step*1e6)/1e6);
+  return{top,ticks};
+}
+// an axis number: in full under 10,000, short above (one style per axis: the largest tick decides)
+function _ckNum(v,unit,big){
+  const n=Number(v)||0,a=Math.max(Math.abs(n),big||0);
+  const s=!n?'0':a>=1e6?(Math.round(n/1e5)/10).toLocaleString('en-US')+'M':a>=1e4?(Math.round(n/100)/10).toLocaleString('en-US')+'K':(Math.round(n*100)/100).toLocaleString('en-US');
+  return (unit||'')+s;
+}
+// a value read out in full (the tooltip, the end label, the table)
+function _ckFull(v,unit,suf){return (unit||'')+(Math.round((Number(v)||0)*100)/100).toLocaleString('en-US')+(suf||'');}
+// which x labels to print: about six, evenly, the last always; every other one goes on a narrow card (ck-xo)
+function _ckXIdx(n,want){
+  const step=Math.max(1,Math.ceil((n-1)/((want||6)-1))),out=[];
+  for(let i=0;i<n;i+=step)out.push(i);
+  if(out[out.length-1]!==n-1){if(out.length>1&&n-1-out[out.length-1]<step)out.pop();out.push(n-1);}
+  return out;
+}
+function _ckPos(x,y){const o={};if(x!=null)o['--x']=(+x).toFixed(2)+'%';if(y!=null)o['--y']=(+y).toFixed(2)+'%';return _cssv(o);}
+// the value axis: its labels in a gutter as wide as the longest one, each centred on its grid line
+function _ckYAxis(nice,unit){
+  const big=nice.top,lab=nice.ticks.map(v=>_ckNum(v,unit,big));
+  const w=Math.max(...lab.map(s=>s.length));
+  return{gutter:(w*0.62+0.9).toFixed(2)+'em',html:`<div class="ck-ya" aria-hidden="true">${nice.ticks.map((v,i)=>`<span class="ck-yl" data-cssv="${_ckPos(null,100-v/nice.top*100)}">${esc(lab[i])}</span>`).join('')}</div>`};
+}
+function _ckGrid(nice){
+  return nice.ticks.map(v=>{const y=(CK_H-v/nice.top*CK_H).toFixed(1);return`<line class="${v?'ck-gl':'ck-base'}" x1="0" x2="${CK_W}" y1="${y}" y2="${y}" vector-effect="non-scaling-stroke"/>`;}).join('');
+}
+function _ckXAxis(labels,at){
+  const n=labels.length,idx=_ckXIdx(n),yr=labels.map(l=>(String(l).match(/\s(\d{4})$/)||[])[1]);
+  if(n>1&&yr[0]&&yr.every(y=>y===yr[0]))labels=labels.map(l=>String(l).slice(0,-5)); // one year on every label: said in the read-out and the table
+  return`<div class="ck-x" dir="ltr" aria-hidden="true">${idx.map((i,j)=>{const x=at(i);return`<span class="ck-xl${x<=2?' ck-x0':x>=98?' ck-xn':''}${j%2&&i!==n-1?' ck-xo':''}" data-cssv="${_ckPos(x)}">${esc(labels[i])}</span>`;}).join('')}</div>`;
+}
+function _ckLegend(items){
+  return items.length>1?`<ul class="ck-leg">${items.map(s=>`<li><i class="ck-sw ${s.k}"></i>${esc(s.n)}</li>`).join('')}</ul>`:'';
+}
+// the numbers under a chart, as a table (closed until opened): one row per x, one column per series
+function _ckTable(labels,series,unit,suf){
+  return`<details class="ck-tv"><summary>${esc(t('ckTable'))}</summary><div class="ck-tvw"><table data-noalign><thead><tr><th></th>${series.map(s=>`<th class="ck-num">${esc(s.n)}</th>`).join('')}</tr></thead><tbody>${
+    labels.map((l,i)=>`<tr><td>${esc(l)}</td>${series.map(s=>`<td class="ck-num">${esc(_ckFull(s.v[i],unit,suf))}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`;
+}
+// A line chart over time. series: [{vals,label,fill,dashed}] - a dashed series is a comparison and is drawn grey; the
+// others take the series colours in order. labels: one per point. opts.unitPfx ('SAR '), opts.suf ('%'), opts.h (px).
 function _areaChart(series,labels,opts={}){
-  const {W=460,H=148,unitPfx=''}=opts;
   const n=labels.length;
   if(!n)return`<div class="an-nodata-chart">${t('anNoData2')}</div>`;
-  const pL=44,pR=14,pT=14,pB=28,cW=W-pL-pR,cH=H-pT-pB;
-  const maxV=Math.max(...series.flatMap(s=>s.vals),1);
-  const xOf=i=>pL+(n===1?cW/2:i/(n-1)*cW);
-  const yOf=v=>pT+cH-(v/maxV)*cH;
-  const nth=Math.ceil(n/7);
-  let defs='',paths='';
-  series.forEach(s=>{
-    const pts=s.vals.map((v,i)=>[xOf(i),yOf(v)]);
-    const lD=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
-    const aD=`M${pts[0][0].toFixed(1)},${(pT+cH).toFixed(1)} ${pts.map(p=>`L${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ')} L${pts[n-1][0].toFixed(1)},${(pT+cH).toFixed(1)}Z`;
-    if(s.fill!==false){
-      const gid='g'+_uid();
-      defs+=`<linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${s.color}" stop-opacity=".25"/><stop offset="100%" stop-color="${s.color}" stop-opacity=".02"/></linearGradient>`;
-      paths+=`<path d="${aD}" fill="url(#${gid})"/>`;
-    }
-    paths+=`<path d="${lD}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"${s.dashed?' stroke-dasharray="5 4"':''}/>`;
-    pts.forEach((p,i)=>{if(n<=14||i%2===0||i===n-1)paths+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${n>10?2.5:3}" fill="${s.color}" stroke="rgba(10,10,10,.7)" stroke-width="1.5"/>`;});
-  });
-  const grid=[0,.25,.5,.75,1].map(pct=>{
-    const v=maxV*pct,y=(pT+cH-pct*cH).toFixed(1);
-    return`<line x1="${pL}" y1="${y}" x2="${pL+cW}" y2="${y}" stroke="rgba(var(--tint-rgb),.04)" stroke-width="1"/><text x="${pL-5}" y="${(parseFloat(y)+4).toFixed(1)}" font-size="11" text-anchor="end" fill="rgba(var(--tint-rgb),.28)">${unitPfx}${Math.round(v)}</text>`;
-  }).join('');
-  const xlbls=labels.map((l,i)=>{
-    if(i%nth!==0&&i!==n-1)return'';
-    const align=i===0?'start':i===n-1?'end':'middle';
-    return`<text x="${xOf(i).toFixed(1)}" y="${H-5}" font-size="11" text-anchor="${align}" fill="rgba(var(--tint-rgb),.28)">${l}</text>`;
-  }).join('');
-  // Hover columns with native tooltips: exact per-point values for every series
-  const bandW=cW/Math.max(n,1);
-  const hover=labels.map((l,i)=>{
-    const tip=l+'\n'+series.map(s=>`${s.label}: ${opts.unitPfx||''}${Math.round(s.vals[i])}`).join('\n');
-    return`<rect class="an-hit" x="${(xOf(i)-bandW/2).toFixed(1)}" y="${pT}" width="${bandW.toFixed(1)}" height="${cH}" fill="transparent"><title>${tip}</title></rect>`;
-  }).join('');
-  return`<svg class="an-area-svg" viewBox="0 0 ${W} ${H}" height="${H}"><defs>${defs}</defs>${grid}${paths}${xlbls}${hover}</svg>`;
+  _ckInit();
+  const unit=opts.unitPfx||'',suf=opts.suf||'';
+  let slot=0;
+  const sv=series.map(s=>({n:String(s.label||''),v:(s.vals||[]).map(x=>Number(x)||0),cmp:!!s.dashed,fill:s.fill!==false&&!s.dashed,k:s.dashed?'ck-cmp':'ck-c'+(1+(slot++%6))}));
+  const nice=_ckNice(Math.max(1,...sv.flatMap(s=>s.v)),4),ya=_ckYAxis(nice,unit);
+  const X=i=>n===1?50:i/(n-1)*100,yp=v=>100-v/nice.top*100;
+  const px=i=>(X(i)*CK_W/100).toFixed(1),py=v=>(yp(v)*CK_H/100).toFixed(1);
+  const mains=sv.filter(s=>!s.cmp),wash=mains.length===1&&mains[0].fill?mains[0]:null;
+  let svg=_ckGrid(nice);
+  if(wash)svg+=`<path class="ck-area ${wash.k}" d="M${px(0)},${CK_H} ${wash.v.map((v,i)=>`L${px(i)},${py(v)}`).join(' ')} L${px(n-1)},${CK_H}Z"/>`;
+  // comparisons first, so the main line runs over them
+  [...sv.filter(s=>s.cmp),...mains].forEach(s=>{svg+=`<path class="ck-line ${s.k}" d="${s.v.map((v,i)=>(i?'L':'M')+px(i)+','+py(v)).join(' ')}" vector-effect="non-scaling-stroke"/>`;});
+  const last=n-1,dots=mains.map(s=>`<i class="ck-dot ${s.k}" data-cssv="${_ckPos(X(last),yp(s.v[last]))}"></i>`).join('');
+  const endLbl=mains.length?`<span class="ck-end" data-cssv="${_ckPos(X(last),yp(mains[0].v[last]))}">${esc(_ckFull(mains[0].v[last],unit,suf))}</span>`:'';
+  const name=sv.map(s=>s.n).filter(Boolean).join(', ');
+  const data=_cssv({k:'line',l:labels.map(String),s:sv.map(s=>({n:s.n,v:s.v,k:s.k})),u:unit,f:suf});
+  return`<figure class="ck ck-line" data-ck="${data}" data-cssv="${_cssv({'--ck-g':ya.gutter,'--ck-h':(opts.h||160)+'px'})}">${_ckLegend(sv)}
+    <div class="ck-body">${ya.html}<div class="ck-plot" dir="ltr" tabindex="0" role="img" aria-label="${esc(name)}">
+      <svg class="ck-svg" viewBox="0 0 ${CK_W} ${CK_H}" preserveAspectRatio="none" aria-hidden="true">${svg}</svg>${dots}${endLbl}<i class="ck-cross" hidden></i></div></div>
+    ${_ckXAxis(labels,X)}${_ckTable(labels,sv,unit,suf)}</figure>`;
 }
-
-function _donut(segs,size=110){
-  const total=segs.reduce((s,d)=>s+d.v,0);
-  if(!total)return`<div class="an-nodata-donut">${t('anNoData2')}</div>`;
-  const r=34,cx=size/2,cy=size/2,sw=13,C=2*Math.PI*r;
-  let off=-0.25;
-  const arcs=segs.filter(d=>d.v>0).map(d=>{
-    const pct=d.v/total,rot=(off*360).toFixed(2);
-    off+=pct;
-    return`<circle class="an-hit" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.c}" stroke-width="${sw}" stroke-dasharray="${(C*pct).toFixed(2)} ${(C*(1-pct)).toFixed(2)}" transform="rotate(${rot} ${cx} ${cy})"><title>${d.label?d.label+': ':''}${d.v} (${Math.round(pct*100)}%)</title></circle>`;
-  }).join('');
-  return`<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" class="an-donut-svg"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(var(--tint-rgb),.07)" stroke-width="${sw}"/>${arcs}<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" font-size="15" font-weight="600" class="an-donut-total">${total}</text></svg>`; // the theme's ink: a white total vanished on the white card of the light theme
-}
-
+// Columns, one per label. data: [{label,v,st}] - st 'bad'/'warn'/'ok' paints a column as a status (with its key in the
+// legend, opts.stKey); the rest are series 1. opts: unit, suf ('%'), refVal + refLabel (a reference line), h.
 function _vbars(data,opts={}){
-  const {W=320,H=130,color='#6ee89a',refVal=null}=opts;
   const n=data.length;
   if(!n)return`<div class="an-nodata-bars">${t('anNoData2')}</div>`;
-  const pL=8,pR=8,pT=10,pB=22,cW=W-pL-pR,cH=H-pT-pB;
-  const maxV=Math.max(...data.map(d=>d.v),refVal||0,1);
-  const bW=Math.max(5,cW/n-4);
-  const xOf=i=>pL+(i+.5)*(cW/n);
-  const yOf=v=>pT+cH-(v/maxV)*cH;
-  const nth=Math.ceil(n/8);
-  const barsHtml=data.map((d,i)=>{
-    const bH=Math.max(2,(d.v/maxV)*cH);
-    return`<rect class="an-hit" x="${(xOf(i)-bW/2).toFixed(1)}" y="${(pT+cH-bH).toFixed(1)}" width="${bW.toFixed(1)}" height="${bH.toFixed(1)}" rx="2" fill="${d.c||color}" opacity=".85"><title>${d.label}: ${d.v}%</title></rect>${(i%nth===0||i===n-1)?`<text x="${xOf(i).toFixed(1)}" y="${H-4}" font-size="11" text-anchor="middle" fill="rgba(var(--tint-rgb),.3)">${d.label}</text>`:''}`;
-  }).join('');
-  const refLine=refVal!==null?`<line x1="${pL}" y1="${yOf(refVal).toFixed(1)}" x2="${pL+cW}" y2="${yOf(refVal).toFixed(1)}" stroke="rgba(var(--tint-rgb),.2)" stroke-width="1" stroke-dasharray="4 3"/>`:'' ;
-  return`<svg class="an-bars-svg" viewBox="0 0 ${W} ${H}" height="${H}">${refLine}${barsHtml}</svg>`;
+  _ckInit();
+  const unit=opts.unit||'',suf=opts.suf||'';
+  const vals=data.map(d=>Math.max(0,Number(d.v)||0)),nice=_ckNice(Math.max(1,opts.refVal||0,...vals),4),ya=_ckYAxis(nice,unit);
+  const X=i=>(i+.5)/n*100;
+  const cols=data.map((d,i)=>`<span class="ck-slot"><i class="ck-cb ${d.st?'ck-st-'+d.st:'ck-c1'}" data-cssv="${_cssv({'--h':(vals[i]/nice.top*100).toFixed(2)+'%'})}"></i></span>`).join('');
+  const ref=opts.refVal!=null?`<i class="ck-ref" data-cssv="${_ckPos(null,100-opts.refVal/nice.top*100)}"><span>${esc(opts.refLabel||_ckFull(opts.refVal,unit,suf))}</span></i>`:'';
+  const labels=data.map(d=>String(d.label||''));
+  const key=opts.stKey&&data.some(d=>d.st)?`<ul class="ck-leg">${opts.stKey.map(k=>`<li><i class="ck-sw ck-st-${k[0]}"></i>${esc(k[1])}</li>`).join('')}</ul>`:'';
+  const dataAttr=_cssv({k:'col',l:labels,s:[{n:opts.name||'',v:vals,k:'ck-c1'}],u:unit,f:suf});
+  return`<figure class="ck ck-colc" data-ck="${dataAttr}" data-cssv="${_cssv({'--ck-g':ya.gutter,'--ck-h':(opts.h||150)+'px'})}">${key}
+    <div class="ck-body">${ya.html}<div class="ck-plot" dir="ltr" tabindex="0" role="img" aria-label="${esc(opts.name||'')}">
+      <svg class="ck-svg" viewBox="0 0 ${CK_W} ${CK_H}" preserveAspectRatio="none" aria-hidden="true">${_ckGrid(nice)}</svg><div class="ck-cols">${cols}</div>${ref}</div></div>
+    ${_ckXAxis(labels,X)}${_ckTable(labels,[{n:opts.name||t('ckValue'),v:vals}],unit,suf)}</figure>`;
+}
+// One whole in parts (was a donut): a 28px bar, each part its share of the width with its share printed inside when
+// there is room, and a legend in the bar's order with each part's count and share. segs: [{v,label,k}] - k a colour
+// class (ck-c1..6, ck-st-*, ck-cmp); without one, parts take the series colours in order.
+function _donut(segs){
+  const parts=(segs||[]).filter(d=>Number(d.v)>0),total=parts.reduce((s,d)=>s+Number(d.v),0);
+  if(!total)return`<div class="an-nodata-donut">${t('anNoData2')}</div>`;
+  const pc=d=>Number(d.v)/total*100,k=(d,i)=>d.k||'ck-c'+(1+i%6);
+  const lab=d=>String(d.label||'').replace(/<[^>]*>/g,'');
+  return`<figure class="ck ck-seg"><div class="ck-segbar" role="img" aria-label="${esc(parts.map(d=>lab(d)+' '+Math.round(pc(d))+'%').join(', '))}">${
+    parts.map((d,i)=>`<span class="ck-sp ${k(d,i)}" data-cssv="${_cssv({'--w':pc(d).toFixed(3)})}" title="${esc(lab(d)+': '+d.v+' ('+Math.round(pc(d))+'%)')}">${pc(d)>=12?`<b>${Math.round(pc(d))}%</b>`:''}</span>`).join('')}</div>
+    <ul class="ck-leg ck-leg-v">${parts.map((d,i)=>`<li><i class="ck-sw ${k(d,i)}"></i><span class="ck-ln">${esc(lab(d))}</span><b>${esc(String(d.v))}</b><span class="ck-lp">${Math.round(pc(d))}%</span></li>`).join('')}</ul></figure>`;
+}
+// A meter: one share of a whole, its fill coloured by how it stands (ok / warn / bad), the track a light step of it.
+function _ckMeter(pct,st,label){
+  const p=Math.max(0,Math.min(100,Math.round(Number(pct)||0)));
+  return`<div class="ck-meter ck-st-${st||'ok'}" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}" aria-label="${esc(label||'')}"><i data-cssv="${_cssv({'--w':p+'%'})}"></i></div>`;
+}
+// Tables line up one way everywhere (2026-11-13): a column of quantities - counts, money, shares, a "22 / 30" - sits at
+// the end of its cells in figures of one width, its heading over it; words, dates, names and identifiers (a booking,
+// badge or phone number, a code, a year) stay at the start. Each staff table is read once, when it is drawn: a column
+// is a quantity when every sampled cell holding anything is a number with at most a unit beside it, and its heading
+// does not name an identifier. A table that lays itself out says data-noalign.
+const CK_ID_HEAD=/(^|[\s(])(no\.?|#|id|number|booking|badge|phone|mobile|code|ref|year|رقم|الرقم|هاتف|جوال|الجوال|كود|الكود|السنة)([\s).:]|$)/i;
+function _ckIsNum(s){
+  s=String(s||'').replace(/[٠-٩]/g,d=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))).replace(/[۰-۹]/g,d=>String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\s+/g,' ').trim();
+  if(!s||/^[—–-]$/.test(s))return null;
+  if(!/\d/.test(s))return false;
+  return s.replace(/SAR|ر\.س|ريال|excl\.?|incl\.?|km|cm|kg|min|[\d\s,.%٫٬/+\-−·×()]/gi,'')==='';
+}
+function _ckAlignTables(root,any){ // any: a report's own document (the viewer's frame), where there is no staff page
+  if(!root||!root.querySelectorAll||!any&&!(document.body&&document.body.classList.contains('view-staff')))return;
+  const tbs=root.tagName==='TABLE'?[root]:root.querySelectorAll('table');
+  for(const tb of tbs){
+    if(tb._ckA||tb.hasAttribute('data-noalign')||!tb.tHead||!tb.tBodies.length)continue;
+    tb._ckA=1;
+    const hr=tb.tHead.rows[tb.tHead.rows.length-1];if(!hr)continue;
+    const ths=[...hr.cells];if(!ths.length||ths.some(c=>c.colSpan>1))continue;
+    const all=[...tb.tBodies].flatMap(b=>[...b.rows]).concat(tb.tFoot?[...tb.tFoot.rows]:[]).filter(r=>r.cells.length===ths.length);
+    const sample=all.slice(0,40);if(!sample.length)continue;
+    ths.forEach((th,j)=>{
+      if(th.classList.contains('ck-num')||CK_ID_HEAD.test(th.textContent.trim()))return;
+      let num=0,txt=0;
+      for(const r of sample){const c=r.cells[j];if(c.querySelector('button,select,input,textarea')){txt++;break;}const v=_ckIsNum(c.textContent);if(v)num++;else if(v===false){txt++;break;}}
+      if(num&&!txt){th.classList.add('ck-num');all.forEach(r=>r.cells[j].classList.add('ck-num'));}
+    });
+  }
+}
+let _ckAlignMo=null;
+function _ckAlignOn(){
+  if(_ckAlignMo||!document.body)return;
+  _ckAlignMo=new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1&&(n.tagName==='TABLE'||n.firstElementChild))_ckAlignTables(n);});
+  _ckAlignMo.observe(document.body,{childList:true,subtree:true});
+  _ckAlignTables(document.body);
+}
+// A ranked bar's colour: a status the caller meant (red, amber) stays one; any other colour (a green ladder, a hue per
+// name) becomes series 1 - one measure, one colour; the rank is the bar's length.
+function _ckBarC(c){c=String(c||'');return /red|#d90909|#a33b2e|#ff6f66/i.test(c)?'var(--ck-st-bad)':/orange|amber|#8a5c14|#e08828|#f2b43f/i.test(c)?'var(--ck-st-warn)':'var(--ck-1)';}
+// A bike type's colour, the same in every chart whatever its rank (colour follows the thing, never its place).
+const CK_TYPE_SLOT={Road:1,Hybrid:2,Mountain:3,Gravel:4,'Road Carbon':5,Kids:6};
+function _ckTypeK(ty){const n=CK_TYPE_SLOT[ty];return n?'ck-c'+n:'ck-cmp';}
+// Hover, tap and the arrow keys over a chart: the crosshair (lines) or the column (columns), the points of each series
+// and a read-out of the x label and each series' value. Wired once, from the first chart drawn; no script runs in a
+// chart's markup (the page's policy), so it listens on the document.
+let _ckOn=false;
+function _ckInit(){
+  if(_ckOn||!document.body)return;_ckOn=true;
+  const tip=document.createElement('div');tip.className='ck-tip';tip.hidden=true;tip.setAttribute('aria-hidden','true');document.body.appendChild(tip);
+  let cur=null;
+  const dat=fig=>{if(!fig)return null;if(fig._ck===undefined){try{fig._ck=JSON.parse(fig.getAttribute('data-ck')||'null');}catch(_){fig._ck=null;}}return fig._ck;};
+  const hide=()=>{if(!cur)return;tip.hidden=true;const p=cur.p;p.querySelectorAll('.ck-hd').forEach(e=>e.remove());const c=p.querySelector('.ck-cross');if(c)c.hidden=true;p.querySelectorAll('.ck-on').forEach(e=>e.classList.remove('ck-on'));cur=null;};
+  const show=(p,i,cx,cy)=>{
+    const fig=p.closest('.ck'),d=dat(fig);if(!d||!d.l||!d.l.length)return;
+    const n=d.l.length;i=Math.max(0,Math.min(n-1,i));
+    if(cur&&cur.p!==p)hide();
+    cur={p,i};
+    p.querySelectorAll('.ck-hd').forEach(e=>e.remove());p.querySelectorAll('.ck-on').forEach(e=>e.classList.remove('ck-on'));
+    const top=Math.max(1,...d.s.flatMap(s=>s.v)),nice=_ckNice(top,4);
+    if(d.k==='line'){
+      const x=n===1?50:i/(n-1)*100,c=p.querySelector('.ck-cross');if(c){c.hidden=false;c.style.setProperty('--x',x+'%');}
+      d.s.forEach(s=>{const e=document.createElement('i');e.className='ck-hd '+s.k;e.style.setProperty('--x',x+'%');e.style.setProperty('--y',(100-(Number(s.v[i])||0)/nice.top*100)+'%');p.appendChild(e);});
+    }else{const cb=p.querySelectorAll('.ck-slot')[i];if(cb)cb.classList.add('ck-on');}
+    tip.innerHTML=`<b class="ck-tl">${esc(d.l[i])}</b>${d.s.map(s=>`<span class="ck-tr"><i class="ck-sw ${esc(s.k)}"></i><span>${esc(s.n)}</span><b>${esc(_ckFull(s.v[i],d.u,d.f))}</b></span>`).join('')}`;
+    tip.hidden=false;
+    const r=p.getBoundingClientRect(),tw=tip.offsetWidth,th=tip.offsetHeight;
+    const ax=cx!=null?cx:r.left+(d.k==='line'?(n===1?.5:i/(n-1)):(i+.5)/n)*r.width,ay=cy!=null?cy:r.top;
+    let lx=ax+14;if(lx+tw>innerWidth-8)lx=ax-14-tw;if(lx<8)lx=8;
+    let ly=ay-th-12;if(ly<8)ly=Math.min(innerHeight-th-8,ay+16);
+    tip.style.setProperty('--tx',Math.round(lx)+'px');tip.style.setProperty('--ty',Math.round(ly)+'px');
+  };
+  const at=(p,e)=>{const d=dat(p.closest('.ck'));if(!d)return 0;const r=p.getBoundingClientRect(),f=(e.clientX-r.left)/Math.max(1,r.width),n=d.l.length;return d.k==='line'?Math.round(f*(n-1)):Math.floor(f*n);};
+  const move=e=>{const p=e.target&&e.target.closest&&e.target.closest('.ck-plot');if(!p){hide();return;}show(p,at(p,e),e.clientX,e.clientY);};
+  document.addEventListener('pointermove',move,{passive:true});
+  document.addEventListener('pointerdown',move,{passive:true});
+  document.addEventListener('scroll',hide,{passive:true,capture:true});
+  document.addEventListener('focusout',e=>{if(e.target&&e.target.classList&&e.target.classList.contains('ck-plot'))hide();});
+  document.addEventListener('keydown',e=>{
+    const p=e.target&&e.target.classList&&e.target.classList.contains('ck-plot')?e.target:null;if(!p)return;
+    const d=dat(p.closest('.ck'));if(!d)return;
+    const k=e.key,n=d.l.length;let i=cur&&cur.p===p?cur.i:(k==='ArrowLeft'||k==='End'?n:-1);
+    if(k==='ArrowRight')i++;else if(k==='ArrowLeft')i--;else if(k==='Home')i=0;else if(k==='End')i=n-1;else if(k==='Escape'){hide();return;}else return;
+    e.preventDefault();show(p,i);
+  });
 }
 
 
 function setAnRange(v){S.analyticsRange=v;renderAnalytics();}
 // Analytics sub-tab switching: sections are tagged with <div class="an-anchor" data-anview="..."> markers; show only those belonging to the active view (no re-render needed).
 function setAnView(v){
+  if(v==='reports'){S._rp2Want='auto';setStaffTab('reports');return;} // the automatic reports moved to the Reports section (2026-11-13)
   S.anView=v;
   renderAnalytics(); // with nothing moved since the last build this only shows the view (drawn from the kept markup the first time)
   _pushNav(); // the address follows the view (/analytics/ratings...)
@@ -62522,7 +63100,7 @@ function _exDraw(noLoad){
     <div class="mny-filters">
       ${_rngFields('_exS','_exLoad')}
       <label class="mny-fld"><span>${t('exOperator')}</span><select class="filter-select" aria-label="${esc(t('exOperator'))}" data-on-change="${_on("_on_ex_op",_EV,_EL)}"><option value="">${t('filterAll')}</option>${ops.map(o=>`<option value="${esc(o)}"${E.op===o?' selected':''}>${esc(o)}</option>`).join('')}</select></label>
-      <button type="button" class="btn-secondary" data-on-click="${_on("_exPrint")}">${_artIcon('print',12)} ${t('repPrintNow')}</button>
+      ${isAdmin()?`<button type="button" class="btn-secondary" data-on-click="${_on("_exPrint")}">${_artIcon('print',12)} ${t('repPrintNow')}</button>`:''}
       <button type="button" class="btn-secondary" data-on-click="${_on("_exCsv")}">${_artIcon('download',12)} ${t('logsExportBtn')}</button>
     </div>
     ${E.busy?`<div class="mny-empty">${t('loadingLabel')}</div>`:''}
@@ -62551,7 +63129,7 @@ function _exPrint(){
   const body=`<div class="totals">${EX_TYPES.map(([k,l])=>`<div class="total-item"><span class="total-num">${sum[k].n} · ${_rpSar(sum[k].amt)}</span><span class="total-lbl">${t(l)}</span></div>`).join('')}</div>
     <table><thead><tr><th>${t('colDate')}</th><th>${t('exType')}</th><th>${t('exWhat')}</th><th>${t('logColAmount')}</th><th>${t('exOperator')}</th><th>${t('exReason')}</th></tr></thead>
     <tbody>${list.map(i=>`<tr><td>${esc(_auWhen(i.at))}</td><td>${esc(_exTypeName(i.type))}</td><td>${esc(i.what.join(', '))}${i.cust?' · <bdi>'+esc(i.cust)+'</bdi>':''}</td><td>${_rpAmt(i.amt)}</td><td><bdi>${esc(i.op||'—')}</bdi></td><td>${esc(i.reason||'')}</td></tr>`).join('')||`<tr><td colspan="6" class="rp-empty">—</td></tr>`}</tbody></table>`;
-  _openReport(_reportShell({kind:t('exTitle'),title:t('exTitle'),subtitle:`${E.from} → ${E.to}${E.op?' · '+esc(E.op):''}`,body}));
+  _openReport(_reportShell({rid:'exc',kind:t('exTitle'),title:t('exTitle'),subtitle:`${E.from} → ${E.to}${E.op?' · '+esc(E.op):''}`,body}));
   logAction(`${t('exTitle')}: ${E.from} → ${E.to}`);
 }
 
@@ -62857,7 +63435,7 @@ function _tillHistDraw(noLoad){
       ${rows.map(r=>`<tr><td>${esc(shortDate(r.day))}</td><td>${esc(_tillCtxName(r))}</td><td><bdi>${esc(r.opened_by_name||_personName(r.opened_by)||'—')}</bdi></td><td>${_money(r.float)}</td>
         <td>${r.expected_cash!=null?_money(r.expected_cash):'—'}</td><td>${r.counted_cash!=null?_money(r.counted_cash):'—'}</td><td>${r.closed_at&&r.counted_cash!=null?_tillVar(v(r)):`<span class="mny-mut">${t('tillStatusOpen')}</span>`}</td>
         <td>${r.card_terminal_total!=null?`${_money(r.card_terminal_total)}<div class="mny-mut">${t('tillCardExp')} ${_money(r.card_expected)}</div>`:'—'}</td><td><bdi>${esc(r.closed_by_name||_personName(r.closed_by)||'')}</bdi></td>
-        <td><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_tillZ",r.id)}">${t('tillZ')}</button></td></tr>`).join('')}
+        <td>${isAdmin()?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_tillZ",r.id)}">${t('tillZ')}</button>`:''}</td></tr>`).join('')}
     </tbody></table></div>
     <div class="mny-grid2">
       <div><h4 class="mny-h4">${t('tillByStaff')}</h4><table class="mny-t"><tbody>${Object.entries(byStaff).map(([w,a])=>`<tr><td><bdi>${esc(w)}</bdi></td><td>${a.n}</td><td>${_tillVar(a.v)}</td></tr>`).join('')||'<tr><td>—</td></tr>'}</tbody></table></div>
@@ -62867,7 +63445,7 @@ function _tillHistDraw(noLoad){
 }
 // The Z-report: one till's day on paper - float, takings by payment, the counts and the close.
 async function _tillZ(id){
-  const w=window.open('','_blank','width=1000,height=760'); // on the tap: a window opened after the reads below is blocked
+  const w=null; // the Z-report opens in the viewer inside the site (2026-11-13): no window to open on the tap
   // The till as it is now (bug hunt 2026-11-10, app40-2): the one this device just closed, else the database's row; History >
   // Till's copy only when that cannot be read. That copy, loaded while the till was open, printed a closed till as open.
   let row=S._till&&S._till.last&&S._till.last.id===id?S._till.last:null;
@@ -62911,7 +63489,7 @@ async function _tillZ(id){
     ${counts.length?`<h2>${t('tillCounts')}</h2><table><thead><tr><th>${t('logsColTime')}</th><th>${t('logsColBy')}</th><th>${t('drawerCounted')}</th><th>${t('drawerExpected')}</th><th>${t('tillNotes')}</th></tr></thead><tbody>${counts.map(k=>`<tr><td>${esc(_auWhen(k.at))}</td><td><bdi>${esc(k.counted_by_name||'')}</bdi></td><td>${_rpAmt(k.counted_cash)}</td><td>${_rpAmt(k.expected_cash)}</td><td>${esc(k.note||'')}</td></tr>`).join('')}</tbody></table>`:''}
     ${deps&&deps.length?`<h2>${t('depZTitle')}</h2><table><thead><tr><th>${t('depColWho')}</th><th>${t('logColAmount')}</th><th>${t('depColHow')}</th><th>${t('depColState')}</th></tr></thead><tbody>${deps.map(d=>`<tr><td><bdi>${esc(d.customer_name||'')}</bdi></td><td>${_rpAmt(d.amount)}</td><td>${esc(_depMethodName(d.method))}${d.ref?' · '+esc(d.ref):''}</td><td>${d.returned_at?(Number(d.kept_amount)>0?esc(t('depStateKept').replace('{0}',_money(d.kept_amount,_NOISO)))+(d.kept_reason?' · '+esc(d.kept_reason):''):esc(t('depStateBack'))):esc(t('depStateHeld'))}</td></tr>`).join('')}</tbody></table>`:''}
     ${tot.cats.length?`<h2>${t('coSales')}</h2><table><tbody>${tot.cats.map(x=>`<tr><td>${esc(_invCatLabel(x.cat))} ×${x.qty}</td><td>${_rpAmt(x.value)}</td></tr>`).join('')}</tbody></table>`:''}`;
-  const win=_openReport(_reportShell({kind:t('tillZ'),title:c.label,subtitle:shortDate(row.day),body,refNo:'MM-Z-'+String(row.day).replace(/-/g,'').slice(2)}),1000,760,w);
+  const win=_openReport(_reportShell({rid:'z',kind:t('tillZ'),title:c.label,subtitle:shortDate(row.day),body,refNo:'MM-Z-'+String(row.day).replace(/-/g,'').slice(2)}),1000,760,w);
   if(win)logAction(`${t('tillZ')} · ${c.label}`,{k:'till_z',e:'till',id});else toast(t('repPopupBlocked'),'info');
 }
 
@@ -63103,7 +63681,7 @@ function renderCashier(){
         ${_outboxCount()?`<div role="button" tabindex="0" data-on-click="${_on("_outboxRetryOrClear")}" data-on-keydown="${_on("_on_renderCashier_3",_EV,_EL)}" title="${t('cashPendingSync').replace('{0}',_outboxCount())}" class="sl-sync">↻ ${t('cashPendingSync').replace('{0}',_outboxCount())}</div>`:''}</div>
       <div class="sl-head-r">
         <label class="filter-sess"><span class="filter-field-lbl">${t('colSession')}</span>${_spk(`<select id="ct-sess-sel" aria-label="${esc(t('colSession'))}" data-on-change="${_on("_ctSet","_ctSession",_P("value"))}" class="filter-select sl-sess">${sessOpts}</select>`)}</label>
-        ${shop?'':`<button class="btn-secondary sl-nowrap" data-on-click="${_on("printCloseout")}">${t('closeoutBtn')}</button>`}
+        ${shop||!isAdmin()?'':`<button class="btn-secondary sl-nowrap" data-on-click="${_on("printCloseout")}">${t('closeoutBtn')}</button>`}
         <button class="btn-secondary sl-nowrap" data-on-click="${_on("recordDrawerCount")}">${t('tillBtn')}</button>
       </div>
     </div>
@@ -68796,7 +69374,7 @@ function _rrReportHtml(){
       });
     }
   }
-  return _reportShell({kind:t('rrKind'),title:esc(_rrSpan(days,_rrRangeName(o.range))),subtitle:esc(_rrRangeName(o.range)),docTitle:t('rrKind'),
+  return _reportShell({rid:'rate',kind:t('rrKind'),title:esc(_rrSpan(days,_rrRangeName(o.range))),subtitle:esc(_rrRangeName(o.range)),docTitle:t('rrKind'),
     refNo:'MM-RTG-'+todayStr().slice(2).replace(/-/g,''),note:esc((anon?t('rrNoteAnon')+' ':'')+t('rrNote')),body:parts.join(''),maxWidth:'1200px'});
 }
 // The restaurant's sheet: anonymous, the breakfast part only. Every rating is a date and five scores, the
@@ -68833,7 +69411,7 @@ function _rrBfReportHtml(){
       parts.push(`<h2>${t('bfRepWhy')}<span class="rp-h2n">${list.length}</span></h2>${list.length?list.map(c=>_rrSaid(_rgLabel(c.k),c.v,c.text,[shortDate(c.r.day),many?c.r.venue:''])).join(''):`<div class="rp-none">${t('bfRepNoWhy')}</div>`}`);
     }
   }
-  return _reportShell({kind:t('bfRepKind'),title:esc(vName),
+  return _reportShell({rid:'bf',kind:t('bfRepKind'),title:esc(vName),
     subtitle:esc(one?`${s1&&s1.day?dayLabel(s1.day)+' · ':''}${rideDay?shortDate(rideDay):''}`:_rrSpan(days,t('rrAllRides'))),docTitle:t('bfRepKind'),
     refNo:'MM-BFR-'+((one&&rideDay)||todayStr()).slice(2).replace(/-/g,''),note:t('bfRepNote'),body:parts.join(''),maxWidth:'1000px'});
 }
@@ -68947,6 +69525,7 @@ function showRatingsReport(mode){
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on_showRatingsReport_1',_EV,_EL)}">
     <div class="modal-box rpt-w640 rr-dlg" data-mode="${S._rrMode}" role="dialog" aria-modal="true" aria-labelledby="dlgt-rr">
       <div class="modal-title" id="dlgt-rr">${t(bf?'rrBfTitle':'rrTitle')}</div>
+      ${_rbBar(bf?'bf':'rate',{get:()=>_rrO(),set:o=>{if(S._rrMode==='bf')S._rrBfOpts=Object.assign(_rrBfDefaults(),o);else S._rrOpts=Object.assign(_rrDefaults(),o);_rrSave();showRatingsReport();},print:()=>{_openReport(S._rrMode==='bf'?_rrBfReportHtml():_rrReportHtml(),1200,800);},reopen:()=>showRatingsReport()})}
       <div class="rr-pills rr-modes" role="group" aria-label="${esc(t('rrFor'))}">
         <button type="button" class="filter-pill${bf?'':' active'}" aria-pressed="${bf?'false':'true'}" data-on-click="${_on('showRatingsReport','team')}">${t('rrForTeam')}</button>
         <button type="button" class="filter-pill${bf?' active':''}" aria-pressed="${bf?'true':'false'}" data-on-click="${_on('showRatingsReport','bf')}">${t('rrForBf')}</button>
@@ -69167,6 +69746,136 @@ function _anMonthsView(){
 // (report_snapshots, migration 20261009181000; there is no e-mail). This is their inbox: open one, print it,
 // or send it on WhatsApp. Read when the view opens and kept for two minutes; without the table it says the
 // database update is pending. Admins can write today's close-out now (report_snapshot_make).
+// ── The Reports section (S5, 2026-11-13, the reports rework) ─────────────────────────────────────────────────────────
+// Every report in one place (Q11: they stay in their own sections too). Every staff account has it (F3), and it lists
+// the reports of the sections that account can open; a report that is all money only for admins (F1). Search,
+// favourites kept with the account (staff prefs state.repfav, any device), the reports printed lately, the automatic
+// ones (the nightly close-out, the Saturday KPI week, and from December the month and each company's month-end bill,
+// S8, all with how they compare, S7), and the history: every report's number, who made it and when, and Reprint (F4: a
+// money report's exact page as printed; any other made again with today's data in its own section).
+// A report opens from its own section's code: a card that needs a session picks it here, then the report's own dialog
+// opens there (a part's printing code is only reached through its entry, so nothing of it moves into the core).
+function _rp2(){return S._rp2||(S._rp2={q:'',area:'all',log:null,logErr:false,logAt:0,busy:false,open:''});}
+const RP2_AREAS=[['rides','rp2Rides'],['money','rp2Money'],['people','rp2People'],['events','rp2Events']];
+// [id, area, its name now, its section, the session it needs ('' none; any / sat / run / race / ptn), open(sid)]
+function _rp2Cat(){
+  const sess=(sid,then)=>{S.sfSession=sid;if(S.staffTab!=='queue')setStaffTab('queue');then();};
+  return[
+    ['session','rides',()=>t('printReportTitle'),'queue','any',sid=>sess(sid,()=>showPrintReportOptions())],
+    ['roster','rides',()=>t('rp2Roster'),'queue','sat',sid=>sess(sid,()=>showPrintReportOptions())],
+    ['run','rides',()=>t('rp2Run'),'queue','run',sid=>sess(sid,()=>showPrintReportOptions())],
+    ['sela','rides',()=>t('selaRepBtn'),'queue','run',sid=>sess(sid,()=>printSelaReport())],
+    ['day','rides',()=>t('daySheetTitle'),'queue','',()=>printDaySheet()],
+    ['lead','rides',()=>t('n6rLeadSheet'),'sessions','',()=>setStaffTab('sessions')],
+    ['close','money',()=>t('closeoutTitle'),'cashier','',()=>setStaffTab('cashier')],
+    ['bill','money',()=>t('ridersReport'),'queue','',()=>{S.queueView='petromin';setStaffTab('queue');setTimeout(()=>{try{openRidersReport();}catch(_){}},60);}],
+    ['z','money',()=>t('tillZ'),'history','',()=>{S.histView='till';setStaffTab('history');}],
+    ['exc','money',()=>t('exTitle'),'history','',()=>{S.histView='exceptions';setStaffTab('history');}],
+    ['pay','money',()=>t('rp2Pay'),'team','',()=>{S.teamView='parttimers';setStaffTab('team');}],
+    ['acc','people',()=>t('acrTitle'),'community','',()=>showAccountReportOptions()],
+    ['rate','people',()=>t('rrKind'),'analytics','',()=>{S.anView='ratings';setStaffTab('analytics');}],
+    ['bf','people',()=>t('bfRepKind'),'analytics','',()=>{S.anView='ratings';setStaffTab('analytics');}],
+    ['height','people',()=>t('anHeightReport'),'analytics','',()=>setStaffTab('analytics')],
+    ['bday','people',()=>t('bdWkKind'),'community','',()=>_pplGo('community','birthdays')],
+    ['vol','people',()=>t('zbTitle'),'volunteers','',()=>setStaffTab('volunteers')],
+    ['vl','events',()=>t('vrbTitle'),'queue','race',sid=>sess(sid,()=>_vrbOpen(sid))],
+    ['vlrc','events',()=>t('vrbRcTitle'),'queue','race',sid=>sess(sid,()=>printVlReceipts(sid))],
+    ['ptn','events',()=>t('rp2Ptn'),'queue','ptn',sid=>sess(sid,()=>_prbOpen(sid))],
+  ];
+}
+function _rp2Ok(c){return (!REPORT_MONEY[c[0]]||isAdmin())&&_deskTabOk(c[3]);}
+function _rp2Sessions(kind){
+  const qb=kind==='ptn'?_qBySession():null;
+  return(S.sessions||[]).filter(s=>s&&s.status!=='deleted'&&(kind==='any'||kind==='sat'&&_isCommunity(s)||kind==='run'&&_isRun(s)||kind==='race'&&_isRace(s)||kind==='ptn'&&(qb.get(s.id)||[]).some(e=>e.partner)))
+    .sort(_sessOrder).slice(0,80);
+}
+function _rp2Fav(id){const f=new Set(_pref('state.repfav',[])||[]);if(f.has(id))f.delete(id);else f.add(id);_prefSet('state.repfav',[...f].slice(0,40));renderReports();}
+function _rp2Set(k,v){const R=_rp2();R[k]=v;renderReports();}
+let _rp2T=0;function _rp2Search(v){const R=_rp2();R.q=String(v||'');clearTimeout(_rp2T);_rp2T=setTimeout(()=>{_rp2Paint(true);},140);}
+function _rp2Run(id){
+  const c=_rp2Cat().find(x=>x[0]===id);if(!c)return;
+  if(!_rp2Ok(c)){toast(t('adminOnlyMsg'),'error');return;}
+  let sid='';
+  if(c[4]){const sel=document.getElementById('rp2-s-'+id);sid=sel&&sel.value||'';if(!sid){toast(t('rp2Pick'),'info');return;}}
+  c[5](sid);
+}
+// the history: the latest 150 lines this account may read (a money line is an admin's)
+async function _rp2LogLoad(force){
+  const R=_rp2();if(!sb||R.busy)return;
+  if(!force&&(R.log||R.logErr)&&Date.now()-R.logAt<60000)return;
+  R.busy=true;
+  let r;try{r=await sb.from('report_log').select('id,no,report,title,money,via,rows,by_user,by_name,at,opts').order('at',{ascending:false}).limit(150);}catch(e){r={error:e};}
+  R.busy=false;R.logAt=Date.now();
+  if(r.error){R.logErr=true;R.missing=_rpcAbsent(r.error)||/PGRST205|42P01/.test(String(r.error.code||''));}else{R.log=r.data||[];R.logErr=false;R.missing=false;}
+  if(S.view==='staff'&&S.staffTab==='reports')_rp2Paint();
+}
+async function _rp2Reprint(id){
+  const R=_rp2(),x=(R.log||[]).find(l=>String(l.id)===String(id));if(!x)return;
+  const c=_rp2Cat().find(k=>k[0]===x.report);
+  if(x.money){
+    if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return;}
+    let r;try{r=await sb.from('report_copies').select('html').eq('log_id',x.id).maybeSingle();}catch(e){r={error:e};}
+    if(r&&!r.error&&r.data&&r.data.html){_rxView(r.data.html,{no:x.no});return;}
+    toast(t('rp2NoCopy'),'info');
+  }
+  if(!c){toast(t('rp2NoCopy'),'info');return;}
+  const sid=x.opts&&x.opts.sid;
+  if(c[4]&&sid&&_sessGet(sid)){c[5](sid);return;}
+  if(c[4]){R.area=c[1];R.q='';renderReports();setTimeout(()=>{const el=document.querySelector(`[data-rp2="${c[0]}"]`);if(el)el.scrollIntoView({block:'center'});},50);return;}
+  c[5]('');
+}
+function _rp2Me(){try{return localStorage.getItem('cq_role_uid')||'';}catch(_){return'';}}
+function _rp2Name(id){const c=_rp2Cat().find(k=>k[0]===id);return c?c[2]():id;}
+function _rp2Card(c,fav){
+  const on=fav.has(c[0]),list=c[4]?_rp2Sessions(c[4]):null;
+  const pick=list?(list.length?_spk(`<select id="rp2-s-${c[0]}" class="filter-select" aria-label="${esc(t('rp2Pick'))}"><option value="">${esc(t('rp2Pick'))}</option>${list.map(s=>`<option value="${esc(s.id)}">${esc(_sessLabel(s))}</option>`).join('')}</select>`):`<span class="rp2-none">${esc(t('rp2NoSess'))}</span>`):'';
+  return`<div class="rp2-card" data-rp2="${c[0]}">
+    <div class="rp2-ch"><b class="rp2-nm">${esc(c[2]())}</b>${REPORT_MONEY[c[0]]?`<span class="rp2-tag">${esc(t('rp2AdminTag'))}</span>`:''}<button type="button" class="rp2-fav" aria-pressed="${on}" aria-label="${esc(t(on?'rp2FavOff':'rp2FavOn'))}" data-on-click="${_on('_rp2Fav',c[0])}">${_artIcon('star',15)}</button></div>
+    <span class="rp2-where">${esc(t(SECTION_KEY[c[3]]||'tabReports'))}</span>
+    ${pick?`<div class="rp2-pick">${pick}</div>`:''}
+    <button type="button" class="btn-sm btn-secondary rp2-go"${list&&!list.length?' disabled':''} data-on-click="${_on('_rp2Run',c[0])}">${esc(t('rp2Open'))}</button></div>`;
+}
+function _rp2HistHtml(n){
+  const R=_rp2();
+  if(R.missing)return`<div class="empty-state">${t('dbPending')}</div>`;
+  if(!R.log)return`<div class="empty-state">${t(R.logErr?'errConnection':'loadingLabel')}</div>`;
+  const rows=R.log.slice(0,n||150);if(!rows.length)return`<div class="empty-state">${t('rp2HistNone')}</div>`;
+  const via={print:t('repPrintNow'),pdf:'PDF',share:t('rxShare'),xlsx:'Excel',csv:'CSV'};
+  return`<div class="table-wrapper rp2-tw"><table class="rp2-hist"><thead><tr><th>${t('rxNo')}</th><th>${t('rp2HReport')}</th><th>${t('rp2HTitle')}</th><th>${t('repPreparedBy')}</th><th>${t('rp2HWhen')}</th><th>${t('rp2HVia')}</th><th></th></tr></thead><tbody>${
+    rows.map(x=>`<tr><td class="rp2-no"><bdi>${esc(x.no)}</bdi></td><td>${esc(_rp2Name(x.report))}</td><td class="rp2-ttl">${esc(x.title||'')}</td><td>${esc(x.by_name||'—')}</td><td><bdi>${esc(_rxWhen(new Date(x.at)))}</bdi></td><td>${esc(via[x.via]||x.via||'')}</td>
+      <td><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_rp2Reprint',x.id)}" title="${esc(t(x.money?'rp2Copy':'rp2Today'))}">${esc(t('rp2Reprint'))}</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function renderReports(){
+  const el=document.getElementById('tab-reports');if(!el)return;
+  const R=_rp2();if(S._rp2Want){R.area=S._rp2Want;R.q='';S._rp2Want='';}_rp2LogLoad(false);if(isAdmin())_rpiLoad(false); // the bell's close-out opens the automatic ones
+  el.innerHTML=`<div class="rp2-head"><h1 class="page-title">${t('tabReports')}</h1><div class="page-sub">${t('rp2Sub')}</div></div>
+    <div class="rp2-bar"><label class="rp2-q"><span class="sr-only">${t('rp2Search')}</span><input type="search" id="rp2-q" class="search-input" placeholder="${esc(t('rp2Search'))}" value="${esc(R.q)}" data-on-input="${_on('_rp2Search',_P('value'))}"></label>
+      <div class="filter-row rp2-areas" role="group" aria-label="${esc(t('rp2Areas'))}">${[['all','filterAll'],...RP2_AREAS,...(isAdmin()?[['auto','rp2Auto']]:[]),['hist','rp2Hist']].map(([k,l])=>`<button type="button" class="filter-pill${R.area===k?' active':''}" aria-pressed="${R.area===k}" data-on-click="${_on('_rp2Set','area',k)}">${t(l)}</button>`).join('')}</div></div>
+    <div id="rp2-body"></div>`;
+  _rp2Paint();
+}
+function _rp2Paint(keepFocus){
+  const h=document.getElementById('rp2-body');if(!h)return;
+  const R=_rp2(),q=R.q.trim().toLocaleLowerCase(),fav=new Set(_pref('state.repfav',[])||[]);
+  const cat=_rp2Cat().filter(_rp2Ok).filter(c=>!q||c[2]().toLocaleLowerCase().includes(q)||t(SECTION_KEY[c[3]]||'').toLocaleLowerCase().includes(q));
+  const grid=list=>`<div class="rp2-grid">${list.map(c=>_rp2Card(c,fav)).join('')}</div>`;
+  let out='';
+  if(R.area==='hist')out=`<h2 class="rp2-h">${t('rp2Hist')}</h2>${_rp2HistHtml()}`;
+  else if(R.area==='auto')out=_rpiInboxHtml();
+  else{
+    if(R.area==='all'&&!q){
+      const f=cat.filter(c=>fav.has(c[0]));if(f.length)out+=`<h2 class="rp2-h">${t('rp2Fav')}</h2>${grid(f)}`;
+      const me=_rp2Me(),mine=(R.log||[]).filter(x=>me&&x.by_user===me).slice(0,5);
+      if(mine.length)out+=`<h2 class="rp2-h">${t('rp2Recent')}</h2><ul class="rp2-recent">${mine.map(x=>`<li><button type="button" class="rp2-rc" data-on-click="${_on('_rp2Reprint',x.id)}"><b>${esc(_rp2Name(x.report))}</b><span>${esc(x.title||'')}</span><bdi>${esc(x.no)}</bdi></button></li>`).join('')}</ul>`;
+    }
+    RP2_AREAS.filter(([k])=>R.area==='all'||R.area===k).forEach(([k,l])=>{const list=cat.filter(c=>c[1]===k);if(list.length)out+=`<h2 class="rp2-h">${t(l)}</h2>${grid(list)}`;});
+    if(!out)out=`<div class="empty-state">${t('rp2None')}</div>`;
+    if(R.area==='all'&&!q&&isAdmin())out+=`<div class="rp2-auto">${_rpiInboxHtml()}</div>`;
+  }
+  h.innerHTML=out;_cssvApply(h);
+  if(keepFocus){const i=document.getElementById('rp2-q');if(i&&document.activeElement!==i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length);}catch(_){}}}
+}
+
 function _rpi(){return S._rep||(S._rep={rows:null,err:false,missing:false,busy:false,at:0,open:null});}
 async function _rpiLoad(force){
   // A forced read (Write now) while one is in flight runs again after it: that read reached the server before
@@ -69183,12 +69892,16 @@ async function _rpiLoad(force){
   }catch(_){R.err=true;}
   R.at=Date.now();R.busy=false;
   if(R.again){R.again=false;return _rpiLoad(true);}
-  if(S.view==='staff'&&S.staffTab==='analytics'&&S.anView==='reports')_anXPaint('reports');
+  if(S.view==='staff'&&S.staffTab==='reports')_rp2Paint();
 }
+function _rpiMonth(iso){try{return new Date(String(iso).slice(0,10)+'T12:00:00Z').toLocaleDateString(_locale(),{month:'long',year:'numeric',timeZone:'UTC'});}catch(_){return String(iso).slice(0,7);}}
 function _rpiTitle(x){
   return x.kind==='weekly_kpi'?t('repWeeklyTitle').replace('{0}',shortDate(x.period_from)).replace('{1}',shortDate(x.period_to))
+    :x.kind==='monthly_kpi'?t('repMonthlyTitle').replace('{0}',_rpiMonth(x.period_from))
+    :x.kind==='month_bill'?t('repMonthBillTitle').replace('{0}',_rpiMonth(x.period_from))
     :t('repDailyTitle').replace('{0}',shortDate(x.period_from));
 }
+function _rpiKind(x){return t(x.kind==='weekly_kpi'?'repWeeklyKind':x.kind==='monthly_kpi'?'repMonthlyKind':x.kind==='month_bill'?'repMonthBillKind':'repDailyKind');}
 function _rpiN(o,k){return Number(o&&o[k])||0;}
 // Fares paid with no method recorded: since 20261028140000 the server's cash is cash recorded as cash, so
 // they are the fares less card less cash (an older snapshot, whose cash was the rest, reads 0). The staff
@@ -69197,13 +69910,17 @@ function _mnyUnk(o,f,c,h){return Math.max(0,Math.round((_rpiN(o,f)-_rpiN(o,c)-_r
 // The report's lines, [label, value, warn] - the one source for the screen, the paper and the WhatsApp text.
 function _rpiLines(x){
   const d=x.data||{},T=d.totals||{},n=k=>_rpiN(T,k),m=v=>_money(v,_NOISO),unk=_mnyUnk(T,'rev_rides','rev_card','rev_cash');
+  if(x.kind==='month_bill'){ // one line per company: its rides and what to bill; then the rides that carry none
+    const cos=Array.isArray(d.companies)?d.companies:[];
+    return[...cos.map(c=>[String(c.name||''),`${_rpiN(c,'rides')} · ${m(_rpiN(c,'total'))}`]),...(_rpiN(d,'no_company')?[[t('rp2NoCo'),String(_rpiN(d,'no_company')),1]]:[])];
+  }
   const out=[[t('anTotalRides'),String(n('rides'))],[t('anRiders'),String(n('riders'))],[t('anCollected'),m(n('rev_rides')+n('rev_sales'))],
     [t('repCash'),m(n('rev_cash')+n('sales_cash'))],[t('repCard'),m(n('rev_card')+n('sales_card'))],...(unk>0?[[t(_cwOk()?'cwMnyUnknown':'mnyUnknown'),m(unk),1]]:[]),[t('pendingLabel'),m(n('pending'))],
     [t('statusNoshow'),String(n('noshows'))],[t('anCancellations'),String(n('cancellations'))]];
-  if(x.kind==='weekly_kpi'){
+  if(x.kind==='weekly_kpi'||x.kind==='monthly_kpi'){
     out.push([t('anAvgOccupancy'),_rpiN(d,'occupancy')+'%']);
     const pv=d.prev||{},ly=d.last_year||{},pc=(a,b)=>b?(a>=b?'+':'')+Math.round((a-b)/b*100)+'%':'—';
-    out.push([t('repVsPrevWeek'),`${t('anTotalRides')} ${pc(n('rides'),_rpiN(pv,'rides'))} · ${t('anCollected')} ${pc(n('rev_rides')+n('rev_sales'),_rpiN(pv,'rev_rides')+_rpiN(pv,'rev_sales'))}`]);
+    out.push([t(x.kind==='monthly_kpi'?'repVsPrevMonth':'repVsPrevWeek'),`${t('anTotalRides')} ${pc(n('rides'),_rpiN(pv,'rides'))} · ${t('anCollected')} ${pc(n('rev_rides')+n('rev_sales'),_rpiN(pv,'rev_rides')+_rpiN(pv,'rev_sales'))}`]);
     out.push([t('anVsLy'),`${t('anTotalRides')} ${pc(n('rides'),_rpiN(ly,'rides'))} · ${t('anCollected')} ${pc(n('rev_rides')+n('rev_sales'),_rpiN(ly,'rev_rides')+_rpiN(ly,'rev_sales'))}`]);
   }else if(d.till){
     const tl=d.till;out.push([t('repTillHouse'),m(_rpiN(tl,'house'))],[t('repTillRefunded'),m(_rpiN(tl,'refunded'))],[t('repTillVoided'),String(_rpiN(tl,'voided'))]);
@@ -69213,7 +69930,7 @@ function _rpiLines(x){
 function _rpiSessLines(x){return(x.kind==='daily_closeout'&&Array.isArray((x.data||{}).sessions))?x.data.sessions:[];}
 // The weekly report's days (by_day). Since 20261009207000 each carries its money: fares and till sales, card
 // and cash. Older snapshots have the rides alone (_rpiDayMoney false), and show those.
-function _rpiDays(x){return(x.kind==='weekly_kpi'&&Array.isArray((x.data||{}).by_day))?x.data.by_day:[];}
+function _rpiDays(x){return((x.kind==='weekly_kpi'||x.kind==='monthly_kpi')&&Array.isArray((x.data||{}).by_day))?x.data.by_day:[];}
 function _rpiDayMoney(days){return days.some(d=>d&&d.fares!==undefined);}
 function _rpiDayTot(d){return _rpiN(d,'fares')+_rpiN(d,'sales');}
 function _rpiDayName(iso){try{return new Date(iso+'T12:00:00Z').toLocaleDateString(_locale(),{timeZone:'UTC',weekday:'short',day:'numeric',month:'short'});}catch(_){return iso;}}
@@ -69238,39 +69955,87 @@ function _rpiDetailHtml(x){
   const tbl=ss.length?`<table class="analytics-trend-table an-w100" data-nosort><thead><tr><th>${t('colSession')}</th><th>${t('anTotalRides')}</th><th>${t('statusNoshow')}</th><th>${t('statusCancelled')}</th><th>${t('repFares')}</th><th>${t('anMoTill')}</th></tr></thead><tbody>${ss.map(r=>`<tr><td>${esc(r.title||'')}${r.time?` <span class="an-c-muted"><bdi>${esc(fmt12h(String(r.time).split(' - ')[0]))}</bdi></span>`:''}</td><td>${_rpiN(r,'rides')} / ${_rpiN(r,'capacity')}</td><td>${_rpiN(r,'noshows')}</td><td>${_rpiN(r,'cancelled')}</td><td>${_money(_rpiN(r,'fares'))}</td><td>${_money(_rpiN(r,'sales'))}</td></tr>`).join('')}</tbody></table>`:'';
   return`<div class="rpi-lines">${lines}</div>${tbl}${_rpiDaysHtml(x)}`;
 }
+// The printed automatic report (2026-11-13): the figures first (the collected money is look C's headline), how it compares
+// (S7: the week or month before and the same time a year ago; a day against the same day last week), the other lines,
+// each session or day with a column chart of the rides (S9). The month-end bill: one block per company.
+function _rxBarsSvg(labels,vals){
+  const n=vals.length;if(n<2)return'';
+  const W=700,H=150,G=34,top=10,bot=20,ih=H-top-bot,pw=W-G,nice=_ckNice(Math.max(1,...vals),4),slot=pw/n,bw=Math.min(22,slot*.7),idx=_ckXIdx(n,8);
+  let s=`<svg class="rx-chart" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(t('anTotalRides'))}">`;
+  nice.ticks.forEach(v=>{const y=(top+ih-v/nice.top*ih).toFixed(1);s+=`<line x1="${G}" x2="${W}" y1="${y}" y2="${y}" stroke="${v?'#e6e8e3':'#9aa39c'}" stroke-width="1"/><text x="${G-6}" y="${(+y+3).toFixed(1)}" text-anchor="end" font-size="9" fill="#5a635c">${v}</text>`;});
+  vals.forEach((v,i)=>{const h=Math.max(1,v/nice.top*ih),x=G+i*slot+(slot-bw)/2,y=top+ih-h;s+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#0c7a3d"/>`;});
+  idx.forEach(i=>{s+=`<text x="${(G+i*slot+slot/2).toFixed(1)}" y="${H-5}" text-anchor="middle" font-size="9" fill="#5a635c">${esc(labels[i])}</text>`;});
+  return s+'</svg>';
+}
+function _rpiCompare(x){
+  const d=x.data||{},T=d.totals||{};
+  let pv=null,pvL='';const ly=d.last_year&&Object.keys(d.last_year).length?d.last_year:null;
+  if(x.kind==='weekly_kpi'||x.kind==='monthly_kpi'){pv=d.prev&&Object.keys(d.prev).length?d.prev:null;pvL=t(x.kind==='monthly_kpi'?'repVsPrevMonth':'repVsPrevWeek');}
+  else if(x.kind==='daily_closeout'){const w=_isoAddDays(String(x.period_from).slice(0,10),-7),o=(_rpi().rows||[]).find(r=>r.kind==='daily_closeout'&&String(r.period_from).slice(0,10)===w);if(o&&o.data&&o.data.totals){pv=o.data.totals;pvL=t('rp2VsWeekDay');}}
+  if(!pv&&!ly)return'';
+  const v=(o,k)=>k==='coll'?_rpiN(o,'rev_rides')+_rpiN(o,'rev_sales'):_rpiN(o,k),f=(k,a)=>k==='coll'?_rpSar(a):String(a);
+  const pc=(a,b)=>b?(a>=b?'+':'')+Math.round((a-b)/b*100)+'%':'—';
+  const rows=[['rides','anTotalRides'],['riders','anRiders'],['coll','anCollected'],['noshows','statusNoshow']];
+  return`<h2>${t('rp2Compare')}</h2><table><thead><tr><th></th><th class="ck-num">${t('rp2This')}</th>${pv?`<th class="ck-num">${esc(pvL)}</th><th class="ck-num">${t('rp2Change')}</th>`:''}${ly?`<th class="ck-num">${esc(t('anVsLy'))}</th><th class="ck-num">${t('rp2Change')}</th>`:''}</tr></thead><tbody>${
+    rows.map(([k,l])=>{const a=v(T,k);return`<tr><td>${t(l)}</td><td class="ck-num">${f(k,a)}</td>${pv?`<td class="ck-num">${f(k,v(pv,k))}</td><td class="ck-num">${pc(a,v(pv,k))}</td>`:''}${ly?`<td class="ck-num">${f(k,v(ly,k))}</td><td class="ck-num">${pc(a,v(ly,k))}</td>`:''}</tr>`;}).join('')}</tbody></table>`;
+}
+function _rpiBillBody(x){
+  const d=x.data||{},cos=Array.isArray(d.companies)?d.companies:[];
+  const tile=(v,l,dk)=>`<div class="total-item${dk?' dark':''}"><span class="total-num">${v}</span><span class="total-lbl">${esc(l)}</span></div>`;
+  let h=`<div class="totals">${tile(_rpSar(cos.reduce((a,c)=>a+_rpiN(c,'total'),0)),t('rp2ToBill'),1)}${tile(cos.reduce((a,c)=>a+_rpiN(c,'rides'),0),t('anTotalRides'))}${_rpiN(d,'no_company')?tile(_rpiN(d,'no_company'),t('rp2NoCo')):''}</div>`;
+  cos.forEach(c=>{
+    h+=`<h2>${esc(c.name)}</h2><table><thead><tr><th>${t('colBike')}</th><th class="ck-num">${t('rp2Fare')}</th><th class="ck-num">${t('anTotalRides')}</th><th class="ck-num">${t('repTotal')}</th></tr></thead><tbody>${(c.by_fare||[]).map(f=>`<tr><td>${esc(typeLabel(f.type)||f.type||'')}</td><td class="ck-num">${_rpSar(f.fare)}</td><td class="ck-num">${_rpiN(f,'n')}</td><td class="ck-num">${_rpSar(_rpiN(f,'fare')*_rpiN(f,'n'))}</td></tr>`).join('')}</tbody><tfoot><tr><td>${t('repTotal')}</td><td></td><td class="ck-num">${_rpiN(c,'rides')}</td><td class="ck-num">${_rpSar(_rpiN(c,'total'))}</td></tr></tfoot></table>`;
+    h+=`<table><thead><tr><th>${t('repColSeq')}</th><th>${t('rp2Night')}</th><th>${t('rp2Badge')}</th><th>${t('nameLabel')}</th><th>${t('colBike')}</th><th class="ck-num">${t('rp2Fare')}</th></tr></thead><tbody>${(c.rows||[]).map((r,i)=>`<tr><td class="rp-seq">${i+1}</td><td>${esc(shortDate(String(r.session_id||'').slice(0,10)))}</td><td>${esc(r.badge||'')}</td><td class="rp-name">${esc(r.name||'')}</td><td>${esc(typeLabel(r.type)||r.type||'')}</td><td class="ck-num">${_rpSar(r.fare)}</td></tr>`).join('')}</tbody></table>`;
+  });
+  return h;
+}
+function _rpiReportBody(x){
+  if(x.kind==='month_bill')return _rpiBillBody(x);
+  const d=x.data||{},T=d.totals||{},n=k=>_rpiN(T,k);
+  const tile=(v,l,dk)=>`<div class="total-item${dk?' dark':''}"><span class="total-num">${v}</span><span class="total-lbl">${esc(l)}</span></div>`;
+  let h=`<div class="totals">${tile(_rpSar(n('rev_rides')+n('rev_sales')),t('anCollected'),1)}${tile(n('rides'),t('anTotalRides'))}${tile(n('riders'),t('anRiders'))}${x.kind!=='daily_closeout'?tile(_rpiN(d,'occupancy')+'%',t('anAvgOccupancy')):''}${tile(n('noshows'),t('statusNoshow'))}</div>`;
+  h+=_rpiCompare(x);
+  const skip=[t('repVsPrevWeek'),t('repVsPrevMonth'),t('anVsLy')];
+  h+=`<h2>${t('rxSummary')}</h2><table><thead><tr><th>${t('rxItem')}</th><th class="ck-num">${t('ckValue')}</th></tr></thead><tbody>${_rpiLines(x).filter(([l])=>!skip.includes(l)).map(([l,v])=>`<tr><td>${esc(l)}</td><td class="ck-num">${esc(v)}</td></tr>`).join('')}</tbody></table>`;
+  const ss=_rpiSessLines(x);
+  if(ss.length)h+=`<h2>${t('colSession')}</h2><table><thead><tr><th>${t('colSession')}</th><th class="ck-num">${t('anTotalRides')}</th><th class="ck-num">${t('statusNoshow')}</th><th class="ck-num">${t('statusCancelled')}</th><th class="ck-num">${t('repFares')}</th><th class="ck-num">${t('anMoTill')}</th></tr></thead><tbody>${ss.map(r=>`<tr><td>${esc(r.title||'')}${r.time?` <bdi>${esc(r.time)}</bdi>`:''}</td><td class="ck-num">${_rpiN(r,'rides')} / ${_rpiN(r,'capacity')}</td><td class="ck-num">${_rpiN(r,'noshows')}</td><td class="ck-num">${_rpiN(r,'cancelled')}</td><td class="ck-num">${_rpSar(_rpiN(r,'fares'))}</td><td class="ck-num">${_rpSar(_rpiN(r,'sales'))}</td></tr>`).join('')}</tbody></table>`;
+  const dd=_rpiDays(x);
+  if(dd.length)h+=`<h2>${t('repByDay')}</h2>${_rxBarsSvg(dd.map(v=>_rpiDayName(v.date)),dd.map(v=>_rpiN(v,'rides')))}${_rpiDaysHtml(x).replace(/<div class="rpi-days-h">[^<]*<\/div>/,'')}`;
+  return h;
+}
 function _rpiById(id){return(_rpi().rows||[]).find(x=>String(x.id)===String(id))||null;}
-function _rpiToggle(id){const R=_rpi();R.open=String(R.open)===String(id)?null:id;_anXPaint('reports');}
+function _rpiToggle(id){const R=_rpi();R.open=String(R.open)===String(id)?null:id;_rp2Paint();}
 function _rpiPrint(id){
   const x=_rpiById(id);if(!x)return;
-  const html=_reportShell({kind:x.kind==='weekly_kpi'?t('repWeeklyKind'):t('repDailyKind'),title:_rpiTitle(x),body:_rpiDetailHtml(x),maxWidth:'900px'});
+  const html=_reportShell({rid:x.kind==='weekly_kpi'?'weekly':x.kind==='monthly_kpi'?'monthly':x.kind==='month_bill'?'monthbill':'daily',kind:_rpiKind(x),title:_rpiTitle(x),body:_rpiReportBody(x),maxWidth:'900px'});
   if(!_openReport(html,940,800))toast(t('repPopupBlocked'),'info');
 }
 function _rpiShare(id){const x=_rpiById(id);if(!x)return;try{window.open('https://wa.me/?text='+encodeURIComponent(_rpiText(x)),'_blank','noopener');}catch(_){}}
 async function _rpiMakeNow(){
   if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return;}
-  const R=_rpi();if(R.making)return;R.making=true;_anXPaint('reports');
+  const R=_rpi();if(R.making)return;R.making=true;_rp2Paint();
   let r;try{r=await sb.rpc('report_snapshot_make',{p_kind:'daily_closeout',p_day:_isoAddDays(todayStr(),1)});}catch(e){r={error:e};}
   R.making=false;
-  if(r&&r.error){if(_rpcAbsent(r.error))toast(t('dbPending'),'info');else toast(_rpcSay(r.error),'error');_anXPaint('reports');return;}
+  if(r&&r.error){if(_rpcAbsent(r.error))toast(t('dbPending'),'info');else toast(_rpcSay(r.error),'error');_rp2Paint();return;}
   toast(r&&r.data!=null?t('repMadeNow'):t('repNoRideToday'),r&&r.data!=null?'success':'info');
   await _rpiLoad(true);_rpiSnapPoll(true);
-  if(S.anView==='reports')_anXPaint('reports'); // a read already in flight returns without painting: the Write now button came back disabled
+  if(S.staffTab==='reports')_rp2Paint(); // a read already in flight returns without painting: the Write now button came back disabled
 }
 function _rpiInboxHtml(){
   const R=_rpi();_rpiLoad(false);
-  const head=`<div class="analytics-section-title rpi-head"><span>${t('anNavReports')}</span>${isAdmin()&&!R.missing?`<button type="button" class="btn-secondary an-btn-sm" data-on-click="${_on("_rpiMakeNow")}"${R.making?' disabled':''}>${t('repMakeNow')}</button>`:''}</div><div class="page-sub">${t('repSub')}</div>`;
+  const head=`<div class="analytics-section-title rpi-head"><span>${t('rp2Auto')}</span>${isAdmin()&&!R.missing?`<button type="button" class="btn-secondary an-btn-sm" data-on-click="${_on("_rpiMakeNow")}"${R.making?' disabled':''}>${t('repMakeNow')}</button>`:''}</div><div class="page-sub">${t('repSub')}</div>`;
   if(R.missing)return head+`<div class="empty-state">${t('dbPending')}</div>`;
   if(!R.rows)return head+`<div class="empty-state">${t(R.err?'errConnection':'loadingLabel')}</div>`;
   if(!R.rows.length)return head+`<div class="empty-state">${t('repNone')}</div>`;
   return head+`<div class="rpi-list">${R.rows.map(x=>{const on=String(R.open)===String(x.id);return`<div class="chart-card rpi-item">
-    <div class="rpi-row"><button type="button" class="rpi-open" aria-expanded="${on}" data-on-click="${_on("_rpiToggle",x.id)}"><span class="rpi-kind">${esc(x.kind==='weekly_kpi'?t('repWeeklyKind'):t('repDailyKind'))}</span><span class="rpi-title">${esc(_rpiTitle(x))}</span><span class="an-c-muted">${esc(fmtStamp(x.created_at))}</span></button>
+    <div class="rpi-row"><button type="button" class="rpi-open" aria-expanded="${on}" data-on-click="${_on("_rpiToggle",x.id)}"><span class="rpi-kind">${esc(_rpiKind(x))}</span><span class="rpi-title">${esc(_rpiTitle(x))}</span><span class="an-c-muted">${esc(fmtStamp(x.created_at))}</span></button>
     <span class="rpi-acts"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_rpiPrint",x.id)}">${_artIcon('print',12)} ${t('repPrintBtn')}</button><button type="button" class="btn-sm btn-green" data-on-click="${_on("_rpiShare",x.id)}">${_artIcon('share',12)} WhatsApp</button></span></div>
     ${on?_rpiDetailHtml(x):''}</div>`;}).join('')}</div>`;
 }
 // The views drawn fresh into their own host (outside the kept markup): Months and Reports.
 function _anXPaint(v){
   const h=document.getElementById(v==='months'?'an-mo-host':'an-rp-host');if(!h)return;
-  h.innerHTML=v==='months'?_anMonthsView():_rpiInboxHtml();
+  h.innerHTML=_anMonthsView(); // Reports moved to the Reports section (2026-11-13)
   _cssvApply(h);
 }
 // RFM bucket from recency (days since last ride) and frequency (ride count).
@@ -69332,13 +70097,14 @@ function _anRetentionCurve(entries,nowMs,jj){ // jj: the journeys, when the call
   return res;
 }
 // Tiny inline sparkline SVG from a series of numbers.
+// A sparkline: the trend in the quiet grey, the latest point in the series colour (the chart kit, 2026-11-13). The colour
+// argument is no longer used: three sparklines side by side read as one family, the point says where each stands now.
 function _anSparkline(values,color,w,h){
   w=w||120;h=h||30;const v=(values||[]).filter(x=>x!=null&&!isNaN(x));
   if(v.length<2)return'';
-  const mn=Math.min(...v),mx=Math.max(...v),rng=(mx-mn)||1;
-  const y=val=>(h-2-((val-mn)/rng)*(h-4));
-  const pts=v.map((val,i)=>((i/(v.length-1))*w).toFixed(1)+','+y(val).toFixed(1)).join(' ');
-  return`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" class="an-block"><polyline points="${pts}" fill="none" stroke="${color||'var(--green)'}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${w}" cy="${y(v[v.length-1]).toFixed(1)}" r="2.4" fill="${color||'var(--green)'}"/></svg>`;
+  const mn=Math.min(...v),mx=Math.max(...v),rng=(mx-mn)||1,y=val=>h-4-((val-mn)/rng)*(h-8),x=i=>4+(i/(v.length-1))*(w-8);
+  const pts=v.map((val,i)=>x(i).toFixed(1)+','+y(val).toFixed(1)).join(' ');
+  return`<svg class="ck-spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><polyline class="ck-spl" points="${pts}"/><circle class="ck-spd" cx="${x(v.length-1).toFixed(1)}" cy="${y(v[v.length-1]).toFixed(1)}" r="3"/></svg>`;
 }
 // Gross margin: product revenue minus cost-of-goods for sold lines that map to an item cost. Revenue is the till's
 // (_salesTotals): a discount line (negative) takes off it, and goods taken on the MM Team account, like those on the
@@ -69521,7 +70287,7 @@ function printHeightBikeReport(){
     const tRows=_anHbTypeRows(d).map(([l,n])=>`<tr><td>${esc(l)}</td><td class="rp-num">${n}</td></tr>`).join('');
     return`<section class="rp-hsec"><h2 class="rp-h2top">${title}</h2><div class="rp-hrow"><div class="rp-hmain"><h3 class="rp-h3">${t('repRiderHeights')} (${d.people.length})</h3>${d.hSummary.count?`<div class="rp-hsum">${t('repHeightSummary')}: <b>${t('anHeightAvg')} ${d.hSummary.avg} cm</b> &nbsp;\u00b7&nbsp; ${t('repMin')} ${d.hSummary.min} &nbsp;\u00b7&nbsp; ${t('repMax')} ${d.hSummary.max}</div><h4 class="rp-h4">${t('repHeightRanges')}</h4><table class="rp-hrange"><tbody>${d.hRanges.map(([l,n])=>`<tr><td>${l} cm</td><td class="rp-num">${n}</td></tr>`).join('')}</tbody></table>`:''}<h4 class="rp-h4">${t('repHeightIndividual')}</h4><table><thead><tr><th>${t('nameLabel')}</th><th>${t('repHeightCol')}</th><th>${t('colBike')}</th></tr></thead><tbody>${hRows}</tbody></table></div><div class="rp-hside"><h3 class="rp-h3">${t('repBikesRented')} (${d.rented})</h3><table><tbody>${tRows}</tbody></table></div></div></section>`;
   }).join('');
-  const html=_reportShell({kind:t('anHeightReport'),title:t('anHeightReport'),subtitle:esc(_anHeightRangeLabel()),body:blocks,maxWidth:'900px'});
+  const html=_reportShell({rid:'height',kind:t('anHeightReport'),title:t('anHeightReport'),subtitle:esc(_anHeightRangeLabel()),body:blocks,maxWidth:'900px'});
   if(!_openReport(html,940,840))toast(t('repPopupBlocked'),'info'); // a blocked pop-up used to do nothing at all
 }
 function exportHeightBikeCsv(){
@@ -70023,19 +70789,8 @@ function _renderAnalyticsNow(){
 
 
   function occGauge(pct){
-    const r=44,cx=56,cy=56,sw=10;
-    const arc=r*Math.PI; 
-    const filled=arc*(pct/100);
-    const c=pct>=80?_thc('--green','#03ff89'):pct>=50?_thc('--orange','#e08828'):_thc('--red','#d90909');
-    return`<div class="occ-gauge-wrap">
-      <svg class="occ-gauge-svg" width="112" height="66" viewBox="0 0 112 66">
-        <path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="rgba(var(--tint-rgb),.08)" stroke-width="${sw}" stroke-linecap="round"/>
-        <path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round"
-          stroke-dasharray="${filled} ${arc}" stroke-dashoffset="0"/>
-      </svg>
-      <div class="an-gauge-pct" data-cssv="${_cssv({'--an-fg':c})}">${pct}%</div>
-      <div class="an-gauge-lbl">${t('anAvgOccupancy')}</div>
-    </div>`;
+    const st=pct>=80?'ok':pct>=50?'warn':'bad';
+    return`<div class="ck-fig"><span class="ck-fig-l">${t('anAvgOccupancy')}</span><b class="ck-fig-v">${pct}%</b>${_ckMeter(pct,st,t('anAvgOccupancy'))}<span class="ck-fig-s">${esc(t(st==='ok'?'ckOccHigh':st==='warn'?'ckOccMid':'ckOccLow'))}</span></div>`;
   }
 
   
@@ -70047,7 +70802,7 @@ function _renderAnalyticsNow(){
       const lbl=isType?_tl(k):esc(k),tip=isType?String(lbl).replace(/<[^>]*>/g,''):String(k); // the tooltip escapes the raw name once (a till name "A&B" read "A&amp;B")
       return`<div class="analytics-bar-row" title="${esc(tip)}: ${valueFmt?esc(String(valueFmt(v)).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim()):v}">
         <div class="analytics-bar-label">${lbl}</div>
-        <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(v/max*100))+'%','--an-bg':colorFn(k)})}"></div></div>
+        <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(v/max*100))+'%','--an-bg':_ckBarC(colorFn(k))})}"></div></div>
         <div class="analytics-bar-value">${valueFmt?valueFmt(v):v}</div>
       </div>`;}).join('');
   }
@@ -70101,8 +70856,8 @@ function _renderAnalyticsNow(){
   ],chartLabels);
 
   const occChart=_vbars(
-    trendData.map(d=>({label:d.lbl,v:d.occ,c:d.occ>=80?_thc('--green','#03ff89'):d.occ>=50?_thc('--orange','#e08828'):_thc('--red','#d90909')})),
-    {color:_thc('--green','#03ff89'),refVal:100}
+    trendData.map(d=>({label:d.lbl,v:d.occ,st:d.occ<50?'bad':''})),
+    {suf:'%',refVal:100,name:t('anChartOccupancy'),stKey:[['bad',t('ckOccLow')]]}
   );
 
   const cumChart=_areaChart([
@@ -70110,26 +70865,15 @@ function _renderAnalyticsNow(){
   ],chartLabels,{unitPfx:'SAR '});
 
   // Our rides: paid, owed at the desk, billed to a company (S08-analytics-02); the organiser's are none of the three.
-  const _blue=_thc('--blue','#2f6fd6');
   const payDonut=_donut([
-    {v:paidOurs.length,  c:_thc('--green','#03ff89'),label:t('paidLabel')},
-    {v:pendRows.length, c:'#8a5c14',label:t('pendingLabel')},
-    {v:billedRows.length, c:_blue,label:t('anBilledCo')},
+    {v:paidOurs.length,k:'ck-c1',label:t('paidLabel')},
+    {v:pendRows.length,k:'ck-st-warn',label:t('pendingLabel')},
+    {v:billedRows.length,k:'ck-c2',label:t('anBilledCo')},
   ]);
-  const payLegend=`<div class="donut-legend">
-    <div class="donut-legend-item"><span class="donut-dot an-bgv" data-cssv="${_cssv({'--an-bg':_thc('--green','#03ff89')})}"></span>${t('paidLabel')} - ${paidOurs.length} (${collectionRate}%)</div>
-    <div class="donut-legend-item"><span class="donut-dot an-dot-pend"></span>${t('pendingLabel')} - ${pendRows.length}</div>
-    ${billedRows.length?`<div class="donut-legend-item"><span class="donut-dot an-bgv" data-cssv="${_cssv({'--an-bg':_blue})}"></span>${t('anBilledCo')} - ${billedRows.length}</div>`:''}
-    <div class="an-pay-total">${sarBoth(revCollected)}</div>
-    <div class="an-sub11">${t('anCollected')}</div>
-  </div>`;
+  const payLegend=`<div class="ck-total"><b>${sarBoth(revCollected)}</b><span>${t('anCollected')} · ${collectionRate}%</span></div>`;
 
-  const typeSegs=Object.entries(typeBreak).map(([k,v])=>({v,c:typeColorHex[k]||'#777',label:_tl(k),key:k})); // label lands in the donut's SVG tooltip as markup
+  const typeSegs=Object.entries(typeBreak).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({v,k:_ckTypeK(k),label:_tl(k),key:k})); // a bike type keeps its colour whatever its rank (_ckTypeK)
   const typeDonut=_donut(typeSegs);
-  const typeLegend=`<div class="donut-legend">${typeSegs.sort((a,b)=>b.v-a.v).map(d=>{
-    const pct=Math.round(d.v/totalDone*100);
-    return`<div class="donut-legend-item"><span class="donut-dot an-bgv" data-cssv="${_cssv({'--an-bg':d.c})}"></span>${_tl(d.key)} - ${d.v} (${pct}%)</div>`;
-  }).join('')}</div>`;
 
   
   const revByDayOrdered=Object.fromEntries(dayOrder.filter(d=>revByDay[d]).map(d=>[dayLabel(d),revByDay[d]]));
@@ -70459,10 +71203,6 @@ function _renderAnalyticsNow(){
         <div class="chart-card-title">${t('anChartRevPerSession')}</div>
         <div class="chart-card-sub">${t('anChartRevSub')}</div>
         ${revenueChart}
-        <div class="chart-legend">
-          <div class="chart-legend-item"><span class="chart-legend-dot an-bgv" data-cssv="${_cssv({'--an-bg':_thc('--green','#03ff89')})}"></span>${t('anCollected')}</div>
-          <div class="chart-legend-item"><span class="chart-legend-dot an-dot-total"></span>${t('anTotal')}</div>
-        </div>
       </div>
       <div class="chart-card">
         <div class="chart-card-title">${t('anChartCumRev')}</div>
@@ -70474,7 +71214,7 @@ function _renderAnalyticsNow(){
       <div class="chart-card">
         <div class="chart-card-title">${t('anChartPaySplit')}</div>
         <div class="chart-card-sub">${t('anChartPaySub')}</div>
-        <div class="donut-wrap">${payDonut}${payLegend}</div>
+        <div class="ck-wrap">${payLegend}${payDonut}</div>
       </div>
       <div class="chart-card">
         <div class="chart-card-title">${t('anRevByDay')}</div>
@@ -70533,15 +71273,11 @@ function _renderAnalyticsNow(){
         <div class="chart-card-title">${t('anChartRidersPerSession')}</div>
         <div class="chart-card-sub">${t('anChartRidersSub')}</div>
         ${ridersChart}
-        <div class="chart-legend">
-          <div class="chart-legend-item"><span class="chart-legend-dot an-dot-riders"></span>${t('anRiders')}</div>
-          <div class="chart-legend-item"><span class="chart-legend-dot an-dot-cap"></span>${t('anCapacity')}</div>
-        </div>
       </div>
       <div class="chart-card">
         <div class="chart-card-title">${t('anChartTypeDistrib')}</div>
         <div class="chart-card-sub">${t('anChartTypeSubtext')}</div>
-        <div class="donut-wrap">${typeDonut}${typeLegend}</div>
+        <div class="ck-wrap">${typeDonut}</div>
       </div>
     </div>
 

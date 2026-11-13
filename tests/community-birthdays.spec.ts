@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/supabase';
+import { viewerFrame } from './helpers/reports';
 
 // Community members owe a birth date and a nationality: the server asks for whichever is empty
 // (_customer_asks, 20260925170000), the app raises the profile page when the site opens on
@@ -302,10 +303,10 @@ test.describe('Community > Birthdays', () => {
     await expect(go).toBeDisabled();
     await sel.selectOption('2026-10-10');
     await expect(go).toBeEnabled();
-    const [pop] = await Promise.all([page.waitForEvent('popup'), go.click()]);
+    await go.click(); const pop = await viewerFrame(page); // the report opens in the viewer inside the site (2026-11-13)
     await expect(page.locator('#bd-wk-sat')).toHaveCount(0);                               // the pop-up goes with the sheet
-    await expect(pop.locator('.mm-doc strong')).toHaveText('Community birthdays');
-    await expect(pop.locator('.mm-title strong')).toContainText(/4 Oct.*10 Oct 2026/);
+    await expect(pop.locator('.rx-k')).toHaveText('Community birthdays');
+    await expect(pop.locator('.rx-title h1')).toContainText(/4 Oct.*10 Oct 2026/);
     await expect(pop.locator('table thead th')).toHaveText(['Day', 'Name', 'Mobile number']);
     const cells = await pop.locator('table tbody tr').evaluateAll(rs => rs.map(r => [...(r as HTMLTableRowElement).cells].map(c => (c.textContent || '').trim())));
     expect(cells).toHaveLength(2);                                                          // the expired tag and the other tag's member stay out

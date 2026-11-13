@@ -36,7 +36,7 @@ test.describe('@staff:analytics months and year-on-year', () => {
     await boot(page, { 'rpc:staff_monthly_totals': TOTALS });
     await page.evaluate(`setAnView('months')`);
     expect(new URL(page.url()).pathname).toBe('/analytics/months');
-    const rows = page.locator('#an-mo-host tbody tr');
+    const rows = page.locator('#an-mo-host table.analytics-trend-table tbody tr'); // the chart's own numbers sit in a table of their own (2026-11-13)
     await expect(rows).toHaveCount(2);
     await expect(rows.nth(0)).toContainText('24');
     await expect(rows.nth(0).locator('.an-delta').first()).toContainText('+140%'); // 24 rides against 10 a year earlier

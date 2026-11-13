@@ -121,7 +121,7 @@ test.describe('@staff:sales money controls at the desk', () => {
     expect(ts.find((x) => x.method === 'PATCH')!.body).toMatchObject({ counted_cash: 185, expected_cash: 185, card_expected: 0, card_terminal_total: 0 });
     await expect(dlg).toContainText('Till closed');
     await expect(dlg).toContainText('Exact');
-    await page.evaluate(`window.open=()=>({closed:false,document:{write:(h)=>{window.__z=(window.__z||'')+h;},close(){},querySelectorAll:()=>[]},focus(){},print(){},close(){}})`);
+    await page.evaluate(`S._rxTap=(h)=>{window.__z=(window.__z||'')+h;return true;}`);
     await dlg.getByRole('button', { name: /Z-report/ }).click();
     await expect.poll(() => page.evaluate(`window.__z||''`)).toContain('Opening float');
     expect(await page.evaluate(`window.__z`)).toContain('SAR 185.00');

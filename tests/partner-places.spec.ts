@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/supabase';
+import { viewerFrame, closeViewer } from './helpers/reports';
 
 // Partner places (the owner, 2026-10-17): Defe gets places on top of the members on a Saturday ride.
 // Its bookings (queue_entries.partner, made by partner_book from the website) are confirmed at once;
@@ -542,14 +543,14 @@ test.describe('@staff:bookings partner places', () => {
     await m.locator('[data-prb-set="shirts"]').click();
     expect(await page.evaluate(`Object.keys(_prbOpts().cols).filter(k=>_prbOpts().cols[k]).join(',')`)).toBe('seq,num,name,code,shirtGot,shirt');
     // the PDF: a heading per code, the per-code table and the shirts table
-    const [pop] = await Promise.all([page.waitForEvent('popup'), m.locator('.rpt-acts .btn-primary').click()]);
-    await pop.waitForLoadState();
+    await m.locator('.rpt-acts .btn-primary').click(); const pop = await viewerFrame(page); // the viewer inside the site (2026-11-13)
     await pop.waitForSelector('h2'); // the window opens on the tap; the sheet is written once the accounts are read
-    const hs = await pop.evaluate(() => [...document.querySelectorAll('h2')].map((h) => (h.textContent || '').trim()));
+    await expect(pop.locator('h2 .rx-ar').first()).toBeAttached(); // a partner's report says its headings in Arabic too (S14, 2026-11-13)
+    const hs = await pop.evaluate(() => [...document.querySelectorAll('h2')].map((h) => [...h.childNodes].filter((n) => !(n as Element).classList?.contains('rx-ar')).map((n) => n.textContent || '').join('').trim()));
     expect(hs).toEqual(['Bookings per code', 'Shirts by code', 'Pink team · PINK10 · 2', 'ROSE5 · 1']);
     const last = await pop.evaluate(() => [...[...document.querySelectorAll('table')].pop()!.querySelectorAll('tbody tr')].map((r) => [...r.querySelectorAll('td')].map((c) => (c.textContent || '').trim()).join('|')));
     expect(last).toEqual(['3|#12|Defe Amal|ROSE5|Yes|—']);
-    await pop.close();
+    await closeViewer(page);
     // Excel: the list, the codes and the shirts sheets; the group column first
     const [dl] = await Promise.all([page.waitForEvent('download'), m.locator('.rpt-acts .btn-secondary', { hasText: 'Excel' }).click()]);
     const buf = readFileSync((await dl.path())!).toString('utf8');

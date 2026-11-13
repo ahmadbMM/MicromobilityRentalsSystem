@@ -14,8 +14,8 @@ const SITE_HOST = new URL(SITE_ORIGIN).hostname;
 // tests/paths.spec.ts checks the three agree. Pages has no file for /bookings/waitlist, so its
 // 404 is answered with the app itself, for a GET navigation only: the app then opens on that
 // section. Files always win, and anything else stays a 404.
-const APP_ROUTE = /^\/(?:reserve|my-bookings|account|members|signup|bookings|waitlist|sessions|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|ask|lockers|store|payments|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/[a-z0-9-]+){0,2}\/?$/;
-const STAFF_ROUTE = /^\/(?:bookings|waitlist|sessions|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|ask|lockers|store|payments|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/;
+const APP_ROUTE = /^\/(?:reserve|my-bookings|account|members|signup|bookings|waitlist|sessions|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|ask|reports|lockers|store|payments|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/[a-z0-9-]+){0,2}\/?$/;
+const STAFF_ROUTE = /^\/(?:bookings|waitlist|sessions|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|ask|reports|lockers|store|payments|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/;
 const isNavigation = (req) => {
   const mode = req.headers.get('sec-fetch-mode');
   return mode ? mode === 'navigate' : /text\/html/.test(req.headers.get('accept') || '');

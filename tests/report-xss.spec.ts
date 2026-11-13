@@ -19,7 +19,7 @@ test('session report escapes hostile customer email/name/bike in the print HTML'
   const html = await page.evaluate(`(()=>{
     let captured='';
     const realOpen=window.open;
-    window.open=()=>({document:{write:(h)=>{captured+=h;},close:()=>{}},focus:()=>{},print:()=>{}});
+    S._rxTap=(h)=>{captured+=h;return true;};
     S.sfSession='s1';
     try{ printSessionReport(); }finally{ window.open=realOpen; }
     return captured;

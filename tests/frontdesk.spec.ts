@@ -34,7 +34,7 @@ test('front desk mode limits the staff tabs to Sales, Bookings & Riders, and the
   // Switch to Front desk -> only Sales (cashier), Bookings (queue) and the Workshop, whose
   // bikes come in at the desk; the Petromin registrations are a page inside Queue, not a tab
   await page.evaluate('setStaffRole("frontdesk")');
-  expect((await vis()).sort()).toEqual(['cashier', 'lockers', 'queue', 'settings', 'waitlist', 'workshop']); // Lockers and the Waitlist (a section since then) since 2026-11-09 // Settings is every account's own page (2026-10-02)
+  expect((await vis()).sort()).toEqual(['cashier', 'lockers', 'queue', 'reports', 'settings', 'waitlist', 'workshop']); // Reports is every staff account's since 2026-11-13, listing what its sections allow // Lockers and the Waitlist (a section since then) since 2026-11-09 // Settings is every account's own page (2026-10-02)
 
   // Trying to open a hidden tab bounces back to queue
   await page.evaluate('setStaffTab("analytics")');

@@ -166,13 +166,10 @@ test.describe('@staff:team part-timers', () => {
 
   test('a pay slip prints the payment with its entries', async ({ page }) => {
     await boot(page);
-    const html = await page.evaluate(() => new Promise<string>((res) => {
-      const w = window as unknown as { open: unknown; _ptSlipOf: (id: number) => void };
-      const orig = w.open; let cap = '';
-      w.open = () => ({ document: { write: (h: string) => { cap = h; }, close() {}, querySelectorAll: () => [] }, focus() {}, print() {} });
-      try { w._ptSlipOf(5); } finally { w.open = orig; }
-      res(cap);
-    }));
+    // reports open in the viewer inside the site (2026-11-13): the spec reads the slip through S._rxTap
+    await page.evaluate(`window.__slip='';S._rxTap=h=>{window.__slip=h;return true;};_ptSlipOf(5)`);
+    await expect.poll(() => page.evaluate('window.__slip')).not.toBe('');
+    const html = (await page.evaluate('window.__slip')) as string;
     expect(html).toContain('Pay slip');
     expect(html).toContain('Sara Desk');
     expect(html).toContain('Bike handout');
