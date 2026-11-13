@@ -487,6 +487,19 @@ tag, never both ("show an error that asks that only one of them must be given pe
   (`tagOneOfTwoN`). `staff_community_approve` hits the trigger too, so the server holds the rule whatever the page.
   `tests/petromin-days.spec.ts`.
 
+## Petromin night booking numbers (2026-11-14, migration 20261114030000)
+
+The user: "change petromin bookings to start with pm and petrolube to start with pl".
+- **Series**: Petromin PM-001…, Petrolube PL-001…, Dukan D-001…, each starting again every night on its own
+  `rider_night_counters` source ('pm', 'pl', 'dukan'); a registration with no company keeps P- on 'petromin'.
+  Invitees stay I- (`_invite_next`, 'invite'). The bookings made before keep their P- numbers (riders were told them).
+- **One minter**: `_rider_next_no(night, company, source)` (closed to clients) is called by `rider_register` (a new
+  registration), `rider_edit` (a move to another night, in the series of the company the edit sends) and
+  `staff_rider_party_move` (the desk's move). A company changed later keeps its number.
+- **Readers**: numbers are matched exactly everywhere (`rider_lookup`, `rider_cancel`, `rider_edit`); the desk scanner's
+  `_scanPmNo` reads `MMP-` + one or two letters; the website's `/api/petromin-pass` takes one or two letters.
+  `tests/riders-tab.spec.ts` ("two-letter numbers scan").
+
 ## Petromin invitees (2026-11-12, migration 20261112234500)
 
 The user: "create me a webpage for petromin invitees to write their names and phone numbers and bike types and add them

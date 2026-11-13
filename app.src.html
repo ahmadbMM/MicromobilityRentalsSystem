@@ -50861,7 +50861,8 @@ function _scanTwinNote(e){return t('scanTwinUsed').replace('{0}',_scanSessLabel(
 // What a scanned code is, read the same way by the camera and by a scanner gun typing into the roster's
 // search (2026-10-09, D9): a bike's sticker or tag URL (its number or id at [1]), a Petromin registration.
 function _scanBikeUrl(txt){return txt.match(/[?&]bike=([0-9A-Za-z-]{1,40})/)||txt.match(/^https?:\/\/(?:www\.)?micromobility\.sa\/(?:bikes|b)\/(\d{1,6})\/?(?:[?#]|$)/i);}
-function _scanPmNo(txt){return txt.match(/^MMP-([A-Za-z]-\d{3,6})$/i);}
+// One or two letters: PM- Petromin, PL- Petrolube, D- Dukan, and the P- of the bookings made before 2026-11-14.
+function _scanPmNo(txt){return txt.match(/^MMP-([A-Za-z]{1,2}-\d{3,6})$/i);}
 // What the scanner says about a code: the line under the camera and the banner over it.
 function _scanSayer(){
   const el=document.getElementById('scan-msg');

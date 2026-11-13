@@ -808,6 +808,41 @@ test('scanning a rider QR opens the booking pop-up with a Check in button, and t
   expect(errs).toEqual([]);
 });
 
+// The user, 2026-11-13: "change petromin bookings to start with pm and petrolube to start with pl" (20261114030000).
+// The QR holds MMP-PM-001 / MMP-PL-001 now; a ticket with one of the old one-letter numbers still opens.
+test('two-letter numbers scan: PM- Petromin, PL- Petrolube, and the old P- and D- still open', async ({ page }) => {
+  const errs = watch(page);
+  const regs = [
+    { ...rider_registrations[0], booking_no: 'PM-001' },
+    { ...rider_registrations[1], booking_no: 'PL-001', checked_in_at: null },
+    { ...rider_registrations[2], booking_no: 'P-003' },
+  ];
+  await stubSupabase(page, { sessions, queue_entries, rider_registrations: regs });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.evaluate(`setStaffTab('riders')`);
+  await expect(rows(page)).toHaveCount(3);
+  expect(await page.evaluate(`['MMP-PM-001','mmp-pl-012','MMP-P-001','MMP-D-004','MMP-ABC-001','MMP-PM001','PM-001']
+    .map(x=>{const m=_scanPmNo(x);return m?m[1]:null;})`)).toEqual(['PM-001', 'pl-012', 'P-001', 'D-004', null, null, null]);
+
+  const modal = page.locator('#rider-modal .modal-box');
+  await page.evaluate(`_onScanPayload('MMP-PL-001')`);
+  await page.evaluate('_scanExceptionGo()'); // the fixture's night is not today
+  await expect(modal).toBeVisible();
+  await expect(modal).toContainText('PL-001');
+  await expect(modal).toContainText('Bader Account');
+  await expect(modal).toContainText('Petrolube');
+  await modal.getByRole('button', { name: 'Close' }).click();
+  await expect(modal).toBeHidden();
+
+  await page.evaluate(`_onScanPayload('MMP-P-003')`);
+  await page.evaluate('_scanExceptionGo()');
+  await expect(modal).toBeVisible();
+  await expect(modal).toContainText('Cara Nobody');
+  expect(errs).toEqual([]);
+});
+
 test.describe('editing a registration', () => {
   test('Edit in the pop-up opens the form pre-filled; saving patches the row and the linked booking', async ({ page }) => {
     await openRiders(page);
