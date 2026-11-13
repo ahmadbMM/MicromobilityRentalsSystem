@@ -8960,6 +8960,27 @@ body:not(.view-staff) .lm-kinds li{display:flex;align-items:center;gap:10px;padd
 body:not(.view-staff) .lm-kinds li.on{color:var(--ink);}
 body:not(.view-staff) .lm-kinds li .cu-ic{flex:none;color:var(--go);}
 body:not(.view-staff) .lm-kinds li i{flex:none;box-sizing:border-box;width:16px;height:16px;border:1.75px solid var(--line);border-radius:50%;}
+/* Circuit challenge laps (new features build F25, 2026-11-13). Stats: one card per running challenge - its name, a bar
+   in the action green and the rider's own laps against the target. The lap page (lap-page.js): a centred pop-up one step
+   under the forced pages (198 < 199), so a rating or a waiver covers it - the count large, the same bar, one status line
+   and the season badge's medal once the target is reached. */
+body:not(.view-staff) .lap-bar{height:8px;margin:2px 0 12px;border-radius:999px;background:var(--card-3);overflow:hidden;}
+body:not(.view-staff) .lap-bar i{display:block;width:var(--w,0);height:100%;border-radius:999px;background:var(--go);}
+body:not(.view-staff) .lap-pop .auth-backdrop{z-index:198;align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;}
+body:not(.view-staff) .lap-pop .lap-box:focus,body:not(.view-staff) .lap-pop .lap-box:focus-visible{outline:none;}
+body:not(.view-staff) .lap-pop .fx-kicker{color:var(--go);}
+body:not(.view-staff) .lap-pop .pg-title{overflow-wrap:anywhere;}
+body:not(.view-staff) .lap-n{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin:20px 0 12px;color:var(--ink);}
+body:not(.view-staff) .lap-n-v{font-family:var(--font-display);font-weight:800;font-size:56px;line-height:1;font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .lap-n-of{font-size:var(--fs-17);font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .lap-pop .lap-bar{height:10px;margin:0;}
+body:not(.view-staff) .lap-state{margin:14px 0 0;font-size:var(--fs-15);font-weight:600;line-height:1.45;color:var(--go);}
+body:not(.view-staff) .lap-state:empty{display:none;}
+body:not(.view-staff) .lap-badge{display:flex;align-items:center;gap:12px;margin:18px 0 0;padding:14px 0 0;border-top:1px solid var(--line);}
+body:not(.view-staff) .lap-badge .bdg-m{flex:none;width:52px;height:52px;}
+body:not(.view-staff) .lap-badge span{display:grid;gap:2px;min-width:0;}
+body:not(.view-staff) .lap-badge b{font-size:var(--fs-17);font-weight:700;color:var(--ink);}
+body:not(.view-staff) .lap-badge small{font-size:var(--fs-15);color:var(--ink-2);}
 /* The account page's switch (2026-11-09): Account, Stats, Badges, a soft segmented control like the wide screen's
    section strip; on a phone it spans the page and the three share it. */
 body:not(.view-staff) #tab-account .acc-views{display:flex;gap:2px;width:fit-content;max-width:100%;margin:14px 0 4px;padding:4px;border-radius:999px;background:var(--card-3);}

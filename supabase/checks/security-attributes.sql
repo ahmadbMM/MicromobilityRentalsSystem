@@ -603,6 +603,12 @@ with expected(fname, want_definer, note) as (values
   ('_ask_state', false, 'pure: a pages state from its row and the clock'),
   ('_ask_public_q', false, 'pure: a question row as riders get it'),
   ('_ask_public_page', false, 'pure: a page row as riders get it'),
+  ('circuit_lap', true, 'counts the callers own lap into circuit_laps, which no client reads or writes; token-checked (20261114012500)'),
+  ('circuit_mine', true, 'the running circuit challenges with the callers own lap count; token-checked'),
+  ('staff_circuit_totals', true, 'riders, laps and finishers per circuit challenge; the People section is checked'),
+  ('_circuit_badge', true, 'trigger: a circuit challenge makes and renames its own season badge in badges'),
+  ('_circuit_badge_gone', true, 'trigger: a deleted circuit challenge takes its badge along unless a rider holds it'),
+  ('_circuit_ts', false, 'pure: a check-in or check-out kept as text, read as a time'),
   ('_purge_old',                   true,  'retention: reaches every personal table; service_role only (20261009165000)')
 )
 select e.fname,

@@ -66,7 +66,10 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   // Volunteers, the staff review part 2 (20261107131000): without them bulk goes one by one, reminders stay on the device and
   // the certificate prints as before; tests/volunteers-review2.spec.ts stubs them by name.
   'staff_volunteer_shift_times_many', 'staff_volunteer_hours_add_many', 'staff_volunteer_reminded', 'staff_volunteer_profile_save',
-  'staff_volunteer_cert_issue', 'staff_volunteer_cert_revoke', 'volunteer_cert_check']);
+  'staff_volunteer_cert_issue', 'staff_volunteer_cert_revoke', 'volunteer_cert_check',
+  // The circuit challenge (20261114012500, F25): the lap page says nothing and Community > Activities > Circuit laps keeps its
+  // list without the counts; tests/circuit-challenge.spec.ts stubs them by name.
+  'circuit_lap', 'staff_circuit_totals']);
 // (staff_pii_reveal and staff_access_reviewed, 20261009220000, are NOT listed: every look at personal data calls the
 // first, so the generic [] answers it; tests/s1010-pii-*.spec.ts give the missing function's answer by name.)
 /** Tables a migration adds that production may not have yet (20261009150000: the till and the receipt
@@ -76,7 +79,8 @@ const TABLES_NOT_YET_IN_DB = new Set(['till_sessions', 'till_counts', 'receipt_n
   'learn_skills', 'learn_progress', // the learn-to-ride ladder (20261114012100): tests/learn-ladder.spec.ts gives them rows
   'session_partners', 'session_partner_codes',
   'customer_contacts', 'volunteer_certs',
-  'saturday_codes', 'saturday_code_rides', 'saturday_settings']); // the Saturday ride codes (20261108120000): tests/saturday-codes.spec.ts gives them rows; last contacted (20261107121000): tests/people-review2.spec.ts gives it rows; volunteer_certs (20261107131000): tests/volunteers-review2.spec.ts // partner places (20261017120000) and codes (20261023120000): tests/partner-places.spec.ts gives them rows
+  'saturday_codes', 'saturday_code_rides', 'saturday_settings',
+  'circuit_challenges']); // the Saturday ride codes (20261108120000): tests/saturday-codes.spec.ts gives them rows; last contacted (20261107121000): tests/people-review2.spec.ts gives it rows; volunteer_certs (20261107131000): tests/volunteers-review2.spec.ts // partner places (20261017120000) and codes (20261023120000): tests/partner-places.spec.ts gives them rows
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),
@@ -164,6 +168,9 @@ export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrit
       // the rider's calendar address (20261114012700): off unless a spec gives it an answer, and no 404 in the console
       // (the Account page asks it once); tests/calendar-feed.spec.ts
       if (body === undefined && rpc[1] === 'calendar_link') body = null;
+      // the circuit challenge's laps on Stats (20261114012500, F25): none unless a spec gives an answer, and no 404 in the
+      // console (every Stats paint asks it); tests/circuit-challenge.spec.ts
+      if (body === undefined && rpc[1] === 'circuit_mine') body = null;
       if (body === undefined && rpc[1] === 'list_sessions') body = fixtures['sessions'] || [];
       // The desk's one-call functions (production since 2026-09; the page no longer carries the
       // multi-write fallbacks, 2026-10-04): answered as the server would, from the fixtures.

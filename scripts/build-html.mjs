@@ -149,6 +149,9 @@ src = src.replace("const CALF_V=''", `const CALF_V='${createHash('sha256').updat
 // The learn-to-ride ladder (learn-ladder.js, F21), stamped the same way: a rider with a lesson fetches it from Account.
 if (!src.includes("const LL_V=''")) throw new Error('build: LL_V placeholder missing');
 src = src.replace("const LL_V=''", `const LL_V='${createHash('sha256').update(await readFile(new URL('../learn-ladder.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
+// The lap page's own file (F25), the same way.
+if (!src.includes("const LAP_V=''")) throw new Error('build: LAP_V placeholder missing');
+src = src.replace("const LAP_V=''", `const LAP_V='${createHash('sha256').update(await readFile(new URL('../lap-page.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
 if (!src.includes("const BIKE_IMG_V=''")) throw new Error('build: BIKE_IMG_V placeholder missing');
 src = src.replace("const BIKE_IMG_V=''", `const BIKE_IMG_V='${bikeFiles.length ? bikesHasher.digest('hex').slice(0, 10) : ''}'`);
 // The Helper path card's own file (helper-path.js, fetched by members on Account): its address changes with it too.
