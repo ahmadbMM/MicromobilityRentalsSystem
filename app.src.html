@@ -8089,6 +8089,9 @@ let GROUP_RIDE_MAX=2; // Settings > Business (group_ride_max); the server's _gro
 // The quantity rules of a group ride (the stepper, its cap, the party-size refusal) follow this;
 // everything else a Petromin night means (own bikes taking a place, prices) stays _isGroupRide's.
 let EVENT_SEAT_MAX=5; // Settings > Business (event_seat_max), as _group_ride_cap
+// The Farm House Night: the account holder and three with them (the user, 2026-11-13: "put a limit for each booking to
+// include the account owner in addition to 3 with them"); the server's _group_ride_cap says the same (20261114150000).
+const FARM_SEAT_MAX=4;
 // The Farm House Night takes a member and their family on one booking, each by name (2026-11-13), as an event's seats do.
 function _partyRide(s){return _isGroupRide(s)||_rideKind(s)==='event'||_rideKind(s)==='farm';}
 // JCC: three riders per account per SESSION, not per booking - a second booking for the
@@ -8104,7 +8107,7 @@ function _jccBooked(s){
 }
 // A Petromin night counts what the account already holds on it too, as an event does: the stepper
 // offered two to a member with one seat booked, and the server then refused the booking (GROUP_CAP).
-function _maxRiders(s){if(!s)return 10;return (_rideKind(s)==='event'||_rideKind(s)==='farm')?Math.max(1,EVENT_SEAT_MAX-_jccBooked(s)):_isGroupRide(s)?Math.max(1,GROUP_RIDE_MAX-_jccBooked(s)):_isCommunity(s)?1:Math.max(1,JCC_ACCOUNT_CAP-_jccBooked(s));}
+function _maxRiders(s){if(!s)return 10;return _rideKind(s)==='farm'?Math.max(1,FARM_SEAT_MAX-_jccBooked(s)):_rideKind(s)==='event'?Math.max(1,EVENT_SEAT_MAX-_jccBooked(s)):_isGroupRide(s)?Math.max(1,GROUP_RIDE_MAX-_jccBooked(s)):_isCommunity(s)?1:Math.max(1,JCC_ACCOUNT_CAP-_jccBooked(s));}
 // The Saturday ride's SHAPE — staff pick the riders, the queue stays hidden until it is
 // published, the spot cap is an allocation rather than a capacity — is what needs_approval
 // says. The Petromin ride sets it false, and every one of those behaviours falls away: real
@@ -13050,11 +13053,13 @@ function _ygSessCard(s,o){
 // bookings") ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 // An evening at a farm, a date inside MicroMobility Experiences (ride_kind 'farm', id suffix -fh): members only, free,
 // staff approve every place as on the Saturday ride (needs_approval, the queue hidden until published), and a member
-// books themselves and their family on one booking, each by name (_partyRide, up to EVENT_SEAT_MAX: the server's
-// _group_ride_cap reads the same setting, 20261114130000). Two times: arrival (the gathering) and dinner (the start).
+// books themselves and their family on one booking, each by name (_partyRide, up to FARM_SEAT_MAX, four: the server's
+// _group_ride_cap says the same, 20261114150000). Two times: arrival (the gathering) and dinner (the start).
 // The look, "Harvest Supper", from the venue's own Instagram (@thefarmhouse.jed): its rust ground, peach lettering and
-// the fanned tail of its turkey, drawn as a fan of rounded feathers behind a farmhouse's gable (assets/farm-mark.svg),
-// and the name in Rubik's heaviest weight, as the venue letters its own.
+// the fanned tail of its turkey, drawn as a fan of rounded feathers, and the name in Rubik's heaviest weight, as the
+// venue letters its own. Its logo is the account's own profile picture, round as Instagram shows it
+// (assets/farm-logo.jpg, the 150 px picture Instagram serves; the user, 2026-11-13: "make sure the logo of the
+// session to be the same of the insta account").
 function _isFarm(s){return !!s&&_rideKind(s)==='farm';}
 // The flow wears the farm skin from the family step on, and on the booked page (not on the list of dates).
 function _fhOn(){
@@ -13063,7 +13068,7 @@ function _fhOn(){
   return (S.regStep||1)>1&&_isFarm(_sessDisp(S.selSession));
 }
 function _syncFhTheme(){try{document.body.classList.toggle('farm-skin',_fhOn());}catch(e){}}
-function _fhMarkImg(cls){return`<img class="${cls}" src="/assets/farm-mark.svg" alt="" aria-hidden="true" width="64" height="40" decoding="async">`;}
+function _fhMarkImg(cls){return`<img class="${cls}" src="/assets/farm-logo.jpg" alt="" aria-hidden="true" width="150" height="150" decoding="async">`;}
 // The fan rising from the card's far corner, its feathers drawn rather than pictured so they take the card's colours.
 function _fhScene(){return`<svg class="fh-scene" aria-hidden="true" focusable="false" viewBox="0 0 160 80"><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(20 80) rotate(-90)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(22.94 61.46) rotate(-72)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(31.46 44.73) rotate(-54)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(44.73 31.46) rotate(-36)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(61.46 22.94) rotate(-18)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(80 20) rotate(0)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(98.54 22.94) rotate(18)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(115.27 31.46) rotate(36)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(128.54 44.73) rotate(54)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(137.06 61.46) rotate(72)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(140 80) rotate(90)"/><circle class="fh-ring" cx="80" cy="80" r="40"/><circle class="fh-core" cx="80" cy="80" r="26"/></svg>`;}
 // The name on the flow's plate: the date's own (Nawar Farm House Night), else the kind's.
@@ -20967,7 +20972,7 @@ function _tkLogo(sess,strip){
 // The owner, 2026-10-12: "change the petromin booking card to be petromin themed and the triathlon pool session
 // to be swimming themed": a Petromin night's ticket wears Petromin's red, its speed stripes and its logo; the pool
 // session's, pool blue and water.
-const TK_MARK={blood:'/logo-dark.webp',jcc:'/jcc-white.webp',comm:'/logo-dark.webp',saturday:'/logo-dark.webp',runher:'/assets/runher-partners.webp',defe5k:'/assets/defe-logo.svg',vlap:'/assets/victory-lap-dark.webp',arena:AR_LOGO,event:'/logo-dark.webp',petromin:'/assets/petromin-logo.png',swim:'/logo-dark.webp',yoga:'/assets/yoga-mark.svg',farm:'/assets/farm-mark.svg'};
+const TK_MARK={blood:'/logo-dark.webp',jcc:'/jcc-white.webp',comm:'/logo-dark.webp',saturday:'/logo-dark.webp',runher:'/assets/runher-partners.webp',defe5k:'/assets/defe-logo.svg',vlap:'/assets/victory-lap-dark.webp',arena:AR_LOGO,event:'/logo-dark.webp',petromin:'/assets/petromin-logo.png',swim:'/logo-dark.webp',yoga:'/assets/yoga-mark.svg',farm:'/assets/farm-logo.jpg'};
 function _tkTheme(s){if(!s)return'';const k=_rideKind(s);return k==='blood'?'blood':k==='snd96'?'':k==='saturday'||k==='jcc'||k==='runher'||k==='event'||k==='petromin'||k==='swim'||k==='vlap'||k==='arena'||k==='defe5k'||k==='yoga'||k==='farm'?k:'comm';}
 function _tkThemeCls(s){const th=_tkTheme(s);return th?` tk-th th-${th}`:'';}
 // ── The ticket through the night (the owner, 2026-10-01: "do 1 2 5 6 10") ─────────────────────

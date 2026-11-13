@@ -1,16 +1,17 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows } from './helpers/supabase';
 
-// The Farm House Night (the user, 2026-11-13): Nawar Farm House Night at Little Farmhouse in Dhahban, a date inside
-// MicroMobility Experiences for community members and their families. Staff approve every place as on the Saturday
-// ride; a member books themselves and their family on one booking, each by name. Arrival from 4:30 PM, dinner at
-// 8:30 PM. Its own look, "Harvest Supper", from the venue's Instagram: rust, peach and a fan of rounded feathers.
+// The Farm House Night (the user, 2026-11-13): The Little Farmhouse Night at Little Farmhouse in Dhahban (first named
+// Nawar Farm House Night), a date inside MicroMobility Experiences for community members and their families. Staff
+// approve every place as on the Saturday ride; a member books themselves and up to three more on one booking, each by
+// name. Arrival from 4:30 PM, dinner at 8:30 PM. Its own look, "Harvest Supper", from the venue's Instagram: rust,
+// peach, a fan of rounded feathers and the account's own picture as its logo.
 
 const FH = '2099-11-19-fh';
 const farm = {
   id: FH, session_date: '2099-11-19', day: 'Thursday', status: 'open', capacity: 60, created_at: 1,
   event_kind: 'community', ride_kind: 'farm', needs_approval: true, hide_queue: true, spots: 60, open_to_all: false,
-  paid_ride: false, title: 'Nawar Farm House Night', title_ar: 'ليلة مزرعة نوار', location: 'Little Farmhouse, Dhahban',
+  paid_ride: false, title: 'The Little Farmhouse Night', title_ar: 'ليلة ليتل فارم هاوس', location: 'Little Farmhouse, Dhahban',
   meet_name: 'Little Farmhouse, Dhahban', meet_url: 'https://maps.app.goo.gl/BYteRL5JCueWZUEs6', bike_slots: '{"_time":"16:30 - 20:30","_ig":"thefarmhouse.jed"}',
 };
 const sat = {
@@ -34,7 +35,7 @@ test.describe('@customer:farm Farm House Night', () => {
       return {kind:_rideKind(s),bike:_needsBike(s),approval:_isApprovalRide(s),free:_isFreeRide(s),party:_partyRide(s),max:_maxRiders(s),
         steps:_regSteps(s),gathers:_gathersTime(s),waiver:_waiverKind(s),nc:_ncEntry({sessionId:'2099-12-03-fh'}),
         time:sessionTime(s),featured:_featured(s)};})()`);
-    expect(k).toEqual({ kind: 'farm', bike: false, approval: true, free: true, party: true, max: 5, steps: [1, 2, 3], gathers: true,
+    expect(k).toEqual({ kind: 'farm', bike: false, approval: true, free: true, party: true, max: 4, steps: [1, 2, 3], gathers: true,
       waiver: 'farm', nc: true, time: 'Arrival 4:30 PM · Dinner 8:30 PM', featured: true });
   });
 
@@ -56,11 +57,11 @@ test.describe('@customer:farm Farm House Night', () => {
     await page.evaluate(`selectEvent('community')`);
     const card = page.locator('#tab-register .sess-card.fh-card');
     await expect(card).toBeVisible();
-    await expect(card.locator('.fh-card-title')).toHaveText('Nawar Farm House Night');
+    await expect(card.locator('.fh-card-title')).toHaveText('The Little Farmhouse Night');
     await expect(card.locator('.fh-card-meta')).toContainText('Arrival 4:30 PM · Dinner 8:30 PM');
     await expect(card.locator('.fh-card-meta')).toContainText('Little Farmhouse, Dhahban');
     await expect(card.locator('.fh-card-with')).toHaveText('Members and their families');
-    await expect(card.locator('img.fh-card-mark')).toHaveAttribute('src', '/assets/farm-mark.svg');
+    await expect(card.locator('img.fh-card-mark')).toHaveAttribute('src', '/assets/farm-logo.jpg');
     await expect(card.locator('svg.fh-scene')).toHaveCount(1);
     await expect(card).not.toContainText(/ride|bike/i);
     // never a count of places: staff choose who comes
@@ -78,7 +79,7 @@ test.describe('@customer:farm Farm House Night', () => {
     await page.evaluate(`setLang('ar')`);
     await page.evaluate(`selectEvent('community')`);
     const card = page.locator('#tab-register .sess-card.fh-card');
-    await expect(card.locator('.fh-card-title')).toHaveText('ليلة مزرعة نوار');
+    await expect(card.locator('.fh-card-title')).toHaveText('ليلة ليتل فارم هاوس');
     await expect(card.locator('.fh-card-meta')).toContainText('الوصول');
     await expect(card.locator('.fh-card-meta')).toContainText('العشاء');
   });
@@ -87,7 +88,7 @@ test.describe('@customer:farm Farm House Night', () => {
     await custBoot(page);
     await page.evaluate(`showSessInfo('${FH}')`);
     const box = page.locator('#bike-info-modal .ev-info');
-    await expect(box).toContainText('Nawar Farm House Night');
+    await expect(box).toContainText('The Little Farmhouse Night');
     await expect(box.locator('.ev-info-text')).toContainText('Arrive from 4:30 PM');
     await expect(box.locator('.ev-info-text')).toContainText('dinner at 8:30 PM');
     await expect(box.locator('.ev-info-facts')).toContainText('Community members and their families');
@@ -109,7 +110,7 @@ test.describe('@customer:farm Farm House Night', () => {
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
     await expect.poll(() => page.evaluate('S.regStep')).toBe(2);
     await expect(page.locator('body')).toHaveClass(/\bfarm-skin\b/);
-    await expect(page.locator('#tab-register .fh-flow-head')).toContainText('Nawar Farm House Night');
+    await expect(page.locator('#tab-register .fh-flow-head')).toContainText('The Little Farmhouse Night');
     await expect(page.locator('#tab-register .reg-row-label')).toHaveText('People coming');
     await page.locator('#reg-qty-inc').click();
     await page.locator('#reg-qty-inc').click();
@@ -145,14 +146,16 @@ test.describe('@customer:farm Farm House Night', () => {
     await expect(page.locator('body')).not.toHaveClass(/\bfarm-skin\b/);
   });
 
-  test('the stepper stops at five people a booking', async ({ page }) => {
+  test('the stepper stops at four people a booking: the account holder and three with them', async ({ page }) => {
     await custBoot(page);
     await page.evaluate(`selectEvent('community')`);
     await page.locator('#tab-register .sess-card.fh-card').click();
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
     await expect.poll(() => page.evaluate('S.regStep')).toBe(2);
     for (let i = 0; i < 6; i++) await page.locator('#reg-qty-inc').click();
-    await expect(page.locator('#tab-register .qty-val')).toHaveText('5');
+    await expect(page.locator('#tab-register .qty-val')).toHaveText('4');
+    // an event keeps Settings > Business event_seat_max (five); the farm night's four is its own
+    expect(await page.evaluate(`[FARM_SEAT_MAX,_maxRiders({...allSessions().find(x=>x.id==='${FH}'),id:'2099-11-20-ev',ride_kind:'event',needs_approval:false})]`)).toEqual([4, 5]);
   });
 
   test('My Bookings: the family\'s ticket in its colours, with Edit to add or remove family members', async ({ page }) => {
@@ -191,7 +194,7 @@ test.describe('@staff:sessions Farm House Night', () => {
     await expect(page.locator('label[for="ns-end"]')).toHaveText('Dinner');
     expect(await page.evaluate(`[_nsComm(),_nsSeats(),_nsTwoTimes(),_nsKind(),_sessIdSuffix('farm')]`)).toEqual([true, true, true, 'farm', '-fh']);
     // staff's lists name it by its title, its kind's short name when it has none; no walk-ins on it
-    expect(await page.evaluate(`_sessShort(allSessions().find(x=>x.id==='${FH}'))`)).toBe('Nawar Farm House Night');
+    expect(await page.evaluate(`_sessShort(allSessions().find(x=>x.id==='${FH}'))`)).toBe('The Little Farmhouse Night');
     expect(await page.evaluate(`_sessShort({...allSessions().find(x=>x.id==='${FH}'),title:null})`)).toBe('Farm night');
     // staff add people by hand: walk-ins, Add rider, Add group (the user, 2026-11-13)
     expect(await page.evaluate(`[_noWalkin,_noAddRider,_noGroupAdd].map(f=>f(allSessions().find(x=>x.id==='${FH}')))`)).toEqual([false, false, false]);

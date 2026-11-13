@@ -1770,22 +1770,24 @@ database's `_yoga_entry_guard` ONE_PER_SESSION). Walk-ins allowed. `_isYoga(s)`.
   Tests: `tests/yoga-session.spec.ts`.
 
 ## Farm House Night (2026-11-13)
-Nawar Farm House Night, Thu 19 Nov 2026 at Little Farmhouse, Dhahban (map link in meet_url, the name in meet_name /
-meet_name_ar): arrival from 16:30, dinner 20:30. The user: approval like the Saturday Social Ride, inside MicroMobility
+The Little Farmhouse Night (title_ar ليلة ليتل فارم هاوس; first named Nawar Farm House Night, renamed by the user
+2026-11-13), Thu 19 Nov 2026 at Little Farmhouse, Dhahban (map link in meet_url, the name in meet_name / meet_name_ar): arrival from 16:30, dinner 20:30. The user: approval like the Saturday Social Ride, inside MicroMobility
 Experiences and not public, every member brings family members on their own booking, themed from the venue's Instagram
 (@thefarmhouse.jed).
 `ride_kind 'farm'` (event_kind community, open_to_all false, free, needs_approval TRUE, hide_queue), id suffix `-fh` (NC_ID
 knows it). KIND_TRAITS: no bike, no breakfast, but it GATHERS: `_time` is "arrival - dinner" (`sessionTime` says
 "Arrival 4:30 PM · Dinner 8:30 PM"; `{gather}` / `{start}` in `infoDtFarm`). `_isFarm(s)`. Featured by default (FEAT_KINDS).
 - **Family**: `_partyRide` takes farm, so the riders step asks how many (`fhPeople`) and a name each (`fhYou`, then
-  `fhFam`); `_maxRiders` = EVENT_SEAT_MAX (Settings > Business event_seat_max, 5) less what the account holds. The
+  `fhFam`); `_maxRiders` = FARM_SEAT_MAX (4: the account holder and three with them, the user 2026-11-13; not a setting, an
+  event keeps event_seat_max) less what the account holds. The
   ticket keeps Edit (approval rides otherwise have none) so a member adds or drops family later. Each family member is
   their own queue_entries row (approval pending) sharing the booking's group_id.
 - **Approval**: the Saturday ride's (Approve, Approve all, Publish, hidden numbers); parties never fold on an approval
   roster. A party's menu adds `✓ Approve (N)` (`_apprPartyIds`, `approveParty`): every place still waiting on a
   decision, guarded as Approve all is. Staff party rows count people, not bikes, on any bike-free session.
 - **Look "Harvest Supper"** (from the venue's profile picture: rust ground, peach lettering, a fanned turkey tail):
-  `assets/farm-mark.svg` (rounded feathers fanned behind a farmhouse gable), tokens `--fh-*` (rust #8A3F27, ember,
+  logo `assets/farm-logo.jpg` (the account's own Instagram picture, 150 px, the largest Instagram serves; shown round
+  with a peach edge: `_fhMarkImg`, TK_MARK.farm; the user 2026-11-13: "the logo ... the same of the insta account"), tokens `--fh-*` (rust #8A3F27, ember,
   maroon, peach #F3C7A9, cream #FBF3EA), title in Rubik 800. `_fhSessCard` (rust tile, `_fhScene` feathers in its far
   corner, never a count of places), `body.farm-skin` from the family step on (`_syncFhTheme`), `_fhHeadHtml`, ticket
   `th-farm` (cream and rust), featured card `.feat-fh`. Staff: mark `barn` (`_CU.barn`), short `snFarm`, chips `th-farm`,
@@ -1794,7 +1796,8 @@ knows it). KIND_TRAITS: no bike, no breakfast, but it GATHERS: `_time` is "arriv
   a gathering kind (ends two hours after dinner), the farm's map link. Apple pass `RIDES.farm` (cream, rust labels),
   ARRIVAL / DINNER; Google pass knows the kind.
 - Migration `20261114130000_farm_kind` (promo kind list, `_session_kind`, `_vol_sess_name`, `staff_record_waiver`
-  activity, `_updates_key`, `_solo_ride_cap` leaves farm alone, `_group_ride_cap` caps it at event_seat_max, push words).
+  activity, `_updates_key`, `_solo_ride_cap` leaves farm alone, `_group_ride_cap` caps it at event_seat_max, push words);
+  `20261114150000_farm_cap_four` (`_group_ride_cap` caps it at 4, an event keeps event_seat_max).
   Session: `supabase/checks/farm-night-2026-11-19.sql`, run after the app is live. Tests: `tests/farm-night.spec.ts`.
 - **Waivers (2026-11-13, "update all waivers especially the nawar farm house session")**: ride, swim and activity bodies end
   with the sentence for everyone on a booking (the booker accepts for each, may do so, is the parent/guardian of every

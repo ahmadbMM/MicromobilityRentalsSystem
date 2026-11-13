@@ -1,8 +1,10 @@
--- Nawar Farm House Night: Thursday 19 November 2026 at Little Farmhouse, Dhahban, Jeddah
--- (https://maps.app.goo.gl/BYteRL5JCueWZUEs6). Arrival from 4:30 PM, dinner at 8:30 PM. A date inside MicroMobility
--- Experiences for community members and their families: free, staff approve every place as on the Saturday ride (the
--- list hidden until staff publish it), and a member books themselves and up to four family members on one booking,
--- each by name. 60 places for staff to allocate. Staff change any of it in the app.
+-- The Little Farmhouse Night: Thursday 19 November 2026 at Little Farmhouse, Dhahban, Jeddah
+-- (https://maps.app.goo.gl/BYteRL5JCueWZUEs6). First inserted as Nawar Farm House Night (ليلة مزرعة نوار), renamed on
+-- production 2026-11-13 (the user: "change the name of the session to the little farmhouse night").
+-- Arrival from 4:30 PM, dinner at 8:30 PM. A date inside MicroMobility Experiences for community members and their
+-- families: free, staff approve every place as on the Saturday ride (the list hidden until staff publish it), and a
+-- member books themselves and up to three more on one booking, each by name (four per booking, 20261114150000).
+-- 60 places for staff to allocate. Staff change any of it in the app.
 -- Run this ONLY after the booking app that knows the farm night is live (and after migration 20261114130000): an
 -- older page shows an unknown community kind as the Saturday ride.
 begin;
@@ -11,7 +13,7 @@ insert into public.sessions (id, day, session_date, capacity, status, bike_slots
   location, meet_url, meet_name, meet_name_ar)
 values ('2026-11-19-fh', 'Thursday', '2026-11-19', 60, 'open', '{"_time":"16:30 - 20:30"}',
   to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
-  'community', null, 'Nawar Farm House Night', 'ليلة مزرعة نوار', true, true, 60, 'farm', false, null, false,
+  'community', null, 'The Little Farmhouse Night', 'ليلة ليتل فارم هاوس', true, true, 60, 'farm', false, null, false,
   'Little Farmhouse, Dhahban', 'https://maps.app.goo.gl/BYteRL5JCueWZUEs6', 'Little Farmhouse, Dhahban', 'ليتل فارم هاوس، ذهبان')
 on conflict (id) do nothing;
 commit;

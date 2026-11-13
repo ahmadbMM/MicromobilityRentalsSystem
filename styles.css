@@ -12170,7 +12170,8 @@ body:not(.view-staff) .sess-card.fh-card .sess-card-spots{background:var(--fh-mi
 .fh-scene .fh-ring{fill:none;stroke:rgba(var(--fh-glow),.3);stroke-width:1.2;}
 .fh-scene .fh-core{fill:rgba(126,32,52,.42);}
 .fh-card-top{display:flex;align-items:center;gap:10px;min-width:0;}
-.fh-card-mark{height:30px;width:auto;display:block;flex:none;}
+/* the venue's Instagram picture, round as Instagram shows it, with a peach edge on the rust */
+.fh-card-mark{height:44px;width:44px;border-radius:50%;object-fit:cover;display:block;flex:none;box-shadow:0 0 0 1.5px rgba(243,199,169,.75);}
 .fh-card-title{font-family:'Rubik','IBM Plex Sans Arabic','Noto Sans Devanagari','Noto Sans Bengali',sans-serif;font-size:21px;font-weight:800;letter-spacing:.2px;line-height:1.15;color:var(--fh-peach);overflow-wrap:anywhere;}
 body:not(.view-staff) :is(.fh-card-title,.fh-flow-name){font-family:'Rubik','IBM Plex Sans Arabic','Noto Sans Devanagari','Noto Sans Bengali',sans-serif;}
 .fh-card-meta{display:flex;flex-wrap:wrap;align-items:center;gap:3px 9px;font-size:13px;font-weight:600;color:var(--fh-milk);min-width:0;}
@@ -12184,7 +12185,7 @@ body.farm-skin:not(.view-staff) .toggle-btn.active{background:var(--fh-rust);bor
   background:linear-gradient(135deg,var(--fh-rust-lt) 0%,var(--fh-rust) 50%,var(--fh-rust-dk) 100%);
   border:1px solid rgba(110,44,28,.55);border-inline-start:3px solid var(--fh-peach);color:var(--fh-milk);}
 html[dir="rtl"] .fh-flow-head{background:linear-gradient(225deg,var(--fh-rust-lt) 0%,var(--fh-rust) 50%,var(--fh-rust-dk) 100%);}
-.fh-flow-mark{height:40px;width:auto;flex:none;display:block;}
+.fh-flow-mark{height:48px;width:48px;border-radius:50%;object-fit:cover;flex:none;display:block;box-shadow:0 0 0 1.5px rgba(243,199,169,.75);}
 .fh-flow-copy{min-width:0;flex:1 1 auto;}
 .fh-flow-name{font-family:'Rubik','IBM Plex Sans Arabic',sans-serif;font-size:19px;font-weight:800;color:var(--fh-peach);line-height:1.2;overflow-wrap:anywhere;}
 .fh-flow-sub{margin-top:3px;font-size:12.5px;font-weight:700;color:var(--fh-milk);}
@@ -12198,7 +12199,7 @@ html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-ca
   background:radial-gradient(120% 55% at 0% 100%,rgba(var(--fh-glow),.34) 0%,rgba(var(--fh-glow),.12) 38%,rgba(251,243,234,0) 66%) var(--fh-cream);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-farm .ticket-num{font-family:'Rubik',sans-serif;font-weight:800;}
 body:not(.view-staff) .ticket-card.tk-th.th-farm :is(.code-k-rw,.code-k-rf,.code-k-rb,.code-k-bd,.code-k-vl,.code-k-promo,.code-k-sat){--code-k:#8A3F27;}
-.ticket-card .tk-logo-ev .tk-logo-farm{height:30px;}
+.ticket-card .tk-logo-ev .tk-logo-farm{height:46px;width:46px;border-radius:50%;object-fit:cover;}
 /* the featured card on the event picker */
 body:not(.view-staff) .feat-card.feat-fh{color:var(--fh-milk);background:linear-gradient(135deg,var(--fh-rust-lt) 0%,var(--fh-rust) 50%,var(--fh-rust-dk) 100%);}
 html[dir="rtl"] body:not(.view-staff) .feat-card.feat-fh{background:linear-gradient(225deg,var(--fh-rust-lt) 0%,var(--fh-rust) 50%,var(--fh-rust-dk) 100%);}
@@ -12232,7 +12233,7 @@ html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-
 :is(.tk-ig,.ev-info-ig) svg{width:16px;height:16px;flex:none;}
 :is(.tk-ig,.ev-info-ig):hover{text-decoration:underline;}
 .ev-info-ig{min-height:0;color:inherit;text-decoration:underline;font-weight:600;}
-@media(max-width:400px){.fh-card-title{font-size:19px;}.fh-card-mark{height:26px;}.fh-flow-mark{height:34px;}.fh-scene{width:148px;height:74px;}.feat-fh .feat-name.fh-card-title{font-size:17px;}}
+@media(max-width:400px){.fh-card-title{font-size:19px;}.fh-card-mark{height:40px;width:40px;}.fh-flow-mark{height:42px;width:42px;}.fh-scene{width:148px;height:74px;}.feat-fh .feat-name.fh-card-title{font-size:17px;}}
 /* ════════════════════════════════════════════════════════════════════════
    FEATURED (the user, 2026-11-13) - a date inside MicroMobility Experiences that staff feature (_featured):
    it leads the list of dates under a heading of its own, and the event picker shows it as a card that opens
