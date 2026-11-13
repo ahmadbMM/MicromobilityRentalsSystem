@@ -6,7 +6,7 @@
 -- club number is read.
 --
 --  1. site_content 'hub.month.from': the first day the card may appear, a date as a JSON string. Seeded as
---     "2026-12-26", so the weekly Saturday recap (20261113120000, R13) has run for a month first. An admin can change
+--     "2026-12-26", so the weekly Saturday recap (20261114000100, R13) has run for a month first. An admin can change
 --     the row (site_content's own admin policies) and so can a later migration:
 --       update public.site_content set value = '"2027-01-26"'::jsonb, updated_by = 'migration' where key = 'hub.month.from';
 --     A missing row, or a value that is not a date, reads as 26 December 2026.

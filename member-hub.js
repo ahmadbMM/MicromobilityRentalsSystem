@@ -682,7 +682,7 @@ function _monKinds(m) {
   });
   return [...by].map(([k, n]) => ({ k, n })).sort((a, b) => b.n - a.n || a.k.localeCompare(b.k));
 }
-function _monIc(k) { return k === 'swim' ? 'wave' : k === 'runher' || k === 'defe5k' || k === 'arena' ? 'run' : k === 'yoga' ? 'lotus' : k === 'workshop' || k === 'event' || k === 'blood' ? 'cal' : 'bike'; }
+function _monIc(k) { return _own(KIND_IC, k) ? KIND_IC[k] : 'bike'; } // the app's own icon for each kind (_kindIc)
 // The one comparison: this month's sessions against the member's own month before. None for a member whose first
 // session is this month (the database sends no previous month).
 function _monPrev(m) {

@@ -225,6 +225,7 @@ test.describe('@customer:members F19 the migration', () => {
     // a community session, published, open for booking, not over, inside the booking window
     expect(going).toContain(`s.event_kind = 'community' and s.ride_kind is distinct from 'snd96'`);
     expect(going).toContain('s.hide_queue is false');
+    expect(going).toContain('s.required_tag_id is null'); // a private (tag-gated) ride is never counted, not even said to exist
     expect(going).toContain(`s.status = 'open' and s.cancelled_at is null and s.ride_status is distinct from 'cancelled'`);
     expect(going).toContain('s.session_date >= v_today');
     expect(going).toContain(`where key = 'booking.window'`);
@@ -249,7 +250,8 @@ test.describe('@customer:members F19 the migration', () => {
   test('hub_feed is the reach build\'s own, with one added key', () => {
     const FROM = 'create or replace function public.hub_feed(p_id text, p_token text, p_src text default null)';
     const TO = 'grant execute on function public.hub_feed(text, text, text) to anon, authenticated;';
-    const before = block(readFileSync('supabase/migrations/20261113120000_community_reach.sql', 'utf8'), FROM, TO);
+    const reach = readdirSync('supabase/migrations').find((f) => f.endsWith('_community_reach.sql'))!; // its number moved on main
+    const before = block(readFileSync('supabase/migrations/' + reach, 'utf8'), FROM, TO);
     const after = block(sql, FROM, TO);
     expect(after).toContain(`    'year', v_year_doc,\n    'going', _hub_going());`);
     expect(after.replace(`    'year', v_year_doc,\n    'going', _hub_going());`, `    'year', v_year_doc);`)).toBe(before);

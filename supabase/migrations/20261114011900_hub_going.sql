@@ -11,6 +11,7 @@
 --                          the pool session, a workshop), or the session was made with its list open (a paid community
 --                          ride). The app's own meaning of published (_commPublished). A session whose list stays
 --                          hidden (an event, a run, yoga, a race) answers nothing.
+--       not private      no required_tag_id: a tag-gated ride is not counted, so the read never says it exists.
 --       open for booking   status 'open', not cancelled, dated today or later in Riyadh, and inside the booking window
 --                          (site_content 'booking.window', read as _booking_window_guard reads it; the races are booked
 --                          from the day they are announced, as there).
@@ -21,14 +22,14 @@
 --            account is never one.
 --     A number under 10 is left out of its object; a session with neither number is left out whole.
 --  2. hub_feed(p_id, p_token, p_src): the Community tab's one read answers them as 'going'. The function is the one in
---     20261113120000_community_reach.sql, copied whole from that file (function attributes trap: header and body from
+--     20261114000100_community_reach.sql, copied whole from that file (function attributes trap: header and body from
 --     the migration, not from prosrc) with ONE change: the answer's last key, 'going', _hub_going(). Anyone merging
 --     another change to hub_feed keeps that one line.
 --
--- Run after 20261113120000_community_reach.sql. The app works before this runs: without 'going' in the answer the card
+-- Run after 20261114000100_community_reach.sql. The app works before this runs: without 'going' in the answer the card
 -- is as it was, with no count and no error.
 --
--- Rollback: run the hub_feed block of 20261113120000_community_reach.sql again, then
+-- Rollback: run the hub_feed block of 20261114000100_community_reach.sql again, then
 --   drop function if exists public._hub_going();
 
 begin;
@@ -68,7 +69,7 @@ begin
                        and s2.session_date < s.session_date)) as is_first
             from sessions s join queue_entries q on q.session_id = s.id
            where s.event_kind = 'community' and s.ride_kind is distinct from 'snd96'
-             and s.hide_queue is false
+             and s.hide_queue is false and s.required_tag_id is null
              and s.status = 'open' and s.cancelled_at is null and s.ride_status is distinct from 'cancelled'
              and s.session_date >= v_today
              and (v_last is null or coalesce(s.ride_kind, '') in ('vlap', 'arena')
