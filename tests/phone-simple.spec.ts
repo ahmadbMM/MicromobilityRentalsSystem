@@ -121,7 +121,7 @@ test.describe('@staff:settings simple phone view', () => {
     await expect(page.locator('#tab-sessions .ss-figs')).toBeHidden();
     await page.evaluate(`selectSessionDetail('${TODAY}')`);
     const acts = page.locator('#tab-sessions .sess-detail-actions button');
-    expect(await acts.allTextContents()).toEqual(['Mark full', 'Close']);
+    expect(await acts.allTextContents()).toEqual(['Mark full', 'Full, no waitlist', 'Close']); // the three statuses that stop or limit bookings (Full, no waitlist: 2026-11-13)
     expect(await page.locator('#tab-sessions .ss-links button').allTextContents()).toEqual(['Open in Bookings']);
     await expect(page.locator('#tab-sessions .n6r-box')).toHaveCount(0);
   });

@@ -8469,6 +8469,8 @@ body.view-staff .mg-row{display:flex;align-items:center;justify-content:space-be
 
 /* A ride not yet inside the booking window (2026-09-28): shown, greyed, with the day it opens. */
 .sess-card-soon{opacity:.62;cursor:default;pointer-events:none;}
+/* Full, no waitlist (_sessFb): on the list at full strength, so it does not read as called off; nothing to tap */
+.sess-card-fbk{cursor:default;pointer-events:none;}
 .sess-card-spots.spots-soon{color:var(--muted);}
 
 

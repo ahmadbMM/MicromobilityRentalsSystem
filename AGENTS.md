@@ -1801,6 +1801,31 @@ and special events such as hatha yoga class", then "even created one in the main
   The kind switch (6) was already on the list (`_regKindsHtml`, the theming picks' B5): nothing built, a spec beside the
   mark. Tests: `tests/booked-mark.spec.ts`.
 
+## Full, no waitlist (2026-11-13)
+The user: "add an option to show that a session is fully booked see you on the next session/saturday without hiding
+the session so people don't think it has cancelled". Mark Full keeps taking riders onto the waitlist and Close hides the
+date from riders; this state stops bookings and keeps the date in sight.
+- **Stored**: status `closed` plus `bike_slots._fbk` 1 (beside `_time`; no column, no migration). The database refuses
+  a booking on a closed session already, and an old cached app hides the date as any closed one, so nothing can book it.
+  `_sessFb(s)` is true only for a closed, marked session that is not called off (`cancelled_at`), not a draft and not
+  waiting on its timer (`opens_at`); `_sessShown(s)` = `_sessLive(s)` or that.
+- **Riders**: `renderRegister` lists it (`_sessShown`) as a `div.sess-card.sess-card-fbk` (aria-disabled, no radio, at
+  full strength so it does not read as called off): "Fully booked" (`sessFbk`) where places are said and "See you next
+  Saturday" (`sessFbkSat`, ride kind `saturday`) or "See you at the next session" (`sessFbkNext`) under it; a rider
+  holding a place on it sees their own mark instead (`_heldHtml`). It never holds the tab stop, a picked date that turns
+  full is un-picked, and a list of full dates alone has no Continue (`_pickable`). The Experiences card keeps the kind's
+  mark (`_commMarks`), a featured date keeps its card (Fully booked on it), and Details says Places: Fully booked.
+  Not covered: the one-off event cards on the picker (Run for Her, Victory Lap, Arena, blood, National Day, Events) still
+  show only while a date is live.
+- **Staff**: "Full, no waitlist" (`ssFbkLbl`) among the status tiles of an open or full session, and of a closed one
+  still ahead (not called off, not a draft or timed); its own badge in the list and the agenda (`_ssStatusBadge`), and
+  Re-open / Close on it (both take the mark off: Close is the plain, hidden close). `toggleSession(id,'fbk')` writes the
+  status and the slots in one update, its undo both back. The edit form has it as a fourth status (`S.editSessStatus`
+  `'fbk'`). The mark never lingers or spreads: every other status write takes it off (bulk too), Restore brings a
+  deleted session back plain closed, a copied week starts without it, a pushed template leaves each night's own.
+- Tests: `tests/full-no-waitlist.spec.ts`. Website: the same on micromobility.sa (mm-platform 32504b7e: `lib/rides.ts`
+  `fbkOf`, Experiences and Events).
+
 ## Blood Donation event (2026-11-03)
 - **Blood Donor badge (2026-11-05):** `blood_donor`, the drop on the red medal, earned from staff's Donated mark (`donatedAt`), so taking the mark back takes the badge; shown only once held. **Volunteer badge:** `volunteer`, the raised hand on its own blue special medal (`BDG_SPECIAL.volunteer`, `.sp-volunteer`), given by staff from Community > Badges. Catalogue rows: migration 20261105100000. Mirrored in the website's `lib/ride-record.ts`.
 - **Blood Donation Visitor badge (2026-11-06):** `blood_visitor`, the drop's outline with a heart inside on the teal medal (glyph `dropo`), earned by everyone who came, donors and visitors alike: any booking on a `blood` session that staff checked out (status done), or one marked Donated (the owner, 2026-11-06: "the blood donation visitor badge give it to donors and visitors"); Blood Donor stays with those marked Donated only. Shown only once held. Catalogue row in migration 20261106100000.

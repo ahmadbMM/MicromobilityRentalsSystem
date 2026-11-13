@@ -894,7 +894,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   newSession:'+ New session',newSessionTitle:'New session',dateLabel:'Date',
   createSession:'Create session',colDate:'Date',colDay:'Day',colCapacity:'Capacity',
   colBookings:'Bookings',colManageBooking:'Manage booking',colManageBike:'Manage bike',colManageRecord:'Manage record',openBtn:'Open',closeBtn:'Close',tmRoleFor:'Role for {0}',cactColDetail:'Details',cactColSite:'Site',rsNotOpenYet:'That session is not open for booking yet.',rsPaidMove:'This booking is paid. To move it to a session with a different price, ask at the booth.',repPopupBlocked:'The browser kept the report from opening. Tap again to open it.',hoTypeConfirmKeep:'Hand over a {0} to a rider who asked for a {1}? Their fare stays as it is.',ciPayCarryNote:'{0} chosen at check-in: recorded when the bike is assigned',deleteBtn:'Delete',
-  statusOpen:'Open',statusClosed:'Closed',statusFull:'Fully Booked',markFullBtn:'Mark full',reopenBtn:'Re-open',noSessionsYet:'No sessions yet. Create one above.',
+  statusOpen:'Open',statusClosed:'Closed',statusFull:'Fully Booked',markFullBtn:'Mark full',reopenBtn:'Re-open',sessFbk:'Fully booked',sessFbkSat:'See you next Saturday',sessFbkNext:'See you at the next session',ssFbkLbl:'Full, no waitlist',ssFbkDone:'Closed to bookings. Riders see it as fully booked.',noSessionsYet:'No sessions yet. Create one above.',
   editSessionTitle:'Edit session',saveSessionBtn:'Save changes',editBtn2:'Edit',dateWarning:'Changing the date will update all existing bookings for this session.',
   bikesTitle:'Fleet',addBike:'+ Add bike',editBikeTitle:'Edit bike',addBikeTitle:'Add new bike',
   frameSizeLabel:'Frame Size',bikeTypeLabel:'Bike type',
@@ -1582,7 +1582,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   newSession:'+ جلسة جديدة',newSessionTitle:'جلسة جديدة',dateLabel:'التاريخ',
   createSession:'إنشاء جلسة',colDate:'التاريخ',colDay:'اليوم',colCapacity:'الطاقة',
   colBookings:'الحجوزات',colManageBooking:'إدارة الحجز',colManageBike:'إدارة الدراجة',colManageRecord:'إدارة السجل',openBtn:'فتح',closeBtn:'إغلاق',tmRoleFor:'دور {0}',cactColDetail:'التفاصيل',cactColSite:'الموقع',rsNotOpenYet:'لم يُفتح الحجز في هذه الجلسة بعد.',rsPaidMove:'هذا الحجز مدفوع. لنقله إلى جلسة بسعر مختلف، اسأل عند الكشك.',repPopupBlocked:'منع المتصفح فتح التقرير. اضغط مرة أخرى لفتحه.',hoTypeConfirmKeep:'تسليم {0} لراكب طلب {1}؟ يبقى سعره كما هو.',ciPayCarryNote:'{0}: اختير عند تسجيل الدخول، ويُسجَّل عند تخصيص الدراجة',deleteBtn:'حذف',
-  statusOpen:'مفتوح',statusClosed:'مغلق',statusFull:'محجوز بالكامل',markFullBtn:'تعيين كمكتمل',reopenBtn:'إعادة فتح',noSessionsYet:'لا توجد جلسات بعد. أنشئ واحدة أعلاه.',
+  statusOpen:'مفتوح',statusClosed:'مغلق',statusFull:'محجوز بالكامل',markFullBtn:'تعيين كمكتمل',reopenBtn:'إعادة فتح',sessFbk:'محجوز بالكامل',sessFbkSat:'نراك السبت القادم',sessFbkNext:'نراك في الجلسة القادمة',ssFbkLbl:'مكتمل، بلا قائمة انتظار',ssFbkDone:'أُغلق الحجز. يراه الدرّاجون محجوزاً بالكامل.',noSessionsYet:'لا توجد جلسات بعد. أنشئ واحدة أعلاه.',
   editSessionTitle:'تعديل الجلسة',saveSessionBtn:'حفظ التغييرات',editBtn2:'تعديل',dateWarning:'تغيير التاريخ سيحدّث جميع الحجوزات الموجودة لهذه الجلسة.',
   sessionAddonsLabel:'الإضافات المتاحة',sessionAddonsHint:'عناصر من المخزون يمكن للعملاء إضافتها إلى الحجز',addonStepTitle:'أضف إلى حجزك',addonNone:'لا توجد إضافات متاحة لهذه الجلسة.',addonsLabel:'الإضافات',addonEditTitle:'تعديل الإضافات',addonAddBtn:'الإضافات',stockLeft:'متبقٍ',outOfStock:'نفد المخزون',coReconOk:'البطاقة + النقد متوازنان',coReconOff:'غير محتسب',
   bikesTitle:'الأسطول',addBike:'+ إضافة دراجة',editBikeTitle:'تعديل الدراجة',addBikeTitle:'إضافة دراجة جديدة',
@@ -8219,6 +8219,14 @@ function _ownOffered(s){return _isCommunity(s)||_rideKind(s)==='snd96';}
 // other ride there is no such thing as a close the rule made, and no marker to read.)
 function _sessLive(s){return !!s&&(s.status==='open'||s.status==='full');}
 function _sessFull(s){return !!s&&s.status==='full';}
+// Full, no waitlist (the user, 2026-11-13: "add an option to show that a session is fully booked see you on the next
+// session/saturday without hiding the session so people don't think it has cancelled"): a closed session staff marked
+// bike_slots._fbk stays on the riders' list as Fully booked, and nothing books it (the server refuses a closed session).
+// No column, no migration. A night called off, a draft or one waiting on its timer is never shown this way.
+function _sessFb(s){return !!s&&s.status==='closed'&&!s.cancelled_at&&!s.draft&&!s.opens_at&&!!(parseSlots(s.bike_slots)||{})._fbk;}
+function _sessShown(s){return _sessLive(s)||_sessFb(s);}
+function _fbkSlots(s,on){const o={...(parseSlots(s&&s.bike_slots)||{})};if(on)o._fbk=1;else delete o._fbk;return o;}
+function _fbkNextTxt(s){return t(_rideKind(s)==='saturday'?'sessFbkSat':'sessFbkNext');}
 // The order of sessions in every staff list (the user, 2026-11-10: "in the sessions lists everywhere show the sessions
 // with the chronological order starting from today and moving forward for open and closed sessions ... for the past
 // sessions put them in the end starting with the most recent to the oldest"): today's and the coming sessions first,
@@ -8312,7 +8320,7 @@ function _featured(s){if(!_featOk(s))return false;const f=(parseSlots(s.bike_slo
 // member's to see, as its Details are (_infoShowSess: the members gate's own answer, asked once per account).
 const FEAT_LAND_MAX=4;
 function _featLand(){
-  return allSessions().filter(s=>_featured(s)&&_sessLive(s)&&!_sessPastDay(s)&&!_sessEnded(s)&&_infoShowSess(s))
+  return allSessions().filter(s=>_featured(s)&&_sessShown(s)&&!_sessPastDay(s)&&!_sessEnded(s)&&_infoShowSess(s))
     .sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id)).slice(0,FEAT_LAND_MAX);
 }
 // A card: the day as a tile (weekday, date, month), the name, when (Today or Tomorrow in words), where, and what is news
@@ -8321,7 +8329,7 @@ function _featCardHtml(s){
   const ds=String(s.session_date||s.id).slice(0,10),yg=_isYoga(s);let wd='',dn=ds.slice(8),mo='';
   try{const d=new Date(ds+'T12:00:00+03:00'),f=o=>d.toLocaleDateString(_locale(),{...o,timeZone:KSA_TZ});wd=f({weekday:'short'});dn=f({day:'numeric'});mo=f({month:'short'});}catch(e){}
   const soon=_bwOpensText(s),full=_sessFull(s),n=spotsLeft(s.id),low=!soon&&!full&&!_isApprovalRide(s)&&n>0&&n<=3;
-  const st=_heldHtml(s)||(soon?`<span class="sess-card-spots spots-soon"><bdi>${esc(soon)}</bdi></span>`:full?`<span class="sess-card-spots spots-red">${t('waitlistLabel')}</span>`:low?`<span class="sess-card-spots spots-low">${spotsLeftLabel(n)}</span>`:''); // the rider's own place first (_heldSt)
+  const st=_heldHtml(s)||(_sessFb(s)?`<span class="sess-card-spots spots-red">${t('sessFbk')}</span>`:soon?`<span class="sess-card-spots spots-soon"><bdi>${esc(soon)}</bdi></span>`:full?`<span class="sess-card-spots spots-red">${t('waitlistLabel')}</span>`:low?`<span class="sess-card-spots spots-low">${spotsLeftLabel(n)}</span>`:''); // the rider's own place first (_heldSt)
   const row=l=>l.filter(Boolean).map(x=>`<span><bdi>${_sarA(esc(x))}</bdi></span>`).join(''); // the span takes the page's direction (its rule and room sit on its start side); the bdi keeps the words' own
   return`<button type="button" class="feat-card ${_evClass(s)}${yg?' feat-yg':''}" data-feat="${esc(s.id)}" data-on-click="${_on("_featOpen",s.id)}">
     ${yg?_ygScene():''}
@@ -9293,7 +9301,7 @@ function _kindArt(s,cls){return s&&KIND_ART.includes(_rideKind(s))?`<span class=
 // pool, Petromin, then any other - in a fixed order, each on its kind's tint, named for a screen reader.
 const COMM_MARKS=['saturday','swim','petromin','yoga','defe5k'];
 function _commMarks(){
-  const on=new Set((S.sessions||[]).filter(x=>_sessLive(x)&&!_sessPastDay(x)&&_evMatch(x,'community')).map(_rideKind));
+  const on=new Set((S.sessions||[]).filter(x=>_sessShown(x)&&!_sessPastDay(x)&&_evMatch(x,'community')).map(_rideKind)); // a kind closed as full keeps its mark (_sessFb)
   const ks=COMM_MARKS.filter(k=>on.has(k));
   return ks.length?`<span class="lec-marks" role="img" aria-label="${esc(ks.map(_evKindName).join(' · '))}">${ks.map(k=>`<span class="lec-mk ev-${k}">${_cuIc(KIND_IC[k]||'bike',18)}</span>`).join('')}</span>`:'';
 }
@@ -13950,7 +13958,8 @@ function _infoFacts(s,next){
   if(_hasRideGroups(s))rows.push([t('infoGroups'),esc(RIDE_GROUPS.map(g=>`${_rgName(g)} ${_rgKmTxt(s,g)}`).join(' · '))]);
   {const r=_rideRoute(s),b=_rtBtn(r);if(b)rows.push([t('rtTitle'),(Array.isArray(S._routes)?esc(r.name)+' · ':'')+b]);} // the route's own page (F11, 2026-11-13); its name once the Routes list is in
   // Victory Lap says open or waitlist, never how many places (the owner, 2026-10-17: "dont show a specific number of spots")
-  if(!_isApprovalRide(s)){const n=spotsLeft(s.id);rows.push([t('infoPlaces'),esc(_sessFull(s)||n<=0?t('waitlistLabel'):k==='vlap'?t('availLabel'):spotsLeftLabel(n))]);}
+  if(_sessFb(s))rows.push([t('infoPlaces'),esc(t('sessFbk'))]); // closed as full: said so, approval ride or not
+  else if(!_isApprovalRide(s)){const n=spotsLeft(s.id);rows.push([t('infoPlaces'),esc(_sessFull(s)||n<=0?t('waitlistLabel'):k==='vlap'?t('availLabel'):spotsLeftLabel(n))]);}
   {const bf=_spotHeld(s)?_revealLine(s):_bfAt(s);if(bf)rows.push([t('infoAfter'),esc(bf)]);} // the breakfast spot, or when it is told
   return rows;
 }
@@ -18906,7 +18915,7 @@ function renderRegister(){
   if(!S.modifyEntryId)S.regBikeTypes=S.regBikeTypes.map(ty=>_regTyBarred(ty,_selSessObj)?undefined:ty);
   S.regBikeTypes=S.regBikeTypes.map((ty,i)=>_regTypeShut(_selSessObj,ty,i)?undefined:ty); // so does a type closed on this ride
   if(S._bw===undefined)_bwLoad(); // the booking window, once; the list repaints when it lands
-  let available=allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&!_sessEnded(s)&&_evMatch(s,_ev)) // men or women only too: everyone sees it, that gender alone books it (_sgPick, 2026-10-28); a ride that ended earlier today is gone, as the server refuses it (bug hunt 2026-10-28)
+  let available=allSessions().filter(s=>_sessShown(s)&&!_sessPastDay(s)&&!_sessEnded(s)&&_evMatch(s,_ev)) // one staff closed as full stays on the list, not bookable (_sessFb) // men or women only too: everyone sees it, that gender alone books it (_sgPick, 2026-10-28); a ride that ended earlier today is gone, as the server refuses it (bug hunt 2026-10-28)
     .sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
   // A list holding two or more kinds offers All and each kind (B5, 2026-11-13); the pick narrows the rows only, so a date
   // already picked stays picked. A kind no longer on the list reads as All.
@@ -18916,7 +18925,7 @@ function renderRegister(){
   if(S.selSession&&!_bwOpen(_sessDisp(S.selSession)))S.selSession=null; // not open yet: nothing to book on
   // Featured dates lead the list under a heading of their own; the rest follow in date order (_featured, 2026-11-13).
   const _feat=available.filter(_featured),_rest=_feat.length?available.filter(s=>!_featured(s)):available;
-  const _first=(_feat.concat(_rest).find(x=>!_bwOpensText(x)&&!_isDefe(x))||{}).id; // the row that holds the tab stop while none is picked (row 11): the first one on the page
+  const _first=(_feat.concat(_rest).find(x=>!_sessFb(x)&&!_bwOpensText(x)&&!_isDefe(x))||{}).id; // the row that holds the tab stop while none is picked (row 11): the first one on the page
   ensureBikeSizes();
   // No bike anywhere in what is in front of the rider (2026-10-18): the picked session, else the event card's
   // dates (a card that is bike-free, or a list whose every date is). The steps then say session and participant.
@@ -18927,8 +18936,16 @@ function renderRegister(){
   const branchFilter='';
 
   const _row=s=>{
-        const _soon=_bwOpensText(s);
         const _dt=_infoDetailsBtn(s,1);
+        // Full, no waitlist (_sessFb): the date stays where riders look for it, said full, and the next one is where to go.
+        // A rider holding a place on it sees that place instead.
+        if(_sessFb(s)){const _h=_heldHtml(s);return`<div class="sess-wrap${_dt?' has-about':''}"><div class="sess-card sess-card-fbk ${_evClass(s)}" aria-disabled="true" data-session="${esc(s.id)}">
+          ${_evNamed(s)?`<span class="sess-card-kicker">${_sessKick(s)}${_sgChip(s)}</span>`:''}
+          <span class="sess-card-head">
+            <span class="sess-card-time"><bdi>${sessionTime(s)}</bdi></span></span>
+          <span class="sess-card-sub"><span class="sess-card-meta">${_h}</span>${_h?'':`<span class="sess-card-spots spots-red">${t('sessFbk')}</span>`}</span>
+          ${_h?'':`<span class="sess-card-bf sess-card-reveal sess-fbk-l">${_cuIc('cal',13)}<bdi>${esc(_fbkNextTxt(s))}</bdi></span>`}${_kindArt(s,'sess-motif')}</div>${_dt}</div>`;}
+        const _soon=_bwOpensText(s);
         if(_soon)return`<div class="sess-wrap${_dt?' has-about':''}"><div class="sess-card sess-card-soon ${_evClass(s)}" aria-disabled="true" data-session="${esc(s.id)}">
           ${_evNamed(s)?`<span class="sess-card-kicker">${_sessKick(s)}${_sgChip(s)}</span>`:''}
           <span class="sess-card-head">
@@ -18987,7 +19004,8 @@ function renderRegister(){
           @MicroMobilitySA
         </a>
       </div>`;
-  if(S.selSession&&!available.find(s=>s.id===S.selSession&&_bwOpen(s)))S.selSession=null;
+  if(S.selSession&&!available.find(s=>s.id===S.selSession&&_bwOpen(s)&&!_sessFb(s)))S.selSession=null; // closed as full while picked: nothing to book on
+  const _pickable=available.some(x=>!_sessFb(x)); // a list of full dates alone offers no Continue
   // Coming back to step one, or arriving by any path other than the event card, still lands
   // on the ride rather than on a list of one.
   const _soleSess=_soleSessionFor(_ev);
@@ -19292,7 +19310,7 @@ function renderRegister(){
     ${usualBtn}
     ${branchFilter}
     <div class="session-picker-wrap" id="session-picker-wrap">
-      ${_soleSess?_soleSessHtml(_soleSess):available.length?`<div class="session-cards-grid" role="radiogroup" aria-labelledby="reg-h" data-on-keydown="${_on('_rgKey',_EV,_EL)}">${sessCards}</div>`:`<div class="session-cards-grid">${sessCards}</div>`}
+      ${_soleSess?_soleSessHtml(_soleSess):_pickable?`<div class="session-cards-grid" role="radiogroup" aria-labelledby="reg-h" data-on-keydown="${_on('_rgKey',_EV,_EL)}">${sessCards}</div>`:`<div class="session-cards-grid">${sessCards}</div>`}
       ${(()=>{ // community ride staff-marked FULL: reservations still work but land on the waitlist - say so up front
         if(!S.selSession)return'';
         const _cs=_sessDisp(S.selSession);
@@ -19304,7 +19322,7 @@ function renderRegister(){
         </div>`;
       })()}
     </div>
-    ${available.length?`<div class="mm-reg-foot${S.selSession&&!_soleSess?' has-sum':''}">${S.selSession?(_soleSess?'':_regFootSum(_sessDisp(S.selSession))):(_rfOpens?`<p class="reg-foot-why" id="rf-why" data-bw="${esc(_soleSess.id)}">${esc(_rfOpens)}</p>`:'')}<button class="btn-primary ${S.selSession&&!_soleSess?'reg-foot-go':'cu-w100'}${S.selSession?'':' cu-off'}" ${S.selSession?'':`disabled${_rfOpens?' aria-describedby="rf-why"':''}`} data-on-click="${_on("regNextFromSession")}">${t('regContinueBtn')}</button></div>`:''}`;
+    ${_pickable?`<div class="mm-reg-foot${S.selSession&&!_soleSess?' has-sum':''}">${S.selSession?(_soleSess?'':_regFootSum(_sessDisp(S.selSession))):(_rfOpens?`<p class="reg-foot-why" id="rf-why" data-bw="${esc(_soleSess.id)}">${esc(_rfOpens)}</p>`:'')}<button class="btn-primary ${S.selSession&&!_soleSess?'reg-foot-go':'cu-w100'}${S.selSession?'':' cu-off'}" ${S.selSession?'':`disabled${_rfOpens?' aria-describedby="rf-why"':''}`} data-on-click="${_on("regNextFromSession")}">${t('regContinueBtn')}</button></div>`:''}`;
 
   
   if((_runSel||_vlSel||_bldSel)&&curStep===2)_runAccLoad();
@@ -28576,7 +28594,7 @@ function startEditSession(id){
   const sess=_sessDisp(id);if(!sess)return;
   S.editSessionId=id;S.editSessFollow=false;
   S.editSessDate=sess.session_date||sess.id;
-  S.editSessStatus=sess.status||'closed';
+  S.editSessStatus=_sessFb(sess)?'fbk':sess.status||'closed'; // Full, no waitlist is a status of its own on the form
   // Only a collection time staff typed is the form's (2026-10-05): one worked out from the start when
   // the form opened was saved with it, and stayed put when the start moved - bikes "from 8:15" on a
   // ride that now left at 7. Untouched, the box shows the default for the start (_collectAuto).
@@ -29488,8 +29506,8 @@ async function _nsTplPush(tp,list){
   // Each night keeps its own invitation (_inv) and ride distance (_km): the template has neither, and a whole
   // bike_slots from the open form wiped or stamped them on every future night (bug hunt 2026-10-28).
   for(const x of list){
-    const old=parseSlots(x.bike_slots)||{},slots={...tplSlots};delete slots._inv;delete slots._feat; // and each night is featured, or not, as it was (2026-11-13)
-    if(old._inv)slots._inv=old._inv;if(old._km&&!('_km' in slots))slots._km=old._km;if(old._feat!=null)slots._feat=old._feat;
+    const old=parseSlots(x.bike_slots)||{},slots={...tplSlots};delete slots._inv;delete slots._feat;delete slots._fbk; // and each night is featured, or not, as it was (2026-11-13), and closed as full, or not (_sessFb)
+    if(old._inv)slots._inv=old._inv;if(old._km&&!('_km' in slots))slots._km=old._km;if(old._feat!=null)slots._feat=old._feat;if(old._fbk)slots._fbk=old._fbk;
     if(!await _wr(sb.from('sessions').update({...patch,bike_slots:JSON.stringify(slots)}).eq('id',x.id).neq('status','deleted'),'update rides'))n++;
   }
   await _sessReload(list.map(x=>x.id));renderSessions();
@@ -30169,7 +30187,7 @@ async function _n6sInsertAll(rows,ctx){
 const N6S_COPY_KEEP=['capacity','bike_slots','addons','title','spots','price','meet_url','meet_name','meet_name_ar','meet_lat','meet_lng','breakfast_name','breakfast_url','event_kind','needs_approval','ride_kind','paid_ride','open_to_all','required_tag_id','description','gender_only','member_cap','location','template_id','route_slug','hide_queue','lockers']; // the meeting point's name and coordinate go with its link; a ride's status stays with its date
 function _n6sCopyRow(s,days){
   const o={};N6S_COPY_KEEP.forEach(k=>{if(k in s)o[k]=s[k];});
-  const d=_ssPlus(_ssDay(s),days),sl=parseSlots(s.bike_slots)||{};delete sl._inv;
+  const d=_ssPlus(_ssDay(s),days),sl={...(parseSlots(s.bike_slots)||{})};delete sl._inv;delete sl._fbk; // a copy starts closed and unseen, never shown as full (_sessFb)
   // Picked bikes the fleet no longer puts out (retired, missing) stay behind, as on a clone (_nsCopy; bug hunt 2026-11-10):
   // copied, they were places customers could book with no bike behind them, which the picker cannot show to untick. Their
   // type counts go down with them, and the places when they were the bike count. A night left with none keeps its list,
@@ -30402,7 +30420,7 @@ function _n6sFormHtml(){
       ${pub==='at'&&can?`<input type="datetime-local" id="n6s-opens" class="ss-mw240 ss-mt6" aria-label="${esc(t('n6sPubAt'))}" value="${esc(S.n6sOpensAt||'')}" data-on-input="${_on('_n6sSet','n6sOpensAt',_P('value'))}">`:''}
       <div class="ss-hint">${t(can?(pub==='open'?'n6sPubOpenHint':pub==='at'?'n6sPubAtHint':'n6sPubDraftHint'):'n6sNeedDb')}</div></div>`;
 }
-function _ssStatusBadge(s){return _n6sDraft(s)||_n6sTimed(s)?_n6sBadge(s):s.status==='open'?`<span class="badge-open">${t('statusOpen')}</span>`:s.status==='full'?`<span class="badge-full">${t('statusFull')}</span>`:`<span class="badge-closed">${t('statusClosed')}</span>`;}
+function _ssStatusBadge(s){return _n6sDraft(s)||_n6sTimed(s)?_n6sBadge(s):_sessFb(s)?`<span class="badge-full">${t('ssFbkLbl')}</span>`:s.status==='open'?`<span class="badge-open">${t('statusOpen')}</span>`:s.status==='full'?`<span class="badge-full">${t('statusFull')}</span>`:`<span class="badge-closed">${t('statusClosed')}</span>`;}
 function _ssBar(pct){return`<div class="sess-lc-bar"><div class="ss-fill ${pct>=100?'ss-fill-full':pct>80?'ss-fill-high':'ss-fill-ok'}" data-cssv="${_cssv({'--ss-w':Math.min(100,pct)+'%'})}"></div></div>`;}
 function _ssCell(c,s,x){
   {const v=_n6rCell(c,s);if(v!=null)return v;}
@@ -30457,12 +30475,13 @@ function _ssBulk(st){
   confirmDialog({title:t('ssBAsk').replace('{0}',ids.length).replace('{1}',t(SESS_STATUS_KEY[st])),body:st==='closed'?esc(t('ssBNote')):skipped?esc(t('n6sPastSkipped').replace('{0}',skipped)):'',confirmLabel:t('ssBGo'),confirmClass:st==='closed'?'btn-red':'btn-primary',onConfirm:()=>_busyRun('ssBulk',()=>_ssBulkDo(ids,st))});
 }
 async function _ssBulkDo(ids,st){
-  const prev=ids.map(id=>{const s=_sessGet(id)||{};return[id,s.status||'closed',s.cancelled_at||null];});
+  const prev=ids.map(id=>{const s=_sessGet(id)||{};return[id,s.status||'closed',s.cancelled_at||null,(parseSlots(s.bike_slots)||{})._fbk?s.bike_slots:null];});
   if(_writeErr(await sb.from('sessions').update(st==='closed'?{status:st}:{status:st,cancelled_at:null}).in('id',ids),'session status'))return; // opened again: no longer called off (Cancel night)
+  for(const[id,,,fs]of prev)if(fs)await _wr(sb.from('sessions').update({bike_slots:JSON.stringify(_fbkSlots({bike_slots:fs},false))}).eq('id',id),'session status'); // a full mark (_sessFb) does not outlive a status set in bulk
   await _sessReload(ids);
   toast(t('ssBDone').replace('{0}',ids.length),'success');
   pushUndo(t('ssBUndo').replace('{0}',ids.length).replace('{1}',t(SESS_STATUS_KEY[st])),async()=>{
-    for(const[id,ps,pc]of prev){if(_writeErr(await sb.from('sessions').update({status:ps,...(pc&&st!=='closed'?{cancelled_at:pc}:{})}).eq('id',id),'undo session status'))return false;} // a night called off is called off again
+    for(const[id,ps,pc,fs]of prev){if(_writeErr(await sb.from('sessions').update({status:ps,...(fs?{bike_slots:fs}:{}),...(pc&&st!=='closed'?{cancelled_at:pc}:{})}).eq('id',id),'undo session status'))return false;} // a night called off is called off again, a full one full again
     await _sessReload(ids);renderSessions();renderStaffQueue();
   });
   S.sessSel=[];renderSessions();renderStaffQueue();
@@ -31015,6 +31034,7 @@ function _on_renderSessions_42(event,el,a0){event.stopPropagation();toggleSessio
 function _on_renderSessions_43(event,el,a0){event.stopPropagation();toggleSession(a0,'closed')}
 function _on_renderSessions_44(event,el,a0){event.stopPropagation();toggleSession(a0,'open')}
 function _on_renderSessions_45(event,el,a0){event.stopPropagation();toggleSession(a0,'closed')}
+function _on_ssFbk(event,el,a0){event.stopPropagation();toggleSession(a0,'fbk')}
 function _on_renderSessions_46(event,el,a0){event.stopPropagation();toggleSession(a0,'open')}
 function _on_renderSessions_47(event,el){_n6rNsOpen('')}
 function _on_renderSessions_50(event,el){if(!S.showAddSession){_n6rNsOpen('');return;}S.showAddSession=false;S.editSessionId=null;S._nsTplId=null;renderSessions()} // opens clean every time (SS16)
@@ -31273,8 +31293,8 @@ function renderSessions(){
         <div class="form-group">
           <label>${t('colStatus')}</label>
           <div class="toggle-group ss-mt4">
-            ${['closed','open','full'].map(st=>`<button class="toggle-btn${S.editSessStatus===st?' active':''}" aria-pressed="${(S.editSessStatus===st)?'true':'false'}"
-              data-on-click="${_on("_on_renderSessions_24",_EV,_EL,st)}">${t(SESS_STATUS_KEY[st])}</button>`).join('')}
+            ${['closed','open','full','fbk'].map(st=>`<button class="toggle-btn${S.editSessStatus===st?' active':''}" aria-pressed="${(S.editSessStatus===st)?'true':'false'}"
+              data-on-click="${_on("_on_renderSessions_24",_EV,_EL,st)}">${t(st==='fbk'?'ssFbkLbl':SESS_STATUS_KEY[st])}</button>`).join('')}
           </div>
         </div>
         ${_twoTimesSess(editSess)?`
@@ -31472,9 +31492,14 @@ function renderSessions(){
     const _tcN=_typesClosed(s).length;
     const _typesBtn=(_needsBike(s)&&!_nightOver)?`<button class="btn-sm btn-muted" data-on-click="${_on("showTypeClose",s.id)}">${t('closeTypesBtn')}${_tcN?` (${_tcN})`:''}</button>`:'';
     let badge,actions;
-    if(s.status==='open'){badge=`<span class="badge-open">${t('statusOpen')}</span>`;actions=`<button class="btn-sm btn-muted" data-on-click="${_on("_on_renderSessions_42",_EV,_EL,s.id)}">${t('markFullBtn')}</button><button class="btn-sm btn-red" data-on-click="${_on("_on_renderSessions_43",_EV,_EL,s.id)}">${t('closeBtn')}</button>`;}
-    else if(s.status==='full'){badge=`<span class="badge-full">${t('statusFull')}</span>`;actions=`<button class="btn-sm btn-green" data-on-click="${_on("_on_renderSessions_44",_EV,_EL,s.id)}">${t('reopenBtn')}</button><button class="btn-sm btn-red" data-on-click="${_on("_on_renderSessions_45",_EV,_EL,s.id)}">${t('closeBtn')}</button>`;}
-    else{badge=s.cancelled_at?`<span class="badge-closed ss-cancelled">${t('statusCancelled')}</span>`:_n6sDraft(s)||_n6sTimed(s)?_n6sBadge(s):`<span class="badge-closed">${t('statusClosed')}</span>`;actions=`<button class="btn-sm btn-green" data-on-click="${_on("_on_renderSessions_46",_EV,_EL,s.id)}">${t('openBtn')}</button>`;}
+    // Full, no waitlist (_sessFb, 2026-11-13): closed to bookings while riders still see the date, said full. Offered on a
+    // live session and on a closed one still ahead; its Close is the plain close that takes it off the riders' list.
+    const _fbBtn=`<button class="btn-sm btn-muted" data-on-click="${_on("_on_ssFbk",_EV,_EL,s.id)}">${t('ssFbkLbl')}</button>`;
+    const _fbOk=s.status==='closed'&&!_sessFb(s)&&!s.cancelled_at&&!_n6sDraft(s)&&!_n6sTimed(s)&&String(s.session_date||s.id).slice(0,10)>=_today;
+    if(s.status==='open'){badge=`<span class="badge-open">${t('statusOpen')}</span>`;actions=`<button class="btn-sm btn-muted" data-on-click="${_on("_on_renderSessions_42",_EV,_EL,s.id)}">${t('markFullBtn')}</button>${_fbBtn}<button class="btn-sm btn-red" data-on-click="${_on("_on_renderSessions_43",_EV,_EL,s.id)}">${t('closeBtn')}</button>`;}
+    else if(s.status==='full'){badge=`<span class="badge-full">${t('statusFull')}</span>`;actions=`<button class="btn-sm btn-green" data-on-click="${_on("_on_renderSessions_44",_EV,_EL,s.id)}">${t('reopenBtn')}</button>${_fbBtn}<button class="btn-sm btn-red" data-on-click="${_on("_on_renderSessions_45",_EV,_EL,s.id)}">${t('closeBtn')}</button>`;}
+    else if(_sessFb(s)){badge=`<span class="badge-full">${t('ssFbkLbl')}</span>`;actions=`<button class="btn-sm btn-green" data-on-click="${_on("_on_renderSessions_44",_EV,_EL,s.id)}">${t('reopenBtn')}</button><button class="btn-sm btn-red" data-on-click="${_on("_on_renderSessions_45",_EV,_EL,s.id)}">${t('closeBtn')}</button>`;}
+    else{badge=s.cancelled_at?`<span class="badge-closed ss-cancelled">${t('statusCancelled')}</span>`:_n6sDraft(s)||_n6sTimed(s)?_n6sBadge(s):`<span class="badge-closed">${t('statusClosed')}</span>`;actions=`<button class="btn-sm btn-green" data-on-click="${_on("_on_renderSessions_46",_EV,_EL,s.id)}">${t('openBtn')}</button>${_fbOk?_fbBtn:''}`;}
     return{booked,cap,left,fleetInfo,badge,stat:actions,actions:actions+_typesBtn+_closeoutBtn+_cancelNightBtn}; // stat: open, full, close alone (the simple phone view)
   };
   // Nothing picked yet on a wide screen: the detail pane shows the next live ride rather than an empty
@@ -32042,7 +32067,8 @@ async function _saveSessionEdit(){
   if(esWlCollect!==undefined)slots._wlCollect=esWlCollect; // the waitlist's own (_wlCollectTime)
   if(!await _dkYCapOk([[sess,total]]))return; // fewer places than riders booked: asked first (S02-core2-06)
   if(newDate!==_prevDate&&!await _n6sClashGate([{...sess,session_date:newDate,bike_slots:JSON.stringify(slots)}],oldId))return; // a move onto a clash is asked first (SS06)
-  const newStatus=S.editSessStatus||sess.status;
+  const _esFb=S.editSessStatus==='fbk',newStatus=_esFb?'closed':(S.editSessStatus||sess.status);
+  if(_esFb)slots._fbk=1; // Full, no waitlist: closed, and riders still see it (_sessFb); any other status leaves the mark off
   const dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const newDay=dayNames[new Date(newDate+'T00:00:00').getDay()];
 
@@ -32448,26 +32474,30 @@ async function _addSession(){
 async function toggleSession(id,newStatus){
   try{
     const prev=_sessDisp(id);
-    const prevStatus=prev?prev.status:'closed',prevCancel=newStatus!=='closed'&&prev&&prev.cancelled_at||null;
+    // 'fbk' is Full, no waitlist (_sessFb): the status closed with bike_slots._fbk. Every other status takes the mark off,
+    // so a session opened again and closed later is not shown as full by a mark left behind.
+    const fb=newStatus==='fbk',st=fb?'closed':newStatus,hadFb=!!(prev&&(parseSlots(prev.bike_slots)||{})._fbk);
+    const prevStatus=prev?prev.status:'closed',prevCancel=st!=='closed'&&prev&&prev.cancelled_at||null,prevSlots=prev?prev.bike_slots:null;
+    const slotsPatch=fb!==hadFb&&prev?{bike_slots:JSON.stringify(_fbkSlots(prev,fb))}:{};
     // PostgREST resolves with {error} on a denial rather than throwing, so the catch below
     // never saw it and the success toast fired on a write that never happened.
     // A night called off (Cancel night's cancelled_at) and opened again is not called off any more.
-    if(_writeErr(await sb.from('sessions').update({status:newStatus,...(newStatus!=='closed'&&prev&&prev.cancelled_at?{cancelled_at:null}:{})}).eq('id',id),'session status',()=>toggleSession(id,newStatus)))return;
+    if(_writeErr(await sb.from('sessions').update({status:st,...slotsPatch,...(st!=='closed'&&prev&&prev.cancelled_at?{cancelled_at:null}:{})}).eq('id',id),'session status',()=>toggleSession(id,newStatus)))return;
     // Closing a session only changes its status (the owner, 2026-10-09: "dont mark all bookings no
     // show or completed unless the close out button is clicked"). Settling the riders - free rides
     // included - is the Close out button's job (closeOutSession), never a side effect of closing.
     await _sessReload([id]);
-    const lbl={open:t('sessOpened'),closed:t('sessClosed'),full:t('statusFull')+'.'}[newStatus]||newStatus;
+    const lbl={open:t('sessOpened'),closed:t('sessClosed'),full:t('statusFull')+'.',fbk:t('ssFbkDone')}[newStatus]||newStatus;
     toast(lbl);
-    pushUndo(`${t('undoSessionStatus')} ${shortDate(prev?.session_date||id)} → ${_own(SESS_STATUS_KEY,newStatus)?t(SESS_STATUS_KEY[newStatus]):newStatus}`,async()=>{ // the status in words, not its code (2026-10-05)
-      if(_writeErr(await sb.from('sessions').update({status:prevStatus,...(prevCancel?{cancelled_at:prevCancel}:{})}).eq('id',id),'undo session status'))return false; // a night called off is called off again
+    pushUndo(`${t('undoSessionStatus')} ${shortDate(prev?.session_date||id)} → ${fb?t('ssFbkLbl'):_own(SESS_STATUS_KEY,newStatus)?t(SESS_STATUS_KEY[newStatus]):newStatus}`,async()=>{ // the status in words, not its code (2026-10-05)
+      if(_writeErr(await sb.from('sessions').update({status:prevStatus,...(slotsPatch.bike_slots?{bike_slots:prevSlots}:{}),...(prevCancel?{cancelled_at:prevCancel}:{})}).eq('id',id),'undo session status'))return false; // a night called off is called off again
       await _sessReload([id]);renderSessions();renderStaffQueue();
     });
     renderSessions();renderStaffQueue();
     // A night of today or before with riders still open is asked about Close out, once the status is written (_coXAsk;
     // the staff review, 2026-10-28). The question settles nothing: only its Close out now opens Close out. Tonight's
     // ride closed before it starts (sign-ups stopped in the afternoon) has nobody to settle yet, so is not asked.
-    if(newStatus==='closed'){const n=_coCount(id);if(n&&_coXStarted({sessionId:id}))_coXAsk(id,n);}
+    if(st==='closed'){const n=_coCount(id);if(n&&_coXStarted({sessionId:id}))_coXAsk(id,n);}
   }catch(e){toast(t('errServerError'),'error');}
 }
 
@@ -32595,7 +32625,8 @@ async function deleteSession(id){
 
 async function restoreSession(id){
   try{
-    if(_writeErr(await sb.from('sessions').update({status:'closed'}).eq('id',id),'restore session',()=>restoreSession(id)))return;
+    const _rs=_sessDisp(id),_rsFb=!!(_rs&&(parseSlots(_rs.bike_slots)||{})._fbk); // back as plain closed, not shown as full (_sessFb)
+    if(_writeErr(await sb.from('sessions').update({status:'closed',...(_rsFb?{bike_slots:JSON.stringify(_fbkSlots(_rs,false))}:{})}).eq('id',id),'restore session',()=>restoreSession(id)))return;
     await _sessReload([id]);
     toast(t('sessRestored'));
     renderSessions();
