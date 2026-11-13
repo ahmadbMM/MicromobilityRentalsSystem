@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Request } from '@playwright/test';
+import { test, expect, type Page, type Request, type Locator, type Route } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -77,8 +77,22 @@ const answers = () => [
   ans(107, 18, 'Yousef Karim', '+966557778888', { t: 'Shade for the little ones, please' }),
   ans(106, 20, 'Noura Fahad', '+966559990000', { g: { a1: [1, 2] } }), // an answer of the undrawn kind
 ];
+// staff_ask_stats: 37 answers from 21 people over three Saudi days; the groups count people
+const stats = (o: Row = {}): Row => ({ answers: 37, people: 21, approved: 30, pending: 5, rejected: 2, flagged: 1, audience: null, first_at: '2026-11-10T06:05:00Z', last_at: '2026-11-12T18:40:00Z',
+  by_day: [{ d: '2026-11-10', n: 9, people: 7 }, { d: '2026-11-11', n: 16, people: 11 }, { d: '2026-11-12', n: 12, people: 9 }],
+  by_hour: [0, 0, 0, 0, 0, 0, 0, 1, 2, 4, 3, 2, 1, 0, 0, 2, 5, 6, 7, 3, 1, 0, 0, 0],
+  by_gender: { male: 12, female: 6, none: 3 }, by_age: { '<18': 1, '18-24': 4, '25-34': 8, '35-44': 5, '45-54': 1, '55-64': 0, '65+': 0, none: 2 },
+  by_member: { member: 9, other: 12 }, by_nationality: [{ code: 'SAUDI ARABIA', n: 11 }, { code: 'EGYPT', n: 4 }, { code: 'none', n: 3 }, { code: 'other', n: 3 }],
+  by_lang: { en: 25, ar: 12 },
+  by_question: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((id, i) => ({ id, answers: [6, 9, 4, 3, 3, 4, 2, 1, 0, 1][i], people: [5, 9, 4, 3, 3, 4, 2, 1, 0, 1][i], pending: id === 11 ? 4 : id === 17 ? 1 : 0 })),
+  top_people: [{ customer_id: 'c1', name: 'Lina Haddad', answers: 6, approved: 5 }, { customer_id: 'c2', name: 'Omar Saleh', answers: 4, approved: 4 }], ...o });
+// staff_ask_segment for "Which day suits you?" by gender: a result of the question's kind for each group, ordered by key
+const segment = (): Row => ({ by: 'gender', segments: [{ key: 'female', n: 3, result: { n: 3, counts: { a1: 1, a2: 0, a3: 2 } } },
+  { key: 'male', n: 5, result: { n: 5, counts: { a1: 4, a2: 1, a3: 0 } } }, { key: 'none', n: 1, result: { n: 1, counts: { a1: 0, a2: 0, a3: 1 } } }] });
 const base = (): Fixtures => ({ sessions: [], queue_entries: [], bikes: [], customers: [], tags, customer_tags: [], staff_options: [],
-  'rpc:staff_ask_pages': pages(), 'rpc:staff_ask_page': detail(), 'rpc:staff_ask_answers': answers(), 'rpc:staff_ask_pending': 5 });
+  'rpc:staff_ask_pages': pages(), 'rpc:staff_ask_page': detail(), 'rpc:staff_ask_answers': answers(), 'rpc:staff_ask_pending': 5,
+  'rpc:staff_ask_stats': stats(), 'rpc:staff_ask_segment': segment() });
+const PNG = 'iVBORw0KGgoAAAANSUhEUgAAACgAAAA8AQMAAAAud2qjAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAGUExURf8AAP///0EdNBEAAAABYktHRAH/Ai3eAAAAB3RJTUUH6goXDh05VoIs3QAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyNi0xMC0yM1QxNDoyOTo1NyswMDowMJJ2CgAAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjYtMTAtMjNUMTQ6Mjk6NTcrMDA6MDDjK7K8AAAAKHRFWHRkYXRlOnRpbWVzdGFtcAAyMDI2LTEwLTIzVDE0OjI5OjU3KzAwOjAwtD6TYwAAAA1JREFUGNNjYBgF9AAAAWgAAdm2FbQAAAAASUVORK5CYII='; // a small red picture
 
 const HEAD = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
 const json = (body: unknown, status = 200) => ({ status, headers: HEAD, body: JSON.stringify(body) });
@@ -101,6 +115,15 @@ async function staff(page: Page, fx: Fixtures = {}, init: Record<string, string>
   await page.goto('/ask');
   await waitForSb(page);
   await page.waitForFunction(`S.view==='staff'&&S.staffTab==='ask'`);
+}
+/** The arguments each call of a database function was made with, in order. */
+function calls(page: Page, fn: string) {
+  const out: Row[] = [];
+  page.on('request', (r: Request) => {
+    if (!new URL(r.url()).pathname.endsWith('/rpc/' + fn) || r.method() !== 'POST') return;
+    try { out.push((r.postDataJSON() || {}) as Row); } catch { out.push({}); }
+  });
+  return out;
 }
 const sec = (page: Page) => page.locator('#tab-ask');
 const rail = (page: Page) => page.locator('#staff-tab-nav .tab-btn[data-stab="ask"]');
@@ -206,11 +229,12 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await expect.poll(() => sent.length).toBe(2);
     expect(sent[0]).toMatchObject({ m: 'POST', path: 'ask_pages' });
     expect(sent[0].body).toEqual({ title_en: 'Farm day: your ideas!', title_ar: '', intro_en: '', intro_ar: '', slug: 'farm-day-your-ideas', audience: 'link', tag_ids: [],
-      opens_at: null, closes_at: null, after_close: 'results', listed: true, notes: '', look: {}, status: 'draft', pace: 'self' }); // no code (the database makes it), no theme
+      not_tag_ids: [], only_gender: null, min_age: null, max_age: null, opens_at: null, closes_at: null, after_close: 'results', listed: true, notes: '', look: {}, block_words: [],
+      status: 'draft', pace: 'self' }); // no code (the database makes it), no theme
     expect(sent[1]).toMatchObject({ m: 'POST', path: 'ask_questions' });
     expect(sent[1].body).toEqual({ kind: 'cloud', pos: 1, title_en: 'Farm day: your ideas!', title_ar: '', help_en: '', help_ar: '', config: { max_len: 25, per_person: 3 },
-      moderated: true, results: 'live', look: {}, page_id: 77, open: true }); // a question with no words of its own takes the page's title
-    await expect(sec(page).locator('.filter-pill[data-ask-tab]')).toHaveCount(3);
+      moderated: true, results: 'live', look: {}, image: null, page_id: 77, open: true }); // a question with no words of its own takes the page's title
+    await expect(sec(page).locator('.filter-pill[data-ask-tab]')).toHaveText(['Setup', 'Answers', 'Results', 'Stats']);
     await expect(sec(page).locator('.ask-st')).toHaveText('Draft');
     await expect(sec(page).locator('#ask-dirty')).toBeHidden();
     await expect(sec(page).locator('h1')).toHaveText('Farm day: your ideas!');
@@ -343,7 +367,7 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     expect(sent[1].body).toMatchObject({ kind: 'cloud', pos: 1, page_id: 79 });
     expect(sent[2].body).toEqual({ kind: 'choice', pos: 2, title_en: 'Which day suits you?', title_ar: '', help_en: '', help_ar: '',
       config: { options: [{ id: 'a1', en: 'Thursday', ar: 'الخميس' }, { id: 'a3', en: 'Saturday', ar: '' }, { id: 'a2', en: 'Friday', ar: '' }], max_picks: 2, change: true },
-      moderated: true, results: 'closed', look: {}, page_id: 79, open: true });
+      moderated: true, results: 'closed', look: {}, image: null, page_id: 79, open: true });
   });
 
   test('Answers: Waiting approves and rejects through staff_ask_review, one and several at once; a refusal puts the row back; a new answer shows without a reload', async ({ page }) => {
@@ -431,10 +455,10 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await pill('approved').click();
     refuse = true;
     await answer(page, 115).getByRole('button', { name: 'Reject' }).click();
-    await expect(page.locator('#err-bar-el')).toBeVisible();
+    await expect(page.locator('.toast.error').last()).toHaveText('This account can look at Ask but not change it.'); // FORBIDDEN, in the section's own words
+    await expect(page.locator('#err-bar-el')).toHaveCount(0);
     await expect(answer(page, 115)).toBeVisible();
     await expect(answer(page, 115).locator('.ask-chip')).toHaveText(['Approved']);
-    await page.locator('#err-bar-el [aria-label="Close"]').click();
     refuse = false;
     // a new answer comes in: the list shows it by itself (read again every ten seconds), and the rail counts it
     await pill('pending').click();
@@ -492,7 +516,8 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await answer(page, 107).getByRole('button', { name: 'Edit text' }).click();
     await page.locator('#prompt-input').fill('Shade');
     await page.locator('#prompt-input').press('Enter');
-    await expect(page.locator('#err-bar-el')).toBeVisible();
+    await expect(page.locator('.toast.error').last()).toHaveText('This account can look at Ask but not change it.');
+    await expect(page.locator('#err-bar-el')).toHaveCount(0);
     await expect(answer(page, 107).locator('.ask-a-txt')).toHaveText('Shade for the little ones, please');
   });
 
@@ -626,7 +651,9 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     expect(sent[0]).toMatchObject({ m: 'PATCH', path: 'ask_pages' });
     expect(sent[0].q).toContain('id=eq.1');
     expect(sent[0].body).toMatchObject({ slug: 'farm-ideas', audience: 'tags', tag_ids: ['tag_saturday', 'tag_team'], opens_at: null, after_close: 'results', listed: true, notes: 'For the farm day', look: {} });
-    expect(Object.keys(sent[0].body).sort()).toEqual(['after_close', 'audience', 'closes_at', 'intro_ar', 'intro_en', 'listed', 'look', 'notes', 'opens_at', 'slug', 'tag_ids', 'title_ar', 'title_en']);
+    expect(Object.keys(sent[0].body).sort()).toEqual(['after_close', 'audience', 'block_words', 'closes_at', 'intro_ar', 'intro_en', 'listed', 'look', 'max_age', 'min_age', 'not_tag_ids', 'notes',
+      'only_gender', 'opens_at', 'slug', 'tag_ids', 'title_ar', 'title_en']);
+    expect(sent[0].body).toMatchObject({ not_tag_ids: [], only_gender: null, min_age: null, max_age: null, block_words: [] }); // nothing more was asked of the audience
     expect(Math.abs(Date.parse(sent[0].body.closes_at as string) - at)).toBeLessThan(90_000);
     expect(String(sent[0].body.closes_at)).toMatch(/Z$/);
     // then the question deleted, then every question whose place or settings changed, each by its id
@@ -783,7 +810,8 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     const arAns = [ans(120, 11, 'لينا حداد', '+966551112222', { t: 'نزهة' }, { status: 'pending' }), ans(115, 11, 'عمر صالح', '+966553334444', { t: 'شواء' }),
       ans(114, 12, 'سارة علي', '+966555556666', { o: ['a1'] }), ans(110, 16, 'لينا حداد', '+966551112222', { n: 3 })];
     await staff(page, { tags: tags.map((g) => ({ ...g, name: g.id === 'tag_saturday' ? 'المجتمع' : g.id === 'tag_vip' ? 'كبار الشخصيات' : 'فريق السباق' })),
-      'rpc:staff_ask_pages': arPages, 'rpc:staff_ask_page': { page: { ...arPages[0], screen_key: 'sk_ar' }, questions: arQs, board: [] }, 'rpc:staff_ask_answers': arAns, 'rpc:staff_ask_pending': 1 },
+      'rpc:staff_ask_pages': arPages, 'rpc:staff_ask_page': { page: { ...arPages[0], screen_key: 'sk_ar' }, questions: arQs, board: [] }, 'rpc:staff_ask_answers': arAns, 'rpc:staff_ask_pending': 1,
+      'rpc:staff_ask_stats': stats({ by_lang: { ar: 4 }, top_people: [{ customer_id: 'c1', name: 'لينا حداد', answers: 3, approved: 2 }] }) },
     { cq_lang: 'ar', cq_lang_pick: '1' });
     await page.locator('html[dir="rtl"]').waitFor();
     await expect(rail(page).locator('.snav-lbl')).toContainText('اسأل');
@@ -834,19 +862,29 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await expect(sec(page).locator('.ask-r')).toHaveCount(3);
     await expect(sec(page).locator('.ask-who h2')).toHaveText('من أجاب بماذا');
     expect(await leftovers('#tab-ask')).toEqual([]);
+    // the numbers: a nationality by its Arabic name, a breakdown's groups in Arabic
+    await page.evaluate(`_askTab('stats')`);
+    await expect(sec(page).locator('.ask-sc[data-ask-s="nat"] .ask-bar-l').first()).toHaveText('السعودية');
+    await page.locator('#ask-sg-q').selectOption('12');
+    await expect(sec(page).locator('.ask-mult-c h3').first()).toContainText('ذكر');
+    expect(await leftovers('#tab-ask')).toEqual([]);
   });
 
   test('the part comes only to an account that can open the section, with its strings, and none of it is in the customer half or the desk\'s core', async ({ page }) => {
     // what the build wrote: the section's code and words in staff-parts/ask.js, the rail's number in the desk's core
     const read = (f: string) => readFileSync(resolve(__dirname, '..', f), 'utf8');
     const customer = read('index.html') + read('app.js'), core = read('staff.js'), part = read('staff-parts/ask.js');
-    for (const word of ['staff_ask_pages', 'staff_ask_review', 'staff_ask_control', '_askSave', 'askSlugTaken', 'This link name is taken']) {
+    for (const word of ['staff_ask_pages', 'staff_ask_review', 'staff_ask_control', '_askSave', 'askSlugTaken', 'This link name is taken', 'staff_ask_stats', 'staff_ask_segment', '_askStatsHtml',
+      'ASK_PALETTES', 'askKindLocked', 'Only an admin can upload pictures.']) {
       expect(customer.includes(word), `customer half: ${word}`).toBe(false);
       expect(core.includes(word), `desk core: ${word}`).toBe(false);
       expect(part.includes(word), `ask part: ${word}`).toBe(true);
     }
     expect(customer).not.toContain('staff_ask_pending');
     expect(core).toContain('staff_ask_pending');
+    expect(customer).not.toContain('_askAddr'); // the open page in the address: the desk core writes it, the riders' half never hears of it
+    expect(core).toContain('function _askAddr');
+    expect(part).not.toContain('function _askAddr');
     expect(core).toMatch(/"?tabAsk"?:"Ask"/);
     for (const code of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) {
       expect(existsSync(resolve(__dirname, '..', `lang/staff-ask-${code}.json`)), code).toBe(true);
@@ -893,7 +931,7 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await expect.poll(asks).toBe(2);
   });
 
-  test('no accessibility violation in the list, a page\'s setup, the question pop-up, the answers and the results; on a phone every control is finger-sized', async ({ page }) => {
+  test('no accessibility violation in the list, a page\'s setup, the question pop-up, the answers, the results and the stats; on a phone every control is finger-sized', async ({ page }) => {
     test.setTimeout(120_000);
     await staff(page);
     const phone = test.info().project.name === 'mobile';
@@ -918,6 +956,8 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await openPage(page, 1, 'setup');
     await sec(page).getByRole('button', { name: 'Accounts with a tag' }).click();
     await sec(page).getByRole('button', { name: '1 week' }).click();
+    await page.evaluate(`_ask().cur.d.block_words=['casino','crypto'];renderAsk()`); // two blocked words, as chips
+    await sec(page).locator('.ask-wchip').first().waitFor();
     await audit('setup');
     await sec(page).locator('.ask-q').nth(1).locator('.ask-q-ed').click();
     await pop(page).waitFor();
@@ -928,6 +968,8 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await pop(page).locator('.chrome-xt').click();
     await page.evaluate(`_askBackGo();_askOpen(1,'answers')`);
     await sec(page).locator('.ask-a').first().waitFor();
+    await page.evaluate(`_askPg().round=3;renderAsk()`); // a page on its third round: the round picker
+    await page.locator('#ask-round').waitFor();
     await audit('answers');
     await sec(page).locator('.lt-sel-btn').click();
     await answer(page, 116).locator('.lt-box').check();
@@ -935,6 +977,596 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await page.evaluate(`_lsMode('askA');_askTab('results')`);
     await sec(page).locator('.ask-who tbody tr').first().waitFor();
     await audit('results');
+    await sec(page).locator('.filter-pill[data-ask-tab="stats"]').click();
+    await page.locator('#ask-sg-q').selectOption('12');
+    await sec(page).locator('.ask-mult-c').first().waitFor();
+    await sec(page).locator('.ask-sc[data-ask-s="day"] summary').click();
+    await audit('stats');
+  });
+
+  // ── The second pass (2026-11-13): the look, pictures, who else a page leaves out, blocked words, Stats, older rounds,
+  // the answers a page at a time, the open page in the address. No change to the database. ──
+
+  test('the page\'s look: the theme and the chart colours as swatches, the line after an answer, one question at a time, the big screen\'s QR, count and pace; written into look, what these screens do not know kept', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    const kept = { future: { x: 1 }, theme: 'sand', screen: { qr: true, count: true, rotate: 0, later: 'kept' } };
+    await staff(page, { 'rpc:staff_ask_page': { ...detail(), page: { ...detail().page, look: kept } } });
+    const sent = writes(page, /\/rest\/v1\/ask_pages$/);
+    await openPage(page, 1, 'setup');
+    const look = sec(page).locator('section[aria-labelledby="ask-g-look"]');
+    await expect(look.locator('h2')).toHaveText('Look');
+    const themes = look.getByRole('group', { name: 'Theme' }), pals = look.getByRole('group', { name: 'Chart colours' });
+    await expect(themes.locator('.ask-swb')).toHaveText(['Light', 'Dark', 'Green', 'Sand']);
+    expect(await themes.locator('.ask-swb svg').count()).toBe(4);
+    await expect(themes.locator('.ask-swb[data-ask-theme="sand"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(pals.locator('.ask-swb')).toHaveText(['Brand', 'Forest', 'Ocean', 'Sunset', 'Berry', 'Mono']);
+    await expect(pals.locator('.ask-swb[data-ask-palette="brand"]')).toHaveAttribute('aria-pressed', 'true'); // nothing said: the first
+    // a palette's swatch is its six colours, read from the one list the section holds
+    expect(await pals.locator('.ask-swb[data-ask-palette="ocean"] svg rect').evaluateAll((els) => els.slice(1).map((e) => e.getAttribute('fill'))))
+      .toEqual(await page.evaluate(`ASK_PALETTES.ocean`));
+    expect(await page.evaluate(`Object.keys(ASK_PALETTES).join()+' '+Object.values(ASK_PALETTES).every(p=>p.length===6&&p.every(c=>/^#[0-9a-f]{6}$/.test(c)))`)).toBe('brand,forest,ocean,sunset,berry,mono true');
+    await themes.getByRole('button', { name: 'Dark' }).click();
+    await expect(themes.locator('.ask-swb[data-ask-theme="dark"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(themes.locator('.ask-swb[data-ask-theme="dark"]')).toBeFocused(); // the form was drawn again: the keyboard stays on the choice
+    await pals.getByRole('button', { name: 'Ocean' }).click();
+    await expect(page.locator('#ask-thanks_en')).toHaveAttribute('maxlength', '120');
+    await look.getByLabel('Line after an answer (English)').fill('  Thank you,  see you there! ');
+    await look.getByLabel('Line after an answer (Arabic)').fill('شكرًا لك');
+    await look.getByRole('group', { name: 'Questions shown' }).getByRole('button', { name: 'One at a time' }).click();
+    const scr = look.getByRole('group', { name: 'The big screen shows' });
+    await expect(scr.locator('.ask-sw')).toHaveText(['QR code', 'How many answered']); // the QR and the count: a page needs no code
+    await expect(scr.getByRole('switch', { name: 'QR code' })).toBeChecked();
+    await expect(scr.getByRole('switch', { name: 'How many answered' })).toBeChecked();
+    await scr.getByRole('switch', { name: 'QR code' }).uncheck();
+    await expect(look.getByLabel('The big screen moves to the next question').locator('option')).toHaveText(['Not by itself', 'Every 10 seconds', 'Every 15 seconds', 'Every 20 seconds',
+      'Every 30 seconds', 'Every 45 seconds', 'Every 60 seconds', 'Every 90 seconds', 'Every 120 seconds']);
+    await page.locator('#ask-scr-rot').selectOption('30');
+    await expect(sec(page).locator('#ask-dirty')).toBeVisible();
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].body.look).toEqual({ future: { x: 1 }, theme: 'dark', screen: { qr: false, count: true, rotate: 30, later: 'kept' }, palette: 'ocean',
+      thanks_en: 'Thank you, see you there!', thanks_ar: 'شكرًا لك', layout: 'steps' });
+    // the first of each list is what the pages take when nothing is said, so it is not written (the stubbed database
+    // still holds the page as it was: Sand)
+    await expect(themes.locator('.ask-swb[data-ask-theme="sand"]')).toHaveAttribute('aria-pressed', 'true');
+    await themes.getByRole('button', { name: 'Light' }).click();
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(2);
+    expect(sent[1].body.look).toEqual({ future: { x: 1 }, screen: { qr: true, count: true, rotate: 0, later: 'kept' } });
+  });
+
+  test('a question\'s look: its chart picked from small drawings, the colours, and only the choices its kind and chart take; written into the question\'s look; a unit is 12 characters', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    const d = detail();
+    d.questions[0].look = { viz: 'bars', angle: 'mixed', glow: true }; // a word cloud drawn as bars, with a key from a newer app
+    await staff(page, { 'rpc:staff_ask_page': d });
+    const sent = writes(page, /\/rest\/v1\/ask_questions$/);
+    await openPage(page, 1, 'setup');
+    const card = (i: number) => sec(page).locator('.ask-q').nth(i), lk = pop(page).locator('.ask-look');
+    // multiple choice: six charts, each a drawing with its name; bars is the kind's own
+    await card(1).locator('.ask-q-ed').click();
+    await expect(lk.locator('.ask-viz')).toHaveText(['Bars', 'Columns', 'Donut', 'Pie', 'Dots', 'Tiles']);
+    expect(await lk.locator('.ask-viz svg.ask-viz-pic').count()).toBe(6);
+    await expect(lk.locator('.ask-viz[data-ask-viz="bars"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(pop(page).locator('#ask-l-sort, #ask-l-values, #ask-l-total')).toHaveCount(3);
+    await expect(pop(page).locator('#ask-l-limit, #ask-l-case, #ask-l-angle, #ask-l-size')).toHaveCount(0); // a word cloud's and a list's
+    await lk.locator('.ask-viz[data-ask-viz="donut"]').click();
+    await expect(lk.locator('.ask-viz[data-ask-viz="donut"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(lk.locator('.ask-viz[data-ask-viz="donut"]')).toBeFocused();
+    // the colours: the page's until the question picks its own, and the drawings take them
+    const pals = lk.getByRole('group', { name: 'Chart colours' });
+    await expect(pals.locator('.ask-swb')).toHaveText(['As the page', 'Brand', 'Forest', 'Ocean', 'Sunset', 'Berry', 'Mono']);
+    await expect(pals.locator('.ask-swb').first()).toHaveAttribute('aria-pressed', 'true');
+    const strokes = () => lk.locator('.ask-viz[data-ask-viz="donut"] svg circle').evaluateAll((els) => els.map((e) => e.getAttribute('stroke')));
+    expect(await strokes()).toEqual(await page.evaluate(`ASK_PALETTES.brand.slice(0,4)`));
+    await pals.getByRole('button', { name: 'Berry' }).click();
+    await expect(pals.locator('.ask-swb[data-ask-palette="berry"]')).toHaveAttribute('aria-pressed', 'true');
+    expect(await strokes()).toEqual(await page.evaluate(`ASK_PALETTES.berry.slice(0,4)`));
+    // one colour for a chart of one thing: the bars' drawing fills with the palette's first only
+    expect(await lk.locator('.ask-viz[data-ask-viz="bars"] svg rect').evaluateAll((els) => [...new Set(els.slice(1).map((e) => e.getAttribute('fill')))])).toEqual([await page.evaluate(`ASK_PALETTES.berry[0]`)]);
+    await expect(pop(page).getByLabel('Order', { exact: true }).locator('option')).toHaveText(['As written', 'Largest first']);
+    await expect(pop(page).getByLabel('Numbers on the chart').locator('option')).toHaveText(['Count and percent', 'Count', 'Percent', 'None']);
+    await page.locator('#ask-l-sort').selectOption('count');
+    await page.locator('#ask-l-values').selectOption('percent');
+    await expect(pop(page).getByRole('switch', { name: 'Show how many answered' })).toBeChecked();
+    await page.locator('#ask-l-total').uncheck();
+    await page.locator('#ask-q-done').click();
+    // the word cloud drawn as bars: no angle to choose until it is a cloud again; what it held is kept
+    await card(0).locator('.ask-q-ed').click();
+    await expect(lk.locator('.ask-viz')).toHaveText(['Word cloud', 'Bubbles', 'Bars', 'Tiles', 'Ranked list']);
+    await expect(lk.locator('.ask-viz[data-ask-viz="bars"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#ask-l-angle')).toHaveCount(0);
+    await expect(pop(page).getByLabel('How many it shows')).toHaveAttribute('placeholder', '10');
+    await lk.locator('.ask-viz[data-ask-viz="cloud"]').click();
+    await expect(page.locator('#ask-l-angle')).toHaveValue('mixed');
+    await expect(pop(page).getByLabel('Words', { exact: true }).locator('option')).toHaveText(['All level', 'Some on their side']);
+    await expect(page.locator('#ask-l-limit')).toHaveAttribute('placeholder', '60');
+    await expect(pop(page).locator('#ask-l-values, #ask-l-sort, #ask-l-size')).toHaveCount(0);
+    await page.locator('#ask-l-limit').fill('500');
+    await expect(pop(page).getByLabel('Letters', { exact: true }).locator('option')).toHaveText(['As typed', 'CAPITALS', 'small letters']);
+    await page.locator('#ask-l-case').selectOption('upper');
+    await page.locator('#ask-q-done').click();
+    // open answers: cards, a wall, one at a time, a stream; a text size, no order
+    await card(7).locator('.ask-q-ed').click();
+    await expect(lk.locator('.ask-viz')).toHaveText(['Cards', 'Sticky notes', 'Spotlight', 'Stream']);
+    await expect(pop(page).getByLabel('Text size').locator('option')).toHaveText(['Medium', 'Small', 'Large']);
+    await expect(page.locator('#ask-l-limit')).toHaveCount(1);
+    await lk.locator('.ask-viz[data-ask-viz="spotlight"]').click();
+    await expect(page.locator('#ask-l-limit')).toHaveCount(0); // one answer at a time: no count to set
+    await page.locator('#ask-l-size').selectOption('l');
+    await page.locator('#ask-q-done').click();
+    // every kind with results has its charts; a text slide has none
+    expect(await page.evaluate(`JSON.stringify(Object.fromEntries(Object.entries(ASK_VIZ).map(([k,v])=>[k,v.length])))`)).toBe('{"cloud":5,"open":4,"qa":2,"choice":6,"scales":4,"ranking":3,"points":3,"number":3}');
+    expect(await page.evaluate(`Object.values(ASK_VIZ).flat().every(v=>_askVizSvg(v,ASK_PALETTES.brand).length>200&&t('askVz'+v)!=='askVz'+v)`)).toBe(true);
+    await card(8).locator('.ask-q-ed').click();
+    await expect(pop(page).locator('.ask-look')).toHaveCount(0);
+    await pop(page).locator('.chrome-xt').click();
+    // a number: its three charts, and a unit of 12 characters, as the database checks
+    await card(5).locator('.ask-q-ed').click();
+    await expect(lk.locator('.ask-viz')).toHaveText(['Histogram', 'Gauge', 'Strip']);
+    await expect(page.locator('#ask-c-unit_en')).toHaveAttribute('maxlength', '12');
+    await expect(page.locator('#ask-c-unit_ar')).toHaveAttribute('maxlength', '12');
+    await page.evaluate(`_askCfgIn('unit_en','kilometres per hour')`);
+    await page.locator('#ask-q-done').click();
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(4);
+    const by = (id: number) => sent.find((s) => s.q.includes(`id=eq.${id}`))!.body;
+    expect(by(12).look).toEqual({ viz: 'donut', palette: 'berry', sort: 'count', values: 'percent', total: false });
+    expect(by(11).look).toEqual({ angle: 'mixed', glow: true, limit: 150, case: 'upper' }); // the kind's own chart is not written; 500 is 150 at most
+    expect(by(18).look).toEqual({ viz: 'spotlight', size: 'l' });
+    expect((by(16).config as Row).unit_en).toBe('kilometres p');
+    expect(by(16).look).toEqual({});
+  });
+
+  test('pictures go up the way the website editor\'s do: the cover and a text slide\'s, kept by their address on the website; anyone but an admin is told why not', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    await staff(page);
+    const sent = writes(page, /\/rest\/v1\/(ask_pages|ask_questions)$/);
+    const ups: string[] = []; let refuse = false;
+    await page.route(/\/storage\/v1\/object\/site\//, (r) => {
+      if (refuse) return r.fulfill(json({ statusCode: '403', error: 'Unauthorized', message: 'new row violates row-level security policy' }, 400));
+      if (r.request().method() === 'POST') ups.push(new URL(r.request().url()).pathname.replace(/^.*\/object\/site\//, ''));
+      return r.fulfill(json({ Key: 'site/x', Id: 'x' }));
+    });
+    const png = Buffer.from(PNG, 'base64');
+    await page.route('https://micromobility.sa/media/**', (r) => r.fulfill({ status: 200, contentType: 'image/png', body: png }));
+    const pick = async (btn: Locator) => { const ch = page.waitForEvent('filechooser'); await btn.click(); await (await ch).setFiles({ name: 'farm.png', mimeType: 'image/png', buffer: png }); };
+    await openPage(page, 1, 'setup');
+    const cover = sec(page).getByRole('group', { name: 'Cover picture' });
+    await expect(cover.locator('img')).toHaveCount(0);
+    await pick(cover.getByRole('button', { name: 'Upload picture' }));
+    await expect.poll(() => ups.length).toBe(1);
+    expect(ups[0]).toMatch(/^ask\/[a-z0-9]+-[a-z0-9]+\.(png|jpg)$/); // the site bucket, as the website editor's uploads
+    await expect(cover.locator('img')).toHaveAttribute('src', `https://micromobility.sa/media/${ups[0]}?w=640`);
+    await expect(cover.locator('img')).toHaveAttribute('alt', 'Cover picture');
+    await expect(cover.getByRole('button', { name: 'Replace picture' })).toBeVisible();
+    await expect(sec(page).locator('#ask-dirty')).toBeVisible();
+    await expect(page.locator('.toast:not(.quiet), #err-bar-el')).toHaveCount(0);
+    await sec(page).getByRole('switch', { name: 'How many answered' }).uncheck(); // (and one of the big screen's switches, on a look that says nothing yet)
+    // a text slide's picture, in its pop-up
+    await sec(page).locator('.ask-q').nth(8).locator('.ask-q-ed').click();
+    const pic = pop(page).getByRole('group', { name: 'Picture' });
+    await pick(pic.getByRole('button', { name: 'Upload picture' }));
+    await expect.poll(() => ups.length).toBe(2);
+    await expect(pic.locator('img')).toHaveAttribute('src', `https://micromobility.sa/media/${ups[1]}?w=640`);
+    await page.locator('#ask-q-done').click();
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(2);
+    expect(sent[0]).toMatchObject({ m: 'PATCH', path: 'ask_pages' });
+    expect(sent[0].body.look).toEqual({ cover: 'https://micromobility.sa/media/' + ups[0], screen: { qr: true, count: false, rotate: 0 } }); // an https address the website draws from /media; the big screen's three, no more
+    expect(sent[1].q).toContain('id=eq.19');
+    expect(sent[1].body.image).toBe('https://micromobility.sa/media/' + ups[1]);
+    // Remove takes a picture off the draft (the stubbed database holds the page as it was: no cover)
+    await expect(cover.locator('img')).toHaveCount(0);
+    await pick(cover.getByRole('button', { name: 'Upload picture' }));
+    await expect(cover.locator('img')).toHaveCount(1);
+    await cover.getByRole('button', { name: 'Remove: Cover picture' }).click();
+    await expect(cover.locator('img')).toHaveCount(0);
+    expect(await page.evaluate(`JSON.stringify(_ask().cur.d.look)`)).toBe('{}');
+    await expect(cover.getByRole('button', { name: 'Upload picture' })).toBeFocused();
+    // the bucket takes a picture from an admin only: said, and nothing is kept
+    refuse = true;
+    await pick(cover.getByRole('button', { name: 'Upload picture' }));
+    await expect(page.locator('.toast.error').last()).toHaveText('Only an admin can upload pictures.');
+    await expect(cover.locator('img')).toHaveCount(0);
+    await expect(cover.getByRole('button', { name: 'Upload picture' })).toBeEnabled();
+  });
+
+  test('who sees it, further: a page for accounts leaves out tags, a gender, ages; a link page is not offered them and sends none', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    await staff(page);
+    const sent = writes(page, /\/rest\/v1\/ask_pages$/);
+    await openPage(page, 1, 'setup');
+    const who = sec(page).locator('section[aria-labelledby="ask-g-who"]');
+    const link = who.getByRole('button', { name: 'Anyone with the link' });
+    // anyone with the link: the database refuses these rules there, so they are not offered
+    await expect(link).toHaveAttribute('aria-pressed', 'true');
+    await expect(who.locator('.ask-not, .ask-gen, .ask-ages')).toHaveCount(0);
+    await who.getByRole('button', { name: 'Signed-in accounts' }).click();
+    const not = who.getByRole('group', { name: 'Not for accounts with' }), gen = who.getByRole('group', { name: 'Gender' });
+    await expect(not.locator('.filter-pill')).toHaveText(['Community', 'VIP', 'Blacklist', 'Race team']); // the Blacklist too: a tag to leave out
+    await expect(gen.locator('.toggle-btn')).toHaveText(['Everyone', 'Male', 'Female']);
+    await expect(gen.getByRole('button', { name: 'Everyone' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(who.getByLabel('Youngest age')).toHaveValue('');
+    await expect(who.getByLabel('Oldest age')).toHaveAttribute('max', '120');
+    // an age rule says plainly who it leaves out, from the first digit
+    await expect(page.locator('#ask-age-note')).toBeHidden();
+    await page.locator('#ask-min_age').fill('16');
+    await expect(page.locator('#ask-age-note')).toBeVisible();
+    await expect(page.locator('#ask-age-note')).toHaveText('An age rule leaves out every account with no birth date. Most accounts have none.');
+    // the youngest above the oldest: said on the fields, nothing sent
+    await page.locator('#ask-max_age').fill('12');
+    await sec(page).locator('.ask-save').click();
+    await expect(page.locator('#ask-age-e')).toHaveText('Ages are whole years from 1 to 120, and the youngest cannot be above the oldest.');
+    await expect(page.locator('#ask-min_age')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#ask-min_age')).toBeFocused();
+    expect(sent).toHaveLength(0);
+    await page.locator('#ask-max_age').fill('40');
+    await expect(page.locator('#ask-age-e')).toHaveCount(0);
+    await expect(page.locator('#ask-max_age')).toBeFocused(); // the error went without the form being drawn again
+    await not.getByRole('button', { name: 'VIP' }).click();
+    await not.getByRole('button', { name: 'Blacklist' }).click();
+    await gen.getByRole('button', { name: 'Female' }).click();
+    await expect(page.locator('#ask-min_age')).toHaveValue('16');
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].body).toMatchObject({ audience: 'accounts', tag_ids: [], not_tag_ids: ['tag_vip', 'tag_blacklist'], only_gender: 'female', min_age: 16, max_age: 40 });
+    await expect(link).toHaveAttribute('aria-pressed', 'true'); // the stubbed database holds the page as it was
+    // accounts with a tag: a tag is asked for or left out, never both
+    await who.getByRole('button', { name: 'Accounts with a tag' }).click();
+    await who.locator('.ask-tags').getByRole('button', { name: 'Community' }).click();
+    await who.locator('.ask-tags').getByRole('button', { name: 'VIP' }).click();
+    await who.getByRole('group', { name: 'Not for accounts with' }).getByRole('button', { name: 'VIP' }).click();
+    await expect(who.locator('.ask-tags').getByRole('button', { name: 'VIP' })).toHaveAttribute('aria-pressed', 'false');
+    await expect(who.getByRole('group', { name: 'Not for accounts with' }).getByRole('button', { name: 'VIP' })).toHaveAttribute('aria-pressed', 'true');
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(2);
+    expect(sent[1].body).toMatchObject({ audience: 'tags', tag_ids: ['tag_saturday'], not_tag_ids: ['tag_vip'], only_gender: null, min_age: null, max_age: null });
+    await expect(link).toHaveAttribute('aria-pressed', 'true');
+    // back to anyone with the link: whatever was set goes as nothing
+    await who.getByRole('button', { name: 'Signed-in accounts' }).click();
+    await who.getByRole('group', { name: 'Gender' }).getByRole('button', { name: 'Male', exact: true }).click();
+    await page.locator('#ask-min_age').fill('18');
+    await link.click();
+    await expect(who.locator('.ask-not, .ask-gen, .ask-ages')).toHaveCount(0);
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(3);
+    expect(sent[2].body).toMatchObject({ audience: 'link', tag_ids: [], not_tag_ids: [], only_gender: null, min_age: null, max_age: null });
+  });
+
+  test('blocked words: a chip each, several added at once, the same word once, 200 of 40 characters at most; written as block_words', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    await staff(page, { 'rpc:staff_ask_page': { ...detail(), page: { ...detail().page, block_words: ['casino', 'crypto'] } } });
+    const sent = writes(page, /\/rest\/v1\/ask_pages$/);
+    await openPage(page, 1, 'setup');
+    const bw = sec(page).locator('section[aria-labelledby="ask-g-bw"]'), long = 'x'.repeat(60);
+    await expect(bw.locator('h2')).toHaveText('Blocked words');
+    await expect(bw.locator('.ask-wchip')).toHaveText(['casino', 'crypto']);
+    const field = bw.getByRole('textbox', { name: 'Add words, with commas between them' });
+    await field.fill(`  Spam , CASINO, free   money,${long}`);
+    await bw.getByRole('button', { name: 'Add', exact: true }).click();
+    await expect(bw.locator('.ask-wchip')).toHaveText(['casino', 'crypto', 'Spam', 'free money', 'x'.repeat(40)]); // the same word once, whatever its capitals; 40 characters
+    await expect(field).toHaveValue('');
+    await expect(field).toBeFocused();
+    await field.fill('scam');
+    await field.press('Enter'); // Enter adds too
+    await expect(bw.locator('.ask-wchip')).toHaveCount(6);
+    await bw.getByRole('button', { name: 'Remove: crypto' }).click();
+    await expect(bw.locator('.ask-wchip')).toHaveCount(5);
+    await sec(page).locator('.ask-save').click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].body.block_words).toEqual(['casino', 'Spam', 'free money', 'x'.repeat(40), 'scam']);
+    // 200 at most, said on the field (the stubbed database holds the page as it was: two words)
+    await expect(bw.locator('.ask-wchip')).toHaveCount(2);
+    await field.fill(Array.from({ length: 205 }, (_, i) => `w${i}`).join(','));
+    await bw.getByRole('button', { name: 'Add', exact: true }).click();
+    await expect(bw.locator('.ask-wchip')).toHaveCount(200);
+    await expect(page.locator('#ask-bw-e')).toHaveText('A page takes 200 blocked words at most.');
+    await expect(field).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  test('Stats: how many and who by group from staff_ask_stats, reach against the audience, columns by day and hour with their table, and one question group by group from staff_ask_segment', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    const d = detail();
+    d.questions.push(qRow({ id: 21, pos: 11, kind: 'choice', title_en: 'Bringing children?', config: { options: [opt('a1', 'Yes'), opt('a2', 'No')], max_picks: 1, change: false }, answers: 2,
+      result: { n: 2, counts: { a1: 1, a2: 1 } } }));
+    await staff(page, { 'rpc:staff_ask_page': d });
+    const asked = calls(page, 'staff_ask_stats'), segs = calls(page, 'staff_ask_segment');
+    let st = stats();
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_stats$/, (r) => r.fulfill(json(st)));
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_segment$/, (r) => r.fulfill(json((r.request().postDataJSON() as Row).p_by === 'q:21'
+      ? { by: 'q:21', segments: [{ key: 'a1', n: 2, result: { n: 2, counts: { a1: 1, a2: 0, a3: 1 } } }, { key: 'a2', n: 1, result: { n: 1, counts: { a1: 1, a2: 0, a3: 0 } } }, { key: 'none', n: 4, result: { n: 4, counts: { a1: 3, a2: 1, a3: 0 } } }] }
+      : segment())));
+    await row(page, 1).locator('.ask-pg-t').click();
+    const tab = sec(page).locator('.filter-pill[data-ask-tab="stats"]');
+    await expect(tab).toHaveText('Stats');
+    expect(asked).toHaveLength(0); // read when the tab is opened, not before
+    await tab.click();
+    await expect(tab).toHaveAttribute('aria-pressed', 'true');
+    await expect.poll(() => asked.length).toBe(1);
+    expect(asked[0]).toEqual({ p_page: 1, p_round: null });
+    const box = sec(page).locator('.ask-stt'), cardOf = (id: string) => box.locator(`.ask-sc[data-ask-s="${id}"]`);
+    // the headline numbers as tiles
+    await expect(box.locator('.ask-stats .ask-stat')).toHaveText(['Answers37', 'People21', 'Approved30', 'Waiting5', 'Not approved2', 'Flagged1']);
+    await expect(box.locator('.ask-s-when')).toContainText('First answer');
+    await expect(box.locator('.ask-s-when')).toContainText('Last answer');
+    await expect(cardOf('reach')).toHaveCount(0); // anyone with the link: no audience to measure against
+    // by day: a column a day in one colour, its number read by a pointer and in the table under it
+    await expect(cardOf('day').locator('h2')).toHaveText('Answers by day');
+    await expect(cardOf('day').locator('.ask-time')).toHaveAttribute('role', 'img');
+    await expect(cardOf('day').locator('.ask-time')).toHaveAttribute('aria-label', 'Answers by day');
+    expect(await cardOf('day').locator('.ask-tcol').evaluateAll((els) => els.map((e) => e.getAttribute('title')))).toEqual(['10 Nov · 9', '11 Nov · 16', '12 Nov · 12']);
+    await expect(cardOf('day').locator('.ask-time-max')).toHaveText('16');
+    const tall = await cardOf('day').locator('.ask-tcol-b').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
+    expect(tall[1]).toBeGreaterThan(tall[2]);
+    expect(tall[2]).toBeGreaterThan(tall[0]);
+    expect(tall[0]).toBeGreaterThan(10);
+    expect(new Set(await cardOf('day').locator('.ask-tcol-b').evaluateAll((els) => els.map((e) => getComputedStyle(e).backgroundColor))).size).toBe(1);
+    await expect(cardOf('day').locator('.ask-tlbls bdi')).toHaveText(['10 Nov', '11 Nov', '12 Nov']);
+    await expect(cardOf('day').locator('tbody')).toBeHidden();
+    await cardOf('day').locator('summary').click();
+    await expect(cardOf('day').locator('summary')).toHaveText('Table');
+    await expect(cardOf('day').locator('thead th')).toHaveText(['Day', 'Answers', 'People']);
+    await expect(cardOf('day').locator('tbody tr').nth(1).locator('td')).toHaveText(['11 Nov', '16', '11']);
+    await expect(cardOf('hour').locator('h2')).toHaveText('Answers by hour, Saudi time');
+    await expect(cardOf('hour').locator('.ask-tcol')).toHaveCount(24);
+    await expect(cardOf('hour').locator('.ask-tcol').nth(18)).toHaveAttribute('title', '18:00 · 7');
+    await expect(cardOf('hour').locator('.ask-tlbls bdi')).toHaveText(['00', '', '', '03', '', '', '06', '', '', '09', '', '', '12', '', '', '15', '', '', '18', '', '', '21', '', '']);
+    // who by group: people, each with its share, the numbers written beside the bars
+    const bars = async (id: string) => [await cardOf(id).locator('.ask-bar-l').allTextContents(), await cardOf(id).locator('.ask-bar-x').allTextContents()];
+    expect(await bars('gender')).toEqual([['Male', 'Female', 'Not given'], ['12 · 57%', '6 · 29%', '3 · 14%']]);
+    expect(await bars('age')).toEqual([['<18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+', 'Not given'], ['1 · 5%', '4 · 19%', '8 · 38%', '5 · 24%', '1 · 5%', '0 · 0%', '0 · 0%', '2 · 10%']]);
+    expect(await bars('member')).toEqual([['Members', 'Other'], ['9 · 43%', '12 · 57%']]);
+    expect(await bars('nat')).toEqual([['Saudi Arabia', 'Egypt', 'Not given', 'Other'], ['11 · 52%', '4 · 19%', '3 · 14%', '3 · 14%']]); // an account's nationality, by the country lists' own names
+    await expect(cardOf('lang').locator('h2')).toHaveText('Language of the answers');
+    expect(await bars('lang')).toEqual([['English', 'العربية'], ['25 · 68%', '12 · 32%']]);
+    // each question, and who answered most
+    await expect(cardOf('q').locator('.ask-bar-l')).toHaveText(['Your ideas', 'Which day suits you?', 'Rate the last ride', 'Order the activities', 'Share 100 points', 'How many people are you bringing?',
+      'Ask the organisers', 'Anything else?']);
+    await expect(cardOf('q').locator('.ask-bar-x').first()).toHaveText('6 · People 5');
+    await expect(cardOf('top').locator('thead th')).toHaveText(['Name', 'Answers', 'Approved']);
+    await expect(cardOf('top').locator('tbody tr').first().locator('td')).toHaveText(['Lina Haddad', '6', '5']);
+    // one question group by group: the question's own drawing, once a group
+    const seg = cardOf('seg');
+    await expect(seg.locator('h2')).toHaveText('One question, group by group');
+    await expect(seg.getByLabel('Question', { exact: true }).locator('option')).toHaveText(['Choose a question', 'Your ideas', 'Which day suits you?', 'Rate the last ride', 'Order the activities', 'Share 100 points',
+      'How many people are you bringing?', 'Ask the organisers', 'Anything else?', 'Bringing children?']);
+    await expect(seg.locator('.ask-mult')).toHaveCount(0);
+    expect(segs).toHaveLength(0);
+    await page.locator('#ask-sg-q').focus();
+    await page.locator('#ask-sg-q').selectOption('12');
+    await expect.poll(() => segs.length).toBe(1);
+    expect(segs[0]).toEqual({ p_question: 12, p_by: 'gender', p_round: null });
+    await expect(seg.locator('.ask-mult-c')).toHaveCount(3);
+    expect(await seg.locator('.ask-mult-c').evaluateAll((els) => els.map((e) => e.getAttribute('data-ask-seg')))).toEqual(['male', 'female', 'none']); // in the groups' own order, not their keys'
+    await expect(seg.locator('.ask-mult-c h3')).toHaveText(['Male People 5', 'Female People 3', 'Not given People 1']);
+    await expect(seg.locator('.ask-mult-c').first().locator('.ask-bar-l')).toHaveText(['Thursday', 'Friday', 'Saturday']);
+    await expect(seg.locator('.ask-mult-c').first().locator('.ask-bar-x')).toHaveText(['4 · 80%', '1 · 20%', '0 · 0%']);
+    await expect(page.locator('#ask-sg-q')).toBeFocused();
+    // by the answer to another multiple-choice question of the page (never by itself)
+    await expect(seg.getByLabel('Group by').locator('option')).toHaveText(['Gender', 'Age', 'Community', 'Language of the answers', 'Bringing children?']);
+    await page.locator('#ask-sg-by').selectOption('q:21');
+    await expect.poll(() => segs.length).toBe(2);
+    expect(segs[1]).toEqual({ p_question: 12, p_by: 'q:21', p_round: null });
+    await expect(seg.locator('.ask-mult-c h3')).toHaveText(['Yes People 2', 'No People 1', 'No answer People 4']);
+    // a page for accounts: how far it reached, against the accounts it is for
+    st = stats({ audience: 180 });
+    await page.evaluate(`_askStats()`);
+    await expect(cardOf('reach').locator('h2')).toHaveText('Reach');
+    await expect(cardOf('reach').locator('.ask-bar-x')).toHaveText('21 of 180 accounts · 12%');
+    expect(await cardOf('reach').locator('.ask-bar-f').evaluate((e) => { const b = e.getBoundingClientRect(), t = e.parentElement!.getBoundingClientRect(); return Math.round(b.width / t.width * 100); })).toBe(12);
+    // no answers yet: the tiles at nothing, and no empty chart
+    st = stats({ answers: 0, people: 0, approved: 0, pending: 0, rejected: 0, flagged: 0, audience: null, first_at: null, last_at: null, by_day: [], top_people: [] });
+    await page.evaluate(`_askStats()`);
+    await expect(box.locator('.ask-stats .ask-stat').first()).toHaveText('Answers0');
+    await expect(box.locator('.ask-sc')).toHaveCount(0);
+    await expect(box.locator('.ask-r-none')).toHaveText('No answers yet.');
+  });
+
+  test('older rounds: a picker on Answers, Results and Stats reads the round asked for; the setup and Reset results are the current round\'s', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    const d = detail(); d.page.round = 3;
+    const old = detail(); old.page.round = 3; old.page.shown_round = 2;
+    old.questions.forEach((q) => { q.answers = q.id === 12 ? 2 : 0; q.pending = 0; });
+    old.questions[1].result = { n: 2, counts: { a1: 0, a2: 2, a3: 0 } };
+    const oldAns = [ans(60, 12, 'Huda Qasim', '+966550001111', { o: ['a2'] }, { round: 2 }), ans(59, 12, 'Lina Haddad', '+966551112222', { o: ['a2'] }, { round: 2 })];
+    await staff(page, { 'rpc:staff_ask_pages': pages().map((p) => (p.id === 1 ? { ...p, round: 3 } : p)) });
+    const pg = calls(page, 'staff_ask_page'), an = calls(page, 'staff_ask_answers'), st = calls(page, 'staff_ask_stats');
+    const round = (r: Route) => (r.request().postDataJSON() as Row).p_round;
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_page$/, (r) => r.fulfill(json(round(r) === 2 ? old : d)));
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_answers$/, (r) => r.fulfill(json(round(r) === 2 ? oldAns : answers())));
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_stats$/, (r) => r.fulfill(json(round(r) === 2 ? stats({ answers: 2, people: 2, approved: 2, pending: 0, rejected: 0, flagged: 0 }) : stats())));
+    await openPage(page, 1, 'setup');
+    await expect(page.locator('#ask-round')).toHaveCount(0); // the setup is the page's, whatever the round
+    await sec(page).locator('.filter-pill[data-ask-tab="results"]').click();
+    const pick = sec(page).getByLabel('Round', { exact: true });
+    await expect(pick.locator('option')).toHaveText(['Round 3 (now)', 'Round 2', 'Round 1']);
+    await expect(pick).toHaveValue('3');
+    await expect(sec(page).locator('.ask-share-n')).toContainText('Round 3');
+    await expect(sec(page).locator('.ask-reset')).toBeVisible();
+    await expect(sec(page).locator('.ask-who tbody tr')).toHaveCount(14);
+    // an older round: its results and its answers are asked for by its number
+    await pick.selectOption('2');
+    await expect.poll(() => pg.some((a) => a.p_round === 2)).toBe(true);
+    expect(pg.find((a) => a.p_round === 2)).toEqual({ p_page: 1, p_round: 2 });
+    await expect.poll(() => an.some((a) => a.p_round === 2)).toBe(true);
+    expect(an.find((a) => a.p_round === 2)).toEqual({ p_page: 1, p_status: null, p_round: 2, p_before: null, p_limit: 300 });
+    await expect(sec(page).locator('.ask-share-n')).toContainText('Round 2 · Answers 2 · People 2');
+    await expect(sec(page).locator('.ask-r[data-ask-r="12"] .ask-bar-x')).toHaveText(['0 · 0%', '2 · 100%', '0 · 0%']);
+    await expect(sec(page).locator('.ask-who tbody tr')).toHaveCount(2);
+    await expect(sec(page).locator('.ask-reset')).toHaveCount(0); // a new round starts from the one the page is on
+    await expect(page.locator('#ask-round')).toBeFocused();
+    const [file] = await Promise.all([page.waitForEvent('download'), sec(page).locator('.ask-csv').click()]);
+    expect(file.suggestedFilename()).toBe('ask-farm-ideas-r2.csv'); // the CSV is that round's
+    // Answers and Stats keep the round
+    await sec(page).locator('.filter-pill[data-ask-tab="answers"]').click();
+    await expect(page.locator('#ask-round')).toHaveValue('2');
+    await expect(sec(page).locator('.filter-pill[data-ask-at="pending"]')).toHaveText('Waiting (0)');
+    await sec(page).locator('.filter-pill[data-ask-at="all"]').click();
+    await expect(sec(page).locator('.ask-a')).toHaveCount(2);
+    await sec(page).locator('.filter-pill[data-ask-tab="stats"]').click();
+    await expect.poll(() => st.length).toBeGreaterThan(0);
+    expect(st[st.length - 1]).toEqual({ p_page: 1, p_round: 2 });
+    await expect(sec(page).locator('.ask-stats .ask-stat').first()).toHaveText('Answers2');
+    // the setup stays the page's own: its questions with the current round's counts
+    await sec(page).locator('.filter-pill[data-ask-tab="setup"]').click();
+    await expect(sec(page).locator('.ask-q').first().locator('.ask-q-txt .am-meta')).toHaveText('Word cloud · Answers 6 · Waiting for approval 4');
+    // back to the round the page is on
+    await sec(page).locator('.filter-pill[data-ask-tab="stats"]').click();
+    an.length = 0;
+    await page.locator('#ask-round').selectOption('3');
+    await expect(sec(page).locator('.ask-stats .ask-stat').first()).toHaveText('Answers37');
+    expect(st[st.length - 1]).toEqual({ p_page: 1, p_round: null });
+    await expect.poll(() => an.some((a) => a.p_round === null)).toBe(true);
+  });
+
+  test('a page with many answers is read a page at a time: the newest and every one waiting, older ones with Show more, and the CSV holds them all', async ({ page }) => {
+    test.setTimeout(120_000);
+    // n answers to the word cloud, newest first; the twelve oldest wait for approval
+    const make = (n: number) => Array.from({ length: n }, (_, i) => { const id = 1000 + n - i;
+      return ans(id, 11, `Rider ${id}`, `+9665${10000000 + id}`, { t: `idea ${id}` }, { status: id <= 1012 ? 'pending' : 'approved', created_at: ago(9000 - id) }); });
+    let db = make(320);
+    const d = detail();
+    const count = () => d.questions.forEach((q) => { q.answers = q.id === 11 ? db.length : 0; q.pending = q.id === 11 ? db.filter((a) => a.status === 'pending').length : 0; });
+    count();
+    await staff(page);
+    const asked = calls(page, 'staff_ask_answers'), sent = writes(page, /\/rest\/v1\/rpc\/staff_ask_review$/);
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_page$/, (r) => r.fulfill(json(d)));
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_answers$/, (r) => {
+      const a = r.request().postDataJSON() as { p_status: string | null; p_before: number | null; p_limit: number };
+      return r.fulfill(json(db.filter((x) => (!a.p_status || x.status === a.p_status) && (a.p_before == null || (x.id as number) < a.p_before)).slice(0, a.p_limit)));
+    });
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_review$/, (r) => {
+      const b = r.request().postDataJSON() as { p_ids: number[]; p_status: string };
+      db.forEach((a) => { if (b.p_ids.includes(a.id as number)) a.status = b.p_status; });
+      count();
+      return r.fulfill(json(b.p_ids.length));
+    });
+    await openPage(page, 1, 'answers');
+    const pill = (k: string) => sec(page).locator(`.filter-pill[data-ask-at="${k}"]`);
+    // the newest 300, and beside them every answer that waits: approval never works from a cut list
+    await expect(pill('pending')).toHaveText('Waiting (12)');
+    expect(asked[0]).toEqual({ p_page: 1, p_status: null, p_round: null, p_before: null, p_limit: 300 });
+    expect(asked[1]).toEqual({ p_page: 1, p_status: 'pending', p_round: null, p_before: null, p_limit: 3000 });
+    await expect(sec(page).locator('.ask-a')).toHaveCount(12); // though none of them is among the newest 300
+    await expect(pill('all')).toHaveText('All (320)'); // the page's own count
+    await expect(pill('approved')).toHaveText('Approved (300+)'); // of the rows read so far: at least
+    await expect(pill('rejected')).toHaveText('Not approved (0+)');
+    await expect(sec(page).locator('.filter-pill[data-ask-tab="answers"] .tab-badge')).toHaveText('12');
+    await expect(sec(page).locator('.ask-more')).toHaveCount(0); // everything waiting is on screen
+    // one of them approved: it leaves Waiting, and the list is read again
+    await answer(page, 1001).getByRole('button', { name: 'Approve' }).click();
+    await expect(answer(page, 1001)).toHaveCount(0);
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].body).toEqual({ p_ids: [1001], p_status: 'approved' });
+    await expect(pill('pending')).toHaveText('Waiting (11)');
+    // Show more: the rows read first, then older ones from the database, from the last id received
+    await pill('all').click();
+    await expect(sec(page).locator('.ask-a')).toHaveCount(60);
+    for (let i = 2; i <= 5; i++) {
+      await expect(sec(page).locator('.ask-more')).toHaveText('Show 60 more');
+      await sec(page).locator('.ask-more').click();
+      await expect(sec(page).locator('.ask-a')).toHaveCount(60 * i);
+    }
+    await expect(sec(page).locator('.ask-more')).toHaveText('Show older answers');
+    asked.length = 0;
+    await sec(page).locator('.ask-more').click();
+    await expect(sec(page).locator('.ask-a')).toHaveCount(320);
+    expect(asked.find((a) => a.p_before != null)).toEqual({ p_page: 1, p_status: null, p_round: null, p_before: 1021, p_limit: 300 });
+    await expect(sec(page).locator('.ask-more')).toHaveCount(0);
+    await expect(pill('approved')).toHaveText('Approved (309)'); // every answer read: the counts are exact
+    await expect(pill('all')).toHaveText('All (320)');
+    // Who answered what pages the same way, and the CSV of a longer page is read anew, 3000 at a time: nothing is cut
+    db = make(3200); count();
+    await page.evaluate(`_askBackGo();_askOpen(1,'results')`);
+    await expect(sec(page).locator('.ask-who tbody tr')).toHaveCount(50);
+    await expect(sec(page).locator('.ask-share-n')).toHaveText('Round 1 · Answers 3200'); // the people are counted from the answers: only once all are read
+    asked.length = 0;
+    const [file] = await Promise.all([page.waitForEvent('download'), sec(page).locator('.ask-csv').click()]);
+    const csv = await (await file.createReadStream()).toArray().then((c) => Buffer.concat(c as Buffer[]).toString('utf8'));
+    const lines = csv.trimEnd().split('\n');
+    expect(lines).toHaveLength(3201);
+    expect(lines[1]).toContain('Rider 4200,+966510004200,Your ideas,idea 4200,Approved,');
+    expect(lines[3200]).toContain('Rider 1001,+966510001001,Your ideas,idea 1001,Waiting,');
+    expect(asked.filter((a) => a.p_limit === 3000 && a.p_status === null)).toEqual([{ p_page: 1, p_status: null, p_round: null, p_before: null, p_limit: 3000 },
+      { p_page: 1, p_status: null, p_round: null, p_before: 1201, p_limit: 3000 }]);
+  });
+
+  test('refusals in the section\'s own words: reading without the right, a write that changes nothing, another type for a question that has answers', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    const d = detail(); d.questions[7].answers = 0; d.questions[7].result = { n: 0, items: [] }; // no answer in this round: the type is free on screen
+    await staff(page, { 'rpc:staff_ask_page': d });
+    let how = 'locked';
+    await page.route(/\/rest\/v1\/ask_questions(\?|$)/, (r) => (r.request().method() !== 'PATCH' ? r.fallback()
+      : r.fulfill(how === 'locked' ? json({ code: '23514', message: 'ASK_KIND_LOCKED', details: null, hint: null }, 400) : json([]))));
+    await openPage(page, 1, 'setup');
+    await sec(page).locator('.ask-q').nth(7).locator('.ask-q-ed').click();
+    await pop(page).locator('.ask-kind[data-ask-kind="cloud"]').click();
+    await page.locator('#ask-q-done').click();
+    // an older round's answers hold the type: the database says so, in the section's words
+    await sec(page).locator('.ask-save').click();
+    await expect(page.locator('.toast.error').last()).toHaveText('This question has answers, so its type cannot change.');
+    await expect(page.locator('#err-bar-el')).toHaveCount(0);
+    await expect(sec(page).locator('#ask-dirty')).toBeVisible(); // the draft keeps what was not written
+    // an update that changes no row: the account may look, not change
+    how = 'none';
+    await sec(page).locator('.ask-save').click();
+    await expect(page.locator('.toast.error').last()).toHaveText('This account can look at Ask but not change it.');
+    await expect(page.locator('#err-bar-el')).toHaveCount(0);
+    // a read the database refuses: who may not open it, said in place of the list
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_pages$/, (r) => r.fulfill(json({ code: '42501', message: 'FORBIDDEN', details: null, hint: null }, 403)));
+    await page.evaluate(`_askBackGo();_ask().pages=null;_ask().at=0;renderAsk()`);
+    await expect(sec(page).locator('.empty-state')).toHaveText('This account cannot open Ask.');
+    await expect(sec(page).locator('.es-err')).toHaveCount(0);
+  });
+
+  test('the open page is in the address: a reload returns to it, and it leaves the address with the page or the section', async ({ page }) => {
+    test.setTimeout(90_000); // a long walk through the screens: room for a busy machine
+    await staff(page);
+    const q = () => new URL(page.url()).searchParams.get('ask');
+    await row(page, 1).waitFor();
+    expect(q()).toBe(null);
+    await row(page, 1).locator('.ask-pend').click(); // opens on its answers
+    await expect.poll(q).toBe('1.answers');
+    await sec(page).locator('.filter-pill[data-ask-tab="setup"]').click();
+    await expect.poll(q).toBe('1');
+    await sec(page).locator('.filter-pill[data-ask-tab="stats"]').click();
+    await expect.poll(q).toBe('1.stats');
+    expect(new URL(page.url()).pathname).toBe('/ask');
+    // a reload comes back to the page and its tab
+    await page.reload();
+    await waitForSb(page);
+    await expect(sec(page).locator('.filter-pill[data-ask-tab="stats"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(sec(page).locator('h1')).toHaveText('What would you like to see at the farm?');
+    await expect(sec(page).locator('.ask-stats .ask-stat').first()).toHaveText('Answers37');
+    expect(q()).toBe('1.stats');
+    // another section: the address is that section's alone; Back returns to the page
+    await page.evaluate(`setStaffTab('queue')`);
+    await expect.poll(() => page.url()).not.toContain('ask=');
+    expect(new URL(page.url()).pathname).toBe('/bookings');
+    await page.goBack();
+    await expect.poll(() => page.evaluate(`S.staffTab`)).toBe('ask');
+    await expect.poll(q).toBe('1.stats');
+    await expect(sec(page).locator('.filter-pill[data-ask-tab="stats"]')).toHaveAttribute('aria-pressed', 'true');
+    // back on the list: nothing named
+    await sec(page).locator('.ask-back').click();
+    await expect.poll(q).toBe(null);
+    await expect(sec(page).locator('.ask-pg')).toHaveCount(4);
+    // a new page has no address until it is saved
+    await sec(page).locator('.ask-new').click();
+    expect(q()).toBe(null);
+    await page.evaluate(`_askBackGo()`);
+    // an address that names a page that is not there opens the list and forgets it
+    await page.goto('/ask?ask=999.results');
+    await waitForSb(page);
+    await row(page, 1).waitFor();
+    await expect.poll(q).toBe(null);
+    // a link straight to a page's results
+    await page.goto('/ask?ask=3.results');
+    await waitForSb(page);
+    await expect(sec(page).locator('.filter-pill[data-ask-tab="results"]')).toHaveAttribute('aria-pressed', 'true');
+    await sec(page).locator('.ask-share').waitFor();
+    expect(q()).toBe('3.results');
   });
 });
 
@@ -973,6 +1605,22 @@ test.describe('@staff:ask Ask under the content security policy', () => {
     await sec(page).locator('.ask-setup').waitFor();
     await sec(page).getByRole('button', { name: 'Accounts with a tag' }).click();
     await sec(page).getByRole('button', { name: '3 days' }).click();
+    // the second pass: a theme and a palette (drawings with their colours as attributes), a chart's drawing in the pop-up, the columns of the Stats tab
+    await sec(page).locator('.ask-swb[data-ask-theme="dark"]').click();
+    await sec(page).locator('.ask-swb[data-ask-palette="ocean"]').click();
+    await sec(page).locator('.ask-q').nth(1).locator('.ask-q-ed').click();
+    await pop(page).locator('.ask-viz[data-ask-viz="donut"]').click();
+    await pop(page).locator('.ask-swb[data-ask-palette="berry"]').click();
+    const berry = await pop(page).locator('.ask-swb[data-ask-palette="berry"] svg rect').nth(1).getAttribute('fill'); // the palette's first colour, off its swatch
+    expect(berry).toMatch(/^#[0-9a-f]{6}$/);
+    await expect(pop(page).locator('.ask-viz[data-ask-viz="donut"] svg circle').first()).toHaveAttribute('stroke', berry!);
+    await pop(page).locator('.chrome-xt').click();
+    await sec(page).locator('.filter-pill[data-ask-tab="stats"]').click();
+    const col = sec(page).locator('.ask-sc[data-ask-s="day"] .ask-tcol-b').nth(1);
+    await col.waitFor();
+    await expect.poll(() => col.evaluate((e) => e.getBoundingClientRect().height)).toBeGreaterThan(20); // a column's height is a run-time value too
+    await page.locator('#ask-sg-q').selectOption('12');
+    await sec(page).locator('.ask-mult-c .ask-bar-f').first().waitFor();
     expect(await page.evaluate(() => (window as unknown as Cspv).__cspv.slice())).toEqual([]);
   });
 });

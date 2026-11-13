@@ -3711,11 +3711,29 @@ who we want it to be visible for and for how much time". Three parts: the databa
   good for 6 to 12 hours) or its permanent screen key (staff's link). A page's `ver` moves on every change riders can
   see; a poll with the same `ver` gets `same: true`.
 - **Staff**: section Ask (`/ask`, `renderAsk` in the `ask` part, `staff-parts/ask.js`; the rail's number is
-  `staff_ask_pending` through `_askCount` in the core). A page has Setup, Answers and Results. Setup is a draft written
-  on Save (the page, then each question; table writes through `_wr`); Start, End, Reset results and a question's
-  "Taking answers" go through `staff_ask_control`. Answers approves, rejects, corrects and deletes
-  (`staff_ask_review`, table updates). Results draws each kind, "Who answered what" and the CSV, with names and mobile
-  numbers: staff only. Strings: 148 keys named `ask*` travel with the part (`lang/staff-ask-<code>.json`).
+  `staff_ask_pending` through `_askCount` in the core). A page has Setup, Answers, Results and Stats; the open page and
+  its tab are in the address (`/ask?ask=<id>.answers`, `_askAddr` in the core), and once a page has been reset a round
+  picker (`#ask-round`) scopes Answers, Results and Stats. Setup is a draft written on Save (the page, then each
+  question; table writes through `_wr`); Start, End, Reset results and a question's "Taking answers" go through
+  `staff_ask_control`. Setup also holds who a page for accounts leaves out (`not_tag_ids`, `only_gender`, `min_age`,
+  `max_age`), the blocked words (`block_words`, 200 of 40 characters) and the Look. Answers approves, rejects, corrects
+  and deletes (`staff_ask_review`, table updates), reading `ASK_PAGE` (300) answers at a time with the waiting ones
+  always whole. Results draws each kind, "Who answered what" and the CSV, with names and mobile numbers: staff only.
+  Stats is `staff_ask_stats` (tiles, reach, by day and hour, gender, age, community, nationality, language) and one
+  question group by group (`staff_ask_segment`). Strings: 261 keys named `ask*` travel with the part
+  (`lang/staff-ask-<code>.json`).
+- **The look** (second pass, 2026-11-13): `look` is free jsonb on a page (`theme` light / dark / green / sand,
+  `palette`, `cover`, `thanks_en`, `thanks_ar`, `layout` steps, `screen` `{qr, count, rotate}`) and on a question
+  (`viz`, `palette`, `sort`, `values`, `total`, `limit`, `case`, `angle`, `size`). The website reads it in
+  `apps/web/src/lib/ask-look.ts` and takes the FIRST value of each list for one it does not know, so a first value is
+  never written and a key these screens do not know is kept. Three lists must stay equal to the website's:
+  `ASK_PALETTES` (six palettes of six colours), `ASK_VIZ` (the charts of each kind, the first its default) and
+  `ASK_LOOKS` (which choices a chart takes). A picture (a page's cover, a text slide's) goes into the `site` bucket
+  under `ask/` the way the website editor's do and is kept as `https://micromobility.sa/media/ask/<file>`; the bucket
+  takes an upload from an admin only.
+- **No code** (the user, 2026-11-13: "i don't want the ask page to need a code to be able to access it"): the 6-digit
+  code is on no screen, staff's or the website's, and `look.screen` has no `code`. The column and `ask_code` stay in
+  the database, unused. Never bring a code box back.
 - **Traps**: the migration is pure ASCII (non-Latin characters are built with `chr()`); a stale staff save cannot move
   `ver` or `round` backwards (trigger); an age rule shuts out an account with no birth date; `ask_code` answers null
   past its meter (30 tries in 10 minutes a network) as for a wrong code; in customer-half or core code a quoted
