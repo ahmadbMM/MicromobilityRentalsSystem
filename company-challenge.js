@@ -2,8 +2,9 @@
 // ride towards one number: staff make the challenge and hand out its code, the rider types it here (or opens a link that
 // holds it, /?company=CODE, kept on the device by the page until they are signed in) and sees one card per challenge:
 // how many are taking part and how many sessions they finished together, only once the people taking part reach the
-// challenge's minimum team size (the database sends neither number before), and their own count. Members see nobody
-// (2026-11-04): nothing here names a colleague or holds one colleague's count, and the database sends none.
+// challenge's minimum team size (the database sends neither number before, and the sessions total only from 10), and
+// their own count. Members see nobody (2026-11-04): nothing here names a colleague or holds one colleague's count,
+// and the database sends none.
 // Everything comes from company_challenge_mine and company_challenge_join (migration 20261114012600), kept in S._coch.
 // A file of its own, fetched only when this page opens (_cochOpen in app.src.html), with its own words in all ten
 // languages. Hand-written, not generated; the build stamps its address (COCH_V).
@@ -38,17 +39,18 @@ function _cochClean(v) { return String(v == null ? '' : v).replace(/[^A-Za-z0-9]
 function _cochNum(n, label, k) {
   return `<div class="coch-num" data-coch-n="${k}"><strong><bdi>${esc(String(n))}</bdi></strong><span>${esc(label)}</span></div>`;
 }
-// One challenge. The two totals are drawn only when the database sent them (it does from the minimum team size up); the
-// rider's own count always. The badge every finisher gets at the end is shown from the start, in full once it is theirs.
+// One challenge. Each total is drawn only when the database sent it (how many are taking part from the minimum team
+// size up; their sessions together then too, once those reach 10); the rider's own count always. The badge every
+// finisher gets at the end is shown from the start, in full once it is theirs.
 function _cochCardHtml(r) {
-  const tot = typeof r.team === 'number' && typeof r.sessions === 'number';
+  const tot = (v, label, k) => (typeof v === 'number' ? _cochNum(v, _cochT(label), k) : '');
   const st = r.state === 'ended' ? _cochT('ended') : r.state === 'soon' ? _cochT('soon') : '';
   const name = window._cochDeps && window._cochDeps.badge ? window._cochDeps.badge() : '';
   const medal = typeof _bdgMedal === 'function' ? _bdgMedal('briefcase', 'blue', 'coch-medal') : '';
   return `<section class="form-section acc-pg-card coch-card" data-coch="${esc(String(r.id))}" aria-labelledby="coch-n-${esc(String(r.id))}">
     <div class="coch-head"><h3 class="coch-name" id="coch-n-${esc(String(r.id))}" tabindex="-1"><bdi>${esc(r.company || '')}</bdi></h3>${st ? `<span class="coch-st">${esc(st)}</span>` : ''}</div>
     <div class="coch-dates"><bdi>${esc(shortDate(r.starts_on))} – ${esc(shortDate(r.ends_on))}</bdi></div>
-    <div class="coch-nums">${tot ? _cochNum(r.team, _cochT('team'), 'team') + _cochNum(r.sessions, _cochT('together'), 'sessions') : ''}${_cochNum(Number(r.mine) || 0, _cochT('mine'), 'mine')}</div>
+    <div class="coch-nums">${tot(r.team, 'team', 'team')}${tot(r.sessions, 'together', 'sessions')}${_cochNum(Number(r.mine) || 0, _cochT('mine'), 'mine')}</div>
     <div class="coch-badge${r.badge ? ' coch-won' : ''}">${medal}<span class="coch-badge-n">${esc(name)}</span>${r.badge ? `<span class="coch-badge-ok">${_cuIc('tick', 14)}${esc(_cochT('badge'))}</span>` : ''}</div>
   </section>`;
 }

@@ -167,6 +167,12 @@ test.describe('@customer:account company challenge: the row, joining, the card',
     await page.goto('/?company=%3Cscript%3Ealert(1)%3C%2Fscript%3E');
     await waitForSb(page);
     expect(await page.evaluate(`_cochParked()`)).toBe('SCRIPTALERT1');
+    // a sign-in that only ended keeps the code for the way back in; Log out drops it, so the next person on this
+    // phone does not join the last one's company
+    await page.evaluate(`doLogout(true)`);
+    expect(await page.evaluate(`_cochParked()`)).toBe('SCRIPTALERT1');
+    await page.evaluate(`doLogout()`);
+    expect(await page.evaluate(`_cochParked()`)).toBe('');
   });
 
   test('totals hidden under the minimum team size: the card holds the rider\'s own count and nothing else', async ({ page }) => {
@@ -188,9 +194,18 @@ test.describe('@customer:account company challenge: the row, joining, the card',
     await expect(page.locator('[data-coch="7"] [data-coch-n="team"]')).toHaveText(/^6\s*Taking part$/);
     await expect(page.locator('[data-coch="7"] [data-coch-n="sessions"]')).toHaveText(/^14\s*Sessions together$/);
     await expect(page.locator('[data-coch="7"] [data-coch-n="mine"]')).toHaveText(/^2\s*Your sessions$/);
-    // a total sent as anything but a number is not drawn (one of the two alone is not drawn either)
-    await page.evaluate(`S._coch.rows=[{id:7,company:'Petromin',starts_on:'2026-11-01',ends_on:'2026-11-30',state:'on',team:6,sessions:null,mine:2,badge:false}];_cochRender()`);
+    // a total sent as anything but a number is not drawn
+    await page.evaluate(`S._coch.rows=[{id:7,company:'Petromin',starts_on:'2026-11-01',ends_on:'2026-11-30',state:'on',team:'6',sessions:'14',mine:2,badge:false}];_cochRender()`);
     await expect(nums(page)).toHaveCount(1);
+  });
+
+  test('a sessions total under 10 is not sent: the card holds how many are taking part and the rider\'s own count', async ({ page }) => {
+    await rider(page, { 'rpc:company_challenge_mine': mine(ch({ team: 5, sessions: null, mine: 2 })) });
+    await row(page).click();
+    await expect(nums(page)).toHaveCount(2);
+    await expect(page.locator('[data-coch="7"] [data-coch-n="team"]')).toHaveText(/^5\s*Taking part$/);
+    await expect(page.locator('[data-coch="7"] [data-coch-n="mine"]')).toHaveText(/^2\s*Your sessions$/);
+    await expect(host(page)).not.toContainText('Sessions together');
   });
 
   test('no colleague on the page: whatever else an answer carried is never drawn', async ({ page }) => {
@@ -290,10 +305,10 @@ test.describe('@customer:account company challenge: what the database lets a rid
       expect(body).not.toMatch(/\b(name|phone|email|photo|joined_at|riders|to_jsonb|row_to_json)\b/);
       expect(body).not.toMatch(/\.\*\s*\)/); // no whole row built into the answer
     }
-    // both totals only from the minimum team size up, and the count the rider gets is their own person's
+    // both totals only from the minimum team size up, the sessions total only from 10 (at 3 taking part, "mine 2,
+    // together 2" would say both colleagues stand at 0), and the count the rider gets is their own person's
     expect(mineFn).toContain(`'team', case when v_team >= ch.min_team then v_team end`);
-    expect(mineFn).toContain(`'sessions', case when v_team >= ch.min_team then v_sum end`);
-    expect(mineFn).toContain('filter (where p.pid = v_me)');
+    expect(mineFn).toContain(`'sessions', case when v_team >= ch.min_team and v_sum >= 10 then v_sum end`);    expect(mineFn).toContain('filter (where p.pid = v_me)');
     // a minimum is never under 3, so a total is never one other person's number; 5 unless staff say otherwise
     expect(SQL).toContain('min_team    integer not null default 5 check (min_team between 3 and 500)');
     expect(fnBody('staff_company_challenge_save')).toContain('v_min not between 3 and 500');
@@ -429,8 +444,14 @@ test.describe('@staff:people company challenges', () => {
     await expect(page.locator('#cochs-d-t')).toHaveCount(0);
     expect(saves).toEqual([{ p_id: 7, p_company: 'Petromin', p_code: 'PETRO26', p_starts: '2026-11-01', p_ends: '2099-11-30', p_min: 10 }]);
     await crow(page, 6).getByRole('button', { name: 'Edit' }).click();
+    await page.locator('#cochs-f-company').fill('Dukan Stores');
     await dlg(page).getByRole('button', { name: 'Delete' }).click();
     const ask = page.getByRole('dialog').filter({ hasText: 'Delete this company challenge?' });
+    await expect(ask).toBeVisible();
+    await ask.getByRole('button', { name: 'Cancel' }).click(); // cancelled: the dialog is back, as it was typed
+    await expect(page.locator('#cochs-f-company')).toHaveValue('Dukan Stores');
+    await expect(ask).toHaveCount(0);
+    await dlg(page).getByRole('button', { name: 'Delete' }).click();
     await expect(ask).toBeVisible();
     expect(dels).toEqual([]);
     await ask.getByRole('button', { name: 'Delete' }).click();
@@ -460,6 +481,11 @@ test.describe('@staff:people company challenges', () => {
     await expect(rs.nth(0).getByRole('button', { name: 'Remove' })).toBeInViewport();
     await rs.nth(0).getByRole('button', { name: 'Remove' }).click();
     const ask = page.getByRole('dialog').filter({ hasText: 'Remove Omar Zed from this challenge?' });
+    await expect(ask).toBeVisible();
+    await ask.getByRole('button', { name: 'Cancel' }).click(); // cancelled: the list is back as it was
+    await expect(rs).toHaveCount(2);
+    await expect(ask).toHaveCount(0);
+    await rs.nth(0).getByRole('button', { name: 'Remove' }).click();
     await expect(ask).toBeVisible();
     expect(calls).toEqual([]);
     await ask.getByRole('button', { name: 'Remove' }).click();

@@ -7597,6 +7597,7 @@ function doLogout(silent){
   // A browser this account turned push on in stops getting its notifications (2026-11-13): the next person on it must not.
   {const pc=S.loggedIn||getSession();if(pc&&pushEnabled())pushUnsubscribe(pc).catch(()=>{});S._pp=null;S._pcFor=null;S._rmDone=null;S._ppErr='';}
   S.loggedIn=null;clearSession();S._commAccess=null;
+  if(!silent)_cochPark(''); // a company's join code still kept from a link (F26) was for whoever just signed out, not the next person on this phone; a sign-in that only ended (silent) keeps it for their way back in
   S._pwdCheckedFor=null;_pwdMustClose();
   // The once-per-account reads start over (2026-10-07): the same account signing in again on this page
   // came back without its ride-news and deletion answers (customer_login carries neither), so both
@@ -28049,7 +28050,8 @@ function _accVolOpen(){const c=S.loggedIn||getSession();if(c)_volHandoff(c);}
 // (/?company=CODE, kept on this device until the rider is signed in). The row shows once company_challenge_mine has
 // answered (migration 20261114012600) that the rider has a challenge or that one can be joined, not at all before. Its
 // page (the code box, and a card per challenge: how many are taking part and their sessions together from the minimum
-// team size up, and the rider's own count; never a colleague) is company-challenge.js, fetched when the page opens.
+// team size up, that total only from 10, and the rider's own count; never a colleague) is company-challenge.js,
+// fetched when the page opens. A Log out drops a code still kept from a link (doLogout).
 // S._coch = {id, at, busy, rows, open}.
 const COCH_V=''; // build stamps a hash of company-challenge.js
 const COCH_KEY='mm_co_code';
@@ -56800,17 +56802,20 @@ function _cochsRiders(id){
     `<button type="button" class="btn-secondary" data-on-click="${_on('_mnyClose')}">${t('closeBtn')}</button>`,true));
 }
 // The question is the app's own confirm, which sits under this part's dialogs: the list closes for it, and comes back
-// with the rider gone once the write is done.
+// with the rider gone once the write is done, or as it was when the question is cancelled (closeConfirm runs
+// S._afterConfirm; went says the answer was yes).
 function _cochsRemove(cid,rid){
   const c=(_cochs().rows||[]).find(x=>x.id===cid),r=c&&(c.riders||[]).find(x=>x.id===rid);if(!r||!_editOk('community'))return;
-  S._cochsR=null;_mnyClose();
+  S._cochsR=null;_mnyClose();let went=false;
   confirmDialog({title:t('cochsRemoveAsk').replace('{0}',r.name||rid),body:'',confirmLabel:t('removeBtn'),confirmClass:'btn-red',onConfirm:async()=>{
+    went=true;
     if(_roNow()){_roRefusal();return;}
     if(await _wr(sb.rpc('staff_company_challenge_remove',{p_challenge:cid,p_customer:rid}),'company challenge remove'))return;
     logAction(`${t('removeBtn')}: ${r.name||rid} · ${t('cochsTab')} · ${c.company}`);
     haptic();await _cochsLoad(true);
     if(S.staffTab==='community'&&S.communityTab==='companies')_cochsRiders(cid);
   }});
+  S._afterConfirm=()=>{if(!went&&S.staffTab==='community'&&S.communityTab==='companies')_cochsRiders(cid);};
 }
 // A code nobody can guess at a glance and nobody misreads: six of the letters and digits that do not look alike.
 function _cochsNewCode(){const a='ABCDEFGHJKMNPQRSTUVWXYZ23456789',b=new Uint8Array(6);let s='';try{crypto.getRandomValues(b);}catch(_){}b.forEach((x,i)=>{s+=a[(x||Math.floor(Math.random()*251)+i)%a.length];});return s;}
@@ -56850,13 +56855,15 @@ async function _cochsSave(){
 }
 function _cochsDel(){
   const d=S._cochsD;if(!d||d.id==null||!_editOk('community'))return;
-  S._cochsD=null;_mnyClose(); // the question sits under this dialog, which closes for it
+  S._cochsD=null;_mnyClose();let went=false; // the question sits under this dialog, which closes for it
   confirmDialog({title:t('cochsDelAsk'),body:'',confirmLabel:t('deleteBtn'),confirmClass:'btn-red',onConfirm:async()=>{
+    went=true;
     if(_roNow()){_roRefusal();return;}
     if(await _wr(sb.rpc('staff_company_challenge_delete',{p_id:d.id}),'company challenge delete'))return;
     logAction(`${t('deleteBtn')}: ${t('cochsTab')} · ${d.company}`);
     haptic();_cochsLoad(true);
   }});
+  S._afterConfirm=()=>{if(!went&&S.staffTab==='community'&&S.communityTab==='companies'){S._cochsD=d;_cochsDraw();}}; // cancelled: the dialog is back, as it was typed
 }
 // A People-part entry: the account window's pieces below ride in the People part, fetched through this function's stand-in.
 function _n6pAhLoad(){return[_n6pAhBar,_n6pAhStage,_n6pDetails,_n6pNotesHtml,_n6pAhSig,_n6qAhExtra,_n6qAhFacts,_n6qTlHost,_refAhSec,_fupAhSec,_walAhSec,_fupBell,_fupDue].length;}

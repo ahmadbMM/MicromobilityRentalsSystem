@@ -7,8 +7,10 @@
 -- many are taking part and how many sessions they finished together, only once the people taking part reach the
 -- minimum team size, and their own count. Members see nobody (2026-11-04): nothing a rider can read names a
 -- colleague, lists one or holds one colleague's count, and the minimum is never under 3, so a total is never one
--- other person's number. Once the last day has passed, everyone who took part with at least one finished session
--- holds the Company Challenge badge. A reward is a badge only.
+-- other person's number. The sessions total is held back as well while it is under 10 (totals under 10 are not
+-- shown): at 3 taking part, "mine 2, together 2" would say that both colleagues stand at 0. Once the last day has
+-- passed, everyone who took part with at least one finished session holds the Company Challenge badge. A reward is
+-- a badge only.
 --
 --  1. Tables, with row level security on and no grant: every read and write goes through the functions below.
 --       company_challenges         one challenge: company, code (4 to 12 capital letters and digits, one challenge
@@ -31,7 +33,8 @@
 --  4. For riders (anon key; the account's id and session token, checked by _cust_token_ok):
 --       company_challenge_mine(p_id, p_token)          {ok, open, rows: [{id, company, starts_on, ends_on, state,
 --                                                      team, sessions, mine, badge}]}; team and sessions are null
---                                                      while fewer than min_team are taking part. A challenge
+--                                                      while fewer than min_team are taking part, and sessions
+--                                                      also while the total is under 10. A challenge
 --                                                      leaves the answer 60 days after its last day. open says
 --                                                      only whether any challenge can still be joined: the app
 --                                                      shows its row then, or when the rider has a challenge.
@@ -162,8 +165,8 @@ end $function$;
 revoke all on function public._cc_award(bigint) from public, anon, authenticated;
 
 -- 4. riders ------------------------------------------------------------------------------------------------------
--- What a rider reads: their own challenges, their own count, and the two totals from the minimum team size up.
--- No name, no list, nobody else's count.
+-- What a rider reads: their own challenges, their own count, and the two totals from the minimum team size up
+-- (the sessions total only from 10). No name, no list, nobody else's count.
 
 create or replace function public.company_challenge_mine(p_id text, p_token text)
  returns jsonb
@@ -194,7 +197,7 @@ begin
       'id', ch.id, 'company', ch.company, 'starts_on', ch.starts_on, 'ends_on', ch.ends_on,
       'state', case when v_today < ch.starts_on then 'soon' when v_today > ch.ends_on then 'ended' else 'on' end,
       'team', case when v_team >= ch.min_team then v_team end,
-      'sessions', case when v_team >= ch.min_team then v_sum end,
+      'sessions', case when v_team >= ch.min_team and v_sum >= 10 then v_sum end,
       'mine', v_mine,
       'badge', v_today > ch.ends_on and v_mine >= 1
                and exists (select 1 from customer_badges b where b.customer_id = any(v_accts) and b.badge_id = 'bd_company_challenge')));
