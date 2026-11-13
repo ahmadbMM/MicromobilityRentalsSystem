@@ -194,7 +194,7 @@ test.describe('@staff:community mentorship', () => {
     await page.locator('#tab-community .filter-pill', { hasText: /^Mentors \(/ }).click();
     await expect(page.locator('.mts-card')).toContainText('Sara Ali');
     await expect(page.locator('.mts-card')).toContainText('Banking');
-    await page.getByRole('button', { name: '+ Add a profile' }).click();
+    await page.getByRole('button', { name: '+ Add a mentee' }).click();
     const dlg = page.getByRole('dialog', { name: "Add a student's profile" });
     await dlg.getByRole('searchbox', { name: 'Student' }).fill('Omar');
     await dlg.locator('.mts-hit', { hasText: 'Omar Saleh' }).click();
@@ -208,5 +208,78 @@ test.describe('@staff:community mentorship', () => {
     await dlg.getByLabel(/The student agreed/).check();
     await dlg.getByRole('button', { name: 'Save' }).click();
     await expect.poll(() => w.find((x) => x.method === 'POST')?.body).toMatchObject({ customer_id: 'c2', university: 'Penn State', country: 'US', helps: ['job'], source: 'staff', status: 'open' });
+  });
+
+  // The user, 2026-11-13: "let the staff be able to add mentors or mentees manually".
+  test('staff add a mentor by hand with their agreement; a registered account opens its registration instead', async ({ page }) => {
+    const w = writes(page, 'mentor_mentors');
+    await staff(page);
+    await page.getByRole('button', { name: '+ Add a mentor' }).click();
+    const dlg = page.getByRole('dialog', { name: 'Add a mentor' });
+    await dlg.getByRole('searchbox', { name: 'Mentor' }).fill('Sara');
+    await expect(dlg.locator('.mts-hit', { hasText: 'Sara Ali' })).toContainText('Already a mentor');
+    await dlg.locator('.mts-hit', { hasText: 'Sara Ali' }).click();
+    const chg = page.getByRole('dialog', { name: "Change the mentor's details" });
+    await expect(chg.getByLabel('Where they studied')).toHaveValue('IE University');
+    await expect(chg.getByRole('checkbox')).toHaveCount(0); // an active mentor agreed already
+    await chg.getByRole('button', { name: 'Cancel' }).click();
+    await page.getByRole('button', { name: '+ Add a mentor' }).click();
+    await dlg.getByRole('button', { name: 'Save' }).click();
+    await expect(dlg.locator('.mts-err')).toContainText("Choose the mentor's account.");
+    await dlg.getByRole('searchbox', { name: 'Mentor' }).fill('Omar');
+    await dlg.locator('.mts-hit', { hasText: 'Omar Saleh' }).click();
+    await dlg.getByLabel('Where they studied').fill('KFUPM');
+    await dlg.getByLabel('What they studied').fill('Petroleum Engineering');
+    await dlg.getByLabel('Work or industry').fill('Energy');
+    await dlg.getByRole('button', { name: 'First job' }).click();
+    await dlg.getByLabel('How their experience could help students').fill('Ten years in energy.');
+    await dlg.getByRole('button', { name: 'Save' }).click();
+    await expect(dlg.locator('.mts-err')).toContainText("Tick the member's agreement.");
+    await dlg.getByLabel(/The member agreed/).check();
+    await dlg.getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => w.find((x) => x.method === 'POST')?.body).toMatchObject({ customer_id: 'c2', university: 'KFUPM', field: 'Petroleum Engineering', work: 'Energy', places: null, helps: ['job'], about: 'Ten years in energy.', status: 'active' });
+    await expect(dlg).toBeHidden();
+  });
+
+  test('staff remove a mentor: their offers are declined; one who left is added again with their agreement', async ({ page }) => {
+    const w = writes(page, 'mentor_mentors'), wo = writes(page, 'mentor_offers');
+    await staff(page);
+    await page.locator('#tab-community .filter-pill', { hasText: /^Mentors \(/ }).click();
+    await page.locator('.mts-card', { hasText: 'Sara Ali' }).getByRole('button', { name: 'Remove from the programme' }).click();
+    const reread = page.waitForResponse((r) => r.url().includes('/rest/v1/mentor_mentors') && r.request().method() === 'GET');
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Remove from the programme' }).click();
+    await expect.poll(() => w.find((x) => x.method === 'PATCH')?.body).toMatchObject({ status: 'left' });
+    await expect.poll(() => wo.find((x) => x.method === 'PATCH' && /status=in/.test(decodeURIComponent(x.url)))?.body).toMatchObject({ status: 'declined', ended_by: 'staff' });
+    await reread; // the list is read again after the writes; the stub still says active, so the test marks her left
+    await page.waitForFunction('!S._mtsBusy');
+    await page.evaluate(`S._mts.m[0].status='left';renderCommunity()`);
+    await page.locator('.mts-card', { hasText: 'Sara Ali' }).getByRole('button', { name: 'Add again' }).click();
+    const dlg = page.getByRole('dialog', { name: 'Add again' });
+    await dlg.getByLabel(/The member agreed/).check();
+    await dlg.getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => w.filter((x) => x.method === 'PATCH')[1]?.body).toMatchObject({ status: 'active', left_at: null, university: 'IE University' });
+  });
+
+  test('staff add an offer from a registered mentor on a profile; the mentor\'s help is picked already', async ({ page }) => {
+    const w = writes(page, 'mentor_offers');
+    await staff(page);
+    const card = page.locator('.mts-card', { hasText: 'University of Reading' });
+    await card.getByRole('button', { name: 'Add an offer' }).click();
+    const dlg = page.getByRole('dialog', { name: 'Add an offer' });
+    await expect(dlg.locator('.mts-hit')).toHaveCount(1); // Sara, the one registered mentor
+    await dlg.locator('.mts-hit', { hasText: 'Sara Ali' }).click();
+    await expect(dlg.getByRole('button', { name: 'University life' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(dlg.locator('.mts-warn')).toHaveCount(0); // a woman, as Lina asked
+    await dlg.getByRole('button', { name: 'Save' }).click();
+    await expect(dlg.locator('.mts-err')).toContainText('Pick at least one of each list');
+    await dlg.getByRole('button', { name: 'Same university' }).click();
+    await dlg.getByLabel('How their experience could help this student').fill('Sent on WhatsApp: studied abroad too.');
+    await dlg.getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => w.find((x) => x.method === 'POST')?.body).toMatchObject({ profile_id: 'mp_1', mentor_id: 'c3', links: ['uni'], helps: ['unilife'], note: 'Sent on WhatsApp: studied abroad too.' });
+    // Profile 3 already has Sara's offer and Omar is its student: nobody is left to add there.
+    await dlg.waitFor({ state: 'hidden' });
+    await page.locator('#tab-community .filter-pill', { hasText: /^Open/ }).click();
+    await page.locator('.mts-card', { hasText: 'Profile 3' }).getByRole('button', { name: 'Add an offer' }).click();
+    await expect(page.getByRole('dialog', { name: 'Add an offer' }).locator('.mts-hit')).toHaveCount(0);
   });
 });
