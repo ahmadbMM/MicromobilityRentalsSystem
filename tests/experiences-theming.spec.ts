@@ -128,13 +128,16 @@ test.describe('@customer:experiences the Experiences card, its list and the Satu
     await expect(row(page, '2099-11-18-pw').locator('.sess-comm-chip')).toHaveText("Petromin's Wednesdays");
   });
 
-  test('the Saturday ticket wears the dawn with the ride’s number; the booking number still waits for Publish', async ({ page }) => {
+  // The dawn picture across the ticket's top, and the ride's number on it, went on 2026-11-13 (the user: "remove the
+  // images at the top of the booking cards").
+  test('the Saturday ticket has no picture across its top; the booking number still waits for Publish', async ({ page }) => {
     const b = [booking('s1', '2099-11-14')];
     await boot(page, { queue_entries: b, 'rpc:my_bookings': b });
     await page.evaluate(`goCustomer('myrides')`);
     const card = page.locator('#tab-myrides .ticket-card.th-saturday');
     await expect(card).toHaveCount(1);
-    await expect(card.locator('> .tk-art .tk-ride-no')).toHaveText('Ride 4');
+    await expect(card.locator('.k-art')).toHaveCount(0);
+    await expect(card).not.toContainText('Ride 4');
     await expect(card.locator('.ticket-num')).not.toContainText('#7');
   });
 

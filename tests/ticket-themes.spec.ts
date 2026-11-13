@@ -50,13 +50,12 @@ test.describe('@customer:tickets every ticket in its event’s colours', () => {
     expect(by.jcc).toMatchObject({ th: 'jcc', st: 'live', bg: 'rgb(6, 52, 111)', mark: '/jcc-white.webp' });
     expect(by.jcc.img).toContain('linear-gradient');
     expect(by['jcc-wl']).toMatchObject({ th: 'jcc', bg: 'rgb(6, 52, 111)', border: 'dashed' });
-    // the Saturday ride wears its own (the owner's pick C4, 2026-11-13): white, the brand green, the dawn on the Corniche across
-    // its top; the pattern stays the other Experiences tickets' (T100, below)
+    // the Saturday ride wears its own (the owner's pick C4, 2026-11-13): white and the brand green; the pattern stays the other
+    // Experiences tickets' (T100, below). No picture across its top (the user, 2026-11-13: "remove the images at the top of
+    // the booking cards").
     expect(by.saturday).toMatchObject({ th: 'saturday', bg: 'rgb(255, 255, 255)', mark: '/logo-dark.webp' });
     expect(by.saturday.img).toBe('none');
-    const art = page.locator('#tab-myrides .ticket-card.th-saturday > .tk-art > .k-art');
-    await expect(art).toHaveCount(1);
-    expect(await art.evaluate((el) => getComputedStyle(el).backgroundImage)).toContain('data:image/svg+xml');
+    await expect(page.locator('#tab-myrides .ticket-card .k-art')).toHaveCount(0);
     // the pool (a reservation staff have not confirmed yet): pool blue and the water's lines (2026-10-12)
     expect(by.swim).toMatchObject({ th: 'swim', st: 'paper', bg: 'rgb(255, 255, 255)', mark: '/logo-dark.webp' });
     expect(by.swim.img).toContain('56, 182, 230');

@@ -9218,9 +9218,6 @@ function _satRouteSvg(s){
 // painted by styles.css from the kind's own tokens (C1). An empty element, so it turns round for Arabic without words.
 const KIND_ART=['saturday','swim','petromin'];
 function _kindArt(s,cls){return s&&KIND_ART.includes(_rideKind(s))?`<span class="k-art${cls?' '+cls:''}" aria-hidden="true"></span>`:'';}
-// The Saturday ticket's top (C4): the dawn, and the ride's number on it. Its booking number stays where it was, shown
-// only after Publish (_satNumOk), so the two never stand in for each other.
-function _tkArtHtml(sess){if(!sess||_rideKind(sess)!=='saturday')return'';const no=_satRideTxt(sess);return`<div class="tk-art">${_kindArt(sess)}${no?`<span class="tk-ride-no">${esc(no)}</span>`:''}</div>`;}
 // What the Experiences card holds, drawn (Q1 c, Q2 c): no date, one mark per kind on its books - the Saturday ride, the
 // pool, Petromin, then any other - in a fixed order, each on its kind's tint, named for a screen reader.
 const COMM_MARKS=['saturday','swim','petromin','yoga','defe5k'];
@@ -19041,7 +19038,6 @@ function renderRegister(){
     const _mod=_rideKind(_sess)==='snd96'?'':_wl?' tk-wl':(_commT||_hold)?'':' tk-live'+(String(tkt.sessionDate||'').slice(0,10)===todayStr()?' tk-today':'');
     const _owe=(!_commT&&!_wl&&!tkt.paid)?_bookingDue(tkt):0;
     return`<div class="ticket-card ${_evClass(_sess)}${idx>0?' cu-mt16':''}${_mod}${_tkThemeCls(_sess)}">
-      ${_tkArtHtml(_sess)}
       ${_isBlood(_sess)?_bldPlateHtml()+_bldTkType(tkt):_tkLogo(_sess)}
       ${label?`<div class="cu-tk-label">${label}</div>`:''}
       ${_commT?`
@@ -21021,7 +21017,6 @@ function renderBookingTicket(entries,opts){
   // A past ride taken out of My Bookings' stack (opts.toggle, its session): its top puts it back (_wlToggle).
   const _tg=opts.toggle;
   return`<div class="ticket-card ${_evClass(sess)} cu-mt0${_mod}${_tkThemeCls(sess)}${_tg?' wl-open':''}"${_tg?` id="wl-${esc(_tg)}"`:''}>
-    ${_tg?'':_tkArtHtml(sess)}
     ${_isBlood(sess)?_bldPlateHtml()+((opts.card&&!_bldVis(primary))?'':_bldTkType(primary)):''}
     <div class="ticket-header${_tg?' wl-head':''}"${_tg?` role="button" tabindex="0" aria-expanded="true" data-on-click="${_on("_wlToggle",_tg)}" data-on-keydown="${_on("_keyClick",_EV,_EL)}"`:''}>
       <div class="ticket-num-block">
