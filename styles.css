@@ -9496,6 +9496,8 @@ body:not(.view-staff) .hub-report .hub-stats{margin:6px 0 10px;}
 body:not(.view-staff) .hub-mine{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-top:10px;border-top:1px solid var(--line);color:var(--ink);}
 body:not(.view-staff) .hub-mine strong{font-size:var(--fs-20);font-variant-numeric:tabular-nums;}
 body:not(.view-staff) .hub-next{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);}
+/* My month (F13, 2026-11-13): each kind's count at the end of its row. */
+body:not(.view-staff) .hub-mon .hub-kinds li strong{margin-inline-start:auto;font-variant-numeric:tabular-nums;}
 body:not(.view-staff) .mb-new{color:var(--go);font-weight:700;}
 /* The learn-to-ride ladder (F21, 2026-11-13, learn-ladder.js): a centred pop-up from Account. Four levels, each a card of its
    skills: a ticked skill wears the action green, the rest read "Practising". A complete level offers its certificate, the

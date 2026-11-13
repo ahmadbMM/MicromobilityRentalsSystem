@@ -11,7 +11,7 @@
 // A file of its own, fetched on the first tap (_shrLoad in app.src.html), with its own words in all ten languages.
 // Hand-written, not generated; the build stamps its address (SHR_V).
 /* global S, esc, _on, _P, getSession, getQueue, _cuIc, _locale, _mrBadgeList, _bdgName, _bdgCol, _bdgMedal, _bdgDay,
-   _bdgPopClose, _bdgRode, _ncEntry, _rideKind, _ttName, _hubBdg, BDG_COLORS, toast */
+   _bdgPopClose, _bdgRode, _ncEntry, _rideKind, _ttName, _hubBdg, BDG_COLORS, toast, _monSub */
 const SHR_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 const SHR_T = {
   kBadge: ['Badge earned', 'وسام مكتسب', 'Badge obtenu', 'Insignia conseguida', 'Conquista obtida','بیج حاصل کیا', 'बैज अर्जित', 'Nakuhang badge', 'ब्याज कमाइयो', 'ব্যাজ অর্জিত'],
@@ -118,6 +118,9 @@ function _shrSubject(job, c) {
     const name = String((S.lang === 'ar' && g.name_ar) || g.name || '');
     return { label: _sT('kMile'), name, level: '', date: '', club: _shrClub(c), medal: g.badge ? { icon: g.badge.icon, color: g.badge.color } : { icon: 'flag', color: 'gold' }, file: 'micromobility-challenge' };
   }
+  // A member's "My month" card (new features build F13): worded where the card is drawn (member-hub.js, _monSub), with
+  // its numbers as `lines` under the month's name.
+  if (job.kind === 'month') return typeof _monSub === 'function' ? _monSub(c, _sLtr) : null;
   return null;
 }
 
@@ -238,12 +241,15 @@ async function _shrDraw(sub, first, a) {
   }
   if (sub.level) rows.push({ t: sub.level, w: 400, s: 44, c: SHR_INK.low, h: 76 });
   if (sub.date) rows.push({ t: sub.date, w: 400, s: 44, c: SHR_INK.mid, h: 76 });
+  if (Array.isArray(sub.lines)) sub.lines.forEach((t) => rows.push({ t, w: 400, s: 40, c: SHR_INK.mid, h: 60 })); // a month's numbers (F13)
   let y = (sub.medal ? 1290 : 1010) - rows.reduce((n, r) => n + r.h, 0) / 2;
+  if (Array.isArray(sub.lines)) y = Math.max(y, 1000); // a long month stays clear of the medal above it
   rows.forEach((r) => { x.fillStyle = r.c; x.font = `${r.w} ${r.s}px ${fam}`; put(r.t, y + r.h * 0.72); y += r.h; });
   if (first) said.push(first);
   if (sub.medal) said.push(sub.label, sub.name);
   if (sub.level) said.push(sub.level);
   if (sub.date) said.push(sub.date);
+  if (Array.isArray(sub.lines)) said.push(...sub.lines);
   if (sub.club) {
     x.fillStyle = SHR_INK.low; x.font = `400 40px ${fam}`;
     const L = _shrWrap(x, sub.club, 960);

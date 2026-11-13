@@ -85,6 +85,10 @@ const HUB_T = {
   yrShare: ['Share my year', 'شارك عامي', 'Partager mon année', 'Compartir mi año', 'Partilhar o meu ano', 'میرا سال شیئر کریں', 'मेरा साल साझा करें', 'Ibahagi ang taon ko', 'मेरो वर्ष साझा गर्नुहोस्', 'আমার বছর শেয়ার করুন'],
   yrMy: ['My {0} with MicroMobility', 'عامي {0} مع مايكروموبيليتي', 'Mon année {0} avec MicroMobility', 'Mi {0} con MicroMobility', 'O meu {0} com a MicroMobility', 'MicroMobility کے ساتھ میرا {0}', 'MicroMobility के साथ मेरा {0}', 'Ang {0} ko kasama ang MicroMobility', 'MicroMobility सँग मेरो {0}', 'MicroMobility-র সাথে আমার {0}'],
   yrShareMsg: ['My {0} with MicroMobility: {1} sessions, {2} Saturday rides.', 'عامي {0} مع مايكروموبيليتي: {1} نشاط، {2} رحلة سبت.', 'Mon année {0} avec MicroMobility : {1} sessions, {2} sorties du samedi.', 'Mi {0} con MicroMobility: {1} sesiones, {2} salidas de sábado.', 'O meu {0} com a MicroMobility: {1} sessões, {2} passeios de sábado.', 'MicroMobility کے ساتھ میرا {0}: {1} سیشن، ہفتے کی {2} سواریاں۔', 'MicroMobility के साथ मेरा {0}: {1} सत्र, {2} शनिवार राइड।', 'Ang {0} ko kasama ang MicroMobility: {1} session, {2} Saturday ride.', 'MicroMobility सँग मेरो {0}: {1} सत्र, {2} शनिबारे राइड।', 'MicroMobility-র সাথে আমার {0}: {1}টি সেশন, শনিবারের {2}টি রাইড।'],
+  monTitle: ['My month', 'شهري', 'Mon mois', 'Mi mes', 'O meu mês', 'میرا مہینہ', 'मेरा महीना', 'Ang buwan ko', 'मेरो महिना', 'আমার মাস'],
+  monSats: ['Saturdays ridden', 'أيام السبت التي ركبت فيها', 'Samedis roulés', 'Sábados rodados', 'Sábados pedalados', 'سواری والے ہفتے', 'राइड वाले शनिवार', 'Mga Sabadong nag-ride', 'राइड गरेका शनिबार', 'রাইড করা শনিবার'],
+  monBadges: ['Badges earned', 'الأوسمة المكتسبة', 'Badges obtenus', 'Insignias conseguidas', 'Conquistas obtidas', 'حاصل کیے گئے بیجز', 'अर्जित बैज', 'Mga nakuhang badge', 'कमाएका ब्याजहरू', 'অর্জিত ব্যাজ'],
+  monVs: ['Sessions compared with {0}', 'الأنشطة مقارنةً بشهر {0}', 'Sessions par rapport à {0}', 'Sesiones respecto a {0}', 'Sessões face a {0}', '{0} کے مقابلے میں سیشن', '{0} की तुलना में सत्र', 'Mga session kumpara sa {0}', '{0} को तुलनामा सत्र', '{0}-এর তুলনায় সেশন'],
   prev: ['Previous', 'السابق', 'Précédent', 'Anterior', 'Anterior', 'پچھلا', 'पिछला', 'Nakaraan', 'अघिल्लो', 'আগের'],
   nextB: ['Next', 'التالي', 'Suivant', 'Siguiente', 'Seguinte', 'اگلا', 'अगला', 'Susunod', 'अर्को', 'পরের'],
   close: ['Close', 'إغلاق', 'Fermer', 'Cerrar', 'Fechar', 'بند کریں', 'बंद करें', 'Isara', 'बन्द गर्नुहोस्', 'বন্ধ করুন'],
@@ -160,6 +164,7 @@ async function _hubFetch(force) {
     if (o) o.due = false;
     S._hub = { forId: c.id, at: Date.now(), d };
     _hubSave(c, d);
+    _monFetch(c, d); // My month (F13): a read of its own, from the 26th
     if (Array.isArray(d.awarded) && d.awarded.length) _hubCheer(d.awarded);
   } else if (h && h.forId === c.id && h.d) { h.stale = true; h.failAt = Date.now(); }
   else S._hub = { forId: c.id, at: Date.now(), d: null, failAt: Date.now() };
@@ -235,6 +240,7 @@ function _feedHtml(c, d, stale) {
     hero.recap ? staff : '',
     hero.html,
     d.year ? _yrCardHtml(d.year) : '',
+    _monHtml(c, d),
     _soonHtml(c, hero.open),
     _akCardHtml(),
     _p5Html() || _meHtml(d.me),
@@ -597,6 +603,104 @@ async function _hubPostImg(id) {
   }
   const src = S._hubImg[id], now = document.querySelector(`#hub-body img[data-hubimg="${CSS.escape(id)}"]`);
   if (now && src) now.src = src; else if (now && src === '') now.remove();
+}
+
+// ── My month (new features build F13, 2026-11-13) ───────────────────────────────────────────────
+// From the 26th to the end of the month, a member with two or more finished sessions that month gets one card: the
+// Saturdays they rode, their sessions by kind, the badges they earned this month, and one comparison with their own month
+// before. Every number is the member's own; nothing compares them with anyone. The numbers come from a read of their own
+// (hub_month, migration 20261114011300), asked only on those days, after the tab's read and by its date (the server's
+// day in Riyadh). The database decides whether the card shows: its first day is site_content 'hub.month.from' (26
+// December 2026), and it answers show false before that day, before the 26th and under two sessions; the page checks the
+// same three on what came back. A database without the function, or a read that fails, shows no card and no error. The
+// last good answer is kept on the phone per account, so the card paints with the rest of the tab.
+const _MON_KEY = 'cq_hubm_';
+function _monDay(d) { const s = String((d && d.today) || ''); return /^\d{4}-\d\d-\d\d$/.test(s) ? s : ''; }
+function _monDue(d) { const s = _monDay(d); return !!s && Number(s.slice(8)) >= 26; }
+function _monOk(m, day) {
+  return !!m && m.ok === true && m.show === true && !!day && Number(day.slice(8)) >= 26
+    && String(m.month || '').slice(0, 7) === day.slice(0, 7)
+    && /^\d{4}-\d\d-\d\d$/.test(String(m.from || '')) && String(m.from) <= day
+    && Number(m.sessions) >= 2;
+}
+async function _monFetch(c, d) {
+  const day = _monDay(d);
+  if (!sb || !c || !_monDue(d) || S._hubMonOff || S._hubMonBusy) return;
+  const a = S._hubMon;
+  if (a && a.forId === c.id && a.day === day && Date.now() - a.at < 12e4) return;
+  S._hubMonBusy = true;
+  let r; try { r = await sb.rpc('hub_month', _hTok(c)); } catch (e) { r = { error: e }; }
+  S._hubMonBusy = false;
+  const code = r && r.error && r.error.code;
+  if (code === 'PGRST202' || code === '42883') { // a database before the migration: no card, and not asked again on this page
+    S._hubMonOff = true; S._hubMon = null;
+    try { localStorage.removeItem(_MON_KEY + c.id); } catch (_) {}
+    if (S.custTab === 'members') _hubRender();
+    return;
+  }
+  // Signed out, or another account signed in, while it was asked: the answer is not theirs. A read that failed keeps
+  // what is in hand; the tab's next read asks again.
+  const now = _hCust(), m = r && !r.error && r.data;
+  if (!now || now.id !== c.id || !m || m.ok !== true) return;
+  S._hubMon = { forId: c.id, at: Date.now(), day, m };
+  try { if (m.show === true) localStorage.setItem(_MON_KEY + c.id, JSON.stringify({ day, m })); else localStorage.removeItem(_MON_KEY + c.id); } catch (_) {}
+  if (S.custTab === 'members') _hubRender();
+}
+// The answer in hand for this account, else the copy on the phone.
+function _monMine(c) {
+  let a = S._hubMon;
+  if (a && (!c || a.forId !== c.id)) a = S._hubMon = null;
+  if (!a && c && !S._hubMonOff) {
+    try { const x = JSON.parse(localStorage.getItem(_MON_KEY + c.id) || 'null'); if (x && x.m && x.m.ok === true) a = S._hubMon = { forId: c.id, at: 0, day: String(x.day || ''), m: x.m }; } catch (_) {}
+  }
+  return a ? a.m : null;
+}
+// Sessions by kind, most first. A session without a ride kind is the circuit's own (the database says 'rental').
+function _monKinds(m) {
+  const by = new Map();
+  (Array.isArray(m.kinds) ? m.kinds : []).forEach((x) => {
+    const k = x && typeof x.k === 'string' ? (x.k === 'rental' ? 'jcc' : x.k) : '', n = x ? Math.floor(Number(x.n)) : 0;
+    if (k && n > 0) by.set(k, (by.get(k) || 0) + n);
+  });
+  return [...by].map(([k, n]) => ({ k, n })).sort((a, b) => b.n - a.n || a.k.localeCompare(b.k));
+}
+function _monIc(k) { return k === 'swim' ? 'wave' : k === 'runher' || k === 'defe5k' || k === 'arena' ? 'run' : k === 'yoga' ? 'lotus' : k === 'workshop' || k === 'event' || k === 'blood' ? 'cal' : 'bike'; }
+// The one comparison: this month's sessions against the member's own month before. None for a member whose first
+// session is this month (the database sends no previous month).
+function _monPrev(m) {
+  const p = m.prev, ym = p ? String(p.month || '') : '';
+  if (!p || p.sessions == null || !/^\d{4}-\d\d/.test(ym) || !Number.isFinite(Number(p.sessions))) return null;
+  return { x: (Number(m.sessions) || 0) - Math.max(0, Math.floor(Number(p.sessions))), name: _hMonth(ym, false) };
+}
+function _monHtml(c, d) {
+  if (!_monDue(d)) return '';
+  const m = _monMine(c);
+  if (!_monOk(m, _monDay(d))) return '';
+  const st = (k, v, l) => `<div class="hub-stat" data-mon="${k}"><strong>${v}</strong><span>${esc(l)}</span></div>`;
+  const p = _monPrev(m), kinds = _monKinds(m);
+  const cells = [st('sats', _hN(m.saturdays), _hT('monSats')), st('sessions', _hN(m.sessions), _hT('yrSessions')), st('badges', _hN(m.badges), _hT('monBadges'))];
+  if (p) cells.push(st('prev', `<bdi dir="ltr">${p.x > 0 ? '+' : p.x < 0 ? '-' : ''}${Math.abs(p.x)}</bdi>`, _hF('monVs', p.name)));
+  return `<div class="hub-card hub-mon" id="hub-mon"><span class="hub-k">${_cuIc('cal', 16)} ${_hT('monTitle')}</span><strong class="hub-name"><bdi>${esc(_hMonth(String(m.month), true))}</bdi></strong>
+    <div class="hub-stats">${cells.join('')}</div>
+    ${kinds.length ? `<ul class="hub-kinds">${kinds.map((k) => `<li data-kind="${esc(k.k)}">${_cuIc(_monIc(k.k), 18)} <span>${esc(_evKindName(k.k))}</span><strong>${_hN(k.n)}</strong></li>`).join('')}</ul>` : ''}
+    ${typeof _shrLoad === 'function' ? `<button type="button" class="btn-secondary hub-wide shr-btn" data-on-click="${_on('_monShare')}">${_cuIc('share', 16)}<span>${esc(t('tcShare'))}</span></button>` : ''}</div>`;
+}
+// The card as a picture, through the page's share pop-up (badge-share.js, F12), which asks _monSub what to draw: the
+// month, then one line for each number above zero. A picture a member sends out says what they did: no "0 badges", the
+// comparison only when it is a gain, and the kinds other than the Saturday ride (its Saturdays are the first line), three
+// at most. ltr: how that file holds a number in its order inside a right-to-left line.
+function _monShare() { if (typeof _shrLoad === 'function') _shrLoad({ kind: 'month' }); }
+function _monSub(c, ltr) {
+  const h = S._hub, d = h && c && h.forId === c.id ? h.d : null, a = S._hubMon, m = a && c && a.forId === c.id ? a.m : null;
+  if (!d || !_monOk(m, _monDay(d))) return null;
+  const n = (v) => (typeof ltr === 'function' ? ltr(v) : String(v)), row = (label, v) => label + ': ' + n(v);
+  const lines = [], p = _monPrev(m);
+  if (Number(m.saturdays) > 0) lines.push(row(_hT('monSats'), Number(m.saturdays)));
+  lines.push(row(_hT('yrSessions'), Number(m.sessions)));
+  _monKinds(m).filter((k) => k.k !== 'saturday').slice(0, 3).forEach((k) => lines.push(row(_evKindName(k.k), k.n)));
+  if (Number(m.badges) > 0) lines.push(row(_hT('monBadges'), Number(m.badges)));
+  if (p && p.x > 0) lines.push(row(_hF('monVs', p.name), '+' + p.x));
+  return { label: _hT('monTitle'), name: _hMonth(String(m.month), true), level: '', date: '', club: '', medal: { icon: 'calcheck', color: 'green' }, lines, file: 'micromobility-' + String(m.month).slice(0, 7) };
 }
 
 // ── The year (December and January) ─────────────────────────────────────────────────────────────
