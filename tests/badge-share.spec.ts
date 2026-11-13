@@ -37,6 +37,9 @@ const feed = (o: Record<string, unknown> = {}) => ({
   numbers: { last: '2026-11-07', last_riders: 96, last_rides: 96, month: 96, all: 2104, since: '2026-06-13' },
   post: null, announce: [], volunteer: null, birthday: false, awarded: [], year: null, ...o,
 });
+// Five circuit rides ridden: the monthly challenge's slot shows the challenge, which a finished one is shared from. Under
+// five rides that slot shows the first-five-rides path instead (new features build F1, tests/first-five-rides.spec.ts).
+const rode5 = ['2026-08-28', '2026-09-04', '2026-09-11', '2026-09-18', '2026-09-25'].map((d, i) => ({ id: 'o' + i, name: 'Lina Haddad', customer_id: 'c1', session_id: 'j-' + d, session_day: 'Friday', session_date: d, queue_num: 1, status: 'done', paid: true, price: 30 }));
 // The Community tab's copy on the phone: where a member's picture finds the club's total away from that tab.
 const hubCopy = (page: Page, numbers: Record<string, unknown>) =>
   page.addInitScript((v) => localStorage.setItem('cq_hub_c1', v), JSON.stringify({ at: Date.now(), d: { ok: true, numbers } }));
@@ -296,7 +299,7 @@ test.describe('@customer:account share a badge, a title or a finished challenge'
 
 test.describe('@customer:members share a finished challenge', () => {
   test('a finished monthly challenge and a finished season challenge are shared; one still running is not', async ({ page }) => {
-    await member(page);
+    await member(page, { queue_entries: rode5 });
     await canShare(page);
     const mine = page.locator('#hub-body .hub-card', { hasText: 'Your challenge' });
     const season = page.locator('#hub-body .hub-card', { hasText: 'Season challenge' });
@@ -319,7 +322,7 @@ test.describe('@customer:members share a finished challenge', () => {
   });
 
   test('a first session done is shared by its own name, with nothing about anyone else', async ({ page }) => {
-    await member(page, { 'rpc:hub_feed': feed({ me: { kind: 'first', levels: [1], target: 1, chosen: false, n: 1, ends_on: '2026-11-30', sats: 4 }, goals: [], numbers: {} }) });
+    await member(page, { queue_entries: rode5, 'rpc:hub_feed': feed({ me: { kind: 'first', levels: [1], target: 1, chosen: false, n: 1, ends_on: '2026-11-30', sats: 4 }, goals: [], numbers: {} }) });
     await page.locator('#hub-body .hub-card', { hasText: 'Your challenge' }).locator('.shr-btn').click();
     await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Challenge completed · First session · November 2026$/);
   });
