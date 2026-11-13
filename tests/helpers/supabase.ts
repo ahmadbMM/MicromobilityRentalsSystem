@@ -21,6 +21,7 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   // The learn-to-ride ladder (20261114012100): without them the rider's Account shows no Learn to ride row;
   // tests/learn-ladder.spec.ts stubs them by name.
   'learn_ladder', 'staff_learn_progress_set',
+  'bike_report', // Report a bike problem (20261114011500): tests/bike-report.spec.ts answers it by name
   'staff_wallet_fee', 'staff_wallet_fees', // wallet fees (20261107121000): tests/people-review2.spec.ts stubs them
   'staff_sat_marks', // the Saturday roster's marks (20261114010400): tests/saturday-roster-marks.spec.ts stubs it
   // the desk's bulk writes in one call (20261111180000): the page sends them two or three at a time without these;
@@ -80,6 +81,7 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
  *  gives a fixture for it (an empty array is enough), so the rest of the suite runs the page's fallback. */
 const TABLES_NOT_YET_IN_DB = new Set(['till_sessions', 'till_counts', 'receipt_numbers', 'deposits', 'waitlist_offers', 'pii_reveals',
   'learn_skills', 'learn_progress', // the learn-to-ride ladder (20261114012100): tests/learn-ladder.spec.ts gives them rows
+  'bike_reports', // Report a bike problem (20261114011500): tests/bike-report.spec.ts gives it rows
   'session_partners', 'session_partner_codes',
   'customer_contacts', 'volunteer_certs',
   'saturday_codes', 'saturday_code_rides', 'saturday_settings',

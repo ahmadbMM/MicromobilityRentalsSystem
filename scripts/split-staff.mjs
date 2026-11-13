@@ -69,6 +69,7 @@ export const STAFF_ENTRY = [
   '_syncFetch',
   '_askCount', // Ask's answers waiting for approval, on the rail (2026-11-13): asked by _secPolls too; only ever on a staff page
   '_stoCounts', // the Store's and Payments' numbers on the rail (2026-11-10): asked by _secPolls, which the customer half holds; only ever on a staff page
+  '_brLoad', // the Workshop's bike reports (new features build F15, 2026-11-13): read beside the requests by _wsLoad and _wsPoll, which the customer half holds; only ever on a staff page
 ];
 /** Entry points that fetch the staff half whatever the page's state: entering staff is the point. */
 const ALWAYS_LOAD = new Set(['goStaff', 'openPinModal', '_staffHostGate']);

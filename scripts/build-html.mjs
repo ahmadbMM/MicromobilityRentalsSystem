@@ -152,6 +152,9 @@ src = src.replace("const LL_V=''", `const LL_V='${createHash('sha256').update(aw
 // The lap page's own file (F25), the same way.
 if (!src.includes("const LAP_V=''")) throw new Error('build: LAP_V placeholder missing');
 src = src.replace("const LAP_V=''", `const LAP_V='${createHash('sha256').update(await readFile(new URL('../lap-page.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
+// The "Report a bike problem" pop-up's own file (F15), fetched on the first tap: its address changes with it too.
+if (!src.includes("const BRP_V=''")) throw new Error('build: BRP_V placeholder missing');
+src = src.replace("const BRP_V=''", `const BRP_V='${createHash('sha256').update(await readFile(new URL('../bike-report.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
 if (!src.includes("const BIKE_IMG_V=''")) throw new Error('build: BIKE_IMG_V placeholder missing');
 src = src.replace("const BIKE_IMG_V=''", `const BIKE_IMG_V='${bikeFiles.length ? bikesHasher.digest('hex').slice(0, 10) : ''}'`);
 // The Helper path card's own file (helper-path.js, fetched by members on Account): its address changes with it too.
