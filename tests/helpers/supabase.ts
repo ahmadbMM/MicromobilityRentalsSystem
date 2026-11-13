@@ -18,9 +18,9 @@ export type FailWrite = {
 
 /** RPCs a spec must opt into: see the stub's answer for them below. */
 const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
-  // The learn-to-ride ladder (20261114012100): without them the rider's Account shows no Learn to ride row;
-  // tests/learn-ladder.spec.ts stubs them by name.
-  'learn_ladder', 'staff_learn_progress_set',
+  // The learn-to-ride ladder (20261114012100): without it the staff can tick nothing; tests/learn-ladder.spec.ts stubs
+  // it by name (learn_ladder, read on every Account open, is answered null below instead: no 404 in the console).
+  'staff_learn_progress_set',
   'bike_report', // Report a bike problem (20261114011500): tests/bike-report.spec.ts answers it by name
   'staff_wallet_fee', 'staff_wallet_fees', // wallet fees (20261107121000): tests/people-review2.spec.ts stubs them
   'staff_sat_marks', // the Saturday roster's marks (20261114010400): tests/saturday-roster-marks.spec.ts stubs it
@@ -179,6 +179,10 @@ export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrit
       // the circuit challenge's laps on Stats (20261114012500, F25): none unless a spec gives an answer, and no 404 in the
       // console (every Stats paint asks it); tests/circuit-challenge.spec.ts
       if (body === undefined && rpc[1] === 'circuit_mine') body = null;
+      // the learn-to-ride ladder (20261114012100, F21): no Learn to ride row unless a spec gives an answer, and no 404 in the
+      // console (every Account open asks it; deep-smoke and modal-smoke count console errors); tests/learn-ladder.spec.ts
+      // gives the database without it (PGRST202) by name
+      if (body === undefined && rpc[1] === 'learn_ladder') body = null;
       if (body === undefined && rpc[1] === 'list_sessions') body = fixtures['sessions'] || [];
       // The desk's one-call functions (production since 2026-09; the page no longer carries the
       // multi-write fallbacks, 2026-10-04): answered as the server would, from the fixtures.

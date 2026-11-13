@@ -262,7 +262,7 @@ test.describe('@customer:account the learn-to-ride ladder', () => {
     const reads = rpcCalls(page, 'learn_ladder');
     const errors: string[] = [];
     page.on('pageerror', (e) => errors.push(String(e)));
-    await account(page);
+    await account(page, { 'rpc:learn_ladder': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.learn_ladder in the schema cache' } } });
     await expect.poll(() => reads.length).toBe(1);
     await page.evaluate(`renderAccount()`);
     await page.waitForTimeout(300);
