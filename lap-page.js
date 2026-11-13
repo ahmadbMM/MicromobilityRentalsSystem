@@ -18,11 +18,10 @@ const LAP_T = {
   laps: ['laps', 'لفة', 'tours', 'vueltas', 'voltas', 'چکر', 'लैप', 'lap', 'ल्याप', 'ল্যাপ'],
   ofLaps: ['{0} of {1} laps', '{0} من {1} لفة', '{0} tours sur {1}', '{0} de {1} vueltas', '{0} de {1} voltas', '{1} میں سے {0} چکر', '{1} में से {0} लैप', '{0} sa {1} lap', '{1} मध्ये {0} ल्याप', '{1}টির মধ্যে {0}টি ল্যাপ'],
   counted: ['Lap counted', 'تم احتساب اللفة', 'Tour compté', 'Vuelta contada', 'Volta contada', 'چکر شمار ہو گیا', 'लैप गिन लिया गया', 'Nabilang ang lap', 'ल्याप गणना भयो', 'ল্যাপ গোনা হয়েছে'],
-  kept: ['Lap saved. It will be sent when you are back online.', 'تم حفظ اللفة. ستُرسل عند عودة الاتصال.', 'Tour enregistré. Il sera envoyé au retour de la connexion.', 'Vuelta guardada. Se enviará cuando vuelva la conexión.', 'Volta guardada. Será enviada quando a ligação voltar.', 'چکر محفوظ ہو گیا۔ کنکشن بحال ہوتے ہی بھیج دیا جائے گا۔', 'लैप सहेज लिया गया। कनेक्शन लौटते ही भेज दिया जाएगा।', 'Na-save ang lap. Ipapadala ito kapag may koneksyon na ulit.', 'ल्याप सुरक्षित भयो। जडान फर्किएपछि पठाइनेछ।', 'ল্যাপ সংরক্ষিত হয়েছে। সংযোগ ফিরে এলে পাঠানো হবে।'],
+  kept: ['Lap saved. It will be sent when you are back online.', 'تم حفظ اللفة. ستُرسل عند عودة الاتصال.', 'Tour enregistré. Il sera envoyé au retour de la connexion.', 'Vuelta guardada. Se enviará cuando vuelva la conexión.', 'Volta salva. Será enviada quando a conexão voltar.', 'چکر محفوظ ہو گیا۔ کنکشن بحال ہوتے ہی بھیج دیا جائے گا۔', 'लैप सहेज लिया गया। कनेक्शन लौटते ही भेज दिया जाएगा।', 'Na-save ang lap. Ipapadala ito kapag may koneksyon na ulit.', 'ल्याप सुरक्षित भयो। जडान फर्किएपछि पठाइनेछ।', 'ল্যাপ সংরক্ষিত হয়েছে। সংযোগ ফিরে এলে পাঠানো হবে।'],
   done: ['Challenge complete', 'اكتمل التحدي', 'Défi réussi', 'Reto completado', 'Desafio concluído', 'چیلنج مکمل', 'चुनौती पूरी', 'Tapos na ang hamon', 'चुनौती पूरा भयो', 'চ্যালেঞ্জ সম্পূর্ণ'],
   badge: ['Season badge earned', 'حصلت على شارة الموسم', 'Badge de la saison obtenu', 'Insignia de la temporada conseguida', 'Emblema da temporada conquistado', 'سیزن کا بیج حاصل ہو گیا', 'सीज़न का बैज मिल गया', 'Nakuha ang badge ng season', 'सिजनको ब्याज प्राप्त भयो', 'মৌসুমের ব্যাজ অর্জিত'],
-  signInMsg: ['Sign in to count your laps', 'سجّل الدخول لاحتساب لفاتك', 'Connectez-vous pour compter vos tours', 'Inicia sesión para contar tus vueltas', 'Inicie sessão para contar as suas voltas', 'اپنے چکر شمار کرنے کے لیے سائن اِن کریں', 'अपने लैप गिनने के लिए साइन इन करें', 'Mag-sign in para mabilang ang mga lap mo', 'आफ्ना ल्याप गणना गर्न साइन इन गर्नुहोस्', 'আপনার ল্যাপ গুনতে সাইন ইন করুন'],
-  signIn: ['Sign in', 'تسجيل الدخول', 'Se connecter', 'Iniciar sesión', 'Iniciar sessão', 'سائن اِن', 'साइन इन करें', 'Mag-sign in', 'साइन इन गर्नुहोस्', 'সাইন ইন করুন'],
+  signIn: ['Sign in', 'تسجيل الدخول', 'Se connecter', 'Iniciar sesión', 'Entrar', 'لاگ اِن کریں', 'लॉग इन करें', 'Mag-log in', 'लग इन गर्नुहोस्', 'লগ ইন'], // the app's own words (authLoginBtn): the button opens that page
   close: ['Close', 'إغلاق', 'Fermer', 'Cerrar', 'Fechar', 'بند کریں', 'बंद करें', 'Isara', 'बन्द गर्नुहोस्', 'বন্ধ করুন'],
 };
 function _lpT(k) {
@@ -91,16 +90,17 @@ async function _lpPump() {
     L.deniedTok = c.session_token; L.st = 'sign'; _lpRender(); _lpWatch(true);
     return;
   }
-  if ((d && d.ok === false) || code) {
+  if ((d && d.ok === false) || code === 'PGRST202' || code === '42883' || (code && ago > LAP_MAX_AGO)) {
     // The database answered and will not take this scan (a poster it does not know, a database from before the
-    // challenge): the scan is dropped and nothing is said.
+    // challenge): the scan is dropped and nothing is said. Any other refusal may pass (the schema cache reloading, a
+    // full pool, a timeout): that scan stays kept and is sent again, until it is too old to count.
     _lpDrop(s.k);
     if (_lpQ().length) { _lpPump(); return; }
     _lpWatch(false);
     if (L.d) _lpRender(); else _lapClose();
     return;
   }
-  // Not reached (no signal, a request that died): the scan stays kept.
+  // Not reached (no signal, a request that died), or refused for now: the scan stays kept.
   L.st = 'kept'; _lpRender(); _lpWatch(true);
 }
 
@@ -118,7 +118,7 @@ function _lpRender() {
       <div class="lap-n"><bdi class="lap-n-v" id="lap-n">${n}</bdi><span class="lap-n-of"><bdi>/ ${tg}</bdi> ${esc(_lpT('laps'))}</span></div>
       <div class="lap-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${tg}" aria-valuenow="${Math.min(n, tg)}" aria-label="${esc(_lpF('ofLaps', n, tg))}"><i data-cssv="${_cssv({ '--w': Math.min(100, Math.round(n / tg * 100)) + '%' })}"></i></div>
       ${d.badge ? `<div class="lap-badge" id="lap-badge">${_bdgMedal('lapring', 'gold')}<span><b>${esc(_lpT('done'))}</b><small>${esc(_lpT('badge'))}</small></span></div>` : ''}`
-    : `<h2 id="lap-title" class="pg-title">${esc(_lpT('title'))}</h2>${sign ? `<p class="pg-sub">${esc(_lpT('signInMsg'))}</p>` : ''}`;
+    : `<h2 id="lap-title" class="pg-title">${esc(_lpT('title'))}</h2>`;
   const state = kept ? _lpT('kept') : d && L.addedN > 0 ? _lpT('counted') : '';
   m.innerHTML = `<div class="auth-backdrop"><div class="pg-box fx-box lap-box" role="dialog" aria-modal="true" aria-labelledby="lap-title" tabindex="-1">
       ${head}

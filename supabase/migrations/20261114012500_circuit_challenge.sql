@@ -99,7 +99,9 @@ end $$;
 revoke all on function public._circuit_ts(text) from public, anon, authenticated;
 
 -- A challenge's own season badge: made with it, renamed with it. system (admins cannot delete it from under the
--- challenge) and auto (a rider sees it only once they hold it), as the Cool Season badge of 20261111100000.
+-- challenge) and auto (a rider sees it only once they hold it), as the Cool Season badge of 20261111100000; held_only
+-- starts true, so its "Customers and members see it" switch (20261112223000) reads off, as the app shows it, and a
+-- later change of that switch by an admin is kept. The description names the target with no noun to make plural.
 create or replace function public._circuit_badge()
 returns trigger
 language plpgsql volatile security definer set search_path to 'public'
@@ -110,10 +112,10 @@ begin
   new.name := btrim(new.name);
   new.name_ar := nullif(btrim(coalesce(new.name_ar, '')), '');
   new.code := lower(new.code);
-  insert into badges (id, slug, icon, color, name, name_ar, description, description_ar, system, auto, sort)
+  insert into badges (id, slug, icon, color, name, name_ar, description, description_ar, system, auto, sort, held_only)
   values (v_id, 'lap_' || v_hex, 'lapring', 'gold', new.name, new.name_ar,
-          new.target || ' laps of the circuit in one season.',
-          new.target || ' لفة في الحلبة خلال موسم واحد.', true, true, 99)
+          'Laps of the circuit in one season: ' || new.target,
+          'لفات الحلبة في موسم واحد: ' || new.target, true, true, 99, true)
   on conflict (id) do update set name = excluded.name, name_ar = excluded.name_ar,
     description = excluded.description, description_ar = excluded.description_ar;
   new.badge_id := v_id;

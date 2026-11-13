@@ -184,7 +184,10 @@ test.describe('@customer:laps circuit challenge: the lap page', () => {
     const st = await lapServer(page, { laps: old(4) });
     await scan(page);
     await expect(pop(page).locator('#lap-title')).toHaveText('Circuit challenge');
-    await expect(pop(page).locator('.pg-sub')).toHaveText('Sign in to count your laps');
+    await expect(pop(page).locator('#lap-signin')).toHaveText('Sign in');
+    // the title, Sign in and Close, and no line under the title (the owner's rule: no hint or subtitle lines)
+    await expect(pop(page).locator('.lap-box')).toHaveText(/^\s*Circuit challenge\s*Sign in\s*Close\s*$/);
+    await expect(pop(page).locator('.pg-sub')).toHaveCount(0);
     expect(st.calls).toHaveLength(0);
     await pop(page).locator('#lap-signin').click();
     await expect(pop(page)).toHaveCount(0);
@@ -201,7 +204,7 @@ test.describe('@customer:laps circuit challenge: the lap page', () => {
     await loginCustomer(page, { id: 'c1', name: 'Spec Rider', session_token: 'tok-old' });
     const st = await lapServer(page, { laps: old(4) });
     await scan(page);
-    await expect(pop(page).locator('.pg-sub')).toHaveText('Sign in to count your laps');
+    await expect(pop(page).locator('#lap-signin')).toBeVisible();
     await page.waitForTimeout(4500); // two looks for a sign-in
     expect(st.calls).toHaveLength(1);
     expect(st.laps).toHaveLength(4);
@@ -225,6 +228,30 @@ test.describe('@customer:laps circuit challenge: the lap page', () => {
     await expect.poll(() => st.calls.length).toBe(1);
     await expect(pop(p2)).toHaveCount(0);
     expect(await p2.evaluate(() => sessionStorage.getItem('cq_lap'))).toBeNull();
+  });
+
+  test('a refusal that may pass (the schema cache reloading, a timeout) keeps the scan, and it counts when sent again', async ({ page }) => {
+    await rider(page);
+    const st = await lapServer(page, { laps: old(4) });
+    let busy = true, refused = 0;
+    await page.route('**/rest/v1/rpc/circuit_lap', async (route) => { // registered last, so asked first
+      if (!busy || route.request().method() === 'OPTIONS') return route.fallback();
+      refused++;
+      return route.fulfill({ status: 503, headers: { ...CORS, 'content-type': 'application/json' }, body: JSON.stringify({ code: 'PGRST002', details: null, hint: null, message: 'Could not query the database for the schema cache. Retrying.' }) });
+    });
+    await scan(page);
+    await expect(pop(page).locator('#lap-state')).toHaveText(/Lap saved/);
+    expect(refused).toBeGreaterThanOrEqual(1);
+    const kept = JSON.parse((await page.evaluate(() => sessionStorage.getItem('cq_lap'))) || '[]') as { k: string }[];
+    expect(kept).toHaveLength(1); // not dropped, as an unknown poster's scan is
+    expect(st.laps).toHaveLength(4);
+    busy = false;
+    await page.evaluate(() => window.dispatchEvent(new Event('online')));
+    await expect(pop(page).locator('#lap-n')).toHaveText('5');
+    await expect(pop(page).locator('#lap-state')).toHaveText('Lap counted');
+    expect(st.calls).toHaveLength(1);
+    expect(st.calls[0].p_key).toBe(kept[0].k);
+    expect(await page.evaluate(() => sessionStorage.getItem('cq_lap'))).toBeNull();
   });
 
   test('the page is its own file, fetched only by a scan; a code that is not one is ignored', async ({ page }) => {
@@ -278,7 +305,10 @@ test.describe('@customer:laps circuit challenge: the lap page', () => {
     await expect(pop(page).locator('#lap-n')).toHaveText('1');
     expect(await page.evaluate(`LAP_LANGS`)).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']);
     const T = await page.evaluate(`LAP_T`) as Record<string, string[]>;
-    expect(Object.keys(T).length).toBeGreaterThanOrEqual(10);
+    expect(Object.keys(T).length).toBeGreaterThanOrEqual(9);
+    // Sign in reads as the app's own button does (authLoginBtn), since it opens that page
+    const own = (l: string) => (JSON.parse(readFileSync(resolve(ROOT, `lang/${l}.json`), 'utf8')) as Record<string, string>).authLoginBtn;
+    expect(T.signIn).toEqual([await page.evaluate(`t('authLoginBtn')`), ...['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'].map(own)]);
     for (const [k, row] of Object.entries(T)) {
       expect(row, k).toHaveLength(10);
       const blanks = (s: string) => (s.match(/\{\d\}/g) || []).sort().join();
@@ -516,6 +546,10 @@ test.describe('@staff:community circuit challenge: the migration', () => {
   test('each challenge has its own badge, made with it, and the checks list names every new function', () => {
     expect(sql).toMatch(/create trigger circuit_challenges_badge before insert or update on public\.circuit_challenges/);
     expect(fn('_circuit_badge')).toContain("'lapring', 'gold'");
+    // only its holders see it, and the staff switch says so; an admin's later change of the switch is not undone
+    expect(fn('_circuit_badge')).toMatch(/system, auto, sort, held_only\)[\s\S]*true, true, 99, true\)/);
+    expect(fn('_circuit_badge').split('on conflict (id) do update')[1]).not.toContain('held_only');
+    expect(fn('_circuit_badge')).not.toContain("' laps"); // no noun after the number: a target of 1 reads right
     const checks = readFileSync(resolve(ROOT, 'supabase/checks/security-attributes.sql'), 'utf8');
     for (const name of ['circuit_lap', 'circuit_mine', 'staff_circuit_totals', '_circuit_badge', '_circuit_badge_gone', '_circuit_ts']) expect(checks, name).toContain(`('${name}',`);
   });
