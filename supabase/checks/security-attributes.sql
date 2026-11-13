@@ -108,6 +108,7 @@ with expected(fname, want_definer, note) as (values
   ('saturday_rides', true, 'Saturday ride codes: reads sessions and codes no client can read; meters wrong codes (20261108120000)'),
   ('saturday_book', true, 'Saturday ride codes: token-checked, books through customer_create_booking under the code (20261108120000)'),
   ('saturday_link_only', true, 'Saturday ride codes: reads saturday_settings, staff-only (20261108120000)'),
+  ('staff_sat_marks', true, 'the Saturday roster''s marks: is_staff()-checked, one read of the roster''s accounts and their earlier Saturday rides (20261114010400)'),
   ('_satcode_on', true, 'Saturday ride codes: reads the codes, staff-only; no client execute (20261108120000)'),
   ('_satcode_live', true, 'Saturday ride codes: counts bookings the caller cannot see; no client execute (20261108120000)'),
   ('_satcode_locked', true, 'Saturday ride codes: reads login_throttle, which no client can read (20261108120000)'),
