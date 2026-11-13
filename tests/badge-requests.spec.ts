@@ -238,6 +238,14 @@ test.describe('@staff:community badge requests', () => {
     await expect(row(page, 1)).toContainText('Senior Marshal · Level 2 of 5');
     await expect(row(page, 1)).toContainText('Lina Haddad');
     await expect(row(page, 1).locator('.bdr-cmt')).toHaveText('Swept 12 rides');
+    // Each request says what its badge is (the user, 2026-11-13: "on badge requests show me the description of every badge
+    // requested"): the how-to line and, for an app badge, what it means; a badge staff made has its own words only.
+    await expect(row(page, 1).locator('.bdr-desc')).toHaveText(['Led, swept or helped run 10 rides or events',
+      'Senior marshals look after a whole stretch of the track. Given by the team after ten rides or events helped.']);
+    await expect(row(page, 2).locator('.bdr-desc')).toHaveText(['Finished the T100 race in Jeddah',
+      'For crossing the finish line of the T100 when the race came to Jeddah: the full distance. Given by our team.']);
+    expect(await page.evaluate(`_bdrDescHtml({id:'bd_x',system:false,name:'Beach clean',description:'Helped clean the beach <3'})`))
+      .toBe('<span class="am-meta bdr-desc"><bdi>Helped clean the beach &lt;3</bdi></span>');
 
     await row(page, 1).getByRole('button', { name: 'View picture' }).click();
     const pf = page.locator('#confirm-modal .bdr-pf');
@@ -286,6 +294,27 @@ test.describe('@staff:community badge requests', () => {
       body: JSON.stringify([{ proof: null, proof_name: 'race.png' }]) })); // the database cleared it with the answer
     await row(page, 1).getByRole('button', { name: 'View picture' }).click();
     await expect(page.locator('#confirm-modal .bdr-pf .vt-rc-wait')).toHaveText('This proof was deleted when the request was answered.');
+  });
+
+  test('Ironman 140.6 given from a request brings Ironman 70.3 with it, and the row says what the race is', async ({ page }) => {
+    // the user, 2026-11-13: "let earning the full ironman automatically award the half ironman" (the database does it too:
+    // trigger customer_badges_ironman_half, 20261114100000)
+    const im = [
+      { id: 'bd_ironman_1406', slug: 'ironman_1406', icon: 'ironman_1406', color: 'gold', name: 'Ironman 140.6 Finisher', system: true, auto: false, retired: false, sort: 88 },
+      { id: 'bd_ironman_703', slug: 'ironman_703', icon: 'ironman_703', color: 'silver', name: 'Ironman 70.3 Finisher', system: true, auto: false, retired: false, sort: 89 },
+    ];
+    await staff(page, { badges: [...badges, ...im], badge_requests: [{ id: 7, customer_id: 'c1', badge_id: 'bd_ironman_1406', comment: 'Ironman Barcelona', proof_kind: null, proof_name: null, status: 'pending', created_at: ago(1), decided_at: null, decided_by: null, reply: null }] });
+    await expect(row(page, 7)).toContainText('Ironman 140.6 Finisher · Level 2 of 2');
+    await expect(row(page, 7).locator('.bdr-desc')).toHaveText(['Finished a full Ironman 140.6 triathlon',
+      'For crossing the finish line of a full Ironman: a 3.8 km swim, 180 km on the bike and a 42.2 km run. Given by our team.']);
+    await expect(row(page, 7).locator('svg.bdg-race path[fill="#e31837"]')).toHaveCount(1);
+    const given = calls(page, /\/rest\/v1\/customer_badges$/);
+    await row(page, 7).getByRole('button', { name: 'Give badge' }).click();
+    await expect(page.locator('.toast').last()).toContainText('Badge given: Ironman 140.6 Finisher to Lina Haddad');
+    expect(given).toHaveLength(1);
+    const rows = given[0].postDataJSON();
+    expect(rows.map((x: { badge_id: string }) => x.badge_id)).toEqual(['bd_ironman_1406', 'bd_ironman_703']);
+    expect(rows[1]).toMatchObject({ customer_id: 'c1' });
   });
 
   test('Decline asks on a second tap and deletes the proof; a request another desk answered is left alone', async ({ page }) => {

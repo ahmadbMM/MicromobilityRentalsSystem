@@ -21871,11 +21871,17 @@ let _bdgSpN=0;
 // the icon picker: they belong to those three badges. [text, [gradient], rim, ink]
 const BDG_RACE={t100:['T100',['#fff3b8','#f3c431','#b07c00'],'#7d5800','#5c3f00'],t50:['T50',['#fff','#cfd5de','#858f9e'],'#636b78','#323946'],t25:['T25',['#ffd9b5','#dc8d4c','#93501d'],'#713b12','#4d2408'],
   // Ironman 70.3 and 140.6 (2026-11-13, the user: "add a new half iron man and full iron man badges", then "ironman 70.3
-  // ironman 140.6"): the same medal on a red ribbon, the distance in miles struck on it, 70.3 in silver and 140.6 in gold.
-  // The fifth item, where there is one, is the ribbon's two halves (else the T100 blue).
-  ironman_703:['70.3',['#fff','#cfd5de','#858f9e'],'#636b78','#323946',['#c8202f','#8a141e']],ironman_1406:['140.6',['#fff3b8','#f3c431','#b07c00'],'#7d5800','#5c3f00',['#c8202f','#8a141e']]};
-function _bdgRace(r,cls){const id='bdgsp'+(++_bdgSpN),n=r[0].length,w=n>4?21:n>3?20.5:15.5,rb=r[4]||['#1e4f96','#153a70'],tx=(y,f,o)=>`<text class="bdg-rt" x="20" y="${y}" fill="${f}"${o} text-anchor="middle" font-size="${n>4?10:11}" textLength="${w}" lengthAdjust="spacingAndGlyphs">${r[0]}</text>`;
-  return `<svg class="bdg-m bdg-race${cls?' '+cls:''}" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">${r[1].map((c,i)=>`<stop offset="${i/2}" stop-color="${c}"/>`).join('')}</linearGradient></defs><path fill="${rb[0]}" d="M9 .8h7.4l6.4 12.6h-7.4z"/><path fill="${rb[1]}" d="M31 .8h-7.4l-6.4 12.6h7.4z"/><path stroke="#fff" stroke-opacity=".55" stroke-width=".9" fill="none" d="M12.7.8l6.4 12.6M27.3.8l-6.4 12.6"/><circle cx="20" cy="24.8" r="14.2" fill="url(#${id})" stroke="${r[2]}" stroke-width="1.2"/><circle cx="20" cy="24.8" r="11.7" fill="none" stroke="${r[2]}" stroke-opacity=".45" stroke-width=".8"/><path d="M9.6 21.4a11 11 0 0 1 7.3-7.7" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.3" stroke-linecap="round"/>${tx(29.1,'#fff',' fill-opacity=".55"')}${tx(28.4,r[3],'')}</svg>`;}
+  // ironman 140.6"): the same medal on a red ribbon, 70.3 in silver and 140.6 in gold. The fifth item, where there is one, is
+  // the ribbon's two halves (else the T100 blue); a sixth draws the IRONMAN M-Dot in its red over the race's total distance in
+  // miles (the user, the same day: "change the design to include the ironman logos with the total distance of the race besides
+  // it or under it").
+  ironman_703:['70.3',['#fff','#cfd5de','#858f9e'],'#636b78','#323946',['#c8202f','#8a141e'],1],ironman_1406:['140.6',['#fff3b8','#f3c431','#b07c00'],'#7d5800','#5c3f00',['#c8202f','#8a141e'],1]};
+// The M-Dot: the IRONMAN mark's block M with the dot over it, centred on x 0, 35.4 wide and 49 tall (the mark's own proportions).
+const BDG_MDOT='M-8.58 8.57a8.58 8.58 0 1 0 17.16 0a8.58 8.58 0 1 0-17.16 0zM-17.72 18.97H17.72V48.93H7.17V37.8L3.22 48.93H-3.22L-7.17 37.8V48.93H-17.72z';
+function _bdgRace(r,cls){const id='bdgsp'+(++_bdgSpN),m=!!r[5],n=r[0].length,w=m?(n>4?15:11.8):n>4?21:n>3?20.5:15.5,rb=r[4]||['#1e4f96','#153a70'],tx=(y,f,o)=>`<text class="bdg-rt" x="20" y="${y}" fill="${f}"${o} text-anchor="middle" font-size="${m?7.6:n>4?10:11}" textLength="${w}" lengthAdjust="spacingAndGlyphs">${r[0]}</text>`,
+    lg=(y,f,o)=>`<path transform="translate(20 ${y}) scale(.23)" fill="${f}"${o} d="${BDG_MDOT}"/>`,
+    face=m?lg(15.2,'#fff',' fill-opacity=".55"')+lg(14.6,'#e31837','')+tx(33.6,'#fff',' fill-opacity=".55"')+tx(33,r[3],''):tx(29.1,'#fff',' fill-opacity=".55"')+tx(28.4,r[3],'');
+  return `<svg class="bdg-m bdg-race${cls?' '+cls:''}" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">${r[1].map((c,i)=>`<stop offset="${i/2}" stop-color="${c}"/>`).join('')}</linearGradient></defs><path fill="${rb[0]}" d="M9 .8h7.4l6.4 12.6h-7.4z"/><path fill="${rb[1]}" d="M31 .8h-7.4l-6.4 12.6h7.4z"/><path stroke="#fff" stroke-opacity=".55" stroke-width=".9" fill="none" d="M12.7.8l6.4 12.6M27.3.8l-6.4 12.6"/><circle cx="20" cy="24.8" r="14.2" fill="url(#${id})" stroke="${r[2]}" stroke-width="1.2"/><circle cx="20" cy="24.8" r="11.7" fill="none" stroke="${r[2]}" stroke-opacity=".45" stroke-width=".8"/><path d="M9.6 21.4a11 11 0 0 1 7.3-7.7" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.3" stroke-linecap="round"/>${face}</svg>`;}
 function _bdgMedal(icon,color,cls){
   if(BDG_RACE[icon])return _bdgRace(BDG_RACE[icon],cls);
   const g=BDG_GLYPH[icon]||BDG_GLYPH.medal,c=BDG_COLORS.includes(color)?color:'green',sp=BDG_SPECIAL[color];
@@ -68063,6 +68069,9 @@ function renderBadgeRequests(){
   el.innerHTML=`${head}<div class="form-section ws-mt0">${body}</div>`;
   const f=fid&&document.getElementById(fid);if(f){try{f.focus({preventScroll:true});if(pos!=null)f.setSelectionRange(pos,pos);}catch(_){}}
 }
+// What the badge asked for is (the user, 2026-11-13: "on badge requests show me the description of every badge requested"):
+// its how-to line, and for an app badge the line on what it means, as the rider's pop-up has them.
+function _bdrDescHtml(b){return[_bdgDesc(b),_bdgAbout(b)].filter(Boolean).map(s=>`<span class="am-meta bdr-desc"><bdi>${esc(s)}</bdi></span>`).join('');}
 function _bdrStRow(r){
   const b=_bdgById(r.badge_id),c=_custById(r.customer_id),p=r.status==='pending',hd=!!r.hidden_at;if(!b)return'';
   const held=p&&!!c&&_bdgAllHolders(b).has(c.id),sure=S._bdgSure==='bdr|'+r.id;
@@ -68074,6 +68083,7 @@ function _bdrStRow(r){
   return`<div class="bdr-row${p?'':' done'}${hd?' bdr-hidden':''}" data-req="${esc(String(r.id))}">
     <div class="bdg-item">${p&&!hd?_lsBox('bdr',r.id,_bdgName(b)+' '+((c&&c.name)||'')):''}${_bdgMedal(b.icon,_bdgCol(b))}<div class="bdg-txt">
       <b>${esc(_bdgName(b)+_bdrLvl(b))}</b>
+      ${_bdrDescHtml(b)}
       <span class="am-meta">${c?`<button type="button" class="bdr-who" data-on-click="${_on("openAccountHistory",c.id)}">${esc(c.name||'—')}</button>`:'—'} · ${p?esc(when):`<span class="bdr-chip bdr-${r.status==='given'?'given':'declined'}">${esc(when)}</span>`}</span>
       ${r.comment?`<span class="bdr-cmt"><bdi>${esc(r.comment)}</bdi></span>`:''}
       ${!p&&r.reply?`<span class="am-meta">${t('bdgNoteLabel')}: <bdi>${esc(r.reply)}</bdi></span>`:''}

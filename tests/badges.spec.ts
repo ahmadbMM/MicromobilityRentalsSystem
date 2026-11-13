@@ -485,6 +485,11 @@ test.describe('@customer:account badges', () => {
     await expect(pop.locator('.badge-pop-about')).toContainText('a 3.8 km swim, 180 km on the bike and a 42.2 km run');
     await expect(pop.locator('svg.badge-pop-ic.bdg-race text').first()).toHaveText('140.6');
     await expect(pop.locator('svg.badge-pop-ic.bdg-race path').first()).toHaveAttribute('fill', '#c8202f');
+    // the IRONMAN M-Dot over the race's total distance (the user, 2026-11-13: "change the design to include the ironman logos
+    // with the total distance of the race besides it or under it"); the T100 medals keep the name alone
+    await expect(pop.locator('svg.badge-pop-ic.bdg-race path[fill="#e31837"]')).toHaveCount(1);
+    expect(await page.evaluate(`['ironman_703','ironman_1406','t100'].map(k=>{const s=_bdgMedal(k,'gold'),i=s.indexOf('#e31837');return [s.includes('fill="#e31837" d="'+BDG_MDOT),i>0&&i<s.indexOf('>'+BDG_RACE[k][0]+'</text>')];})`))
+      .toEqual([[true, true], [true, true], [false, false]]);
     await expect(pop.locator('.badge-pop-lvn')).toHaveText('Level 2 of 2');
     await expect(pop.locator('.badge-lvl.on')).toHaveCount(2);
     await expect(pop.locator('.badge-lvl svg.bdg-race text:first-of-type')).toHaveText(['70.3', '140.6']);

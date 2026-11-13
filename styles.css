@@ -13432,6 +13432,7 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
 #tab-badgereq .bdr-who{padding:0;border:0;background:none;color:var(--text);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
 #tab-badgereq .bdr-who{padding-block:5px;margin-block:-5px;} /* 24x24 hit area (WCAG 2.5.8, staff round s10): padding grows it, the negative margin gives the room back, so nothing moves */
 #tab-badgereq .bdr-cmt{margin-top:2px;font-size:var(--sf-fs-sm);line-height:1.45;color:var(--text);white-space:pre-line;overflow-wrap:anywhere;}
+#tab-badgereq .bdr-desc{line-height:1.45;overflow-wrap:anywhere;}
 #tab-badgereq .bdr-held{color:var(--orange);font-weight:600;}
 #tab-badgereq .bdr-chip{font-weight:600;}
 #tab-badgereq .bdr-chip.bdr-given{color:var(--green);}

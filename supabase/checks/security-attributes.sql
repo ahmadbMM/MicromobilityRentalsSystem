@@ -489,6 +489,7 @@ with expected(fname, want_definer, note) as (values
   ('customer_my_badge_requests', true,  'badge requests: reads the caller''s own badge_requests (staff-only); token-checked'),
   ('_badge_proof_purge',         true,  'pg_cron: clears the proof of any answered badge request (20261108230000)'),
   ('_badge_req_drop_proof',      false, 'badge requests: a trigger that only clears NEW.proof once the request is answered (20261108230000)'),
+  ('_badge_ironman_half',        false, 'badges: a trigger that puts the rider''s Ironman 70.3 in beside a 140.6, with the writer''s rights (20261114100000)'),
   -- Volunteer certificates (20261107131000, 20261108220000)
   ('_vol_cert_make',            true,  'writes volunteer_certs, which no client can insert; reads customers and the hours ledger'),
   ('_vol_cert_make_session',    true,  'same, for one session; reads volunteer_shifts too'),

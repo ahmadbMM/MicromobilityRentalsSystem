@@ -602,6 +602,11 @@ on a red ribbon (its fifth item) with 70.3 in silver and 140.6 in gold, one ladd
 88 / 89, seen greyed by every rider. Not in `BDG_GIVEN_SYS`: that list only speaks where the database has no badge_catalog,
 which every database has had since October, and leaving it alone keeps the badge-count specs' totals. Website: Medal.tsx RACE,
 ride-record.ts SYS and LADDERS, RideRecord.text.ts and the language files.
+Since the same day ("change the design to include the ironman logos with the total distance of the race besides it or under
+it"), `BDG_RACE`'s sixth item draws the IRONMAN M-Dot (`BDG_MDOT`, the mark's block M and dot in its red #e31837) over the
+distance instead of the name alone; Medal.tsx `MDOT` is the same path. And ("let earning the full ironman automatically award the
+half ironman") migration 20261114100000 adds trigger `customer_badges_ironman_half` (`_badge_ironman_half`, invoker): any 140.6
+written to customer_badges puts the rider's 70.3 in beside it, on top of `_bdgWithLower` in the app.
 Badge ladders (the owner, 2026-10-09, "the same way it's done in clash of clans achievements"): `BDG_LADDERS` makes
 First Lap > Grid Regular > Podium Pace > Corniche 25, Hot Streak > Safety Car > Endurance, Rolling Start > ... > Hall of Fame,
 Perfect Week > Perfect Month and T25 > T50 > T100 the levels of one badge each. The rider's page folds each into one tile
@@ -677,7 +682,8 @@ Staff: **Badge requests is a section of its own** (`data-stab="badgereq"`, `#tab
 People on the rail, with the waiting number), drawn by `renderBadgeRequests` in the community staff part (it shares the badge
 code) and a staff entry point (`_secPolls`, which the customer half holds, reloads `_bdrLoad` for the rail's count). Roles and
 account lists that open People open it (`ROLE_TABS` manager and owner, `_modIds`); People > Badges no longer carries requests.
-Waiting / Given / Declined / All pills, a search (name, phone, email, badge, comment, note, who answered), and Filters: badge,
+Each row names the badge, its level, and its how-to and meaning lines (`_bdrDescHtml`; the user, 2026-11-13: "show me the
+description of every badge requested"). Waiting / Given / Declined / All pills, a search (name, phone, email, badge, comment, note, who answered), and Filters: badge,
 proof, order (`_bdrV`, `_bdrShown`); 40 rows at a time. `badge_requests` (staff-only RLS) is read without the proof (`BDR_COLS`,
 the newest 1,000), each proof read alone when opened (`_bdrProof`: a picture shown, a PDF opened in a tab through a blob: link,
 since the CSP frames none). **Give** claims the request first (`_bdrAnswer`: `status=eq.pending`, so two desks never both
