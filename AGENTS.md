@@ -2319,6 +2319,26 @@ staff chooses", then, the same day, "show the meeting point immediately only hid
   file) and reads signed-out visitors' rides through `list_sessions(null, null)` too, since the table hides the held
   row. `tests/spot-reveal.spec.ts`.
 
+## The breakfast spot for members only (2026-11-13)
+
+The owner: "add a switch on the breakfast spot to choose to show it to all booking cards or only members booking cards".
+- **Staff**: under the breakfast picker and the "announce at" box of the Saturday ride's (and Run for Her's) new-session
+  form and editor, "Who sees the breakfast spot": All bookings / Members only (`_bfMemFieldHtml`, `S.newSessBfMem` /
+  `S.editSessBfMem`; a tap sets the buttons in place, no repaint). Stored as `bike_slots._bfm` 1 (`_bfMemSlot`), beside
+  `_time`, so no column and no migration. The new form takes the last ride of its kind's choice (`_nsFillBlank`/`_nsCopy`)
+  and a template remembers it (`NS_TPL_KEYS`); a template pushed to the nights leaves each night its own (`_nsTplPush`), and
+  Copy week carries it. The Sessions card and its detail say "Breakfast at X · Members only".
+- **Riders**: `_bfOff(s)` = the mark is on, the ride has a breakfast, the page is not staff's (`S.view`, `_rtStaffDevice`)
+  and the rider is not a community member (`_infoMember`, the members gate's own answer; signed out is not one). Then
+  `_bfName` is '' (so `_bfAt`: the date card, Details, the rating form's breakfast question), `_commInfoHtml` (the ticket's
+  breakfast block) draws nothing, and `_spotSaid(s)` (`_spotHeld` and not `_bfOff`) keeps the "announced at" line off the
+  date card, Details, the ticket and the calendar file. The meeting point, the route and `_meetHeld` still go by `_spotHeld`.
+  `_infoRepaint` repaints My Bookings too, so a member's ticket shows the spot once the answer comes.
+- It is what the page shows, not a secret: `list_sessions` and the table still carry the breakfast columns to anyone who
+  can read the row. Making it one would need the columns blanked server-side for non-members (and the live channel).
+- The website mirrors it (mm-platform `bfMembersOf` in lib/rides.ts, `bfFor` in lib/tickets.ts: Experiences' card and
+  Details, the account ticket and its calendar file, the rating pop-up's restaurant). `tests/breakfast-members.spec.ts`.
+
 ## The Waitlist is a section of its own (2026-11-09)
 
 The owner: "make the waitlist as a separate section not under the bookings page". The staff list that was Bookings'
