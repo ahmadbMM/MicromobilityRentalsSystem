@@ -82,6 +82,28 @@ test('every search finds a phone typed as 05x, 5x or +966 5x, and a name search 
   expect(await page.evaluate(`_phoneHit('+966564221234','٠٥٦٤')`)).toBe(true);
 });
 
+test('a search that starts with + or 00 is a country code: it finds only the numbers that begin with it', async ({ page }) => {
+  await boot(page, { queue_entries: [...queue_entries, row('q4', 4, 'Bahrain Rider', '+97333334444'), row('q5', 5, 'Saudi Rider', '+966559731234')] });
+  const hit = (p: string, q: string) => page.evaluate(`_phoneHit(${JSON.stringify(p)},${JSON.stringify(q)})`);
+  // +973 is Bahrain: never a Saudi number with 973 further along
+  expect(await hit('+97333334444', '+973')).toBe(true);
+  expect(await hit('+966559731234', '+973')).toBe(false);
+  expect(await hit('0559731234', '+973')).toBe(false);
+  expect(await hit('+966559731234', '00973')).toBe(false);
+  expect(await hit('+97333334444', '00973')).toBe(true);
+  expect(await hit('+97333334444', '+ 973 33')).toBe(true);
+  // the home country's numbers saved as 05x or 5x are still +966
+  expect(await hit('0551112222', '+966')).toBe(true);
+  expect(await hit('551112222', '+96655')).toBe(true);
+  expect(await hit('+201001234567', '+966')).toBe(false);
+  // without the plus the digits are found anywhere, as before
+  expect(await hit('+966559731234', '973')).toBe(true);
+  // and the queue's search box shows only the Bahraini rider for +973
+  await page.evaluate(`setStaffTab('queue')`);
+  await page.evaluate(`setSfSearch('+973')`);
+  await expect.poll(async () => { const t = await rendered(page, 'q-results'); return t.includes('Bahrain Rider') && !t.includes('Saudi Rider'); }).toBe(true);
+});
+
 test('a plain table sorts by any column it shows, reverses on a second tap, and keeps the order through a re-render', async ({ page }) => {
   await boot(page, {
     inventory: [

@@ -7397,26 +7397,33 @@ function _phoneForms(p){
   const raw=_asciiDigits(String(p==null?'':p)).trim();
   if(_phoneFormsMemo.has(raw))return _phoneFormsMemo.get(raw);
   let d=raw.replace(/\D/g,'');const out=[];
+  out.intl=''; // the number as written after its + (digits only): +973 3… is 9733…, a home 05… is 9665…
   if(d){
     const intl=/^(\+|00)/.test(raw)||(d.length>=11&&d[0]!=='0');
     if(d.startsWith('00'))d=d.slice(2);
-    out.push(d);
+    out.push(d);out.intl=d;
     if(intl){
       if(!_ccDigitsList)_ccDigitsList=[...new Set(COUNTRY_CODES.map(c=>c[0].replace(/\D/g,'')))].sort((a,b)=>b.length-a.length);
       const cc=_ccDigitsList.find(c=>d.startsWith(c));
-      if(cc){const n=d.slice(cc.length).replace(/^0/,'');out.push(n,'0'+n);}
-    }else if(d[0]==='0'){const n=d.slice(1);out.push(n,'966'+n);} // national 05x: the home country's
-    else out.push('0'+d,'966'+d);                                      // a bare local 5x
+      if(cc){const n=d.slice(cc.length).replace(/^0/,'');out.push(n,'0'+n);out.intl=cc+n;}
+    }else if(d[0]==='0'){const n=d.slice(1);out.push(n,'966'+n);out.intl='966'+n;} // national 05x: the home country's
+    else{out.push('0'+d,'966'+d);out.intl='966'+d;}                                 // a bare local 5x
   }
   _phoneFormsMemo.set(raw,out);
   return out;
 }
 /** Does saved phone `p` contain the number typed in `q`? A query with letters in it never does. */
+// A query that starts with + (or 00, the same thing dialled) is a country code: it finds only the numbers
+// that begin with it, never the same digits further along (the user, 2026-11-13: "+973 should only show
+// results that contain numbers that have +973 not 973 without the plus sign"). +966 5 still finds a 05….
 function _phoneHit(p,q){
   const s=_asciiDigits(String(q==null?'':q)).trim();
   if(!s||/[^\d\s+().\-]/.test(s))return false;
   const qd=s.replace(/\D/g,'').replace(/^00/,'');
-  return !!qd&&_phoneForms(p).some(f=>f.includes(qd));
+  if(!qd)return false;
+  const f=_phoneForms(p);
+  if(/^[\s(]*(\+|00)/.test(s))return f.intl.startsWith(qd);
+  return f.some(x=>x.includes(qd));
 }
 function _linkCustomer(name,phone,email){
   const cs=S.customers||[];
