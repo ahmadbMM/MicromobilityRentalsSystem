@@ -151,6 +151,9 @@ if (!src.includes("const LL_V=''")) throw new Error('build: LL_V placeholder mis
 src = src.replace("const LL_V=''", `const LL_V='${createHash('sha256').update(await readFile(new URL('../learn-ladder.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
 if (!src.includes("const BIKE_IMG_V=''")) throw new Error('build: BIKE_IMG_V placeholder missing');
 src = src.replace("const BIKE_IMG_V=''", `const BIKE_IMG_V='${bikeFiles.length ? bikesHasher.digest('hex').slice(0, 10) : ''}'`);
+// The Helper path card's own file (helper-path.js, fetched by members on Account): its address changes with it too.
+if (!src.includes("const HP_V=''")) throw new Error('build: HP_V placeholder missing');
+src = src.replace("const HP_V=''", `const HP_V='${createHash('sha256').update(await readFile(new URL('../helper-path.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
 
 // The print windows' stylesheets (report.css for every report _openReport writes, receipt.css for
 // the till's receipt) are linked from windows written into about:blank, which run under the page's

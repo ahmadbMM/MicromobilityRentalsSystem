@@ -21,6 +21,7 @@ export const FILES = [
   'report.css', 'receipt.css', // the print windows' stylesheets (_reportShell, _ctPrintReceipt)
   'certificate.css', // the volunteer certificate's; its markup is assets/certificate.html (certificate/README.md)
   '404.css', // the 404 page's
+  'helper-path.js', // the Helper path card's own file, hand-written as member-hub.js is; fetched by members on Account (_hpShow)
   '_headers', '_redirects',
   'robots.txt', 'sitemap.xml',
   'brand.png', 'hero.webp', 'icon-192.png', 'icon-512.png', 'logo.png', 'apple-touch-icon.png',

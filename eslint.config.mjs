@@ -13,6 +13,7 @@ export default tseslint.config(
   // .claude/ holds agent worktrees (whole checkouts of this repo): linted, each brought a second
   // tsconfig root and the parser refused every file ("multiple candidate TSConfigRootDirs").
   { ignores: ['node_modules/**', 'dist/**', 'test-results/**', 'vendor/**', '**/*.mjs', 'service-worker.js', 'staff.js', 'app.js', 'member-hub.js', 'member-ask.js', 'route-page.js', 'calendar-feed.js', 'learn-ladder.js', 'staff-parts/**', 'functions/api/wallet-pass.js', 'design_handoff_erp_reskin/**', '.claude/**'] },
+  { ignores: ['helper-path.js'] }, // the Helper path card's own file: a classic script that reads the page's globals, as member-hub.js
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

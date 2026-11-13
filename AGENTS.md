@@ -716,6 +716,24 @@ counts Saturday nights when read and stores nothing. The member's card on Accoun
 address; `renderMembers`) has its own tab in both menus, shown only to members (`_commNavPaint`, on the members gate's `_infoMember`); a non-member opening the address is sent away.
 **Members see nothing about each other (2026-11-04, migration 20261104120000):** no customer-facing read may return another member's name, title, badges, rides, kudos, squad, photo or buddy. `member_directory` stays only as the page's "is this a member" gate and returns an empty list. Anything that would break this rule also needs a row in the privacy notice. The one exception is the mentorship programme (2026-11-13, the user's own request): an open mentee profile carries no name, and a first name and WhatsApp number reach only the other side of a match the student accepted, while it runs (section "Mentorship programme").
 
+## Helper path (2026-11-13, new features F23)
+
+Migration 20261114012300. Four steps for community members: rider, helper, trainee ride leader, ride leader. The three after rider are
+titles of the catalogue (`titles.path_step` 1 to 3, seeded as `ttl_path_helper`, `ttl_path_trainee`, `ttl_path_leader`): a step is given
+and taken as any title is, the trigger `_title_path_one` keeps one path title per member, and a member holding none is a rider. Helper
+days are the days of the volunteer shifts attended (`_helper_shift_days`: the session not called off, the shift `done`, or `accepted` with
+a clock-in; the volunteer portal's own "worked"), never hours and never a shift not attended.
+- **Member**: `customer_helper_path(p_id, p_token)` answers `{ok, member, step, days}` about its caller alone. `_hpMineLoad` asks it when
+  Account paints and, for a member, `_hpShow` fetches **`helper-path.js`, which is hand-written and not generated** (as `member-hub.js`;
+  `HP_V` is stamped by the build, the file is in `FILES` and in eslint's ignores, the build's handler, style and emoji checks do not read
+  it). It holds its own words in the ten languages (`HP_T`) and draws the card `#hp-mine` on Account > Badges (the steps, the next step's
+  name, the helper days, the ladder at 1, 5, 10 and 25 days as badge tiles) and the line `#hp-line` on Account > Stats. The ladder is
+  counted on the page and is not in the `badges` table. A database without the function, a non-member or a failed read draws nothing.
+- **Staff**: Community > Titles has a Helper path section under the catalogue (`_hpStaffHtml`, part `peoplemore`), only once the catalogue
+  holds the three path titles: members on the path or with helper days (`staff_helper_days`), a search that reaches every member, and a
+  select per member that moves them (`_hpSet`: the step's title upserted, or every path title deleted for Rider). A path title can be
+  edited but not retired, deleted or made automatic. Tests: tests/helper-path.spec.ts.
+
 ## Invitations and the Community page's activities (2026-11-03)
 
 **Since 2026-11-04 only challenges, the community goal and the year reach members; kudos, the vote, squads, the photo wall and the welcome buddy left the page (see above). Their tables and the staff screens remain, members' reads of them are closed, and what follows describes the original build.**
