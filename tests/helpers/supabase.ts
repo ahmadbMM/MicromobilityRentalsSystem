@@ -157,6 +157,9 @@ export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrit
       // the Store and Payments (20261110150000): absent, as on production (no section on the rail), and no 404 in the console;
       // tests/store-payments.spec.ts answers true, or the real 404 (PGRST202)
       if (body === undefined && rpc[1] === 'staff_store_ready') body = null;
+      // the rider's calendar address (20261114012700): off unless a spec gives it an answer, and no 404 in the console
+      // (the Account page asks it once); tests/calendar-feed.spec.ts
+      if (body === undefined && rpc[1] === 'calendar_link') body = null;
       if (body === undefined && rpc[1] === 'list_sessions') body = fixtures['sessions'] || [];
       // The desk's one-call functions (production since 2026-09; the page no longer carries the
       // multi-write fallbacks, 2026-10-04): answered as the server would, from the fixtures.

@@ -17,7 +17,7 @@ const dist = join(root, 'dist');
 // worker serves cache-first into its cache name from these same two lists, so the site that
 // ships and the files the worker's cache name covers cannot drift apart.
 export const FILES = [
-  'index.html', 'app.js', 'member-hub.js', 'member-ask.js', 'route-page.js', 'app.css', 'styles.css', 'staff.js', 'service-worker.js', 'manifest.json', '404.html', // app.js, app.css: the customer half and its stylesheet, written minified by build-html
+  'index.html', 'app.js', 'member-hub.js', 'member-ask.js', 'route-page.js', 'calendar-feed.js', 'app.css', 'styles.css', 'staff.js', 'service-worker.js', 'manifest.json', '404.html', // app.js, app.css: the customer half and its stylesheet, written minified by build-html
   'report.css', 'receipt.css', // the print windows' stylesheets (_reportShell, _ctPrintReceipt)
   'certificate.css', // the volunteer certificate's; its markup is assets/certificate.html (certificate/README.md)
   '404.css', // the 404 page's

@@ -7251,6 +7251,13 @@ body .vendor-dlg textarea.vendor-pw-msg{width:100%;min-height:170px;box-sizing:b
 #acc-pwd-modal .pg-msg:not(:empty){margin-top:10px;}
 #acc-pwd-modal .ap-done{display:flex;gap:8px;align-items:flex-start;color:#0f1215;}
 #acc-pwd-modal .ap-done .cu-ic{flex:none;margin-top:2px;color:#008f52;}
+/* The rider's calendar address (calendar-feed.js, new features build F27): the same box, with one main action (a
+   link) and two quiet ones under it; what an action did is said in the line below them. */
+#acc-pwd-modal .calf-box a.pg-btn{text-decoration:none;box-sizing:border-box;}
+#acc-pwd-modal .calf-acts{display:grid;gap:10px;margin-top:10px;}
+#acc-pwd-modal .calf-acts .btn-secondary{width:100%;justify-content:center;border-radius:999px;}
+#acc-pwd-modal .calf-note:empty{display:none;}
+#acc-pwd-modal .calf-note.calf-addr{overflow-wrap:anywhere;user-select:all;-webkit-user-select:all;}
 
 /* ── Filter button and folded search, 2026-09-22 ──
    A view's filter dropdowns open under its Filter button (_fPanel), each with its name above it; the

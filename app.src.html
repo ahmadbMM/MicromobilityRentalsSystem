@@ -21201,6 +21201,40 @@ function _icsBody(ev){
     'BEGIN:VALARM','TRIGGER:-PT2H','ACTION:DISPLAY','DESCRIPTION:'+esc2(ev.al),'END:VALARM',
     'END:VEVENT','END:VCALENDAR'].join('\r\n');
 }
+// ── A calendar address of the rider's own (new features build F27, 2026-11-13) ────────────────────────────────
+// Account, Settings, "Calendar": a centred pop-up with Add to my calendar (a webcal link), Copy the address and
+// Replace the address. The address is /api/ics?k=<key> (functions/api/ics.js): the bookings the rider still holds, as
+// calendar events the phone's calendar keeps up to date. The pop-up lives in calendar-feed.js, fetched on the first
+// open, so no other rider carries it. The row shows only once the database says it has the feature (calendar_link
+// 'peek', migration 20261114012700: no key is made or sent by it), so a database without it never offers the row;
+// a peek that did not answer is asked again a minute later at the earliest. S._calf = {id, on, busy, at}.
+const CALF_V=''; // build stamps a hash of calendar-feed.js
+function _calfPeek(c){
+  if(!c||!c.id||!c.session_token||!sb)return;
+  const m=S._calf;if(m&&m.id===c.id&&(m.on||m.busy||Date.now()-m.at<6e4))return;
+  const cur={id:c.id,on:false,busy:true,at:Date.now()};S._calf=cur;
+  Promise.resolve(sb.rpc('calendar_link',{p_id:c.id,p_token:c.session_token,p_op:'peek'})).then(({data,error})=>{
+    cur.busy=false;cur.at=Date.now();
+    if(S._calf!==cur||error||!data||data.ok!==true)return;
+    cur.on=true;_accRowsPaint();
+  },()=>{cur.busy=false;cur.at=Date.now();});
+}
+function _calfOn(c){const m=S._calf;return !!(c&&m&&m.id===c.id&&m.on);}
+function _calfRow(c){
+  _calfPeek(c);
+  return`<button type="button" class="acc-row" id="acc-cal-btn" data-on-click="${_on("_calfGo")}"${_calfOn(c)?'':' hidden'}><span class="acc-row-ic">${_cuIc('cal',20)}</span><span class="acc-row-t">${t('calViewCal')}</span>${_cuIc('go',16,1)}</button>`;
+}
+function _calfLoad(run){
+  // What calendar-feed.js takes from the page, named here so the build's split keeps it on the riders' side.
+  window._calfDeps={cust:()=>S.loggedIn||getSession(),ic:_cuIc,ask:askConfirm,words:()=>({kicker:t('calViewCal'),close:t('closeBtn'),retry:t('retryBtn'),loading:t('loadingLabel')})};
+  if(window._calfOpen){run();return;}
+  if(S._calfLoading)return;S._calfLoading=true;
+  const s=document.createElement('script');s.src='/calendar-feed.js?v='+CALF_V;
+  s.onload=()=>{S._calfLoading=false;if(window._calfOpen)run();};
+  s.onerror=()=>{S._calfLoading=false;s.remove();toast(t('mbErr'),'error');}; // not fetched (offline, a failed request): said, and the next tap asks again
+  document.head.appendChild(s);
+}
+function _calfGo(){_calfLoad(()=>window._calfOpen());}
 
 // Rebook the same riders/types/heights as a past booking (customer picks a new session)
 // One-tap rebooking for returning riders: pre-fill a solo booking with their remembered height + favourite bike type,
@@ -27168,6 +27202,7 @@ function renderAccount(){
       </div></div>
       <div class="acc-grp"><h2 class="acc-grp-h">${t('accGrpSettings')}</h2><div class="acc-list">
         ${row('notifications','bell')}
+        ${_calfRow(cust)}
         <button type="button" class="acc-row" id="acc-lang-btn" data-on-click="${_on("showLangMenu",_EV)}"><span class="acc-row-ic">${_cuIc('globe',20)}</span><span class="acc-row-t">${t('settingsLanguage')}</span><span class="acc-row-v">${(LANGS.find(x=>x.code===S.lang)||LANGS[0]).label}</span>${_cuIc('go',16,1)}</button>
         ${cust.session_token?`<button type="button" class="acc-row" id="acc-pwd-btn" data-on-click="${_on("_accPwdOpen")}"><span class="acc-row-ic">${_cuIc('lock',20)}</span><span class="acc-row-t">${t('authPassword')}</span><span class="acc-row-v">${t('accPwdBtn')}</span>${_cuIc('go',16,1)}</button>`:''}
         <a class="acc-row" id="acc-help-row" href="https://wa.me/${FORGOT_PW_WA}" target="_blank" rel="noopener noreferrer"><span class="acc-row-ic">${_cuIc('chat',20)}</span><span class="acc-row-t">${t('footSupport')}</span><span class="acc-row-v"><bdi dir="ltr">+(966) 57 954 3997</bdi></span>${_cuIc('go',16,1)}</a>
@@ -27440,6 +27475,7 @@ function _accRowsPaint(){
   const pu=_purchList(c);put('purchases',pu&&pu.rows.length?`<bdi>${esc(_sar(pu.tot))}</bdi>`:'',{show:!!pu});
   const rn=!!c.session_token&&S._rnUnavailable!==c.id&&c.ride_news!==undefined;
   put('notifications',rn?esc(t(c.ride_news?'accOn':'accOff')):'',{show:rn||pushSupported()});
+  const cf=document.getElementById('acc-cal-btn');if(cf)cf.hidden=!_calfOn(c); // the calendar address (F27): once the database has it
   put('delete',c.deletion_requested_at?esc(t('accDelPending')):'',{show:!!c.session_token&&S._delUnavailable!==c.id&&c.deletion_requested_at!==undefined,add:!!c.deletion_requested_at});
   const g=document.getElementById('acc-g-activity');
   if(g)g.hidden=!['ambassador','volunteer','purchases'].some(k=>{const r=document.getElementById('acc-r-'+k);return r&&!r.hidden;});
