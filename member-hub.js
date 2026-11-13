@@ -221,10 +221,13 @@ function _hubRender() {
 }
 
 function _hubInvite() { const dep = window._hubDeps || {}; if (dep.inv) dep.inv(); }
+// The Updates list's way in (new features build F3, 2026-11-13): a button at the foot of the staff card, whichever of the
+// three it is. The page draws it (window._hubDeps.upd), and repaints it when the unread count lands.
+function _hubUpd(html) { const dep = window._hubDeps || {}, i = html.lastIndexOf('</div>'); return dep.upd && i >= 0 ? html.slice(0, i) + dep.upd() + html.slice(i) : html; }
 function _feedHtml(c, d, stale) {
   const dep = window._hubDeps || {}, hero = _heroHtml(c, d);
   // A ride the member has just finished, with nothing else booked: its recap leads the page, before the next one to book.
-  const staff = _staffHtml(d);
+  const staff = _hubUpd(_staffHtml(d));
   return [
     stale ? `<div class="hub-card hub-stale" role="status"><span>${_hT('stale')}</span><button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_hubRetry')}">${_hT('retry')}</button></div>` : '',
     d.birthday ? `<div class="hub-card hub-bday">${_cuIc('gift', 20)}<strong>${esc(_hF('bday', String((c && c.name) || '').trim().split(/\s+/)[0] || ''))}</strong></div>` : '',

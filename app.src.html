@@ -1223,7 +1223,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   noOtherTypes:'No other types available either.',
   noBikesForType:'No {0} bikes in the fleet.',
   doneSessChip:'done',activeSessChip:'on bike',
-  colContact:'Contact',callLabel:'Call',waYourTurnMsg:'Hello! Your turn at MicroMobility is coming up soon. Please head to the booth.\n\nمرحباً! اقترب دورك في مايكروموبيليتي. يرجى التوجه إلى الكشك.',pushTitle:'Notifications',pushRides:'My rides',pushComm:'Community',pushRemindBtn:'Remind me',pushRemindOn:'Reminder on',pushIosTitle:'Add the app to your Home Screen',pushIosStep1:'Tap Share',pushIosStep2:'Add to Home Screen',pushIosStep3:'Open it from your Home Screen',pushBlockedMsg:'Notifications are blocked for this site in your browser settings.',pushFailedMsg:'Could not turn notifications on.',pushPromotedTitle:'A spot opened up',pushPromotedBody:'You’re off the waitlist: booking #{0} is confirmed. See you at the booth.',
+  colContact:'Contact',callLabel:'Call',waYourTurnMsg:'Hello! Your turn at MicroMobility is coming up soon. Please head to the booth.\n\nمرحباً! اقترب دورك في مايكروموبيليتي. يرجى التوجه إلى الكشك.',pushTitle:'Notifications',updTitle:'Updates',pushRides:'My rides',pushComm:'Community',pushRemindBtn:'Remind me',pushRemindOn:'Reminder on',pushIosTitle:'Add the app to your Home Screen',pushIosStep1:'Tap Share',pushIosStep2:'Add to Home Screen',pushIosStep3:'Open it from your Home Screen',pushBlockedMsg:'Notifications are blocked for this site in your browser settings.',pushFailedMsg:'Could not turn notifications on.',pushPromotedTitle:'A spot opened up',pushPromotedBody:'You’re off the waitlist: booking #{0} is confirmed. See you at the booth.',
   colPrice:'Price',
   colHeight:'Height',colDuration:'Duration',
   anDurationSection:'Ride duration',anAvgDuration:'Avg duration',anLongestRide:'Longest ride',anShortestRide:'Shortest ride',anDurRidesTracked:'rides tracked',
@@ -1908,7 +1908,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   noOtherTypes:'لا توجد أنواع أخرى متاحة.',
   noBikesForType:'لا توجد دراجات من نوع {0} في الأسطول.',
   doneSessChip:'منتهٍ',activeSessChip:'على الدراجة',
-  colContact:'تواصل',callLabel:'اتصال',waYourTurnMsg:'Hello! Your turn at MicroMobility is coming up soon. Please head to the booth.\n\nمرحباً! اقترب دورك في مايكروموبيليتي. يرجى التوجه إلى الكشك.',pushTitle:'الإشعارات',pushRides:'رحلاتي',pushComm:'المجتمع',pushRemindBtn:'ذكّرني',pushRemindOn:'التذكير مفعّل',pushIosTitle:'أضف التطبيق إلى الشاشة الرئيسية',pushIosStep1:'اضغط مشاركة',pushIosStep2:'إضافة إلى الشاشة الرئيسية',pushIosStep3:'افتحه من الشاشة الرئيسية',pushBlockedMsg:'الإشعارات محظورة لهذا الموقع في إعدادات متصفحك.',pushFailedMsg:'تعذّر تفعيل الإشعارات.',pushPromotedTitle:'توفّر مكان',pushPromotedBody:'خرجت من قائمة الانتظار - تم تأكيد الحجز رقم {0}. نراك في الكشك.',
+  colContact:'تواصل',callLabel:'اتصال',waYourTurnMsg:'Hello! Your turn at MicroMobility is coming up soon. Please head to the booth.\n\nمرحباً! اقترب دورك في مايكروموبيليتي. يرجى التوجه إلى الكشك.',pushTitle:'الإشعارات',updTitle:'التحديثات',pushRides:'رحلاتي',pushComm:'المجتمع',pushRemindBtn:'ذكّرني',pushRemindOn:'التذكير مفعّل',pushIosTitle:'أضف التطبيق إلى الشاشة الرئيسية',pushIosStep1:'اضغط مشاركة',pushIosStep2:'إضافة إلى الشاشة الرئيسية',pushIosStep3:'افتحه من الشاشة الرئيسية',pushBlockedMsg:'الإشعارات محظورة لهذا الموقع في إعدادات متصفحك.',pushFailedMsg:'تعذّر تفعيل الإشعارات.',pushPromotedTitle:'توفّر مكان',pushPromotedBody:'خرجت من قائمة الانتظار - تم تأكيد الحجز رقم {0}. نراك في الكشك.',
   colPrice:'السعر',
   colHeight:'الطول',colDuration:'المدة',
   anDurationSection:'مدة الركوب',anAvgDuration:'متوسط المدة',anLongestRide:'أطول جولة',anShortestRide:'أقصر جولة',anDurRidesTracked:'جولات مرصودة',
@@ -7779,7 +7779,7 @@ const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',mem
 // The account page's three parts (the owner, 2026-11-09): Account at /account, then /account/stats and /account/badges.
 const ACC_VIEWS=['account','stats','badges'];
 // The Account part is a menu whose rows open small pages (the user, 2026-11-10), each at /account/<page>.
-const ACC_PAGES=['personal','contact','residence','emergency','riding','sport','about','wallet','invite','ambassador','volunteer','purchases','company','notifications','delete'];
+const ACC_PAGES=['personal','contact','residence','emergency','riding','sport','about','wallet','invite','ambassador','volunteer','purchases','company','notifications','updates','delete'];
 // A signed-out visitor's two pages: Sign in at /, Create account at /signup (the owner, 2026-09-28),
 // so a link can open the sign-up itself. Signed in, /signup is just /.
 const SIGNUP_PATH='signup';
@@ -16025,9 +16025,10 @@ function _commNavPaint(){
   if(grid)grid.classList.toggle('with-comm',on);
   const cl=document.getElementById('bnav-members-lbl');if(cl)cl.textContent=t('mbTitle'); // a language change reaches the bar's label too
   // The dot (R4): this account's last pulse lit it; never while the tab is open. Its state is said in the tab's name.
-  const c=S.loggedIn,p=S._pls,dot=on&&!!(c&&p&&p.id===c.id&&p.dot)&&!(S.view==='customer'&&S.custTab==='members');
+  const c=S.loggedIn,p=S._pls,dot=on&&(!!(c&&p&&p.id===c.id&&p.dot)||_inbN()>0)&&!(S.view==='customer'&&S.custTab==='members'); // or an unread update (F3)
   [top,bot].forEach(b=>{if(!b)return;b.classList.toggle('has-dot',dot);if(dot)b.setAttribute('aria-label',t('hubDotLbl'));else b.removeAttribute('aria-label');});
   if(on)_pulse();
+  _inbPulse();_inbBadge();
 }
 // ── Community where members already are (2026-11-13, reports/Community tab reach after launch.md: R1, R4-R7) ──────────
 // One light read, hub_pulse (migration 20261114000100), for a member anywhere in the app: once the account's data is in
@@ -16065,7 +16066,7 @@ function _pulse(force){
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')try{_pulse();}catch(e){}});
 // The tab bar's Community: a tap while the dot is lit is counted as the dot's.
-function _commTap(){const c=S.loggedIn,p=S._pls;S._hubSrc=c&&p&&p.id===c.id&&p.dot?'dot':'tab';setCustTab('members');}
+function _commTap(){const c=S.loggedIn,p=S._pls;S._hubSrc=(c&&p&&p.id===c.id&&p.dot)||_inbN()>0?'dot':'tab';setCustTab('members');} // the dot is lit by an unread update too (F3)
 function _hubGo(src){S._hubSrc=src;setCustTab('members');}
 function _hubDotOff(){S._hubDotOffAt=Date.now();if(S._pls)S._pls.dot=false;}
 // Signed out on /members (a link from WhatsApp in a browser that is not signed in): the sign-in, then the tab (R7).
@@ -16081,6 +16082,69 @@ function _readHubSrc(pn){
     if(v===null&&nav&&nav.type!=='navigate')return;
     S._hubSrc=/^wa-/.test(v||'')?'wa':v==='push'?'push':'link';
   }catch(e){}
+}
+// ── The Updates list (new features build F3, 2026-11-13) ────────────────────────────────────────────────────────────
+// Every message the app addressed to this rider (a reminder, a change, a waitlist place, the month's challenge, the
+// Saturday recap, a note from staff), with push on or off, kept 90 days: a page of Account, /account/updates, drawn by
+// rider-updates.js (fetched when the page opens, with its own words; it names where each row leads and reads the list,
+// customer_updates, which marks every row read). The ways in: a row on Account > Notifications and, for members, a
+// button at the foot of the Community tab's staff card. One light read here, customer_updates_unread (migration
+// 20261114010300), with the pulse's rhythm, says how many are unread: they light the Community tab's dot, set the app
+// icon's badge where the browser has one, and are counted on the two ways in. A database without it: no row, no button,
+// no dot (S._inbOff). S._inb: {id, ok, n, comm, at} - comm of the n are Community's, and count as read once the tab is
+// opened after the count was asked (the tab's own read clears them on the server).
+const INB_V=''; // build stamps a hash of rider-updates.js
+function _inbOk(){const c=S.loggedIn,u=S._inb;return !!(c&&u&&u.id===c.id&&u.ok);}
+function _inbN(){const u=S._inb;return _inbOk()?Math.max(0,u.n-((S._hubDotOffAt||0)>u.at?u.comm:0)):0;}
+function _inbPulse(){
+  const c=S.loggedIn;
+  if(!c||!c.session_token||S._inbOff||S.view==='staff'||_isStaffHost()||typeof sb==='undefined'||!sb||!S.dataLoaded)return;
+  let u=S._inb;if(!u||u.id!==c.id)u=S._inb={id:c.id,ok:false,n:0,comm:0,at:0,asked:0};
+  const asked=Date.now();if(asked-u.asked<PLS_GAP)return;
+  u.asked=asked;
+  Promise.resolve().then(()=>sb.rpc('customer_updates_unread',_plsTok(c))).then(r=>r,e=>({error:e})).then(r=>{
+    if(S._inb!==u||u.asked!==asked)return; // another account, or the list was read meanwhile
+    if(r.error&&_rpcAbsent(r.error)){S._inbOff=true;S._inb=null;}
+    else{
+      const d=!r.error&&r.data&&r.data.ok===true&&r.data;
+      if(!d){u.asked=asked-PLS_GAP+6e4;return;} // no answer: asked again a minute on
+      u.ok=true;u.at=asked;u.n=Math.max(0,+d.n||0);u.comm=Math.min(u.n,Math.max(0,+d.comm||0));
+    }
+    _inbMark();
+  });
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')try{_inbPulse();}catch(e){}});
+// The count where it shows: the dot and the app icon (_commNavPaint), the two ways in.
+function _inbMark(){
+  _commNavPaint();_accRowsPaint();
+  const h=document.getElementById('hub-inb');if(h)h.outerHTML=_inbHubHtml();
+}
+// The app icon's badge (an installed app, where the browser has one): left as it was until the count is known, none signed out.
+function _inbBadge(){
+  const n=_inbOk()?_inbN():S.loggedIn&&!S._inbOff?-1:0;if(n<0||S._inbBadged===n)return;S._inbBadged=n;
+  try{Promise.resolve(n?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{});}catch(e){}
+}
+// The button the Community tab's staff card carries (the other way in is a menu row on Account > Notifications).
+function _inbHubHtml(){
+  const n=_inbN();
+  return _inbOk()?`<button type="button" class="btn-secondary hub-wide" id="hub-inb" data-on-click="${_on('setCustTab','account','updates')}">${esc(t('updTitle'))}${n?` · <bdi>${n}</bdi>`:''}</button>`:'<span id="hub-inb" hidden></span>';
+}
+// The page on screen: its file is fetched once, then draws and reads the list. Not fetched (offline, a failed request):
+// said, with Try again.
+function _inbShow(){
+  const b=document.getElementById('inb-body');
+  if(!b||S.view!=='customer'||S.custTab!=='account'||_accView()!=='account'||_accPage()!=='updates')return;
+  if(window._inbRender){window._inbRender();return;}
+  if(S._inbLoading)return;S._inbLoading=true;
+  b.innerHTML=_skelHtml(3,'inb-skel');
+  const s=document.createElement('script');s.src='/rider-updates.js?v='+INB_V;
+  s.onload=()=>{S._inbLoading=false;_inbShow();};
+  s.onerror=()=>{
+    S._inbLoading=false;s.remove();
+    const x=document.getElementById('inb-body');
+    if(x)x.innerHTML=`<div class="inb-card" role="status"><strong>${t('mbErr')}</strong><button type="button" class="btn-primary" data-on-click="${_on('_inbShow')}">${t('mbRetry')}</button></div>`;
+  };
+  document.head.appendChild(s);
 }
 // A Community badge: the two ladders, a season challenge's own, any the pulse brought. Account's pop-up leaves them to
 // the pulse while it runs (_bdgCelebrate).
@@ -22610,6 +22674,7 @@ function _hubLoad(){
     still:_stcHtml, // "Still coming?" on the next session's card (F2): the ticket's own two buttons
     // the ticket's words for them, named here so the build keeps them on the riders' side (member-hub.js is not read for keys)
     words:()=>({gather:t('sessGatherTime'),start:t('sessStartTime'),end:t('sessEndTime'),collect:t('sessCollectTime'),doors:t('vlDoorsShort'),heat:t('vlHeatShort'),meet:t('meetPointLbl'),where:t('tkWhereLabel'),map:t('infoMap'),newTab:t('opensNewTab')})};
+  window._hubDeps.upd=_inbHubHtml; // the Updates list's button at the foot of the staff card (F3)
   if(window._hubRender){window._hubRender();return;}
   if(S._hubLoading)return;S._hubLoading=true;
   const s=document.createElement('script');s.src='/member-hub.js?v='+HUB_V;
@@ -27616,6 +27681,7 @@ function renderAccount(){
     ${page('purchases',`<div id="acc-purch">${(_purchLoad(cust),_purchHtml(cust))}</div>`,1)}
     ${page('company','<div id="acc-co-host"></div>',1)}
     ${page('notifications',`
+    <div class="acc-list inb-entry">${row('updates','chat') /* Updates: every message the app addressed to this rider (F3). Hidden until the database answers its unread count */}</div>
     ${(()=>{
       // Ride news: the rider's own yes or no (_consentCheck reads it once per page life). Not shown
       // until the server answers - a switch must never show a state that is not stored - and
@@ -27634,6 +27700,7 @@ function renderAccount(){
     })()}
     ${_ppHostHtml(cust) /* Notifications: My rides and Community (R16). Hidden until a VAPID key is configured, on browsers without push, and until the account's switches are read - an inert switch is worse than none */}
 `)}
+    ${page('updates','<div id="inb-body" class="inb-body"></div>',1)}
     ${page('delete',`
     ${(()=>{
       // Delete my account: a request staff act on within 30 days, withdrawable until then.
@@ -27658,6 +27725,7 @@ function renderAccount(){
   S._accBase={id:cust.id,v:_accFormVals()}; // what the form showed, to tell a rider's edit from a stale box
   _accRowsPaint();
   _cochLoad(cust);if(pg==='company')_cochOpen(); // the Company challenge row and its page (F26)
+  _inbShow();
 }
 // The account page's parts (the owner, 2026-11-09: "divide the customer my account page into 3 separate pages account
 // stats badges"): the switch above them, Account first. All three are drawn and the others hidden, as the staff account
@@ -27683,7 +27751,7 @@ function _accPage(){return ACC_PAGES.includes(S.accPage)?S.accPage:null;}
 function _accSub(){const v=_accView();return v!=='account'?v:(_accPage()||'');}
 function _accSubSet(sub){S.accView=ACC_VIEWS.includes(sub)?sub:'account';S.accPage=S.accView==='account'&&ACC_PAGES.includes(sub)?sub:null;}
 const _ACC_PG_T={personal:'accPgPersonal',contact:'accPgContact',residence:'accPgResidence',emergency:'accPgEmergency',riding:'accPgRiding',sport:'spTitle',about:'accPgAbout',
-  wallet:'cwTitle',invite:'refTitle',ambassador:'ambMineTitle',volunteer:'accVolTitle',purchases:'custPurchTitle',company:'cochTitle',notifications:'pushTitle',delete:'delTitle'};
+  wallet:'cwTitle',invite:'refTitle',ambassador:'ambMineTitle',volunteer:'accVolTitle',purchases:'custPurchTitle',company:'cochTitle',notifications:'pushTitle',updates:'updTitle',delete:'delTitle'};
 function _accPgTitle(k){return t(_ACC_PG_T[k]||'accountTitle');}
 // The profile columns each page writes (_saveAccount); every other column keeps the value on file.
 const ACC_PG_KEYS={personal:['name','birth_date','nationality','gender'],contact:['email','phone'],residence:['country','city'],riding:['height','type_preference'],about:['socials','profession','workplace','heard_from']};
@@ -27698,6 +27766,7 @@ function _accShow(){
   const sp=h.querySelector('.acc-split');if(sp)sp.classList.toggle('acc-has-pg',!!pg);
   h.classList.toggle('acc-in-pg',!!pg);
   if(pg==='company')_cochOpen();
+  _inbShow();
 }
 // Back and Forward landed on an account address (the tab is already open).
 function _accFromNav(sub){
@@ -27812,7 +27881,9 @@ function _accRowsPaint(){
   put('learn','',{show:_llHas(c)}); // the learn-to-ride ladder: only an account whose sign-up has a lesson
   put('company',_cochOn(c)?`<bdi>${esc(S._coch.rows.map(r=>r.company).join(' · '))}</bdi>`:'',{show:_cochOn(c)}); // the company challenge (F26): once its read has answered
   const rn=!!c.session_token&&S._rnUnavailable!==c.id&&c.ride_news!==undefined;
-  put('notifications',rn?esc(t(c.ride_news?'accOn':'accOff')):'',{show:rn||pushSupported()});
+  const un=_inbN()?`<bdi>${_inbN()}</bdi>`:''; // the Updates list (F3): how many are unread, on its row on Notifications and on the menu's
+  put('updates',un,{show:_inbOk()});
+  put('notifications',un||(rn?esc(t(c.ride_news?'accOn':'accOff')):''),{show:rn||pushSupported()||_inbOk()});
   const cf=document.getElementById('acc-cal-btn');if(cf)cf.hidden=!_calfOn(c); // the calendar address (F27): once the database has it
   put('delete',c.deletion_requested_at?esc(t('accDelPending')):'',{show:!!c.session_token&&S._delUnavailable!==c.id&&c.deletion_requested_at!==undefined,add:!!c.deletion_requested_at});
   const g=document.getElementById('acc-g-activity');
