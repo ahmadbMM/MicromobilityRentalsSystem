@@ -28,14 +28,14 @@ test.describe('roles', () => {
       setStaffRole('admin');
       return out;})()`) as Record<string, { role: string; admin: boolean; tabs: string[] }>;
     expect(r.admin.admin).toBe(true);
-    expect(r.admin.tabs.length).toBe(19); // the Waitlist and Lockers since 2026-11-09, Vendors since 2026-10-03, Volunteers since 2026-11-05, Sessions since 2026-11-06, Badge requests since 2026-11-08; Customers 2026-10-07 to 2026-11-06 (now People's)
+    expect(r.admin.tabs.length).toBe(20); // Ask since 2026-11-13, the Waitlist and Lockers since 2026-11-09, Vendors since 2026-10-03, Volunteers since 2026-11-05, Sessions since 2026-11-06, Badge requests since 2026-11-08; Customers 2026-10-07 to 2026-11-06 (now People's)
     expect(r.frontdesk).toEqual({ role: 'frontdesk', admin: false, tabs: ['queue', 'waitlist', 'lockers', 'cashier', 'workshop'] }); // the Waitlist: a section since 2026-11-09, wherever Bookings opens
     expect(r.leader).toEqual({ role: 'leader', admin: false, tabs: ['queue', 'waitlist', 'lockers'] });
     expect(r.mechanic).toEqual({ role: 'mechanic', admin: false, tabs: ['inventory', 'workshop'] });
     expect(r.cashier).toEqual({ role: 'cashier', admin: false, tabs: ['cashier', 'inventory'] });
     expect(r.owner.admin).toBe(false);
-    // Messages, Vendors, the website and Team too since 2026-10-09 (read-only: an owner's edit list is empty); Volunteers since 2026-11-05; Badge requests since 2026-11-08
-    expect(r.owner.tabs).toEqual(['queue', 'waitlist', 'lockers', 'dashboard', 'cashier', 'inventory', 'workshop', 'community', 'badgereq', 'volunteers', 'vendors', 'website', 'messages', 'analytics', 'history', 'team']);
+    // Messages, Vendors, the website and Team too since 2026-10-09 (read-only: an owner's edit list is empty); Volunteers since 2026-11-05; Badge requests since 2026-11-08; Ask since 2026-11-13
+    expect(r.owner.tabs).toEqual(['queue', 'waitlist', 'lockers', 'dashboard', 'cashier', 'inventory', 'workshop', 'community', 'badgereq', 'ask', 'volunteers', 'vendors', 'website', 'messages', 'analytics', 'history', 'team']);
     expect(r.bogus.role).toBe('admin'); // setStaffRole keeps the larger default for a name it does not know; the row's role is normalised on read
     expect(await page.evaluate(`_roleNorm('bogus','frontdesk')`)).toBe('frontdesk');
     expect(await page.evaluate(`_roleNorm('owner','frontdesk')`)).toBe('owner');
@@ -72,7 +72,7 @@ test.describe('roles', () => {
     await expect(acct.locator('.tm-chip[data-sec="view:inventory"]')).toBeVisible();
     // owner: every section on view, none on edit
     await page.evaluate(`_tmRole('u-mech','owner')`);
-    await expect(acct.locator('.tm-chip[data-sec^="view:"]')).toHaveCount(16); // the Waitlist and Lockers since 2026-11-09; Customers 2026-10-07 to 2026-11-06 (People's since); Messages, Vendors, website, Team since 2026-10-09; Volunteers since 2026-11-05; Badge requests since 2026-11-08
+    await expect(acct.locator('.tm-chip[data-sec^="view:"]')).toHaveCount(17); // Ask since 2026-11-13; the Waitlist and Lockers since 2026-11-09; Customers 2026-10-07 to 2026-11-06 (People's since); Messages, Vendors, website, Team since 2026-10-09; Volunteers since 2026-11-05; Badge requests since 2026-11-08
     await expect(acct.locator('.tm-chip[data-sec^="edit:"].active')).toHaveCount(0);
     const draft = await page.evaluate(`_tm().edit['u-mech']`) as { role: string; edit: string[] | null };
     expect(draft.role).toBe('owner');

@@ -137,7 +137,7 @@ test.describe('@staff:team s10 trust: section rights', () => {
     expect(m).not.toBeNull();
     const desk = /const DESK_TABS=(\[[^\]]*\])/.exec(src)![1];
     const roleTabs = new Function('DESK_TABS', `return ${m![1]}`)(JSON.parse(desk.replace(/'/g, '"'))) as Record<string, string[]>;
-    const parent: Record<string, string> = { sessions: 'queue', lockers: 'queue', waitlist: 'queue', badgereq: 'community', store: 'cashier', payments: 'cashier' };
+    const parent: Record<string, string> = { sessions: 'queue', lockers: 'queue', waitlist: 'queue', badgereq: 'community', ask: 'community', store: 'cashier', payments: 'cashier' }; // Ask (2026-11-13) is People's in the database: _staff_mod('community', ...)
     for (const [role, tabs] of Object.entries(roleTabs)) {
       const line = new RegExp(`when '${role}' then array\\[([^\\]]*)\\]`).exec(sql);
       const dbIds = line ? line[1].replace(/'/g, '').split(',').filter(Boolean) : (role === 'frontdesk' ? ['queue', 'cashier', 'workshop'] : []);

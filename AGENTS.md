@@ -3603,3 +3603,37 @@ The owner's D11 ("do it all"): a staff role `door` for people whose only job is 
 - The roster's Code column: under a tight table (Arabic, the booth theme) the code itself is never cut short
   (`.code-cell .code-full` tracks `auto minmax(min-content,1fr)`, the kind's name `width:0;min-width:100%` ellipsizes).
 - Budgets: customer 326.1 / 328 (main's), staff half 974.5 / 978 (956 -> 978), desk core 329.1 / 346.
+
+## Ask (2026-11-13, migration 20261113010000)
+
+The owner (2026-11-13): questions put to an audience under one link, micromobility.sa/ask. "Force everyone to sign in
+before answering so we know who wrote what", "only show answers that were approved", "let us add questions and specify
+who we want it to be visible for and for how much time". Three parts: the database (here), the pages (the website,
+`apps/web/src/app/[locale]/ask`, `components/ask`, `lib/ask.ts`) and the staff section Ask.
+
+- **Database**: `ask_pages` (slug, 6-digit code, audience `link` / `accounts` / `tags` with `tag_ids`, `not_tag_ids`,
+  `only_gender`, `min_age`, `max_age`; status `draft` / `live` / `ended`; `opens_at`, `closes_at`, `after_close`
+  `results` / `hidden`; `pace`, `round`, `look`, `block_words`, `ver`), `ask_questions` (14 kinds: cloud, open, qa,
+  choice, scales, ranking, points, grid, number, pin, form, quiz, quiz_text, info; `config` checked by a trigger;
+  `moderated`; `results` live / answered / closed / staff; `open`), `ask_answers` (always an account's: `customer_id`;
+  `status` pending / approved / rejected), `ask_votes`, `ask_reactions`, `ask_secret`. No table is open to anon; staff
+  read with `_staff_mod('community', false)` and write with `_staff_mod('community', true)`: whoever opens People opens
+  Ask, and no section id was added to `staff_set_access` (it refuses ids it does not know).
+- **Riders** call only functions: `ask_list`, `ask_code`, `ask_page`, `ask_live`, `ask_screen`, `ask_send`,
+  `ask_unsend`, `ask_vote`, `ask_react` (definer, `_cust_token_ok`). A public result never names anyone and never
+  holds a pending or rejected answer. `ask_live` and `ask_screen` take a key: the page's `rk` (given by `ask_page`,
+  good for 6 to 12 hours) or its permanent screen key (staff's link). A page's `ver` moves on every change riders can
+  see; a poll with the same `ver` gets `same: true`.
+- **Staff**: section Ask (`/ask`, `renderAsk` in the `ask` part, `staff-parts/ask.js`; the rail's number is
+  `staff_ask_pending` through `_askCount` in the core). A page has Setup, Answers and Results. Setup is a draft written
+  on Save (the page, then each question; table writes through `_wr`); Start, End, Reset results and a question's
+  "Taking answers" go through `staff_ask_control`. Answers approves, rejects, corrects and deletes
+  (`staff_ask_review`, table updates). Results draws each kind, "Who answered what" and the CSV, with names and mobile
+  numbers: staff only. Strings: 148 keys named `ask*` travel with the part (`lang/staff-ask-<code>.json`).
+- **Traps**: the migration is pure ASCII (non-Latin characters are built with `chr()`); a stale staff save cannot move
+  `ver` or `round` backwards (trigger); an age rule shuts out an account with no birth date; `ask_code` answers null
+  past its meter (30 tries in 10 minutes a network) as for a wrong code; in customer-half or core code a quoted
+  one-letter word joined with `+` reads as a string-key prefix to the build (use `.concat`).
+- **Tests**: `tests/ask.spec.ts` (`@staff:ask`); the functions' attributes are in
+  `supabase/checks/security-attributes.sql`. Never write the name of the product it resembles in code, strings or
+  commits.

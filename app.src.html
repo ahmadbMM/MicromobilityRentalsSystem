@@ -368,6 +368,7 @@ window.mmLoading=(function(){
     <span class="snav-group" data-group="snavPeople" role="heading" aria-level="2">People</span>
     <button class="tab-btn"        data-stab="community" data-on-click='["setStaffTab","community"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">People</span></button>
     <button class="tab-btn"        data-stab="badgereq"  data-on-click='["setStaffTab","badgereq"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Badge requests</span></button>
+    <button class="tab-btn"        data-stab="ask"       data-on-click='["setStaffTab","ask"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ask</span></button>
     <span class="snav-group" data-group="snavPartners" role="heading" aria-level="2">Partners &amp; web</span>
     <button class="tab-btn"        data-stab="vendors"       data-on-click='["setStaffTab","vendors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Vendors</span></button>
     <button class="tab-btn"        data-stab="ambassadors" data-on-click='["setStaffTab","ambassadors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ambassadors</span></button>
@@ -395,6 +396,7 @@ window.mmLoading=(function(){
     <div id="tab-payments"  class="tab-panel"></div>
     <div id="tab-community"  class="tab-panel"></div>
     <div id="tab-badgereq"  class="tab-panel"></div>
+    <div id="tab-ask"       class="tab-panel"></div>
     <div id="tab-analytics"  class="tab-panel"></div>
     <div id="tab-history"   class="tab-panel"></div>
     <div id="tab-website"   class="tab-panel"></div>
@@ -1353,6 +1355,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   cfnScWork:'Work and socials',
   cfnScXem:'Emergency contact (signed in)',
   cfnScCheck:'Check your answers',
+  tabAsk:'Ask',tabAskWait:'{0} waiting for approval',askNew:'New question',askEmpty:'No questions yet.',askNoMatch:'Nothing matches the filter.',askNoDb:'Ask is not set up on the database yet.',askStDraft:'Draft',askStOpen:'Open',askStSoon:'Opens {0}',askStClosed:'Closed',askFSoon:'Not open yet',askClosesAt:'Closes {0}',askNoEnd:'No end',askAnswers:'Answers',askPeople:'People',askWaiting:'Waiting for approval',askCopy:'Copy',askCopied:'Link copied',askBack:'All questions',askTabSetup:'Setup',askTabResults:'Results',askGPage:'Page',askTitleEn:'Title (English)',askTitleAr:'Title (Arabic)',askIntroEn:'Introduction (English)',askIntroAr:'Introduction (Arabic)',askSlug:'Link name',askSlugTaken:'This link name is taken',askSlugBad:'Use 3 to 40 lower-case letters, digits and dashes.',askNeedTitle:'Write a title in English or Arabic.',askAud:'Who sees it',askAudLink:'Anyone with the link',askAudAcc:'Signed-in accounts',askAudTags:'Accounts with a tag',askAudPick:'Pick at least one tag.',askTags:'Tags',askGWhen:'When it is open',askOpens:'Opens',askNow:'Now',askAt:'Date and time',askCloses:'Closes',askIn1d:'1 day',askIn3d:'3 days',askIn1w:'1 week',askSaudi:'Saudi time',askWhenBad:'Pick a date and time.',askCloseBad:'It must close after it opens.',askAfter:'After it closes',askAfterShow:'Show results',askAfterHide:'Hide',askGMore:'More',askListed:'Shown in the list on micromobility.sa/ask',askNotes:'Staff notes',askStart:'Start',askEnd:'End',askEndAsk:'End this page?',askUnsaved:'Unsaved changes',askSaved:'Saved',askStarted:'Started',askDelPage:'Delete page',askDelAsk:'Delete this page and all its answers?',askQs:'Questions',askAddQ:'Add question',askEditQ:'Edit question',askNeedQ:'Add a question first.',askUp:'Move up',askDown:'Move down',askQDelAsk:'Delete this question and its {0} answers?',askTaking:'Taking answers',askType:'Type',askKcloud:'Word cloud',askKopen:'Open answers',askKqa:'Questions from people',askKchoice:'Multiple choice',askKscales:'Scales',askKranking:'Ranking',askKpoints:'100 points',askKnumber:'Number',askKinfo:'Text slide',askQTitleEn:'Question (English)',askQTitleAr:'Question (Arabic)',askHelpEn:'Help text (English)',askHelpAr:'Help text (Arabic)',askMaxLen:'Longest answer, in characters',askPerPerson:'Answers per person',askVotes:'People can upvote answers',askOptions:'Options',askStatements:'Statements',askOptEn:'Option {0}, English',askOptAr:'Option {0}, Arabic',askEn:'English',askAr:'Arabic',askAddOpt:'Add option',askMaxPicks:'Choices per person',askChange:'People can change their answer',askMin:'Lowest',askMax:'Highest',askLoEn:'Low end label (English)',askLoAr:'Low end label (Arabic)',askHiEn:'High end label (English)',askHiAr:'High end label (Arabic)',askTotal:'Points to share',askNumMin:'Smallest number',askNumMax:'Largest number',askStep:'Step',askUnitEn:'Unit (English)',askUnitAr:'Unit (Arabic)',askModerated:'Approve answers before they show',askResWho:'Who sees the results',askResLive:'At once',askResAnswered:'After answering',askResClosed:'After it closes',askResStaff:'Staff only',askNeedOpts:'Add at least {0} options.',askOptEmpty:'Fill in every option, or remove it.',askNumOrder:'The largest number must be above the smallest.',askCfgBad:'These settings do not fit this type of question.',askAWait:'Waiting',askAOk:'Approved',askANo:'Not approved',askApprove:'Approve',askReject:'Reject',askToWait:'Back to waiting',askEditText:'Edit text',askMarkAnswered:'Mark answered',askNotAnswered:'Not answered',askAnswered:'Answered',askApproveN:'Approve {0} selected',askRejectN:'Reject {0} selected',askApproveAll:'Approve all waiting',askApproveAllAsk:'Approve all {0} waiting answers?',askDelAAsk:'Delete this answer?',askNoAnswers:'No answers yet.',askNoneHere:'Nothing here.',askFlagged:'Flagged',askQuestion:'Question',askAnswer:'Answer',askTime:'Time',askCode:'Code',askQr:'QR code of the link',askScreen:'Open big screen',askPreview:'Preview',askReset:'Reset results',askResetAsk:'Reset the results?',askResetBody:'A new round starts with no answers. Older answers are kept.',askRound:'Round {0}',askAvg:'Average',askPlace:'Average place {0}',askVotesN:'Votes {0}',askWho:'Who answered what',
 },
 ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'ممتلئة',settingsLanguage:'اللغة',proteinWord:'{0} بروتين',
   s13BikeChanged:'تم تغيير هذه الدراجة للتو على جهاز آخر. تم تحديث القائمة — راجعها وحاول مرة أخرى.',ticketQrLabel:'رمز QR للحجز',mrCxByYou:'أُلغي بطلبك',mrCxByUs:'أُلغي من قِبَلنا',liveMapBtn:'الخريطة الحية',leaveWlBtn:'مغادرة قائمة الانتظار',mapsApple:'خرائط Apple',mapsGoogle:'خرائط Google',offlineActTitle:'أنت غير متصل. اتصل بالإنترنت لتعديل هذا الحجز.',errLoginPhoneCc:'لا يوجد حساب بهذا الرقم كرقم سعودي. إذا كان رقمك من دولة أخرى فاكتبه مع رمز الدولة، مثل ‎+20 1012345678.',selectBookingAria:'تحديد الحجز',modifyChangedMsg:'تغيّر هذا الحجز أثناء تعديلك له. راجع التفاصيل ثم احفظ مرة أخرى.',wlAimedClosedMsg:'هذه الجولة لا تستقبل الحضور المباشر. اختر جولة أخرى من القائمة أعلاه لتسليمه دراجة.',bdNotEarned:'لم تُكتسب بعد',promoCustAmbiguous:'يوجد أكثر من عميل بهذا الاسم. اختر من القائمة العميل صاحب رقم الجوال الصحيح.',naDelBodyFinal:'يُؤرشف الحساب ولا يُمحى: تبقى {0} حجوزات سابقة ومدفوعاته ومحفظته وأوسمته وسجله باسم الراكب. يُسجَّل خروج الراكب ولا يمكنه تسجيل الدخول بعد ذلك، ويصبح البريد الإلكتروني ورقم الجوال متاحين لحساب جديد. يمكن للمسؤول استعادته من العملاء > المؤرشفة.',geMoveOnBike:'أحد أفراد هذه المجموعة على دراجة بالفعل، لذا تبقى المجموعة في هذه الجلسة.',errChangedElsewhere:'تم تعديل هذا الحجز للتو من جهاز آخر. تم تحديث القائمة — راجعها وحاول مجددًا.',errBikeNumberMax:'رقم الدراجة من 4 أرقام كحد أقصى (1–9999)، وإلا فلن يمكن مسح ملصقها وبطاقتها.',ridersEditOnBike:'أحد أفراد هذه المجموعة على دراجة بالفعل، لذا لا يمكن نقل المجموعة إلى ليلة أخرى.',
@@ -2017,6 +2020,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   cfnScWork:'العمل وحسابات التواصل',
   cfnScXem:'جهة اتصال الطوارئ (بعد تسجيل الدخول)',
   cfnScCheck:'راجع إجاباتك',
+  tabAsk:'اسأل',tabAskWait:'{0} بانتظار الموافقة',askNew:'سؤال جديد',askEmpty:'لا توجد أسئلة بعد.',askNoMatch:'لا شيء يطابق الفلتر.',askNoDb:'قسم «اسأل» غير مُعدّ في قاعدة البيانات بعد.',askStDraft:'مسودة',askStOpen:'مفتوحة',askStSoon:'تفتح {0}',askStClosed:'مغلقة',askFSoon:'لم تفتح بعد',askClosesAt:'تغلق {0}',askNoEnd:'بلا نهاية',askAnswers:'الإجابات',askPeople:'الأشخاص',askWaiting:'بانتظار الموافقة',askCopy:'نسخ',askCopied:'تم نسخ الرابط',askBack:'كل الأسئلة',askTabSetup:'الإعداد',askTabResults:'النتائج',askGPage:'الصفحة',askTitleEn:'العنوان (بالإنجليزية)',askTitleAr:'العنوان (بالعربية)',askIntroEn:'المقدمة (بالإنجليزية)',askIntroAr:'المقدمة (بالعربية)',askSlug:'اسم الرابط',askSlugTaken:'اسم الرابط هذا مستخدم',askSlugBad:'استخدم من 3 إلى 40 حرفًا إنجليزيًا صغيرًا وأرقامًا وشرطات.',askNeedTitle:'اكتب عنوانًا بالإنجليزية أو بالعربية.',askAud:'من يراها',askAudLink:'كل من لديه الرابط',askAudAcc:'الحسابات المسجَّل دخولها',askAudTags:'الحسابات التي تحمل وسمًا',askAudPick:'اختر وسمًا واحدًا على الأقل.',askTags:'الوسوم',askGWhen:'متى تكون مفتوحة',askOpens:'الفتح',askNow:'الآن',askAt:'تاريخ ووقت',askCloses:'الإغلاق',askIn1d:'يوم واحد',askIn3d:'3 أيام',askIn1w:'أسبوع واحد',askSaudi:'بتوقيت السعودية',askWhenBad:'اختر تاريخًا ووقتًا.',askCloseBad:'يجب أن تغلق بعد أن تفتح.',askAfter:'بعد الإغلاق',askAfterShow:'عرض النتائج',askAfterHide:'إخفاء',askGMore:'المزيد',askListed:'تظهر في القائمة على micromobility.sa/ask',askNotes:'ملاحظات الموظفين',askStart:'بدء',askEnd:'إنهاء',askEndAsk:'إنهاء هذه الصفحة؟',askUnsaved:'تغييرات غير محفوظة',askSaved:'تم الحفظ',askStarted:'بدأت',askDelPage:'حذف الصفحة',askDelAsk:'حذف هذه الصفحة وكل إجاباتها؟',askQs:'الأسئلة',askAddQ:'إضافة سؤال',askEditQ:'تعديل السؤال',askNeedQ:'أضف سؤالًا أولًا.',askUp:'تحريك لأعلى',askDown:'تحريك لأسفل',askQDelAsk:'حذف هذا السؤال وإجاباته ({0})؟',askTaking:'يستقبل الإجابات',askType:'النوع',askKcloud:'سحابة كلمات',askKopen:'إجابات مفتوحة',askKqa:'أسئلة من الحضور',askKchoice:'اختيار من متعدد',askKscales:'مقاييس',askKranking:'ترتيب',askKpoints:'100 نقطة',askKnumber:'رقم',askKinfo:'شريحة نصية',askQTitleEn:'السؤال (بالإنجليزية)',askQTitleAr:'السؤال (بالعربية)',askHelpEn:'نص المساعدة (بالإنجليزية)',askHelpAr:'نص المساعدة (بالعربية)',askMaxLen:'أطول إجابة، بعدد الأحرف',askPerPerson:'عدد الإجابات لكل شخص',askVotes:'يمكن التصويت للإجابات',askOptions:'الخيارات',askStatements:'العبارات',askOptEn:'الخيار {0}، بالإنجليزية',askOptAr:'الخيار {0}، بالعربية',askEn:'الإنجليزية',askAr:'العربية',askAddOpt:'إضافة خيار',askMaxPicks:'عدد الاختيارات لكل شخص',askChange:'يمكن تغيير الإجابة',askMin:'الأدنى',askMax:'الأعلى',askLoEn:'تسمية الطرف الأدنى (بالإنجليزية)',askLoAr:'تسمية الطرف الأدنى (بالعربية)',askHiEn:'تسمية الطرف الأعلى (بالإنجليزية)',askHiAr:'تسمية الطرف الأعلى (بالعربية)',askTotal:'النقاط المراد توزيعها',askNumMin:'أصغر رقم',askNumMax:'أكبر رقم',askStep:'الخطوة',askUnitEn:'الوحدة (بالإنجليزية)',askUnitAr:'الوحدة (بالعربية)',askModerated:'الموافقة على الإجابات قبل ظهورها',askResWho:'من يرى النتائج',askResLive:'فورًا',askResAnswered:'بعد الإجابة',askResClosed:'بعد الإغلاق',askResStaff:'الموظفون فقط',askNeedOpts:'أضف {0} خيارات على الأقل.',askOptEmpty:'املأ كل خيار أو احذفه.',askNumOrder:'يجب أن يكون أكبر رقم أعلى من أصغر رقم.',askCfgBad:'هذه الإعدادات لا تناسب هذا النوع من الأسئلة.',askAWait:'بالانتظار',askAOk:'موافق عليها',askANo:'غير موافق عليها',askApprove:'موافقة',askReject:'رفض',askToWait:'إعادة للانتظار',askEditText:'تعديل النص',askMarkAnswered:'تحديد كمُجاب عنه',askNotAnswered:'لم يُجَب عنه',askAnswered:'تمت الإجابة',askApproveN:'الموافقة على {0} محددة',askRejectN:'رفض {0} محددة',askApproveAll:'الموافقة على كل المنتظرة',askApproveAllAsk:'الموافقة على كل الإجابات المنتظرة ({0})؟',askDelAAsk:'حذف هذه الإجابة؟',askNoAnswers:'لا توجد إجابات بعد.',askNoneHere:'لا شيء هنا.',askFlagged:'مُعلَّمة',askQuestion:'السؤال',askAnswer:'الإجابة',askTime:'الوقت',askCode:'الرمز',askQr:'رمز QR للرابط',askScreen:'فتح الشاشة الكبيرة',askPreview:'معاينة',askReset:'تصفير النتائج',askResetAsk:'تصفير النتائج؟',askResetBody:'تبدأ جولة جديدة بلا إجابات. الإجابات السابقة تبقى محفوظة.',askRound:'الجولة {0}',askAvg:'المتوسط',askPlace:'متوسط الترتيب {0}',askVotesN:'الأصوات {0}',askWho:'من أجاب بماذا',
 }};
 // The staff screens' strings are not in LANG on a customer's phone (2026-10-01): the build moves
 // every key only staff code names into staff.js (English) and lang/staff-<code>.json (the rest,
@@ -2283,7 +2287,7 @@ function isAdmin(){return S.staffRole==='admin';}
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
 // Inside Riders the summary report stays admin-only (renderRiders).
 const DESK_TABS=['queue','waitlist','lockers','cashier','workshop']; // Lockers (2026-11-09): the desk gives them // the Waitlist (2026-11-09): a section of its own, opened by whoever opens Bookings // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
-const ROLE_TABS={volunteer:[],door:[],manager:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','waitlist','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','store','inventory'],owner:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
+const ROLE_TABS={volunteer:[],door:[],manager:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','waitlist','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','store','inventory'],owner:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
 function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]||DESK_TABS).filter(_stoSecOk);}
 // The Store and Payments (2026-11-10) are sections only where the database has them (staff_store_ready, _stoProbe): not on
 // the rail, not among the Team page's sections, not in "every section" anywhere else.
@@ -2294,7 +2298,7 @@ function _deskTabOk(tab){return tab==='settings'||(_roleTabs(S.staffRole).includ
 // call into (a return's fleet check, a void's reason, the night summary). Every other part comes the first time something asks for it (its stand-in fetches it).
 // Before the role is known nothing is held back. People's rarely opened views (peopleapps, peoplemore: staff round s10,
 // item 47) come only when one is opened; a session's report (sessreport) with the desk's parts.
-const STAFF_PART_TABS={peopleapps:[],peoplemore:[],sessreport:['queue'],sessions:['sessions'],lockers:['lockers'],store:['store','payments'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist'],door:[]}; // door: fetched by its stand-in when a Door account signs in
+const STAFF_PART_TABS={peopleapps:[],peoplemore:[],sessreport:['queue'],sessions:['sessions'],lockers:['lockers'],store:['store','payments'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],ask:['ask'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist'],door:[]}; // door: fetched by its stand-in when a Door account signs in
 function _staffPartWanted(n){const tabs=STAFF_PART_TABS[n];if(!tabs||!S.staffRole)return true;return tabs.some(_deskTabOk);}
 // A staff account's own preferences (2026-10-09): staff.prefs through staff_my_prefs, with this
 // device's copy (cq_prefs, kept per account) read at once so a reload starts as the person left it.
@@ -7695,7 +7699,7 @@ let _navRestoring=false;
 // them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
-const STAFF_PATHS={volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',store:'store',payments:'payments',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
+const STAFF_PATHS={volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',store:'store',payments:'payments',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ask:'ask',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',members:'members'};
 // The account page's three parts (the owner, 2026-11-09): Account at /account, then /account/stats and /account/badges.
 const ACC_VIEWS=['account','stats','badges'];
@@ -15770,6 +15774,7 @@ function setStaffTab(tab,o){
   else if(tab==='cashier')renderCashier();
   else if(tab==='community')renderCommunity();
   else if(tab==='badgereq')renderBadgeRequests();
+  else if(tab==='ask')renderAsk();
   else if(tab==='lockers')renderLockers();
   else if(tab==='store')renderStore();
   else if(tab==='payments')renderPayments();
@@ -15876,11 +15881,12 @@ function _commNavPaint(){
   if(grid)grid.classList.toggle('with-comm',on);
 }
 
-const _SNAV_ICON={store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',ask:'ask',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   if(!_ART.bag)_ART.bag='<path opacity=".35" d="M4 8h16l-1.1 12.2A2 2 0 0 1 16.9 22H7.1a2 2 0 0 1-2-1.8z"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9h-2V6.5a2 2 0 0 0-4 0V9z"/>'; // the Store's mark (2026-11-10), kept here for the same reason
   if(!_ART.calendar)_ART.calendar='<rect opacity=".35" x="3" y="5" width="18" height="16" rx="2"/><path d="M5 5h14a2 2 0 0 1 2 2v2.5H3V7a2 2 0 0 1 2-2ZM7 2.5h2v5H7zm8 0h2v5h-2zM7 13h3v3H7zm7 0h3v3h-3z"/>'; // the Sessions section's mark (2026-11-06), kept here: in _ART it rode on every customer's page
+  if(!_ART.ask)_ART.ask='<path opacity=".35" d="M4 3.5h16a2 2 0 0 1 2 2V15a2 2 0 0 1-2 2h-9.2L5.6 21v-4H4a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z"/><path d="M9.6 8.3a2.4 2.4 0 1 1 3.9 1.9c-.9.7-1.5 1.2-1.5 2.3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="14.7" r="1.15"/>'; // Ask's mark (2026-11-13): a question in a speech bubble, kept here like the two above
   document.querySelectorAll('#staff-tab-nav .tab-btn').forEach(b=>{
     const ic=b.querySelector('.snav-ico');
     if(ic&&!ic.firstChild)ic.innerHTML=_artIcon(_SNAV_ICON[b.dataset.stab]||'grid',17);
@@ -15979,6 +15985,8 @@ function renderStaffTabs(){
   document.getElementById('tab-community') .classList.toggle('active',S.staffTab==='community');
   document.getElementById('tab-badgereq')  .classList.toggle('active',S.staffTab==='badgereq');
   if(!S._bdrAt&&S._staffAuthed&&_deskTabOk('badgereq'))_bdrLoad(); // the rail's count, from the first paint on (then _secPolls)
+  document.getElementById('tab-ask')       .classList.toggle('active',S.staffTab==='ask');
+  _askRailSync();if(!S._askCAt&&S._staffAuthed&&_deskTabOk('ask'))_askCount(); // Ask's name, and the answers waiting for approval (then _secPolls)
   document.getElementById('tab-history')   .classList.toggle('active',S.staffTab==='history');
   document.getElementById('tab-analytics') .classList.toggle('active',S.staffTab==='analytics');
   document.getElementById('tab-website')   .classList.toggle('active',S.staffTab==='website');
@@ -17770,7 +17778,7 @@ const _N6T_REC='cq_gs_recent',_N6T_KIND_TAB={booking:'queue',acct:'community',bi
 // Every command says its keyboard shortcut (when this device has them on) and answers to its name in English and Arabic
 // whatever the language on screen (s10, item 29).
 const GS_AKA={dashboard:'لوحة القيادة',queue:'الحجوزات',waitlist:'قائمة الانتظار',sessions:'الجلسات',lockers:'الخزائن',cashier:'المبيعات till',store:'المتجر',payments:'المدفوعات',
-  inventory:'المخزون',workshop:'الورشة',community:'الأشخاص accounts',badgereq:'طلبات الأوسمة',ambassadors:'السفراء',volunteers:'المتطوعون',vendors:'الموردون',website:'الموقع',
+  inventory:'المخزون',workshop:'الورشة',community:'الأشخاص accounts',badgereq:'طلبات الأوسمة',ask:'اسأل',ambassadors:'السفراء',volunteers:'المتطوعون',vendors:'الموردون',website:'الموقع',
   catalog:'كتالوج الدراجات',messages:'الرسائل',analytics:'التحليلات',history:'السجل',team:'الفريق',settings:'الإعدادات',next:'تسجيل دخول التالي',walkin:'زيارة مباشرة',scan:'مسح التذكرة',newsess:'جلسة جديدة',closeout:'إنهاء الليلة'};
 function _gsAka(k,lk){return(GS_AKA[k]||'')+' '+((LANG.en||{})[lk]||'');}
 // Ctrl K opens every sub-view too ("People › Applications", "Analytics › Ratings"): one per SUB_PATHS entry named here
@@ -19742,7 +19750,7 @@ function _deferWhileTyping(tab){
   return true;
 }
 function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for something the staffer did
-  _dqInit();_stoTabLabelSync(); // the Store's and Payments' names, in the language on screen
+  _dqInit();_stoTabLabelSync();_askRailSync(); // the Store's, Payments' and Ask's names, in the language on screen
   if(S.staffRole==='door'){_doorShow();return;}
   const tab=S.staffTab;
   if(bg&&['cashier','inventory','community','customers','bikes'].includes(tab)&&_deferWhileTyping(tab)){try{_ahRefresh();}catch(_){}try{_ntSync();}catch(_){}return;}
@@ -19754,6 +19762,7 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
   else if(tab==='inventory')renderInventory();
   else if(tab==='community')renderCommunity();
   else if(tab==='badgereq'){if(!bg)renderBadgeRequests();} // its own loader: the desk's data has nothing for it
+  else if(tab==='ask'){if(!bg||!(S._askS&&S._askS.cur))renderAsk();} // its own loader; the list follows the tags' names, a page on screen (a draft in hand) is left alone
   else if(tab==='lockers')renderLockers(); // names and booking numbers come from the desk's rows
   else if(tab==='store'){if(!bg)renderStore();} // its own loader: the desk's data has nothing for it
   else if(tab==='payments'){if(!bg)renderPayments();}
@@ -24434,6 +24443,790 @@ async function _paySetSave(){
   logAction(`${t('paySettings')}: ${ch.join(', ')}`,{k:'settings',e:'site_content',id:'pay'});
   toast(t('paySetSaved'));
   _payRepaint();
+}
+
+// ── Ask (/ask; the owner, 2026-11-13): questions put to an audience under one link, micromobility.sa/ask ──────────
+// Staff make a page (one link, micromobility.sa/ask/<slug>) that holds one or more questions, say who sees it and for
+// how long, approve the written answers before they show, and read who wrote what. The database is migration
+// 20261113010000 (ask_pages, ask_questions, ask_answers; staff_ask_pages / _page / _answers / _review / _control /
+// _pending); the riders' pages are the website's. The section comes with People (ROLE_TABS, _modIds, _MOD_PARENT) and
+// the database lets only those who may change People write it (_askCan). It is a staff part of its own (scripts/
+// split-staff.mjs): the desk's core holds only the rail's number, the two functions below.
+// A page is edited as a draft (cur.d, against its saved copy cur.d0) and written on Save or Start: the page, then its
+// questions in order. What acts at once says so: Taking answers on a saved question, Start, End, Reset results and the
+// approval of answers. The setup is drawn in small groups (_askG...) and the results from small drawing pieces
+// (_askV...), so a new group or chart is one more function.
+// Stage 1 draws nine kinds of question (ASK_KINDS); the database already takes more, which these screens leave undrawn.
+async function _askCount(force){
+  if(!sb||S._askCB||S._askGone||(!force&&S._askCAt&&Date.now()-S._askCAt<6e4))return;
+  S._askCB=true;S._askCAt=Date.now();
+  let r;try{r=await _roFree(()=>sb.rpc('staff_ask_pending'));}catch(e){r={error:e};} // a read: past the read-only guard, which takes any rpc for a write
+  S._askCB=false;
+  if(r&&!r.error){const n=Math.floor(Number(r.data));S._askN=n>0?n:0;}
+  else if(r&&r.error&&_rpcAbsent(r.error))S._askGone=true; // a database from before Ask: no number, and the section says so
+  _askRailSync();
+}
+// The rail's name and the answers waiting, in the language on screen (the label loop in render() leaves this one alone).
+function _askRailSync(){
+  const l=document.querySelector('#staff-tab-nav .tab-btn[data-stab="ask"] .snav-lbl');if(!l)return;
+  const n=S._askN|0,k=S.lang+'|'+n;if(l.dataset.k===k)return;l.dataset.k=k;
+  l.innerHTML=esc(t('tabAsk'))+(n?` <span class="tab-badge" title="${esc(t('tabAskWait').replace('{0}',n))}">${n}</span>`:'');
+}
+const ASK_KINDS=['cloud','open','qa','choice','scales','ranking','points','number','info'];
+const ASK_TEXT=['cloud','open','qa']; // written answers: they can wait for approval and their text can be corrected
+const ASK_OPTS={choice:[2,12],scales:[1,8],ranking:[2,10],points:[2,10]}; // the kinds with a list of options: the fewest, the most
+const ASK_LIVE_MS=10000; // the answers and the results on screen are read again this often
+// The section's own marks, in the staff set's two tones (the main shape in the ink, the second at .35).
+const _ASK_ART={
+  cloud:'<path opacity=".35" d="M6.5 19a4.5 4.5 0 0 1-.7-8.95 6 6 0 0 1 11.6-1.2A5.1 5.1 0 0 1 17 19H6.5Z"/><path d="M6.8 10.9h5.6v1.9H6.8zm6.9 0h3.6v1.9h-3.6zm-5.2 3.4h3.1v1.9H8.5zm4.4 0h4.1v1.9h-4.1z"/>',
+  open:'<path opacity=".35" d="M4.5 3h15a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M6 7h12v2H6zm0 4h12v2H6zm0 4h7v2H6z"/>',
+  qa:'<path opacity=".35" d="M3 3.5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8.2l-3.4 3v-3H3a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2Z"/><path d="M12.5 10H21a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-.9v2.6L17 19h-4.5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Z"/><path d="M5 6.9a1.7 1.7 0 1 1 2.8 1.3c-.6.5-1 .8-1 1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="6.8" cy="11.5" r=".9"/>',
+  choice:'<circle cx="5.5" cy="6" r="2.7"/><path d="M10 4.9h11v2.2H10z"/><g opacity=".35"><circle cx="5.5" cy="12" r="2.7"/><circle cx="5.5" cy="18" r="2.7"/><path d="M10 10.9h11v2.2H10zm0 6h8v2.2h-8z"/></g>',
+  scales:'<path opacity=".35" d="M3 5.4h18v1.8H3zm0 5.7h18v1.8H3zm0 5.7h18v1.8H3z"/><circle cx="8" cy="6.3" r="2.5"/><circle cx="15.5" cy="12" r="2.5"/><circle cx="11" cy="17.7" r="2.5"/>',
+  ranking:'<path d="M9 4h6v16H9z"/><path opacity=".35" d="M2.5 10H8v10H2.5zM16 13h5.5v7H16z"/>',
+  points:'<circle opacity=".35" cx="12" cy="12" r="9.5"/><path d="M12 2.5a9.5 9.5 0 0 1 8.23 14.25L12 12V2.5Z"/>',
+  number:'<rect opacity=".35" x="2.5" y="2.5" width="19" height="19" rx="4"/><path d="M10 6.5 8.8 17.5M15.2 6.5 14 17.5M6.8 9.8h10.9M6.3 14.2h10.9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>',
+  info:'<rect opacity=".35" x="2" y="3.5" width="20" height="13.5" rx="2"/><path d="M10.9 9.4h2.2V14h-2.2zm0-3.4h2.2v2.2h-2.2zM7.5 19.5h9v1.9h-9z"/>',
+  up:'<path d="m12 7.2 7.6 7.6-1.6 1.6-6-6-6 6-1.6-1.6L12 7.2Z"/>',
+  down:'<path d="M12 16.8 4.4 9.2 6 7.6l6 6 6-6 1.6 1.6-7.6 7.6Z"/>',
+  back:'<path d="M14.8 4.4 7.2 12l7.6 7.6 1.6-1.6-6-6 6-6-1.6-1.6Z"/>',
+  trash:'<path opacity=".35" d="M6 8h12l-.9 12.2a2 2 0 0 1-2 1.8H8.9a2 2 0 0 1-2-1.8L6 8Z"/><path d="M9.5 2.5h5l.8 1.7H20v2.2H4V4.2h4.7l.8-1.7Zm-.1 8h1.8v8H9.4zm3.4 0h1.8v8h-1.8z"/>',
+  plus:'<path d="M10.9 4h2.2v6.9H20v2.2h-6.9V20h-2.2v-6.9H4v-2.2h6.9V4Z"/>',
+  screen:'<rect opacity=".35" x="2" y="3.5" width="20" height="13" rx="2"/><path d="M7.5 19.3h9v1.9h-9zm3.4-2.8h2.2v2.8h-2.2zM6 13.2l3.2-3.6 2.6 2.2 3.3-4 2.9 3.2v2.2H6z"/>',
+  eye:'<path opacity=".35" d="M12 5c5 0 8.6 3.4 10.2 7-1.6 3.6-5.2 7-10.2 7S3.4 15.6 1.8 12C3.4 8.4 7 5 12 5Z"/><circle cx="12" cy="12" r="3.6"/>',
+};
+function _askIc(k,px){return`<svg aria-hidden="true" width="${px||16}" height="${px||16}" viewBox="0 0 24 24" fill="currentColor" class="art-ic">${_ASK_ART[k]||_ASK_ART.info}</svg>`;}
+function _ask(){return S._askS||(S._askS={pages:null,busy:false,err:false,at:0,f:{st:''},cur:null,tm:0,reg:0});}
+function _askCan(){return _editOk('community');} // People's own right: the database lets only those who may change People write Ask
+function _askPaint(){if(S.view==='staff'&&S.staffTab==='ask')renderAsk();}
+function _askPg(){const C=_ask().cur;return C?((C.det&&C.det.page)||C.row):null;}
+// A page's or a question's text for the person reading: Arabic first to an Arabic reader, English first to everyone else.
+function _askT(o){return o?(S.lang==='ar'?(o.title_ar||o.title_en):(o.title_en||o.title_ar))||'':'';}
+function _askUrl(slug){return SITE_URL+'/ask/'+slug;}
+// Draft, Open, Opens <date> or Closed: a live page is open inside its window.
+function _askState(p){
+  if(!p||p.status==='draft'||!p.status)return['draft',t('askStDraft')];
+  const now=Date.now(),o=Date.parse(p.opens_at||''),c=Date.parse(p.closes_at||'');
+  if(p.status==='ended'||(c&&now>=c))return['closed',t('askStClosed')];
+  if(o&&now<o)return['soon',t('askStSoon').replace('{0}',fmtStamp(p.opens_at))];
+  return['open',t('askStOpen')];
+}
+function _askTagName(id){const g=(S.tags||[]).find(x=>x.id===id);return g?g.name:id;}
+function _askAudTxt(p){return p.audience==='tags'?t('askAudTags')+': '+((p.tag_ids||[]).map(_askTagName).join(', ')||'-'):t(p.audience==='accounts'?'askAudAcc':'askAudLink');}
+// Times are entered and shown in Saudi time (UTC+3) and stored as timestamptz: a datetime-local field's value both ways.
+function _askLocal(iso){const ms=Date.parse(iso||'');return isNaN(ms)?'':new Date(ms+108e5).toISOString().slice(0,16);}
+function _askIso(v){const m=/^\d{4}-\d\d-\d\dT\d\d:\d\d/.exec(String(v||'')),ms=m?Date.parse(m[0]+':00+03:00'):NaN;return isNaN(ms)?null:new Date(ms).toISOString();}
+function _askSlugOf(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40).replace(/-+$/,'');}
+// A read. Sent past the read-only guard, which takes any rpc for a write: an account that opens Ask without changing it reads too.
+async function _askGet(fn,args){
+  let r;try{r=await _roFree(()=>sb.rpc(fn,args||{}));}catch(e){r={error:e};}
+  if(r&&r.error&&_rpcAbsent(r.error))S._askGone=true;
+  return r;
+}
+// A change a function makes (staff_ask_review, staff_ask_control): true when it was done; a refusal is said.
+async function _askDo(fn,args,ctx){let r;try{r=await sb.rpc(fn,args);}catch(e){r={error:e};}return!_writeErr(r,ctx);}
+async function _askCtl(act,qid){const C=_ask().cur;if(!C||!C.id)return false;return _askDo('staff_ask_control',qid==null?{p_page:C.id,p_action:act}:{p_page:C.id,p_action:act,p_question:qid},'ask '+act);}
+async function _askCopy(slug){const u=_askUrl(slug);try{await navigator.clipboard.writeText(u);toast(t('askCopied'));}catch(e){toast(u,'info');}}
+
+// ── The list of pages ──
+async function _askLoad(force){
+  const A=_ask();
+  if(!sb||A.busy||S._askGone||(!force&&A.at&&Date.now()-A.at<(A.err?8000:30000)))return;
+  A.busy=true;A.at=Date.now();
+  const was=JSON.stringify(A.pages);
+  const r=await _askGet('staff_ask_pages');
+  A.busy=false;
+  if(r&&!r.error){A.pages=Array.isArray(r.data)?r.data:[];A.err=false;}
+  else if(!S._askGone)A.err=true;
+  if(!A.cur&&(A.err||S._askGone||JSON.stringify(A.pages)!==was))_askPaint();
+}
+function _askReload(){const A=_ask();A.err=false;A.at=0;_askLoad(true);_askPaint();}
+function _askF(v){_ask().f.st=String(v||'');renderAsk();}
+function _askShown(){const A=_ask(),f=A.f.st;return(A.pages||[]).filter(p=>!f||_askState(p)[0]===f);}
+function _askLinkHtml(slug){
+  const l=_askUrl(slug).replace(/^https?:\/\//,'');
+  return`<span class="ask-link"><bdi dir="ltr">${esc(l)}</bdi><button type="button" class="btn-sm btn-muted ask-copy" aria-label="${esc(t('askCopy')+' '+l)}" data-on-click="${_on('_askCopy',slug)}">${_artIcon('copy',13)} ${esc(t('askCopy'))}</button></span>`;
+}
+function _askRowHtml(p){
+  const st=_askState(p),n=p.pending|0;
+  return`<div class="ask-pg" data-ask-pg="${esc(String(p.id))}">
+    <div class="ask-pg-head"><button type="button" class="ask-pg-t" data-on-click="${_on('_askOpen',p.id)}"><bdi>${esc(_askT(p)||p.slug)}</bdi></button><span class="ask-st ask-st-${st[0]}">${esc(st[1])}</span></div>
+    ${_askLinkHtml(p.slug)}
+    <div class="am-meta ask-pg-meta">${esc(_askAudTxt(p))} · ${esc(p.closes_at?t('askClosesAt').replace('{0}',fmtStamp(p.closes_at)):t('askNoEnd'))} · ${esc(t('askAnswers'))} <bdi>${p.answers|0}</bdi> · ${esc(t('askPeople'))} <bdi>${p.people|0}</bdi></div>
+    ${n?`<button type="button" class="ask-pend" data-on-click="${_on('_askOpen',p.id,'answers')}">${esc(t('askWaiting'))} <b>${n}</b></button>`:''}
+  </div>`;
+}
+function _askListHtml(){
+  const A=_ask();
+  let body;
+  if(S._askGone)body=_emptyState(esc(t('askNoDb')));
+  else if(!A.pages)body=A.err&&!A.busy?_loadErr(esc(t('errConnection')),_on('_askReload')):skeletonList();
+  else{
+    const L=_askShown(),opt=(v,l)=>`<option value="${v}"${A.f.st===v?' selected':''}>${esc(t(l))}</option>`;
+    const sel=`<select class="filter-select" aria-label="${esc(t('colStatus'))}" data-on-change="${_on('_askF',_P('value'))}">${opt('','filterAll')}${opt('draft','askStDraft')}${opt('open','askStOpen')}${opt('soon','askFSoon')}${opt('closed','askStClosed')}</select>`;
+    body=`<div class="filter-bar">${listToolbar({key:'ask',f:[_fField(esc(t('colStatus')),sel),'',_fS(A.f,'st')],
+        extra:_askCan()?`<button type="button" class="btn-sm btn-primary ask-new" data-on-click="${_on('_askNew')}">${_askIc('plus',13)} ${esc(t('askNew'))}</button>`:''})}</div>
+      <div class="ask-list" id="ask-list">${L.map(_askRowHtml).join('')||_emptyState(esc(t(A.pages.length?'askNoMatch':'askEmpty')))}</div>`;
+  }
+  return`<h1 class="page-title">${esc(t('tabAsk'))}</h1><div class="form-section ws-mt0">${body}</div>`;
+}
+
+// ── One page: its setup, its answers, its results ──
+function _askCur(p,tab){return{id:p?p.id:null,row:p||null,tab,d:null,d0:'',det:null,detSig:'',detErr:false,ans:null,ansSig:'',ansErr:false,seq:0,wr:0,errs:{},at:'pending',aq:'',an:60,wn:50,q:null,saving:false};}
+function _askTop(){try{const m=document.getElementById('staff-main');if(m)m.scrollTop=0;window.scrollTo(0,0);}catch(_){}}
+function _askOpen(id,tab){
+  const A=_ask(),p=(A.pages||[]).find(x=>String(x.id)===String(id));if(!p)return;
+  A.cur=_askCur(p,tab||(p.status==='draft'?'setup':'results'));
+  const s=_lsSel('askA');if(s)s.clear();
+  _askDetail();_askAnswers();renderAsk();_askTop();
+}
+// New question: the editor with one word cloud ready, so the common case is a title and Start.
+function _askNew(){
+  if(!_askCan())return;
+  const A=_ask(),C=A.cur=_askCur(null,'setup');
+  C.d=_askDraft(null,[_askQNew('cloud')]);C.d0=JSON.stringify(C.d);
+  renderAsk();_askTop();
+  const f=document.getElementById('ask-title-en');if(f)f.focus();
+}
+function _askBackGo(){const A=_ask();A.cur=null;A.at=0;renderAsk();_askTop();}
+function _askBack(){if(_askDirty()&&_draftAsk('ask',_askBackGo))return;_askBackGo();}
+function _askTab(k){
+  const C=_ask().cur;if(!C||!C.id)return;
+  C.tab=k==='answers'||k==='results'?k:'setup';
+  if(C.tab!=='setup'){_askAnswers();if(C.tab==='results')_askDetail();}
+  renderAsk();
+}
+// The page as the database holds it (staff_ask_page: the row, its questions with their counts and results). The draft is
+// made from it, and made again from a newer answer only while nothing in it is unsaved.
+async function _askDetail(){
+  const C=_ask().cur;if(!C||!C.id||C.dBusy)return;
+  C.dBusy=true;
+  const r=await _askGet('staff_ask_page',{p_page:C.id});
+  C.dBusy=false;
+  if(_ask().cur!==C)return;
+  if(r&&!r.error&&r.data&&r.data.page){
+    const sig=JSON.stringify(r.data),chg=sig!==C.detSig||C.detErr;
+    C.det=r.data;C.detSig=sig;C.detErr=false;
+    if(!C.d||!_askDirty()){C.d=_askDraft(r.data.page,r.data.questions||[]);C.d0=JSON.stringify(C.d);}
+    if(chg){if(C.tab==='results')_askAnswers();_askPaint();}
+  }else{const was=C.detErr;C.detErr=true;if(!C.det&&!was)_askPaint();}
+}
+// Every answer of the page's round, with who wrote it (staff_ask_answers). A read that crossed a change made here is dropped and asked again.
+async function _askAnswers(){
+  const C=_ask().cur;if(!C||!C.id||C.aBusy)return;
+  C.aBusy=true;const seq=C.seq;
+  const r=await _askGet('staff_ask_answers',{p_page:C.id});
+  C.aBusy=false;
+  if(_ask().cur!==C)return;
+  if(C.seq!==seq||C.wr){if(!C.wr)_askAnswers();return;} // changed here meanwhile: this answer is older than the change
+  if(r&&!r.error){
+    const rows=Array.isArray(r.data)?r.data:[],sig=JSON.stringify(rows);C.ansErr=false;
+    if(sig!==C.ansSig||!C.ans){const w=_askWaitN();C.ans=rows;C.ansSig=sig;_askPaint();if(_askWaitN()!==w)_askCount(true);}
+  }else{const was=C.ansErr;C.ansErr=true;if(!C.ans&&!was)_askPaint();}
+}
+// While a page's answers or results are on screen and the tab is in view they are read again every ten seconds, so a
+// new answer shows without a reload (no realtime channel).
+function _askTick(){
+  const A=_ask(),C=A.cur;
+  if(A.tm||!C||!C.id||C.tab==='setup')return;
+  A.tm=setInterval(()=>{
+    const X=A.cur;
+    if(S.view!=='staff'||S.staffTab!=='ask'||!X||!X.id||X.tab==='setup'){clearInterval(A.tm);A.tm=0;return;}
+    if(document.hidden||_sbCooling())return;
+    if(X.tab==='answers')_askAnswers();else _askDetail();
+  },ASK_LIVE_MS);
+}
+function _askWaitN(){
+  const C=_ask().cur;if(!C)return 0;
+  if(C.ans)return _askARows().filter(a=>a.status==='pending').length;
+  if(C.det)return(C.det.questions||[]).reduce((s,q)=>s+(q.pending|0),0);
+  return C.row?C.row.pending|0:0;
+}
+function _askPageHtml(){
+  const C=_ask().cur,p=_askPg(),st=_askState(p),n=_askWaitN();
+  const tab=(k,l,b)=>`<button type="button" class="filter-pill${C.tab===k?' active':''}" aria-pressed="${C.tab===k}" data-ask-tab="${k}" data-on-click="${_on('_askTab',k)}">${esc(t(l))}${b?` <span class="tab-badge">${b}</span>`:''}</button>`;
+  let body;
+  if(S._askGone)body=_emptyState(esc(t('askNoDb')));
+  else if(!C.d)body=C.detErr&&!C.dBusy?_loadErr(esc(t('errConnection')),_on('_askDetail')):skeletonList();
+  else body=C.tab==='answers'?_askAnsHtml():C.tab==='results'?_askResHtml():_askSetupHtml();
+  return`<div class="ask-top"><button type="button" class="btn-sm btn-muted ask-back" data-on-click="${_on('_askBack')}">${_askIc('back',13)} ${esc(t('askBack'))}</button></div>
+    <div class="ask-title"><h1 class="page-title"><bdi>${esc(C.id?(_askT(p)||(p&&p.slug)||''):t('askNew'))}</bdi></h1><span class="ask-st ask-st-${st[0]}">${esc(st[1])}</span></div>
+    ${C.id&&p&&p.slug?_askLinkHtml(p.slug):''}
+    ${C.id?`<div class="filter-bar ask-tabs"><div class="filter-row">${tab('setup','askTabSetup')}${tab('answers','askAnswers',n)}${tab('results','askTabResults')}</div></div>`:''}
+    <div class="form-section ws-mt0 ask-body">${body}</div>`;
+}
+
+// ── The draft ──
+let _askSeq=0;
+function _askCfgDef(k){
+  return k==='cloud'?{max_len:25,per_person:3}:k==='open'?{max_len:200,per_person:1,votes:false}:k==='qa'?{max_len:200,per_person:3,votes:true}
+    :k==='choice'?{options:[],max_picks:1,change:false}:k==='scales'?{options:[],min:1,max:5,lo_en:'',lo_ar:'',hi_en:'',hi_ar:'',skip:false}
+    :k==='ranking'?{options:[]}:k==='points'?{options:[],total:100}:k==='number'?{min:0,max:100,step:1,unit_en:'',unit_ar:''}:{};
+}
+function _askOptsNew(n){return Array.from({length:n},(_,i)=>({id:'a'.concat(i+1),en:'',ar:''}));} // .concat, not a plus: the build reads a quoted word joined with a plus as the start of string keys, and every string starting with that letter would follow it into the desk's core
+// A question's settings as the database takes them (the contract's section 2): each number inside its range, the options
+// trimmed, and whatever else they already held kept (a correct answer has no field here yet). err: what must be fixed first.
+function _askCfgNorm(k,c){
+  c=c&&typeof c==='object'&&!Array.isArray(c)?c:{};
+  const typed=v=>v!=null&&String(v).trim()!=='',o={};let err='';
+  const int=(v,lo,hi,df)=>{const n=Math.round(Number(v));return typed(v)&&Number.isFinite(n)?Math.min(hi,Math.max(lo,n)):df;};
+  const num=(v,df)=>{const n=Number(v);return typed(v)&&Number.isFinite(n)?n:df;};
+  if(k==='cloud'){o.max_len=int(c.max_len,5,40,25);o.per_person=int(c.per_person,1,10,3);}
+  else if(k==='open'||k==='qa'){o.max_len=int(c.max_len,20,500,200);o.per_person=int(c.per_person,1,10,k==='qa'?3:1);o.votes=c.votes==null?k==='qa':!!c.votes;}
+  if(ASK_OPTS[k]){
+    o.options=(Array.isArray(c.options)?c.options:[]).map(x=>({id:String((x&&x.id)||''),en:String((x&&x.en)||'').trim().slice(0,80),ar:String((x&&x.ar)||'').trim().slice(0,80)}));
+    if(o.options.some(x=>!x.en&&!x.ar))err='askOptEmpty';else if(o.options.length<ASK_OPTS[k][0])err='askNeedOpts';
+  }
+  if(k==='choice'){o.max_picks=int(c.max_picks,1,Math.max(1,o.options.length),1);o.change=!!c.change;}
+  else if(k==='scales'){o.min=int(c.min,0,1,1);o.max=int(c.max,3,10,5);for(const x of['lo_en','lo_ar','hi_en','hi_ar'])o[x]=String(c[x]||'').trim().slice(0,40);o.skip=!!c.skip;}
+  else if(k==='points')o.total=int(c.total,10,1000,100);
+  else if(k==='number'){o.min=num(c.min,0);o.max=num(c.max,100);o.step=num(c.step,1);if(!(o.step>0))o.step=1;o.unit_en=String(c.unit_en||'').trim().slice(0,20);o.unit_ar=String(c.unit_ar||'').trim().slice(0,20);if(!(o.max>o.min))err=err||'askNumOrder';}
+  for(const x of Object.keys(c))if(!(x in o))o[x]=c[x];
+  return{cfg:o,err};
+}
+function _askQNew(k){
+  const c=_askCfgDef(k);if(ASK_OPTS[k])c.options=_askOptsNew(2);
+  return{id:null,k:'n'.concat(++_askSeq),kind:k,title_en:'',title_ar:'',help_en:'',help_ar:'',config:c,moderated:true,results:'live',open:true,look:{}};
+}
+function _askQOf(q){
+  const known=ASK_KINDS.includes(q.kind),obj=x=>x&&typeof x==='object'&&!Array.isArray(x)?x:{};
+  return{id:q.id,k:'q'.concat(q.id),kind:q.kind,title_en:q.title_en||'',title_ar:q.title_ar||'',help_en:q.help_en||'',help_ar:q.help_ar||'',
+    config:known?_askCfgNorm(q.kind,q.config).cfg:obj(q.config),moderated:q.moderated!==false,results:['answered','closed','staff'].includes(q.results)?q.results:'live',open:q.open!==false,look:obj(q.look)};
+}
+function _askDraft(p,qs){
+  p=p||{};
+  return{title_en:p.title_en||'',title_ar:p.title_ar||'',intro_en:p.intro_en||'',intro_ar:p.intro_ar||'',slug:p.slug||'',auto:!p.id,
+    audience:p.audience==='accounts'||p.audience==='tags'?p.audience:'link',tag_ids:Array.isArray(p.tag_ids)?p.tag_ids.slice():[],
+    oOn:!!p.opens_at,opens:_askLocal(p.opens_at),cOn:!!p.closes_at,closes:_askLocal(p.closes_at),
+    after_close:p.after_close==='hidden'?'hidden':'results',listed:p.id?!!p.listed:true,notes:p.notes||'',look:p.look&&typeof p.look==='object'&&!Array.isArray(p.look)?p.look:{},
+    qs:qs.map(q=>q.k?q:_askQOf(q)),del:[]};
+}
+function _askDirty(){const C=_ask().cur;return!!(C&&C.d&&JSON.stringify(C.d)!==C.d0);}
+function _askMark(){const n=document.getElementById('ask-dirty');if(n)n.hidden=!_askDirty();}
+// A field typed in: the draft takes it and nothing is drawn again, except to take away the error it answered.
+function _askIn(k,v){
+  const C=_ask().cur,d=C&&C.d;if(!d)return;
+  d[k]=v;
+  let re=false;
+  if(k==='title_en'&&d.auto){d.slug=_askSlugOf(v);const s=document.getElementById('ask-slug');if(s)s.value=d.slug;if(C.errs.slug){delete C.errs.slug;re=true;}}
+  const e=k==='title_en'||k==='title_ar'?'title':k;
+  if(C.errs[e]){delete C.errs[e];re=true;}
+  if(re)renderAsk();else _askMark();
+}
+function _askSlugIn(el){
+  const C=_ask().cur,d=C&&C.d;if(!d)return;
+  const v=String(el.value||'').toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/-{2,}/g,'-').slice(0,40);
+  if(v!==el.value)el.value=v;
+  d.slug=v;d.auto=false;
+  if(C.errs.slug){delete C.errs.slug;renderAsk();}else _askMark();
+}
+// A choice that changes what the form shows (who sees it, a date instead of Now): the draft takes it and the form is drawn again.
+function _askSet(k,v){
+  const C=_ask().cur,d=C&&C.d;if(!d||!_askCan())return;
+  d[k]=v;
+  if(k==='oOn'&&v&&!d.opens)d.opens=_askLocal(new Date().toISOString());
+  if(k==='cOn'&&v&&!d.closes)d.closes=_askLocal(new Date(Date.now()+7*864e5).toISOString());
+  delete C.errs.tags;delete C.errs.opens;delete C.errs.closes;
+  renderAsk();
+}
+function _askTag(id){
+  const C=_ask().cur,d=C&&C.d;if(!d||!_askCan())return;
+  d.tag_ids=d.tag_ids.includes(id)?d.tag_ids.filter(x=>x!==id):[...d.tag_ids,id];
+  delete C.errs.tags;renderAsk();
+}
+// Closes in 1 day, 3 days or a week: counted from when it opens, or from now.
+function _askCloseIn(n){
+  const C=_ask().cur,d=C&&C.d;if(!d||!_askCan())return;
+  const o=d.oOn?Date.parse(_askIso(d.opens)||''):NaN,base=o>Date.now()?o:Date.now();
+  d.cOn=true;d.closes=_askLocal(new Date(base+n*864e5).toISOString());
+  delete C.errs.closes;renderAsk();
+}
+
+// ── The setup, in groups ──
+function _askG(id,title,inner){return`<section class="ask-g" aria-labelledby="ask-g-${id}"><h2 id="ask-g-${id}">${esc(title)}</h2>${inner}</section>`;}
+// One text field with its label: o.ltr / o.ar its direction, o.area a textarea, o.err the key of what is wrong with it.
+function _askInp(id,label,val,on,o){
+  o=o||{};
+  const e=o.err?t(o.err):'',dir=o.ar?'dir="rtl" lang="ar"':o.ltr?'dir="ltr"':'dir="auto"',bad=e?` aria-invalid="true" aria-describedby="${id}-e"`:'',dis=o.ro?' disabled':'';
+  return`<div class="form-group ask-f"><label for="${id}">${esc(label)}</label>${o.area
+    ?`<textarea id="${id}" ${dir} rows="${o.rows||2}" maxlength="${o.max||300}"${dis}${bad} data-on-input="${on}">${esc(val)}</textarea>`
+    :`<input type="text" id="${id}" ${dir} autocomplete="off" maxlength="${o.max||120}"${dis}${bad} value="${esc(val)}" data-on-input="${on}">`}${e?`<div class="ask-err" id="${id}-e" role="alert">${esc(e)}</div>`:''}</div>`;
+}
+function _askSetupHtml(){
+  const ro=!_askCan();
+  return`<div class="ask-setup">${ro?'':_askActsHtml()}${_askGText(ro)}${_askGQs(ro)}${_askGWho(ro)}${_askGWhen(ro)}${_askGMore(ro)}</div>`;
+}
+// Start (or End on a live page), Save and Delete, above the form: the common case is a title and Start.
+function _askActsHtml(){
+  const C=_ask().cur,live=!!C.id&&(_askPg()||{}).status==='live',dis=C.saving?' disabled':'';
+  const save=pr=>`<button type="button" class="${pr?'btn-primary':'btn-secondary'} ask-save" id="ask-save"${dis} data-on-click="${_on('_askSave',false)}">${esc(t('saveBtn'))}</button>`;
+  return`<div class="ask-acts">${live?save(1)+`<button type="button" class="btn-secondary ask-end"${dis} data-on-click="${_on('_askEnd')}">${esc(t('askEnd'))}</button>`
+      :`<button type="button" class="btn-primary ask-start"${dis} data-on-click="${_on('_askSave',true)}">${esc(t('askStart'))}</button>`+save(0)}
+    <span class="am-meta ask-dirty" id="ask-dirty"${_askDirty()?'':' hidden'}>${esc(t('askUnsaved'))}</span>
+    ${C.id?`<button type="button" class="btn-sm btn-muted ask-del"${dis} data-on-click="${_on('_askDelPage')}">${esc(t('askDelPage'))}</button>`:''}</div>`;
+}
+function _askGText(ro){
+  const C=_ask().cur,d=C.d,E=C.errs,f=(k,l,o)=>_askInp('ask-'+k.replace('_','-'),t(l),d[k],_on('_askIn',k,_P('value')),{ro,...o});
+  return _askG('page',t('askGPage'),`<div class="ask-two">${f('title_en','askTitleEn',{ltr:1,err:E.title})}${f('title_ar','askTitleAr',{ar:1})}</div>
+    <div class="ask-two">${f('intro_en','askIntroEn',{ltr:1,area:1,max:600,rows:3})}${f('intro_ar','askIntroAr',{ar:1,area:1,max:600,rows:3})}</div>
+    <div class="form-group ask-f"><label for="ask-slug">${esc(t('askSlug'))}</label><div class="ask-slug" dir="ltr"><span class="ask-slug-pre">micromobility.sa/ask/</span><input type="text" id="ask-slug" dir="ltr" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="40"${ro?' disabled':''}${E.slug?' aria-invalid="true" aria-describedby="ask-slug-e"':''} value="${esc(d.slug)}" data-on-input="${_on('_askSlugIn',_EL)}"></div>${E.slug?`<div class="ask-err" id="ask-slug-e" role="alert">${esc(t(E.slug))}</div>`:''}</div>`);
+}
+function _askQTitle(q){return _askT(q)||_askT(_ask().cur.d)||'';}
+function _askQStat(id){const C=_ask().cur;return id!=null&&C.det?(C.det.questions||[]).find(x=>x.id===id)||null:null;}
+function _askGQs(ro){
+  const C=_ask().cur,L=C.d.qs;
+  const row=(q,i)=>{
+    const s=q.kind==='info'?null:_askQStat(q.id),known=ASK_KINDS.includes(q.kind),nm=known?t('askK'+q.kind):String(q.kind||''),own=_askQTitle(q),ti=own||nm;
+    const ib=(fn,ic,l,off,arg)=>`<button type="button" class="btn-sm btn-muted ask-ib ask-ib-${ic}"${off?' disabled':''} aria-label="${esc(t(l)+': '+ti)}" title="${esc(t(l))}" data-on-click="${_on(fn,i,arg)}">${_askIc(ic,15)}</button>`;
+    return`<div class="ask-q" data-ask-q="${esc(q.k)}"><span class="ask-q-ic">${_askIc(known?q.kind:'info',20)}</span>
+      <div class="ask-q-txt"><b><bdi>${esc(ti)}</bdi></b>${own||s?`<span class="am-meta">${[own?esc(nm):'',s?`${esc(t('askAnswers'))} <bdi>${s.answers|0}</bdi>`:'',s&&s.pending?`${esc(t('askWaiting'))} <bdi>${s.pending|0}</bdi>`:''].filter(Boolean).join(' · ')}</span>`:''}</div>
+      ${q.kind==='info'?'':`<label class="web-switch ask-sw"><input type="checkbox" class="web-toggle" role="switch"${q.open?' checked':''}${ro?' disabled':''} data-on-change="${_on('_askQTake',i,_P('checked'))}"><span>${esc(t('askTaking'))}</span></label>`}
+      ${ro?'':`<div class="ask-q-acts">${known?`<button type="button" class="btn-sm btn-secondary ask-q-ed" aria-label="${esc(t('editBtn')+': '+ti)}" data-on-click="${_on('_askQOpen',i)}">${esc(t('editBtn'))}</button>`:''}${ib('_askQMove','up','askUp',i===0,-1)}${ib('_askQMove','down','askDown',i===L.length-1,1)}${ib('_askQDel','trash','deleteBtn',false,0)}</div>`}</div>`;
+  };
+  return _askG('qs',t('askQs'),`<div class="ask-qs">${L.map(row).join('')}</div>${C.errs.qs?`<div class="ask-err" role="alert">${esc(t(C.errs.qs))}</div>`:''}
+    ${ro?'':`<div><button type="button" class="btn-sm btn-secondary ask-add" data-on-click="${_on('_askQOpen',-1)}">${_askIc('plus',13)} ${esc(t('askAddQ'))}</button></div>`}`);
+}
+function _askGWho(ro){
+  const C=_ask().cur,d=C.d,dis=ro?' disabled':'';
+  const b=(v,l)=>`<button type="button" class="toggle-btn${d.audience===v?' active':''}" aria-pressed="${d.audience===v}"${dis} data-on-click="${_on('_askSet','audience',v)}">${esc(t(l))}</button>`;
+  const tags=(S.tags||[]).filter(g=>g.id!==TAG_BLACKLIST),all=[...tags,...d.tag_ids.filter(id=>id!==TAG_BLACKLIST&&!tags.some(g=>g.id===id)).map(id=>({id,name:id}))];
+  return _askG('who',t('askAud'),`<div class="ask-opts" role="group" aria-labelledby="ask-g-who">${b('link','askAudLink')}${b('accounts','askAudAcc')}${b('tags','askAudTags')}</div>
+    ${d.audience==='tags'?`<div class="ask-opts ask-tags" role="group" aria-label="${esc(t('askTags'))}">${all.map(g=>{const on=d.tag_ids.includes(g.id);return`<button type="button" class="filter-pill${on?' active':''}" aria-pressed="${on}"${dis} data-on-click="${_on('_askTag',g.id)}">${esc(g.name)}</button>`;}).join('')}</div>${C.errs.tags?`<div class="ask-err" role="alert">${esc(t(C.errs.tags))}</div>`:''}`:''}`);
+}
+function _askGWhen(ro){
+  const C=_ask().cur,d=C.d,E=C.errs,dis=ro?' disabled':'';
+  const b=(k,v,l)=>`<button type="button" class="toggle-btn${d[k]===v?' active':''}" aria-pressed="${d[k]===v}"${dis} data-on-click="${_on('_askSet',k,v)}">${esc(t(l))}</button>`;
+  const q=(n,l)=>`<button type="button" class="btn-sm btn-muted ask-in"${dis} data-on-click="${_on('_askCloseIn',n)}">${esc(t(l))}</button>`;
+  const err=(id,e)=>e?`<div class="ask-err" id="${id}-e" role="alert">${esc(t(e))}</div>`:'';
+  const tz=`<span class="am-meta ask-tz">${esc(t('askSaudi'))}</span>`;
+  return _askG('when',t('askGWhen'),`<div class="form-group ask-f"><div class="ask-lbl" id="ask-l-o">${esc(t('askOpens'))}</div><div class="ask-opts" role="group" aria-labelledby="ask-l-o">${b('oOn',false,'askNow')}${b('oOn',true,'askAt')}</div>
+      ${d.oOn?`<div class="ask-when"><input type="datetime-local" id="ask-opens" aria-label="${esc(t('askOpens')+', '+t('askSaudi'))}" value="${esc(d.opens)}"${dis}${E.opens?' aria-invalid="true" aria-describedby="ask-opens-e"':''} data-on-input="${_on('_askIn','opens',_P('value'))}">${tz}</div>${err('ask-opens',E.opens)}`:''}</div>
+    <div class="form-group ask-f"><div class="ask-lbl" id="ask-l-c">${esc(t('askCloses'))}</div><div class="ask-opts" role="group" aria-labelledby="ask-l-c">${b('cOn',false,'askNoEnd')}${b('cOn',true,'askAt')}${q(1,'askIn1d')}${q(3,'askIn3d')}${q(7,'askIn1w')}</div>
+      ${d.cOn?`<div class="ask-when"><input type="datetime-local" id="ask-closes" aria-label="${esc(t('askCloses')+', '+t('askSaudi'))}" value="${esc(d.closes)}"${dis}${E.closes?' aria-invalid="true" aria-describedby="ask-closes-e"':''} data-on-input="${_on('_askIn','closes',_P('value'))}">${tz}</div>${err('ask-closes',E.closes)}`:''}</div>
+    <div class="form-group ask-f"><div class="ask-lbl" id="ask-l-a">${esc(t('askAfter'))}</div><div class="ask-opts" role="group" aria-labelledby="ask-l-a">${b('after_close','results','askAfterShow')}${b('after_close','hidden','askAfterHide')}</div></div>`);
+}
+function _askGMore(ro){
+  const d=_ask().cur.d,dis=ro?' disabled':'';
+  return _askG('more',t('askGMore'),`<label class="web-switch ask-sw"><input type="checkbox" class="web-toggle" role="switch" id="ask-listed"${d.listed?' checked':''}${dis} data-on-change="${_on('_askIn','listed',_P('checked'))}"><span>${esc(t('askListed'))}</span></label>
+    <div class="form-group ask-f"><label for="ask-notes">${esc(t('askNotes'))}</label><textarea id="ask-notes" dir="auto" rows="2" maxlength="2000"${dis} data-on-input="${_on('_askIn','notes',_P('value'))}">${esc(d.notes)}</textarea></div>`);
+}
+
+// ── The questions of the draft ──
+function _askQMove(i,dir){
+  const C=_ask().cur,L=C&&C.d&&C.d.qs,j=i+dir;if(!L||!L[i]||!L[j]||!_askCan())return;
+  const q=L[i];L[i]=L[j];L[j]=q;renderAsk();
+  const r=document.querySelector(`#tab-ask .ask-q[data-ask-q="${CSS.escape(q.k)}"]`),b=r&&(r.querySelector(`.ask-ib-${dir<0?'up':'down'}:not([disabled])`)||r.querySelector('.ask-ib:not([disabled])'));if(b)b.focus();
+}
+async function _askQDel(i){
+  const C=_ask().cur,d=C&&C.d,q=d&&d.qs[i];if(!q||!_askCan())return;
+  const s=_askQStat(q.id),n=s?s.answers|0:0;
+  if(n&&!await askConfirm({title:t('askQDelAsk').replace('{0}',n),body:esc(_askQTitle(q)),confirmLabel:t('deleteBtn'),confirmClass:'btn-red'}))return;
+  if(_ask().cur!==C||d.qs[i]!==q)return;
+  d.qs.splice(i,1);if(q.id!=null)d.del.push(q.id);renderAsk();
+}
+// Taking answers: a saved question opens or closes at once (staff_ask_control), a new one takes it with its first save.
+async function _askQTake(i,on){
+  const C=_ask().cur,d=C&&C.d,q=d&&d.qs[i];if(!q)return;
+  on=!!on;
+  if(q.id==null){q.open=on;_askMark();return;}
+  if(!await _askCtl(on?'open':'close',q.id)){_askPaint();return;} // refused: the switch goes back
+  q.open=on;
+  try{const b=JSON.parse(C.d0),x=(b.qs||[]).find(y=>y.id===q.id);if(x){x.open=on;C.d0=JSON.stringify(b);}}catch(_){}
+  _askDetail();
+}
+function _askQ(){const C=_ask().cur;return C&&C.q;}
+function _askQOpen(i){
+  const C=_ask().cur;if(!C||!C.d||!_askCan())return;
+  const q=i>=0?C.d.qs[i]:null;if(i>=0&&!q)return;
+  const v=q?JSON.parse(JSON.stringify(q)):_askQNew('cloud');
+  C.q={i,v,v0:JSON.stringify(v),err:''};
+  _askQDraw();
+  const b=document.querySelector('#ask-pop .ask-kind.on');if(b)b.focus(); // the kind it is, not the Close the dialog layer would pick
+}
+function _askQClose(){const C=_ask().cur;if(C)C.q=null;_askQDraw();}
+function _askQBg(ev,el){const Q=_askQ();if(ev.target===el&&Q&&JSON.stringify(Q.v)===Q.v0)_askQClose();} // outside the box (or Escape): only while nothing was typed
+// The question pop-up: its kind, its words in both languages, the settings its kind takes, who sees the results.
+function _askQDraw(){
+  const Q=_askQ();let m=document.getElementById('ask-pop');
+  if(!Q){if(m&&m.innerHTML){m.style.display='none';m.innerHTML='';}return;}
+  if(!m){m=document.createElement('div');m.id='ask-pop';document.body.appendChild(m);}
+  const v=Q.v,k=v.kind,s=_askQStat(v.id),locked=!!(s&&(s.answers|0)); // a question people have answered keeps its kind
+  const kb=x=>`<button type="button" class="ask-kind${k===x?' on':''}" aria-pressed="${k===x}" data-ask-kind="${x}"${locked&&k!==x?' disabled':''} data-on-click="${_on('_askQKind',x)}">${_askIc(x,22)}<span>${esc(t('askK'+x))}</span></button>`;
+  const f=(key,l,o)=>_askInp('ask-q-'+key.replace('_','-'),t(l),v[key],_on('_askQIn',key,_P('value')),{max:300,...o});
+  m.style.display='block';
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_askQBg',_EV,_EL)}"><div class="confirm-box ask-box" role="dialog" aria-modal="true" aria-labelledby="ask-q-t">
+    <div class="chrome-dh10"><div class="chrome-dt" id="ask-q-t">${esc(t(Q.i>=0?'askEditQ':'askAddQ'))}</div><button type="button" class="chrome-xt" aria-label="${esc(t('closeBtn'))}" data-on-click="${_on('_askQClose')}">${_artIcon('close',16)}</button></div>
+    <div class="chrome-dbody">
+      <div class="form-group ask-f"><div class="ask-lbl" id="ask-q-kl">${esc(t('askType'))}</div><div class="ask-kinds" role="group" aria-labelledby="ask-q-kl">${ASK_KINDS.map(kb).join('')}</div></div>
+      <div class="ask-two">${f('title_en','askQTitleEn',{ltr:1})}${f('title_ar','askQTitleAr',{ar:1})}</div>
+      <div class="ask-two">${f('help_en','askHelpEn',{ltr:1,area:1})}${f('help_ar','askHelpAr',{ar:1,area:1})}</div>
+      ${_askCfgHtml(v)}
+      ${k==='info'?'':_askQRules(v)}
+      ${Q.err?`<div class="ask-err" id="ask-q-err" role="alert">${esc(Q.err)}</div>`:''}
+    </div>
+    <div class="chrome-dact"><button type="button" class="btn-secondary" data-on-click="${_on('_askQClose')}">${esc(t('cancelBtn'))}</button><button type="button" class="btn-primary" id="ask-q-done" data-on-click="${_on('_askQDone')}">${esc(t('doneBtn'))}</button></div>
+  </div></div>`;
+}
+// The settings of a kind (the contract's section 2), each kind its own few fields.
+function _askCfgHtml(v){
+  const k=v.kind,c=v.config||{};
+  const num=(key,l,lo,hi,step)=>`<div class="form-group ask-f"><label for="ask-c-${key}">${esc(t(l))}</label><input type="number" inputmode="decimal" id="ask-c-${key}" min="${lo}" max="${hi}" step="${step||1}" value="${esc(c[key]==null?'':c[key])}" data-on-input="${_on('_askCfgIn',key,_P('value'))}"></div>`;
+  const pick=(key,l,lo,hi)=>`<div class="form-group ask-f"><label for="ask-c-${key}">${esc(t(l))}</label><select id="ask-c-${key}" data-on-change="${_on('_askCfgIn',key,_P('value'))}">${Array.from({length:hi-lo+1},(_,i)=>`<option value="${lo+i}"${Number(c[key])===lo+i?' selected':''}>${lo+i}</option>`).join('')}</select></div>`;
+  const sw=(key,l)=>`<label class="web-switch ask-sw"><input type="checkbox" class="web-toggle" role="switch" id="ask-c-${key}"${c[key]?' checked':''} data-on-change="${_on('_askCfgIn',key,_P('checked'))}"><span>${esc(t(l))}</span></label>`;
+  const txt=(key,l,ar,max)=>`<div class="form-group ask-f"><label for="ask-c-${key}">${esc(t(l))}</label><input type="text" id="ask-c-${key}" ${ar?'dir="rtl" lang="ar"':'dir="ltr"'} autocomplete="off" maxlength="${max}" value="${esc(c[key]||'')}" data-on-input="${_on('_askCfgIn',key,_P('value'))}"></div>`;
+  if(k==='cloud')return`<div class="ask-two">${num('max_len','askMaxLen',5,40)}${num('per_person','askPerPerson',1,10)}</div>`;
+  if(k==='open'||k==='qa')return`<div class="ask-two">${num('max_len','askMaxLen',20,500)}${num('per_person','askPerPerson',1,10)}</div>${sw('votes','askVotes')}`;
+  if(k==='choice')return`${_askOptsHtml(v)}<div class="ask-two">${num('max_picks','askMaxPicks',1,12)}</div>${sw('change','askChange')}`;
+  if(k==='scales')return`${_askOptsHtml(v)}<div class="ask-two">${pick('min','askMin',0,1)}${pick('max','askMax',3,10)}</div><div class="ask-two">${txt('lo_en','askLoEn',0,40)}${txt('lo_ar','askLoAr',1,40)}</div><div class="ask-two">${txt('hi_en','askHiEn',0,40)}${txt('hi_ar','askHiAr',1,40)}</div>`;
+  if(k==='ranking')return _askOptsHtml(v);
+  if(k==='points')return`${_askOptsHtml(v)}<div class="ask-two">${num('total','askTotal',10,1000)}</div>`;
+  if(k==='number')return`<div class="ask-two">${num('min','askNumMin',-1e9,1e9,'any')}${num('max','askNumMax',-1e9,1e9,'any')}</div><div class="ask-two">${num('step','askStep',0,1e9,'any')}</div><div class="ask-two">${txt('unit_en','askUnitEn',0,20)}${txt('unit_ar','askUnitAr',1,20)}</div>`;
+  return'';
+}
+// The options (or a scale's statements): each in English and Arabic, added, removed and put in order. An option keeps the
+// id it was given (a1, a2...), which is what an answer names.
+function _askOptsHtml(v){
+  const L=v.config.options||[],lim=ASK_OPTS[v.kind];
+  const ib=(fn,ic,l,i,off,arg)=>`<button type="button" class="btn-sm btn-muted ask-ib ask-ib-${ic}"${off?' disabled':''} aria-label="${esc(t(l)+' '+(i+1))}" title="${esc(t(l))}" data-on-click="${_on(fn,i,arg)}">${_askIc(ic,15)}</button>`;
+  return`<div class="form-group ask-f"><div class="ask-lbl" id="ask-o-l">${esc(t(v.kind==='scales'?'askStatements':'askOptions'))}</div><div class="ask-os" role="group" aria-labelledby="ask-o-l">${L.map((o,i)=>`<div class="ask-o" data-ask-o="${esc(o.id)}">
+      <input type="text" id="ask-o-en-${i}" dir="ltr" autocomplete="off" maxlength="80" aria-label="${esc(t('askOptEn').replace('{0}',i+1))}" placeholder="${esc(t('askEn'))}" value="${esc(o.en||'')}" data-on-input="${_on('_askOptIn',i,'en',_P('value'))}">
+      <input type="text" id="ask-o-ar-${i}" dir="rtl" lang="ar" autocomplete="off" maxlength="80" aria-label="${esc(t('askOptAr').replace('{0}',i+1))}" placeholder="${esc(t('askAr'))}" value="${esc(o.ar||'')}" data-on-input="${_on('_askOptIn',i,'ar',_P('value'))}">
+      <span class="ask-o-acts">${ib('_askOptMove','up','askUp',i,i===0,-1)}${ib('_askOptMove','down','askDown',i,i===L.length-1,1)}${ib('_askOptDel','trash','removeBtn',i,L.length<=lim[0],0)}</span></div>`).join('')}</div>
+    <div><button type="button" class="btn-sm btn-secondary ask-add" id="ask-o-add"${L.length>=lim[1]?' disabled':''} data-on-click="${_on('_askOptAdd')}">${_askIc('plus',13)} ${esc(t('askAddOpt'))}</button></div></div>`;
+}
+// Approve before they show (written answers only) and who sees the results.
+function _askQRules(v){
+  const opt=(x,l)=>`<option value="${x}"${v.results===x?' selected':''}>${esc(t(l))}</option>`;
+  return`${ASK_TEXT.includes(v.kind)?`<label class="web-switch ask-sw"><input type="checkbox" class="web-toggle" role="switch" id="ask-q-mod"${v.moderated?' checked':''} data-on-change="${_on('_askQIn','moderated',_P('checked'))}"><span>${esc(t('askModerated'))}</span></label>`:''}
+    <div class="form-group ask-f"><label for="ask-q-res">${esc(t('askResWho'))}</label><select id="ask-q-res" data-on-change="${_on('_askQIn','results',_P('value'))}">${opt('live','askResLive')}${opt('answered','askResAnswered')}${opt('closed','askResClosed')}${opt('staff','askResStaff')}</select></div>`;
+}
+function _askQKind(k){
+  const Q=_askQ();if(!Q||!ASK_KINDS.includes(k)||Q.v.kind===k)return;
+  const v=Q.v,o=v.config&&v.config.options,c=_askCfgDef(k);
+  if(ASK_OPTS[k])c.options=Array.isArray(o)&&o.length?o.slice(0,ASK_OPTS[k][1]):_askOptsNew(2);
+  v.kind=k;v.config=c;Q.err='';_askQDraw();
+  const b=document.querySelector(`#ask-pop .ask-kind[data-ask-kind="${k}"]`);if(b)b.focus();
+}
+function _askQIn(k,v){const Q=_askQ();if(Q)Q.v[k]=v;}
+function _askCfgIn(k,v){const Q=_askQ();if(Q)Q.v.config[k]=v;}
+function _askOptIn(i,k,v){const Q=_askQ(),o=Q&&(Q.v.config.options||[])[i];if(o)o[k]=v;}
+function _askOptAdd(){
+  const Q=_askQ(),lim=Q&&ASK_OPTS[Q.v.kind];if(!lim)return;
+  const L=Q.v.config.options||(Q.v.config.options=[]);if(L.length>=lim[1])return;
+  L.push({id:'a'.concat(L.reduce((m,o)=>Math.max(m,+(/^a(\d+)$/.exec(String(o.id))||[])[1]||0),0)+1),en:'',ar:''});
+  Q.err='';_askQDraw();
+  const f=document.getElementById('ask-o-en-'+(L.length-1));if(f)f.focus();
+}
+function _askOptDel(i){
+  const Q=_askQ(),L=Q&&Q.v.config.options;if(!L||!L[i])return;
+  L.splice(i,1);Q.err='';_askQDraw();
+  const f=document.getElementById('ask-o-add');if(f)f.focus();
+}
+function _askOptMove(i,dir){
+  const Q=_askQ(),L=Q&&Q.v.config.options,j=i+dir;if(!L||!L[i]||!L[j])return;
+  const o=L[i];L[i]=L[j];L[j]=o;_askQDraw();
+  const r=document.querySelector(`#ask-pop .ask-o[data-ask-o="${CSS.escape(String(o.id))}"]`),b=r&&(r.querySelector(`.ask-ib-${dir<0?'up':'down'}:not([disabled])`)||r.querySelector('.ask-ib:not([disabled])'));if(b)b.focus();
+}
+// Done: the settings are checked and the question goes into the draft (the page's Save writes it).
+function _askQDone(){
+  const C=_ask().cur,Q=C&&C.q;if(!Q)return;
+  const v=Q.v,r=_askCfgNorm(v.kind,v.config);
+  if(r.err){Q.err=t(r.err).replace('{0}',(ASK_OPTS[v.kind]||[2])[0]);_askQDraw();const e=document.getElementById('ask-q-err');if(e)e.scrollIntoView({block:'nearest'});return;}
+  for(const k of['title_en','title_ar','help_en','help_ar'])v[k]=String(v[k]||'').trim();
+  v.config=r.cfg;
+  if(Q.i>=0)C.d.qs[Q.i]=v;else C.d.qs.push(v);
+  delete C.errs.qs;C.q=null;_askQDraw();renderAsk();
+  const b=document.querySelector(`#tab-ask .ask-q[data-ask-q="${CSS.escape(v.k)}"] .ask-q-ed`);if(b)b.focus();
+}
+
+// ── Saving the draft ──
+// What stops a save, said on the field: a title, a link name, a tag for a tagged page, a real window.
+function _askCheck(start){
+  const C=_ask().cur,d=C.d,E=C.errs={};
+  d.slug=String(d.slug||'').replace(/^-+|-+$/g,'');
+  if(d.auto&&d.slug.length<3)d.slug=((d.slug||'ask')+'-'+String(Date.now()).slice(-5)).slice(0,40); // a title with no Latin letters: a name to start from
+  if(!d.title_en.trim()&&!d.title_ar.trim())E.title='askNeedTitle';
+  if(d.slug.length<3||d.slug.length>40||!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(d.slug))E.slug='askSlugBad';
+  if(d.audience==='tags'&&!d.tag_ids.length)E.tags='askAudPick';
+  const o=d.oOn?_askIso(d.opens):null,c=d.cOn?_askIso(d.closes):null;
+  if(d.oOn&&!o)E.opens='askWhenBad';
+  if(d.cOn&&!c)E.closes='askWhenBad';else if(c&&o&&Date.parse(c)<=Date.parse(o))E.closes='askCloseBad';
+  if(start&&!d.qs.length)E.qs='askNeedQ';
+  const k=Object.keys(E)[0];if(!k)return true;
+  C.tab='setup';renderAsk();
+  const f=document.getElementById({title:'ask-title-en',slug:'ask-slug',opens:'ask-opens',closes:'ask-closes'}[k]||'')||document.querySelector('#tab-ask .ask-err');
+  if(f){try{f.focus();}catch(_){}f.scrollIntoView({block:'center'});}
+  return false;
+}
+// The database's own refusals in Ask's words: a link name another page has (23505 on the page), settings the question's
+// kind does not take (ASK_CONFIG). True when it said so; anything else is _writeErr's to say.
+function _askSaid(res,page){
+  const e=res&&res.error;if(!e)return false;
+  const m=String(e.message||'');
+  if(page&&String(e.code)==='23505'&&!/_code\b|\(code\)/.test(m)){
+    const C=_ask().cur;
+    if(C){C.errs.slug='askSlugTaken';C.tab='setup';renderAsk();const f=document.getElementById('ask-slug');if(f)f.focus();}
+    toast(t('askSlugTaken'),'error');return true;
+  }
+  if(/ASK_CONFIG/.test(m)){toast(t('askCfgBad'),'error');return true;}
+  return false;
+}
+// An update that changed no row was refused (the database lets only those who may change People write): said like any refusal.
+function _askNone(res){return res&&!res.error&&Array.isArray(res.data)&&!res.data.length?{error:{code:'42501',message:'no row changed'}}:res;}
+// Writes the draft: the page, then its questions in order (one deleted, added, changed or moved), every write checked.
+// False as soon as one is refused: what was written stays written, and the draft keeps the rest for the next Save.
+async function _askWrite(C){
+  const d=C.d,b0=C.d0?JSON.parse(C.d0):null,pg=x=>JSON.stringify({...x,qs:0,del:0,auto:0});
+  if(C.id==null||!b0||pg(d)!==pg(b0)){
+    const body={title_en:d.title_en.trim(),title_ar:d.title_ar.trim(),intro_en:d.intro_en.trim(),intro_ar:d.intro_ar.trim(),slug:d.slug,audience:d.audience,tag_ids:d.audience==='tags'?d.tag_ids.slice():[],
+      opens_at:d.oOn?_askIso(d.opens):null,closes_at:d.cOn?_askIso(d.closes):null,after_close:d.after_close,listed:!!d.listed,notes:d.notes.trim(),look:d.look||{}};
+    let res;
+    if(C.id!=null){try{res=await sb.from('ask_pages').update(body).eq('id',C.id).select('id');}catch(e){res={error:e};}res=_askNone(res);}
+    else{try{res=await sb.from('ask_pages').insert({...body,status:'draft',pace:'self'}).select();}catch(e){res={error:e};}}
+    if(_askSaid(res,true)||_writeErr(res,'ask page'))return false;
+    if(C.id==null){const row=res.data&&res.data[0];if(!row||row.id==null){errorBar(t('errSomethingWrong'));return false;}C.id=row.id;C.row=row;}
+  }
+  for(const id of d.del.slice()){
+    if(await _wr(sb.from('ask_questions').delete().eq('id',id),'ask question'))return false;
+    d.del=d.del.filter(x=>x!==id);
+  }
+  // a question with no words of its own takes the page's title
+  const qb=(q,i,pt)=>{const own=q.title_en||q.title_ar;return{kind:q.kind,pos:i+1,title_en:own?q.title_en:pt.title_en.trim(),title_ar:own?q.title_ar:pt.title_ar.trim(),help_en:q.help_en,help_ar:q.help_ar,config:q.config,moderated:!!q.moderated,results:q.results,look:q.look||{}};};
+  const was=new Map(((b0&&b0.qs)||[]).map((q,i)=>[q.id,JSON.stringify(qb(q,i,b0))]));
+  for(let i=0;i<d.qs.length;i++){
+    const q=d.qs[i],body=qb(q,i,d);
+    let res;
+    if(q.id!=null){
+      if(was.get(q.id)===JSON.stringify(body))continue;
+      try{res=await sb.from('ask_questions').update(body).eq('id',q.id).select('id');}catch(e){res={error:e};}
+      res=_askNone(res);
+    }else{try{res=await sb.from('ask_questions').insert({...body,page_id:C.id,open:q.open!==false}).select();}catch(e){res={error:e};}}
+    if(_askSaid(res,false)||_writeErr(res,'ask question'))return false;
+    if(q.id==null){const row=res.data&&res.data[0];if(row&&row.id!=null)q.id=row.id;}
+  }
+  return true;
+}
+// Save keeps a draft a draft; Start saves and puts the page live (staff_ask_control).
+async function _askSave(start){
+  const A=_ask(),C=A.cur;if(!C||!C.d||C.saving||!_askCan())return false;
+  if(!_askCheck(start))return false;
+  C.saving=true;document.querySelectorAll('#tab-ask .ask-acts button').forEach(b=>{b.disabled=true;});
+  let ok=false;
+  try{ok=await _askWrite(C);}catch(e){_writeErr({error:e||{message:'failed'}},'ask save');}
+  if(ok){
+    C.d0=JSON.stringify(C.d);
+    if(start)ok=await _askCtl('start');
+    if(ok)toast(t(start?'askStarted':'askSaved'));
+    A.at=0;_askLoad(true);_askCount(true);
+    if(A.cur===C)await _askDetail();
+  }
+  C.saving=false;
+  if(A.cur===C)_askPaint();
+  return ok;
+}
+function _askAfterCtl(){const A=_ask();A.at=0;_askLoad(true);_askCount(true);_askDetail();}
+async function _askEnd(){
+  const C=_ask().cur;if(!C||!C.id||!_askCan())return;
+  if(!await askConfirm({title:t('askEndAsk'),body:esc(_askT(_askPg())),confirmLabel:t('askEnd'),confirmClass:'btn-primary'}))return;
+  if(_ask().cur===C&&await _askCtl('end'))_askAfterCtl();
+}
+async function _askDelPage(){
+  const A=_ask(),C=A.cur;if(!C||!C.id||!_askCan())return;
+  const p=_askPg()||{},n=((C.det&&C.det.questions)||[]).reduce((s,q)=>s+(q.answers|0),0);
+  if(!await askConfirm({title:t('askDelAsk'),body:esc(_askT(p)||p.slug||'')+(n?`<div>${esc(t('askAnswers'))} <bdi>${n}</bdi></div>`:''),confirmLabel:t('deleteBtn'),confirmClass:'btn-red'}))return;
+  if(A.cur!==C||await _wr(sb.from('ask_pages').delete().eq('id',C.id),'ask page'))return;
+  A.cur=null;A.pages=(A.pages||[]).filter(x=>x.id!==C.id);A.at=0;renderAsk();_askCount(true);
+}
+
+// ── The answers, and their approval ──
+function _askQMap(){const C=_ask().cur,m=new Map();((C.det&&C.det.questions)||[]).forEach(q=>m.set(String(q.id),q));return m;}
+function _askBody(a){return a.body!=null&&a.body!==''?String(a.body):String((a.value&&a.value.t)||'');}
+function _askOptName(q,id){const o=((q.config&&q.config.options)||[]).find(x=>x.id===id);return(o&&(S.lang==='ar'?(o.ar||o.en):(o.en||o.ar)))||String(id);}
+// What a person answered, in words: the text they wrote, or the options by their names.
+function _askSum(a,q){
+  const v=a.value&&typeof a.value==='object'?a.value:{},k=q?q.kind:'',c=(q&&q.config)||{};
+  if(ASK_TEXT.includes(k))return _askBody(a);
+  if(k==='choice')return(Array.isArray(v.o)?v.o:[]).map(id=>_askOptName(q,id)).join(', ');
+  if(k==='ranking')return(Array.isArray(v.r)?v.r:[]).map((id,i)=>(i+1)+'. '+_askOptName(q,id)).join(', ');
+  if(k==='scales'||k==='points'){const m=(k==='scales'?v.s:v.p)||{};return(c.options||[]).filter(o=>m[o.id]!=null).map(o=>_askOptName(q,o.id)+': '+m[o.id]).join(', ');}
+  if(k==='number'){const u=S.lang==='ar'?(c.unit_ar||c.unit_en):(c.unit_en||c.unit_ar);return v.n==null?'':String(v.n)+(u?' '+u:'');}
+  return'';
+}
+function _askStTxt(s){return t(s==='pending'?'askAWait':s==='approved'?'askAOk':'askANo');}
+// The answers these screens draw: those of the nine kinds (another kind's are left alone).
+function _askARows(){
+  const C=_ask().cur,Q=_askQMap();
+  return(C.ans||[]).filter(a=>{const q=Q.get(String(a.question_id));return!!q&&ASK_KINDS.includes(q.kind);});
+}
+function _askAShown(){
+  const C=_ask().cur,f=C.at,L=_askARows().filter(a=>(f==='all'||a.status===f)&&(!C.aq||String(a.question_id)===C.aq));
+  return f==='pending'?L.reverse():L; // waiting: the longest wait first, so a new answer never moves the row under a finger
+}
+function _askARowHtml(a,Q,can){
+  const q=Q.get(String(a.question_id)),txt=_askSum(a,q),st=a.status;
+  const B=(cls,l,fn,pr)=>`<button type="button" class="btn-sm ${pr?'btn-primary':'btn-secondary'} ${cls}" data-on-click="${_on(...fn)}">${esc(t(l))}</button>`;
+  const who=[a.name?`<b><bdi>${esc(a.name)}</bdi></b>`:'',a.phone?_piiLink('phone',a.phone,a.customer_id,'ask:'+a.id,'tel:'+a.phone,'call'):'',`<bdi class="ask-nw">${esc(fmtStamp(a.created_at))}</bdi>`,`<bdi>${esc(_askT(q))}</bdi>`].filter(Boolean).join(' · ');
+  return`<div class="ask-a" data-ask-a="${esc(String(a.id))}" data-status="${esc(st)}">${can?_lsBox('askA',a.id,txt.slice(0,40)):''}
+    <div class="ask-a-main"><div class="ask-a-txt"><bdi>${esc(txt)}</bdi></div><div class="am-meta ask-a-by">${who}</div></div>
+    <div class="ask-a-marks"><span class="ask-chip ask-c-${esc(st)}">${esc(_askStTxt(st))}</span>${a.flagged?`<span class="ask-chip ask-c-flag">${esc(t('askFlagged'))}</span>`:''}${q.kind==='qa'&&a.answered?`<span class="ask-chip ask-c-done">${esc(t('askAnswered'))}</span>`:''}</div>
+    ${can?`<div class="ask-a-acts">${st!=='approved'?B('ask-ok','askApprove',['_askReview',[a.id],'approved'],st==='pending'):''}${st!=='rejected'?B('ask-no','askReject',['_askReview',[a.id],'rejected']):''}${st!=='pending'?B('ask-wait','askToWait',['_askReview',[a.id],'pending']):''}${ASK_TEXT.includes(q.kind)?B('ask-edit','askEditText',['_askEditText',a.id]):''}${q.kind==='qa'?B('ask-ans',a.answered?'askNotAnswered':'askMarkAnswered',['_askAnswered',a.id,!a.answered]):''}${B('ask-adel','deleteBtn',['_askDelA',a.id])}</div>`:''}
+  </div>`;
+}
+function _askAnsHtml(){
+  const C=_ask().cur,can=_askCan();
+  if(!C.ans)return C.ansErr&&!C.aBusy?_loadErr(esc(t('errConnection')),_on('_askAnswers')):skeletonList();
+  const all=_askARows().filter(a=>!C.aq||String(a.question_id)===C.aq),n=k=>k==='all'?all.length:all.filter(a=>a.status===k).length,L=_askAShown(),Q=_askQMap();
+  const pill=(k,l)=>`<button type="button" class="filter-pill${C.at===k?' active':''}" aria-pressed="${C.at===k}" data-ask-at="${k}" data-on-click="${_on('_askATab',k)}">${esc(t(l))} (${n(k)})</button>`;
+  const qs=((C.det&&C.det.questions)||[]).filter(q=>ASK_KINDS.includes(q.kind)&&q.kind!=='info');
+  const f=qs.length>1?[_fField(esc(t('askQuestion')),`<select class="filter-select" aria-label="${esc(t('askQuestion'))}" data-on-change="${_on('_askAQ',_P('value'))}"><option value="">${esc(t('filterAll'))}</option>${qs.map(q=>`<option value="${esc(String(q.id))}"${C.aq===String(q.id)?' selected':''}>${esc(_askT(q))}</option>`).join('')}</select>`),'',_fS(C,'aq')]:null;
+  return`<div class="filter-bar">${listToolbar({key:'askA',pills:pill('pending','askAWait')+pill('approved','askAOk')+pill('rejected','askANo')+pill('all','filterAll'),f,
+      sel:can?{ids:L.map(a=>a.id),acts:(m,ids)=>`<button type="button" class="btn-sm btn-primary ask-ok-n" data-on-click="${_on('_askReview',ids,'approved')}">${esc(t('askApproveN').replace('{0}',m))}</button><button type="button" class="btn-sm btn-secondary ask-no-n" data-on-click="${_on('_askReview',ids,'rejected')}">${esc(t('askRejectN').replace('{0}',m))}</button>`}:null,
+      extra:can&&n('pending')?`<button type="button" class="btn-sm btn-secondary ask-ok-all" data-on-click="${_on('_askApproveAll')}">${esc(t('askApproveAll'))}</button>`:''})}</div>
+    <div class="ask-as" id="ask-as">${L.slice(0,C.an).map(a=>_askARowHtml(a,Q,can)).join('')||_emptyState(esc(t(all.length?'askNoneHere':'askNoAnswers')))}</div>
+    ${L.length>C.an?`<div><button type="button" class="btn-secondary btn-sm ask-more" data-on-click="${_on('_askAMore')}">${esc(t('amShowMore').replace('{0}',Math.min(60,L.length-C.an)))}</button></div>`:''}`;
+}
+function _askATab(k){const C=_ask().cur;if(!C)return;C.at=['approved','rejected','all'].includes(k)?k:'pending';C.an=60;const s=_lsSel('askA');if(s)s.clear();renderAsk();}
+function _askAQ(v){const C=_ask().cur;if(!C)return;C.aq=String(v||'');C.an=60;const s=_lsSel('askA');if(s)s.clear();renderAsk();}
+function _askAMore(){const C=_ask().cur;if(C){C.an+=60;renderAsk();}}
+// A change to the answers held here, then the write: the row moves at once and comes back if the database refuses.
+// what(a) answers the changed row, or nothing to leave it; write() is true when it was done.
+async function _askAEdit(ids,what,write){
+  const C=_ask().cur;if(!C||!C.ans||!_askCan())return false;
+  const set=new Set([].concat(ids).map(String)),old=new Map();
+  C.ans=C.ans.map(a=>{if(!set.has(String(a.id)))return a;const b=what(a);if(b===undefined)return a;old.set(String(a.id),a);return b;}).filter(Boolean);
+  if(!old.size)return false;
+  C.seq++;C.wr++;C.ansSig='';
+  const s=_lsSel('askA');if(s)old.forEach(a=>s.delete(a.id));
+  _askPaint();
+  let ok=false;try{ok=await write([...old.values()].map(a=>a.id));}catch(e){_writeErr({error:e||{message:'failed'}},'ask answer');}
+  C.wr--;C.seq++;
+  if(!ok&&_ask().cur===C&&C.ans){ // back as they were, each in its place
+    const have=new Set(C.ans.map(a=>String(a.id)));
+    C.ans=C.ans.map(a=>old.get(String(a.id))||a).concat([...old.values()].filter(a=>!have.has(String(a.id)))).sort((x,y)=>String(y.created_at).localeCompare(String(x.created_at))||y.id-x.id);
+    C.ansSig='';_askPaint();
+  }
+  if(ok)_askCount(true);
+  return ok;
+}
+// Approve, Reject or back to Waiting, one answer or many (staff_ask_review).
+function _askReview(ids,st){return _askAEdit(ids,a=>a.status===st?undefined:{...a,status:st},done=>_askDo('staff_ask_review',{p_ids:done,p_status:st},'ask review'));}
+async function _askApproveAll(){
+  const C=_ask().cur;if(!C||!C.ans)return;
+  const ids=_askARows().filter(a=>a.status==='pending'&&(!C.aq||String(a.question_id)===C.aq)).map(a=>a.id);if(!ids.length)return;
+  if(!await askConfirm({title:t('askApproveAllAsk').replace('{0}',ids.length),body:'',confirmLabel:t('askApprove'),confirmClass:'btn-primary'}))return;
+  if(_ask().cur===C)_askReview(ids,'approved');
+}
+// A written answer's text, corrected by staff (the body column: what others read).
+async function _askEditText(id){
+  const C=_ask().cur,a=C&&(C.ans||[]).find(x=>String(x.id)===String(id));if(!a||!_askCan())return;
+  const v=await promptDialog({title:t('askEditText'),value:_askBody(a),confirmLabel:t('saveBtn')});
+  if(v==null||_ask().cur!==C)return;
+  const body=String(v).replace(/\s+/g,' ').trim();if(!body||body===_askBody(a))return;
+  _askAEdit([id],x=>({...x,body}),async()=>{let res;try{res=await sb.from('ask_answers').update({body}).eq('id',id).select('id');}catch(e){res={error:e};}res=_askNone(res);return!_writeErr(res,'ask answer');});
+}
+// A question from the audience, marked answered (or not).
+function _askAnswered(id,on){
+  on=!!on;
+  return _askAEdit([id],x=>({...x,answered:on}),async()=>{let res;try{res=await sb.from('ask_answers').update({answered:on}).eq('id',id).select('id');}catch(e){res={error:e};}res=_askNone(res);return!_writeErr(res,'ask answer');});
+}
+async function _askDelA(id){
+  const C=_ask().cur,a=C&&(C.ans||[]).find(x=>String(x.id)===String(id));if(!a||!_askCan())return;
+  if(!await askConfirm({title:t('askDelAAsk'),body:esc(_askSum(a,_askQMap().get(String(a.question_id)))),confirmLabel:t('deleteBtn'),confirmClass:'btn-red'}))return;
+  if(_ask().cur!==C)return;
+  _askAEdit([id],()=>null,async()=>!await _wr(sb.from('ask_answers').delete().eq('id',id),'ask answer'));
+}
+
+// ── The results ──
+// Small drawing pieces any view can use. Bars: rows [{l: label, v: number, x: what is written at the end}] against max
+// (the largest value when none is given).
+function _askVBars(rows,max){
+  const m=max||Math.max(1,...rows.map(r=>r.v));
+  return`<div class="ask-bars">${rows.map(r=>`<div class="ask-bar"><span class="ask-bar-l"><bdi>${esc(r.l)}</bdi></span><span class="ask-bar-t"><span class="ask-bar-f" data-cssv="${_cssv({'--w':Math.max(0,Math.min(100,r.v/m*100)).toFixed(1)+'%'})}"></span></span><bdi class="ask-bar-x">${esc(r.x==null?r.v:r.x)}</bdi></div>`).join('')}</div>`;
+}
+// Words with how often each was sent, the most sent largest: [{w, n}].
+function _askVWords(ws){
+  const m=Math.max(1,...ws.map(w=>w.n|0));
+  return`<div class="ask-words">${ws.slice(0,150).map(w=>`<span class="ask-word ask-w${w.n>=m*.66?3:w.n>=m*.33?2:1}"><bdi>${esc(w.w)}</bdi> <bdi class="ask-word-n">${w.n|0}</bdi></span>`).join('')}</div>`;
+}
+// Figures side by side: [[label, value]].
+function _askVStats(L){return`<div class="ask-stats">${L.map(([l,v])=>`<div class="ask-stat"><span class="am-meta">${esc(l)}</span><bdi>${esc(v==null?'-':v)}</bdi></div>`).join('')}</div>`;}
+// Columns over ranges: [{lo, hi, n}].
+function _askVCols(bins){
+  const m=Math.max(1,...bins.map(b=>b.n|0));
+  return bins.length?`<div class="ask-cols">${bins.map(b=>`<div class="ask-col"><bdi class="ask-col-n">${b.n|0}</bdi><span class="ask-col-b" data-cssv="${_cssv({'--h':Math.max(2,(b.n|0)/m*100).toFixed(1)+'%'})}"></span><bdi class="ask-col-l">${esc(b.lo)}-${esc(b.hi)}</bdi></div>`).join('')}</div>`:'';
+}
+// Written answers with their votes: [{t, v, a}].
+function _askVTexts(items,qa){
+  return`<ul class="ask-texts">${items.slice(0,100).map(x=>`<li><bdi>${esc(x.t)}</bdi>${x.v?` <bdi class="ask-chip">${esc(t('askVotesN').replace('{0}',x.v))}</bdi>`:''}${qa&&x.a?` <span class="ask-chip ask-c-done">${esc(t('askAnswered'))}</span>`:''}</li>`).join('')}</ul>`;
+}
+// One question's results, drawn by its kind from what staff_ask_page answers.
+function _askResOf(q){
+  const r=q.result&&typeof q.result==='object'?q.result:{},k=q.kind,c=q.config||{},opts=c.options||[],nm=o=>_askOptName(q,o.id),n=r.n|0,id=esc(String(q.id));
+  let viz='';
+  if(k==='cloud')viz=_askVWords(r.words||[]);
+  else if(k==='open'||k==='qa')viz=_askVTexts(r.items||[],k==='qa');
+  else if(k==='choice')viz=_askVBars(opts.map(o=>{const v=(r.counts||{})[o.id]|0;return{l:nm(o),v,x:v+(n?' · '+Math.round(v/n*100)+'%':'')};}),n);
+  else if(k==='scales')viz=_askVBars(opts.map(o=>{const v=(r.avg||{})[o.id];return{l:nm(o),v:v==null?0:v-(+c.min||0),x:v==null?'-':v};}),(+c.max||5)-(+c.min||0)||1);
+  else if(k==='ranking')viz=_askVBars(opts.map(o=>{const p=(r.pos||{})[o.id];return{l:nm(o),v:+(r.score||{})[o.id]||0,x:p==null?'-':t('askPlace').replace('{0}',p)};}).sort((a,b)=>b.v-a.v));
+  else if(k==='points')viz=_askVBars(opts.map(o=>{const v=+(r.avg||{})[o.id]||0;return{l:nm(o),v,x:v};}),+c.total||100);
+  else if(k==='number')viz=_askVStats([[t('askAvg'),r.avg],[t('askMin'),r.min],[t('askMax'),r.max]])+_askVCols(r.bins||[]);
+  return`<section class="ask-r" data-ask-r="${id}" aria-labelledby="ask-r-${id}"><h2 id="ask-r-${id}"><span class="ask-q-ic">${_askIc(k,18)}</span><bdi>${esc(_askT(q))}</bdi></h2>
+    <div class="am-meta">${esc(t('askK'+k))} · ${esc(t('askAnswers'))} <bdi>${q.answers|0}</bdi>${q.pending?` · ${esc(t('askWaiting'))} <bdi>${q.pending|0}</bdi>`:''}${q.open===false?` · ${esc(t('askStClosed'))}`:''}</div>
+    ${n||(q.answers|0)?viz:`<div class="am-meta ask-r-none">${esc(t('askNoAnswers'))}</div>`}</section>`;
+}
+// The page's code and QR, the big screen and the preview (both open with the page's screen key), the CSV and Reset.
+function _askShareHtml(p,can){
+  const C=_ask().cur,u=_askUrl(p.slug),k=p.screen_key?'?k='+encodeURIComponent(p.screen_key):'',code=String(p.code||'');
+  const tot=(C.det.questions||[]).reduce((s,q)=>s+(q.answers|0),0),ppl=C.ans?new Set(C.ans.map(a=>a.customer_id)).size:null;
+  const a=(href,ic,l,cls)=>`<a class="btn-sm btn-secondary ${cls}" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${_askIc(ic,14)} ${esc(t(l))}</a>`;
+  return`<div class="ask-share"><canvas class="ask-qr" id="ask-qr" width="132" height="132" role="img" aria-label="${esc(t('askQr'))}" data-u="${esc(u)}"></canvas>
+    <div class="ask-share-txt">${code?`<div class="ask-code"><span class="am-meta">${esc(t('askCode'))}</span> <bdi dir="ltr">${esc(code.replace(/^(\d{3})(\d{3})$/,'$1 $2'))}</bdi></div>`:''}
+      <div class="am-meta ask-share-n">${esc(t('askRound').replace('{0}',p.round||1))} · ${esc(t('askAnswers'))} <bdi>${tot}</bdi>${ppl==null?'':` · ${esc(t('askPeople'))} <bdi>${ppl}</bdi>`}</div>
+      <div class="ask-share-acts">${k?a(u+'/screen'+k,'screen','askScreen','ask-screen')+a(u+k,'eye','askPreview','ask-preview'):''}${_can('export')?`<button type="button" class="btn-sm btn-secondary ask-csv" data-on-click="${_on('_askCsv')}">${ICON_EXPORT} ${esc(t('exportBtn'))}</button>`:''}${can?`<button type="button" class="btn-sm btn-muted ask-reset" data-on-click="${_on('_askReset')}">${esc(t('askReset'))}</button>`:''}</div></div></div>`;
+}
+// Who answered what: every answer of the round with its person, in full (staff screens show personal data unmasked).
+function _askWhoHtml(){
+  const C=_ask().cur;
+  if(!C.ans)return C.ansErr&&!C.aBusy?_loadErr(esc(t('errConnection')),_on('_askAnswers')):skeletonList();
+  const L=_askARows(),Q=_askQMap();if(!L.length)return'';
+  const row=a=>{const q=Q.get(String(a.question_id));return`<tr><td><bdi>${esc(a.name||'')}</bdi></td><td class="ask-nw">${a.phone?_piiLink('phone',a.phone,a.customer_id,'ask:'+a.id,'tel:'+a.phone,'call'):''}</td><td><bdi>${esc(_askT(q))}</bdi></td><td><bdi>${esc(_askSum(a,q))}</bdi></td><td>${esc(_askStTxt(a.status))}</td><td class="ask-nw"><bdi>${esc(fmtStamp(a.created_at))}</bdi></td></tr>`;};
+  const th=l=>`<th scope="col">${esc(t(l))}</th>`;
+  return`<section class="ask-who" aria-labelledby="ask-who-t"><h2 id="ask-who-t">${esc(t('askWho'))}</h2>
+    <div class="ask-tbl" role="region" aria-labelledby="ask-who-t" tabindex="0"><table><thead><tr>${th('nameLabel')}${th('wsLblPhone')}${th('askQuestion')}${th('askAnswer')}${th('colStatus')}${th('askTime')}</tr></thead><tbody>${L.slice(0,C.wn).map(row).join('')}</tbody></table></div>
+    ${L.length>C.wn?`<div><button type="button" class="btn-secondary btn-sm ask-more" data-on-click="${_on('_askWMore')}">${esc(t('amShowMore').replace('{0}',Math.min(50,L.length-C.wn)))}</button></div>`:''}</section>`;
+}
+function _askWMore(){const C=_ask().cur;if(C){C.wn+=50;renderAsk();}}
+function _askResHtml(){
+  const C=_ask().cur,D=C.det,qs=(D.questions||[]).filter(q=>ASK_KINDS.includes(q.kind)&&q.kind!=='info');
+  return`${_askShareHtml(D.page,_askCan())}<div class="ask-rs">${qs.map(_askResOf).join('')}</div>${_askWhoHtml()}`;
+}
+function _askQrPaint(){
+  const cv=document.getElementById('ask-qr');if(!cv)return;
+  _loadQrcode().then(()=>{if(window.qrcode&&cv.isConnected)try{QR.paint(cv,cv.getAttribute('data-u'),{size:132,margin:2,pad:6});}catch(_){}});
+}
+function _askCsv(){
+  const C=_ask().cur;if(!C||!C.ans)return;
+  const L=_askARows(),Q=_askQMap(),p=_askPg()||{};
+  if(!L.length){toast(t('askNoAnswers'),'info');return;}
+  _downloadCsv(`ask-${p.slug||C.id}.csv`,[[t('nameLabel'),t('wsLblPhone'),t('askQuestion'),t('askAnswer'),t('colStatus'),t('askTime')],
+    ...L.map(a=>{const q=Q.get(String(a.question_id));return[a.name||'',a.phone||'',_askT(q),_askSum(a,q),_askStTxt(a.status),fmtStamp(a.created_at)];})],t('tabAsk')+': '+(p.slug||C.id));
+}
+// Reset results: a new round. The answers so far stay stored; the results and the lists show the new round.
+async function _askReset(){
+  const C=_ask().cur;if(!C||!C.id||!_askCan())return;
+  if(!await askConfirm({title:t('askResetAsk'),body:esc(t('askResetBody')),confirmLabel:t('askReset'),confirmClass:'btn-red'}))return;
+  if(_ask().cur!==C||!await _askCtl('reset'))return;
+  C.ans=null;C.ansSig='';C.seq++;_askAfterCtl();_askAnswers();_askPaint();
+}
+function renderAsk(){
+  const el=document.getElementById('tab-ask');if(!el)return;
+  const A=_ask();
+  if(!A.reg){A.reg=1;_draftReg('ask','ask',_askDirty,()=>{A.cur=null;});} // leaving the section with an unsaved draft asks first
+  _askCount(); // the rail's number, at most once a minute
+  if(!A.cur)_askLoad();
+  if(!_askQ())_askQDraw();
+  el.innerHTML=A.cur?_askPageHtml():_askListHtml();
+  _askQrPaint();_askTick();
 }
 
 // ── The Lockers section (/lockers; the owner, 2026-11-09: "a dedicated section for it on the staff website") ──
@@ -39632,17 +40425,17 @@ async function _pinApprove(what,opt){
 // only some of those (staff.modules_edit); null is everything its role allows. The role itself
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
-function _staffSections(){return['queue','waitlist','sessions','lockers','dashboard','cashier','store','payments','inventory','workshop','community','badgereq','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'].filter(_stoSecOk);}
-const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',store:'tabStore',payments:'tabPayments',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+function _staffSections(){return['queue','waitlist','sessions','lockers','dashboard','cashier','store','payments','inventory','workshop','community','badgereq','ask','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'].filter(_stoSecOk);}
+const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',store:'tabStore',payments:'tabPayments',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ask:'tabAsk',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
 // Customers and Community are one section, People, since 2026-11-06 (id 'community'): a list naming either names it.
-function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('queue')&&!l.includes('waitlist'))l.push('waitlist');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');if(l.includes('cashier')){if(!l.includes('store'))l.push('store');if(!l.includes('payments'))l.push('payments');}return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08); one naming Bookings names the Waitlist (a view of it until 2026-11-09)
+function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('queue')&&!l.includes('waitlist'))l.push('waitlist');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');if(l.includes('community')&&!l.includes('ask'))l.push('ask');if(l.includes('cashier')){if(!l.includes('store'))l.push('store');if(!l.includes('payments'))l.push('payments');}return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08) and Ask (2026-11-13: it comes with People); one naming Bookings names the Waitlist (a view of it until 2026-11-09)
 // What _modIds adds back to a list that names the section's parent (Sessions, Lockers and the Waitlist with Bookings, Badge
 // requests with People). The database's staff_set_access knows only its own list of sections (none of these four on
 // 2026-11-09), so the Team page sends them only without their parent, where the database's refusal says so; with it they
 // would cost nothing to drop, since they come back on every read.
-const _MOD_PARENT={sessions:'queue',lockers:'queue',waitlist:'queue',badgereq:'community',store:'cashier',payments:'cashier'}; // the Store and Payments (2026-11-10) come with Sales
+const _MOD_PARENT={sessions:'queue',lockers:'queue',waitlist:'queue',badgereq:'community',ask:'community',store:'cashier',payments:'cashier'}; // the Store and Payments (2026-11-10) come with Sales
 function _modSend(a){return Array.isArray(a)?a.filter(x=>!(_own(_MOD_PARENT,x)&&a.includes(_MOD_PARENT[x]))):a;}
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
 // Settings is every account's own page (_deskTabOk opens it to all) and is never one of the
@@ -70226,7 +71019,7 @@ function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
   if(st==='fnb')st='vendors'; // the section's id until 2026-10-03
-  return['queue','waitlist','sessions','lockers','cashier','store','payments','inventory','customers','community','badgereq','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
+  return['queue','waitlist','sessions','lockers','cashier','store','payments','inventory','customers','community','badgereq','ask','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
 }
 // The tab iOS opens for a bike tag (2026-10-09, D15): when a staff tab is already open on this device, the
 // bike goes to it over the 'mm-staff' channel and this tab only says so - nothing is loaded. No answer
@@ -70709,6 +71502,7 @@ function _secPolls(full){
   if(_deskTabOk('vendors'))_vendorPoll(whole);
   if(_deskTabOk('store')||_deskTabOk('payments'))_stoCounts(); // orders to prepare and refunds owed, on the rail (2026-11-10)
   if(_deskTabOk('community')){const f=globalThis['_apps'+'Probe'];if(typeof f==='function')f();} // the applications waiting, counted (s10, item 33): staff-half code, by name
+  if(_deskTabOk('ask'))_askCount(); // Ask's answers waiting for approval, on the rail (2026-11-13)
 }
 // ── The online store and its payments (2026-11-10, migration 20261110150000) ─────────────────────
 // The website takes the money (Moyasar); the staff page fulfils orders, edits the products and decides refunds.

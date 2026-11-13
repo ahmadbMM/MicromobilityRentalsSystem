@@ -72,7 +72,7 @@ export function rewriteApp(src, { key, origin }) {
   s = must(s, /const STAFF_ORIGIN='https:\/\/staff\.micromobility\.sa'/, `const STAFF_ORIGIN='${origin}'`, 'STAFF_ORIGIN');
   s = s.replace(PROD_WEB_RE, STAGING_WEB);
   s = must(s, /<title>([^<]*)<\/title>/, '<title>[Staging] $1</title>', 'the page title');
-  s = must(s, "function _pageTitle(){return t(", "function _pageTitle(){return'[Staging] '+t(", '_pageTitle');
+  s = must(s, "function _pageTitle(){const b=t(", "function _pageTitle(){const b='[Staging] '+t(", '_pageTitle');
   s = must(s, /<meta charset="utf-8">/i, '<meta charset="utf-8">\n  <meta name="robots" content="noindex, nofollow">', 'the head (noindex)');
   return s;
 }

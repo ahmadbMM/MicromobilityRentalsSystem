@@ -22,7 +22,7 @@ const GROUP = /^@(?:media|supports|layer|container|document)\b/i;
 // `#tab-cashier .sl-lbl` shared. These hosts are only ever shown to staff: the section panels under #view-staff and the
 // staff dialogs' hosts (the customer's page never opens them), so a selector that needs one is a staff rule too.
 export const STAFF_HOSTS = new Set(['view-staff', 'tab-queue', 'tab-waitlist', 'tab-sessions', 'tab-lockers', 'tab-inventory', 'tab-cashier',
-  'tab-store', 'tab-payments', 'tab-community', 'tab-customers', 'tab-badgereq', 'tab-analytics', 'tab-history', 'tab-website', 'tab-catalog',
+  'tab-store', 'tab-payments', 'tab-community', 'tab-customers', 'tab-badgereq', 'tab-ask', 'tab-analytics', 'tab-history', 'tab-website', 'tab-catalog',
   'tab-workshop', 'tab-messages', 'tab-ambassadors', 'tab-volunteers', 'tab-vendors', 'tab-team', 'tab-settings', 'tab-dashboard', 'tab-bikes',
   'pin-modal', 'bike-modal', 'checkin-modal', 'edit-price-modal', 'optlist-modal', 'return-pay-modal', 'return-modal', 'cust-modal',
   'bike-profile-modal', 'cashier-modal', 'receipt-edit-modal', 'team-mgr-modal', 'cancel-reason-modal', 'walkin-modal', 'op-gate-modal',

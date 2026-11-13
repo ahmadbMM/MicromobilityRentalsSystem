@@ -80,7 +80,7 @@ test.describe('accessibility gate (any violation fails the build)', () => {
   // (staff round s10, item 43), and every list holds about twenty rows (officeFixtures), so the gate reads real tables.
   const STAFF_TABS = ['queue', 'dashboard', 'cashier', 'inventory', 'workshop', 'customers', 'community', 'ambassadors',
     'vendors', 'website', 'catalog', 'messages', 'analytics', 'history', 'team', 'settings',
-    'waitlist', 'sessions', 'lockers', 'badgereq', 'volunteers', 'store', 'payments'] as const;
+    'waitlist', 'sessions', 'lockers', 'badgereq', 'volunteers', 'store', 'payments', 'ask'] as const; // Ask: 2026-11-13 (its page views are audited in tests/ask.spec.ts)
   for (const lang of ['en', 'ar'] as const) {
     for (const tab of STAFF_TABS) {
       test(`staff: ${tab} (${lang})`, async ({ page }) => {
@@ -278,7 +278,13 @@ function officeFixtures() {
   const lockers = Array.from({ length: 18 }, (_, i) => ({ id: `L${i + 1}`, code: String(i + 1), status: i === 5 ? 'out' : 'available', note: '', created_at: at(1) }));
   const locker_rentals = ids.slice(0, 10).map((i) => ({ id: `R${i}`, day: DAY, period: i % 2 ? 'late' : 'early', booking_id: `q${i}`, session_id: DAY,
     customer_id: `c${i}`, name: nm(i), locker_id: `L${i}`, price: 10, on_bill: true, status: i % 3 ? 'reserved' : 'in_use', created_at: at(i), created_by: 'rider' }));
+  // Ask's pages (2026-11-13): one in each state, with answers waiting on some
+  const ask_pages = ids.map((i) => ({ id: i, slug: `page-${i}`, code: String(100000 + i), title_en: `Question ${i} for ${nm(i)}`, title_ar: '', intro_en: '', intro_ar: '',
+    audience: ['link', 'accounts', 'tags'][i % 3], tag_ids: i % 3 === 2 ? ['tag_saturday'] : [], status: ['live', 'draft', 'ended'][i % 3], opens_at: i % 6 ? null : '2099-01-01T09:00:00Z',
+    closes_at: i % 2 ? '2099-02-01T18:00:00Z' : null, after_close: 'results', pace: 'self', listed: true, round: 1, notes: '', look: {}, open: i % 3 === 0 && i % 6 !== 0,
+    questions: 1 + (i % 3), answers: i * 3, people: i * 2, pending: i % 4 }));
   return { ...base, customers, queue_entries, bikes, workshop_jobs, workshop_job_events: [], site_messages, badges, customer_badges: [], badge_requests,
     community_applications, learn_applications: [], volunteers, desk_waitlist, lockers, locker_rentals,
-    'rpc:staff_store_ready': true, 'rpc:staff_store_orders': [], store_orders: [], payment_refunds: [] };
+    'rpc:staff_store_ready': true, 'rpc:staff_store_orders': [], store_orders: [], payment_refunds: [],
+    'rpc:staff_ask_pages': ask_pages, 'rpc:staff_ask_pending': 12 };
 }
