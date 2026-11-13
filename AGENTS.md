@@ -725,7 +725,7 @@ Back on it, and the old `member_directory` check is gone: `hub_feed` answers `er
 
 ## Community reaches members where they already are (2026-11-13)
 
-Migrations 20261113120000 (community reach) and 20261113130000 (push consent); reports/Community tab reach after launch.md, R1-R22
+Migrations 20261114000100 (community reach) and 20261114000200 (push consent); reports/Community tab reach after launch.md, R1-R22
 (all Build now but R19, WhatsApp Business: no). The tab's reach was the problem (6% of members opened it in its first two days),
 so its pieces now live outside it too.
 - **The database makes the backbone itself.** `_hub_tick` (pg_cron `mm-hub-tick`, every 15 minutes) makes every active member's

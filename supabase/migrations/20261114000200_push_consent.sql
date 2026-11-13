@@ -17,6 +17,10 @@
 --     tells its riders (a pass already in Wallet never updates).
 --
 -- Headers copied from the live definitions (function attributes trap).
+--
+-- Numbered 20261114000200: it was written as 20261113130000 and moved with 20261114000100_community_reach.sql (first
+-- written as 20261113120000, a number reports_rework had already taken on production and staging). It runs after that
+-- file: it reads sessions.ride_status, meet_lat, meet_lng and hub_posts.auto.
 
 begin;
 
@@ -397,7 +401,7 @@ create trigger session_change_push after update of bike_slots, meet_url, meet_la
 select cron.schedule('mm-hub-push', '*/10 * * * *', 'select public._hub_push_tick()');
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261113130000', 'push_consent')
+values ('20261114000200', 'push_consent')
 on conflict (version) do nothing;
 
 commit;
@@ -414,4 +418,4 @@ select (select count(*) from pg_class where relnamespace = 'public'::regnamespac
        (select count(*) from public.push_words) as words_140,
        (select count(*) from cron.job where jobname = 'mm-hub-push') as cron_1,
        (select count(*) from pg_trigger where tgname in ('push_outbox_gate', 'session_change_push')) as triggers_2,
-       (select version from supabase_migrations.schema_migrations where version = '20261113130000') as ledger;
+       (select version from supabase_migrations.schema_migrations where version = '20261114000200') as ledger;

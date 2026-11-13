@@ -142,7 +142,7 @@ async function _hubFetch(force) {
   if (!force && !o && h && h.forId === c.id && h.d && !h.stale && Date.now() - h.at < 12e4) return;
   S._hubBusy = true; S._hubAgain = false; if (o) o.sent = true;
   let r; try { r = await sb.rpc('hub_feed', o ? { ..._hTok(c), p_src: o.src } : _hTok(c)); } catch (e) { r = { error: e }; }
-  // A database before the entry points (20261113120000) has only the two-argument read: the open is read without its source.
+  // A database before the entry points (20261114000100) has only the two-argument read: the open is read without its source.
   if (o && r && r.error && r.error.code === 'PGRST202') { try { r = await sb.rpc('hub_feed', _hTok(c)); } catch (e) { r = { error: e }; } }
   S._hubBusy = false;
   if (S._hubAgain) { S._hubAgain = false; if (S._hubVisit && S._hubVisit.due && S._hubVisit !== o) setTimeout(() => _hubFetch(true), 0); }

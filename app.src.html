@@ -8439,7 +8439,7 @@ function _revealLocal(iso){const ms=iso?Date.parse(iso):NaN;if(!isFinite(ms))ret
   try{return new Date(ms+108e5).toISOString().slice(0,16);}catch(_){return'';}}
 function _revealIso(v){v=String(v||'').slice(0,16);if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v))return null;const ms=Date.parse(v+':00+03:00');return isFinite(ms)?new Date(ms).toISOString():null;}
 function _revealNoteTxt(v){const iso=_revealIso(v);if(!iso)return'';return Date.parse(iso)>Date.now()?t('revealHeldNote').replace('{0}',_revealWhen({reveal_at:iso})):t('revealPastNote');}
-// The meeting point by name, in English and Arabic, and as a coordinate (R11, 20261113120000), for the riders' map buttons
+// The meeting point by name, in English and Arabic, and as a coordinate (R11, 20261114000100), for the riders' map buttons
 // and the Wallet pass. Staff type "lat, lng" or paste a Google Maps or Apple Maps link and the coordinate is read out of
 // it: a place's pin (!3d..!4d..) first, then q=, query=, ll=, coordinate=, destination= or daddr=, then the map's
 // centre (@lat,lng). A short link (maps.app.goo.gl) carries none. Both or neither; meet_url stays as it was.
@@ -15975,7 +15975,7 @@ function _commNavPaint(){
   if(on)_pulse();
 }
 // ── Community where members already are (2026-11-13, reports/Community tab reach after launch.md: R1, R4-R7) ──────────
-// One light read, hub_pulse (migration 20261113120000), for a member anywhere in the app: once the account's data is in
+// One light read, hub_pulse (migration 20261114000100), for a member anywhere in the app: once the account's data is in
 // on opening, when the page comes back into view (at most once in ten minutes), after a rating and after a booking. It
 // lights a dot on the Community tab (never a number, never for a booking or a sale), brings the Community badges the
 // server gave that this member has not seen (the badge pop-up, once, on whatever tab is up; the rating's last screen
@@ -27173,7 +27173,7 @@ function startEditSession(id){
   S.editSessAddonsOpen=false; // the add-ons stay folded until staff open them (the owner, 2026-11-10)
   S.editSessMapUrl=sess.meet_url||'';S.editSessBfName=sess.breakfast_name||'';S.editSessBfUrl=sess.breakfast_url||'';
   S.editSessReveal=_revealLocal(sess.reveal_at); // when riders are told where it meets (_revealFieldHtml)
-  // The meeting point by name and coordinate, and the ride's status for riders (20261113120000; _esMeetHtml, _esRsHtml)
+  // The meeting point by name and coordinate, and the ride's status for riders (20261114000100; _esMeetHtml, _esRsHtml)
   S.editSessMeetName=sess.meet_name||'';S.editSessMeetNameAr=sess.meet_name_ar||'';S.editSessMeetCoord=_meetCoordTxt(sess);S.editSessRideStatus=sess.ride_status||'';
   S.editSessTitle=sess.title||'';S.editSessTitleAr=sess.title_ar||'';S.editSessDesc=sess.description||'';
   // Every field the form shows is set from THIS session. Spots used to keep whatever was last
@@ -30449,7 +30449,7 @@ function _sessRowSnap(id){const r=_sessGet(id);if(!r)return null;const o={...r};
 // Who can book (gender_only, 2026-10-27) too; a row read before 20261027150000 has no such key, so its Undo names none.
 // Lockers offered as well (bug hunt 2026-11-10): the edit writes it, and Undo said done while it stayed as edited.
 const SESS_EDIT_COLS=['day','session_date','capacity','status','bike_slots','addons','title','spots','price','meet_url','breakfast_name','breakfast_url','event_kind','needs_approval','ride_kind','paid_ride','open_to_all','required_tag_id','reveal_at','description','gender_only','member_cap','lockers','meet_name','meet_name_ar','meet_lat','meet_lng','ride_status'];
-// The meeting point's name and coordinate and the ride's status too (20261113120000): the editor writes them.
+// The meeting point's name and coordinate and the ride's status too (20261114000100): the editor writes them.
 // The members limit too (bug hunt 2026-10-28): the edit writes it, and Undo left a mistyped limit in place.
 // The rides the editor sizes by places, not by bikes: the approval rides, and a ticketed event
 // (seats, no fleet). An event opened as a bike session read "add bikes" on every save.
@@ -30673,7 +30673,7 @@ async function _saveSessionEdit(){
     if(newStatus!=='closed'&&sess.cancelled_at)_patch.cancelled_at=null; // a night called off (Cancel night) and opened again here
     if(!!S.editSessLockers!==(sess.lockers===true))_patch.lockers=!!S.editSessLockers; // Lockers offered (2026-11-09), sent only when it changed
     // The meeting point's name and coordinate (R11) and the ride's status (R10), each sent only when it changed: a database before
-    // 20261113120000 refuses the unknown column and _sessPatch writes the rest field by field.
+    // 20261114000100 refuses the unknown column and _sessPatch writes the rest field by field.
     if(_mtOn){
       const nm=String(S.editSessMeetName||'').trim().slice(0,80)||null,na=String(S.editSessMeetNameAr||'').trim().slice(0,80)||null;
       if(nm!==(String(sess.meet_name||'').trim()||null))_patch.meet_name=nm;
@@ -44422,7 +44422,7 @@ function _remSet(k,v){const g=S._rem;if(!g||g.run)return;g[k]=v;_remPaint();}
 function _remLangSet(id,v){const g=S._rem;if(!g)return;g.lang[id]=v;_remPaint();}
 function _remTplId(){return S._rem&&S._rem.kind==='2h'?'remind_2h':S._rem&&S._rem.kind==='late'?'remind_late':'remind_24h';}
 // Not reminded yet with this reminder: a 24 h reminder counts once any reminder went; a 2 h one only a 2 h one. The server's
-// push the evening before (reminded_kind 'push', 20261113130000) counts as the day before's, so the WhatsApp run skips that rider.
+// push the evening before (reminded_kind 'push', 20261114000200) counts as the day before's, so the WhatsApp run skips that rider.
 function _remKindKey(k){return k==='2h'?'remKind2':k==='late'?'n6cLateKind':k==='push'?'remKindPush':'remKind24';}
 function _remDone(e,kind){if(kind==='late')return !!_n6cLateAt(e);const w=_remWhen(e);return !!w&&(kind==='24h'||w.kind==='2h');}
 function _remPaint(){
@@ -68729,7 +68729,7 @@ async function _ttTake(cid,tid){
 // Any staffer may run these. Photos come without their pictures; each is read when it is on show.
 const AC_PH_COLS='id,customer_id,caption,status,reported_at,report_reason,created_at';
 const AC_PO_COLS='id,session_id,line,line_ar,riders,rides,shows_from,shows_until,created_at'; // never the photo: read alone
-// The automatic Saturday report (R13, migration 20261113120000): the server writes one about two hours after each Saturday ride
+// The automatic Saturday report (R13, migration 20261114000100): the server writes one about two hours after each Saturday ride
 // closes, with its numbers; staff add a line and a photo with no people in it, or hide it. A database before it reads the old columns.
 const AC_PO_RX=',auto,first_rides,leads,volunteers,prev_riders,hidden';
 function _acPostsRead(){
@@ -68746,7 +68746,7 @@ async function _acLoad(force){
     fail=[r,g,q,m,p,w].map(x=>x&&x.error).find(Boolean)||null;
     if(!fail)S._ac={rounds:r.data||[],goals:g.data||[],squads:q.data||[],sqm:m.data||[],photos:p.data||[],welcome:w.data||[],posts:[],badges:[]};
     if(!fail){ // the Saturday reports and the badges a challenge can give (2026-11-11): a database without them keeps the rest
-      // and the months' club goals and Ramadan's dates (R20, R21; 20261113120000): null where the database has no such table yet
+      // and the months' club goals and Ramadan's dates (R20, R21; 20261114000100): null where the database has no such table yet
       const[po,bd,cg,rm]=await Promise.all([_acPostsRead(),
         sb.from('badges').select('id,slug,name,name_ar,retired,sort').eq('retired',false).order('sort'),
         sb.from('hub_club_goals').select('*').order('month',{ascending:false}).limit(36),sb.from('hub_ramadan').select('*').order('year')]);
@@ -69053,7 +69053,7 @@ function _acNumHtml(){
     +_acNumSrcHtml(x.src)+_acNumWeeksHtml(x.weeks));
 }
 // Where members opened the tab from (R3, staff_hub_numbers.src) and the weekly funnel read each week from 25 Nov (R22,
-// staff_hub_numbers.weeks: the last six Saturday-to-Friday weeks, newest first). A database before 20261113120000 sends neither.
+// staff_hub_numbers.weeks: the last six Saturday-to-Friday weeks, newest first). A database before 20261114000100 sends neither.
 const AC_RX_SRC=[['tab','acRxSrcTab'],['dot','acRxSrcDot'],['rating','acRxSrcRating'],['booked','acRxSrcBooked'],['wa','acRxSrcWa'],['push','acRxSrcPush'],['badge','acRxSrcBadge'],['link','acRxSrcLink']];
 function _acPct(n,of){return of>0?` (${Math.round(n/of*100)}%)`:'';}
 function _acTbl(head,cols,rows,cards){ // cards: the wide weekly table becomes cards on a phone; three short columns fit as they are

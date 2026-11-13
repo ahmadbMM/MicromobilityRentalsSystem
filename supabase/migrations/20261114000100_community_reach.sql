@@ -25,6 +25,11 @@
 -- Headers copied from 20261111100000_community_tab.sql and the live definitions, not from prosrc (function attributes
 -- trap). hub_feed gains a third argument with a default, so the two-argument version is dropped first; old pages that
 -- call it with two arguments reach the new one.
+--
+-- Numbered 20261114000100: it was written as 20261113120000, a number reports_rework had already taken on production and
+-- staging, where "on conflict (version) do nothing" would have left this file out of the ledger. Neither ledger held
+-- anything of this build when it was renumbered (2026-11-13; both ended at 20261113190000). It runs before
+-- 20261114000200_push_consent.sql, which reads the columns added here.
 
 begin;
 
@@ -658,7 +663,7 @@ grant execute on function public.staff_hub_numbers(date) to authenticated;
 select cron.schedule('mm-hub-tick', '*/15 * * * *', 'select public._hub_tick()');
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261113120000', 'community_reach')
+values ('20261114000100', 'community_reach')
 on conflict (version) do nothing;
 
 commit;
@@ -677,4 +682,4 @@ select (select count(*) from pg_class where relnamespace = 'public'::regnamespac
        (select count(*) from cron.job where jobname = 'mm-hub-tick') as cron_1,
        (select count(*) from public.customer_badges where seen_at is null) as unseen_0,
        (select ramadan_any from public.hub_goals where id = 'goal_cool_season_2026') as season_ramadan_true,
-       (select version from supabase_migrations.schema_migrations where version = '20261113120000') as ledger;
+       (select version from supabase_migrations.schema_migrations where version = '20261114000100') as ledger;

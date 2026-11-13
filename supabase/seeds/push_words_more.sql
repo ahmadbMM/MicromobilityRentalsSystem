@@ -1,5 +1,5 @@
 -- The push texts in the eight languages after English and Arabic (2026-11-13, the Community tab reach build, R18).
--- push_words (key, lang, title, body) comes with migration 20261113130000_push_consent.sql, which seeds en and ar;
+-- push_words (key, lang, title, body) comes with migration 20261114000200_push_consent.sql, which seeds en and ar;
 -- run this after it. {0} and {1} are filled by the server when it queues a push:
 --   remind     {0} = the session's name, {1} = the gather time      (My rides, the evening before at 21:00 KSA)
 --   change     {0} = the session's name                             (My rides, start, meeting point or status changed)

@@ -5,7 +5,7 @@ import { stubSupabase, loginCustomer, waitForSb, type Fixtures } from './helpers
 // where it came from, once (R3); the next session's card gives its two times and where it meets with one map button (R9) and
 // changes with the time to turn up, with staff's word on the ride as a chip (R10); the Saturday report is number tiles (R13);
 // a club goal reached names the next Saturday's own target (R20). All Supabase traffic is stubbed; hub_feed's p_src and the
-// new session and post fields are the contract of migration 20261113120000.
+// new session and post fields are the contract of migration 20261114000100.
 
 const sess = (id: string, date: string, o: Record<string, unknown> = {}) => ({ id, day: 'Saturday', session_date: date, capacity: 40, status: 'open', created_at: 1, event_kind: 'community', ride_kind: 'saturday', paid_ride: false, bike_slots: '{"_time":"06:00 - 06:30","_total":40}', ...o });
 const open = [sess('2099-01-03', '2099-01-03'), sess('2099-01-10', '2099-01-10'), sess('2099-01-17', '2099-01-17')];

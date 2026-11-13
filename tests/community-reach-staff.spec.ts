@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb, type Fixtures } from './helpers/supabase';
 
 // The Community tab's reach, staff side (2026-11-13, reports/Community tab reach after launch.md R3, R10, R11, R13, R14, R20,
-// R21, R22; migrations 20261113120000 and 20261113130000). Community > Activities: the numbers by entry point and week by week,
+// R21, R22; migrations 20261114000100 and 20261114000200). Community > Activities: the numbers by entry point and week by week,
 // the automatic Saturday report staff can edit or hide, the WhatsApp link with its source tag, the club goal by month and
 // Ramadan's dates. The session editor: the meeting point by name and coordinate, and the ride's status. The reminder sheet:
 // a rider the server reminded by push the evening before is skipped like one reminded on WhatsApp. All Supabase traffic is stubbed.
