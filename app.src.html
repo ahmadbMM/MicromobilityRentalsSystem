@@ -41445,7 +41445,21 @@ function _srmPanelHtml(sid){
   });
   if(!rows.length)return'';
   rows.sort((a,b)=>b.n-a.n||String(a.e.name||'').localeCompare(String(b.e.name||'')));
-  return`<section class="ptn-panel srm-panel" aria-label="${esc(t('srmTitle'))}"><div class="ptn-title">${esc(t('srmTitle'))}</div><ul class="satc-list srm-list">${rows.map(({e,n})=>`<li class="satc-li"><b>${esc(e.name)}</b> <span class="ptn-sub">${esc(t('srmMile').replace('{0}',String(n)))}</span></li>`).join('')}</ul></section>`;
+  const f=_srmFolded(); // folded to its title by the arrow, as the ride codes above it fold (the user, 2026-11-14: "make this section coolapsable Milestones this Saturday")
+  return`<section class="ptn-panel srm-panel${f?' folded':''}" aria-label="${esc(t('srmTitle'))}"><div class="ptn-title"><button type="button" class="satc-fold" aria-expanded="${!f}" aria-controls="srm-body" title="${esc(t(f?'foldShow':'attnHide'))}" data-on-click="${_on('_srmFold',_EL)}"><span class="satc-arr"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>${esc(t('srmTitle'))}<span class="srm-n">${rows.length}</span></button></div><div id="srm-body" class="srm-body"${f?' hidden':''}><ul class="satc-list srm-list">${rows.map(({e,n})=>`<li class="satc-li"><b>${esc(e.name)}</b> <span class="ptn-sub">${esc(t('srmMile').replace('{0}',String(n)))}</span></li>`).join('')}</ul></div></section>`;
+}
+// The list folds to its title with the arrow (the user, 2026-11-14), the count beside the name; kept on this device, so it
+// stays folded on every Saturday ride, as the ride codes' panel does (_satcFold).
+function _srmFolded(){
+  if(S._srmFold===undefined){try{S._srmFold=localStorage.getItem('cq_srm_fold')==='1';}catch(e){S._srmFold=false;}}
+  return S._srmFold;
+}
+function _srmFold(btn){
+  const f=S._srmFold=!_srmFolded();
+  try{localStorage.setItem('cq_srm_fold',f?'1':'0');}catch(e){}
+  btn.setAttribute('aria-expanded',String(!f));btn.title=t(f?'foldShow':'attnHide');
+  const p=btn.closest('.srm-panel');if(p)p.classList.toggle('folded',f);
+  const b=document.getElementById('srm-body');if(b)b.hidden=f;
 }
 // ── Saturday ride codes (the owner, 2026-11-08) ──────────────────────────────────────────────────────────────────
 // Riders book a Saturday Social Ride at micromobility.sa/saturday with a code staff give out (20261108120000): a valid

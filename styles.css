@@ -11906,6 +11906,9 @@ html[dir="rtl"] :is(#tab-queue,#tab-waitlist) .satc-fold[aria-expanded="false"] 
 .srm-first{background:#0c7a3d;}.srm-second{background:#0b7285;}.srm-back{background:#6741d9;}.srm-mile{background:#8a6500;}
 :is(#tab-queue,#tab-waitlist) .srm-panel{border-inline-start-color:#8a6500;}
 :is(#tab-queue,#tab-waitlist) .srm-list{margin-top:0;}
+:is(#tab-queue,#tab-waitlist) .srm-panel.folded .ptn-title{margin:0;}
+:is(#tab-queue,#tab-waitlist) .srm-panel .ptn-title{margin-bottom:6px;}
+:is(#tab-queue,#tab-waitlist) .srm-n{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;font-size:var(--sf-fs-xs);font-weight:600;color:#fff;background:#8a6500;border-radius:999px;}
 .satc-sw{display:inline-flex;align-items:center;gap:6px;font-size:var(--sf-fs-sm);font-weight:600;color:var(--text);cursor:pointer;}
 /* The code a booking used, its kind and its mark (2026-11-08, _codeTag): beside a name the mark and the code; in the
    Bookings table's Code column, the reports and the rider's ticket the kind's name too. The mark wears its kind's

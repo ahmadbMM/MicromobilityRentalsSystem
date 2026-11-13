@@ -127,7 +127,7 @@ test.describe('@staff:bookings Marks on the Saturday roster', () => {
     await roster(page);
     await expect(panel(page)).toBeVisible();
     await expect(panel(page)).toHaveAttribute('aria-label', 'Milestones this Saturday');
-    await expect(panel(page).locator('.ptn-title')).toHaveText('Milestones this Saturday');
+    await expect(panel(page).locator('.ptn-title')).toHaveText('Milestones this Saturday2');
     const items = panel(page).locator('.satc-li');
     await expect(items).toHaveText(['Uma Twentyfive Saturday ride 25', 'Dana Five Saturday ride 5']);
     // Tariq Ten holds No call-out; Hala Hundred is waitlisted, Fadi Fifty cancelled, Riad Rejected not selected, and
@@ -139,9 +139,28 @@ test.describe('@staff:bookings Marks on the Saturday roster', () => {
     await page.evaluate(`(()=>{S.queue=S.queue.map(e=>e.id==='q13'?{...e,approval:null}:e);renderStaffQueue();})()`);
     await expect(items).toHaveText(['Uma Twentyfive Saturday ride 25', 'Dana Five Saturday ride 5']);
     await expect(mk(page, 'q5')).toHaveText(['Saturday ride 10']);
-    // it sits above the roster, on the screen staff already use: no dialog, no button
-    await expect(panel(page).locator('button, a')).toHaveCount(0);
+    // it sits above the roster, on the screen staff already use: no dialog, one button, the arrow that folds it
+    await expect(panel(page).locator('button, a')).toHaveCount(1);
     await expect(page.locator('#confirm-modal [role="dialog"]')).toHaveCount(0);
+  });
+
+  test('Milestones this Saturday folds to its title and count with the arrow, and stays folded on this device', async ({ page }) => {
+    await boot(page);
+    await roster(page);
+    const fold = panel(page).locator('button.satc-fold');
+    await expect(fold).toHaveAttribute('aria-expanded', 'true');
+    await expect(panel(page).locator('.srm-n')).toHaveText('2');
+    await fold.click();
+    await expect(fold).toHaveAttribute('aria-expanded', 'false');
+    await expect(panel(page).locator('#srm-body')).toBeHidden();
+    await expect(panel(page)).toHaveClass(/\bfolded\b/);
+    // a repaint of the roster keeps it folded, and so does the next visit on this device
+    await page.evaluate('renderStaffQueue()');
+    await expect(panel(page).locator('#srm-body')).toBeHidden();
+    expect(await page.evaluate(`localStorage.getItem('cq_srm_fold')`)).toBe('1');
+    await panel(page).locator('button.satc-fold').click();
+    await expect(panel(page).locator('#srm-body')).toBeVisible();
+    await expect(panel(page).locator('.satc-li')).toHaveCount(2);
   });
 
   test('nobody reaching a step: the marks show and there is no list', async ({ page }) => {
@@ -324,7 +343,7 @@ test.describe('@staff:bookings Marks on the Saturday roster', () => {
     await expect(mk(page, 'q2')).toHaveText(['ثاني سبت']);
     await expect(mk(page, 'q3')).toHaveText(['عاد بعد تفويت 4']);
     await expect(mk(page, 'q4')).toHaveText(['جولة السبت رقم 5']);
-    await expect(panel(page).locator('.ptn-title')).toHaveText('إنجازات هذا السبت');
+    await expect(panel(page).locator('.ptn-title')).toHaveText('إنجازات هذا السبت2');
     await expect(panel(page).locator('.satc-li')).toHaveText(['Uma Twentyfive جولة السبت رقم 25', 'Dana Five جولة السبت رقم 5']);
   });
 
