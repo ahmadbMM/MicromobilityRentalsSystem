@@ -30,7 +30,7 @@
 -- without them. Nothing is sent until the owner sets the push secrets (push stays dormant, as before).
 --
 -- Safe before or after the app: until this runs no booking carries coming_at, so the page shows no buttons.
--- _hub_push_tick's header is copied from 20261113130000_push_consent.sql (function attributes trap).
+-- _hub_push_tick's header is copied from 20261114000200_push_consent.sql (function attributes trap).
 --
 -- Rollback:
 --   drop trigger if exists queue_entries_coming_guard on public.queue_entries;
@@ -38,7 +38,7 @@
 --   drop function if exists public.booking_coming(text, text, text);
 --   alter table public.queue_entries drop column if exists coming_at;
 --   delete from public.push_words where key = 'remind:nc';
---   and run 20261113130000_push_consent.sql again for the earlier words and _hub_push_tick.
+--   and run 20261114000200_push_consent.sql again for the earlier words and _hub_push_tick.
 -- Idempotent.
 -- ============================================================================
 
@@ -147,7 +147,7 @@ on conflict (key, lang) do update set title = excluded.title, body = excluded.bo
 alter table public.queue_entries drop constraint if exists queue_entries_reminded_kind_chk;
 alter table public.queue_entries add constraint queue_entries_reminded_kind_chk
   check (reminded_kind is null or reminded_kind in ('24h', '2h', 'push'));
-comment on column public.queue_entries.reminded_kind is 'Which reminder that was: 24h | 2h (staff, 20261009225000) | push (the evening-before notification, 20261113130000).';
+comment on column public.queue_entries.reminded_kind is 'Which reminder that was: 24h | 2h (staff, 20261009225000) | push (the evening-before notification, 20261114000200).';
 
 -- The ten-minute job, as push_consent wrote it, with two changes in the evening-before reminder: the words follow the
 -- session (a session with no bike takes 'remind:nc'; the kinds are the app's own list, KIND_TRAITS bike:false) and

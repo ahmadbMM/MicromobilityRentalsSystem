@@ -36,9 +36,9 @@
 --     clears its dot. customer_updates marks what it returned as read.
 --  7. _updates_sweep, daily (mm-updates-sweep): rows older than 90 days go.
 --
--- Headers of the three redefined functions copied from 20261113130000_push_consent.sql (function attributes trap).
+-- Headers of the three redefined functions copied from 20261114000200_push_consent.sql (function attributes trap).
 --
--- Rollback: run sections 2, 4 and 5 of 20261113130000_push_consent.sql again (the three functions as they were), then
+-- Rollback: run sections 2, 4 and 5 of 20261114000200_push_consent.sql again (the three functions as they were), then
 --   select cron.unschedule('mm-updates-sweep');
 --   drop trigger if exists queue_entries_updates_wl on public.queue_entries;
 --   drop trigger if exists waitlist_offers_updates on public.waitlist_offers;
@@ -76,7 +76,7 @@ comment on column public.push_outbox.read_at is
 comment on column public.push_outbox.key is
   'The push_words key this message was written from, with args: the Updates list says it in the page''s language; null = title and body as stored (20261114010300).';
 
--- The evening-before reminder marks its booking reminded_kind = 'push' (_hub_push_tick, below and in 20261113130000).
+-- The evening-before reminder marks its booking reminded_kind = 'push' (_hub_push_tick, below and in 20261114000200).
 -- The check of 20261009225000 allowed '24h' and '2h' alone and refused it, which rolled the whole run back. Dropped and
 -- added again with the three kinds; every value on file is one of the first two.
 alter table public.queue_entries drop constraint if exists queue_entries_reminded_kind_chk;
