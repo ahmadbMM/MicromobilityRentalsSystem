@@ -70195,8 +70195,8 @@ function _commTitles(){
       <div class="cmy-am-tacts">
         <button type="button" class="btn-sm ${open?'btn-primary':'btn-secondary'}" aria-expanded="${open}" data-on-click="${_on('_ttOpen',x.id)}">${t('tgHoldersBtn')}</button>
         ${adm?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_ttEdit',x.id)}">${t('editBtn')}</button>
-        ${x.path_step?'':`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_ttRetire',x.id,!x.retired)}">${t(x.retired?'ttRestore':'ttRetire')}</button>
-        ${anyRow?'':`<button type="button" class="btn-sm btn-red" data-on-click="${_on('_ttDelete',x.id)}">${S._ttSure===x.id?t('ttSure'):t('deleteBtn')}</button>`}`}`:''}
+        ${x.path_step&&!x.retired?'':`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_ttRetire',x.id,!x.retired)}">${t(x.retired?'ttRestore':'ttRetire')}</button>
+        ${anyRow||x.path_step?'':`<button type="button" class="btn-sm btn-red" data-on-click="${_on('_ttDelete',x.id)}">${S._ttSure===x.id?t('ttSure'):t('deleteBtn')}</button>`}`}`:''}
       </div></div>${open?_ttHoldersHtml(x):''}`;
   }).join('')||_emptyState(t('ttEmpty'));
   return`<div class="form-section cmy-mt0"><h2 class="form-title">${t('ttTab')}</h2><div class="cmy-am-sub">${t('ttSub')}</div>${rows}
@@ -70207,7 +70207,8 @@ function _commTitles(){
 // title is, here or from the title's own holders; the database keeps one path title per member (_title_path_one), and a
 // member holding none is a rider. Helper days are the days of the volunteer shifts a member attended (staff_helper_days),
 // read only once the catalogue holds the path titles. A database from before the path has none: no section, no read.
-// The path's titles are edited (name, colour) but not retired or deleted, and are never automatic.
+// The path's titles are edited (name, colour) but not retired or deleted, and are never automatic; one found retired
+// (a page from before the path still offers Retire on it) can be restored.
 const HP_STEP_KEYS=['hpStep0','hpStep1','hpStep2','hpStep3'];
 function _hpTitles(){return(S.titles||[]).filter(x=>x.path_step>=1&&x.path_step<=3).sort((a,b)=>a.path_step-b.path_step);}
 async function _hpDaysLoad(){
@@ -70246,7 +70247,7 @@ function _hpStaffHtml(){
     .sort((a,b)=>stepOf(b)-stepOf(a)||daysOf(b)-daysOf(a)||String(a.name||'').localeCompare(String(b.name||'')));
   const cap=S._hpCap||50;
   const rows=list.slice(0,cap).map(c=>{const s=stepOf(c),nm=c.name||'—';
-    return`<div class="tg-row" data-hp="${esc(c.id)}"><span class="tg-who"><strong>${esc(nm)}</strong><small>${c.phone?_pii('phone',c.phone,c.id):_pii('email',c.email,c.id)}${D?` · <span class="hp-dn">${esc(t('hpDaysN').replace('{0}',daysOf(c)))}</span>`:''}</small></span>
+    return`<div class="tg-row" data-hp="${esc(c.id)}"><span class="tg-who"><strong>${esc(nm)}</strong><small>${c.phone?_pii('phone',c.phone,c.id):_pii('email',c.email,c.id)}</small></span>${D?`<span class="hp-dn">${esc(t('hpDaysN').replace('{0}',daysOf(c)))}</span>`:''}
       ${can?`<select class="hp-sel" aria-label="${esc(t('hpStepFor').replace('{0}',nm))}" data-on-change="${_on('_hpSet',c.id,_P('value'))}">${HP_STEP_KEYS.map((k,i)=>`<option value="${i}"${i===s?' selected':''}>${esc(t(k))}</option>`).join('')}</select>`
         :`<span class="am-meta hp-step-ro">${esc(t(HP_STEP_KEYS[s]))}</span>`}</div>`;}).join('');
   return`<div class="form-section" id="hp-staff"><h2 class="form-title">${t('hpTitle')}</h2><div class="cmy-am-sub">${t('hpSub')}</div>

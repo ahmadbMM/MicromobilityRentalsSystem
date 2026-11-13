@@ -54,10 +54,13 @@ alter table public.titles add constraint titles_path_not_auto check (path_step i
 create unique index if not exists titles_path_step_one on public.titles (path_step) where path_step is not null;
 
 -- An admin's later change of a name or colour stays: a second run only puts the step back.
+-- Sorted after the catalogue (its titles start at 500): a member who never picked the title to show sees the first one
+-- held by sort (customer_my_titles), so a step given does not go ahead of another title staff gave them. (Any given
+-- title goes ahead of an automatic one; that rule is the catalogue's and is not changed here.)
 insert into public.titles (id, name, name_ar, color, path_step, sort) values
-  ('ttl_path_helper',  'Helper',              'مساعد',            'teal', 1, 1),
-  ('ttl_path_trainee', 'Trainee ride leader', 'قائد جولة متدرّب', 'blue', 2, 2),
-  ('ttl_path_leader',  'Ride leader',         'قائد الجولة',      'gold', 3, 3)
+  ('ttl_path_helper',  'Helper',              'مساعد',            'teal', 1, 9001),
+  ('ttl_path_trainee', 'Trainee ride leader', 'قائد جولة متدرّب', 'blue', 2, 9002),
+  ('ttl_path_leader',  'Ride leader',         'قائد الجولة',      'gold', 3, 9003)
 on conflict (id) do update set path_step = excluded.path_step, auto_rides = null;
 
 -- One step at a time: the path title just given is the member's step, the others go back.

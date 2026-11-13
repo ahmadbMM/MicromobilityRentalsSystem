@@ -20,9 +20,9 @@ const tags = [{ id: 'tag_saturday', slug: 'saturday', name: 'Community', color: 
 const customer_tags = ['c1', 'c2', 'c4'].map((id) => ({ customer_id: id, tag_id: 'tag_saturday', added_at: 1 })); // c3 is not a member
 const captain = { id: 'ttl_cap', name: 'Ride Captain', name_ar: 'قائد الرحلة', color: 'gold', auto_rides: null, retired: false, sort: 500 };
 const pathTitles = [
-  { id: 'ttl_path_helper', name: 'Helper', name_ar: 'مساعد', color: 'teal', auto_rides: null, retired: false, sort: 1, path_step: 1 },
-  { id: 'ttl_path_trainee', name: 'Trainee ride leader', name_ar: 'قائد جولة متدرّب', color: 'blue', auto_rides: null, retired: false, sort: 2, path_step: 2 },
-  { id: 'ttl_path_leader', name: 'Ride leader', name_ar: 'قائد الجولة', color: 'gold', auto_rides: null, retired: false, sort: 3, path_step: 3 },
+  { id: 'ttl_path_helper', name: 'Helper', name_ar: 'مساعد', color: 'teal', auto_rides: null, retired: false, sort: 9001, path_step: 1 },
+  { id: 'ttl_path_trainee', name: 'Trainee ride leader', name_ar: 'قائد جولة متدرّب', color: 'blue', auto_rides: null, retired: false, sort: 9002, path_step: 2 },
+  { id: 'ttl_path_leader', name: 'Ride leader', name_ar: 'قائد الجولة', color: 'gold', auto_rides: null, retired: false, sort: 9003, path_step: 3 },
 ];
 const PATH_IDS = pathTitles.map((x) => x.id);
 const held = [{ customer_id: 'c1', title_id: 'ttl_path_trainee', expires_on: null, given_by: 'Spec Staff', given_at: '2026-11-01T10:00:00+00:00' }];
@@ -65,6 +65,20 @@ async function staff(page: Page, fx: Fixtures = {}, init = '') {
   await page.waitForFunction('S._ttAt>0&&!S._ttBusy&&!S._hpDaysBusy');
 }
 const row = (page: Page, id: string) => page.locator(`#hp-staff [data-hp="${id}"]`);
+// A member row drawn whole at this width: the helper days are not cut short (their own box holds them, and each end of
+// them is theirs at that point, so nothing clips or covers it), and the step select is as wide as its longest word needs.
+const rowWhole = (r: Element) => {
+  r.scrollIntoView({ block: 'center' });
+  const dn = r.querySelector('.hp-dn') as HTMLElement, sel = r.querySelector('select') as HTMLSelectElement;
+  const b = dn.getBoundingClientRect(), y = b.top + b.height / 2;
+  const mine = (x: number) => { const hit = document.elementFromPoint(x, y); return !!hit && dn.contains(hit); };
+  const free = sel.cloneNode(true) as HTMLSelectElement;
+  free.style.maxWidth = 'none'; free.style.position = 'absolute';
+  r.appendChild(free);
+  const need = free.getBoundingClientRect().width;
+  free.remove();
+  return { days: b.width > 0 && dn.scrollWidth <= dn.clientWidth && mine(b.left + 1) && mine(b.right - 1), select: sel.getBoundingClientRect().width >= need - 0.5, inRow: r.scrollWidth <= r.clientWidth };
+};
 
 test.describe('@customer:account helper path', () => {
   test('a member sees their own step, the next step, their helper days and the helper-day ladder', async ({ page }) => {
@@ -241,6 +255,8 @@ test.describe('@staff:community helper path', () => {
     await expect(sec.locator('[data-hp] strong')).toHaveText(['Lina Haddad', 'Omar Saleh']);
     await expect(row(page, 'c1').locator('.hp-dn')).toHaveText('Helper days: 12');
     await expect(row(page, 'c2').locator('.hp-dn')).toHaveText('Helper days: 3');
+    // read whole on a phone as on a desk: the days are not inside the row's one-line detail, and the select is not squeezed
+    for (const id of ['c1', 'c2']) expect(await row(page, id).evaluate(rowWhole), id).toEqual({ days: true, select: true, inRow: true });
     // the step shown matches the title held
     await expect(row(page, 'c1').locator('select')).toHaveValue('2');
     await expect(row(page, 'c1').locator('select option:checked')).toHaveText('Trainee ride leader');
@@ -252,6 +268,9 @@ test.describe('@staff:community helper path', () => {
     await expect(cat).toContainText('Helper path');
     await expect(cat.locator('button')).toHaveText(['Holders', 'Edit']);
     await expect(page.locator('#tab-community [data-title="ttl_cap"] button')).toHaveText(['Holders', 'Edit', 'Retire', 'Delete']);
+    // one found retired (a page from before the path still offers Retire on it) can be put back, and is still not deleted
+    await page.evaluate(`S.titles.find(x=>x.id==='ttl_path_leader').retired=true;renderCommunity()`);
+    await expect(page.locator('#tab-community [data-title="ttl_path_leader"] button')).toHaveText(['Holders', 'Edit', 'Restore']);
     await cat.locator('button', { hasText: 'Edit' }).click();
     await expect(page.locator('#tt-f-name')).toHaveValue('Helper');
     await expect(page.locator('#tt-f-auto')).toHaveCount(0);
@@ -366,6 +385,7 @@ test.describe('@staff:community helper path', () => {
     await expect(page.locator('#hp-staff h2')).toHaveText('Parcours d’assistant');
     await expect(row(page, 'c1').locator('select option')).toHaveText(['Cycliste', 'Assistant', 'Chef de sortie en formation', 'Chef de sortie']);
     await expect(row(page, 'c1').locator('.hp-dn')).toHaveText('Jours d’aide : 12');
+    expect(await row(page, 'c1').evaluate(rowWhole)).toEqual({ days: true, select: true, inRow: true }); // longer words, still whole
   });
 
   test('what the build wrote: the staff words stay out of the riders\' half, the riders\' words out of the main bundle', () => {
@@ -456,7 +476,8 @@ test.describe('@staff:community helper path SQL (migration 20261114012300, read 
     expect(SQL).toContain('check (path_step between 1 and 3)');
     expect(SQL).toContain('check (path_step is null or auto_rides is null)');
     expect(SQL).toContain('create unique index if not exists titles_path_step_one on public.titles (path_step) where path_step is not null;');
-    for (const [id, step] of [['ttl_path_helper', 1], ['ttl_path_trainee', 2], ['ttl_path_leader', 3]]) expect(SQL).toMatch(new RegExp(`\\('${id}',\\s+'[^']+',\\s+'[^']+',\\s+'[a-z]+', ${step}, ${step}\\)`));
+    // sorted after the catalogue's titles (500 and up), so a step given never goes ahead of another title staff gave
+    for (const [id, step] of [['ttl_path_helper', 1], ['ttl_path_trainee', 2], ['ttl_path_leader', 3]] as const) expect(SQL).toMatch(new RegExp(`\\('${id}',\\s+'[^']+',\\s+'[^']+',\\s+'[a-z]+', ${step}, ${9000 + step}\\)`));
     const one = fn('_title_path_one').body;
     expect(one).toContain('if exists (select 1 from titles t where t.id = new.title_id and t.path_step is not null) then');
     expect(one).toMatch(/delete from customer_titles ct\s+where ct\.customer_id = new\.customer_id and ct\.title_id <> new\.title_id\s+and ct\.title_id in \(select t\.id from titles t where t\.path_step is not null\);/);

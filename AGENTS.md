@@ -719,7 +719,8 @@ address; `renderMembers`) has its own tab in both menus, shown only to members (
 ## Helper path (2026-11-13, new features F23)
 
 Migration 20261114012300. Four steps for community members: rider, helper, trainee ride leader, ride leader. The three after rider are
-titles of the catalogue (`titles.path_step` 1 to 3, seeded as `ttl_path_helper`, `ttl_path_trainee`, `ttl_path_leader`): a step is given
+titles of the catalogue (`titles.path_step` 1 to 3, seeded as `ttl_path_helper`, `ttl_path_trainee`, `ttl_path_leader` with `sort` 9001
+to 9003, after the catalogue's own, so a step given never goes ahead of another title staff gave the member): a step is given
 and taken as any title is, the trigger `_title_path_one` keeps one path title per member, and a member holding none is a rider. Helper
 days are the days of the volunteer shifts attended (`_helper_shift_days`: the session not called off, the shift `done`, or `accepted` with
 a clock-in; the volunteer portal's own "worked"), never hours and never a shift not attended.
@@ -731,8 +732,9 @@ a clock-in; the volunteer portal's own "worked"), never hours and never a shift 
   counted on the page and is not in the `badges` table. A database without the function, a non-member or a failed read draws nothing.
 - **Staff**: Community > Titles has a Helper path section under the catalogue (`_hpStaffHtml`, part `peoplemore`), only once the catalogue
   holds the three path titles: members on the path or with helper days (`staff_helper_days`), a search that reaches every member, and a
-  select per member that moves them (`_hpSet`: the step's title upserted, or every path title deleted for Rider). A path title can be
-  edited but not retired, deleted or made automatic. Tests: tests/helper-path.spec.ts.
+  select per member that moves them (`_hpSet`: the step's title upserted, or every path title deleted for Rider). A row's helper days
+  are their own piece (`.hp-dn`), never inside the one-line detail, and on a phone the select takes the next line. A path title can be
+  edited but not retired, deleted or made automatic; one found retired can be restored. Tests: tests/helper-path.spec.ts.
 
 ## Invitations and the Community page's activities (2026-11-03)
 

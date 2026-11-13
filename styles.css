@@ -10986,7 +10986,13 @@ body.view-staff #tab-community .tg-row:last-child{border-bottom:0;}
 body.view-staff #tab-community .tg-who{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
 body.view-staff #tab-community .tg-who strong{font-size:var(--sf-fs-md);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 body.view-staff #tab-community .tg-who small{font-size:var(--sf-fs-xs);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-body.view-staff #tab-community .hp-sel{flex:none;width:auto;max-width:55%;} /* Helper path (F23): the step select at a member row's end */
+/* Helper path (F23): a member row is the name, the helper days (their own piece, never cut short) and the step select
+   at the row's end; where the three do not fit on one line, a phone, the select takes the next line whole */
+body.view-staff #tab-community #hp-staff .tg-row{flex-wrap:wrap;}
+body.view-staff #tab-community #hp-staff .tg-who{flex-basis:9rem;}
+body.view-staff #tab-community .hp-dn{flex:none;font-size:var(--sf-fs-xs);color:var(--muted);white-space:nowrap;}
+body.view-staff #tab-community .hp-sel{flex:none;width:auto;max-width:100%;margin-inline-start:auto;}
+body.view-staff #tab-community .hp-step-ro{margin-inline-start:auto;}
 body.view-staff #tab-community .tg-give{background:rgba(var(--green-rgb),.05);border-radius:var(--sf-r-ctl);padding-inline:8px;}
 
 /* Applications, made the admins' own (2026-10-07): sort, card details, saved views, selecting several, rules on
