@@ -25191,7 +25191,7 @@ function _askShareHtml(p,can){
   const tot=(C.det.questions||[]).reduce((s,q)=>s+(q.answers|0),0),ppl=C.ans?new Set(C.ans.map(a=>a.customer_id)).size:null;
   const a=(href,ic,l,cls)=>`<a class="btn-sm btn-secondary ${cls}" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${_askIc(ic,14)} ${esc(t(l))}</a>`;
   return`<div class="ask-share"><canvas class="ask-qr" id="ask-qr" width="132" height="132" role="img" aria-label="${esc(t('askQr'))}" data-u="${esc(u)}"></canvas>
-    <div class="ask-share-txt">${code?`<div class="ask-code"><span class="am-meta">${esc(t('askCode'))}</span> <bdi dir="ltr">${esc(code.replace(/^(\d{3})(\d{3})$/,'$1 $2'))}</bdi></div>`:''}
+    <div class="ask-share-txt">
       <div class="am-meta ask-share-n">${esc(t('askRound').replace('{0}',p.round||1))} · ${esc(t('askAnswers'))} <bdi>${tot}</bdi>${ppl==null?'':` · ${esc(t('askPeople'))} <bdi>${ppl}</bdi>`}</div>
       <div class="ask-share-acts">${k?a(u+'/screen'+k,'screen','askScreen','ask-screen')+a(u+k,'eye','askPreview','ask-preview'):''}${_can('export')?`<button type="button" class="btn-sm btn-secondary ask-csv" data-on-click="${_on('_askCsv')}">${ICON_EXPORT} ${esc(t('exportBtn'))}</button>`:''}${can?`<button type="button" class="btn-sm btn-muted ask-reset" data-on-click="${_on('_askReset')}">${esc(t('askReset'))}</button>`:''}</div></div></div>`;
 }

@@ -496,14 +496,16 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await expect(answer(page, 107).locator('.ask-a-txt')).toHaveText('Shade for the little ones, please');
   });
 
-  test('Results: a summary for each kind, who answered what, the code and the QR, the big screen and the preview, Export CSV and Reset results', async ({ page }) => {
+  test('Results: a summary for each kind, who answered what, the QR and no code, the big screen and the preview, Export CSV and Reset results', async ({ page }) => {
     await staff(page);
     const sent = writes(page, /\/rest\/v1\/rpc\/staff_ask_control$/);
     await page.route(/\/rest\/v1\/rpc\/staff_ask_control$/, (r) => r.fulfill(json({ ok: true })));
     await row(page, 1).locator('.ask-pg-t').click(); // a page that is live opens on its results
     await expect(sec(page).locator('.filter-pill[data-ask-tab="results"]')).toHaveAttribute('aria-pressed', 'true');
-    // the code people type, the link as a QR, the big screen and the preview with the page's screen key
-    await expect(sec(page).locator('.ask-code bdi')).toHaveText('482 913');
+    // the link as a QR, the big screen and the preview with the page's screen key; no code (nobody types one: the
+    // user, 2026-11-13: "i don't want the ask page to need a code to be able to access it")
+    await expect(sec(page).locator('.ask-code')).toHaveCount(0);
+    await expect(sec(page).locator('.ask-share')).not.toContainText('482');
     const qr = sec(page).locator('canvas#ask-qr');
     await expect(qr).toHaveAttribute('aria-label', 'QR code of the link');
     await expect(qr).toHaveAttribute('data-u', 'https://micromobility.sa/ask/farm-ideas');
