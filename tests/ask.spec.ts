@@ -265,7 +265,7 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
       not_tag_ids: [], only_gender: null, min_age: null, max_age: null, opens_at: null, closes_at: null, after_close: 'results', listed: true, notes: '', look: {}, block_words: [],
       status: 'draft', pace: 'self' }); // no code (the database makes it), no theme
     expect(sent[1]).toMatchObject({ m: 'POST', path: 'ask_questions' });
-    expect(sent[1].body).toEqual({ kind: 'cloud', pos: 1, title_en: 'Farm day: your ideas!', title_ar: '', help_en: '', help_ar: '', config: { max_len: 25, per_person: 3 },
+    expect(sent[1].body).toEqual({ kind: 'cloud', pos: 1, title_en: 'Farm day: your ideas!', title_ar: '', help_en: '', help_ar: '', config: { max_len: 25, per_person: 10 },
       moderated: true, results: 'live', look: {}, image: null, page_id: 77, open: true }); // a question with no words of its own takes the page's title
     await expect(sec(page).locator('.filter-pill[data-ask-tab]')).toHaveText(['Setup', 'Answers', 'Results', 'Stats']);
     await expect(sec(page).locator('.ask-st')).toHaveText('Draft');
@@ -339,13 +339,14 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await expect(pop(page).locator('.ask-kind[data-ask-kind="cloud"]')).toBeFocused();
     // a word cloud: the longest answer, how many each, approval on, who sees the results
     await expect(page.locator('#ask-c-max_len')).toHaveValue('25');
-    await expect(page.locator('#ask-c-per_person')).toHaveValue('3');
+    await expect(page.locator('#ask-c-per_person')).toHaveValue('10'); // ten ideas a person to start with (the user, 2026-11-14)
     await expect(page.locator('#ask-q-mod')).toBeChecked();
     await expect(page.locator('#ask-q-res option')).toHaveText(['At once', 'After answering', 'After it closes', 'Staff only']);
     // the other kinds' settings
     await pop(page).locator('.ask-kind[data-ask-kind="qa"]').click();
     await expect(page.locator('#ask-c-votes')).toBeChecked();
     await expect(page.locator('#ask-c-max_len')).toHaveValue('200');
+    await expect(page.locator('#ask-c-per_person')).toHaveValue('10');
     await pop(page).locator('.ask-kind[data-ask-kind="scales"]').click();
     await expect(pop(page).locator('#ask-o-l')).toHaveText('Statements');
     await expect(page.locator('#ask-c-min')).toHaveValue('1');

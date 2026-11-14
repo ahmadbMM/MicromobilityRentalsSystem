@@ -25698,7 +25698,7 @@ function _askPageHtml(){
 // ── The draft ──
 let _askSeq=0;
 function _askCfgDef(k){
-  return k==='cloud'?{max_len:25,per_person:3}:k==='open'?{max_len:200,per_person:1,votes:false}:k==='qa'?{max_len:200,per_person:3,votes:true}
+  return k==='cloud'?{max_len:25,per_person:10}:k==='open'?{max_len:200,per_person:1,votes:false}:k==='qa'?{max_len:200,per_person:10,votes:true}
     :k==='choice'?{options:[],max_picks:1,change:false}:k==='scales'?{options:[],min:1,max:5,lo_en:'',lo_ar:'',hi_en:'',hi_ar:'',skip:false}
     :k==='ranking'?{options:[]}:k==='points'?{options:[],total:100}:k==='number'?{min:0,max:100,step:1,unit_en:'',unit_ar:''}
     :k==='grid'?{options:[],x_en:'',x_ar:'',y_en:'',y_ar:'',max:10}:k==='form'?{fields:[{id:'f1',en:'',ar:'',type:'text',required:true}]}
