@@ -241,6 +241,8 @@ th[aria-sort="descending"] .rp-sbtn::after{content:"\25BC"}
 .sn-ico{display:block;width:11px;height:11px}
 .inf-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#c2255c;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .inf-ico{display:block;width:11px;height:11px}
+.food-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#6f2dbd;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.food-ico{display:block;width:11px;height:11px}
 .imc-mk{display:inline-flex;align-items:center;margin-inline-start:6px;height:14px;padding:0 3px;box-sizing:border-box;background:#fff;border:1px solid #0e5592;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .imc-mk img{display:block;height:10px;width:auto}
 /* the partner report's signature column: room to sign on paper */

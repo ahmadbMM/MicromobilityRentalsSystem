@@ -471,6 +471,20 @@ for it "on their bookings": `_imcChip` puts the logo on a white plate edged in b
 `.imc-mk` in styles.css and report.css; the image's address carries `location.origin` for the print window). Display
 only: no band, filter, count or rule. `_imcOn()` is false while the tag is missing or hidden. tests/imc-tag.spec.ts.
 
+## The food blogger tag (2026-11-14, migration 20261114173000)
+
+`tags` row `tag_food_blogger` (slug `food_blogger`, name "Food blogger", locked, never auto-granted), staff-only like
+the influencer tag and built the same way. The owner's picks: a white fork and knife on aubergine purple `#6f2dbd`
+(`_FOOD_SVG`, `TAG_BRANDS.food_blogger` with `svg:'food'`); the mark after the holder's name wherever `_infChip` goes,
+on screen and on the printed sheets (`_foodChip`, `.food-mk` in styles.css and report.css), and **beside the
+account's name** on Accounts and Members (`.food-nm` wraps the name button and the mark) and on the account page's
+title (`_foodChip({customerId})`); a purple band on the Bookings row, phone card and hand-over row (`_foodRow`, class
+`food-row`, laid like the influencer's magenta; an influencer keeps the magenta band and a BD- booking its red, as
+the band rules leave out `.inf-row` and `.bdf-row`), the name in purple unless another colour dresses it; the Food
+blogger filter on Bookings (`sfFood`) and People (`amFood`); the account report's `fblog` column and section and the
+session sheets' tile (`_foodTile`). `_foodOn()` is false while the tag is missing or hidden, which takes it all off.
+The `fb`/`_fb` prefix was already taken (feedback), hence `food`. tests/food-blogger-tag.spec.ts.
+
 ## The Petromin tag and Petromin Days (2026-10-12)
 
 The owner: "add a new petromin tag that gives its holders access only to petromin sessions through a new event

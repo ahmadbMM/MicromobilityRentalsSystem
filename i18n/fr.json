@@ -6578,6 +6578,7 @@
   "vtRcptGone": "Cette réservation n'est plus active : son reçu ne peut pas être confirmé.",
   "snLabel": "Besoins particuliers",
   "infLabel": "Influenceur",
+  "foodLabel": "Blogueur culinaire",
   "snShareAll": "des comptes listés",
   "snAmongComm": "Membres de la communauté : {0} sur {1}",
   "snAmongCust": "Autres clients : {0} sur {1}",

@@ -6578,6 +6578,7 @@
   "vtRcptGone": "Esta reserva ya no está activa: su comprobante no se puede confirmar.",
   "snLabel": "Necesidades especiales",
   "infLabel": "Influencer",
+  "foodLabel": "Bloguero gastronómico",
   "snShareAll": "de las cuentas listadas",
   "snAmongComm": "Miembros de la comunidad: {0} de {1}",
   "snAmongCust": "Otros clientes: {0} de {1}",
