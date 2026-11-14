@@ -4050,7 +4050,10 @@ who we want it to be visible for and for how much time". Three parts: the databa
   `ask_unsend`, `ask_vote`, `ask_react` (definer, `_cust_token_ok`). A public result never names anyone and never
   holds a pending or rejected answer. `ask_live` and `ask_screen` take a key: the page's `rk` (given by `ask_page`,
   good for 6 to 12 hours) or its permanent screen key (staff's link). A page's `ver` moves on every change riders can
-  see; a poll with the same `ver` gets `same: true`.
+  see; a poll with the same `ver` gets `same: true`. A written answer (`cloud`, `open`, `qa`) takes any length: its
+  question's `max_len` is not read (20261114210000_ask_answers_any_length), only a 2000-character ceiling in `ask_send`
+  and `ask_answers.body` that nothing on screen names (`AK_TEXT_MAX` in member-ask.js, `ASK_TEXT_MAX` on the website);
+  the boxes have no count of what is left. The typed quiz (`quiz_text`) keeps its own `max_len`.
 - **Staff**: section Ask (`/ask`, `renderAsk` in the `ask` part, `staff-parts/ask.js`; the rail's number is
   `staff_ask_pending` through `_askCount` in the core). A page has Setup, Answers, Results and Stats; the open page and
   its tab are in the address (`/ask?ask=<id>.answers`, `_askAddr` in the core), and once a page has been reset a round

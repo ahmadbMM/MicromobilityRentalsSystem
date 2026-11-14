@@ -127,9 +127,13 @@ function _akOpts(c) {
   return out;
 }
 const _akOt = (o) => _akTx(o.en, o.ar);
+// A written answer takes any length (the user, 2026-11-14: "allow me to write unlimited amount of characters not limited"):
+// a question's max_len is no longer read; AK_TEXT_MAX is only the database's ceiling (ask_send, 20261114210000), and
+// nothing on screen names it.
+const AK_TEXT_MAX = 2000;
 function _akCfgW(kind, c) {
   c = _akO(c) || {};
-  return { maxLen: _akClamp(_akInt(c.max_len) ?? (kind === 'cloud' ? 25 : 200), 1, 500), perPerson: _akClamp(_akInt(c.per_person) ?? (kind === 'open' ? 1 : 3), 1, 10), votes: typeof c.votes === 'boolean' ? c.votes : kind === 'qa' };
+  return { maxLen: AK_TEXT_MAX, perPerson: _akClamp(_akInt(c.per_person) ?? (kind === 'open' ? 1 : 3), 1, 10), votes: typeof c.votes === 'boolean' ? c.votes : kind === 'qa' };
 }
 function _akCfgC(c) {
   c = _akO(c) || {};
@@ -692,9 +696,9 @@ function _akForm(a, full, q, st, late) {
   const busy = !!a.busy[k], locked = st === 'done' || st === 'shut';
   switch (q.kind) {
     case 'cloud': case 'open': case 'qa': {
-      const c = _akCfgW(q.kind, q.config), long = c.maxLen > 80;
+      const c = _akCfgW(q.kind, q.config);
       const attrs = `id="ak-in-${k}" class="ak-input" dir="auto" maxlength="${c.maxLen}" autocomplete="off" enterkeyhint="send" placeholder="${esc(_aT(q.kind === 'qa' ? 'yourQuestion' : 'yourAnswer'))}" aria-labelledby="ak-qt-${k}" data-ak-d="${k}|t" data-on-input="${_on('_akIn', k, 't', _EL)}" data-on-keydown="${_on('_akKey', _EV, k)}"`;
-      return `<div class="ak-write"><div class="ak-field">${long ? `<textarea rows="2" ${attrs}></textarea>` : `<input type="text" ${attrs}>`}<span class="ak-left" data-ak-left="${k}" aria-hidden="true"></span></div>${_akSendBtn(q, busy)}</div>`;
+      return `<div class="ak-write"><div class="ak-field"><textarea rows="2" ${attrs}></textarea></div>${_akSendBtn(q, busy)}</div>`;
     }
     case 'choice': {
       const c = _akCfgC(q.config), single = c.maxPicks === 1, was = _akSentIds(sent && sent.value, 'o');

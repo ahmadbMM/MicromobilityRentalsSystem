@@ -84,12 +84,17 @@ test.describe('@customer:members Ask in the Community tab', () => {
     await expect(res).toContainText('4 answers');
     await expect(res.locator('.ak-w5')).toHaveText('BBQ (3)');
     const box = page.locator('#ak-in-7');
-    await box.fill('Camel rides');
-    await expect(page.locator('#ak-q-7 .ak-left')).toHaveText('14');
+    // any length (the user, 2026-11-14): the question's old max_len (25) is not read, the box takes up to the
+    // database's ceiling, and nothing counts what is left
+    await expect(box).toHaveJSProperty('tagName', 'TEXTAREA');
+    await expect(box).toHaveAttribute('maxlength', '2000');
+    const idea = 'Camel rides at sunset, then a bonfire with music and dates';
+    await box.fill(idea);
+    await expect(page.locator('#ak-q-7 .ak-left')).toHaveCount(0);
     await box.press('Enter');
-    await expect.poll(() => sent.filter((x) => x.fn === 'ask_send').map((x) => [x.body.p_question, x.body.p_value, x.body.p_id, typeof x.body.p_token])).toEqual([[7, { t: 'Camel rides' }, 'c1', 'string']]);
+    await expect.poll(() => sent.filter((x) => x.fn === 'ask_send').map((x) => [x.body.p_question, x.body.p_value, x.body.p_id, typeof x.body.p_token])).toEqual([[7, { t: idea }, 'c1', 'string']]);
     const mine = page.locator('#ak-q-7 .ak-mine-row');
-    await expect(mine).toContainText('Camel rides');
+    await expect(mine).toContainText(idea);
     await expect(mine).toContainText('Waiting for approval');
     await expect(box).toHaveValue('');
     await expect(box).toBeFocused();

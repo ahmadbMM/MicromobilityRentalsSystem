@@ -9339,7 +9339,7 @@ body:not(.view-staff) .ak-q .ak-part+.ak-part{margin-top:12px;}
 body:not(.view-staff) .ak-write{display:flex;align-items:flex-start;gap:8px;}
 body:not(.view-staff) .ak-field{position:relative;flex:1;min-width:0;}
 body:not(.view-staff) .ak-input{width:100%;box-sizing:border-box;min-height:44px;padding:10px 14px;border:1px solid var(--line-2);border-radius:8px;font:inherit;font-size:16px;color:var(--ink);background:var(--card);}
-body:not(.view-staff) .ak-field .ak-input{padding-inline-end:44px;}
+body:not(.view-staff) .ak-field input.ak-input{padding-inline-end:44px;}
 body:not(.view-staff) textarea.ak-input{resize:vertical;min-height:64px;line-height:1.4;}
 body:not(.view-staff) .ak-input:focus{border-color:var(--go);outline:none;}
 body:not(.view-staff) .ak-input:disabled{background:var(--card-2);color:var(--ink-2);}

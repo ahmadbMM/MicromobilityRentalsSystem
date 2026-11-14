@@ -25708,7 +25708,7 @@ function _askPageHtml(){
 // ── The draft ──
 let _askSeq=0;
 function _askCfgDef(k){
-  return k==='cloud'?{max_len:25,per_person:10}:k==='open'?{max_len:200,per_person:1,votes:false}:k==='qa'?{max_len:200,per_person:10,votes:true}
+  return k==='cloud'?{per_person:10}:k==='open'?{per_person:1,votes:false}:k==='qa'?{per_person:10,votes:true}
     :k==='choice'?{options:[],max_picks:1,change:false}:k==='scales'?{options:[],min:1,max:5,lo_en:'',lo_ar:'',hi_en:'',hi_ar:'',skip:false}
     :k==='ranking'?{options:[]}:k==='points'?{options:[],total:100}:k==='number'?{min:0,max:100,step:1,unit_en:'',unit_ar:''}
     :k==='grid'?{options:[],x_en:'',x_ar:'',y_en:'',y_ar:'',max:10}:k==='form'?{fields:[{id:'f1',en:'',ar:'',type:'text',required:true}]}
@@ -25724,8 +25724,10 @@ function _askCfgNorm(k,c){
   const opts=L=>(Array.isArray(L)?L:[]).map(x=>({id:String((x&&x.id)||''),en:String((x&&x.en)||'').trim().slice(0,80),ar:String((x&&x.ar)||'').trim().slice(0,80)}));
   const int=(v,lo,hi,df)=>{const n=Math.round(Number(v));return typed(v)&&Number.isFinite(n)?Math.min(hi,Math.max(lo,n)):df;};
   const num=(v,df)=>{const n=Number(v);return typed(v)&&Number.isFinite(n)?n:df;};
-  if(k==='cloud'){o.max_len=int(c.max_len,5,40,25);o.per_person=int(c.per_person,1,10,3);}
-  else if(k==='open'||k==='qa'){o.max_len=int(c.max_len,20,500,200);o.per_person=int(c.per_person,1,10,k==='qa'?3:1);o.votes=c.votes==null?k==='qa':!!c.votes;}
+  // a written answer takes any length (the user, 2026-11-14: "allow me to write unlimited amount of characters not
+  // limited"): max_len is no longer read for these three kinds (20261114210000_ask_answers_any_length), and goes
+  if(k==='cloud'){own.push('max_len');o.per_person=int(c.per_person,1,10,3);}
+  else if(k==='open'||k==='qa'){own.push('max_len');o.per_person=int(c.per_person,1,10,k==='qa'?3:1);o.votes=c.votes==null?k==='qa':!!c.votes;}
   if(ASK_OPTS[k]){
     o.options=opts(c.options);
     if(o.options.some(x=>!x.en&&!x.ar))err='askOptEmpty';else if(o.options.length<ASK_OPTS[k][0])err='askNeedOpts';
@@ -26234,8 +26236,8 @@ function _askCfgHtml(v){
   const pick=(key,l,lo,hi)=>`<div class="form-group ask-f"><label for="ask-c-${key}">${esc(t(l))}</label><select id="ask-c-${key}" data-on-change="${_on('_askCfgIn',key,_P('value'))}">${Array.from({length:hi-lo+1},(_,i)=>`<option value="${lo+i}"${Number(c[key])===lo+i?' selected':''}>${lo+i}</option>`).join('')}</select></div>`;
   const sw=(key,l)=>`<label class="web-switch ask-sw"><input type="checkbox" class="web-toggle" role="switch" id="ask-c-${key}"${c[key]?' checked':''} data-on-change="${_on('_askCfgIn',key,_P('checked'))}"><span>${esc(t(l))}</span></label>`;
   const txt=(key,l,ar,max)=>`<div class="form-group ask-f"><label for="ask-c-${key}">${esc(t(l))}</label><input type="text" id="ask-c-${key}" ${ar?'dir="rtl" lang="ar"':'dir="ltr"'} autocomplete="off" maxlength="${max}" value="${esc(c[key]||'')}" data-on-input="${_on('_askCfgIn',key,_P('value'))}"></div>`;
-  if(k==='cloud')return`<div class="ask-two">${num('max_len','askMaxLen',5,40)}${num('per_person','askPerPerson',1,10)}</div>`;
-  if(k==='open'||k==='qa')return`<div class="ask-two">${num('max_len','askMaxLen',20,500)}${num('per_person','askPerPerson',1,10)}</div>${sw('votes','askVotes')}`;
+  if(k==='cloud')return`<div class="ask-two">${num('per_person','askPerPerson',1,10)}</div>`;
+  if(k==='open'||k==='qa')return`<div class="ask-two">${num('per_person','askPerPerson',1,10)}</div>${sw('votes','askVotes')}`;
   if(k==='choice')return`${_askOptsHtml(v)}<div class="ask-two">${num('max_picks','askMaxPicks',1,12)}</div>${sw('change','askChange')}`;
   if(k==='quiz')return`${_askOptsHtml(v)}<div class="ask-two">${num('seconds','askSeconds',5,120)}</div>${sw('speed','askSpeed')}`;
   if(k==='quiz_text')return`<div class="form-group ask-f"><label for="ask-c-accept">${esc(t('askAccept'))}</label><textarea id="ask-c-accept" dir="auto" rows="3" maxlength="900" data-on-input="${_on('_askAcceptIn',_P('value'))}">${esc((Array.isArray(c.accept)?c.accept:[]).join('\n'))}</textarea></div>

@@ -265,7 +265,7 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
       not_tag_ids: [], only_gender: null, min_age: null, max_age: null, opens_at: null, closes_at: null, after_close: 'results', listed: true, notes: '', look: {}, block_words: [],
       status: 'draft', pace: 'self' }); // no code (the database makes it), no theme
     expect(sent[1]).toMatchObject({ m: 'POST', path: 'ask_questions' });
-    expect(sent[1].body).toEqual({ kind: 'cloud', pos: 1, title_en: 'Farm day: your ideas!', title_ar: '', help_en: '', help_ar: '', config: { max_len: 25, per_person: 10 },
+    expect(sent[1].body).toEqual({ kind: 'cloud', pos: 1, title_en: 'Farm day: your ideas!', title_ar: '', help_en: '', help_ar: '', config: { per_person: 10 },
       moderated: true, results: 'live', look: {}, image: null, page_id: 77, open: true }); // a question with no words of its own takes the page's title
     await expect(sec(page).locator('.filter-pill[data-ask-tab]')).toHaveText(['Setup', 'Answers', 'Results', 'Stats']);
     await expect(sec(page).locator('.ask-st')).toHaveText('Draft');
@@ -338,14 +338,14 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await expect(pop(page).locator('.ask-kind[data-ask-kind="cloud"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(pop(page).locator('.ask-kind[data-ask-kind="cloud"]')).toBeFocused();
     // a word cloud: the longest answer, how many each, approval on, who sees the results
-    await expect(page.locator('#ask-c-max_len')).toHaveValue('25');
+    await expect(page.locator('#ask-c-max_len')).toHaveCount(0); // a written answer takes any length (the user, 2026-11-14)
     await expect(page.locator('#ask-c-per_person')).toHaveValue('10'); // ten ideas a person to start with (the user, 2026-11-14)
     await expect(page.locator('#ask-q-mod')).toBeChecked();
     await expect(page.locator('#ask-q-res option')).toHaveText(['At once', 'After answering', 'After it closes', 'Staff only']);
     // the other kinds' settings
     await pop(page).locator('.ask-kind[data-ask-kind="qa"]').click();
     await expect(page.locator('#ask-c-votes')).toBeChecked();
-    await expect(page.locator('#ask-c-max_len')).toHaveValue('200');
+    await expect(page.locator('#ask-c-max_len')).toHaveCount(0);
     await expect(page.locator('#ask-c-per_person')).toHaveValue('10');
     await pop(page).locator('.ask-kind[data-ask-kind="scales"]').click();
     await expect(pop(page).locator('#ask-o-l')).toHaveText('Statements');
@@ -696,7 +696,8 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     expect(sent[1].q).toContain('id=eq.13');
     const moved = sent.slice(2).map((s) => [Number(/id=eq\.(\d+)/.exec(s.q)![1]), s.m, s.body.pos]);
     expect(moved).toEqual([[12, 'PATCH', 1], [11, 'PATCH', 2], [14, 'PATCH', 3], [15, 'PATCH', 4], [16, 'PATCH', 5], [17, 'PATCH', 6], [18, 'PATCH', 7], [19, 'PATCH', 8], [20, 'PATCH', 9]]);
-    expect(sent[3].body).toMatchObject({ kind: 'cloud', config: { max_len: 40, per_person: 5 } });
+    expect(sent[3].body).toMatchObject({ kind: 'cloud', config: { per_person: 5 } });
+    expect(sent[3].body.config).not.toHaveProperty('max_len'); // the old length it held goes: nothing reads it any more
     expect(sent[3].body).not.toHaveProperty('open'); // Taking answers is the switch's, not the Save's
     expect(sent[2].body).not.toHaveProperty('page_id');
     // End asks first
