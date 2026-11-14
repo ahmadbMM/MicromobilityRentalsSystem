@@ -13072,10 +13072,14 @@ function _fhMarkImg(cls){return`<img class="${cls}" src="/assets/farm-logo.jpg" 
 // The fan rising from the card's far corner, its feathers drawn rather than pictured so they take the card's colours.
 function _fhScene(){return`<svg class="fh-scene" aria-hidden="true" focusable="false" viewBox="0 0 160 80"><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(20 80) rotate(-90)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(22.94 61.46) rotate(-72)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(31.46 44.73) rotate(-54)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(44.73 31.46) rotate(-36)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(61.46 22.94) rotate(-18)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(80 20) rotate(0)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(98.54 22.94) rotate(18)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(115.27 31.46) rotate(36)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(128.54 44.73) rotate(54)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(137.06 61.46) rotate(72)"/><rect class="fh-fth" x="-6" y="-12" width="12" height="24" rx="6" transform="translate(140 80) rotate(90)"/><circle class="fh-ring" cx="80" cy="80" r="40"/><circle class="fh-core" cx="80" cy="80" r="26"/></svg>`;}
 // The name on the flow's plate: the date's own (Nawar Farm House Night), else the kind's.
-function _fhName(){const tk=(S.lastTickets||[]).find(x=>_isFarm(_sessDisp(x.sessionId)));const s=_sessDisp(tk?tk.sessionId:S.selSession);return _isFarm(s)?_evName(s):t('evFarmName');}
+function _fhSess(){const tk=(S.lastTickets||[]).find(x=>_isFarm(_sessDisp(x.sessionId)));return _sessDisp(tk?tk.sessionId:S.selSession);}
+function _fhName(){const s=_fhSess();return _isFarm(s)?_evName(s):t('evFarmName');}
+// The venue's Instagram on the plate while the member books (the user, 2026-11-14: "add the insta of the farmhouse in
+// the registration process so people can see before registering"); once booked, the ticket below carries it (tk-ig).
 function _fhHeadHtml(){
+  const s=_fhSess(),ig=_isFarm(s)&&!(S.lastTickets||[]).length?_sessIgLink(s,'fh-flow-ig'):'';
   return`<div class="fh-flow-head">${_fhMarkImg('fh-flow-mark')}
-    <div class="fh-flow-copy"><div class="fh-flow-name">${esc(_fhName())}</div><div class="fh-flow-sub">${esc(t('fhFamLine'))}</div></div>
+    <div class="fh-flow-copy"><div class="fh-flow-name">${esc(_fhName())}</div><div class="fh-flow-sub">${esc(t('fhFamLine'))}</div>${ig}</div>
   </div>`;
 }
 // The date's card in the Experiences list: the venue's rust, the fan rising from the far corner, the mark, the name in

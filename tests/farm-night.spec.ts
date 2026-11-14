@@ -111,6 +111,11 @@ test.describe('@customer:farm Farm House Night', () => {
     await expect.poll(() => page.evaluate('S.regStep')).toBe(2);
     await expect(page.locator('body')).toHaveClass(/\bfarm-skin\b/);
     await expect(page.locator('#tab-register .fh-flow-head')).toContainText('The Farmhouse Night');
+    // the venue's Instagram on the plate before the member books (2026-11-14)
+    const ig = page.locator('#tab-register .fh-flow-head a.fh-flow-ig');
+    await expect(ig).toHaveAttribute('href', 'https://www.instagram.com/thefarmhouse.jed');
+    await expect(ig).toHaveAttribute('target', '_blank');
+    await expect(ig).toContainText('@thefarmhouse.jed');
     await expect(page.locator('#tab-register .reg-row-label')).toHaveText('People coming');
     await page.locator('#reg-qty-inc').click();
     await page.locator('#reg-qty-inc').click();
@@ -121,6 +126,7 @@ test.describe('@customer:farm Farm House Night', () => {
     await page.locator('#reg-rider-name-2').fill('Omar Haddad');
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
     await expect.poll(() => page.evaluate('S.regStep')).toBe(3);
+    await expect(ig).toBeVisible();
     await expect(page.locator('#tab-register')).not.toContainText('Bike Type');
     // the farm night's own waiver: the farm, its animals, the food, and the family on the booking
     await expect(page.locator('#reg-waiver')).toContainText('Farm House Night waiver');
@@ -141,6 +147,9 @@ test.describe('@customer:farm Farm House Night', () => {
     const tk = page.locator('#tab-register .ticket-card').first();
     await expect(tk).toHaveClass(/\bth-farm\b/);
     await expect(tk).toContainText('Waiting for confirmation');
+    // booked: the ticket carries the Instagram, the plate above it no longer does
+    await expect(page.locator('#tab-register .fh-flow-ig')).toHaveCount(0);
+    await expect(tk.locator('a.tk-ig')).toHaveCount(1);
     // leaving Reserve takes the skin with it
     await page.evaluate(`setCustTab('myrides')`);
     await expect(page.locator('body')).not.toHaveClass(/\bfarm-skin\b/);
