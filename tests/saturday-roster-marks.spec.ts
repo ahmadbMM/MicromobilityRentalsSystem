@@ -364,6 +364,37 @@ test.describe('@staff:bookings Marks on the Saturday roster', () => {
     }
   });
 
+  // the user, 2026-11-14: "on phone screen the tiles besides the names and bookings that says saturday ride 5 or any
+  // similar tiles and pills they sometimes hide the name". On a phone's card the name and its marks shared one line
+  // that never wrapped: the marks kept their width, the name was squeezed to 0px and the marks ran off the card.
+  test('on a phone the marks step under the name: the whole name shows and nothing runs off the card', async ({ page }) => {
+    await boot(page, {}, 390);
+    await roster(page);
+    // long names beside the most marks, and a party (an open one: a Saturday ride's parties are never folded) with its group name
+    await page.evaluate(`(()=>{S.queue=S.queue.map(e=>e.id==='q6'?{...e,name:'Abdulrahman Mohammed Alzahrani'}:e.id==='q10'?{...e,name:'Omar Hassan Alghamdi'}:['q3','q4'].includes(e.id)?{...e,groupId:'g1',groupName:'Alghamdi family'}:e);renderStaffQueue();})()`);
+    const cards = page.locator('#tab-queue .queue-mobile-view');
+    await expect(cards.locator('.q-card .srm-mk').first()).toBeVisible();
+    const fit = (sel: string) => page.evaluate(`[...document.querySelectorAll('#tab-queue .queue-mobile-view ${sel}')].map(n=>{const r=n.getBoundingClientRect(),c=n.closest('.q-card').getBoundingClientRect();return{t:n.textContent.trim(),w:Math.round(r.width),sw:n.scrollWidth,inside:r.left>=c.left-0.5&&r.right<=c.right+0.5};})`) as Promise<{ t: string; w: number; sw: number; inside: boolean }[]>;
+    const names = await fit('.rq-cname');
+    for (const who of ['Abdulrahman Mohammed Alzahrani', 'Omar Hassan Alghamdi', 'Rana Returns', 'Dana Five']) expect(names.map((x) => x.t), who).toContain(who);
+    for (const n of names) {
+      expect(n.w, `${n.t} has room`).toBeGreaterThan(0);
+      expect(n.sw, `${n.t} is not cut`).toBeLessThanOrEqual(n.w + 1);
+      expect(n.inside, `${n.t} inside its card`).toBe(true);
+    }
+    for (const m of await fit('.rq-cl > *')) expect(m.inside, `${m.t} inside its card`).toBe(true);
+    // the party's top line: the group's name has its width and Hide riders stays on the card
+    const head = await fit('.rq-ch > *');
+    const group = head.find((x) => x.t === 'Alghamdi family');
+    expect(group && group.w, 'the group name has room').toBeGreaterThan(0);
+    for (const h of head) expect(h.inside, `${h.t} inside its card`).toBe(true);
+    // in Arabic too
+    await page.evaluate(`setLang('ar')`);
+    await expect(cards.locator('.srm-mk', { hasText: 'جولة السبت رقم 25' })).toBeVisible();
+    for (const n of await fit('.rq-cname')) expect(n.sw, `${n.t} is not cut (ar)`).toBeLessThanOrEqual(n.w + 1);
+    for (const m of await fit('.rq-cl > *')) expect(m.inside, `${m.t} inside its card (ar)`).toBe(true);
+  });
+
   test('nothing of it reaches a rider\'s page', async () => {
     const rider = readFileSync('app.js', 'utf8') + readFileSync('index.html', 'utf8');
     expect(rider).not.toMatch(/staff_sat_marks|_srm[A-Z]|srm-mk|srmFirst|tag_no_callout/);

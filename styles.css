@@ -12526,8 +12526,20 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table td .rq-ccin{display:i
   /* the rider's name on its own line: the call, WhatsApp, status and payment cluster beside it left the
      name 0-31px ("Omar Hassan" read "O..", a walk-in's name nothing at all) */
   body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-crow>.rq-sb8{flex-wrap:wrap;row-gap:8px;}
-  body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-crow .rq-cl{flex:1 1 100%;}
-  body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-crow .rq-cname{max-width:none;}
+  /* and the marks after it (Saturday ride 5, Back after 3 missed, First ride, the member's logo...) step onto the
+     lines under it: on one line they kept their width and the name was squeezed to nothing (the user, 2026-11-14:
+     "the tiles besides the names ... sometimes hide the name"). The name keeps the line, wrapping only when it is
+     longer than the card; the party's rider number stays beside it. The gap spaces the marks, so their own margin
+     goes (it indented a mark that starts a line). */
+  body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-crow .rq-cl{flex:1 1 100%;flex-wrap:wrap;row-gap:4px;}
+  body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-crow .rq-cl>*{margin-inline:0;max-width:100%;}
+  body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-crow .rq-cname{flex:0 1 auto;max-width:100%;white-space:normal;overflow-wrap:anywhere;}
+  body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-crow .rq-num16+.rq-cname{max-width:calc(100% - 22px);}
+  /* a party's head line: the name and its marks wrap, where the marks ran off the card's edge */
+  body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-cname2{white-space:normal;overflow-wrap:anywhere;}
+  /* an open party's top line wraps as a folded one's does (.rq-chw): its number, time, bikes, place, Check in and
+     Hide riders squeezed the group's name to nothing and pushed Hide riders off the card */
+  body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-ch{flex-wrap:wrap;row-gap:6px;}
   body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-crow .rq-cr{flex:1 1 100%;}
   body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-crow .rq-cr .rq-end{margin-inline-start:auto;}
   /* the header's actions as equal cells, three to a row (they ran off the screen's edge) */
