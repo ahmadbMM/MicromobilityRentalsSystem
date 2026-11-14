@@ -14727,13 +14727,13 @@ body.view-staff #tab-ask .ask-st{display:inline-flex;align-items:center;padding:
 body.view-staff #tab-ask .ask-st-open{border-color:var(--sf-green-ink,var(--green));background:var(--sf-card,var(--s1));color:var(--sf-green-ink,var(--green));} /* on the card's own surface: over the page (a page's title) a green wash under green ink falls short of 4.5:1 */
 body.view-staff #tab-ask .ask-st-soon{color:var(--orange);}
 body.view-staff #tab-ask .ask-link{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:100%;font-size:var(--sf-fs-sm);color:var(--muted);overflow-wrap:anywhere;}
-body.view-staff #tab-ask :is(.ask-copy,.ask-back,.ask-new,.ask-add,.ask-share-acts .btn-sm){display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+body.view-staff #tab-ask :is(.ask-copy,.ask-back,.ask-new,.ask-add,.ask-rb,.ask-share-acts .btn-sm){display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
 body.view-staff #tab-ask .ask-pg-meta{font-weight:400;line-height:1.5;}
 body.view-staff #tab-ask .ask-pend{display:inline-flex;align-items:center;gap:8px;min-height:var(--sf-ctl-size);padding:4px 12px;border:1px solid var(--orange);border-radius:var(--sf-r-ctl);background:rgba(var(--warn-rgb),.1);color:var(--orange);font:inherit;font-size:var(--sf-fs-sm);font-weight:600;cursor:pointer;}
 body.view-staff #tab-ask .ask-pend b{min-width:22px;padding:1px 7px;border-radius:var(--sf-r-pill);background:var(--orange);color:var(--sf-card,#fff);font-weight:600;text-align:center;}
 body.view-staff #tab-ask .ask-pend:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
 /* a page: the way back, its title and state, its link, the three tabs */
-body.view-staff #tab-ask .ask-top{margin-bottom:10px;}
+body.view-staff #tab-ask .ask-top{margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
 html[dir="rtl"] body.view-staff #tab-ask .ask-back .art-ic{transform:scaleX(-1);}
 body.view-staff #tab-ask .ask-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
 body.view-staff #tab-ask .ask-title .page-title{margin:0;min-width:0;overflow-wrap:anywhere;}

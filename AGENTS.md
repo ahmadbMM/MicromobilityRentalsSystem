@@ -4070,6 +4070,15 @@ who we want it to be visible for and for how much time". Three parts: the databa
   and the CSV (points and seconds on a quiz page, a column per form field). Stats is `staff_ask_stats` (tiles, reach,
   by day and hour, gender, age, community, nationality, language) and one question group by group
   (`staff_ask_segment`). Strings: 336 keys named `ask*` travel with the part (`lang/staff-ask-<code>.json`).
+- **The answers report builder** (the user, 2026-11-14: "let me be able to extract a report with the answers for each ask
+  question with a report builder with all possible fields to include in the report"): Report builder on a page's top
+  bar and beside Export in Results (`_akrOpen`, functions `_akr*`, keys `askRb*`, options `cq_ask_rep_opts`, saved setups
+  under report `ask`). Each row is an answer or a person; every answer field and every account field (with both
+  emergency contacts through `_emFetch` and the sports) is a column, plus a column per question and per form field.
+  Sections: the summary, each question's results counted from the answers the filters keep (approved by default), the
+  same group by group (Split results by an account field or the option picked in another multiple choice), the quiz
+  board and the list. The round on screen, another or all of them; the answers are read whole (`staff_ask_answers`,
+  3000 at a time) and kept a minute so the live preview does not read them again. Spec: tests/ask-report.spec.ts.
 - **The look** (second pass, 2026-11-13): `look` is free jsonb on a page (`theme` light / dark / green / sand,
   `palette`, `cover`, `thanks_en`, `thanks_ar`, `layout` steps, `screen` `{qr, count, rotate}`) and on a question
   (`viz`, `palette`, `sort`, `values`, `total`, `limit`, `case`, `angle`, `size`). The website reads it in
