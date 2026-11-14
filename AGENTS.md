@@ -1770,8 +1770,8 @@ database's `_yoga_entry_guard` ONE_PER_SESSION). Walk-ins allowed. `_isYoga(s)`.
   Tests: `tests/yoga-session.spec.ts`.
 
 ## Farm House Night (2026-11-13)
-The Little Farmhouse Night (title_ar ليلة ليتل فارم هاوس; first named Nawar Farm House Night, renamed by the user
-2026-11-13), Thu 19 Nov 2026 at Little Farmhouse, Dhahban (map link in meet_url, the name in meet_name / meet_name_ar): arrival from 16:30, dinner 20:30. The user: approval like the Saturday Social Ride, inside MicroMobility
+The Farmhouse Night (title_ar ليلة فارم هاوس; first named Nawar Farm House Night, renamed by the user
+2026-11-13 to The Little Farmhouse Night, then 2026-11-14 "remove little from the name of the farmhouse"), Thu 19 Nov 2026 at Farmhouse, Dhahban (map link in meet_url, the name in meet_name / meet_name_ar): arrival from 16:30, dinner 20:30. The user: approval like the Saturday Social Ride, inside MicroMobility
 Experiences and not public, every member brings family members on their own booking, themed from the venue's Instagram
 (@thefarmhouse.jed).
 `ride_kind 'farm'` (event_kind community, open_to_all false, free, needs_approval TRUE, hide_queue), id suffix `-fh` (NC_ID

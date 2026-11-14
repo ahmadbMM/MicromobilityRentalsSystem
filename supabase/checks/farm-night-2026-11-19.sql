@@ -1,6 +1,7 @@
--- The Little Farmhouse Night: Thursday 19 November 2026 at Little Farmhouse, Dhahban, Jeddah
+-- The Farmhouse Night: Thursday 19 November 2026 at Farmhouse, Dhahban, Jeddah
 -- (https://maps.app.goo.gl/BYteRL5JCueWZUEs6). First inserted as Nawar Farm House Night (ليلة مزرعة نوار), renamed on
--- production 2026-11-13 (the user: "change the name of the session to the little farmhouse night").
+-- production 2026-11-13 (the user: "change the name of the session to the little farmhouse night"), then on 2026-11-14
+-- to The Farmhouse Night, the venue to Farmhouse, Dhahban (the user: "remove little from the name of the farmhouse").
 -- Arrival from 4:30 PM, dinner at 8:30 PM. A date inside MicroMobility Experiences for community members and their
 -- families: free, staff approve every place as on the Saturday ride (the list hidden until staff publish it), and a
 -- member books themselves and up to three more on one booking, each by name (four per booking, 20261114150000).
@@ -13,8 +14,8 @@ insert into public.sessions (id, day, session_date, capacity, status, bike_slots
   location, meet_url, meet_name, meet_name_ar)
 values ('2026-11-19-fh', 'Thursday', '2026-11-19', 60, 'open', '{"_time":"16:30 - 20:30"}',
   to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
-  'community', null, 'The Little Farmhouse Night', 'ليلة ليتل فارم هاوس', true, true, 60, 'farm', false, null, false,
-  'Little Farmhouse, Dhahban', 'https://maps.app.goo.gl/BYteRL5JCueWZUEs6', 'Little Farmhouse, Dhahban', 'ليتل فارم هاوس، ذهبان')
+  'community', null, 'The Farmhouse Night', 'ليلة فارم هاوس', true, true, 60, 'farm', false, null, false,
+  'Farmhouse, Dhahban', 'https://maps.app.goo.gl/BYteRL5JCueWZUEs6', 'Farmhouse, Dhahban', 'فارم هاوس، ذهبان')
 on conflict (id) do nothing;
 commit;
 
