@@ -39,8 +39,9 @@ test('a Saturday booking opens its three messages, ride details read off the ses
 
   await box.locator('.rm-opt[data-rm="ride"]').click();
   const txt = await box.locator('#rm-msg-text').inputValue();
-  // the booking app's link leads every message (the user, 2026-11-14), so WhatsApp's preview is the booking app
-  expect(txt.startsWith('Booking:\nhttps://experiences.micromobility.sa/\n\nMicroMobility')).toBe(true);
+  // the booking link sits just above the meeting point (the user, 2026-11-14), still the first link, so WhatsApp's preview is the booking app
+  expect(txt.startsWith('MicroMobility’s Saturday Community Ride')).toBe(true);
+  expect(txt).toContain('Intermediate Group *40km*\n\nBooking:\nhttps://experiences.micromobility.sa/\n\nMeet Up Location: \n' + MEET);
   expect(txt.indexOf('https://experiences.micromobility.sa/')).toBeLessThan(txt.indexOf(MEET));
   expect(txt.match(/experiences\.micromobility\.sa/g)).toHaveLength(1);
   expect(txt).toContain('Saturday Community Ride');

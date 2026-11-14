@@ -2249,7 +2249,8 @@ tags and rules, form questions.
   A save keeps the languages the editor did not open.
 - The booking app's link opens every message template (the user, 2026-11-14, `_bkFirst`): each builder's output, the
   editor's built-in text (`_tplDefault` = `_bkFirst(_tplBuiltIn())`) and an admin's own text get `CA_SITE/` on top unless
-  the text already opens with it, bare or under a one-line label (the Saturday ride's "Booking:" block now leads it).
+  the text already opens with it, bare or under a one-line label. The Saturday ride's details (rm_ride) are the one
+  exception: their "Booking:" block sits just above "Meet Up Location:" (the user, 2026-11-14), still the first link.
   WhatsApp previews a message's first link. A new prepared message wraps its final text in `_bkFirst`. Left as they
   were: the rate-your-ride one-tap (its words point at the link after them), lockers, vendors, share sheets.
 - site_content `community.form` = {q:{<question>:{on,req,label:{lang:text}}}} (`CF_QS`, `_apFormSettings`): the website

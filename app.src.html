@@ -37093,8 +37093,10 @@ const LM_LINE_DEF={en:'Thank you for riding with us. Here is to many more rides 
   ur:'ہمارے ساتھ رائیڈ کرنے کا شکریہ۔ آگے بھی بہت سی رائیڈز ایک ساتھ ہوں۔',hi:'हमारे साथ राइड करने के लिए धन्यवाद। आगे भी कई और राइड्स साथ में हों।',tl:'Salamat sa pag-ride kasama namin. Nawa ay marami pa tayong ride na magkasama.',
   ne:'हामीसँग राइड गर्नुभएकोमा धन्यवाद। अझै धेरै राइडहरू सँगै गरौं।',bn:'আমাদের সঙ্গে রাইড করার জন্য ধন্যবাদ। সামনে আরও অনেক রাইড একসঙ্গে হোক।'};
 // The built-in text with its fill-ins showing, which the editor starts from.
-// A message opens with the booking app's link (_bkFirst); lm_anniv is a line on a card, never sent, so it stays bare.
-function _tplDefault(id,lang){const v=_tplBuiltIn(id,lang);return id==='lm_anniv'?v:_bkFirst(v);}
+// A message opens with the booking app's link (_bkFirst); lm_anniv is a line on a card, never sent, so it stays bare, and the
+// Saturday ride's details carry it just above the meeting point (the user, 2026-11-14: "put the bookings website link just
+// above the location directly"), still before the map's link, so WhatsApp's preview stays the booking app's.
+function _tplDefault(id,lang){const v=_tplBuiltIn(id,lang);return id==='lm_anniv'||id==='rm_ride'?v:_bkFirst(v);}
 function _tplBuiltIn(id,lang){
   const L=/^(ca|la)_/.test(id)&&CA_MSG[lang]&&LA_MSG[lang]?lang:lang==='ar'?'ar':'en';
   const hi=(o)=>String(o.hi||'').replace('{name}','{first_name}');
@@ -37139,16 +37141,16 @@ const TPL_QUICK={
     segOpsMsg:'مرحباً {0}، معك مايكروموبيليتي بخصوص رحلتك:\n\n',segNewsMsg:'مرحباً {0}! أخبار من مايكروموبيليتي:\n\n\nتصلك هذه الرسالة لأنك اخترت متابعة أخبار رحلاتنا. أرسل STOP ولن نراسلك مجدداً.'}
 };
 // The Saturday ride's details, as a template: what _rmRideText builds, with its fill-ins showing.
-const RM_RIDE_TPL=`Booking:
-{booking_link}
-
-MicroMobility’s Saturday Community Ride ${RM_E.bike} *{date}*
+const RM_RIDE_TPL=`MicroMobility’s Saturday Community Ride ${RM_E.bike} *{date}*
 
 Meet up time: *{meet_time}*
 Start time: *{start_time}*
 Ride distance:
 Beginner’s Group *{beg_km}km*
 Intermediate Group *{int_km}km*
+
+Booking:
+{booking_link}
 
 Meet Up Location:
 {meet_link}
@@ -37158,16 +37160,16 @@ Meet Up Location:
 {breakfast}`;
 // The same three in Arabic (the owner, 2026-10-02: "include the arabic language translated"). The rider
 // messages dialog and the templates editor offer them beside the English.
-const RM_RIDE_AR=`الحجز:
-{booking_link}
-
-جولة MicroMobility الاجتماعية يوم السبت ${RM_E.bike} *{date}*
+const RM_RIDE_AR=`جولة MicroMobility الاجتماعية يوم السبت ${RM_E.bike} *{date}*
 
 وقت التجمّع: *{meet_time}*
 وقت الانطلاق: *{start_time}*
 مسافة الجولة:
 مجموعة المبتدئين *{beg_km} كم*
 مجموعة المتوسطين *{int_km} كم*
+
+الحجز:
+{booking_link}
 
 موقع التجمّع:
 {meet_link}
@@ -37246,10 +37248,11 @@ function _rmRideText(sess,lang){
   }
   const own=_tplUse('rm_ride',lang||'en',{beg_km:String(_rgKm(sess,'beg')),int_km:String(_rgKm(sess,'int')),date:day,meet_time:meet?tm(meet):'',start_time:start?tm(start):'',meet_link:loc||'',booking_link:CA_SITE+'/',breakfast:_hasBreakfast(sess)?'*Breakfast after the ride*':''});
   if(own!=null)return own;
-  const L=['Booking:',CA_SITE+'/','',`MicroMobility’s Saturday Community Ride ${RM_E.bike} *${day}*`,''];
+  const L=[`MicroMobility’s Saturday Community Ride ${RM_E.bike} *${day}*`,''];
   if(meet)L.push(`Meet up time: *${tm(meet)}*`);
   if(start)L.push(`Start time: *${tm(start)}*`);
   L.push('Ride distance:',`Beginner’s Group *${_rgKm(sess,'beg')}km*`,`Intermediate Group *${_rgKm(sess,'int')}km*`,'');
+  L.push('Booking:',CA_SITE+'/','');
   if(loc)L.push('Meet Up Location: ',loc,'');
   L.push('*No Registration & QR Code = No Participation*','*Parking Behind The Building*');
   if(_hasBreakfast(sess))L.push('*Breakfast after the ride*');
@@ -37263,7 +37266,7 @@ function _rmText(e,k,lang){
   lang=lang||'en';
   if(k==='privacy')return _bkFirst(_tplUse('rm_privacy',lang,{})??(lang==='ar'?RM_PRIVACY_AR:RM_PRIVACY));
   if(k==='etiq')return _bkFirst(_tplUse('rm_etiq',lang,{})??(lang==='ar'?RM_ETIQ_AR:RM_ETIQ));
-  return _bkFirst(_rmRideText(_rmSess(e),lang));
+  const r=_rmRideText(_rmSess(e),lang);return r.includes(CA_SITE)?r:_bkFirst(r); // the link sits just above the location (the user, 2026-11-14)
 }
 const RM_TPL_ID={ride:'rm_ride',privacy:'rm_privacy',etiq:'rm_etiq'};
 // The language last picked on this device: it always started on English, row after row.
