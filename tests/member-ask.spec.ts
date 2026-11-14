@@ -263,7 +263,8 @@ test.describe('@customer:members Ask in the Community tab', () => {
     const pg = askPage([q(3, 'qa')], {
       live: live({ results: { 3: { n: 2, items: [{ id: 21, t: 'Will there be parking?', v: 2, a: false }, { id: 22, t: 'What time?', v: 0, a: true }] } }, reactions: { 3: { love: 2 } } }),
     }, { look: { reactions: true } });
-    await member(page, { list: list([card('farm-ideas')]), page: pg });
+    const st: { list: Doc; page: Doc; live?: Doc } = { list: list([card('farm-ideas')]), page: pg };
+    await member(page, st);
     await openPage(page);
     const items = page.locator('#ak-q-3 .ak-text');
     await expect(items.nth(1)).toContainText('Answered');
@@ -273,6 +274,9 @@ test.describe('@customer:members Ask in the Community tab', () => {
     await expect(items.first().locator('.ak-vote')).toContainText('3');
     const love = page.locator('#ak-re-3-love');
     await expect(love).toHaveAttribute('aria-label', 'Love (2)');
+    // a reaction the database takes is read again at once (_akPollNow): ask_live then counts it, as the database would.
+    // Answering the old count let a slow runner's poll land before the check and put Love back to 2 (CI, 2026-11-14)
+    st.live = live({ results: { 3: { n: 2, items: [{ id: 21, t: 'Will there be parking?', v: 3, a: false }, { id: 22, t: 'What time?', v: 0, a: true }] } }, reactions: { 3: { love: 3 } } });
     await love.click();
     await expect(love).toHaveAttribute('aria-pressed', 'true');
     await expect(love).toHaveAttribute('aria-label', 'Love (3)');
