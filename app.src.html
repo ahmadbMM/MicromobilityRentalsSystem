@@ -31008,7 +31008,7 @@ async function _n6rGoSave(){
 function _n6rGoCancel(sid){
   const s=_sessDisp(sid);if(!s)return;
   const when=`${dayLabel(s.day)||''} ${shortDate(_ssDay(s))}`.trim();
-  S._cnMsg=t('n6rGoMsg').replace('{0}',when);S._cnMsgFor=sid;
+  S._cnMsg=_bkFirst(t('n6rGoMsg').replace('{0}',when));S._cnMsgFor=sid;
   showCancelNight(sid);
 }
 
@@ -33696,7 +33696,7 @@ function _bdLang(c){
 function _bdWaUrl(c){
   const first=String(c.name||'').trim().split(/\s+/)[0]||'';
   const lg=_bdLang(c);
-  return`https://wa.me/${_waDigits(_waNum(c))}?text=${encodeURIComponent(_tplUse('bd_wish',lg,{first_name:first})??BD_MSG[lg].replace('{name}',first))}`;
+  return`https://wa.me/${_waDigits(_waNum(c))}?text=${encodeURIComponent(_bkFirst(_tplUse('bd_wish',lg,{first_name:first})??BD_MSG[lg].replace('{name}',first)))}`;
 }
 // One formatter per language and shape (2026-10-31): a new one per row cost the birthday list ~20 ms a paint.
 const _bdDateF=new Map();
@@ -35639,12 +35639,12 @@ function _caPhoneShow(p){const d=String(p||'').replace(/\D/g,'');return /^9665\d
 // made in the account editor (_tpMsgOpen) is not about an application and goes without it.
 function _caMsgBuild(kind,lang,d){
   const L=_caMsgBody(kind,lang,d).split('\n');
-  if(!d.ig)return L.join('\n');
+  if(!d.ig)return _bkFirst(L.join('\n'));
   const m=CA_MSG[lang]||CA_MSG.en;let i=L.lastIndexOf(m.team);
-  if(i<0)return L.join('\n');
+  if(i<0)return _bkFirst(L.join('\n'));
   if(L[i-1]===m.seeYou)i--;
   L.splice(i,0,m.ig,CA_IG,'');
-  return L.join('\n');
+  return _bkFirst(L.join('\n'));
 }
 function _caMsgBody(kind,lang,d){
   const m=CA_MSG[lang]||CA_MSG.en,L=[];
@@ -36278,7 +36278,8 @@ function _laWhenLines(a,lang){
   if(a.lesson_place)out.push(a.lesson_place);
   return out;
 }
-function _laMsgBuild(a,kind,lang,d){
+function _laMsgBuild(a,kind,lang,d){return _bkFirst(_laMsgBody(a,kind,lang,d));}
+function _laMsgBody(a,kind,lang,d){
   const m=LA_MSG[lang]||LA_MSG.en,c=CA_MSG[lang]||CA_MSG.en,L=[];
   const first=String(a.name||'').trim().split(/\s+/)[0]||'';
   // Whose lesson: "Your lesson", "Sara's lesson", or several named together in the language's own
@@ -36488,10 +36489,19 @@ function _tplFill(src,vars){
 // The message as the admins wrote it, filled in, or null when they have not (the caller builds it). A language
 // they have not written takes their English (2026-10-09), but Arabic, which every message has built in.
 function _tplUse(id,lang,vars){const o=_tplOver(id,lang)??(lang!=='ar'?_tplOver(id,'en'):null);return o==null?null:_tplFill(o,vars||{});}
+// The booking app's link opens every prepared message (the user, 2026-11-14: "change all message templates to have the
+// link for the booking app always first even this one"). WhatsApp previews a message's first link, so the card a rider
+// sees is the booking app's. A text that already opens with it, bare or under a one-line label such as the Saturday
+// ride's "Booking:", is left as it is; an admin's own text without it gets it on top, as the built-in ones do.
+function _bkFirst(txt){
+  const s=String(txt==null?'':txt).replace(/^\s+/,'');if(!s.trim())return s;
+  const ln=s.split('\n',2),lk=l=>{l=String(l||'').trim();return l==='{booking_link}'||l===CA_SITE||l.startsWith(CA_SITE+'/');};
+  return lk(ln[0])||(/:\s*$/.test(ln[0])&&lk(ln[1]))?s:CA_SITE+'/\n\n'+s;
+}
 // A one-tap WhatsApp to a rider is in English and Arabic, as the built-in text is written, whatever the desk's own
 // language (bug hunt 2026-10-28): t() in a Hindi or French desk sent the rider Hindi or French plus Arabic, and the
 // rider's own pack is not on this device. The admins' Arabic text on an Arabic desk, their English on any other.
-function _waRiderMsg(id,k){const l=S.lang==='ar'?'ar':'en',o=id?_tplUse(id,l,{}):null;if(o!=null)return o;const s=S.lang;try{S.lang=l;return t(k);}finally{S.lang=s;}}
+function _waRiderMsg(id,k){const l=S.lang==='ar'?'ar':'en',o=id?_tplUse(id,l,{}):null;if(o!=null)return _bkFirst(o);const s=S.lang;try{S.lang=l;return id?_bkFirst(t(k)):t(k);}finally{S.lang=s;}}
 // The first-ride anniversary card's line as built in (F16), which the editor starts from in each language: the riders'
 // own packs carry the same words as lmLine (a staff device holds one pack, the editor shows all ten; tests/personal-landmarks.spec.ts
 // holds the two equal).
@@ -36500,7 +36510,9 @@ const LM_LINE_DEF={en:'Thank you for riding with us. Here is to many more rides 
   ur:'ہمارے ساتھ رائیڈ کرنے کا شکریہ۔ آگے بھی بہت سی رائیڈز ایک ساتھ ہوں۔',hi:'हमारे साथ राइड करने के लिए धन्यवाद। आगे भी कई और राइड्स साथ में हों।',tl:'Salamat sa pag-ride kasama namin. Nawa ay marami pa tayong ride na magkasama.',
   ne:'हामीसँग राइड गर्नुभएकोमा धन्यवाद। अझै धेरै राइडहरू सँगै गरौं।',bn:'আমাদের সঙ্গে রাইড করার জন্য ধন্যবাদ। সামনে আরও অনেক রাইড একসঙ্গে হোক।'};
 // The built-in text with its fill-ins showing, which the editor starts from.
-function _tplDefault(id,lang){
+// A message opens with the booking app's link (_bkFirst); lm_anniv is a line on a card, never sent, so it stays bare.
+function _tplDefault(id,lang){const v=_tplBuiltIn(id,lang);return id==='lm_anniv'?v:_bkFirst(v);}
+function _tplBuiltIn(id,lang){
   const L=/^(ca|la)_/.test(id)&&CA_MSG[lang]&&LA_MSG[lang]?lang:lang==='ar'?'ar':'en';
   const hi=(o)=>String(o.hi||'').replace('{name}','{first_name}');
   if(id==='rm_ride')return L==='en'?RM_RIDE_TPL:RM_RIDE_AR;
@@ -36544,7 +36556,10 @@ const TPL_QUICK={
     segOpsMsg:'مرحباً {0}، معك مايكروموبيليتي بخصوص رحلتك:\n\n',segNewsMsg:'مرحباً {0}! أخبار من مايكروموبيليتي:\n\n\nتصلك هذه الرسالة لأنك اخترت متابعة أخبار رحلاتنا. أرسل STOP ولن نراسلك مجدداً.'}
 };
 // The Saturday ride's details, as a template: what _rmRideText builds, with its fill-ins showing.
-const RM_RIDE_TPL=`MicroMobility’s Saturday Community Ride ${RM_E.bike} *{date}*
+const RM_RIDE_TPL=`Booking:
+{booking_link}
+
+MicroMobility’s Saturday Community Ride ${RM_E.bike} *{date}*
 
 Meet up time: *{meet_time}*
 Start time: *{start_time}*
@@ -36555,15 +36570,15 @@ Intermediate Group *{int_km}km*
 Meet Up Location:
 {meet_link}
 
-Booking:
-{booking_link}
-
 *No Registration & QR Code = No Participation*
 *Parking Behind The Building*
 {breakfast}`;
 // The same three in Arabic (the owner, 2026-10-02: "include the arabic language translated"). The rider
 // messages dialog and the templates editor offer them beside the English.
-const RM_RIDE_AR=`جولة MicroMobility الاجتماعية يوم السبت ${RM_E.bike} *{date}*
+const RM_RIDE_AR=`الحجز:
+{booking_link}
+
+جولة MicroMobility الاجتماعية يوم السبت ${RM_E.bike} *{date}*
 
 وقت التجمّع: *{meet_time}*
 وقت الانطلاق: *{start_time}*
@@ -36573,9 +36588,6 @@ const RM_RIDE_AR=`جولة MicroMobility الاجتماعية يوم السبت 
 
 موقع التجمّع:
 {meet_link}
-
-الحجز:
-{booking_link}
 
 *لا مشاركة دون تسجيل ورمز QR*
 *المواقف خلف المبنى*
@@ -36651,12 +36663,12 @@ function _rmRideText(sess,lang){
   }
   const own=_tplUse('rm_ride',lang||'en',{beg_km:String(_rgKm(sess,'beg')),int_km:String(_rgKm(sess,'int')),date:day,meet_time:meet?tm(meet):'',start_time:start?tm(start):'',meet_link:loc||'',booking_link:CA_SITE+'/',breakfast:_hasBreakfast(sess)?'*Breakfast after the ride*':''});
   if(own!=null)return own;
-  const L=[`MicroMobility’s Saturday Community Ride ${RM_E.bike} *${day}*`,''];
+  const L=['Booking:',CA_SITE+'/','',`MicroMobility’s Saturday Community Ride ${RM_E.bike} *${day}*`,''];
   if(meet)L.push(`Meet up time: *${tm(meet)}*`);
   if(start)L.push(`Start time: *${tm(start)}*`);
   L.push('Ride distance:',`Beginner’s Group *${_rgKm(sess,'beg')}km*`,`Intermediate Group *${_rgKm(sess,'int')}km*`,'');
   if(loc)L.push('Meet Up Location: ',loc,'');
-  L.push('Booking:',CA_SITE+'/','','*No Registration & QR Code = No Participation*','*Parking Behind The Building*');
+  L.push('*No Registration & QR Code = No Participation*','*Parking Behind The Building*');
   if(_hasBreakfast(sess))L.push('*Breakfast after the ride*');
   return L.join('\n');
 }
@@ -36666,9 +36678,9 @@ function _rmSess(e){return (S.sessions||[]).find(s=>s.id===(e&&e.sessionId))||nu
 function _rmBtn(e){return _rideKind(_rmSess(e))==='saturday'?`<button type="button" class="btn-sm btn-muted rq-msg" title="${t('rmBtn')}" aria-label="${t('rmBtn')}" aria-haspopup="dialog" data-on-click="${_on("_rmOpen",e.id)}">${RM_ENV}</button>`:'';}
 function _rmText(e,k,lang){
   lang=lang||'en';
-  if(k==='privacy')return _tplUse('rm_privacy',lang,{})??(lang==='ar'?RM_PRIVACY_AR:RM_PRIVACY);
-  if(k==='etiq')return _tplUse('rm_etiq',lang,{})??(lang==='ar'?RM_ETIQ_AR:RM_ETIQ);
-  return _rmRideText(_rmSess(e),lang);
+  if(k==='privacy')return _bkFirst(_tplUse('rm_privacy',lang,{})??(lang==='ar'?RM_PRIVACY_AR:RM_PRIVACY));
+  if(k==='etiq')return _bkFirst(_tplUse('rm_etiq',lang,{})??(lang==='ar'?RM_ETIQ_AR:RM_ETIQ));
+  return _bkFirst(_rmRideText(_rmSess(e),lang));
 }
 const RM_TPL_ID={ride:'rm_ride',privacy:'rm_privacy',etiq:'rm_etiq'};
 // The language last picked on this device: it always started on English, row after row.
@@ -40726,7 +40738,7 @@ function showCancelNight(sid){
   S._cnSid=sid;
   const nCodes=rows.filter(e=>e.promoCode).length;
   const when=`${dayLabel(sess.day)||''} ${shortDate(sess.session_date||sid)}`.trim();
-  if(S._cnMsg===undefined||S._cnMsgFor!==sid){S._cnMsg=_tplUse('cn_cancel',S.lang,{when})??t('cnMsgDefault').replace('{0}',when);S._cnMsgFor=sid;}
+  if(S._cnMsg===undefined||S._cnMsgFor!==sid){S._cnMsg=_bkFirst(_tplUse('cn_cancel',S.lang,{when})??t('cnMsgDefault').replace('{0}',when));S._cnMsgFor=sid;}
   let m=document.getElementById('cancel-night-modal');
   // A backdrop like every other dialog's: the focus trap and Escape (_MODAL_SEL) find it; it was a bare div they never saw.
   if(!m){m=document.createElement('div');m.id='cancel-night-modal';m.className='modal-backdrop';document.body.appendChild(m);}
@@ -46172,7 +46184,7 @@ function _remVars(e,sess,lang,extra){
   return{first_name:String(e.name||'').trim().split(/\s+/)[0]||'',ride:_evName(sess),date:_remDate(sess.session_date||sess.id,lang),time:_remTime(start,lang),
     cancel_link:CA_SITE+'/'+CUST_PATHS.myrides+'?lang='+encodeURIComponent(lang),...(extra||{})};
 }
-function _remText(id,e,sess,lang,extra){const v=_remVars(e,sess,lang,extra);return _tplUse(id,lang,v)??_tplFill(_remDefault(id,lang,sess),v);}
+function _remText(id,e,sess,lang,extra){const v=_remVars(e,sess,lang,extra);return _bkFirst(_tplUse(id,lang,v)??_tplFill(_remDefault(id,lang,sess),v));}
 // What this device marked before the database had the columns (kept for the session only).
 function _remWhen(e){const l=S._remLocal&&S._remLocal[e.id];return l||(e.remindedAt?{at:e.remindedAt,kind:e.remindedKind}:null);}
 // The rows carry reminded_at once the database has it (entryFromDB keeps undefined for a row read without it).
@@ -59848,9 +59860,9 @@ function _wsMsgText(j,lang){
   { // an admin's own text for this stage (Settings > Message templates), filled in
     const k=j.status==='confirmed'?(j.scheduled_for?(j.lane==='pickup'?'confirmedPickup':'confirmed'):'new'):j.status==='ready'?(j.lane==='pickup'?'readyPickup':'ready'):(m[j.status]?j.status:'new');
     const own=_tplUse('ws_'+k,lang,{first_name:first,ref:_wsRef(j),service:j.service_label||j.service||'',when:j.scheduled_for?_wsWhen(j.scheduled_for,lang):'',price:j.price_final!=null?m.price.replace('{n}',String(Number(j.price_final))):''});
-    if(own!=null)return own;
+    if(own!=null)return _bkFirst(own);
   }
-  return[m.hi.replace('{name}',first),'',body,'',m.team].join('\n');
+  return _bkFirst([m.hi.replace('{name}',first),'',body,'',m.team].join('\n'));
 }
 function _wsMsgOpen(id){const j=_wsFind(id);if(!j)return;S._wsMsg={id:j.id,lang:j.lang==='ar'?'ar':'en'};_wsMsgRender();}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -60101,8 +60113,8 @@ async function _smMove(id,status){
 }
 function _smFrame(m,lang){
   const f=SM_MSG[lang]||SM_MSG.en,first=String(m.name||'').trim().split(/\s+/)[0]||'';
-  const own=_tplUse('sm_reply',lang,{first_name:first,ref:_smRef(m)});if(own!=null)return own;
-  return[f.hi.replace('{name}',first),'',f.thanks.replace('{ref}',_smRef(m)),'','','',f.team].join('\n');
+  const own=_tplUse('sm_reply',lang,{first_name:first,ref:_smRef(m)});if(own!=null)return _bkFirst(own);
+  return _bkFirst([f.hi.replace('{name}',first),'',f.thanks.replace('{ref}',_smRef(m)),'','','',f.team].join('\n'));
 }
 // The reply: a frame in the sender's language that staff complete, sent from their own
 // WhatsApp or mail app. Opening either marks the message as replied.
@@ -60438,8 +60450,8 @@ async function _ambNotesSave(id){
 function _ambMsgText(a,kind,lang){
   const m=AMB_MSG[lang]||AMB_MSG.en,first=String(a.name||'').trim().split(/\s+/)[0]||'';
   const body=(kind==='reject'?m.reject:m.welcome).replace('{code}',a.code||'').replace('{discount}',String(_ambDiscount(a)));
-  const own=_tplUse(kind==='reject'?'amb_reject':'amb_welcome',lang,{first_name:first,code:a.code||'',discount:String(_ambDiscount(a))});if(own!=null)return own;
-  return[m.hi.replace('{name}',first),'',body,'',m.team].join('\n');
+  const own=_tplUse(kind==='reject'?'amb_reject':'amb_welcome',lang,{first_name:first,code:a.code||'',discount:String(_ambDiscount(a))});if(own!=null)return _bkFirst(own);
+  return _bkFirst([m.hi.replace('{name}',first),'',body,'',m.team].join('\n'));
 }
 function _ambMsgOpen(id,kind){const a=_ambFind(id);if(!a)return;S._ambMsg={id:a.id,kind,lang:a.lang==='ar'?'ar':'en'};_ambMsgRender();}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -68195,7 +68207,7 @@ function _segReach(){
   return out;
 }
 function _segTplId(){return S._seg&&S._seg.kind==='news'?'seg_news':'seg_ops';}
-function _segText(lang){const g=S._seg,id=_segTplId();lang=lang||_segEdLang();if(g.texts[lang]==null)g.texts[lang]=_tplOver(id,lang)??(lang!=='ar'?_tplOver(id,'en'):null)??_tplDefault(id,lang);return g.texts[lang];}
+function _segText(lang){const g=S._seg,id=_segTplId();lang=lang||_segEdLang();if(g.texts[lang]==null)g.texts[lang]=_bkFirst(_tplOver(id,lang)??(lang!=='ar'?_tplOver(id,'en'):null)??_tplDefault(id,lang));return g.texts[lang];}
 function _segPaint(){
   const g=S._seg,m=document.getElementById('confirm-modal');if(!g||!m)return;
   const n=g.ids.length,tab=(k,l)=>`<button type="button" class="toggle-btn${g.tab===k?' active':''}" aria-pressed="${g.tab===k}" data-on-click="${_on("_segSet","tab",k)}"${g.busy?' disabled':''}>${esc(l)}</button>`;
@@ -74241,7 +74253,7 @@ function _renderAnalyticsNow(){
     // anRfmAtrisk, keys that exist in no language, so two headings showed the raw key.
     const _rfmStem={champions:'Champions',loyal:'Loyal',newbie:'New',atrisk:'AtRisk',lost:'Lost'};
     const cap=k=>_rfmStem[k];
-    const rfmChip=r=>{const ph=_waDigits(r.phone),lbl=`${esc(r.name||'—')} · ${r.rides} ${_artIcon('bike',11)} · ${_money(r.spend)}`;return ph?`<a class="an-rfm-chip" data-wa-t="an_rfm" href="https://wa.me/${ph}?text=${encodeURIComponent(_tplUse('an_rfm',S.lang,{first_name:(r.name||'').split(' ')[0]||''})??t('anRfmMsg').replace('{0}',(r.name||'').split(' ')[0]||''))}" target="_blank" rel="noopener">${lbl}</a>`:`<span class="an-rfm-chip-off">${lbl}</span>`;};
+    const rfmChip=r=>{const ph=_waDigits(r.phone),lbl=`${esc(r.name||'—')} · ${r.rides} ${_artIcon('bike',11)} · ${_money(r.spend)}`;return ph?`<a class="an-rfm-chip" data-wa-t="an_rfm" href="https://wa.me/${ph}?text=${encodeURIComponent(_bkFirst(_tplUse('an_rfm',S.lang,{first_name:(r.name||'').split(' ')[0]||''})??t('anRfmMsg').replace('{0}',(r.name||'').split(' ')[0]||'')))}" target="_blank" rel="noopener">${lbl}</a>`:`<span class="an-rfm-chip-off">${lbl}</span>`;};
     const segMeta=[['champions','var(--green)'],['loyal','var(--blue)'],['newbie','var(--green)'],['atrisk','var(--orange)'],['lost','var(--muted-l)']];
     const rfm=`<div class="chart-card"><div class="chart-card-title">${t('anRfmTitle')}</div><div class="chart-card-sub">${t('anRfmSub')}</div>${segMeta.map(([k,col])=>{const list=segs[k];return`<div class="an-mt10"><div class="an-rfm-title" data-cssv="${_cssv({'--an-fg':col})}">${t('anRfm'+cap(k))} <span class="an-muted-700">${list.length}</span> <span class="an-rfm-desc">· ${t('anRfm'+cap(k)+'D')}</span></div><div class="an-rfm-chips">${list.length?list.slice(0,10).map(rfmChip).join('')+(list.length>10?`<span class="an-rfm-more">${t('anRfmMore').replace('{0}',list.length-10)}</span>`:''):`<span class="an-rfm-none">${t('anRfmNone')}</span>`}</div></div>`;}).join('')}</div>`;
     // Market-basket: product pairs sharing a receipt (cashier sales in range)

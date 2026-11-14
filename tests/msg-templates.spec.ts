@@ -26,7 +26,24 @@ test('the fill-ins are filled, and a line whose fill-in is empty is left out', a
   await boot(page, { rm_ride: { en: 'Ride on *{date}*\nMeet at {meet_time}\nMap: {meet_link}\nBook: {booking_link}' } });
   await page.waitForFunction(`S._tpl&&S._tpl.rm_ride`);
   const txt = await page.evaluate(`_rmText(getQueue()[0],'ride','en')`);
-  expect(txt).toBe('Ride on *3rd of October*\nMeet at 5:45AM\nBook: https://experiences.micromobility.sa/');
+  // an admin's own text that does not open with the booking app's link gets it on top (the user, 2026-11-14)
+  expect(txt).toBe('https://experiences.micromobility.sa/\n\nRide on *3rd of October*\nMeet at 5:45AM\nBook: https://experiences.micromobility.sa/');
+});
+
+// The user, 2026-11-14: "change all message templates to have the link for the booking app always first". WhatsApp
+// previews a message's first link, so every prepared message opens with the booking app's (not lm_anniv, a card line never sent).
+test('every message template opens with the booking app\'s link, in every language', async ({ page }) => {
+  await boot(page);
+  await page.waitForFunction(`typeof globalThis['_remDef'+'ault']==='function'`);
+  const bad = await page.evaluate(`(()=>{const out=[];for(const[,list]of TPL)for(const[id]of list)if(id!=='lm_anniv')for(const g of _tplLangs()){
+    const v=_tplDefault(id,g);if(!v.trim()){out.push(id+'/'+g+' empty');continue;}
+    const ok=id==='rm_ride'?v.startsWith(g==='ar'?'الحجز:\\n{booking_link}\\n\\n':'Booking:\\n{booking_link}\\n\\n'):v.startsWith('https://experiences.micromobility.sa/\\n\\n');
+    if(!ok)out.push(id+'/'+g+': '+v.slice(0,40));}return out;})()`);
+  expect(bad).toEqual([]);
+  // once is enough: a text that already opens with it, bare or under a label, is left as it is
+  expect(await page.evaluate(`_bkFirst(_bkFirst('Hi'))`)).toBe('https://experiences.micromobility.sa/\n\nHi');
+  expect(await page.evaluate(`_bkFirst('Booking:\\nhttps://experiences.micromobility.sa/\\n\\nRide')`)).toBe('Booking:\nhttps://experiences.micromobility.sa/\n\nRide');
+  expect(await page.evaluate(`_bkFirst('')`)).toBe('');
 });
 
 test('with no text of its own a message is the built-in one', async ({ page }) => {
@@ -45,13 +62,13 @@ test('the rider messages come in English and Arabic, an admin\'s Arabic text fir
   const box = page.locator('#confirm-modal .ca-msg-box');
   await box.locator('.rm-opt[data-rm="ride"]').click();
   await box.locator('[data-rm-lang="ar"]').click(); // the built-in Arabic ride details, the ride's own date and times
-  await expect(box.locator('#rm-msg-text')).toHaveValue(/جولة MicroMobility الاجتماعية[\s\S]*وقت التجمّع: \*5:45 ص\*[\s\S]*وقت الانطلاق: \*6:15 ص\*/);
+  await expect(box.locator('#rm-msg-text')).toHaveValue(/^الحجز:\nhttps:\/\/experiences\.micromobility\.sa\/\n\nجولة MicroMobility الاجتماعية[\s\S]*وقت التجمّع: \*5:45 ص\*[\s\S]*وقت الانطلاق: \*6:15 ص\*/);
   await box.locator('[data-rm-lang="en"]').click();
   await box.locator('.rm-back').click();
   await box.locator('.rm-opt[data-rm="privacy"]').click();
   await expect(box.locator('#rm-msg-text')).toHaveValue(/A Friendly Privacy Reminder/);
   await box.locator('[data-rm-lang="ar"]').click();
-  await expect(box.locator('#rm-msg-text')).toHaveValue('تذكير بالخصوصية يا {first_name}'); // a word it does not know stays as written
+  await expect(box.locator('#rm-msg-text')).toHaveValue('https://experiences.micromobility.sa/\n\nتذكير بالخصوصية يا {first_name}'); // a word it does not know stays as written; the booking app's link on top
   await expect(box.locator('#rm-msg-text')).toHaveAttribute('dir', 'rtl');
 });
 

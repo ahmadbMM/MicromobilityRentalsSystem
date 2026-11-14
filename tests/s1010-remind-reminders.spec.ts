@@ -102,7 +102,7 @@ test.describe('@staff:bookings ride reminders', () => {
     await open(page);
     const r = await page.evaluate(`(()=>{const ids=['remind_24h','remind_2h','wl_offer'];return{rows:ids.map(id=>!!_tplDef(id)),
       all:LANGS.every(l=>ids.every(id=>{const v=_tplDefault(id,l.code);return v&&/\\{first_name\\}/.test(v)&&(id==='wl_offer'?/\\{claim_link\\}/.test(v):/\\{cancel_link\\}/.test(v));})),
-      hi:_tplDefault('remind_24h','hi').startsWith('नमस्ते {first_name}')}})()`);
+      hi:_tplDefault('remind_24h','hi').startsWith('https://experiences.micromobility.sa/\\n\\nनमस्ते {first_name}')}})()`);
     expect(r).toEqual({ rows: [true, true, true], all: true, hi: true });
   });
 });

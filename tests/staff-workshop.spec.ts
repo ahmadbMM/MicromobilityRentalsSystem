@@ -94,7 +94,7 @@ test('confirming sets the day and time, signs it, and offers the confirmation me
   await expect(text).toContainText('Your bike service W-0042 (Full service) is booked for');
   await expect(text).toContainText('6 May');
   await expect(text).toContainText('18:30');
-  await expect(dialog(page).locator('a.ws-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/966551234567\?text=Hi%20Sara/);
+  await expect(dialog(page).locator('a.ws-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/966551234567\?text=https%3A%2F%2Fexperiences\.micromobility\.sa%2F%0A%0AHi%20Sara/);
   await dialog(page).locator('#ws-msg-lang').selectOption('ar');
   await expect(text).toContainText('مرحباً Sara،');
   await expect(text).toHaveAttribute('dir', 'rtl');

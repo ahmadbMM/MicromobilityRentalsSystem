@@ -200,12 +200,12 @@ test('Approve (an application from before the form made accounts): a welcome wit
   await expect(dlg).toBeVisible();
   await expect(dlg.locator('.ca-pwd')).toHaveText('Kp7wXr4Mnq');
   const msg = await dlg.locator('#ca-msg-text').inputValue();
-  expect(msg).toBe(['Hi Karim,', '', 'Welcome to the MicroMobility community!', '',
+  expect(msg).toBe(['https://experiences.micromobility.sa/', '', 'Hi Karim,', '', 'Welcome to the MicroMobility community!', '', // the booking app's link leads every message (the user, 2026-11-14)
     'We’re delighted to let you know that your membership application has been approved. You’re now part of a community of riders who love riding together, and we can’t wait to ride with you.', '',
     'You can now book our community rides, which are open to members only.', '',
     'Follow us on Instagram for ride photos and news:', 'https://www.instagram.com/MicroMobilitySA/', '', // every application message (2026-09-30)
     'See you on the road!', 'The MicroMobility team'].join('\n'));
-  for (const none of ['Kp7wXr4Mnq', 'karim.mansour@gmail.com', '0552468013', 'experiences.micromobility.sa', 'password', 'sign in', 'Google', 'Apple']) expect(msg).not.toContain(none);
+  for (const none of ['Kp7wXr4Mnq', 'karim.mansour@gmail.com', '0552468013', 'experiences.micromobility.sa', 'password', 'sign in', 'Google', 'Apple']) expect(msg.replace(/^https:\/\/experiences\.micromobility\.sa\/\n\n/, '')).not.toContain(none);
   const wa = await dlg.locator('a.ca-wa').getAttribute('href');
   expect(wa).toMatch(/^https:\/\/wa\.me\/966552468013\?text=/);
   expect(decodeURIComponent(wa!.split('text=')[1])).toBe(msg);
@@ -221,7 +221,7 @@ test('Approve (an application from before the form made accounts): a welcome wit
   await dlg.locator('#ca-msg-lang').selectOption('en');
   await dlg.locator('.ca-tp-go').click();
   const pw = await dlg.locator('#ca-msg-text').inputValue();
-  expect(pw).toBe(['Hi Karim,', '', 'We’ve set a temporary password for your MicroMobility account:', 'Email: karim.mansour@gmail.com', 'Temporary password: Kp7wXr4Mnq', '', 'Sign in with it here:', 'https://experiences.micromobility.sa', '',
+  expect(pw).toBe(['https://experiences.micromobility.sa/', '', 'Hi Karim,', '', 'We’ve set a temporary password for your MicroMobility account:', 'Email: karim.mansour@gmail.com', 'Temporary password: Kp7wXr4Mnq', '', 'Sign in with it here:', 'https://experiences.micromobility.sa', '',
     'As soon as you sign in with it, you’ll be asked to change it to a password of your own.', '',
     'Follow us on Instagram for ride photos and news:', 'https://www.instagram.com/MicroMobilitySA/', '', 'The MicroMobility team'].join('\n'));
   await expect(dlg.locator('.ca-tp-go')).toHaveCount(0);
@@ -249,7 +249,7 @@ test('An applicant with an account gets the welcome, with no account details and
   expect(msg).toContain('Hi Huda,');
   expect(msg).toContain('your membership application has been approved');
   expect(msg).toContain('You can now book our community rides');
-  for (const none of ['huda.saleh@gmail.com', '0551239876', 'experiences.micromobility.sa', 'password', 'Forgot', 'sign in', 'Google']) expect(msg).not.toContain(none);
+  for (const none of ['huda.saleh@gmail.com', '0551239876', 'experiences.micromobility.sa', 'password', 'Forgot', 'sign in', 'Google']) expect(msg.replace(/^https:\/\/experiences\.micromobility\.sa\/\n\n/, '')).not.toContain(none);
 });
 
 // Approving can also give more tags and put the rider on the Final list of a Saturday Social Ride
@@ -648,6 +648,7 @@ test('Invite to ride: no tag ticked, a ride to pick, then the approval without C
   const text = () => msgBox.locator('#ca-msg-text').inputValue();
   let msg = await text();
   expect(msg).toBe([
+    'https://experiences.micromobility.sa/', '', 
     'Hi Karim,', '',
     'You’re invited to our Saturday Social Ride!', '',
     'Thank you for applying to join the MicroMobility community. We’d love to ride with you, so we’ve saved you a place on this ride:',

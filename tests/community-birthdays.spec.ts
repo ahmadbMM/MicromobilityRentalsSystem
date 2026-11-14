@@ -172,7 +172,7 @@ test.describe('Community > Birthdays', () => {
     await page.evaluate(`setCommTab('birthdays')`);
     const amal = page.locator('#bd-list .bd-row', { hasText: 'Amal Today' });
     const wa = amal.locator('a.bd-wa');
-    expect(await wa.getAttribute('href')).toBe('https://wa.me/966551112222?text=' + encodeURIComponent('Happy birthday, Amal! Everyone at MicroMobility wishes you a wonderful year ahead, full of great rides. See you on the road!'));
+    expect(await wa.getAttribute('href')).toBe('https://wa.me/966551112222?text=' + encodeURIComponent('https://experiences.micromobility.sa/\n\nHappy birthday, Amal! Everyone at MicroMobility wishes you a wonderful year ahead, full of great rides. See you on the road!'));
     // a birthday greeting does not wait for ride news (owner, 2026-09-25): Badr said no and still gets the button
     await expect(page.locator('#bd-list .bd-row', { hasText: 'Badr Tomorrow' }).locator('a.bd-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/966553334444\?text=/);
     // only an account with no mobile number has nothing to open

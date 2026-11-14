@@ -55,7 +55,7 @@ test('Generate makes a random temporary password; saving it marks it temporary a
   const txt = await msg.locator('#ca-msg-text').inputValue();
   // The account's email, the password, where to sign in, and that it is changed at once (the owner,
   // 2026-09-30; the email since 2026-10-11) - not the mobile.
-  expect(txt).toBe(['Hi Huda,', '', 'We’ve set a temporary password for your MicroMobility account:', 'Email: huda.saleh@gmail.com', 'Temporary password: ' + pwd2, '', 'Sign in with it here:', 'https://experiences.micromobility.sa', '',
+  expect(txt).toBe(['https://experiences.micromobility.sa/', '', 'Hi Huda,', '', 'We’ve set a temporary password for your MicroMobility account:', 'Email: huda.saleh@gmail.com', 'Temporary password: ' + pwd2, '', 'Sign in with it here:', 'https://experiences.micromobility.sa', '',
     'As soon as you sign in with it, you’ll be asked to change it to a password of your own.', '', 'The MicroMobility team'].join('\n'));
   expect(txt).not.toContain('instagram'); // not about an application: no Instagram line (2026-09-30)
   expect(txt).not.toContain('0551239876');

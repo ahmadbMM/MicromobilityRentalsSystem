@@ -76,7 +76,7 @@ test('Reply opens a frame in the sender\'s language; sending it marks the messag
   await expect(card(page, 7)).toContainText('Warranty');
   await card(page, 7).getByRole('button', { name: 'Reply', exact: true }).click();
   const text = dialog(page).locator('#sm-reply-text');
-  await expect(text).toHaveValue(/^مرحباً سارة،/);
+  await expect(text).toHaveValue(/^https:\/\/experiences\.micromobility\.sa\/\n\nمرحباً سارة،/);
   await expect(text).toHaveValue(/M-0007/);
   await expect(dialog(page).locator('#sm-reply-lang')).toHaveValue('ar');
   await text.fill('Hi Sara,\n\nYes, wheels are not covered.\n\nMicromobility team');
@@ -96,9 +96,9 @@ test('switching the reply language swaps an untouched frame', async ({ page }) =
   await open(page);
   await card(page, 7).getByRole('button', { name: 'Reply', exact: true }).click();
   const text = dialog(page).locator('#sm-reply-text');
-  await expect(text).toHaveValue(/^Hi Omar,/);
+  await expect(text).toHaveValue(/^https:\/\/experiences\.micromobility\.sa\/\n\nHi Omar,/);
   await dialog(page).locator('#sm-reply-lang').selectOption('ar');
-  await expect(text).toHaveValue(/^مرحباً Omar،/);
+  await expect(text).toHaveValue(/^https:\/\/experiences\.micromobility\.sa\/\n\nمرحباً Omar،/);
   await expect(text).toHaveAttribute('dir', 'rtl');
 });
 

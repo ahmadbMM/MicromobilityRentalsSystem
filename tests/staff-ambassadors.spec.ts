@@ -97,7 +97,7 @@ test('approving suggests a code, refuses a taken one, then opens the welcome mes
   await expect(text).toContainText('Hi Sara,');
   await expect(text).toContainText('Your code is SARA20.');
   await expect(text).toContainText('15% off');
-  await expect(dialog(page).locator('a.amb-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/966551234567\?text=Hi%20Sara/);
+  await expect(dialog(page).locator('a.amb-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/966551234567\?text=https%3A%2F%2Fexperiences\.micromobility\.sa%2F%0A%0AHi%20Sara/);
 });
 
 test('a refusal of a row action (Reject) is said, not swallowed', async ({ page }) => {

@@ -39,6 +39,10 @@ test('a Saturday booking opens its three messages, ride details read off the ses
 
   await box.locator('.rm-opt[data-rm="ride"]').click();
   const txt = await box.locator('#rm-msg-text').inputValue();
+  // the booking app's link leads every message (the user, 2026-11-14), so WhatsApp's preview is the booking app
+  expect(txt.startsWith('Booking:\nhttps://experiences.micromobility.sa/\n\nMicroMobility')).toBe(true);
+  expect(txt.indexOf('https://experiences.micromobility.sa/')).toBeLessThan(txt.indexOf(MEET));
+  expect(txt.match(/experiences\.micromobility\.sa/g)).toHaveLength(1);
   expect(txt).toContain('Saturday Community Ride');
   expect(txt).toContain('*3rd of October*');
   expect(txt).toContain('Meet up time: *5:45AM*');
@@ -53,11 +57,11 @@ test('a Saturday booking opens its three messages, ride details read off the ses
   await box.locator('.rm-back').click();
   await box.locator('.rm-opt[data-rm="etiq"]').click();
   const et = await box.locator('#rm-msg-text').inputValue();
-  expect(et).toContain('Public Road Cycling Etiquette');
+  expect(et.startsWith('https://experiences.micromobility.sa/\n\nMicroMobility’s Public Road Cycling Etiquette')).toBe(true);
   expect(et).toContain('\u{1F4DE} *+966 56 666 8818*');
   await box.locator('.rm-back').click();
   await box.locator('.rm-opt[data-rm="privacy"]').click();
-  expect(await box.locator('#rm-msg-text').inputValue()).toMatch(/^\u{1F512} \*A Friendly Privacy Reminder\*/u);
+  expect(await box.locator('#rm-msg-text').inputValue()).toMatch(/^https:\/\/experiences\.micromobility\.sa\/\n\n\u{1F512} \*A Friendly Privacy Reminder\*/u);
   await box.locator('.ca-x').click();
   await expect(page.locator('#confirm-modal .ca-msg-box')).toHaveCount(0);
 });

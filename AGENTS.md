@@ -2224,6 +2224,11 @@ tags and rules, form questions.
   card and "Apply rules" rejects the marked. Admins edit it in Applications > Customize.
 - Message templates: the ca_*/la_* messages take every language (`_tplLangs`, `_tplOver(id,lang)`); others stay en/ar.
   A save keeps the languages the editor did not open.
+- The booking app's link opens every message template (the user, 2026-11-14, `_bkFirst`): each builder's output, the
+  editor's built-in text (`_tplDefault` = `_bkFirst(_tplBuiltIn())`) and an admin's own text get `CA_SITE/` on top unless
+  the text already opens with it, bare or under a one-line label (the Saturday ride's "Booking:" block now leads it).
+  WhatsApp previews a message's first link. A new prepared message wraps its final text in `_bkFirst`. Left as they
+  were: the rate-your-ride one-tap (its words point at the link after them), lockers, vendors, share sheets.
 - site_content `community.form` = {q:{<question>:{on,req,label:{lang:text}}}} (`CF_QS`, `_apFormSettings`): the website
   form (mm-platform forms/community) reads it as it opens; customer_community_apply reads it too (migration
   20261007230000, which patches the function by replace() and drops NOT NULL on four application columns).
