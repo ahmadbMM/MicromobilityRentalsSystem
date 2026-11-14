@@ -1825,6 +1825,15 @@ knows it). KIND_TRAITS: no bike, no breakfast, but it GATHERS: `_time` is "arriv
 - **Instagram**: `bike_slots._ig` (handle, `IG_HANDLE`, `_igClean`), `_sessIg` / `_sessIgLink`: a row on Details and a link
   on both tickets; the session editor's Instagram box (`es-ig`, `S.editSessIg`) keeps or changes it (the editor rebuilds
   slots, so it must be carried there). The first night carries @thefarmhouse.jed.
+- **Badge (2026-11-14, "create a badge for attending the farmhouse night")**: `farmhouse_night`, a barn under a crescent
+  moon (glyph `barn`) on the night's own special medal, peach into ember into maroon (`BDG_SPECIAL.farm`, `.sp-farm`;
+  the catalogue row says orange, its colour check holding only the eight plain colours). Earned in `_mrBadges` by any row
+  of the account checked in on a farm night, on site (active) or checked out (done): the session's `ride_kind`, else the
+  id's `-fh` (a night over is not always in the device's sessions). The member who booked holds it; family on the booking
+  are names, not accounts. Shown only once held (`hide`, `BDG_HELD_ONLY`, `held_only` true), pops up once (`BDG_CHEER`
+  `cq_bdg_fhn_`). Arabic name = the night's own title, ليلة فارم هاوس. Catalogue row: migration
+  `20261114200000_farmhouse_night_badge`. Website: mm-platform `lib/ride-record.ts`, its words server-side in
+  `content/farm-words.ts` as the rest of the farm's.
 
 ## Featured (2026-11-13)
 The user: "create a new featured section under micromobility experiences in the booking app to put featured sessions

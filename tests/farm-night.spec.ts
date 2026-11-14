@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows } from './helpers/supabase';
 
 // The Farm House Night (the user, 2026-11-13): The Farmhouse Night at Farmhouse in Dhahban (first named
@@ -265,5 +266,78 @@ test.describe('@staff:sessions Farm House Night', () => {
     await page.evaluate(`setStaffTab('sessions');startEditSession('${FH}')`);
     await expect(page.locator('#es-ig')).toHaveValue('thefarmhouse.jed');
     expect(await page.evaluate(`[_igClean('@thefarmhouse.jed'),_igClean('https://www.instagram.com/thefarmhouse.jed/?hl=en'),IG_HANDLE.test('bad handle')]`)).toEqual(['thefarmhouse.jed', 'thefarmhouse.jed', false]);
+  });
+});
+
+// The Farmhouse Night badge (the user, 2026-11-14: "create a badge for attending the farmhouse night"): a barn under a
+// crescent moon on the night's own medal, peach into ember into maroon, for the member checked in on a farm night (on
+// site or checked out). Shown only to those who hold it.
+test.describe('@customer:farm The Farmhouse Night badge', () => {
+  const row = (x: Record<string, unknown>) => ({ id: 'q1', session_id: FH, session_day: 'Thursday', session_date: '2099-11-19', queue_num: 3, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'active', paid: false, price: 0, registered_at: '2099-11-14T10:00:00Z', customer_id: 'c1', ...x });
+  async function rider(page: Page, x: Record<string, unknown>, sessions: unknown[] = [farm, sat]) {
+    const r = row(x);
+    await stubSupabase(page, {
+      sessions, queue_entries: [r], 'rpc:my_bookings': [r], 'rpc:community_member': true,
+      'rpc:customer_profile': [{ id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', phone: '+966500000001', birth_date: '1995-05-05', height: 165, type_preference: 'Any', nationality: 'Saudi Arabia' }],
+      'rpc:customer_update_profile': true,
+      'rpc:customer_emergency': [{ emergency_name: 'Nora Haddad', emergency_phone: '+966551234567', emergency_relation: 'sibling' }],
+    });
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('account')`);
+  }
+
+  test('checked in on the night: the barn on the farm medal, once with a pop-up', async ({ page }) => {
+    await rider(page, {});
+    const pop = page.locator('#badge-pop');
+    await expect(pop).toContainText('Farmhouse Night');
+    await expect(pop).toContainText('Come to one of our farmhouse nights.');
+    await expect(pop.locator('svg.bdg-m.bdg-sp')).toHaveCount(1);
+    await expect(pop.locator('.sp-farm')).not.toHaveCount(0);
+    await pop.getByRole('button', { name: 'Close' }).click();
+    await expect(page.locator('#tab-account .mr-badges .mr-badge.sp-farm', { hasText: 'Farmhouse Night' })).toHaveCount(1);
+  });
+
+  for (const [what, x, ses] of [
+    ['checked out', { status: 'done' }, undefined],
+    ['a night over that the device no longer lists (read from the id)', { status: 'done', session_id: '2099-10-15-fh', session_date: '2099-10-15' }, [sat]],
+  ] as const) {
+    test(`${what} earns it too`, async ({ page }) => {
+      await rider(page, x, ses ? [...ses] : undefined);
+      await expect(page.locator('#badge-pop')).toContainText('Farmhouse Night');
+    });
+  }
+
+  for (const [what, x] of [
+    ['a family still waiting on approval', { status: 'waiting' }],
+    ['a booking called off', { status: 'cancelled' }],
+    ['a member who never came', { status: 'noshow' }],
+    ['a Saturday ride ridden', { status: 'done', session_id: '2099-11-21-2', session_date: '2099-11-21', type_preference: 'Road', paid: true }],
+  ] as const) {
+    test(`${what} does not get it, not even to earn`, async ({ page }) => {
+      await rider(page, x);
+      await expect(page.locator('#mr-badges-host')).toHaveCount(1);
+      await page.evaluate(`_mrBadgesMore()`);
+      await expect(page.locator('#tab-account .mr-badge', { hasText: 'Farmhouse Night' })).toHaveCount(0);
+    });
+  }
+
+  test('the Arabic page names it as the night is named', async ({ page }) => {
+    await rider(page, { status: 'done' });
+    await page.locator('#badge-pop').getByRole('button', { name: 'Close' }).click();
+    await page.evaluate(`setLang('ar')`);
+    await expect(page.locator('#tab-account .mr-badges .mr-badge.sp-farm')).toContainText('ليلة فارم هاوس'); // the Arabic pack arrives, then the page repaints
+    expect(await page.evaluate(`[t('bdgFarmNightD'),_bdgName({system:true,slug:'farmhouse_night'})]`)).toEqual(['احضر ليلة فارم هاوس معنا.', 'ليلة فارم هاوس']);
+  });
+
+  test('every language has it, and the migration adds it for holders only', async () => {
+    for (const code of ['es', 'fr', 'hi', 'ur', 'bn', 'ne', 'pt', 'tl']) {
+      const pack = JSON.parse(readFileSync(`i18n/${code}.json`, 'utf8')) as Record<string, string>;
+      for (const k of ['bdgFarmNight', 'bdgFarmNightD', 'bdgFarmNightA']) expect(pack[k], `${code} ${k}`).toBeTruthy();
+    }
+    const sql = readFileSync('supabase/migrations/20261114200000_farmhouse_night_badge.sql', 'utf8');
+    expect(sql).toMatch(/'bd_farmhouse_night', 'farmhouse_night', 'barn', 'orange'.*true, true, 93, true\)/);
+    expect(sql).toContain("values ('20261114200000', 'farmhouse_night_badge')");
   });
 });

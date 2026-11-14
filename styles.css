@@ -10723,6 +10723,7 @@ body:not(.view-staff) .ticket-card.th-arena .vl-tk-code strong{color:#fff;}
 /* Rode with Defe: the ribbon wheel, rose into berry (BDG_SPECIAL.defe). */
 .mr-badge.sp-defe,.badge-pop-box.sp-defe{--sp1:#f6c3d6;--sp2:#d782a0;--sp3:#a22b63;--spg:215,130,160;--sph:255,236,243;}
 .mr-badge.sp-volunteer,.badge-pop-box.sp-volunteer{--sp1:#8fd0ff;--sp2:#1f7ae0;--sp3:#0b3b82;--spg:31,122,224;--sph:226,241,255;} /* the Volunteer badge */
+.mr-badge.sp-farm,.badge-pop-box.sp-farm{--sp1:#F3C7A9;--sp2:#C9502A;--sp3:#7E2034;--spg:201,80,42;--sph:251,239,228;} /* the Farmhouse Night badge: peach into ember into maroon (BDG_SPECIAL.farm) */
 
 /* Staff: the race column, the split above the roster, and the Victory Lap dialogs. */
 .vl-cell{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;}
