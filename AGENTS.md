@@ -1869,6 +1869,26 @@ knows it). KIND_TRAITS: no bike, no breakfast, but it GATHERS: `_time` is "arriv
   `cq_bdg_fhn_`). Arabic name = the night's own title, ليلة فارم هاوس. Catalogue row: migration
   `20261114200000_farmhouse_night_badge`. Website: mm-platform `lib/ride-record.ts`, its words server-side in
   `content/farm-words.ts` as the rest of the farm's.
+- **micromobility.sa/farmhouse (2026-11-15, migration `20261115210000_farmhouse_page`)**. The user: "create a webpage for
+  booking the farmhouse session ... ask if they have an account or not ... only allow reservations through a code ... as i
+  am willing to close the session and only accept bookings through the webpage". Their answers: anyone with the code
+  books (no Community tag); still waits for approval; closing the session stops the APP only, the page books the closed
+  night until its capacity is full; the code has no limit of its own; a ticket made before drops family, never adds.
+  - Page: mm-platform `forms/farmhouse` (a fork of `forms/saturday`: code first, "Do you have a MicroMobility account?",
+    sign in or create one, missing details, people, the farm waiver, sent, then the app signed in at My Bookings).
+  - Database: `farm_codes` (staff only; the code is written by hand on each database and is NEVER in this public repo or
+    a page's code), `farm_night(code[,id,token])` (state open/full/over, never a count; `held` names when signed in),
+    `farm_book(id,token,night,code,family,waiver)` (the holder unless already booked, plus up to three family names;
+    four per account; the night's capacity counted here, as an approval ride has no capacity guard; every refusal a row:
+    throttled/signin/code/session/waiver/input/name/fix/nothing/cap/full/room), wrong codes metered (`_ip_gate`
+    'farmcode', 30 in 10 minutes). `customer_create_booking` takes a CLOSED night only under `mm.farmcode`
+    (`_farm_code_on`), and `_community_booking_gate` lets that booking in with no tag (both patched in place from their
+    live text). A night marked Full, no waitlist, called off or ended stops the page too.
+  - App: `queue_entries.farm_code` reads as a ride code (`rideCode`: chip, Ride code column, CSV). `?handoff=farmhouse`
+    comes back to `/farmhouse`. The farm ticket's Edit is `_fhDropOpen`: who is on the booking (`_fhPartyRows`), the
+    holder marked You (`_fhHolderId`), each family member taken off one at a time (`_fhDrop`, customer_booking_update
+    cancel, which a closed night allows); no add, no number; no Edit when the holder is alone. An approval ride never
+    enters the Reserve tab's modify mode (it would show the hidden numbers), so Edit no longer opens the booking flow.
 
 ## Featured (2026-11-13)
 The user: "create a new featured section under micromobility experiences in the booking app to put featured sessions

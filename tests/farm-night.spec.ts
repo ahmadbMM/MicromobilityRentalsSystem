@@ -168,7 +168,7 @@ test.describe('@customer:farm Farm House Night', () => {
     expect(await page.evaluate(`[FARM_SEAT_MAX,_maxRiders({...allSessions().find(x=>x.id==='${FH}'),id:'2099-11-20-ev',ride_kind:'event',needs_approval:false})]`)).toEqual([4, 5]);
   });
 
-  test('My Bookings: the family\'s ticket in its colours, with Edit to add or remove family members', async ({ page }) => {
+  test('My Bookings: the family\'s ticket in its colours, with Edit to remove family members', async ({ page }) => {
     const base = { session_id: FH, session_day: 'Thursday', session_date: '2099-11-19', phone: '+966500000001', type_preference: 'None',
       size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-12T10:00:00Z', customer_id: 'c1', approval: 'pending', group_id: 'g1' };
     const mine = [{ ...base, id: 'q1', queue_num: 4, name: 'Sara Haddad' }, { ...base, id: 'q2', queue_num: 5, name: 'Lina Haddad' }];
@@ -184,6 +184,66 @@ test.describe('@customer:farm Farm House Night', () => {
     expect(await page.evaluate(`_cdAttr(allSessions().find(x=>x.id==='${FH}'),'2099-11-19')`)).toMatch(/:fhCdArrive\|\d+:fhCdDinner$/);
     await expect(tk).not.toContainText(/\bbike\b/i);
     await expect(page.locator('#tab-myrides .cu-act88', { hasText: 'Edit' })).toHaveCount(1);
+  });
+
+  // micromobility.sa/farmhouse (the user, 2026-11-15): the night is closed in the app and booked on that page with a
+  // code; a ticket made before keeps Edit to drop family members, never to add one ("Drop only, no adding").
+  test('a farm ticket\'s Edit only drops family, on a night closed in the app too', async ({ page }) => {
+    const base = { session_id: FH, session_day: 'Thursday', session_date: '2099-11-19', phone: '+966500000001', type_preference: 'None',
+      size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-12T10:00:00Z', customer_id: 'c1', approval: 'pending' };
+    const mine = [{ ...base, id: 'q1', queue_num: 4, name: 'Sara Haddad' }, { ...base, id: 'q2', queue_num: 5, name: 'Lina Haddad' },
+      { ...base, id: 'q3', queue_num: 6, name: 'Omar Haddad' }];
+    await custBoot(page, { sessions: [{ ...farm, status: 'closed' }, sat], 'rpc:my_bookings': mine, queue_entries: mine, 'rpc:customer_booking_update': true });
+    const updates: Record<string, unknown>[] = [], adds: string[] = [];
+    page.on('request', (r) => {
+      if (r.method() !== 'POST') return;
+      if (r.url().includes('/rest/v1/rpc/customer_booking_update')) updates.push(r.postDataJSON());
+      if (r.url().includes('/rest/v1/rpc/customer_create_booking') || /\/rest\/v1\/queue_entries/.test(r.url())) adds.push(r.url());
+    });
+    await page.evaluate(`setCustTab('myrides')`);
+    await page.locator('#tab-myrides .fh-drop-open').click();
+    // the pop-up, not the booking flow: who is on the booking, no number, the account holder never taken off alone
+    expect(await page.evaluate('S.custTab')).toBe('myrides');
+    const dlg = page.locator('#confirm-modal .fh-drop');
+    await expect(dlg).toBeVisible();
+    await expect(dlg.locator('#fh-drop-title')).toHaveText('On this booking');
+    const rowsL = dlg.locator('.fh-drop-row');
+    await expect(rowsL).toHaveCount(3);
+    await expect(rowsL.nth(0)).toContainText('Sara Haddad');
+    await expect(rowsL.nth(0).locator('.fh-drop-you')).toHaveText('You');
+    await expect(rowsL.nth(0).locator('button')).toHaveCount(0);
+    await expect(dlg).not.toContainText(/#\s?\d|\b[456]\b/);
+    await expect(dlg.locator('.fh-drop-btn')).toHaveCount(2);
+    // Remove asks once; Keep leaves the booking as it was
+    await rowsL.nth(2).locator('.fh-drop-btn').click();
+    await expect(rowsL.nth(2).locator('.fh-drop-yes')).toHaveText('Yes, remove');
+    await rowsL.nth(2).locator('.fh-drop-no').click();
+    await expect(rowsL.nth(2).locator('.fh-drop-btn')).toBeVisible();
+    expect(updates).toEqual([]);
+    await rowsL.nth(2).locator('.fh-drop-btn').click();
+    await rowsL.nth(2).locator('.fh-drop-yes').click();
+    await expect.poll(() => updates.length).toBe(1);
+    expect(updates[0]).toMatchObject({ p_id: 'c1', p_entry_id: 'q3', p_patch: { status: 'cancelled' } });
+    await expect(page.locator('.toast')).toContainText('Omar Haddad is no longer on this booking.');
+    expect(adds).toEqual([]);
+  });
+
+  test('a farm ticket for the account holder alone has no Edit (nothing to drop, nobody added there)', async ({ page }) => {
+    const base = { session_id: FH, session_day: 'Thursday', session_date: '2099-11-19', phone: '+966500000001', type_preference: 'None',
+      size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-12T10:00:00Z', customer_id: 'c1', approval: 'pending' };
+    const mine = [{ ...base, id: 'q1', queue_num: 4, name: 'Sara Haddad' }];
+    await custBoot(page, { 'rpc:my_bookings': mine, queue_entries: mine });
+    await page.evaluate(`setCustTab('myrides')`);
+    await expect(page.locator('#tab-myrides .ticket-card').first()).toHaveClass(/\bth-farm\b/);
+    await expect(page.locator('#tab-myrides .cu-act88', { hasText: 'Edit' })).toHaveCount(0);
+    await expect(page.locator('#tab-myrides .cu-act88', { hasText: 'Cancel' })).toHaveCount(1);
+  });
+
+  test('micromobility.sa/farmhouse\'s Forgot password comes back to the page', async ({ page }) => {
+    await stubSupabase(page, { sessions: [farm, sat], queue_entries: [] });
+    await page.goto('/?handoff=farmhouse&auth=forgot');
+    await waitForSb(page);
+    expect(await page.evaluate(`[sessionStorage.getItem('cq_handoff'),S.authMode,location.search]`)).toEqual(['farmhouse', 'forgot', '']);
   });
 });
 
@@ -231,6 +291,24 @@ test.describe('@staff:sessions Farm House Night', () => {
     await page.evaluate(`setStaffTab('queue');S.sfSession='${FH}';renderStaffQueue()`);
     await expect(page.locator('#tab-queue')).toContainText('3 participants');
     await expect(page.locator('#tab-queue')).not.toContainText('3 bikes');
+  });
+
+  test('a booking made at micromobility.sa/farmhouse carries its code as a ride code does', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const base = { session_id: FH, session_day: 'Thursday', session_date: '2099-11-19', phone: '+966500000001', type_preference: 'None',
+      size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-12T10:00:00Z', approval: 'pending' };
+    const rows = [{ ...base, id: 'q1', queue_num: 4, name: 'Sara Haddad', customer_id: 'c1', farm_code: 'FARM1911' },
+      { ...base, id: 'q2', queue_num: 5, name: 'Lina Haddad', customer_id: 'c1', farm_code: 'FARM1911' },
+      { ...base, id: 'q3', queue_num: 6, name: 'Majed Omar', customer_id: 'c2' }];
+    await stubSupabase(page, { sessions: [farm, sat], bikes: [], queue_entries: rows });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    expect(await page.evaluate(`getQueue().filter(e=>e.sessionId==='${FH}').map(e=>e.rideCode)`)).toEqual(['FARM1911', 'FARM1911', null]);
+    // the page's family and the app's member are each one party (no group: by account and night)
+    expect(await page.evaluate(`getQueue().filter(e=>e.sessionId==='${FH}').map(_partyKey)`)).toEqual([`c:c1|${FH}`, `c:c1|${FH}`, `c:c2|${FH}`]);
+    await page.evaluate(`setStaffTab('queue');S.sfSession='${FH}';renderStaffQueue()`);
+    await expect(page.locator('#tab-queue')).toContainText('FARM1911');
   });
 
   test('the booking editor adds family members to a farm booking, waiting on the booking\'s own decision', async ({ page }) => {

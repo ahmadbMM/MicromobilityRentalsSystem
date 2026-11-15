@@ -12260,6 +12260,14 @@ html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-
 .ev-farm{--ev:#8A3F27;--ev-rgb:138,63,39;}
 body:not(.view-staff) .ev-farm:not(.landing-event-card){--ev:#8A3F27;--ev-rgb:138,63,39;}
 html[data-staff-theme="dark"] body.view-staff .ev-farm{--ev:#E8A383;--ev-rgb:232,163,131;}
+/* the ticket's Edit: who is on the booking, a family member taken off one at a time (_fhDropOpen, 2026-11-15) */
+body:not(.view-staff) .fh-drop-list{list-style:none;margin:4px 0 14px;padding:0;display:grid;gap:8px;}
+body:not(.view-staff) .fh-drop-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;min-height:48px;padding:6px 12px;border:1px solid var(--line-2);border-radius:var(--r-ctl);background:var(--card);}
+body:not(.view-staff) .fh-drop-nm{font-weight:600;color:var(--ink);overflow-wrap:anywhere;min-width:0;}
+body:not(.view-staff) .fh-drop-you{font-size:var(--fs-13);font-weight:600;color:var(--fh-rust);}
+html[data-theme="dark"] body:not(.view-staff) .fh-drop-you{color:var(--fh-peach);}
+body:not(.view-staff) .fh-drop-ask{display:flex;gap:8px;flex-wrap:wrap;}
+body:not(.view-staff) .fh-drop :is(.fh-drop-btn,.fh-drop-yes,.fh-drop-no){min-height:40px;}
 /* the date's card: the venue's tile */
 body .sess-card.fh-card{
   position:relative;overflow:hidden;isolation:isolate;gap:6px;padding-top:14px;color:var(--fh-milk);
