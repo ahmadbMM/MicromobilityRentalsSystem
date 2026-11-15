@@ -88,7 +88,8 @@ const TABLES_NOT_YET_IN_DB = new Set(['till_sessions', 'till_counts', 'receipt_n
   'session_partners', 'session_partner_codes',
   'customer_contacts', 'volunteer_certs',
   'saturday_codes', 'saturday_code_rides', 'saturday_settings',
-  'circuit_challenges']); // the Saturday ride codes (20261108120000): tests/saturday-codes.spec.ts gives them rows; last contacted (20261107121000): tests/people-review2.spec.ts gives it rows; volunteer_certs (20261107131000): tests/volunteers-review2.spec.ts // partner places (20261017120000) and codes (20261023120000): tests/partner-places.spec.ts gives them rows
+  'circuit_challenges',
+  'volunteer_ratings']); // staff's ratings of volunteers (20261115230000): tests/volunteer-ratings.spec.ts gives it rows; // the Saturday ride codes (20261108120000): tests/saturday-codes.spec.ts gives them rows; last contacted (20261107121000): tests/people-review2.spec.ts gives it rows; volunteer_certs (20261107131000): tests/volunteers-review2.spec.ts // partner places (20261017120000) and codes (20261023120000): tests/partner-places.spec.ts gives them rows
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),

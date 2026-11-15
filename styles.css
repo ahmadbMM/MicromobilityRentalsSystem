@@ -13495,6 +13495,29 @@ html[data-staff-theme="dark"] body.view-staff .vx-star.on{color:#fcd34d;}
 .vx-fb-avg .num{font-size:var(--sf-fs-2xl);font-weight:600;line-height:1;color:var(--text);}
 .vx-fb-who{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;}
 .vx-fb-who .vx-msg{flex-basis:100%;}
+/* staff rate volunteers (2026-11-15, migration 20261115230000): a volunteer's average (People gets a Rating column), this
+   opportunity's stars on their Shifts row (a tap changes them), and the rating window: per person five large stars, a radio
+   group, and a comment */
+.vm-tbl.vm-rt{grid-template-columns:minmax(180px,1.5fr) minmax(130px,1fr) minmax(130px,1fr) minmax(110px,.8fr) minmax(120px,.8fr) minmax(110px,.8fr) auto;}
+.vrt-avg{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-size:var(--sf-fs-sm);font-weight:400;}
+.vrt-avg .am-meta{font-size:var(--sf-fs-xs);}
+.vrt-chip{display:inline-flex;align-items:center;gap:4px;min-height:32px;padding:0 8px;border:1px solid var(--sf-line2,var(--border));border-radius:var(--sf-r-xs);background:var(--sf-card,var(--s1));color:var(--muted);font:inherit;cursor:pointer;}
+.vrt-chip:hover{background:var(--sf-hover);}
+.vrt-list{display:grid;}
+.vrt-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);}
+.vrt-row:last-child{border-bottom:0;}
+.vrt-who{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-width:0;overflow-wrap:anywhere;}
+.vrt-pick{display:inline-flex;gap:2px;}
+.vrt-s{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;border-radius:var(--sf-r-xs);background:transparent;color:var(--muted);cursor:pointer;}
+.vrt-s.on{color:#b07d00;}
+html[data-staff-theme="dark"] body.view-staff .vrt-s.on{color:#fcd34d;}
+.vrt-s:hover{background:var(--sf-hover);}
+.vrt-s:focus-visible{outline:2px solid var(--green);outline-offset:1px;}
+.vrt-cm{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;font-size:var(--sf-fs-sm);font-weight:600;}
+.vrt-cm textarea{width:100%;box-sizing:border-box;min-height:var(--sf-ctl-size);font-weight:400;}
+.vrt-h{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+.vrt-p-row .btn-sm{flex:none;}
+@media (max-width:767px){.vrt-row{grid-template-columns:minmax(0,1fr);}}
 .vsf-det .vsf-err{font-size:var(--sf-fs-xs);font-weight:500;color:var(--vx-r-ink,#991b1b);}
 .vsf-det [aria-invalid="true"]{border-color:var(--vx-e-ns,#dc2626);}
 /* a phone: the figures scroll sideways, each row is a card */
