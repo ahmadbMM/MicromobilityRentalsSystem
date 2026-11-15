@@ -584,6 +584,9 @@ with expected(fname, want_definer, note) as (values
   ('_vol_feedback_follow',         true,  'trigger: moves a rating with its shift (session move, merge, unmerge); writes volunteer_feedback'),
   ('_vol_shift_reset',             false, 'trigger: only clears the last round''s reasons and plan on NEW; reads no table'),
   ('_vol_session_end',             false, 'pure: a session''s end from its typed time; reads no table'),
+  -- Staff rate volunteers (20261115230000)
+  ('staff_volunteer_rate',         true,  'writes volunteer_ratings, which no client writes; the Volunteers section''s change right is checked'),
+  ('_vol_rating_follow',           true,  'trigger: moves a staff rating with its shift (session move, merge, unmerge); writes volunteer_ratings'),
   -- Ask, the questions at micromobility.sa/ask (20261113010000)
   ('ask_list', true, 'the open pages a viewer may see; reads ask_pages, which only staff read; token-checked'),
   ('ask_code', true, 'the page a 6-digit code opens; metered per network'),
