@@ -237,7 +237,7 @@ create or replace function public._store_delivery_fee(p_fulfil text, p_subtotal 
 language plpgsql stable security definer set search_path = public as $$
 declare d jsonb := coalesce(_pay_setting('store.delivery'), '{}'::jsonb); f numeric; free numeric;
 begin
-  /* a gift card alone is never delivered (store build 2026-11-15 (20261115200100)) */
+  /* a gift card alone is never delivered (store build 2026-11-15 (20261115235500)) */
   if p_fulfil = 'digital' then return 0; end if;
   /* pickup is offered unless staff switched it off: an explicit false (X01: it answered 0 whatever the switch said) */
   if p_fulfil = 'pickup' then
@@ -1342,7 +1342,7 @@ begin
   back := _pay_apply(p);
   perform set_config('mm.pay_ok', '', true);
   -- its invoice number: a store order's is the order's own ('ord-<no>', also the wallet-only order's)
-  /* the provider that took it: Moyasar unless the server says Tabby (F84, store build 2026-11-15 (20261115200100)) */
+  /* the provider that took it: Moyasar unless the server says Tabby (F84, store build 2026-11-15 (20261115235500)) */
   update payments set status = 'paid', provider_id = p_provider_id, paid_at = now(), message = null,
          provider = case when p_info ->> 'provider' in ('moyasar', 'tabby') then p_info ->> 'provider' else 'moyasar' end,
          method = left(p_info ->> 'method', 20), brand = left(lower(p_info ->> 'brand'), 20),
@@ -1443,7 +1443,7 @@ begin
           perform _wallet_post(_wallet_owner(o.customer_id), -o.wallet_paid, 'sale', null, null, null, 'ord-' || o.no, null);
         end if;
         /* the gift card's part went back onto it on the cancel: taken again while the card still holds it and has not
-           expired, else the payment is refunded; the code's use is counted again (store build 2026-11-15 (20261115200100)) */
+           expired, else the payment is refunded; the code's use is counted again (store build 2026-11-15 (20261115235500)) */
         if o.gift_card_id is not null and o.gift_paid > 0 then
           update store_gift_cards set balance = balance - o.gift_paid
            where id = o.gift_card_id and status = 'active' and balance >= o.gift_paid and expires_at > now();
@@ -1464,7 +1464,7 @@ begin
     update store_orders set status = 'paid', paid_at = now(), expires_at = null, cancel_reason = null where id = o.id returning * into o;
     insert into store_order_events (order_id, status, note) values (o.id, 'paid', null);
     insert into receipt_numbers (receipt_id) values ('ord-' || o.no) on conflict (receipt_id) do nothing;
-    /* its gift cards, and a gift card order delivered at once (store build 2026-11-15 (20261115200100)) */
+    /* its gift cards, and a gift card order delivered at once (store build 2026-11-15 (20261115235500)) */
     perform _store_paid(o);
   elsif p.kind = 'locker' then
     for l in select x from jsonb_array_elements(p.lines) x loop
@@ -1541,7 +1541,7 @@ begin
       if o.wallet_paid > 0 then
         perform _wallet_post(_wallet_owner(o.customer_id), o.wallet_paid, 'sale_back', null, null, null, 'ord-' || o.no, null);
       end if;
-      /* the gift card's part back onto it and the code's use back (store build 2026-11-15 (20261115200100)) */
+      /* the gift card's part back onto it and the code's use back (store build 2026-11-15 (20261115235500)) */
       perform _store_give_back(o, 'system', true);
       update store_orders set status = 'cancelled', cancel_reason = 'unpaid', expires_at = null where id = o.id;
       insert into store_order_events (order_id, status, note) values (o.id, 'cancelled', p_reason);
@@ -1623,7 +1623,7 @@ begin
   end if;
   if r.order_id is not null then
     insert into store_order_events (order_id, status, note, by_name) values (r.order_id, 'refund', r.amount::text || ' SAR', r.by_name);
-    /* what neither the wallet nor a gift card paid (both went back on the cancel) (store build 2026-11-15 (20261115200100)) */
+    /* what neither the wallet nor a gift card paid (both went back on the cancel) (store build 2026-11-15 (20261115235500)) */
     update store_orders set status = 'refunded'
      where id = r.order_id and status = 'cancelled'
        and (select coalesce(sum(x.amount), 0) from payment_refunds x where x.order_id = r.order_id and x.status = 'done' and x.dest in ('card', 'wallet'))
@@ -1694,7 +1694,7 @@ begin
     if r.order_id is not null then
       insert into store_order_events (order_id, status, note, by_name) values (r.order_id, 'refund', amt::text || ' SAR · wallet', r.by_name);
       /* refunded whole: 'refunded', as the card's answer does it in pay_refund_done (bug hunt 2026-11-10); what neither
-         the wallet nor a gift card paid (store build 2026-11-15 (20261115200100)) */
+         the wallet nor a gift card paid (store build 2026-11-15 (20261115235500)) */
       update store_orders set status = 'refunded'
        where id = r.order_id and status = 'cancelled'
          and (select coalesce(sum(x.amount), 0) from payment_refunds x where x.order_id = r.order_id and x.status = 'done' and x.dest in ('card', 'wallet'))
@@ -1823,7 +1823,7 @@ begin
     perform set_config('mm.wallet_op', '', true);
   end if;
   /* a gift card's part back onto it; a code's use back for an order never paid; the gift cards it bought are no longer
-     sold, so what is left on them is voided (store build 2026-11-15 (20261115200100)) */
+     sold, so what is left on them is voided (store build 2026-11-15 (20261115235500)) */
   perform _store_give_back(o, left(coalesce(p_op, who), 60), o.status = 'pending');
   for g in select * from store_gift_cards where order_id = o.id and status = 'active' order by created_at for update loop
     update store_gift_cards set status = 'void', balance = 0, voided_at = now(), void_reason = 'order cancelled' where id = g.id;
@@ -2232,7 +2232,7 @@ begin
   end if;
 end $chk$;
 
-insert into supabase_migrations.schema_migrations (version, name) values ('20261115200100', 'store_build') on conflict do nothing;
+insert into supabase_migrations.schema_migrations (version, name) values ('20261115235500', 'store_build') on conflict do nothing;
 
 commit;
 
@@ -2259,4 +2259,4 @@ notify pgrst, 'reload schema';
 --        public._store_delivery_fee('digital', 100) as digital_fee_0,
 --        (select count(*) from site_content where key in ('store.tabby.on','store.smsa.on','store.addressLookup.on','store.slots',
 --                                                         'store.districts','store.lowStock','store.complaintsDays')) as settings_7,
---        (select count(*) from supabase_migrations.schema_migrations where version = '20261115200100') as ledger_1;
+--        (select count(*) from supabase_migrations.schema_migrations where version = '20261115235500') as ledger_1;

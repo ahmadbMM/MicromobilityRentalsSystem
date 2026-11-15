@@ -1,7 +1,7 @@
 import { test, expect, type Page, type Request } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb, type Fixtures } from './helpers/supabase';
 
-// The store build's staff side (2026-11-15, migration 20261115200100, staging only): the Store's new views (returns,
+// The store build's staff side (2026-11-15, migration 20261115235500, staging only): the Store's new views (returns,
 // back-in-stock requests, reviews, promo codes, gift cards, low stock), the product editor's new parts (photo order and
 // descriptions, colours, key specs, the box, fit, FAQ, sizes, relations, condition and warranty, sale dates, Duplicate,
 // bulk prices), the order sheet's out for delivery, SMSA label, gift slip and returns, and Payments > Settings' new keys.
