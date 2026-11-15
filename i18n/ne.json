@@ -9348,5 +9348,7 @@
   "askRbSortPts": "सबैभन्दा धेरै अङ्क",
   "askRbSortFast": "सबैभन्दा छिटो",
   "askRbSortVotes": "सबैभन्दा धेरै भोट",
-  "askRbSortN": "सबैभन्दा धेरै उत्तर"
+  "askRbSortN": "सबैभन्दा धेरै उत्तर",
+  "askHideA": "लुकाउनुहोस्",
+  "askHideOf": "लुकाउनुहोस्: {0}"
 }

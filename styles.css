@@ -14815,8 +14815,14 @@ body.view-staff #tab-ask .ask-bar-t{height:14px;border-radius:0;border-start-end
 body.view-staff #tab-ask .ask-bar-f{display:block;width:var(--w,0%);height:100%;border-radius:0;border-start-end-radius:var(--sf-r-xs);border-end-end-radius:var(--sf-r-xs);background:var(--sf-green-ink,var(--green));}
 body.view-staff #tab-ask .ask-bar-x{font-size:var(--sf-fs-sm);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
 body.view-staff #tab-ask .ask-words{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;}
-body.view-staff #tab-ask .ask-word{display:inline-flex;align-items:baseline;gap:6px;padding:4px 12px;border-radius:var(--sf-r-pill);background:var(--sf-chip,var(--s2));color:var(--text);font-size:var(--sf-fs-sm);font-weight:600;overflow-wrap:anywhere;}
+body.view-staff #tab-ask .ask-word{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:var(--sf-r-pill);background:var(--sf-chip,var(--s2));color:var(--text);font-size:var(--sf-fs-sm);font-weight:600;overflow-wrap:anywhere;}
+body.view-staff #tab-ask .ask-word-in{display:inline-flex;align-items:baseline;gap:6px;min-width:0;} /* the word and its count on one baseline; a Hide beside them, centred */
 body.view-staff #tab-ask .ask-word-n{color:var(--muted);font-size:var(--sf-fs-xs);font-variant-numeric:tabular-nums;}
+/* Hide on a word of the cloud and on a written answer in Results (2026-11-15) */
+body.view-staff #tab-ask .ask-hide-ic{display:inline-flex;align-items:center;justify-content:center;align-self:center;flex:none;width:24px;height:24px;margin-inline-end:-6px;padding:0;border:0;border-radius:var(--sf-r-pill);background:none;color:var(--muted);font:inherit;cursor:pointer;}
+body.view-staff #tab-ask .ask-hide-ic:hover{color:var(--text);background:var(--sf-sunken,var(--s2));}
+body.view-staff #tab-ask .ask-hide-ic:focus-visible{outline:2px solid var(--green);outline-offset:1px;}
+body.view-staff #tab-ask .ask-texts .ask-hide{align-self:center;margin-inline-start:auto;}
 body.view-staff #tab-ask .ask-w2{font-size:var(--sf-fs-lg);}
 body.view-staff #tab-ask .ask-w3{background:var(--sf-accent-wash);color:var(--sf-green-ink,var(--green));font-size:var(--sf-fs-xl);}
 body.view-staff #tab-ask .ask-stats{display:flex;gap:10px;flex-wrap:wrap;}
@@ -14929,6 +14935,7 @@ body.view-staff #tab-ask .ask-mult-c .ask-bars{grid-template-columns:minmax(0,1f
 body.view-staff #tab-ask .ask-mult-c .ask-bar-l{grid-column:1/-1;max-width:none;margin-bottom:-4px;}
 @media(max-width:767px){
   body.view-staff #tab-ask :is(.ask-wchip,.ask-tv>summary){min-height:44px;}
+  body.view-staff #tab-ask .ask-hide-ic{width:44px;height:44px;margin-block:-4px;margin-inline-end:-12px;} /* a finger's Hide: the word's chip grows to hold it */
   body.view-staff :is(#tab-ask,#ask-pop) :is(.ask-swb,.ask-viz){min-height:44px;}
   body.view-staff #tab-ask .ask-rnd{flex:1 1 100%;}
   body.view-staff #tab-ask .ask-rnd select{flex:1 1 auto;min-height:44px;}

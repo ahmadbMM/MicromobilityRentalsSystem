@@ -593,8 +593,8 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await expect(res(15).locator('.ask-bar-x')).toHaveText(['50', '30', '20']);
     await expect(res(16).locator('.ask-stat')).toHaveText(['Average2.5', 'Lowest1', 'Highest5']);
     await expect(res(16).locator('.ask-col')).toHaveCount(5);
-    await expect(res(17).locator('.ask-texts li')).toHaveText(['Is there parking at the farm? Votes 4 Answered']);
-    await expect(res(18).locator('.ask-texts li')).toHaveText(['Shade for the little ones, please']);
+    await expect(res(17).locator('.ask-texts li')).toHaveText(['Is there parking at the farm? Votes 4 Answered Hide']);
+    await expect(res(18).locator('.ask-texts li')).toHaveText(['Shade for the little ones, please Hide']);
     // who answered what: every answer of the nine kinds with its person, in full
     const who = sec(page).locator('.ask-who');
     await expect(who.locator('h2')).toHaveText('Who answered what');
@@ -618,6 +618,74 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await confirmBox(page).getByRole('button', { name: 'Reset results' }).click();
     await expect.poll(() => sent.length).toBe(1);
     expect(sent[0].body).toEqual({ p_page: 1, p_action: 'reset' });
+  });
+
+  test('Results: Hide takes a word of the cloud or a written answer off what everyone sees: a word is every approved answer with its key, a written answer goes by its id; a refusal brings it back', async ({ page }) => {
+    // the user, 2026-11-15: "add a hide button for ask answers to hide unwanted answers"
+    await staff(page);
+    const sent = writes(page, /\/rest\/v1\/(ask_answers|rpc\/staff_ask_review)$/);
+    // the database: what is hidden leaves the results staff_ask_page answers next
+    let det = detail();
+    const drop = (qid: number, keep: (x: Row) => boolean) => {
+      det = { ...det, questions: det.questions.map((q) => {
+        if (q.id !== qid) return q;
+        const r = q.result as Row, k = Array.isArray(r.words) ? 'words' : 'items';
+        return { ...q, result: { ...r, [k]: (r[k] as Row[]).filter(keep) } };
+      }) };
+    };
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_page$/, (r) => r.fulfill(json(det)));
+    const reads: Record<string, string>[] = [];
+    await page.route(/\/rest\/v1\/ask_answers(\?|$)/, (r) => {
+      const q = Object.fromEntries(new URL(r.request().url()).searchParams);
+      if (r.request().method() === 'GET') { reads.push(q); return r.fulfill(json([{ norm: q.body === 'eq.pony rides' ? 'ponyrides' : 'bbq' }])); }
+      if (r.request().method() === 'PATCH') { drop(11, (w) => w.w !== (q.norm === 'eq.bbq' ? 'BBQ' : 'pony rides')); return r.fulfill(json([{ id: 115 }, { id: 61 }])); }
+      return r.fallback();
+    });
+    let refuse = false;
+    await page.route(/\/rest\/v1\/rpc\/staff_ask_review$/, (r) => {
+      if (refuse) return r.fulfill(json({ code: '42501', message: 'FORBIDDEN' }, 403));
+      const b = r.request().postDataJSON() as { p_ids: number[] };
+      drop(18, (x) => !b.p_ids.includes(x.id as number));
+      return r.fulfill(json(1));
+    });
+    await openPage(page, 1, 'results');
+    const res = (id: number) => sec(page).locator(`.ask-r[data-ask-r="${id}"]`);
+    // a Hide on each word and each written answer, none on the other kinds
+    await expect(res(11).locator('.ask-word .ask-hide')).toHaveCount(3);
+    await expect(res(11).locator('.ask-hide').first()).toHaveAttribute('aria-label', 'Hide: BBQ');
+    await expect(res(11).locator('.ask-hide').first()).toHaveAttribute('title', 'Hide');
+    await expect(res(17).locator('.ask-hide')).toHaveText('Hide');
+    await expect(res(17).locator('.ask-hide')).toHaveAttribute('aria-label', 'Hide: Is there parking at the farm?');
+    await expect(sec(page).locator('.ask-hide')).toHaveCount(5);
+    // BBQ: one of its answers is read here (115), so the key comes from that row, and every approved answer of the
+    // round with that key is hidden in one write; the word leaves at once and the keyboard moves to the next Hide
+    await res(11).locator('.ask-hide').first().focus();
+    await page.keyboard.press('Enter');
+    await expect(res(11).locator('.ask-word')).toHaveText(['pony rides 4', 'bonfire 1']);
+    await expect(res(11).locator('.ask-hide').first()).toBeFocused();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(reads[0]).toMatchObject({ id: 'eq.115', select: 'norm', limit: '1' });
+    expect(sent[0]).toMatchObject({ m: 'PATCH', path: 'ask_answers', body: { status: 'rejected' } });
+    for (const f of ['question_id=eq.11', 'round=eq.1', 'status=eq.approved', 'norm=eq.bbq']) expect(decodeURIComponent(sent[0].q)).toContain(f);
+    // pony rides: none of its approved answers is read here, so the key is asked for by the words shown
+    await res(11).locator('.ask-hide').first().click();
+    await expect(res(11).locator('.ask-word')).toHaveText(['bonfire 1']);
+    await expect.poll(() => sent.length).toBe(2);
+    expect(reads[1]).toMatchObject({ question_id: 'eq.11', round: 'eq.1', status: 'eq.approved', body: 'eq.pony rides', select: 'norm', limit: '1' });
+    expect(decodeURIComponent(sent[1].q)).toContain('norm=eq.ponyrides');
+    // a written answer goes by its id, through staff_ask_review; read again, it stays gone
+    await res(18).locator('.ask-hide').click();
+    await expect(res(18).locator('.ask-texts li')).toHaveCount(0);
+    await expect.poll(() => sent.length).toBe(3);
+    expect(sent[2]).toMatchObject({ path: 'rpc/staff_ask_review', body: { p_ids: [107], p_status: 'rejected' } });
+    await page.evaluate(`_askDetail()`);
+    await expect(res(11).locator('.ask-word')).toHaveText(['bonfire 1']);
+    await expect(res(18).locator('.ask-texts li')).toHaveCount(0);
+    // refused: said in the section's words, and the answer is back
+    refuse = true;
+    await res(17).locator('.ask-hide').click();
+    await expect(page.locator('.toast.error').last()).toHaveText('This account can look at Ask but not change it.');
+    await expect(res(17).locator('.ask-texts li')).toHaveText(['Is there parking at the farm? Votes 4 Answered Hide']);
   });
 
   test('the setup of a saved page: Taking answers acts at once, Save writes what changed (a question moved, one deleted, a closing time), End asks, leaving unsaved asks', async ({ page }) => {
@@ -797,7 +865,7 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await expect(sec(page).locator('.ask-a-acts, .lt-sel-btn, .ask-ok-all')).toHaveCount(0);
     await page.evaluate(`_askTab('results')`);
     await expect(sec(page).locator('.ask-r')).toHaveCount(8);
-    await expect(sec(page).locator('.ask-reset')).toHaveCount(0);
+    await expect(sec(page).locator('.ask-reset, .ask-hide')).toHaveCount(0);
     await expect(sec(page).locator('a.ask-screen')).toBeVisible();
     // and a call made anyway is stopped before the wire
     await page.evaluate(`_askReview([116],'approved')`);

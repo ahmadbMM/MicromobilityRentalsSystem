@@ -9348,5 +9348,7 @@
   "askRbSortPts": "سب سے زیادہ پوائنٹس",
   "askRbSortFast": "سب سے تیز",
   "askRbSortVotes": "سب سے زیادہ ووٹ",
-  "askRbSortN": "سب سے زیادہ جوابات"
+  "askRbSortN": "سب سے زیادہ جوابات",
+  "askHideA": "چھپائیں",
+  "askHideOf": "چھپائیں: {0}"
 }

@@ -9348,5 +9348,7 @@
   "askRbSortPts": "Más puntos",
   "askRbSortFast": "Las más rápidas",
   "askRbSortVotes": "Más votos",
-  "askRbSortN": "Más respuestas"
+  "askRbSortN": "Más respuestas",
+  "askHideA": "Ocultar",
+  "askHideOf": "Ocultar: {0}"
 }

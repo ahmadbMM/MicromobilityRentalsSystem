@@ -9348,5 +9348,7 @@
   "askRbSortPts": "सबसे ज़्यादा अंक",
   "askRbSortFast": "सबसे तेज़",
   "askRbSortVotes": "सबसे ज़्यादा वोट",
-  "askRbSortN": "सबसे ज़्यादा उत्तर"
+  "askRbSortN": "सबसे ज़्यादा उत्तर",
+  "askHideA": "छिपाएँ",
+  "askHideOf": "छिपाएँ: {0}"
 }

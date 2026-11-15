@@ -4071,7 +4071,12 @@ who we want it to be visible for and for how much time". Three parts: the databa
   database said yes; Reveal also closes the question (the database's rule). Answers approves, rejects, corrects and
   deletes (`staff_ask_review`, table updates), reading `ASK_PAGE` (300) answers at a time with the waiting ones always
   whole. Results draws each kind, the board (`staff_ask_page.board`, names in full: staff only), "Who answered what"
-  and the CSV (points and seconds on a quiz page, a column per form field). Stats is `staff_ask_stats` (tiles, reach,
+  and the CSV (points and seconds on a quiz page, a column per form field). Hide (the user, 2026-11-15: "add a hide button for ask answers to hide unwanted
+  answers") sits on each word of a cloud and each open answer or question from people in Results (`_askHide`, keys
+  `askHideA` / `askHideOf`; not in Stats' group-by-group drawings): hidden is Not approved, so the page, the big screen
+  and the booking app drop it at their next poll (the page's `ver` moves) and Approve in Answers brings it back. A word
+  hides every approved answer of the round on screen with its `norm` (one table update; the key read from an answer held
+  here, else by the words shown), a written answer goes by its id through `staff_ask_review`. No database change. Stats is `staff_ask_stats` (tiles, reach,
   by day and hour, gender, age, community, nationality, language) and one question group by group
   (`staff_ask_segment`). Strings: 336 keys named `ask*` travel with the part (`lang/staff-ask-<code>.json`).
 - **The answers report builder** (the user, 2026-11-14: "let me be able to extract a report with the answers for each ask

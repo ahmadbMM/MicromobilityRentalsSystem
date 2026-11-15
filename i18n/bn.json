@@ -9348,5 +9348,7 @@
   "askRbSortPts": "সবচেয়ে বেশি পয়েন্ট",
   "askRbSortFast": "সবচেয়ে দ্রুত",
   "askRbSortVotes": "সবচেয়ে বেশি ভোট",
-  "askRbSortN": "সবচেয়ে বেশি উত্তর"
+  "askRbSortN": "সবচেয়ে বেশি উত্তর",
+  "askHideA": "লুকান",
+  "askHideOf": "লুকান: {0}"
 }

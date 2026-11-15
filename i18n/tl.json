@@ -9348,5 +9348,7 @@
   "askRbSortPts": "Pinakamaraming puntos",
   "askRbSortFast": "Pinakamabilis",
   "askRbSortVotes": "Pinakamaraming boto",
-  "askRbSortN": "Pinakamaraming sagot"
+  "askRbSortN": "Pinakamaraming sagot",
+  "askHideA": "Itago",
+  "askHideOf": "Itago: {0}"
 }
