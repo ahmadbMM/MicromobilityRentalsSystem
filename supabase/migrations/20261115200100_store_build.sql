@@ -36,7 +36,8 @@
 --     for a gift card only).
 --  5. New tables, each with row security, explicit revokes and grants: store_stock_requests (back in stock, F34; staff
 --     call them on WhatsApp, no email or SMS), store_return_requests (F93), store_reviews (verified buyers only, F42 and
---     F94; no name, phone or account on a review), store_promo_codes (F67, licence only), store_gift_cards and
+--     F94; no name, phone or account on a review, and the public reads only a shown review's own words, not its order
+--     or the staffer who showed it), store_promo_codes (F67, licence only), store_gift_cards and
 --     store_gift_card_moves (F57), store_invoice_counter (L06). A gift card expires a year after it is issued (the owner,
 --     2026-11-15): past expires_at it is refused (STORE_GIFT_EXPIRED) and its balance can no longer be spent; staff may
 --     extend it (staff_store_gift_card_extend).
@@ -57,9 +58,11 @@
 --     wallet, then the gift card), staff_store_review_set (F42, F94; admins), staff_store_gift_card_issue,
 --     staff_store_gift_card_void and staff_store_gift_card_extend (F57). staff_store_order_set takes 'out' (F96) and staff_store_orders counts it open.
 --     staff_store_order_cancel gives a gift card's part back, a never-paid order's code use back, and voids the gift
---     cards the order bought.
+--     cards the order bought; what those cards already paid for elsewhere is kept back from its refund (the card's
+--     part owed first, then the wallet's).
 -- 10. Payments: pay_settle records the provider (moyasar | tabby, F84); pay_view gives an order's subtotal, discount,
---     gift_paid, total and provider; _pay_apply takes a late order's gift card part and code use again and issues its
+--     gift_paid, total and provider, and (for the instalments provider's session, server only) its buyer and where it
+--     goes; _pay_apply takes a late order's gift card part and code use again and issues its
 --     gift cards; _pay_release gives them back; pay_refund_done and staff_pay_refund_begin count a gift card's part when
 --     they decide an order is refunded whole.
 --
@@ -481,7 +484,12 @@ grant select on public.store_return_requests to authenticated;
 drop policy if exists "store reviews shown read" on public.store_reviews;
 create policy "store reviews shown read" on public.store_reviews for select to anon, authenticated
   using (status = 'shown' or (select is_staff()));
-grant select on public.store_reviews to anon, authenticated;
+/* the public reads a shown review's own words, not the order it came from or who on staff showed it (decided_by is a
+   staffer's name; owner rule: nobody's name). These are the columns the website reads, filters and sorts on
+   (lib/store.ts readReviews); staff read every column. No view or invoker function reads this table (store build
+   review 2026-11-15) */
+grant select (id, product_id, rating, body, lang, bought_month, status, created_at) on public.store_reviews to anon;
+grant select on public.store_reviews to authenticated;
 
 drop policy if exists "store promo codes staff read" on public.store_promo_codes;
 create policy "store promo codes staff read" on public.store_promo_codes for select to authenticated using ((select is_staff()));
@@ -1147,7 +1155,8 @@ grant execute on function public.store_review_add(text, bigint, text, uuid, int,
 
 -- ── 10. Payments (rebuilt) ─────────────────────────────────────────────────────────────────────────
 -- The page that takes a payment (20261110150000): an order's also gives its subtotal, discount, gift card part, total
--- and the payment's provider (store build 2026-11-15, w4's pay page).
+-- and the payment's provider (store build 2026-11-15, w4's pay page), and its buyer and where it goes for the
+-- instalments provider's session (F84; read by the website's server alone, never drawn: w4's addition 2).
 create or replace function public.pay_view(p_key text, p_pay uuid) returns jsonb
 language plpgsql stable security definer set search_path = public as $$
 declare p payments%rowtype; o store_orders%rowtype; extra jsonb := '{}'::jsonb;
@@ -1160,7 +1169,11 @@ begin
     extra := jsonb_build_object('order_no', o.no, 'order_key', o.track_key, 'order_status', o.status,
                                 'items', (_store_order_json(o)) -> 'items', 'delivery_fee', o.delivery_fee, 'wallet_paid', o.wallet_paid,
                                 'subtotal', o.subtotal, 'discount', o.discount, 'gift_paid', o.gift_paid, 'total', o.total,
-                                'provider', p.provider);
+                                'provider', p.provider,
+                                'buyer', case when o.id is not null then jsonb_build_object('name', o.name, 'phone', o.phone, 'email', o.email) end,
+                                'ship', case when o.fulfil in ('jeddah', 'ksa') and jsonb_typeof(o.address) = 'object' then
+                                          jsonb_strip_nulls(jsonb_build_object('city', o.address ->> 'city', 'district', o.address ->> 'district',
+                                                                               'street', o.address ->> 'street', 'postal', o.address ->> 'postal')) end);
   elsif p.kind = 'booking' then
     extra := jsonb_build_object('rides', coalesce((select jsonb_agg(jsonb_build_object('id', e.id, 'name', e.name, 'type', e.type_preference,
                'date', e.session_date, 'title', s.title, 'kind', s.ride_kind, 'status', e.status, 'paid', e.paid) order by e.id)
@@ -1667,12 +1680,13 @@ grant execute on function public.staff_store_order_set(uuid, text, text, text, t
 
 -- Cancels an order (not yet delivered): its stock goes back, the wallet's part goes back, a gift card's part goes back
 -- onto it, a never-paid order gives its code's use back, the gift cards it bought are voided, and what was paid by card
--- is owed as a refund 'due' (Refunds), decided there. Managers and admins. (Rebuilt from 20261110150000 with
--- 20261110235500's patch.)
+-- is owed as a refund 'due' (Refunds), decided there. What the gift cards it bought have already paid for elsewhere is
+-- not given back: it comes off the card's part owed first, then off the wallet's part. Managers and admins. (Rebuilt
+-- from 20261110150000 with 20261110235500's patch.)
 create or replace function public.staff_store_order_cancel(p_order uuid, p_reason text, p_op text default null, p_approval text default null)
 returns jsonb
 language plpgsql security definer set search_path = public as $$
-declare o store_orders%rowtype; p payments%rowtype; who text; owed numeric; g store_gift_cards%rowtype;
+declare o store_orders%rowtype; p payments%rowtype; who text; owed numeric; g store_gift_cards%rowtype; kept numeric := 0; cut numeric;
 begin
   if not is_staff() then raise exception 'STAFF_ONLY' using errcode = '42501'; end if;
   if not is_admin() and not _staff_cap('can_refund') then raise exception 'CAP_REFUND' using errcode = '42501'; end if;
@@ -1682,9 +1696,30 @@ begin
   if o.status in ('delivered', 'cancelled', 'refunded') then raise exception 'STORE_STATUS' using errcode = 'P0001'; end if;
   select coalesce(nullif(btrim(s.display_name), ''), 'Staff') into who from staff s where s.user_id = auth.uid();
   perform _store_restock(o.id);
-  if o.wallet_paid > 0 then
+  /* the gift cards this order bought are issued once it is paid, so they may be spent before the goods go out: what
+     they paid for elsewhere stays spent and is kept back from the refund (store build review 2026-11-15: a 100 SAR card
+     spent in full and its order cancelled still owed the 100 SAR by card) */
+  select greatest(coalesce(-sum(m.amount), 0), 0) into kept
+    from store_gift_card_moves m join store_gift_cards gc on gc.id = m.card_id
+   where gc.order_id = o.id and m.kind in ('spend', 'back', 'refund');
+  select * into p from payments where id = o.payment_id;
+  /* owed: the card's money less what came back or is on its way, on the order's own Moyasar payment, as
+     staff_pay_refund_begin counts it: card refunds done (p.refunded), being sent, failed (for a retry), wallet
+     refunds done, and refunds already owed. Nothing when nothing is left; an order refunded whole before the cancel
+     is 'refunded', as pay_refund_done and staff_pay_refund_begin leave it (bug hunt 2026-11-10 (20261110235500): it
+     was p.amount - p.refunded, so those were owed a second time) */
+  if p.status in ('paid', 'partly_refunded') then
+    owed := round(p.amount - p.refunded - coalesce((select sum(x.amount) from payment_refunds x
+              where x.payment_id = p.id and x.provider_id is not distinct from p.provider_id
+                and ((x.status = 'pending' and x.dest = 'card') or (x.status = 'done' and x.dest = 'wallet')
+                     or x.status in ('due', 'failed'))), 0), 2);
+    cut := least(greatest(owed, 0), kept);
+    owed := owed - cut;
+    kept := kept - cut;
+  end if;
+  if o.wallet_paid - kept > 0 then
     perform set_config('mm.wallet_op', left(coalesce(p_op, who), 40), true);
-    perform _wallet_post(_wallet_owner(o.customer_id), o.wallet_paid, 'sale_back', null, null, null, 'ord-' || o.no, null);
+    perform _wallet_post(_wallet_owner(o.customer_id), o.wallet_paid - kept, 'sale_back', null, null, null, 'ord-' || o.no, null);
     perform set_config('mm.wallet_op', '', true);
   end if;
   /* a gift card's part back onto it; a code's use back for an order never paid; the gift cards it bought are no longer
@@ -1699,17 +1734,7 @@ begin
   end if;
   update store_orders set status = 'cancelled', cancel_reason = 'staff', expires_at = null where id = o.id returning * into o;
   insert into store_order_events (order_id, status, note, by_name) values (o.id, 'cancelled', left(nullif(btrim(coalesce(p_reason, '')), ''), 300), left(who, 60));
-  select * into p from payments where id = o.payment_id;
-  /* owed: the card's money less what came back or is on its way, on the order's own Moyasar payment, as
-     staff_pay_refund_begin counts it: card refunds done (p.refunded), being sent, failed (for a retry), wallet
-     refunds done, and refunds already owed. Nothing when nothing is left; an order refunded whole before the cancel
-     is 'refunded', as pay_refund_done and staff_pay_refund_begin leave it (bug hunt 2026-11-10 (20261110235500): it
-     was p.amount - p.refunded, so those were owed a second time) */
   if p.status in ('paid', 'partly_refunded') then
-    owed := round(p.amount - p.refunded - coalesce((select sum(x.amount) from payment_refunds x
-              where x.payment_id = p.id and x.provider_id is not distinct from p.provider_id
-                and ((x.status = 'pending' and x.dest = 'card') or (x.status = 'done' and x.dest = 'wallet')
-                     or x.status in ('due', 'failed'))), 0), 2);
     if owed > 0 then
       insert into payment_refunds (payment_id, provider_id, amount, status, reason, order_id, by_user, by_name)
       values (p.id, p.provider_id, owed, 'due', left(coalesce(p_reason, 'order cancelled'), 200), o.id, auth.uid(), left(who, 60));
@@ -2031,6 +2056,10 @@ begin
      or has_table_privilege('anon', 'public.store_stock_requests', 'select') or has_table_privilege('anon', 'public.store_return_requests', 'select')
      or has_table_privilege('authenticated', 'public.store_invoice_counter', 'update') then
     raise exception 'a store table that holds codes or phones is readable by anon';
+  end if;
+  if has_column_privilege('anon', 'public.store_reviews', 'decided_by', 'select') or has_column_privilege('anon', 'public.store_reviews', 'order_id', 'select')
+     or not has_column_privilege('anon', 'public.store_reviews', 'bought_month', 'select') then
+    raise exception 'anon reads more of a review than its own words, or not those';
   end if;
 end $chk$;
 
