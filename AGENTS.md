@@ -4083,7 +4083,11 @@ who we want it to be visible for and for how much time". Three parts: the databa
   `askHideA` / `askHideOf`; not in Stats' group-by-group drawings): hidden is Not approved, so the page, the big screen
   and the booking app drop it at their next poll (the page's `ver` moves) and Approve in Answers brings it back. A word
   hides every approved answer of the round on screen with its `norm` (one table update; the key read from an answer held
-  here, else by the words shown), a written answer goes by its id through `staff_ask_review`. No database change. Stats is `staff_ask_stats` (tiles, reach,
+  here, else by the words shown), a written answer goes by its id through `staff_ask_review`. No database change. An
+  answer still waiting has the same Hide in Answers, in the place of Reject (the user, 2026-11-15: "add a hide button
+  for non approved answers in asks"; `_askHideW`, class `ask-hide-w`): it is `staff_ask_review` rejected, the row leaves
+  Waiting at once and the keyboard moves to the next Hide; an approved answer keeps Reject there, and the bulk bar keeps
+  Reject N selected. Stats is `staff_ask_stats` (tiles, reach,
   by day and hour, gender, age, community, nationality, language) and one question group by group
   (`staff_ask_segment`). Strings: 336 keys named `ask*` travel with the part (`lang/staff-ask-<code>.json`).
 - **The answers report builder** (the user, 2026-11-14: "let me be able to extract a report with the answers for each ask

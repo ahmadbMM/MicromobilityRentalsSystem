@@ -441,8 +441,16 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await expect(answer(page, 116)).toHaveCount(0);
     await expect.poll(() => sent.length).toBe(1);
     expect(sent[0].body).toEqual({ p_ids: [116], p_status: 'approved' });
-    await answer(page, 117).getByRole('button', { name: 'Reject' }).click();
+    // a waiting answer has Hide (the eye with a line through it) where Reject was: hidden is Not approved, and the
+    // keyboard moves on to the next Hide
+    await expect(answer(page, 117).getByRole('button', { name: 'Reject' })).toHaveCount(0);
+    await expect(answer(page, 117).locator('.ask-a-acts button')).toHaveText(['Approve', 'Hide', 'Edit text', 'Delete']);
+    await expect(answer(page, 117).locator('.ask-hide-w')).toHaveAttribute('aria-label', 'Hide: free crypto visit my site');
+    await expect(answer(page, 117).locator('.ask-hide-w svg')).toHaveCount(1);
+    await answer(page, 117).locator('.ask-hide-w').focus();
+    await page.keyboard.press('Enter');
     await expect(answer(page, 117)).toHaveCount(0);
+    await expect(answer(page, 118).locator('.ask-hide-w')).toBeFocused();
     await expect.poll(() => sent.length).toBe(2);
     expect(sent[1].body).toEqual({ p_ids: [117], p_status: 'rejected' });
     await expect(pill('pending')).toHaveText('Waiting (3)');

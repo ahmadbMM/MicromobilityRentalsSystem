@@ -26606,7 +26606,7 @@ function _askARowHtml(a,Q,can){
   return`<div class="ask-a" data-ask-a="${esc(String(a.id))}" data-status="${esc(st)}">${can?_lsBox('askA',a.id,txt.slice(0,40)):''}
     <div class="ask-a-main"><div class="ask-a-txt"><bdi>${esc(txt)}</bdi></div><div class="am-meta ask-a-by">${who}</div></div>
     <div class="ask-a-marks"><span class="ask-chip ask-c-${esc(st)}">${esc(_askStTxt(st))}</span>${a.flagged?`<span class="ask-chip ask-c-flag">${esc(t('askFlagged'))}</span>`:''}${ASK_QUIZ.includes(q.kind)&&a.score!=null?`<span class="ask-chip ${a.score>0?'ask-c-done':'ask-c-rejected'}">${esc(t(a.score>0?'askRightMark':'askWrong'))}</span>`:''}${q.kind==='qa'&&a.answered?`<span class="ask-chip ask-c-done">${esc(t('askAnswered'))}</span>`:''}</div>
-    ${can?`<div class="ask-a-acts">${st!=='approved'?B('ask-ok','askApprove',['_askReview',[a.id],'approved'],st==='pending'):''}${st!=='rejected'?B('ask-no','askReject',['_askReview',[a.id],'rejected']):''}${st!=='pending'?B('ask-wait','askToWait',['_askReview',[a.id],'pending']):''}${ASK_TEXT.includes(q.kind)?B('ask-edit','askEditText',['_askEditText',a.id]):''}${q.kind==='qa'?B('ask-ans',a.answered?'askNotAnswered':'askMarkAnswered',['_askAnswered',a.id,!a.answered]):''}${B('ask-adel','deleteBtn',['_askDelA',a.id])}</div>`:''}
+    ${can?`<div class="ask-a-acts">${st!=='approved'?B('ask-ok','askApprove',['_askReview',[a.id],'approved'],st==='pending'):''}${st==='pending'?`<button type="button" class="btn-sm btn-secondary ask-hide-w" aria-label="${esc(t('askHideOf').replace('{0}',txt.slice(0,80)))}" data-on-click="${_on('_askHideW',a.id)}">${_askIc('hide',14)} ${esc(t('askHideA'))}</button>`:st!=='rejected'?B('ask-no','askReject',['_askReview',[a.id],'rejected']):''}${st!=='pending'?B('ask-wait','askToWait',['_askReview',[a.id],'pending']):''}${ASK_TEXT.includes(q.kind)?B('ask-edit','askEditText',['_askEditText',a.id]):''}${q.kind==='qa'?B('ask-ans',a.answered?'askNotAnswered':'askMarkAnswered',['_askAnswered',a.id,!a.answered]):''}${B('ask-adel','deleteBtn',['_askDelA',a.id])}</div>`:''}
   </div>`;
 }
 function _askAnsHtml(){
@@ -26653,6 +26653,16 @@ async function _askAEdit(ids,what,write){
 }
 // Approve, Reject or back to Waiting, one answer or many (staff_ask_review).
 function _askReview(ids,st){return _askAEdit(ids,a=>a.status===st?undefined:{...a,status:st},done=>_askDo('staff_ask_review',{p_ids:done,p_status:st},'ask review'));}
+// Hide on an answer still waiting (the user, 2026-11-15: "add a hide button for non approved answers in asks"), in the
+// place of Reject: hidden is Not approved, as Hide in Results is, so it never reaches the page, the big screen or the
+// booking app, and Approve brings it back. It leaves Waiting at once (the write's own paint) and the keyboard moves to
+// the next Hide.
+function _askHideW(id){
+  const sel='#ask-as .ask-hide-w',at=[...document.querySelectorAll(sel)].indexOf(document.activeElement);
+  const done=_askReview([id],'rejected');
+  if(at>=0){const B=[...document.querySelectorAll(sel)],n=B[Math.min(at,B.length-1)];if(n)n.focus({preventScroll:true});}
+  return done;
+}
 async function _askApproveAll(){
   const C=_ask().cur;if(!C||!C.ans)return;
   const ids=_askPendRows().filter(a=>!C.aq||String(a.question_id)===C.aq).map(a=>a.id);if(!ids.length)return;
