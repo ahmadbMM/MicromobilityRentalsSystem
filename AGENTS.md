@@ -485,6 +485,17 @@ blogger filter on Bookings (`sfFood`) and People (`amFood`); the account report'
 session sheets' tile (`_foodTile`). `_foodOn()` is false while the tag is missing or hidden, which takes it all off.
 The `fb`/`_fb` prefix was already taken (feedback), hence `food`. tests/food-blogger-tag.spec.ts.
 
+## The food worker tag (2026-11-15, migration 20261115150000)
+
+`tags` row `tag_food_worker` (slug `food_worker`, name "Food worker", locked, never auto-granted). The user: "looks the
+same as food blogger but has a worker between the fork and knife, but use a different color". It is the food blogger
+tag in everything, prefix `fwk`: `TAG_FWK`, `_FWK_SVG` (a worker between the fork and knife, viewBox 28x24, so
+`.fwk-mk` is 22px wide), `_fwkOn/_fwkCid/_fwkOf/_fwkRow/_fwkChip/_fwkTile`, `TAG_BRANDS.food_worker` (`svg:'fwk'`),
+chocolate brown `#8a4b1f` (dark-theme name `#d9a273`). `_fwkChip` follows every `_foodChip`, `_fwkRow` every
+`_foodRow`; beside the account's name it shares the `.food-nm` wrapper. Filters `sfFwk` / `amFwk`, report column and
+section `fwork`, words `fwkLabel`. The brown band rules leave out `.inf-row`, `.bdf-row` and `.food-row`: an
+influencer keeps magenta, a BD booking red, a food blogger purple; both marks still show. tests/food-worker-tag.spec.ts.
+
 ## The Petromin tag and Petromin Days (2026-10-12)
 
 The owner: "add a new petromin tag that gives its holders access only to petromin sessions through a new event
