@@ -3999,6 +3999,10 @@ async function _syncLoad(kind){
   let meta=null,list=null;
   await _idbDo('readonly',['meta',kind],(m,r)=>{const a=m.get(kind);a.onsuccess=()=>{meta=a.result;};const b=r.getAll();b.onsuccess=()=>{list=b.result;};return b;});
   if(!meta||meta.v!==SYNC_V||meta.url!==SUPABASE_URL||!meta.wm||!Array.isArray(list))return null;
+  // A copy that never finished a whole read (no fullAt) and is not part-way through one (no fill) is no copy: it is
+  // read whole (2026-11-15). Every whole read writes fullAt when it ends, so a meta with neither was written over a
+  // part-read store, and the deltas would only ever add what changed after it (a staff device showed 379 of 4,583).
+  if(!meta.fill&&!meta.fullAt)return null;
   const rows=new Map();list.forEach(r=>{if(r)rows.set(_syncKey(kind,r),r);});
   return{wm:meta.wm,fullAt:meta.fullAt||0,savedAt:Date.now(),rows,dirty:new Set(),gone:new Set(),all:false,fill:meta.fill||null,disk:true}; // fill: a whole read cut short, resumed from its last key (_syncFillRun); disk: checked against the server's count at its first answer (_syncCheck)
 }
@@ -4008,7 +4012,12 @@ async function _syncLoad(kind){
 function _syncSave(kind){
   clearTimeout(_syncSaveT[kind]);
   _syncSaveT[kind]=setTimeout(()=>{
-    const st=_sync[kind];if(!st)return;st.savedAt=Date.now();
+    const st=_sync[kind];if(!st)return;
+    // A whole read under way writes its own pages and its meta (fill), and saves the whole copy when it ends. A save
+    // queued before it began (by a sync answer, 1.5 s earlier) wrote the clock without the fill over the part-read
+    // store, and the next load took the pages it held for the whole list (2026-11-15).
+    if(st.fill)return;
+    st.savedAt=Date.now();
     const all=st.all,dirty=st.dirty,gone=st.gone;st.all=false;st.dirty=new Set();st.gone=new Set();
     _idbDo('readwrite',['meta',kind],(m,r)=>{
       if(all){r.clear();st.rows.forEach((row,k)=>r.put(row,k));}
@@ -4102,6 +4111,7 @@ async function _syncFillRun(kind,cut,gen){
       const list=[...st.rows.values()].sort(SYNC_ORDER[kind]),ordered=new Map();
       list.forEach(x=>ordered.set(_syncKey(kind,x),x));
       Object.assign(st,{rows:ordered,list,fill:null,fullAt:Date.now(),savedAt:Date.now()});
+      _syncCheckAt[kind]=Date.now(); // just read whole: the next count is due in ten minutes
     }
     _syncFillPut(kind,st,rows,gen);
     if(done){if(st.all)_syncSave(kind);return{data:st.list.slice(),error:null,whole:true,changed:null};} // a page the store did not take: the whole copy is written again
@@ -4233,9 +4243,9 @@ async function _syncRun(kind,cut){
   if(!list){list=[...rows.values()].sort(SYNC_ORDER[kind]);ordered=new Map();list.forEach(x=>ordered.set(_syncKey(kind,x),x));}
   const next=_sync[kind]={wm:d.now,fullAt:full?Date.now():st.fullAt,savedAt:full?0:st.savedAt,rows:ordered,list,
     all:full||!!(st&&st.all),dirty:full?new Set():new Set([...(st.dirty||[]),...changed]),gone:full?new Set():new Set([...(st.gone||[]),...gone])};
-  if(!full)gone.forEach(k=>next.dirty.delete(k));
+  if(!full)gone.forEach(k=>next.dirty.delete(k));else _syncCheckAt[kind]=Date.now();
   if(moved||(Date.now()-(next.savedAt||0))>30*60*1000)_syncSave(kind); // keep the clock fresh on disk too, without rewriting a row that did not change
-  if(st&&st.disk&&!full)_syncCheck(kind,cut); // the first answer from a copy read off the disk: is it all there?
+  if(st&&!full&&(st.disk||(Date.now()-(_syncCheckAt[kind]||0))>SYNC_CHECK_EVERY_MS))_syncCheck(kind,cut); // the first answer from a copy read off the disk, and every ten minutes after: is it all there?
   return{data:list.slice(),error:null,whole:true,changed:full?null:changed};
 }
 // A copy read off the disk is checked against the server's own count once, at its first answer (2026-11-10). A staff
@@ -4249,20 +4259,37 @@ const SYNC_COUNT={
   c:()=>sb.from('customers').select('id',{count:'exact',head:true}),
   ct:()=>sb.from('customer_tags').select('customer_id',{count:'exact',head:true}),
 };
+// Since 2026-11-15 ("make sure this error doesn't occur again because this is not the first time": a staff device showed
+// 379 of the 4,583 accounts) the count is taken again every ten minutes of a page's life and at Sync now, not only at
+// the first answer after a load. A check that could not be made (the count failed, or a whole read was under way) is
+// tried again a minute later instead of being spent. A short copy found by the check is read whole at most once in
+// half an hour per list, so a count that never agrees (a rule that hides rows from one read and not the other) costs
+// one whole read per half hour, not one per poll.
+const SYNC_CHECK_EVERY_MS=10*60*1000,SYNC_CHECK_RETRY_MS=60*1000,SYNC_CHECK_FIX_GAP_MS=30*60*1000;
+let _syncCheckAt={},_syncCheckFixAt={};
+// Sync now: the riders and the tags are counted now, and the bookings at their next answer. A staff entry point
+// (scripts/split-staff.mjs): Sync now is customer-half code, and the count stays in staff.js.
+function _syncRecount(){_syncCheckAt={};_syncCheckFixAt={};['c','ct'].forEach(k=>{if(_sync[k])_syncCheck(k);});}
 function _syncShort(count,held){return count-held>Math.max(5,Math.ceil(count*0.002));}
 function _syncCheck(kind,cut){
   if(!SYNC_COUNT[kind])return;
   const gen=_syncGen;
+  _syncCheckAt[kind]=Date.now();
+  const later=()=>{if(gen===_syncGen)_syncCheckAt[kind]=Date.now()-SYNC_CHECK_EVERY_MS+SYNC_CHECK_RETRY_MS;}; // not made: again in a minute
   Promise.resolve(SYNC_COUNT[kind](cut)).then(r=>{
     const st=_sync[kind];
-    if(!r||r.error||typeof r.count!=='number'||gen!==_syncGen||!S._staffAuthed||!st||st.fill||_syncFillP[kind])return;
+    if(gen!==_syncGen||!S._staffAuthed)return;
+    if(!r||r.error||typeof r.count!=='number'||!st||st.fill||_syncFillP[kind])return later();
     if(!_syncShort(r.count,st.rows.size))return;
+    if((Date.now()-(_syncCheckFixAt[kind]||0))<SYNC_CHECK_FIX_GAP_MS)return;
+    _syncCheckFixAt[kind]=Date.now();
     console.warn('sync: the copy of '+SYNC_TABLES[kind]+' holds '+st.rows.size+' of '+r.count+' rows; reading it whole');
+    clearTimeout(_syncSaveT[kind]);
     _sync[kind]=null; // no copy: the next read of this list is whole, and its first write empties the store
     if(kind==='q'){_qWholeAt=0;_syncLive.q=true;_syncFill('q',cut);return;} // the year behind the screen, laid on by a light reload once in (_syncFilled; _qWholeAt 0 makes it ask for the year)
     refDirty(); // the riders and the tags: read again now, not at the next full load
     Promise.resolve(_refInFlight).catch(()=>{}).then(()=>_refFetch()).then(()=>{try{if(S.view==='staff')_renderStaffTab(true);}catch(e){}},()=>{});
-  },()=>{});
+  },()=>later());
 }
 // The bookings from a list the sync answered: a row it did not bring this time keeps the entry built
 // from it before, when that entry still reads exactly as the row does (nothing on this device has
@@ -18893,6 +18920,7 @@ async function _syncNow(){
   let ok=false; // a reload that did not reach the server is no "Up to date": the roster on screen is the old copy (bug hunt 2026-11-10)
   try{
     await Promise.allSettled([_outboxFlush(),_bookOutboxFlush()]);
+    try{_syncRecount();}catch(_){} // and the copies are counted against the server again: a short one is read whole (2026-11-15)
     ok=(await _autoRefresh(true,true))!==false;
   }catch(_){}finally{S._syncing=false;_syncPaint();try{_updateConnUI();}catch(_){}}
   const left=_outboxCount()+_bookOutboxCount();

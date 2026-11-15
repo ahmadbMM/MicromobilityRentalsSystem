@@ -186,6 +186,17 @@ characters, no overlapping `/x/*`) and runs every excluded file through the midd
   IndexedDB version; `SYNC_V` still only says what the rows mean. Each answer also names the keys
   it brought (`changed`), and `_qEntries` keeps the entry objects of the bookings that did not move
   (when they still read exactly as their row), while the `S.queue` array is new every time.
+- **A short copy must never pass for a whole one (2026-11-10, again 2026-11-15).** Staff devices
+  twice showed a fraction of the accounts (105, then 379 of 4,583): the copy held only the rows that
+  changed after a whole read began, under a meta that called it whole. Four rules guard it, each
+  with a spec in tests/sync-copy-check.spec.ts: `_syncLoad` refuses a meta with neither `fill` nor
+  `fullAt` (it never finished a whole read); `_syncSave` writes nothing while `st.fill` is set (a
+  whole read writes its own pages and meta); `_syncCheck` counts each list against the server (one
+  HEAD request) at the first answer after a load, every ten minutes after (`SYNC_CHECK_EVERY_MS`;
+  a check it could not make is retried in a minute) and at Sync now (`_syncRecount`, a
+  `STAFF_ENTRY`), reading a short list whole at most once per half hour; and a page IndexedDB
+  refused marks the copy for a whole write. Any new path that writes the `meta` record must keep
+  these: it writes `fullAt` only for a copy that is whole, and `fill` while one is part-read.
 - **A customer's device is cheap to keep open.** It joins only `sessions` and `bikes` on the live
   channel (`_rtTables`), ignores bike events outside My Rides, reloads at most once per
   `RT_CUST_GAP_MS` (`_rtCustWait`), and in secure mode never asks for the staff-only lists

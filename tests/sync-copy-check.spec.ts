@@ -7,6 +7,10 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 // called the copy whole. What must hold: a copy read off the disk is counted against the server once, and a short one
 // is thrown away and read whole behind the screen; a whole copy is not read again; and a page the store refused is
 // written again with the whole copy, so the disk never holds less than the device showed.
+// 2026-11-15, the second time (a staff device showed 379 of 4,583 accounts, the user: "make sure this error doesn't
+// occur again because this is not the first time"): a copy on the disk that never finished a whole read is no copy; a
+// save queued before a whole read began does not write the clock over the part-read store; and the count is taken
+// again every ten minutes and at Sync now, so a copy that goes short in a page's life is found and read whole.
 const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*', 'access-control-expose-headers': 'content-range' };
 const json = (body: unknown) => ({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(body) });
 const WHOLE = '2999-12-31T00:00:00Z';
@@ -88,4 +92,64 @@ test('@staff pages the store refused are written again with the whole copy', asy
   await syncLoad(page);
   expect(await held(page)).toBe(N);
   expect(srv.wholeReads()).toBe(1); // the copy on the disk answered
+});
+
+const meta = (page: Page) => disk(page).then((d) => d && d.meta) as Promise<{ fill?: unknown; fullAt?: number; wm?: string } | null>;
+
+test('@staff a copy on the disk that never finished a whole read is read whole, whatever the count says', async ({ page }) => {
+  const srv = await open(page);
+  await syncLoad(page);
+  await whole(page).toBe(N);
+  // Five rows left and a meta with the clock but neither the fill nor the time of a whole read: what a save that ran
+  // during a whole read left on the device.
+  await page.evaluate(`new Promise(res=>{const rq=indexedDB.open('mm-sync-2');rq.onsuccess=()=>{const db=rq.result;const tx=db.transaction(['meta','c'],'readwrite');const m=tx.objectStore('meta'),s=tx.objectStore('c');${JSON.stringify(riders.slice(5).map((r) => r.id))}.forEach(k=>s.delete(k));const g=m.get('c');g.onsuccess=()=>{const v={...g.result};delete v.fullAt;delete v.fill;m.put(v,'c');};tx.oncomplete=()=>{db.close();res(true);};};})`);
+  await page.reload();
+  // the count agrees with the five (so only the rule on the meta can catch it)
+  await page.route(/\/rest\/v1\/customers\?/, (route: Route) => route.request().method() === 'HEAD'
+    ? route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json', 'content-range': '*/5' }, body: '' })
+    : route.fallback());
+  await waitForSb(page);
+  await syncLoad(page);
+  await expect.poll(() => held(page), { timeout: 15000 }).toBe(N);
+  expect(srv.wholeReads()).toBe(2);
+  await whole(page).toBe(N);
+});
+
+test('@staff a save queued before a whole read begins does not call the part-read copy whole', async ({ page }) => {
+  await open(page);
+  await syncLoad(page);
+  await whole(page).toBe(N);
+  const before = await meta(page);
+  expect(before && before.fullAt).toBeTruthy();
+  // A sync answer queues a save; before it fires, a whole read begins (its first pages in, the rest to come).
+  await page.evaluate(`(()=>{const st=_sync.c;_syncSave('c');_sync.c={...st,rows:new Map([...st.rows].slice(0,5)),list:null,fill:{wm:st.wm,after:'c004',at:Date.now()},fullAt:0,all:false,dirty:new Set(),gone:new Set()};})()`);
+  await page.waitForTimeout(2200); // past the save's 1.5 s
+  const after = await meta(page);
+  expect(after && after.fullAt).toBe(before && before.fullAt); // the whole copy's meta stands: no clock without the fill over it
+});
+
+test('@staff a copy that goes short in the page\'s life is found at the ten-minute count and at Sync now', async ({ page }) => {
+  const srv = await open(page);
+  await syncLoad(page);
+  expect(await held(page)).toBe(N);
+  const h0 = srv.heads.length;
+  const shorten = `(()=>{const st=_sync.c;[...st.rows.keys()].slice(5).forEach(k=>st.rows.delete(k));st.list=null;})()`;
+  // within ten minutes of the whole read: not counted
+  await page.evaluate(shorten);
+  await page.evaluate(`(async()=>{refDirty();await _refFetch();})()`);
+  expect(await held(page)).toBe(5);
+  expect(srv.heads.length).toBe(h0);
+  // ten minutes on: counted, found short, read whole
+  await page.evaluate(`(async()=>{_syncCheckAt.c=Date.now()-11*60*1000;refDirty();await _refFetch();})()`);
+  await expect.poll(() => held(page), { timeout: 15000 }).toBe(N);
+  expect(srv.heads.length).toBe(h0 + 1);
+  expect(srv.wholeReads()).toBe(2);
+  // short again: Sync now counts it at once, even inside the half hour after the last fix
+  await page.evaluate(shorten);
+  await page.evaluate(`(async()=>{refDirty();await _refFetch();})()`);
+  expect(await held(page)).toBe(5);
+  await page.evaluate(`_syncNow()`);
+  await expect.poll(() => held(page), { timeout: 15000 }).toBe(N);
+  expect(srv.wholeReads()).toBe(3);
+  await whole(page).toBe(N);
 });

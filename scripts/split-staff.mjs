@@ -37,6 +37,7 @@ export const STAFF_ENTRY = [
   'goStaff', 'openPinModal', '_staffHostGate', // the way in: these always fetch the staff half
   'renderVolunteers', '_vsfMount', '_vsfSave', '_cfVolMount', // 2026-11-05: the Volunteers section, and the two forms that ask for its block
   '_lkAdFill', // 2026-11-10: the booking's Locker card in the add-on picker (the picker is in the customer half)
+  '_syncRecount', // 2026-11-15: Sync now (customer half) has the copies of the riders and tags counted again
   'setStaffTab', 'renderStaffTabs', '_renderStaffTab', '_bgRenderStaffTab',
   'renderStaffQueue', 'renderSessions', 'renderBikes', 'renderHistory', 'renderAnalytics', 'setAnView', 'renderInventory',
   'renderCashier', 'renderCommunity', 'renderCustomers', 'renderBadgeRequests', 'renderWebsite', 'renderCatalog', 'renderWorkshop', 'renderMessages',
