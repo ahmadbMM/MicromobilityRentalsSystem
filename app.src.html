@@ -1076,7 +1076,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   sessOpened:'Session opened.',sessClosed:'Session closed.',sessDeleted:'Session deleted.',sessRestored:'Session restored.',sessPurgeBtn:'Delete permanently',sessPurgeAllBtn:'Delete all permanently',sessPurgeTitle:'Delete permanently?',sessPurgeBody:'The session is removed for good and cannot be restored.',sessPurgeAllBody:'All {0} deleted sessions are removed for good and cannot be restored.',sessPurged:'Session deleted permanently.',sessPurgedN:'Sessions deleted permanently: {0}.',sessPurgeKept:'Kept in Deleted sessions: it has bookings, sales or registrations on record.',sessPurgeKeptN:'Kept in Deleted sessions: {0} (they have bookings, sales or registrations on record).',
   totalStat:'Total',waitingStat:'Waiting',onBikeStat:'On bike',doneStat:'Done',ridersStat:'Riders',
   statNumRiders:'# of riders',statExpected:'Expected',statCompleted:'Completed',
-  cloneSessBtn:'Clone',cloneBtn:'Clone',
+  cloneSessBtn:'Clone',fcBtn:'Fast clone',cloneBtn:'Clone',
   kbNoWaiting:'No riders waiting',
   fixDupBtn:'Fix duplicate numbers',fixDupTitle:'Fix duplicate booking numbers',fixDupBody:'Found {0} duplicate booking number(s). Each duplicate will get a fresh unique number (the earliest booking keeps its number). Continue?',fixDupConfirm:'Renumber duplicates',fixDupNone:'No duplicate booking numbers found.',fixDupDone:'Renumbered {0} booking(s).',fixDupLog:'Fixed {0} duplicate booking number(s)',
   expTitle:'Export report',expChoose:'Choose a format',repOptCols:'Columns',repOptSections:'Sections',repOptFilters:'Filters',repOptSummary:'Summary tiles',repOptReset:'Reset',repKmEach:'One report per distance',repKmEachHint:'Each distance prints on its own, numbered from 1, with the columns and filters above.',selaRepBtn:'Report for Sela',selaRepHint:'Every booking, the waitlist included, with what Sela asked for: full name, email, birth date, distance and emergency contact. The details are read fresh at each tap.',selaColRel:'Relationship',selaWlKey:'Shaded rows are on the waitlist, in waitlist order.',repRunners:'Runners',expPdf:'PDF / print',expExcel:'Excel (CSV)',
@@ -1764,7 +1764,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   sessOpened:'تم فتح الجلسة.',sessClosed:'تم إغلاق الجلسة.',sessDeleted:'تم حذف الجلسة.',sessRestored:'تم استعادة الجلسة.',sessPurgeBtn:'حذف نهائي',sessPurgeAllBtn:'حذف الكل نهائياً',sessPurgeTitle:'حذف نهائي؟',sessPurgeBody:'ستُحذف الجلسة نهائياً ولا يمكن استعادتها.',sessPurgeAllBody:'ستُحذف كل الجلسات المحذوفة ({0}) نهائياً ولا يمكن استعادتها.',sessPurged:'تم حذف الجلسة نهائياً.',sessPurgedN:'الجلسات المحذوفة نهائياً: {0}.',sessPurgeKept:'بقيت في الجلسات المحذوفة: عليها حجوزات أو مبيعات أو تسجيلات مسجلة.',sessPurgeKeptN:'بقي في الجلسات المحذوفة: {0} (عليها حجوزات أو مبيعات أو تسجيلات مسجلة).',
   totalStat:'الكل',waitingStat:'بانتظار',onBikeStat:'على الدراجة',doneStat:'منتهٍ',ridersStat:'الراكبون',
   statNumRiders:'عدد الركّاب',statExpected:'متوقّع',statCompleted:'مكتمل',
-  cloneSessBtn:'نسخ',cloneBtn:'نسخ',
+  cloneSessBtn:'نسخ',fcBtn:'نسخ سريع',cloneBtn:'نسخ',
   kbNoWaiting:'لا يوجد ركاب في الانتظار',
   fixDupBtn:'إصلاح الأرقام المكررة',fixDupTitle:'إصلاح أرقام الحجوزات المكررة',fixDupBody:'تم العثور على {0} رقم حجز مكرر. سيحصل كل مكرر على رقم فريد جديد (يحتفظ الحجز الأقدم برقمه). متابعة؟',fixDupConfirm:'إعادة ترقيم المكررات',fixDupNone:'لا توجد أرقام حجوزات مكررة.',fixDupDone:'تمت إعادة ترقيم {0} حجز.',fixDupLog:'إصلاح {0} رقم حجز مكرر',
   repOptCols:'الأعمدة',repOptSections:'الأقسام',repOptFilters:'عوامل التصفية',repOptSummary:'بطاقات الملخص',repOptReset:'إعادة تعيين',repKmEach:'تقرير لكل مسافة',repKmEachHint:'تُطبع كل مسافة في تقرير مستقل مرقّم من 1، بالأعمدة وعوامل التصفية أعلاه.',selaRepBtn:'تقرير صلة',selaRepHint:'كل الحجوزات، ومعها قائمة الانتظار، بما طلبته صلة: الاسم الكامل والبريد الإلكتروني وتاريخ الميلاد والمسافة وجهة الاتصال للطوارئ. تُقرأ البيانات من جديد عند كل ضغطة.',selaColRel:'صلة القرابة',selaWlKey:'الصفوف المظللة في قائمة الانتظار، بترتيبها.',repRunners:'العدّاؤون',expTitle:'تصدير التقرير',expChoose:'اختر الصيغة',expPdf:'PDF / طباعة',expExcel:'إكسل (CSV)',
@@ -30659,6 +30659,69 @@ function cloneSession(id){
   renderSessions();
   setTimeout(()=>document.getElementById('sess-add-form')?.scrollIntoView({behavior:_sb(),block:'start'}),50);
 }
+// Fast clone (the user, 2026-11-15: "add a fast clone option on sessions that when clicked only asks for the date that the
+// clone wanted to be in and its status of it open closed etc."): no form, only the date and the status. The copy is Copy a
+// week's row (_n6sCopyRow: the same session with every bike type open, no invitation of its own, retired bikes left
+// behind, the announce time moved by as many days) with its Arabic name, and a Petromin night takes tonight's collection
+// rule as Clone does. Clash-checked like every new session; one Undo takes it away while nobody has booked it.
+const FC_STATUS=[['draft','n6sPubDraft'],['open','statusOpen'],['closed','statusClosed'],['full','statusFull'],['fbk','ssFbkLbl']];
+function _on__fc_bg(event,el){if(event.target===el)closeConfirm()}
+function fastCloneSession(id){
+  const s=_sessGet(id),host=document.getElementById('confirm-modal');
+  if(!s||!host||s.status==='deleted'||_isBlood(s)||!_editOk('sessions'))return; // a blood drive is set up on its own, as for Clone
+  const sts=FC_STATUS.filter(([k])=>k!=='draft'||_n6sCol('draft')),st=sts[0][0];
+  S._fc={id,st};
+  host.style.display='block';
+  host.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on__fc_bg',_EV,_EL)}"><div class="confirm-box fc-box" role="dialog" aria-modal="true" aria-labelledby="fc-t">
+    <div class="chrome-dh10"><div class="chrome-dt" id="fc-t">${esc(t('fcBtn'))} · ${esc(_evName(s))} · ${esc(shortDate(_ssDay(s)))}</div>
+      <button type="button" data-on-click="${_on('closeConfirm')}" aria-label="${esc(t('closeBtn'))}" class="chrome-xt x-close">&times;</button></div>
+    <div class="chrome-dbody fc-body">
+      <label class="filter-field fc-f" for="fc-date"><span class="filter-field-lbl">${esc(t('dateLabel'))}</span><input type="date" id="fc-date" min="${todayStr()}"></label>
+      <div class="filter-field fc-f"><span class="filter-field-lbl" id="fc-st-l">${esc(t('colStatus'))}</span>
+        <div class="toggle-group fc-st" role="group" aria-labelledby="fc-st-l">${sts.map(([k,l])=>`<button type="button" class="toggle-btn${k===st?' active':''}" aria-pressed="${k===st}" data-fc="${k}" data-on-click="${_on('_fcPick',_EL,k)}">${esc(t(l))}</button>`).join('')}</div></div>
+    </div>
+    <div class="chrome-dact"><button type="button" class="btn-secondary" data-on-click="${_on('closeConfirm')}">${esc(t('cancelBtn'))}</button><button type="button" class="btn-primary" id="fc-go" data-on-click="${_on('_fcGo')}">${esc(t('cloneSessBtn'))}</button></div>
+  </div></div>`;
+  setTimeout(()=>document.getElementById('fc-date')?.focus(),30);
+}
+function _fcPick(el,k){
+  if(!S._fc)return;S._fc.st=k;
+  (el&&el.parentElement?el.parentElement.querySelectorAll('.toggle-btn'):[]).forEach(b=>{const on=b.dataset.fc===k;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});
+}
+function _fcGo(){
+  const d=S._fc,el=document.getElementById('fc-date'),v=String(el&&el.value||'');
+  if(!d)return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v)){if(el){_fieldErr(el,t('errPickDate'));el.focus();}return;}
+  S._fc=null;closeConfirm();
+  return _busyRun('fast-clone',()=>_fcDo(d.id,v,d.st));
+}
+// The row Fast clone inserts: the session on that date, in that status (draft and full-no-waitlist are closed rows, marked).
+function _fcRow(s,date,st){
+  const row=_n6sCopyRow(s,Math.round((Date.parse(date+'T12:00:00Z')-Date.parse(_ssDay(s)+'T12:00:00Z'))/864e5));
+  if(s.title_ar)row.title_ar=s.title_ar;
+  const sl=parseSlots(row.bike_slots)||{};
+  if(_rideKind(s)==='petromin'){const a=(String(sl._time||'').match(/(\d{1,2}:\d{2})/)||[])[1];if(a&&!_collectLate(PETROMIN_COLLECT,a))sl._collect=PETROMIN_COLLECT;else delete sl._collect;}
+  if(st==='fbk')sl._fbk=1;
+  row.bike_slots=JSON.stringify(sl);
+  row.status=st==='open'||st==='full'?st:'closed';
+  if('draft' in row)row.draft=st==='draft';
+  return row;
+}
+async function _fcDo(id,date,st){
+  const s=_sessGet(id);if(!s||s.status==='deleted')return;
+  const rows=await _n6sClashGate([_fcRow(s,date,st)],null);if(!rows||!rows.length)return;
+  const made=await _n6sInsertAll(rows,'fast clone session');if(!made.length)return;
+  await _sessReload(made);
+  const msg=`${shortDate(date)} - ${t('toastSessionReady')}`;
+  toast(msg,'success');logAction(`${t('fcBtn')}: ${_evName(s)} ${shortDate(_ssDay(s))} → ${shortDate(date)}`);
+  pushUndo(`${t('fcBtn')} ${shortDate(date)}`,async()=>{
+    // Only while nobody has booked it since; a booked clone stays (its riders are real), as Copy a week's undo.
+    const empty=made.filter(x=>!(_qBySession().get(x)||[]).some(e=>e.status!=='removed'&&e.status!=='cancelled'));
+    if(empty.length&&_writeErr(await sb.from('sessions').delete().in('id',empty),'undo fast clone'))return false;
+    await _sessReload(made);renderSessions();
+  });
+  S.selSessionDetail=made[0];renderSessions();
+}
 // Picking a kind fills what the staffer has not typed from the last ride of that kind, without its date, name, words or price
 // (the staff review, 2026-10-28, S02-core2-14): admins make three to five rides a week and most fields repeat, and a Saturday ride
 // used to start as "gather 21:00, start 23:00". Not typed = still what the form opened with or what the last pick put there. The
@@ -32281,7 +32344,7 @@ function renderSessions(){
         return`<div class="sess-detail-actions">${_shTools('sh:sess',{title:_evName(_selSess),pri:`<button class="btn-sm btn-green" data-on-click="${_on("startEditSession",id)}">${t('editBtn2')}</button>`,vis:bk,grp:[
           ['rsGrpStatus',d.actions+(_n6sTimed(_selSess)&&_editOk('sessions')?mu('_n6sUntime',id,t('n6sUntimeBtn')):'')],
           ['shGrpShare',mu('_ssCopyLink',id,t('ssCopyLink'))+mu('_ssRidersCsv',id,t('ssRidersCsv'))],
-          ['shGrpSession',(_isBlood(_selSess)?'':`<button class="btn-sm btn-muted" data-on-click="${_on("cloneSession",id)}">${t('cloneSessBtn')}</button>`)+_rmSessBtn(id)+_n6tVolBtn(id)
+          ['shGrpSession',(_isBlood(_selSess)?'':`<button class="btn-sm btn-muted" data-on-click="${_on("cloneSession",id)}">${t('cloneSessBtn')}</button>`+(_editOk('sessions')?mu('fastCloneSession',id,t('fcBtn')):''))+_rmSessBtn(id)+_n6tVolBtn(id)
             +(_n6sSeriesOf(_selSess).length>1?mu('_n6sSelSeries',id,t('n6sSelSeries').replace('{0}',_n6sSeriesOf(_selSess).length)):'')+_n6rLinksHtml(_selSess)
             +(isAdmin()?`<button class="btn-sm btn-red" data-on-click="${_on("deleteSession",id)}" ${d.booked>0?`disabled title="${t('hasBookingsTitle')}"`:''}>${t('deleteBtn')}</button>`:'')],
         ]})}</div>`;

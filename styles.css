@@ -13562,6 +13562,8 @@ body.vol-mode #scan-modal .bkm-srow,body.vol-mode #scan-modal .bkm-srow6,body.vo
 #confirm-modal .n6s-edit .modal-footer{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;}
 #confirm-modal .n6s-copy-btns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px;}
 #confirm-modal .n6s-copy-wk{display:flex;flex-direction:column;gap:4px;}
+#confirm-modal .fc-body{display:flex;flex-direction:column;gap:14px;}
+#confirm-modal .fc-body input[type="date"]{max-width:240px;}
 #confirm-modal .n6s-clash{margin:0;padding-inline-start:18px;font-size:var(--sf-fs-sm);line-height:1.5;}
 #confirm-modal .n6s-clash-box .chrome-dact{flex-wrap:wrap;}
 #tab-sessions .n6s-badge-draft{border-style:dashed;}

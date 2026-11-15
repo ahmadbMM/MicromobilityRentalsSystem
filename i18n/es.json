@@ -2048,6 +2048,7 @@
   "statExpected": "Esperados",
   "statCompleted": "Completados",
   "cloneSessBtn": "Clonar",
+  "fcBtn": "Clonar rápido",
   "cloneBtn": "Clonar",
   "kbNoWaiting": "No hay ciclistas en espera",
   "fixDupBtn": "Corregir números duplicados",
