@@ -14325,6 +14325,7 @@ body.view-staff.view-staff :is(#pay-rf,#sto-dlg) .confirm-box{width:min(var(--sf
 .sto-pill:is(.sto-p-rt-open,.sto-p-rq-open,.sto-p-rv-pending){border-color:var(--orange);color:var(--orange);}
 .sto-pill:is(.sto-p-rt-approved,.sto-p-rq-done,.sto-p-rv-shown,.sto-p-out){border-color:var(--green);color:var(--green);}
 .sto-pill:is(.sto-p-rt-refused,.sto-p-rq-dropped,.sto-p-rv-hidden){color:var(--muted);}
+.sto-pill.sto-p-exp{border-color:var(--red);color:var(--red);}
 #tab-store .sto-low{color:var(--orange);}
 #tab-store .sto-zero{color:var(--red);}
 #tab-store .sto-row-s{cursor:default;}

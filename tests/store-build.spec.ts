@@ -596,3 +596,117 @@ test.describe('@staff:payments Settings: the delivery as charged, pickup days, s
     expect(by).not.toHaveProperty('site.legal.legalName');
   });
 });
+
+// The review's fixes (2026-11-15): a gift card's year and Extend (the lead's answer 3), the store's own addresses refused
+// as a slug (w2's addition), a gift card's face value, clearing sale dates without the licence, a return's refund less
+// the order's discount, bulk prices leaving gift cards alone, and a free-delivery threshold of 0 read as none.
+const ksaDay = (days = 0) => new Date(Date.now() + 3 * 3600e3 + days * 86400e3).toISOString().slice(0, 10);
+const atKsaEnd = (day: string) => new Date(Date.parse(day + 'T00:00:00+03:00') + 86400e3).toISOString(); // the instant after that day
+
+test.describe('@staff:store review fixes', () => {
+  test('gift cards: each says until when it is valid, an expired one reads Expired, and Extend moves its last day with the PIN', async ({ page }) => {
+    const seen = rpcCalls(page);
+    const card = (id: string, code: string, exp: string, x: Record<string, unknown> = {}) => ({ id, code, amount: 200, balance: 200, status: 'active', order_id: null, order_item_id: null,
+      note: null, issued_by: 'Spec Staff', created_at: NOW, expires_at: exp, voided_at: null, void_reason: null, ...x });
+    const later = ksaDay(40);
+    await staff(page, { store_gift_cards: [card('g1', 'GC-AB2C-DE3F-GH4J', atKsaEnd(ksaDay(200))), card('g2', 'GC-KM5N-PQ6R-ST7U', atKsaEnd(ksaDay(-3)))],
+      'rpc:staff_store_gift_card_extend': card('g2', 'GC-KM5N-PQ6R-ST7U', atKsaEnd(later)) });
+    await view(page, 'cards');
+    const sec = page.locator('#tab-store');
+    await expect(sec.locator('.sto-row')).toHaveCount(1); // Active: the expired one is under Expired
+    await expect(sec.locator('.sto-row', { hasText: 'GC-AB2C-DE3F-GH4J' })).toContainText('Valid until');
+    await sec.locator('.sto-pills .filter-pill', { hasText: 'Expired' }).click();
+    const row = sec.locator('.sto-row', { hasText: 'GC-KM5N-PQ6R-ST7U' });
+    await expect(row.locator('.sto-pill')).toHaveText('Expired');
+    await expect(row.locator('button', { hasText: 'Print' })).toHaveCount(0);
+    await row.locator('button', { hasText: 'Extend' }).click();
+    const dlg = page.locator('#sto-dlg [role="dialog"]');
+    await expect(dlg.locator('#sto-gc-until')).toHaveValue(String(Number(ksaDay(0).slice(0, 4)) + 1) + ksaDay(0).slice(4)); // a year from today, the card being past its own
+    await dlg.locator('#sto-gc-until').fill(ksaDay(0));
+    await dlg.locator('button', { hasText: /^Extend$/ }).click();
+    await expect(dlg.locator('.sto-err')).toContainText('from tomorrow');
+    expect(seen.filter((c) => c.name === 'staff_store_gift_card_extend')).toHaveLength(0);
+    await dlg.locator('#sto-gc-until').fill(later);
+    await dlg.locator('button', { hasText: /^Extend$/ }).click();
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_store_gift_card_extend').length).toBe(1);
+    expect(seen.find((c) => c.name === 'staff_store_gift_card_extend')!.body).toMatchObject({ p_id: 'g2', p_until: later, p_op: 'Spec Staff' });
+    await expect(page.locator('#toast-container')).toContainText('is valid until');
+    await sec.locator('.sto-pills .filter-pill', { hasText: 'Active' }).click();
+    await expect(sec.locator('.sto-row')).toHaveCount(2);
+  });
+
+  test('a gift card\'s new date the database refuses is said in the dialog', async ({ page }) => {
+    await staff(page, { store_gift_cards: [{ id: 'g1', code: 'GC-AB2C-DE3F-GH4J', amount: 50, balance: 50, status: 'active', order_id: null, note: null, issued_by: null, created_at: NOW, expires_at: atKsaEnd(ksaDay(30)), voided_at: null, void_reason: null }],
+      'rpc:staff_store_gift_card_extend': { __rpcError: { status: 400, code: 'P0001', message: 'STORE_GIFT_DATE' } } });
+    await view(page, 'cards');
+    await page.locator('#tab-store .sto-row button', { hasText: 'Extend' }).click();
+    await page.locator('#sto-dlg button', { hasText: /^Extend$/ }).click();
+    await expect(page.locator('#sto-dlg .sto-err')).toContainText('Pick a day from tomorrow');
+  });
+
+  test('the store\'s own addresses are refused as a slug, gift-card for anything but a gift card; a gift card\'s value is SAR 10 to 5,000', async ({ page }) => {
+    const pw = writes(page, 'store_products');
+    await staff(page, { store_products: [], store_variants: [] });
+    await view(page, 'products');
+    await page.locator('#tab-store button', { hasText: 'New product' }).click();
+    const pe = page.locator('#sto-pe [role="dialog"]');
+    await pe.locator('#sto-pe-name_en').fill('Saved');
+    await pe.locator('#sto-pe-price').fill('50');
+    await pe.locator('button', { hasText: /^Save$/ }).click();
+    await expect(pe.locator('.sto-err')).toContainText('one of the store’s own pages');
+    await pe.locator('#sto-pe-slug').fill('gift-card');
+    await pe.locator('button', { hasText: /^Save$/ }).click();
+    await expect(pe.locator('.sto-err')).toContainText('one of the store’s own pages');
+    expect(pw).toHaveLength(0);
+    await pe.locator('#sto-pe-kind').selectOption('gift_card');
+    await pe.locator('#sto-pe-price').fill('5');
+    await pe.locator('button', { hasText: /^Save$/ }).click();
+    await expect(pe.locator('.sto-err')).toContainText('SAR 10 to SAR 5,000');
+    expect(pw).toHaveLength(0);
+    await pe.locator('#sto-pe-price').fill('50');
+    await pe.locator('button', { hasText: /^Save$/ }).click();
+    await expect.poll(() => pw.length).toBe(1);
+    expect(pw[0].body).toMatchObject({ slug: 'gift-card', kind: 'gift_card', category: 'gift', price: 50 });
+  });
+
+  test('without the licence a sale\'s dates can still be cleared (the database allows it); the was price stays as it was', async ({ page }) => {
+    const pw = writes(page, 'store_products');
+    await staff(page, { store_products: [prod('pa', { name_en: 'City Bike', price: 2000, compare_at: 2300, sale_from: '2026-12-01', sale_to: '2026-12-15' })], store_variants: [], site_content: [] });
+    await view(page, 'products');
+    await page.locator('#tab-store .sto-prod', { hasText: 'City Bike' }).click();
+    const pe = page.locator('#sto-pe [role="dialog"]');
+    await pe.locator('#sto-pe-sale_from').fill('');
+    await pe.locator('#sto-pe-sale_to').fill('');
+    await pe.locator('button', { hasText: /^Save$/ }).click();
+    await expect.poll(() => pw.length).toBe(1);
+    expect(pw[0].body).toMatchObject({ compare_at: 2300, sale_from: null, sale_to: null });
+  });
+
+  test('a return\'s refund starts at the lines less their share of the order\'s discount', async ({ page }) => {
+    const o = order('o4', 1004, 'delivered', { subtotal: 300, discount: 30, discounts: [{ kind: 'promo', ref: 'EID10', amount: 30 }], total: 270,
+      items: [{ id: 11, name: 'Trail helmet', variant: 'M', qty: 1, unit_price: 200, product_id: 'pr1', variant_id: 'v1', image: null, slug: 'trail-helmet', gift_card: false, reviewed: false },
+        { id: 12, name: 'Bottle', variant: null, qty: 1, unit_price: 100, product_id: 'pr2', variant_id: 'v2', image: null, slug: 'bottle', gift_card: false, reviewed: false }] });
+    const rt = { id: 'rt1', order_id: 'o4', order_no: 1004, name: 'Huda Buyer', phone: '966501112233', kind: 'return', items: [{ item_id: 11, name: 'Trail helmet', variant: 'M', qty: 1, unit_price: 200 }],
+      reason: 'damaged', note: null, status: 'open', amount: null, staff_note: null, created_at: NOW, decided_at: null, decided_by: null };
+    await staff(page, { 'rpc:staff_store_orders': [o], 'rpc:staff_store_returns': [rt] });
+    const read = page.waitForResponse((r) => r.url().includes('/rpc/staff_store_orders'));
+    await view(page, 'returns');
+    await read;
+    await expect.poll(() => page.evaluate(`!!_stoOrder('o4')`)).toBe(true);
+    await page.locator('#tab-store .sto-row', { hasText: 'MM-1004' }).click();
+    await expect(page.locator('#sto-rt-amt')).toHaveValue('180'); // 200 of 300 in goods, 30 off: 200 x 270 / 300
+  });
+
+  test('bulk prices leave gift cards alone; a free-delivery threshold of 0 reads as none', async ({ page }) => {
+    await staff(page, { store_products: [prod('pa', { name_en: 'Bottle', price: 45 }), prod('pg', { name_en: 'Gift card', kind: 'gift_card', category: 'gift', slug: 'gift-card', price: 100 })], store_variants: [],
+      site_content: [{ key: 'store.delivery', value: { pickup: { on: true, fee: 0 }, jeddah: { on: true, fee: 20 }, ksa: { on: false }, freeOver: 0 }, updated_at: NOW }] });
+    await view(page, 'products');
+    await page.locator('#tab-store button', { hasText: 'Change prices' }).click();
+    await expect(page.locator('#tab-store .sto-prod-pick')).toHaveCount(1);
+    await page.locator('#tab-store button', { hasText: 'Select all' }).click();
+    await expect(page.locator('#sto-bulk-go')).toHaveText('Apply to 1');
+    await page.evaluate(`S.payView='settings';setStaffTab('payments')`);
+    await expect(page.locator('#tab-payments #ps-jfee')).toHaveValue('20');
+    await expect(page.locator('#tab-payments #ps-free')).toHaveValue('');
+  });
+});
