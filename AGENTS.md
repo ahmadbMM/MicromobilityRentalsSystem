@@ -2003,7 +2003,7 @@ Volunteers use their customer accounts on a portal of their own, `volunteer.micr
   teammate, by the shift in `entry_id`), `staff_lead`, `reward`, `ended` ("automatically" for actor `auto`). Spec:
   `tests/volunteers-rework.spec.ts`.
 - **The staff review's second part (2026-11-06, migration 20261107131000, functions `_n6w*`)**: Message team (WhatsApp one by one, `volunteer_shifts.reminded_at` through `staff_volunteer_reminded`, else kept on the device; there is no server push sender, so no automatic reminder), Invite (`volunteers.days`, weekday 0 = Sunday), the Applied pill, `volunteers.skills` / `whatsapp` (the portal's "Become a volunteer", `volunteer_apply`; `_vmWa` prefers that number), `briefed_at` (portal tick `volunteer_brief_ack`; a trigger clears it when the briefing changes), certificates in `volunteer_certs` (serial MMV-YYYY-NNNNN, a 12-character code; `volunteer_cert_check` is the one call the portal answers signed out, at `#check/<code>`), the bulk calls `staff_volunteer_shift_times_many` / `staff_volunteer_hours_add_many` (each row through the one-person function), a check-in or check-out that the network lost goes to the desk outbox as kind `vtimes` (bid `vol:<session>:<customer>`, not a booking: `_dqRun` does not re-read it as one), the Shifts view and roster filters in `ST_KEYS.volunteers` / `SV_SECS.volunteers` (`S.vdv`, `S.vmf` = the roster's `W.f`), and the Analytics view `volunteers` (`_n6wAnPaint`, its own narrow reads). Specs: `tests/volunteers-review2.spec.ts`.
-- **The volunteer report builder (2026-11-12, the user: "create me a report builder for volunteers in the volunteering sessions"; `_vbOpen`, in the part, in #print-opts-modal)**: Report builder on Shifts (the opportunity on screen), on Opportunities (the ones in its view, `_vbOpenView`) and in an opportunity's ⋯ menu. Staff tick one opportunity or several (not kept), start from a set (`VB_SETS`: team list, sign-in sheet with a Signature column, contacts, hours and rewards, T-shirts, profiles, feedback), pick 44 columns and six sections (summary, Each opportunity, Each role with `role_needs`, T-shirt sizes, Feedback, the list), 14 filters, 16 sorts and 8 groupings (by opportunity by default); kept per device (`cq_vol_rep_opts`). The summary, Each opportunity and Each role count every status the other filters keep (`_vbOk(r,o,true)`), the rest follow Status too. Shifts, hours, VL- codes, certificates, feedback and accounts (both emergency contacts) are read fresh at each tap (`_vbLoad`; the stub ignores `.in()`, so it filters by session itself). PDF `printVolReport`, Excel `exportVolXlsx` through `_vrbXlsx`, which now sits in the desk core because the vlap part and this one both call it. Keys `zb*`. Spec: `tests/volunteer-report.spec.ts`.
+- **The volunteer report builder (2026-11-12, the user: "create me a report builder for volunteers in the volunteering sessions"; `_vbOpen`, in the part, in #print-opts-modal)**: Report builder on Shifts (the opportunity on screen), on Opportunities (the ones in its view, `_vbOpenView`) and in an opportunity's ⋯ menu. Staff tick one opportunity or several (not kept), start from a set (`VB_SETS`: team list, sign-in sheet with a Signature column, contacts, hours and rewards, T-shirts, profiles, feedback), pick 47 columns and six sections (summary, Each opportunity, Each role with `role_needs`, T-shirt sizes, Feedback, the list), 14 filters, 16 sorts and 8 groupings (by opportunity by default); kept per device (`cq_vol_rep_opts`). The summary, Each opportunity and Each role count every status the other filters keep (`_vbOk(r,o,true)`), the rest follow Status too. Shifts, hours, VL- codes, certificates, feedback and accounts (both emergency contacts) are read fresh at each tap (`_vbLoad`; the stub ignores `.in()`, so it filters by session itself). PDF `printVolReport`, Excel `exportVolXlsx` through `_vrbXlsx`, which now sits in the desk core because the vlap part and this one both call it. Keys `zb*`. Spec: `tests/volunteer-report.spec.ts`.
 
 ## The volunteer certificate is one design, in `certificate/` (2026-11-08, migration 20261108220000)
 
@@ -2162,6 +2162,38 @@ scope: the report's "Later" list, dark mode, push (stays off), anything legal.
   reason, the optional rating after the event, the motive question, decline reasons in Updates, the thank-you and the
   impact on past shifts, the team's year totals, hours with no session, and an offline screen from a cached shell (D11).
   The certificate there needs its own `npm run sync:cert`, the seven placeholders filled and the skills step in `fitCert`.
+
+## Staff rate volunteers (2026-11-15, migration 20261115230000)
+
+The user: "add a feature that allows staff to rate volunteers and for them to have an average rating and add comments with
+the rating, request a rating for each volunteer after each volunteering experience".
+- **Database**: `volunteer_ratings`, one row per shift worked (`shift_id` unique): `rating` 1-5, `comment` <= 500, `rated_by`
+  (the staff name, `_vol_op`), `rated_by_user`. Policy "staff read" (`_staff_mod('volunteers')`); no client writes it. The one
+  writer is `staff_volunteer_rate(p_session, p_customer, p_rating, p_comment)`: the change right on Volunteers, the shift must be
+  worked (`done` or checked in, else `VOL_NOT_WORKED`), a second call rewrites in place, `p_rating` null removes it; logged as
+  `staff_rate`; answers the row and the person's `avg` / `n`. A rating follows its shift (trigger
+  `volunteer_shifts_rating_follow`, as the volunteers' own feedback does), and `_purge_old` deletes an anonymised account's
+  ratings. **Volunteers never see them**: no `volunteer_*` function reads the table, and the privacy notice (2026-11-15) says
+  only staff see the ratings and comments.
+- **Staff** (part `volunteers`, words `zvRt*`, `zbColS*`, CSS `.vrt-*` after the feedback window's): read with the section
+  (`W.rates`, `VM_RT_COLS`); a database without the table sets `W.rtOff` and nothing below shows (`_vrtOn`). The average is
+  worked out from the rows held (`_vrtAvg`), never stored.
+  - **The request**: a volunteer's part is over (`_vrtOver`: done, checked out, or the opportunity's day has passed in Saudi
+    time) and unrated -> **Rate** is their row's main action, the opportunity's heading has **Rate the team (N)**
+    (`_vrtOpen(sid,'')`, everyone waiting, one window), Shifts names the other opportunities of the last 30 days still waiting
+    (`_vrtOtherHtml`, `VRT_DAYS`), and the Shifts tab's count adds them (`_vrtDueN`). Older ones are rated from their row or
+    the person's window.
+  - **The rating window** (`_vrtOpen(sid,cid,back)`): per person a radio group of five stars (`.vrt-s`, `_rgKey` arrows) and an
+    optional comment; only the people given stars are saved, one call each; Remove rating asks first. `back` returns to the
+    person's window.
+  - **Where the average shows**: People's Rating column (`.vm-tbl.vm-rt`, sorts Highest / Lowest rated, the Advanced filter
+    Rating: 4 and above, Under 3, Not rated; CSV columns), an offer waiting for an answer, and the person's window (each
+    rating with its comment, who gave it and when, and the opportunities still waiting). A rated row on Shifts shows its stars
+    (`_vrtRowHtml`, the comment on hover; a tap changes it).
+  - The report builder: columns Staff rating, Staff comment, Average staff rating, the sort Highest staff rating and the set
+    Staff ratings (`staffrt`). Activity names `staff_rate`.
+- The stub answers `volunteer_ratings` as a database without it (`TABLES_NOT_YET_IN_DB`) unless a spec gives rows; spec
+  `tests/volunteer-ratings.spec.ts`.
 
 ## Arena Heros Hybrid Race (2026-10-28)
 The owner: "create a session for this event and make it exclusive for community members Arena Heros Hybrid Race": Fri 6 Nov
