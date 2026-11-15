@@ -1234,6 +1234,8 @@
     /* VIP's letters sit smaller than the other marks (the owner, 2026-09-30: "make the vip font smaller"). */
     .tag-logo-vip{width:20px;height:10px;vertical-align:-1px;-webkit-mask-image:url('assets/tag-vip.svg');mask-image:url('assets/tag-vip.svg');}
     .am-chip.tag-brand{color:#fff;gap:6px;padding:3px 10px;}
+    /* Every tag chip has soft corners instead of round ends (the user's pick on the tag redesign page, 2026-11-15). */
+    .am-chip.tag-chip{border-radius:var(--sf-r-xs);}
     /* The Petromin tag (2026-10-12): Petromin's logo in its own colours, on the white chip. */
     .tag-img{display:inline-block;flex-shrink:0;height:16px;width:auto;vertical-align:-4px;}
     /* The Victory Lap tag's logo is white: on a tag button (picked or not) it sits on its own black plate,
@@ -1246,7 +1248,7 @@
     /* The blacklist tag (2026-09-27): black, the white mark struck through by a no-entry ring. */
     .tag-banned{position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;vertical-align:-5px;}
     .tag-banned .tag-logo{width:12px;height:10px;vertical-align:0;}
-    .tag-ban-sign{position:absolute;inset:0;width:20px;height:20px;color:currentColor;}
+    .tag-ban-sign{position:absolute;inset:0;width:20px;height:20px;color:#ff4d4f;}
     .tag-ban-warn{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:9px 12px;border-radius:var(--sf-r-ctl);background:#0b0b0b;color:#fff;font-size:var(--sf-fs-xs);font-weight:600;line-height:1.4;}
     .tag-ban-warn.tag-rival-warn{background:#a33b2e;} /* Community or Petromin, never both (2026-10-12) */
     .confirm-box .tag-ban-opt{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:var(--sf-fs-sm);font-weight:600;letter-spacing:0;text-transform:none;color:var(--text);cursor:pointer;}
@@ -11791,18 +11793,18 @@ html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.bdf-row{box-shadow:in
 html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) .bdf-row .rider-name{color:#ff8a9a;}
 body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).cm-row-mark .rider-name{color:#0a5c2e;}
 html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).cm-row-mark .rider-name{color:#6ee7a0;}
-.queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset 6px 0 0 #0c7a3d;}
-html[dir="rtl"] .queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset -6px 0 0 #0c7a3d;}
-body.view-staff .queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset 6px 0 0 #0c7a3d,inset 10px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset -6px 0 0 #0c7a3d,inset -10px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-table tbody tr.cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #0c7a3d,inset 14px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #0c7a3d,inset -14px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-.q-card.cm-row-mark,.ho-row.cm-row-mark{box-shadow:inset 6px 0 0 #0c7a3d;}
-html[dir="rtl"] .q-card.cm-row-mark,html[dir="rtl"] .ho-row.cm-row-mark{box-shadow:inset -6px 0 0 #0c7a3d;}
-body.view-staff .queue-mobile-view .q-card.cm-row-mark{box-shadow:inset 6px 0 0 #0c7a3d,inset 10px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.cm-row-mark{box-shadow:inset -6px 0 0 #0c7a3d,inset -10px 0 0 var(--rs-edge,transparent);}
-body.view-staff .queue-mobile-view .q-card.cm-row-mark.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #0c7a3d,inset 14px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #0c7a3d,inset -14px 0 0 var(--rs-edge,transparent);}
+.queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset 3px 0 0 #0c7a3d;}
+html[dir="rtl"] .queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset -3px 0 0 #0c7a3d;}
+body.view-staff .queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset 3px 0 0 #0c7a3d,inset 7px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset -3px 0 0 #0c7a3d,inset -7px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0c7a3d,inset 11px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0c7a3d,inset -11px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+.q-card.cm-row-mark,.ho-row.cm-row-mark{box-shadow:inset 3px 0 0 #0c7a3d;}
+html[dir="rtl"] .q-card.cm-row-mark,html[dir="rtl"] .ho-row.cm-row-mark{box-shadow:inset -3px 0 0 #0c7a3d;}
+body.view-staff .queue-mobile-view .q-card.cm-row-mark{box-shadow:inset 3px 0 0 #0c7a3d,inset 7px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.cm-row-mark{box-shadow:inset -3px 0 0 #0c7a3d,inset -7px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.cm-row-mark.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0c7a3d,inset 11px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0c7a3d,inset -11px 0 0 var(--rs-edge,transparent);}
 /* and the rider's cell (the whole phone card) carries the community's pattern, as on the community's ride cards,
    fading into the state's colour so the state still reads */
 body.view-staff .queue-table tbody tr td.cm-cell,body.view-staff .queue-table tbody tr:hover td.cm-cell{background:linear-gradient(to right,var(--rs-bg,var(--s1)) 0 25%,color-mix(in srgb,var(--rs-bg,var(--s1)) 55%,transparent) 100%),url('assets/mm-pattern.svg') right -10px top -8px/80px auto repeat var(--rs-bg,var(--s1));}
@@ -11817,104 +11819,107 @@ html[dir="rtl"] body.view-staff .queue-table tbody tr.bdf-row.cm-row-mark td:fir
 html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.bdf-row.cm-row-mark{box-shadow:inset -6px 0 0 #c8102e,inset -10px 0 0 var(--rs-edge,transparent);}
 :root body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).bdf-row.cm-row-mark .rider-name{color:#a50d26;}
 html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).bdf-row.cm-row-mark .rider-name{color:#ff8a9a;}
+/* The tag bands (the community's green, the influencer's, the food blogger's and the food worker's) are 3px wide since the
+   tag redesign (the user's pick, 2026-11-15; they were 6px); a BD booking's red and a partner's rose keep their widths. */
 /* ══ THE INFLUENCER TAG (the owner, 2026-11-12) ═════════════════════════════════════════════════════════
-   Staff only. A white megaphone on magenta after the holder's name (.inf-mk, _infChip) and on its tag chip (.tag-svg),
-   and a magenta band down the start edge of their row, phone card or hand-over row (_infRow): inside a community
+   Staff only. A white star on plum (the tag redesign, 2026-11-15; it was a megaphone on magenta) after the holder's
+   name (.inf-mk, _infChip) and on its tag chip (.tag-svg), and a plum band down the start edge of their row, phone card or hand-over row (_infRow): inside a community
    member's green band and outside a partner's rose stripe, and a Blood Donation booking's red band takes its place.
-   The name turns magenta unless the community's green or the BD red already dresses it. */
-.inf-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#c2255c;color:#fff;border-radius:var(--sf-r-xs);vertical-align:middle;}
+   The name turns plum unless the community's green or the BD red already dresses it. */
+.inf-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#862e9c;color:#fff;border-radius:var(--sf-r-xs);vertical-align:middle;}
 .inf-ico{display:block;width:14px;height:14px;}
 .tag-svg .inf-ico{width:16px;height:16px;}
-.queue-table tbody tr.inf-row td:first-child,.q-card.inf-row,.ho-row.inf-row{box-shadow:inset 6px 0 0 #c2255c;}
-html[dir="rtl"] .queue-table tbody tr.inf-row td:first-child,html[dir="rtl"] .q-card.inf-row,html[dir="rtl"] .ho-row.inf-row{box-shadow:inset -6px 0 0 #c2255c;}
-.q-card.inf-row.cm-row-mark,.ho-row.inf-row.cm-row-mark{box-shadow:inset 6px 0 0 #0c7a3d,inset 12px 0 0 #c2255c;}
-html[dir="rtl"] .q-card.inf-row.cm-row-mark,html[dir="rtl"] .ho-row.inf-row.cm-row-mark{box-shadow:inset -6px 0 0 #0c7a3d,inset -12px 0 0 #c2255c;}
-body.view-staff .queue-table tbody tr.inf-row td:first-child{box-shadow:inset 6px 0 0 #c2255c,inset 10px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.inf-row td:first-child{box-shadow:inset -6px 0 0 #c2255c,inset -10px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-table tbody tr.inf-row.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #c2255c,inset 14px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.inf-row.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #c2255c,inset -14px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-table tbody tr.inf-row.cm-row-mark td:first-child{box-shadow:inset 6px 0 0 #0c7a3d,inset 12px 0 0 #c2255c,inset 16px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.inf-row.cm-row-mark td:first-child{box-shadow:inset -6px 0 0 #0c7a3d,inset -12px 0 0 #c2255c,inset -16px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-table tbody tr.inf-row.cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #0c7a3d,inset 16px 0 0 #c2255c,inset 20px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.inf-row.cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #0c7a3d,inset -16px 0 0 #c2255c,inset -20px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-mobile-view .q-card.inf-row{box-shadow:inset 6px 0 0 #c2255c,inset 10px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.inf-row{box-shadow:inset -6px 0 0 #c2255c,inset -10px 0 0 var(--rs-edge,transparent);}
-body.view-staff .queue-mobile-view .q-card.inf-row.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #c2255c,inset 14px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.inf-row.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #c2255c,inset -14px 0 0 var(--rs-edge,transparent);}
-body.view-staff .queue-mobile-view .q-card.inf-row.cm-row-mark{box-shadow:inset 6px 0 0 #0c7a3d,inset 12px 0 0 #c2255c,inset 16px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.inf-row.cm-row-mark{box-shadow:inset -6px 0 0 #0c7a3d,inset -12px 0 0 #c2255c,inset -16px 0 0 var(--rs-edge,transparent);}
-body.view-staff .queue-mobile-view .q-card.inf-row.cm-row-mark.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #0c7a3d,inset 16px 0 0 #c2255c,inset 20px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.inf-row.cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #0c7a3d,inset -16px 0 0 #c2255c,inset -20px 0 0 var(--rs-edge,transparent);}
-body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).inf-row:not(.cm-row-mark):not(.bdf-row) .rider-name{color:#a61e4d;}
+.queue-table tbody tr.inf-row td:first-child,.q-card.inf-row,.ho-row.inf-row{box-shadow:inset 3px 0 0 #862e9c;}
+html[dir="rtl"] .queue-table tbody tr.inf-row td:first-child,html[dir="rtl"] .q-card.inf-row,html[dir="rtl"] .ho-row.inf-row{box-shadow:inset -3px 0 0 #862e9c;}
+.q-card.inf-row.cm-row-mark,.ho-row.inf-row.cm-row-mark{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 #862e9c;}
+html[dir="rtl"] .q-card.inf-row.cm-row-mark,html[dir="rtl"] .ho-row.inf-row.cm-row-mark{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 #862e9c;}
+body.view-staff .queue-table tbody tr.inf-row td:first-child{box-shadow:inset 3px 0 0 #862e9c,inset 7px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.inf-row td:first-child{box-shadow:inset -3px 0 0 #862e9c,inset -7px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.inf-row.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #862e9c,inset 11px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.inf-row.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #862e9c,inset -11px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.inf-row.cm-row-mark td:first-child{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 #862e9c,inset 10px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.inf-row.cm-row-mark td:first-child{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 #862e9c,inset -10px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.inf-row.cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0c7a3d,inset 10px 0 0 #862e9c,inset 14px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.inf-row.cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0c7a3d,inset -10px 0 0 #862e9c,inset -14px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-mobile-view .q-card.inf-row{box-shadow:inset 3px 0 0 #862e9c,inset 7px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.inf-row{box-shadow:inset -3px 0 0 #862e9c,inset -7px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.inf-row.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #862e9c,inset 11px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.inf-row.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #862e9c,inset -11px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.inf-row.cm-row-mark{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 #862e9c,inset 10px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.inf-row.cm-row-mark{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 #862e9c,inset -10px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.inf-row.cm-row-mark.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0c7a3d,inset 10px 0 0 #862e9c,inset 14px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.inf-row.cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0c7a3d,inset -10px 0 0 #862e9c,inset -14px 0 0 var(--rs-edge,transparent);}
+body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).inf-row:not(.cm-row-mark):not(.bdf-row) .rider-name{color:#862e9c;}
 /* ══ THE IMC TAG (the owner, 2026-11-13) ═════════════════════════════════════════════════════════════════
    IMC's arch and letters (assets/tag-imc.png) on a white plate edged in IMC blue, after the holder's name on their
    bookings (.imc-mk, _imcChip). White in both themes: the blue reads faintly on the dark one without it. */
 .imc-mk{display:inline-flex;align-items:center;flex:none;margin-inline-start:6px;height:18px;padding:0 4px;box-sizing:border-box;background:#fff;border:1px solid #0e5592;border-radius:var(--sf-r-xs);vertical-align:middle;}
 .imc-mk img{display:block;height:12px;width:auto;}
-html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).inf-row:not(.cm-row-mark):not(.bdf-row) .rider-name{color:#f783ac;}
+html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).inf-row:not(.cm-row-mark):not(.bdf-row) .rider-name{color:#e599f7;}
 /* ══ THE FOOD BLOGGER TAG (the owner, 2026-11-14) ════════════════════════════════════════════════════════
-   Staff only. A white fork and knife on aubergine purple after the holder's name (.food-mk, _foodChip), beside the
-   account's name on Accounts, Members and the account page (.food-nm), and on its tag chip (.tag-svg). A purple band
-   down the start edge of their row, phone card or hand-over row (_foodRow), laid like the influencer's magenta: inside
-   a member's green, outside a partner's rose. An influencer keeps the magenta band and a BD booking its red (both are
-   left out here), and the name turns purple unless green, red or magenta already dresses it. */
-.food-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#6f2dbd;color:#fff;border-radius:var(--sf-r-xs);vertical-align:middle;}
+   Staff only. A white fork and knife cut out of a speech bubble, on teal (the tag redesign, 2026-11-15; it was a plain
+   fork and knife on aubergine purple), after the holder's name (.food-mk, _foodChip), beside the account's name on
+   Accounts, Members and the account page (.food-nm), and on its tag chip (.tag-svg). A teal band down the start edge
+   of their row, phone card or hand-over row (_foodRow), laid like the influencer's plum: inside a member's green,
+   outside a partner's rose. An influencer keeps the plum band and a BD booking its red (both are left out here), and
+   the name turns teal unless green, red or plum already dresses it. */
+.food-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#0b7285;color:#fff;border-radius:var(--sf-r-xs);vertical-align:middle;}
 .food-ico{display:block;width:14px;height:14px;}
 .tag-svg .food-ico{width:16px;height:16px;}
 .food-nm{display:flex;align-items:center;min-width:0;}
 .food-nm>.am-cust-name{flex:0 1 auto;min-width:0;}
-.queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row) td:first-child,.q-card.food-row:not(.inf-row):not(.bdf-row),.ho-row.food-row:not(.inf-row):not(.bdf-row){box-shadow:inset 6px 0 0 #6f2dbd;}
-html[dir="rtl"] .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row) td:first-child,html[dir="rtl"] .q-card.food-row:not(.inf-row):not(.bdf-row),html[dir="rtl"] .ho-row.food-row:not(.inf-row):not(.bdf-row){box-shadow:inset -6px 0 0 #6f2dbd;}
-.q-card.food-row:not(.inf-row):not(.bdf-row).cm-row-mark,.ho-row.food-row:not(.inf-row):not(.bdf-row).cm-row-mark{box-shadow:inset 6px 0 0 #0c7a3d,inset 12px 0 0 #6f2dbd;}
-html[dir="rtl"] .q-card.food-row:not(.inf-row):not(.bdf-row).cm-row-mark,html[dir="rtl"] .ho-row.food-row:not(.inf-row):not(.bdf-row).cm-row-mark{box-shadow:inset -6px 0 0 #0c7a3d,inset -12px 0 0 #6f2dbd;}
-body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row) td:first-child{box-shadow:inset 6px 0 0 #6f2dbd,inset 10px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row) td:first-child{box-shadow:inset -6px 0 0 #6f2dbd,inset -10px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row).ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #6f2dbd,inset 14px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row).ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #6f2dbd,inset -14px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row).cm-row-mark td:first-child{box-shadow:inset 6px 0 0 #0c7a3d,inset 12px 0 0 #6f2dbd,inset 16px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row).cm-row-mark td:first-child{box-shadow:inset -6px 0 0 #0c7a3d,inset -12px 0 0 #6f2dbd,inset -16px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row).cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #0c7a3d,inset 16px 0 0 #6f2dbd,inset 20px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row).cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #0c7a3d,inset -16px 0 0 #6f2dbd,inset -20px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row){box-shadow:inset 6px 0 0 #6f2dbd,inset 10px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row){box-shadow:inset -6px 0 0 #6f2dbd,inset -10px 0 0 var(--rs-edge,transparent);}
-body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row).ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #6f2dbd,inset 14px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row).ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #6f2dbd,inset -14px 0 0 var(--rs-edge,transparent);}
-body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row).cm-row-mark{box-shadow:inset 6px 0 0 #0c7a3d,inset 12px 0 0 #6f2dbd,inset 16px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row).cm-row-mark{box-shadow:inset -6px 0 0 #0c7a3d,inset -12px 0 0 #6f2dbd,inset -16px 0 0 var(--rs-edge,transparent);}
-body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row).cm-row-mark.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #0c7a3d,inset 16px 0 0 #6f2dbd,inset 20px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row).cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #0c7a3d,inset -16px 0 0 #6f2dbd,inset -20px 0 0 var(--rs-edge,transparent);}
-body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).food-row:not(.inf-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:#6f2dbd;}
-html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).food-row:not(.inf-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:#b794f6;}
+.queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row) td:first-child,.q-card.food-row:not(.inf-row):not(.bdf-row),.ho-row.food-row:not(.inf-row):not(.bdf-row){box-shadow:inset 3px 0 0 #0b7285;}
+html[dir="rtl"] .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row) td:first-child,html[dir="rtl"] .q-card.food-row:not(.inf-row):not(.bdf-row),html[dir="rtl"] .ho-row.food-row:not(.inf-row):not(.bdf-row){box-shadow:inset -3px 0 0 #0b7285;}
+.q-card.food-row:not(.inf-row):not(.bdf-row).cm-row-mark,.ho-row.food-row:not(.inf-row):not(.bdf-row).cm-row-mark{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 #0b7285;}
+html[dir="rtl"] .q-card.food-row:not(.inf-row):not(.bdf-row).cm-row-mark,html[dir="rtl"] .ho-row.food-row:not(.inf-row):not(.bdf-row).cm-row-mark{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 #0b7285;}
+body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row) td:first-child{box-shadow:inset 3px 0 0 #0b7285,inset 7px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row) td:first-child{box-shadow:inset -3px 0 0 #0b7285,inset -7px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row).ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0b7285,inset 11px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row).ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0b7285,inset -11px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row).cm-row-mark td:first-child{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 #0b7285,inset 10px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row).cm-row-mark td:first-child{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 #0b7285,inset -10px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row).cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0c7a3d,inset 10px 0 0 #0b7285,inset 14px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.food-row:not(.inf-row):not(.bdf-row).cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0c7a3d,inset -10px 0 0 #0b7285,inset -14px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row){box-shadow:inset 3px 0 0 #0b7285,inset 7px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row){box-shadow:inset -3px 0 0 #0b7285,inset -7px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row).ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0b7285,inset 11px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row).ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0b7285,inset -11px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row).cm-row-mark{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 #0b7285,inset 10px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row).cm-row-mark{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 #0b7285,inset -10px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row).cm-row-mark.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0c7a3d,inset 10px 0 0 #0b7285,inset 14px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.food-row:not(.inf-row):not(.bdf-row).cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0c7a3d,inset -10px 0 0 #0b7285,inset -14px 0 0 var(--rs-edge,transparent);}
+body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).food-row:not(.inf-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:#0b7285;}
+html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).food-row:not(.inf-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:#66d9e8;}
 /* ══ THE FOOD WORKER TAG (the user, 2026-11-15) ══════════════════════════════════════════════════════════
-   The food blogger tag in brown: a white worker between the fork and knife on chocolate brown (#8a4b1f) after the
-   holder's name (.fwk-mk, _fwkChip), beside the account's name (inside .food-nm), on its tag chip (.tag-svg), and a
-   brown band laid like the purple one (_fwkRow). The drawing is 28x24, so the mark is wider. An influencer keeps the
-   magenta band, a BD booking its red and a food blogger the purple (all three are left out here). */
-.fwk-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:22px;height:18px;background:#8a4b1f;color:#fff;border-radius:var(--sf-r-xs);vertical-align:middle;}
-.fwk-ico{display:block;width:16px;height:14px;}
-.tag-svg .fwk-ico{width:19px;height:16px;}
-.queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row) td:first-child,.q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row),.ho-row.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row){box-shadow:inset 6px 0 0 #8a4b1f;}
-html[dir="rtl"] .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row) td:first-child,html[dir="rtl"] .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row),html[dir="rtl"] .ho-row.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row){box-shadow:inset -6px 0 0 #8a4b1f;}
-.q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark,.ho-row.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark{box-shadow:inset 6px 0 0 #0c7a3d,inset 12px 0 0 #8a4b1f;}
-html[dir="rtl"] .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark,html[dir="rtl"] .ho-row.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark{box-shadow:inset -6px 0 0 #0c7a3d,inset -12px 0 0 #8a4b1f;}
-body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row) td:first-child{box-shadow:inset 6px 0 0 #8a4b1f,inset 10px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row) td:first-child{box-shadow:inset -6px 0 0 #8a4b1f,inset -10px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #8a4b1f,inset 14px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #8a4b1f,inset -14px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark td:first-child{box-shadow:inset 6px 0 0 #0c7a3d,inset 12px 0 0 #8a4b1f,inset 16px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark td:first-child{box-shadow:inset -6px 0 0 #0c7a3d,inset -12px 0 0 #8a4b1f,inset -16px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #0c7a3d,inset 16px 0 0 #8a4b1f,inset 20px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
-html[dir="rtl"] body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #0c7a3d,inset -16px 0 0 #8a4b1f,inset -20px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
-body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row){box-shadow:inset 6px 0 0 #8a4b1f,inset 10px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row){box-shadow:inset -6px 0 0 #8a4b1f,inset -10px 0 0 var(--rs-edge,transparent);}
-body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #8a4b1f,inset 14px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #8a4b1f,inset -14px 0 0 var(--rs-edge,transparent);}
-body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark{box-shadow:inset 6px 0 0 #0c7a3d,inset 12px 0 0 #8a4b1f,inset 16px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark{box-shadow:inset -6px 0 0 #0c7a3d,inset -12px 0 0 #8a4b1f,inset -16px 0 0 var(--rs-edge,transparent);}
-body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #0c7a3d,inset 16px 0 0 #8a4b1f,inset 20px 0 0 var(--rs-edge,transparent);}
-html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #0c7a3d,inset -16px 0 0 #8a4b1f,inset -20px 0 0 var(--rs-edge,transparent);}
-body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).fwk-row:not(.inf-row):not(.food-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:#8a4b1f;}
-html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).fwk-row:not(.inf-row):not(.food-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:#d9a273;}
+   The food blogger tag in slate: a white worker in a chef's hat on slate (#475569; the tag redesign, 2026-11-15, it was
+   a worker between the fork and knife on chocolate brown) after the holder's name (.fwk-mk, _fwkChip), beside the
+   account's name (inside .food-nm), on its tag chip (.tag-svg), and a slate band laid like the teal one (_fwkRow). An
+   influencer keeps the plum band, a BD booking its red and a food blogger the teal (all three are left out here). */
+.fwk-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#475569;color:#fff;border-radius:var(--sf-r-xs);vertical-align:middle;}
+.fwk-ico{display:block;width:14px;height:14px;}
+.tag-svg .fwk-ico{width:16px;height:16px;}
+.queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row) td:first-child,.q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row),.ho-row.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row){box-shadow:inset 3px 0 0 #475569;}
+html[dir="rtl"] .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row) td:first-child,html[dir="rtl"] .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row),html[dir="rtl"] .ho-row.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row){box-shadow:inset -3px 0 0 #475569;}
+.q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark,.ho-row.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 #475569;}
+html[dir="rtl"] .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark,html[dir="rtl"] .ho-row.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 #475569;}
+body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row) td:first-child{box-shadow:inset 3px 0 0 #475569,inset 7px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row) td:first-child{box-shadow:inset -3px 0 0 #475569,inset -7px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #475569,inset 11px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #475569,inset -11px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark td:first-child{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 #475569,inset 10px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark td:first-child{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 #475569,inset -10px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0c7a3d,inset 10px 0 0 #475569,inset 14px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0c7a3d,inset -10px 0 0 #475569,inset -14px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row){box-shadow:inset 3px 0 0 #475569,inset 7px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row){box-shadow:inset -3px 0 0 #475569,inset -7px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #475569,inset 11px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #475569,inset -11px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 #475569,inset 10px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 #475569,inset -10px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0c7a3d,inset 10px 0 0 #475569,inset 14px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0c7a3d,inset -10px 0 0 #475569,inset -14px 0 0 var(--rs-edge,transparent);}
+body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).fwk-row:not(.inf-row):not(.food-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:#475569;}
+html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).fwk-row:not(.inf-row):not(.food-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:#b6c2d2;}
 /* The special needs tag (2026-10-23): a figure in a wheelchair, white on orange (the owner, 2026-10-23; it was blue) - on its tag chip (.tag-svg) and after
    a holder's name wherever staff meet the booking (.sn-mk, _snChip). */
 .sn-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#e8590c;color:#fff;border-radius:var(--sf-r-xs);vertical-align:middle;}

@@ -38,7 +38,7 @@ const accounts = (page: Page) => page.evaluate(`setStaffTab('customers');S.commu
 const applications = (page: Page) => page.evaluate(`setStaffTab('community');S.communityTab='applications';renderCommunity()`);
 const modal = (page: Page) => page.locator('#confirm-modal');
 
-test('the chip is black and wears the white mark struck through, and nothing else', async ({ page }) => {
+test('the chip is black and wears the white mark struck through in a red ring, and nothing else', async ({ page }) => {
   await boot(page);
   await accounts(page);
   const chip = page.locator('#am-cust-rows .am-chip.tag-ban').first();
@@ -47,6 +47,7 @@ test('the chip is black and wears the white mark struck through, and nothing els
   await expect(chip).toHaveCSS('color', 'rgb(255, 255, 255)');
   await expect(chip.locator('.tag-banned .tag-logo-mm')).toHaveCount(1);
   await expect(chip.locator('.tag-banned .tag-ban-sign')).toHaveCount(1);
+  await expect(chip.locator('.tag-banned .tag-ban-sign')).toHaveCSS('color', 'rgb(255, 77, 79)'); // the red ring (the tag redesign, 2026-11-15)
   await expect(chip).not.toContainText('Blacklist'); // the mark alone, as the other brand chips; the name is the title
   await expect(chip).toHaveAttribute('title', 'Blacklist');
   // The Community chip is as it was: its mark alone, no ring, no name.

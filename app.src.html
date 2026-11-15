@@ -31004,13 +31004,13 @@ function _stcChip(e){
   return`<span class="stc-mk" role="img" title="${w} · ${esc(fmtStamp(e.comingAt))}" aria-label="${w}"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.6l4.3 4.3L19 7.4"/></svg></span>`;
 }
 function _snChip(e){if(!_snOf(e))return'';const tg=(S.tags||[]).find(x=>x.id===TAG_SN),w=esc((tg&&tg.name)||t('snLabel'));return`<span class="sn-mk" role="img" title="${w}" aria-label="${w}">${_SN_SVG}</span>`;}
-// The influencer tag (the owner, 2026-11-12): staff give it by hand and only staff ever see it. A white megaphone on
-// magenta: on its tag chip, after the holder's name wherever the special needs mark goes (on screen and on the printed
-// sheets), a magenta band down the start edge of their row or phone card on Bookings (_infRow), an Influencer filter on
+// The influencer tag (the owner, 2026-11-12): staff give it by hand and only staff ever see it. A white star on
+// plum (the user's pick on the tag redesign page, 2026-11-15; it was a megaphone on magenta): on its tag chip, after the holder's name wherever the special needs mark goes (on screen and on the printed
+// sheets), a plum band down the start edge of their row or phone card on Bookings (_infRow), an Influencer filter on
 // People and Bookings, and a count in the reports (_infTile, the account report's Influencer column and section).
 // Hiding the tag on the Tags page takes all of it off. Drawn inline (no file), so a printed sheet carries it too.
 const TAG_INF='tag_influencer';
-const _INF_SVG='<svg class="inf-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2.6 9.2h3.6l7.6-4.9v15.4l-7.6-4.9H2.6a.8.8 0 0 1-.8-.8V10a.8.8 0 0 1 .8-.8z"/><path fill="currentColor" d="M5 15.4h3.4l1.1 4.4a.9.9 0 0 1-.9 1.1H7.1a.9.9 0 0 1-.9-.7z"/><path d="M16.6 9.3a3.9 3.9 0 0 1 0 5.4M19.2 6.7a7.6 7.6 0 0 1 0 10.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>';
+const _INF_SVG='<svg class="inf-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" d="M12 2.4L14.53 8.92L21.51 9.31L16.09 13.73L17.88 20.49L12 16.7L6.12 20.49L7.91 13.73L2.49 9.31L9.47 8.92Z"/></svg>';
 function _infOn(){const tg=(S.tags||[]).find(x=>x.id===TAG_INF);return !!tg&&!_tagHidden(tg);}
 function _infCid(cid){return !!cid&&_infOn()&&_ctRowsFor(cid).some(ct=>ct.tag_id===TAG_INF&&_tagActive(ct));}
 function _infOf(e){return !!e&&_infCid(e.customerId);}
@@ -31018,14 +31018,15 @@ function _infRow(x){return(Array.isArray(x)?x.some(_infOf):_infOf(x))?' inf-row'
 function _infChip(e){if(!_infOf(e))return'';const tg=(S.tags||[]).find(x=>x.id===TAG_INF),w=esc((tg&&tg.name)||t('infLabel'));return`<span class="inf-mk" role="img" title="${w}" aria-label="${w}">${_INF_SVG}</span>`;}
 // The food blogger tag (the owner, 2026-11-14: "create a new food bloggers tag give me options to the design and show the
 // tag besides the name of the account and bookings"). Staff give it by hand and only staff see it, as the influencer tag.
-// The owner's picks: a white fork and knife on aubergine purple (#6f2dbd), after the holder's name wherever the
+// The owner's picks: a white fork and knife (since the tag redesign, 2026-11-15, cut out of a speech bubble, on teal #0b7285; it
+// was aubergine purple), after the holder's name wherever the
 // influencer mark goes (on screen and on the printed sheets) and beside the account's name on Accounts and Members and on
-// the account page; a purple band down the start edge of their row or phone card on Bookings (_foodRow); a Food blogger
+// the account page; a teal band down the start edge of their row or phone card on Bookings (_foodRow); a Food blogger
 // filter on People and Bookings; and a count in the reports (_foodTile, the account report's fblog column and section).
-// A rider who is also an influencer keeps the magenta band (both marks show). Hiding the tag on the Tags page takes all
+// A rider who is also an influencer keeps the plum band (both marks show). Hiding the tag on the Tags page takes all
 // of it off. Drawn inline (no file), so a printed sheet carries it too. _foodChip takes a booking or {customerId}.
 const TAG_FOOD='tag_food_blogger';
-const _FOOD_SVG='<svg class="food-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4.3 2.8a.7.7 0 0 1 1.4 0V8h1.6V2.8a.7.7 0 0 1 1.4 0V8h1.6V2.8a.7.7 0 0 1 1.4 0V9a3.3 3.3 0 0 1-2.6 3.2v8.3a1.1 1.1 0 0 1-2.2 0v-8.3A3.3 3.3 0 0 1 4.3 9z"/><path fill="currentColor" d="M15.1 3.2a1 1 0 0 1 1.2-.9c2 .8 3.4 3.6 3.4 7.4v2.6a.8.8 0 0 1-.8.8h-1.6v7.4a1.1 1.1 0 0 1-2.2 0z"/></svg>';
+const _FOOD_SVG='<svg class="food-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M5 2.8h14a2.7 2.7 0 0 1 2.7 2.7v9.2a2.7 2.7 0 0 1-2.7 2.7h-7.6l-4.6 3.9v-3.9H5a2.7 2.7 0 0 1-2.7-2.7V5.5A2.7 2.7 0 0 1 5 2.8zM8.15 5.6a.35.35 0 0 1 .7 0V8.2h.8V5.6a.35.35 0 0 1 .7 0V8.2h.8V5.6a.35.35 0 0 1 .7 0V8.7a1.65 1.65 0 0 1-1.3 1.6v4.15a.55.55 0 0 1-1.1 0v-4.15A1.65 1.65 0 0 1 8.15 8.7zM13.55 5.8a.5.5 0 0 1 .6-.45c1 .4 1.7 1.8 1.7 3.7v1.3a.4.4 0 0 1-.4.4h-.8v3.7a.55.55 0 0 1-1.1 0z"/></svg>';
 function _foodOn(){const tg=(S.tags||[]).find(x=>x.id===TAG_FOOD);return !!tg&&!_tagHidden(tg);}
 function _foodCid(cid){return !!cid&&_foodOn()&&_ctRowsFor(cid).some(ct=>ct.tag_id===TAG_FOOD&&_tagActive(ct));}
 function _foodOf(e){return !!e&&_foodCid(e.customerId);}
@@ -31034,11 +31035,11 @@ function _foodChip(e){if(!_foodOf(e))return'';const tg=(S.tags||[]).find(x=>x.id
 // The food worker tag (the user, 2026-11-15: "add a new food worker tag that looks the same as food blogger but has a
 // worker between the fork and knife, but use a different color"). The food blogger tag in everything (the mark after the
 // holder's name on bookings and printed sheets, beside the account's name, the band, the filters, the report counts),
-// drawn as a worker between the fork and knife, white on chocolate brown (#8a4b1f). The drawing is wider than the
-// fork and knife alone (viewBox 28x24), so its mark is too. A food blogger who also works with food keeps the purple
+// drawn since the tag redesign (the user's picks, 2026-11-15) as a worker in a chef's hat, white on slate (#475569); it
+// was a worker between the fork and knife on chocolate brown. A food blogger who also works with food keeps the teal
 // band (both marks show). Hiding the tag on the Tags page takes all of it off. _fwkChip takes a booking or {customerId}.
 const TAG_FWK='tag_food_worker';
-const _FWK_SVG='<svg class="fwk-ico" viewBox="0 0 28 24" aria-hidden="true"><path fill="currentColor" d="M1.3 2.8a.7.7 0 0 1 1.4 0V8h1.6V2.8a.7.7 0 0 1 1.4 0V8h1.6V2.8a.7.7 0 0 1 1.4 0V9a3.3 3.3 0 0 1-2.6 3.2v8.3a1.1 1.1 0 0 1-2.2 0v-8.3A3.3 3.3 0 0 1 1.3 9z"/><circle fill="currentColor" cx="15.55" cy="6.3" r="3"/><path fill="currentColor" d="M11 20.6v-1.9c0-3.4 2.1-5.8 4.55-5.8s4.55 2.4 4.55 5.8v1.9a1 1 0 0 1-1 1h-7.1a1 1 0 0 1-1-1z"/><path fill="currentColor" d="M22.4 3.2a1 1 0 0 1 1.2-.9c2 .8 3.4 3.6 3.4 7.4v2.6a.8.8 0 0 1-.8.8h-1.6v7.4a1.1 1.1 0 0 1-2.2 0z"/></svg>';
+const _FWK_SVG='<svg class="fwk-ico" viewBox="0 0 24 24" aria-hidden="true"><circle fill="currentColor" cx="10" cy="4.3" r="2.1"/><circle fill="currentColor" cx="12" cy="3.5" r="2.4"/><circle fill="currentColor" cx="14" cy="4.3" r="2.1"/><rect fill="currentColor" x="9.3" y="4.4" width="5.4" height="2.5" rx=".4"/><circle fill="currentColor" cx="12" cy="10.4" r="2.9"/><path fill="currentColor" d="M6.3 21.2v-1.5c0-3.5 2.6-5.9 5.7-5.9s5.7 2.4 5.7 5.9v1.5a1 1 0 0 1-1 1H7.3a1 1 0 0 1-1-1z"/></svg>';
 function _fwkOn(){const tg=(S.tags||[]).find(x=>x.id===TAG_FWK);return !!tg&&!_tagHidden(tg);}
 function _fwkCid(cid){return !!cid&&_fwkOn()&&_ctRowsFor(cid).some(ct=>ct.tag_id===TAG_FWK&&_tagActive(ct));}
 function _fwkOf(e){return !!e&&_fwkCid(e.customerId);}
@@ -69161,7 +69162,7 @@ async function saveTagGrant(){
 // The Petromin tag (2026-10-12) is the fifth: Petromin's own logo, in its colours, on a white chip
 // edged in Petromin's red (the owner: "change the petromin tag to include petromin logo instead"; it
 // was the word PETROMIN in white on red), for a rider who books the Petromin nights through Petromin Days.
-const TAG_BRANDS={jcc:{cls:'jcc',color:'#0466AF'},saturday:{cls:'mm',color:'#0c7a3d'},blacklist:{cls:'mm',color:'#0b0b0b',ban:true},vip:{cls:'vip',color:'#a67c00'},petromin:{cls:'pm',color:'#d6202a',img:'/assets/petromin-logo.png',fill:'#fff'},vlap:{cls:'vl',color:'#0d0d0d',img:'/assets/victory-lap-white.webp',fill:'#0d0d0d'},special_needs:{cls:'sn',color:'#e8590c',svg:1},influencer:{cls:'inf',color:'#c2255c',svg:'inf'},food_blogger:{cls:'food',color:'#6f2dbd',svg:'food'},food_worker:{cls:'fwk',color:'#8a4b1f',svg:'fwk'},imc:{cls:'imc',color:'#0e5592',img:'/assets/tag-imc.png',fill:'#fff'}}; // imc: IMC's arch and letters on white, edged in IMC blue (2026-11-13, _imcChip); special_needs: a figure in a wheelchair, white on orange (the owner, 2026-10-23; it was blue) (2026-10-23, _SN_SVG); vlap: the race's logo in white on black (the owner picked T1, 2026-10-17)
+const TAG_BRANDS={jcc:{cls:'jcc',color:'#0466AF'},saturday:{cls:'mm',color:'#0c7a3d'},blacklist:{cls:'mm',color:'#0b0b0b',ban:true},vip:{cls:'vip',color:'#a67c00'},petromin:{cls:'pm',color:'#d6202a',img:'/assets/petromin-logo.png',fill:'#fff'},vlap:{cls:'vl',color:'#0d0d0d',img:'/assets/victory-lap-white.webp',fill:'#0d0d0d'},special_needs:{cls:'sn',color:'#e8590c',svg:1},influencer:{cls:'inf',color:'#862e9c',svg:'inf'},food_blogger:{cls:'food',color:'#0b7285',svg:'food'},food_worker:{cls:'fwk',color:'#475569',svg:'fwk'},imc:{cls:'imc',color:'#0e5592',img:'/assets/tag-imc.png',fill:'#fff'}}; // imc: IMC's arch and letters on white, edged in IMC blue (2026-11-13, _imcChip); special_needs: a figure in a wheelchair, white on orange (the owner, 2026-10-23; it was blue) (2026-10-23, _SN_SVG); vlap: the race's logo in white on black (the owner picked T1, 2026-10-17)
 const TAG_COMMUNITY='tag_saturday',TAG_BLACKLIST='tag_blacklist',TAG_VIP='tag_vip',TAG_PETROMIN='tag_petromin',TAG_VLAP='tag_vlap';
 // The Community tag and the Petromin tag never sit on one account (the owner, 2026-10-12: "when giving a
 // petromin tag to a community member show an error that asks that only one of them must be given per
@@ -69190,7 +69191,7 @@ function _tagBrand(tg){return (tg&&TAG_BRANDS[String(tg.slug||'').toLowerCase()]
 function _tagColor(tg){const b=_tagBrand(tg);return b?b.color:((tg&&tg.color)||'#00e585');}
 function _tagLogo(tg){
   const b=_tagBrand(tg);if(!b)return'';
-  if(b.svg)return `<span class="tag-svg tag-svg-${b.cls}" role="img" aria-label="${esc(tg.name)}">${b.svg==='inf'?_INF_SVG:b.svg==='food'?_FOOD_SVG:b.svg==='fwk'?_FWK_SVG:_SN_SVG}</span>`; // influencer: the megaphone (2026-11-12); food blogger: the fork and knife (2026-11-14); food worker: a worker between them (2026-11-15)
+  if(b.svg)return `<span class="tag-svg tag-svg-${b.cls}" role="img" aria-label="${esc(tg.name)}">${b.svg==='inf'?_INF_SVG:b.svg==='food'?_FOOD_SVG:b.svg==='fwk'?_FWK_SVG:_SN_SVG}</span>`; // influencer: a star (a megaphone until the tag redesign, 2026-11-15); food blogger: the fork and knife in a speech bubble; food worker: a worker in a chef's hat
   if(b.img)return `<img class="tag-img tag-img-${b.cls}" src="${esc(b.img)}" alt="${esc(tg.name)}" width="38" height="16" decoding="async">`;
   if(!b.ban)return `<span class="tag-logo tag-logo-${b.cls}" role="img" aria-label="${esc(tg.name)}"></span>`;
   // The mark with a no-entry ring struck through it.
@@ -69210,8 +69211,8 @@ function _tagChip(tg,ct){
   const b=_tagBrand(tg);
   // Its colours come from the tag (data-cssv, set through the CSSOM): the fill and the edge, and a
   // tag staff made also takes its colour as the ink.
-  if(b)return `<span class="am-chip tag-brand${b.ban?' tag-ban':''} cmy-tc${dim}" data-cssv="${_cssv({'--cmy-tbg':b.fill||b.color,'--cmy-tbd':b.color})}" title="${esc(tg.name)}">${_tagLogo(tg)}${suffix?`<span>${suffix.replace(/^ · /,'')}</span>`:''}</span>`;
-  return `<span class="am-chip cmy-tc cmy-tcf${dim}" data-cssv="${_cssv({'--cmy-tbg':col+'22','--cmy-tbd':col+'66','--cmy-tfg':col})}">${esc(tg.name)}${suffix}</span>`;
+  if(b)return `<span class="am-chip tag-chip tag-brand${b.ban?' tag-ban':''} cmy-tc${dim}" data-cssv="${_cssv({'--cmy-tbg':b.fill||b.color,'--cmy-tbd':b.color})}" title="${esc(tg.name)}">${_tagLogo(tg)}${suffix?`<span>${suffix.replace(/^ · /,'')}</span>`:''}</span>`;
+  return `<span class="am-chip tag-chip cmy-tc cmy-tcf${dim}" data-cssv="${_cssv({'--cmy-tbg':col+'22','--cmy-tbd':col+'66','--cmy-tfg':col})}">${esc(tg.name)}${suffix}</span>`;
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__tagEditForm_1(event,el){S.tagEdit=null;renderCommunity()}

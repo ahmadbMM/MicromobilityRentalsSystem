@@ -440,20 +440,32 @@ that Hybrid is the easiest choice (`bikeInfoHint`).
 
 `tags` row `tag_blacklist` (slug `blacklist`, locked; migration 20260927170000) marks an account
 that is not fit to be in the community. `TAG_BRANDS.blacklist` draws it black with the white mark
-struck through (`_tagLogo`, `.tag-banned`), the mark alone like the other brand chips. `_isBlacklisted(cid)` is read in
+struck through in a red ring (`_tagLogo`, `.tag-banned`; `.tag-ban-sign` is `#ff4d4f` since the tag redesign,
+2026-11-15), the mark alone like the other brand chips. `_isBlacklisted(cid)` is read in
 two places: the Community grant dialog shows the warning, and `_caApprove` adds it to the confirm
 and turns Approve red. Granting the blacklist to a Community member offers to drop the Community
 tag (`S._tg.dropComm`, on by default). Nothing is enforced server-side; it is a staff signal.
+
+## The tag redesign (2026-11-15, migration 20261115235900)
+
+The user picked every staff tag's look on a visual page (artifact 4DHnmMw23eDA3FAjiVdfpW). Changed: every tag chip
+from `_tagChip` carries `.tag-chip` and has soft corners (`border-radius:var(--sf-r-xs)`, not round ends); the tag
+bands on Bookings (the community's green and the influencer's, food blogger's and food worker's) are 3px, not 6px,
+with the layers after them moved in to match (a BD booking's red and a partner's rose keep their widths); the
+influencer is a star on plum, the food blogger a speech bubble with the fork and knife cut out on teal, the food worker
+a worker in a chef's hat on slate, and the blacklist's ring and slash are red. Kept as they were, by the user's
+choice: the square mark after the name, every mark in a row, and the special needs, community, VIP, JCC, Petromin, IMC,
+Victory Lap and No call-out looks. The migration only brings `tags.color` in step with `TAG_BRANDS`.
 
 ## The influencer tag (2026-11-12, migration 20261112235800)
 
 `tags` row `tag_influencer` (slug `influencer`, locked, never auto-granted): staff give it by hand and **only staff
 see it** (`customer_tags` is staff-only and no rider-facing function reads it; never add it to a customer screen or
-the website). The owner's picks: a white megaphone on magenta `#c2255c` (`_INF_SVG`, `TAG_BRANDS.influencer` with
-`svg:'inf'`, which `_tagLogo` maps to the megaphone); the mark after the holder's name wherever the special needs
-mark goes, on screen and on the printed sheets (`_infChip`, `.inf-mk` in styles.css and report.css); a magenta band
+the website). The owner's picks were a white megaphone on magenta; since the tag redesign (2026-11-15) it is a white star on plum
+`#862e9c` (`_INF_SVG`, `TAG_BRANDS.influencer` with `svg:'inf'`, which `_tagLogo` maps to the star); the mark after the holder's name wherever the special needs
+mark goes, on screen and on the printed sheets (`_infChip`, `.inf-mk` in styles.css and report.css); a plum band
 down the start edge of the Bookings row, phone card and hand-over row (`_infRow`, class `inf-row`: inside a
-member's green band, outside a partner's rose stripe, under a BD- booking's red), with the name in magenta unless
+member's green band, outside a partner's rose stripe, under a BD- booking's red), with the name in plum unless
 green or red already dresses it; the Influencer filter on Bookings (`sfInf`) and People (`amInf`); the account
 report's `infl` column and section (`_accSnParts`/`_accSnHtml`/`_accSnCsv` take a holder test and a label key) and
 the session sheets' tile (`_infTile`). Nothing else: no price, booking or bell change. `_infOn()` is false while
@@ -474,13 +486,14 @@ only: no band, filter, count or rule. `_imcOn()` is false while the tag is missi
 ## The food blogger tag (2026-11-14, migration 20261114173000)
 
 `tags` row `tag_food_blogger` (slug `food_blogger`, name "Food blogger", locked, never auto-granted), staff-only like
-the influencer tag and built the same way. The owner's picks: a white fork and knife on aubergine purple `#6f2dbd`
+the influencer tag and built the same way. The owner's picks were a white fork and knife on aubergine purple; since the tag redesign (2026-11-15) the fork and
+knife are cut out of a speech bubble (one `evenodd` path, no mask, so the printed sheets carry it) on teal `#0b7285`
 (`_FOOD_SVG`, `TAG_BRANDS.food_blogger` with `svg:'food'`); the mark after the holder's name wherever `_infChip` goes,
 on screen and on the printed sheets (`_foodChip`, `.food-mk` in styles.css and report.css), and **beside the
 account's name** on Accounts and Members (`.food-nm` wraps the name button and the mark) and on the account page's
-title (`_foodChip({customerId})`); a purple band on the Bookings row, phone card and hand-over row (`_foodRow`, class
-`food-row`, laid like the influencer's magenta; an influencer keeps the magenta band and a BD- booking its red, as
-the band rules leave out `.inf-row` and `.bdf-row`), the name in purple unless another colour dresses it; the Food
+title (`_foodChip({customerId})`); a teal band on the Bookings row, phone card and hand-over row (`_foodRow`, class
+`food-row`, laid like the influencer's plum; an influencer keeps the plum band and a BD- booking its red, as
+the band rules leave out `.inf-row` and `.bdf-row`), the name in teal unless another colour dresses it; the Food
 blogger filter on Bookings (`sfFood`) and People (`amFood`); the account report's `fblog` column and section and the
 session sheets' tile (`_foodTile`). `_foodOn()` is false while the tag is missing or hidden, which takes it all off.
 The `fb`/`_fb` prefix was already taken (feedback), hence `food`. tests/food-blogger-tag.spec.ts.
@@ -489,12 +502,12 @@ The `fb`/`_fb` prefix was already taken (feedback), hence `food`. tests/food-blo
 
 `tags` row `tag_food_worker` (slug `food_worker`, name "Food worker", locked, never auto-granted). The user: "looks the
 same as food blogger but has a worker between the fork and knife, but use a different color". It is the food blogger
-tag in everything, prefix `fwk`: `TAG_FWK`, `_FWK_SVG` (a worker between the fork and knife, viewBox 28x24, so
-`.fwk-mk` is 22px wide), `_fwkOn/_fwkCid/_fwkOf/_fwkRow/_fwkChip/_fwkTile`, `TAG_BRANDS.food_worker` (`svg:'fwk'`),
-chocolate brown `#8a4b1f` (dark-theme name `#d9a273`). `_fwkChip` follows every `_foodChip`, `_fwkRow` every
+tag in everything, prefix `fwk`: `TAG_FWK`, `_FWK_SVG` (since the tag redesign, 2026-11-15, a worker in a chef's hat, viewBox 24x24; it was a worker between the
+fork and knife, 28x24), `_fwkOn/_fwkCid/_fwkOf/_fwkRow/_fwkChip/_fwkTile`, `TAG_BRANDS.food_worker` (`svg:'fwk'`),
+slate `#475569` (dark-theme name `#b6c2d2`; it was chocolate brown). `_fwkChip` follows every `_foodChip`, `_fwkRow` every
 `_foodRow`; beside the account's name it shares the `.food-nm` wrapper. Filters `sfFwk` / `amFwk`, report column and
-section `fwork`, words `fwkLabel`. The brown band rules leave out `.inf-row`, `.bdf-row` and `.food-row`: an
-influencer keeps magenta, a BD booking red, a food blogger purple; both marks still show. tests/food-worker-tag.spec.ts.
+section `fwork`, words `fwkLabel`. The slate band rules leave out `.inf-row`, `.bdf-row` and `.food-row`: an
+influencer keeps plum, a BD booking red, a food blogger teal; both marks still show. tests/food-worker-tag.spec.ts.
 
 ## The Petromin tag and Petromin Days (2026-10-12)
 

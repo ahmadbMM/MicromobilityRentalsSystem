@@ -239,12 +239,12 @@ th[aria-sort="descending"] .rp-sbtn::after{content:"\25BC"}
 :root tr.rp-mate td:first-child{border-inline-start:3px solid #16191d}
 .sn-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#e8590c;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .sn-ico{display:block;width:11px;height:11px}
-.inf-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#c2255c;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.inf-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#862e9c;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .inf-ico{display:block;width:11px;height:11px}
-.food-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#6f2dbd;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.food-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#0b7285;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .food-ico{display:block;width:11px;height:11px}
-.fwk-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:18px;height:14px;background:#8a4b1f;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.fwk-ico{display:block;width:13px;height:11px}
+.fwk-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#475569;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.fwk-ico{display:block;width:11px;height:11px}
 .imc-mk{display:inline-flex;align-items:center;margin-inline-start:6px;height:14px;padding:0 3px;box-sizing:border-box;background:#fff;border:1px solid #0e5592;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .imc-mk img{display:block;height:10px;width:auto}
 /* the partner report's signature column: room to sign on paper */

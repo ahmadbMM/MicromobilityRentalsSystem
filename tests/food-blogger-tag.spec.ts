@@ -3,18 +3,18 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // The food blogger tag (the owner, 2026-11-14: "create a new food bloggers tag give me options to the design and show
 // the tag besides the name of the account and bookings"). The owner's picks: a white fork and knife on aubergine
-// purple; the mark after the holder's name on their bookings (on screen and on the printed sheets) and beside the
-// account's name; a Food blogger filter and report counts; and a purple band on their Bookings row. Staff only, like
+// purple (since the tag redesign, 2026-11-15, cut out of a speech bubble on teal); the mark after the holder's name on their bookings (on screen and on the printed sheets) and beside the
+// account's name; a Food blogger filter and report counts; and a teal band on their Bookings row. Staff only, like
 // the influencer tag. Hiding the tag takes all of it off. All Supabase traffic is stubbed.
 
 const LIVE = '2099-03-01';
-const PURPLE = 'rgb(111, 45, 189)';
-const MAGENTA = 'rgb(194, 37, 92)';
+const TEAL = 'rgb(11, 114, 133)';
+const PLUM = 'rgb(134, 46, 156)';
 const sessions = [{ id: LIVE, day: 'Sunday', session_date: LIVE, status: 'open', capacity: 20, created_at: 1, bike_slots: '{"_time":"21:00 - 23:00","_total":20}' }];
 const baseTags = [
   { id: 'tag_saturday', slug: 'saturday', name: 'Community', color: '#0c7a3d', locked: true, auto_grant: false },
-  { id: 'tag_influencer', slug: 'influencer', name: 'Influencer', color: '#c2255c', locked: true, auto_grant: false },
-  { id: 'tag_food_blogger', slug: 'food_blogger', name: 'Food blogger', color: '#6f2dbd', locked: true, auto_grant: false },
+  { id: 'tag_influencer', slug: 'influencer', name: 'Influencer', color: '#862e9c', locked: true, auto_grant: false },
+  { id: 'tag_food_blogger', slug: 'food_blogger', name: 'Food blogger', color: '#0b7285', locked: true, auto_grant: false },
 ];
 const cust = (id: string, name: string) => ({ id, name, email: id + '@example.test', phone: '05000000' + id.slice(1).padStart(2, '0'), height: 170, created_at: '2026-01-01T00:00:00Z' });
 const customers = [cust('c1', 'Fay Food Member'), cust('c2', 'Carl Community'), cust('c3', 'Fred Food'), cust('c4', 'Nora Nobody'), cust('c5', 'Iris Both')];
@@ -45,15 +45,19 @@ const roster = (page: Page) => page.evaluate(`setStaffTab('queue');S.queueView='
 const accounts = (page: Page) => page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
 
 test.describe('@staff:tags The food blogger tag', () => {
-  test('its chip is the drawn fork and knife, white on purple, named by its title', async ({ page }) => {
+  test('its chip is the drawn fork and knife, white on teal, named by its title', async ({ page }) => {
     await boot(page);
     await accounts(page);
     const chip = page.locator('#am-cust-rows .am-chip.tag-brand', { has: page.locator('.tag-svg-food') }).first();
     await expect(chip).toBeVisible();
-    await expect(chip).toHaveCSS('background-color', PURPLE);
+    await expect(chip).toHaveCSS('background-color', TEAL);
     await expect(chip).toHaveAttribute('title', 'Food blogger');
     await expect(chip.locator('svg.food-ico')).toHaveCount(1);
+    await expect(chip.locator('svg.food-ico path[fill-rule="evenodd"]')).toHaveCount(1); // the bubble with the fork and knife cut out
     await expect(chip).not.toContainText('Food blogger');
+    // every tag chip has soft corners since the tag redesign (2026-11-15), the food blogger's and a staff-made one alike
+    await expect(chip).toHaveCSS('border-radius', '4px');
+    await expect(page.locator('#am-cust-rows .am-chip.tag-chip').first()).toHaveCSS('border-radius', '4px');
   });
 
   test('Accounts: the mark beside a holder\'s name, and on the account page\'s title', async ({ page }) => {
@@ -62,7 +66,7 @@ test.describe('@staff:tags The food blogger tag', () => {
     const nameRow = (name: string) => page.locator('#am-cust-rows .am-cust', { has: page.locator('.am-cust-name', { hasText: name }) });
     await expect(nameRow('Fred Food').locator('.am-c-nm .food-nm .food-mk')).toHaveCount(1);
     await expect(nameRow('Fred Food').locator('.food-mk')).toHaveAttribute('title', 'Food blogger');
-    await expect(nameRow('Fred Food').locator('.food-mk')).toHaveCSS('background-color', PURPLE);
+    await expect(nameRow('Fred Food').locator('.food-mk')).toHaveCSS('background-color', TEAL);
     await expect(nameRow('Nora Nobody').locator('.food-mk')).toHaveCount(0);
     await expect(nameRow('Carl Community').locator('.food-mk')).toHaveCount(0);
     // the mark sits on the name's line, after it
@@ -79,7 +83,7 @@ test.describe('@staff:tags The food blogger tag', () => {
     await expect(page.locator('#ah-title .food-mk')).toHaveCount(0);
   });
 
-  test('Bookings: the fork and knife after a holder\'s name and a purple band down the row, inside a member\'s green', async ({ page }) => {
+  test('Bookings: the fork and knife after a holder\'s name and a teal band down the row, inside a member\'s green', async ({ page }) => {
     await boot(page);
     await roster(page);
     await expect(tr(page, 'q3')).toHaveClass(/\bfood-row\b/);
@@ -91,18 +95,19 @@ test.describe('@staff:tags The food blogger tag', () => {
     await expect(tr(page, 'q2').locator('.food-mk')).toHaveCount(0);
     await expect(tr(page, 'q4').locator('.food-mk')).toHaveCount(0);
     const sh = (id: string) => tr(page, id).locator('td').first().evaluate((el) => getComputedStyle(el).boxShadow);
-    expect(await sh('q3')).toContain(PURPLE);
+    expect(await sh('q3')).toContain(TEAL);
+    expect(await sh('q3')).toContain(TEAL + ' 3px 0px 0px 0px inset'); // the thin band (the tag redesign, 2026-11-15)
     const both = await sh('q1');
     expect(both).toContain('rgb(12, 122, 61)');
-    expect(both).toContain(PURPLE);
-    expect(both.indexOf('rgb(12, 122, 61)')).toBeLessThan(both.indexOf(PURPLE));
-    // an influencer who also blogs keeps the magenta band, and both marks show (the influencer's first)
+    expect(both).toContain(TEAL);
+    expect(both.indexOf('rgb(12, 122, 61)')).toBeLessThan(both.indexOf(TEAL));
+    // an influencer who also blogs keeps the plum band, and both marks show (the influencer's first)
     const inf = await sh('q5');
-    expect(inf).toContain(MAGENTA);
-    expect(inf).not.toContain(PURPLE);
+    expect(inf).toContain(PLUM);
+    expect(inf).not.toContain(TEAL);
     await expect(tr(page, 'q5').locator('.inf-mk + .food-mk')).toHaveCount(1);
-    // the name turns purple
-    await expect(tr(page, 'q3').locator('.rider-name').first()).toHaveCSS('color', PURPLE);
+    // the name turns teal
+    await expect(tr(page, 'q3').locator('.rider-name').first()).toHaveCSS('color', TEAL);
     if (process.env.SHOT_DIR) await page.locator('#tab-queue .queue-table').screenshot({ path: `${process.env.SHOT_DIR}/food-roster.png` });
     // the phone cards too
     await page.setViewportSize({ width: 390, height: 900 });
@@ -110,7 +115,7 @@ test.describe('@staff:tags The food blogger tag', () => {
     const card = page.locator('#tab-queue .queue-mobile-view .q-card[data-id="q3"]');
     await expect(card).toHaveClass(/\bfood-row\b/);
     await expect(card.locator('.food-mk')).toHaveCount(1);
-    expect(await card.evaluate((el) => getComputedStyle(el).boxShadow)).toContain(PURPLE);
+    expect(await card.evaluate((el) => getComputedStyle(el).boxShadow)).toContain(TEAL);
   });
 
   test('the Food blogger filter on Bookings and on People', async ({ page }) => {
