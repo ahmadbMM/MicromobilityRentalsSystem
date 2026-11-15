@@ -21707,7 +21707,8 @@ function renderBookingTicket(entries,opts){
       ${rateBtn}
       ${(_isRun(sess)||_isRace(sess)||_isBlood(sess))?'':`<button class="btn-sm btn-green cu-act110" data-on-click="${_on("bookAgain",_ids)}">${_cuIc('again')} ${t('bookAgainBtn')}</button>`}
     </div>`:'');
-  const numCls=numDisplay.length<=4?'cu-num-l':numDisplay.length<=9?'cu-num-m':'cu-num-s';
+  // cu-num-3: a one- or two-digit number ("#7", "#45"), which the circuit's ticket draws larger still (2026-11-15).
+  const numCls=numDisplay.length<=4?'cu-num-l'+(numDisplay.length<=3?' cu-num-3':''):numDisplay.length<=9?'cu-num-m':'cu-num-s';
   // The state classes (tk-live held, tk-today, tk-wl, tk-past) stay; since 2026-10-06 every ticket also
   // wears its event's colours in every state (_tkThemeCls), so the night look no longer says "held": the
   // status line, the code and the waitlist's dashed edge do.

@@ -11065,6 +11065,19 @@ html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-ca
 /* the chevrons sit in the card's bottom corner, under the last row of buttons: the card keeps room for them */
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc{padding-bottom:30px;}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc .ticket-num{font-family:'Chakra Petch','IBM Plex Sans Arabic',sans-serif;}
+/* The circuit's booking number as large as the room beside the QR allows (the user, 2026-11-15: "make the number of
+   the booking in jcc booking cards bigger"). The header is the size container: --tk-qr is the QR's column and the gap
+   (132 + 12), and each size divides what is left by its number's width in ems, so "#7" or "#45" fills it, "#128" fits
+   it and a party's range or list wraps at its spaces. On the ride day the corner QR is gone (the large one sits under
+   the header) and the number has the whole width, up to the caps. Never smaller than before (the clamps' floors);
+   the waitlist and past tickets keep their quieter sizes. A browser without container units keeps the old sizes. */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc:not(.tk-wl,.tk-past) .ticket-header{container-type:inline-size;gap:12px;--tk-qr:144px;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc:not(.tk-wl,.tk-past) .ticket-header:not(:has(>.ticket-right>*)){--tk-qr:0px;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc:not(.tk-wl,.tk-past) .ticket-right{flex-shrink:0;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc:not(.tk-wl,.tk-past) .ticket-num.cu-num-l{font-size:clamp(72px,calc((100cqw - var(--tk-qr)) / 2.4),120px);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc:not(.tk-wl,.tk-past) .ticket-num.cu-num-l.cu-num-3{font-size:clamp(72px,calc((100cqw - var(--tk-qr)) / 1.95),120px);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc:not(.tk-wl,.tk-past) .ticket-num.cu-num-m{font-size:clamp(40px,calc((100cqw - var(--tk-qr)) / 2.9),72px);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc:not(.tk-wl,.tk-past) .ticket-num.cu-num-s{font-size:clamp(24px,calc((100cqw - var(--tk-qr)) / 4.9),48px);}
 /* the light cards: ink on white, the event's own accent where the night ticket has its neon */
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim){
   --night:#fff;--night-ink:#1A1919;--night-ink-2:rgba(26,25,25,.62);--night-line:rgba(26,25,25,.12);
