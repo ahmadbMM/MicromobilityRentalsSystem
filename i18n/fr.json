@@ -9606,6 +9606,7 @@
   "stoSmsaDone": "Étiquette SMSA créée : {0}",
   "stoSmsaErr": "L’étiquette SMSA n’a pas été créée : {0}",
   "stoSmsaOff": "Les étiquettes SMSA ne sont pas encore configurées",
+  "stoSmsaUnsaved": "Étiquette SMSA créée ({0}), mais la commande n’est pas marquée comme expédiée : marquez-la comme expédiée",
   "stoSoldOut": "Épuisé",
   "stoStOut": "En cours de livraison",
   "stoSzCMax": "Taille {0}, poitrine jusqu’à (cm)",

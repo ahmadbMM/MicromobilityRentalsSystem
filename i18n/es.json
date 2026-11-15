@@ -9606,6 +9606,7 @@
   "stoSmsaDone": "Etiqueta SMSA creada: {0}",
   "stoSmsaErr": "No se creó la etiqueta SMSA: {0}",
   "stoSmsaOff": "Las etiquetas SMSA aún no están configuradas",
+  "stoSmsaUnsaved": "Etiqueta SMSA creada ({0}), pero el pedido no quedó marcado como enviado: márcalo como enviado",
   "stoSoldOut": "Agotado",
   "stoStOut": "En reparto",
   "stoSzCMax": "Talla {0}, pecho hasta (cm)",

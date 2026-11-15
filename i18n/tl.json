@@ -9606,6 +9606,7 @@
   "stoSmsaDone": "Nagawa ang SMSA label: {0}",
   "stoSmsaErr": "Hindi nagawa ang SMSA label: {0}",
   "stoSmsaOff": "Hindi pa naka-set up ang mga SMSA label",
+  "stoSmsaUnsaved": "Nagawa ang SMSA label ({0}), pero hindi namarkahang naipadala ang order: markahan itong naipadala",
   "stoSoldOut": "Ubos na",
   "stoStOut": "Papunta na para i-deliver",
   "stoSzCMax": "Size {0}, dibdib hanggang (cm)",

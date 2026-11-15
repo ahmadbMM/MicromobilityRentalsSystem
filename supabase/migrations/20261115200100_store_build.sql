@@ -56,7 +56,9 @@
 --  9. New for staff: staff_store_stock_requests and staff_store_stock_request_set (F34), staff_store_returns and
 --     staff_store_return_decide (F93: a refund goes to the card first, as a refund owed in Payments > Refunds, then the
 --     wallet, then the gift card), staff_store_review_set (F42, F94; admins), staff_store_gift_card_issue,
---     staff_store_gift_card_void and staff_store_gift_card_extend (F57). staff_store_order_set takes 'out' (F96) and staff_store_orders counts it open.
+--     staff_store_gift_card_void and staff_store_gift_card_extend (F57). Approving a return's refund and issuing a gift
+--     card take a manager's word over the shop's manager limit (_mgr_ok 'refund'), as every other refund staff make and
+--     as the staff page asks for it. staff_store_order_set takes 'out' (F96) and staff_store_orders counts it open.
 --     staff_store_order_cancel gives a gift card's part back, a never-paid order's code use back, and voids the gift
 --     cards the order bought; what those cards already paid for elsewhere is kept back from its refund (the card's
 --     part owed first, then the wallet's).
@@ -1816,7 +1818,8 @@ end $$;
 revoke execute on function public.staff_store_returns(text) from public, anon;
 grant execute on function public.staff_store_returns(text) to authenticated;
 
--- Approve or refuse a return asked for. Admins or the refund right, with the PIN (as a cancel). Approving a return with
+-- Approve or refuse a return asked for. Admins or the refund right, with the PIN (as a cancel), and a manager over the
+-- manager limit for a refund. Approving a return with
 -- an amount refunds that much, no more than is left of what the order paid: the card's part first, as a refund owed on
 -- the order's payment (Payments > Refunds sends it, the existing flow), then the wallet's at once, then the gift card's
 -- (its balance back). An exchange refunds nothing. A public order event says the answer (X09 lists the refunds).
@@ -1861,6 +1864,10 @@ begin
        where m.card_id = o.gift_card_id and m.order_id = o.id and m.kind in ('spend', 'back', 'refund');
     end if;
     if amt > card_room + wal_room + gift_room then raise exception 'PAY_TOO_MUCH' using errcode = 'P0001'; end if;
+    /* over the shop's manager limit a manager's word, as every refund staff make (staff_pay_refund_begin, lockers): the
+       wallet's and the gift card's parts are given back here at once, and the staff page asks for that word on approving
+       (store build integration 2026-11-15) */
+    if not _mgr_ok('refund', amt, p_approval) then raise exception 'MANAGER_REQUIRED' using errcode = '42501'; end if;
     c := least(amt, card_room);
     w := least(amt - c, wal_room);
     g := least(amt - c - w, gift_room);
@@ -1917,7 +1924,8 @@ language sql stable security definer set search_path = public as $$
 $$;
 revoke execute on function public._store_gift_json(store_gift_cards) from public, anon, authenticated;
 
--- A card by hand (a prize, a goodwill gesture): 10-5000 SAR (STORE_GIFT_AMOUNT). Admins or the refund right, the PIN.
+-- A card by hand (a prize, a goodwill gesture): 10-5000 SAR (STORE_GIFT_AMOUNT). Admins or the refund right, the PIN,
+-- and a manager over the manager limit.
 create or replace function public.staff_store_gift_card_issue(p_amount numeric, p_note text, p_op text default null, p_approval text default null)
 returns jsonb
 language plpgsql security definer set search_path = public as $$
@@ -1927,6 +1935,9 @@ begin
   if not is_admin() and not _staff_cap('can_refund') then raise exception 'CAP_REFUND' using errcode = '42501'; end if;
   if not _pin_ok(p_op, p_approval) then raise exception 'PIN_REQUIRED' using errcode = '42501'; end if;
   if amt is null or amt < 10 or amt > 5000 then raise exception 'STORE_GIFT_AMOUNT' using errcode = 'P0001'; end if;
+  /* a card is money to spend: over the shop's manager limit a manager's word, as for a refund (the staff page asks for it
+     as one; store build integration 2026-11-15) */
+  if not _mgr_ok('refund', amt, p_approval) then raise exception 'MANAGER_REQUIRED' using errcode = '42501'; end if;
   select left(coalesce(p_op, nullif(btrim(s.display_name), ''), 'Staff'), 60) into who from staff s where s.user_id = auth.uid();
   who := coalesce(who, left(coalesce(p_op, 'Staff'), 60));
   insert into store_gift_cards (code, amount, balance, note, issued_by)

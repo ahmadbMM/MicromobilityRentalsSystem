@@ -9606,6 +9606,7 @@
   "stoSmsaDone": "SMSA लेबल बना: {0}",
   "stoSmsaErr": "SMSA लेबल नहीं बना: {0}",
   "stoSmsaOff": "SMSA लेबल अभी सेट नहीं हैं",
+  "stoSmsaUnsaved": "SMSA लेबल बना ({0}), पर ऑर्डर भेजा गया चिह्नित नहीं हुआ: भेजा गया चिह्नित करें",
   "stoSoldOut": "ख़त्म",
   "stoStOut": "डिलीवरी के लिए निकला",
   "stoSzCMax": "साइज़ {0}, छाती तक (cm)",

@@ -115,7 +115,7 @@ test.describe('@staff:store the order sheet: out for delivery, the SMSA label, a
   });
 
   test('SMSA not set up on the server is said inside the sheet', async ({ page }) => {
-    const o = order('o3', 1003, 'preparing', { fulfil: 'jeddah' });
+    const o = order('o3', 1003, 'preparing', { fulfil: 'ksa', address: { city: 'Riyadh', district: 'Olaya', street: 'King Fahd Rd', building: '7' } });
     await staff(page, { 'rpc:staff_store_orders': [o], site_content: [{ key: 'store.smsa.on', value: true, updated_at: NOW }] });
     await smsaEndpoint(page, { ok: false, error: 'smsa_off' });
     await page.evaluate(`setStaffTab('store')`);
@@ -123,6 +123,51 @@ test.describe('@staff:store the order sheet: out for delivery, the SMSA label, a
     const sh = page.locator('#sto-modal [role="dialog"]');
     await sh.locator('button', { hasText: 'Create SMSA label' }).click();
     await expect(sh.locator('.sto-err')).toContainText('SMSA labels are not set up yet');
+  });
+
+  // The website's route (w5) makes labels for Kingdom orders only and answers saved:false when SMSA made the waybill but
+  // the order could not be marked shipped: staff then save it from the ship form, filled with SMSA and the waybill.
+  test('SMSA is offered on Kingdom orders only; a label the route could not save opens the ship form with its waybill', async ({ page }) => {
+    const seen = rpcCalls(page);
+    const j = order('o4', 1004, 'paid', { fulfil: 'jeddah', address: { city: 'Jeddah', district: 'Al Rawdah', street: 'Prince Sultan Rd', building: '12' } });
+    const k = order('o5', 1005, 'preparing', { fulfil: 'ksa', address: { city: 'Riyadh', district: 'Olaya', street: 'King Fahd Rd', building: '7' } });
+    await staff(page, { 'rpc:staff_store_orders': [j, k], 'rpc:staff_store_order_set': { ...k, status: 'shipped', courier: 'SMSA', tracking_no: '290055500011' },
+      site_content: [{ key: 'store.smsa.on', value: true, updated_at: NOW }] });
+    const sent = await smsaEndpoint(page, { ok: true, awb: '290055500011', label: Buffer.from('%PDF-1.4 label').toString('base64'), saved: false });
+    await page.evaluate(`setStaffTab('store')`);
+    await page.locator('#tab-store .sto-row', { hasText: 'MM-1004' }).click();
+    const sh = page.locator('#sto-modal [role="dialog"]');
+    await expect(sh.locator('button', { hasText: 'Shipped…' })).toBeVisible(); // the courier's way is offered, the label is not
+    await expect(sh.locator('button', { hasText: 'Create SMSA label' })).toHaveCount(0);
+    await page.evaluate('_stoClose()');
+    await page.locator('#tab-store .sto-row', { hasText: 'MM-1005' }).click();
+    const dl = page.waitForEvent('download');
+    await sh.locator('button', { hasText: 'Create SMSA label' }).click();
+    expect((await dl).suggestedFilename()).toBe('SMSA-290055500011.pdf');
+    expect(sent[0].body).toEqual({ order: 'o5' });
+    await expect(sh.locator('.sto-err')).toContainText('the order was not marked shipped');
+    await expect(sh.locator('#sto-courier')).toHaveValue('SMSA');
+    await expect(sh.locator('#sto-track')).toHaveValue('290055500011');
+    await expect(sh.locator('.sto-sh-top .sto-pill')).toHaveText('Preparing');
+    expect(seen.filter((c) => c.name === 'staff_store_order_set')).toHaveLength(0);
+    await sh.locator('button', { hasText: 'Mark shipped' }).click();
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_store_order_set').length).toBe(1);
+    expect(seen.find((c) => c.name === 'staff_store_order_set')!.body).toMatchObject({ p_order: 'o5', p_status: 'shipped', p_courier: 'SMSA', p_tracking: '290055500011' });
+    await expect(sh.locator('.sto-sh-top .sto-pill')).toHaveText('Shipped');
+  });
+
+  test('an order SMSA refuses as moved on is said and read again', async ({ page }) => {
+    const seen = rpcCalls(page);
+    const o = order('o6', 1006, 'paid', { fulfil: 'ksa', address: { city: 'Riyadh', district: 'Olaya', street: 'King Fahd Rd', building: '7' } });
+    await staff(page, { 'rpc:staff_store_orders': [o], site_content: [{ key: 'store.smsa.on', value: true, updated_at: NOW }] });
+    await smsaEndpoint(page, { ok: false, error: 'state' });
+    await page.evaluate(`setStaffTab('store')`);
+    await page.locator('#tab-store .sto-row', { hasText: 'MM-1006' }).click();
+    const sh = page.locator('#sto-modal [role="dialog"]');
+    const before = seen.filter((c) => c.name === 'staff_store_orders').length;
+    await sh.locator('button', { hasText: 'Create SMSA label' }).click();
+    await expect(sh.locator('.sto-err')).toContainText('This order has moved on meanwhile');
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_store_orders').length).toBeGreaterThan(before);
   });
 
   test('a gift order shows its note and prints a slip without prices; a return request is decided from the sheet', async ({ page }) => {
