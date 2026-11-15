@@ -2817,6 +2817,7 @@
   "spotsLeft_few": "{0} puwesto na lang",
   "spotsLeft_many": "{0} puwesto na lang",
   "spotsLeft_other": "{0} puwesto na lang",
+  "fewSpots": "Kaunting puwesto na lang",
   "errSomethingWrong": "Hindi ito gumana, at natanggap namin ang mga detalye. Pakisubukan ulit.",
   "errQNumTaken": "Ginagamit na ang numerong iyon ng ibang booking.",
   "errLoginFirst": "Mag-log in muna.",

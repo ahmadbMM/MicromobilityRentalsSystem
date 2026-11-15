@@ -1916,6 +1916,24 @@ date from riders; this state stops bookings and keeps the date in sight.
 - Tests: `tests/full-no-waitlist.spec.ts`. Website: the same on micromobility.sa (mm-platform 32504b7e: `lib/rides.ts`
   `fbkOf`, Experiences and Events).
 
+## Few spots left (2026-11-15)
+The user: "in the farmhouse session show everywhere that there are few spots remaining on the event card too". A ride
+staff approve never counts its places out loud, and a ride that counts says "N spots left" only at three or fewer, so
+the Farmhouse Night (79 of 130 places held) said nothing about filling up.
+- **Stored**: `bike_slots._few` 1 beside `_time` (no column, no migration). `_sessFew(s)` = live, not full, marked.
+- **Staff**: a "Few spots left" switch on both session forms (`_fewSessSwitch`, `#es-few` / `#ns-few`, class
+  `few-sess`); the edit form opens on what the date has and its save keeps or drops the mark (`_fewSlot`, the editor
+  rebuilds `bike_slots` from scratch, so a mark set only in the database would vanish on the next save). A template
+  push keeps each night's own; a copied week and a clone start without it.
+- **Riders** (`fewSpots`, all 10 languages): the event picker's Featured card (`_featCardHtml`), the date's card in its
+  list (the plain card, and Defe's, yoga's and the farm's own via `o.few`), Details (Places: Few spots left, approval
+  ride or not; on a ride that counts, in place of a count above three) and the farm's booking plate (`.fh-flow-few`,
+  until booked). A count of three or fewer, the waitlist, Fully booked, not open yet and the rider's own mark all say
+  theirs first. On the rust farm cards every status is milk (`:is(.sess-card.fh-card,.feat-card.feat-fh)
+  .sess-card-spots`): the system strips a status's chip and its amber or red read under 3:1 on rust.
+- Tests: `tests/few-spots.spec.ts`. Website: `lib/rides.ts` `fewOf`, the date card's and Featured card's status
+  (`stateOf`), Details (`infoPlaces`), `src/lib/__tests__/few-spots.test.ts`.
+
 ## Blood Donation event (2026-11-03)
 - **Blood Donor badge (2026-11-05):** `blood_donor`, the drop on the red medal, earned from staff's Donated mark (`donatedAt`), so taking the mark back takes the badge; shown only once held. **Volunteer badge:** `volunteer`, the raised hand on its own blue special medal (`BDG_SPECIAL.volunteer`, `.sp-volunteer`), given by staff from Community > Badges. Catalogue rows: migration 20261105100000. Mirrored in the website's `lib/ride-record.ts`.
 - **Blood Donation Visitor badge (2026-11-06):** `blood_visitor`, the drop's outline with a heart inside on the teal medal (glyph `dropo`), earned by everyone who came, donors and visitors alike: any booking on a `blood` session that staff checked out (status done), or one marked Donated (the owner, 2026-11-06: "the blood donation visitor badge give it to donors and visitors"); Blood Donor stays with those marked Donated only. Shown only once held. Catalogue row in migration 20261106100000.

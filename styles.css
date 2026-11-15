@@ -12257,6 +12257,7 @@ html[dir="rtl"] .fh-flow-head{background:linear-gradient(225deg,var(--fh-rust-lt
 .fh-flow-name{font-family:'Rubik','IBM Plex Sans Arabic',sans-serif;font-size:19px;font-weight:800;color:var(--fh-peach);line-height:1.2;overflow-wrap:anywhere;}
 .fh-flow-sub{margin-top:3px;font-size:12.5px;font-weight:700;color:var(--fh-milk);}
 /* the venue's Instagram on the plate while booking: milk on the rust (peach is under 4.5:1 at this size), underlined */
+.fh-flow-few{display:block;width:fit-content;margin-top:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:800;background:var(--fh-milk);color:var(--fh-rust-dk);}
 .fh-flow-ig{display:inline-flex;align-items:center;gap:6px;min-height:28px;margin-top:4px;font-size:13px;font-weight:700;color:var(--fh-milk);text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere;}
 .fh-flow-ig svg{width:16px;height:16px;flex:none;color:var(--fh-peach);}
 .fh-flow-ig:focus-visible{outline:2px solid var(--fh-peach);outline-offset:2px;border-radius:4px;}
@@ -12284,6 +12285,8 @@ body:not(.view-staff) .feat-card.feat-fh:focus-visible{outline-color:var(--fh-pe
 .feat-fh .feat-meta>span:not(.sess-card-spots)::before{background:rgba(243,199,169,.5);}
 .feat-fh .feat-foot>span:nth-child(2):not(.sess-card-spots){color:var(--fh-peach-lt);font-weight:700;}
 .feat-fh .sess-card-spots{background:var(--fh-milk);color:var(--fh-rust-dk);padding:2px 8px;border-radius:999px;}
+/* a status on the rust (Few spots left, Waitlist, the rider's own place) in milk: the system strips a status's chip and the amber or red it wears reads under 3:1 on rust; milk is 5.1:1 on the lightest rust */
+body:not(.view-staff) :is(.sess-card.fh-card,.feat-card.feat-fh) .sess-card-spots{color:var(--fh-milk);}
 .feat-fh .feat-go{color:var(--fh-peach);}
 /* staff: the date's chip and the Bookings row's colour */
 body.view-staff :is(.sess-summary-chip,.sess-lc).th-farm{
