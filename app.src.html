@@ -1170,6 +1170,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   errBikeInUse:'Cannot change status while in use.',errBikeHasHistory:'This bike has been handed out before, so its record stays: retire it instead of deleting it.',pinRequiredMsg:'The PIN approval has expired. Enter the PIN again.',
   toastAccountCreated:'Account created.',
   toastWelcomeBack:'Welcome back',
+  bdfxHi:'Happy birthday, {0}!',
   toastLoggedOut:'You’re signed out.',
   toastStaffPanel:'Welcome to the staff panel.',
   toastBookingCancelled:'Booking cancelled. Your spot has been freed.',
@@ -1855,6 +1856,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   errBikeInUse:'لا يمكن التغيير والدراجة قيد الاستخدام.',errBikeHasHistory:'سُلّمت هذه الدراجة من قبل، فسجلها يبقى: أوقفها عن الخدمة بدلاً من حذفها.',pinRequiredMsg:'انتهت صلاحية موافقة الرمز السري. أدخل الرمز مرة أخرى.',
   toastAccountCreated:'تم إنشاء الحساب.',
   toastWelcomeBack:'مرحباً بعودتك',
+  bdfxHi:'كل عام وأنت بخير يا {0}!',
   toastLoggedOut:'سجّلت الخروج.',
   toastStaffPanel:'مرحباً بك في لوحة الموظفين.',
   toastBookingCancelled:'تم إلغاء الحجز، وأصبح مكانك متاحًا لغيرك.',
@@ -4832,6 +4834,85 @@ function _custSeen(c){
   }catch(_){}
 }
 try{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S&&S.loggedIn)_custSeen();});}catch(_){}
+// ── Birthday week (2026-11-15) ──────────────────────────────────────────────────────────────
+// The user: "in birthday week of the customer make the screen throw confetti from the top to the
+// bottom of the page everytime he opens the website". Their picks that day: the week is the three
+// days before the birthday, the day and the three after (Saudi dates, the birthday in the middle);
+// a "Happy birthday, {name}!" line comes with it; micromobility.sa does the same (mm-platform,
+// components/BirthdayConfetti.tsx). It plays for a signed-in rider whose birth date is saved, once
+// each time the app is opened: the boot, a sign-in on the page (sign-up asks no birth date), and the app brought back after half
+// an hour away (an installed app is resumed, not loaded again). Never on a staff device. Taps go
+// through it, and it is gone in a few seconds; with reduced motion on, the line comes alone.
+// A 29 February birthday is kept on 28 February in other years, as Community > Birthdays keeps it.
+const BDFX_SPAN=3,BDFX_AWAY_MS=30*60*1000;
+const BDFX_COLS=['#077A4B','#03FF89','#F2B43F','#FF6B8B','#4AA8FF','#1A1919'];
+function _bdfxOn(birth,today){
+  const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(birth||''));if(!m)return false;
+  const bm=+m[2],bd=+m[3],t0=Date.parse(String(today||'')+'T00:00:00Z');
+  if(bm<1||bm>12||bd<1||bd>31||isNaN(t0))return false;
+  const ty=+today.slice(0,4);
+  // the birthday of the year before and after too: 30 December is in the week of a 2 January birthday
+  return [ty-1,ty,ty+1].some(y=>{const leap=(y%4===0&&y%100!==0)||y%400===0;return Math.abs(Date.UTC(y,bm-1,bm===2&&bd===29&&!leap?28:bd)-t0)<=BDFX_SPAN*864e5;});
+}
+let _bdfxFor='',_bdfxAway=0;
+function _bdfx(){
+  try{
+    const c=S.loggedIn||getSession();
+    if(!c||!c.id||!c.birth_date||_bdfxFor===c.id||S.view==='staff'||_isStaffHost())return;
+    try{if(localStorage.getItem('cq_staff')==='1')return;}catch(_){}
+    if(navigator.webdriver&&!window.__bdfx)return; // the suite's riders carry fixed birth dates: only the birthday spec asks for it
+    if(!_bdfxOn(c.birth_date,todayStr()))return;
+    _bdfxFor=c.id;
+    _bdfxHi(c);
+    let still=false;try{still=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(_){}
+    if(!still)_bdfxRain();
+  }catch(_){}
+}
+// The line, in the middle of the screen; its look and its fade are in styles.css (.bdfx-hi).
+function _bdfxHi(c){
+  const first=String(c.name||'').trim().split(/\s+/)[0];if(!first)return;
+  const parts=t('bdfxHi').split('{0}'),d=document.createElement('div');
+  d.className='bdfx-hi';d.setAttribute('role','status');
+  d.innerHTML=`${_cuIc('cake',24)}<span>${esc(parts[0])}<bdi>${esc(first)}</bdi>${esc(parts.slice(1).join(''))}</span>`;
+  document.body.appendChild(d);
+  const gone=()=>d.remove();d.addEventListener('animationend',gone);setTimeout(gone,4800); // the timer alone with reduced motion (no animation)
+}
+// The confetti: a canvas over the whole screen. Every piece starts above the top edge and falls
+// out past the bottom, swaying and turning over as paper does; the canvas goes with the last one.
+function _bdfxRain(){
+  const cv=document.createElement('canvas'),ctx=cv.getContext&&cv.getContext('2d');if(!ctx)return;
+  cv.className='bdfx-cv';cv.setAttribute('aria-hidden','true');document.body.appendChild(cv);
+  const dpr=Math.min(2,window.devicePixelRatio||1);let W=0,H=0;
+  const size=()=>{W=window.innerWidth;H=window.innerHeight;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);};
+  size();window.addEventListener('resize',size);
+  const R=Math.random,n=Math.round(Math.min(220,Math.max(100,W*H/4200))),P=[];
+  for(let i=0;i<n;i++){
+    const k=R()<.22?1:R()<.3?2:0,w=k===1?5+R()*4:k===2?3+R()*1.5:6+R()*5;
+    P.push({k,w,h:k===2?14+R()*10:w*(1.3+R()*.6),c:BDFX_COLS[i%BDFX_COLS.length],x:R()*W,y:-24-R()*H*.5,
+      vy:(H+48)/(2.2+R()*1.6),vx:(R()-.5)*40,sa:18+R()*36,sw:1.5+R()*2.5,rot:R()*6.283,vr:(R()-.5)*7,fl:4+R()*6,ph:R()*6.283});
+  }
+  const t0=performance.now();let last=t0;
+  const end=()=>{window.removeEventListener('resize',size);cv.remove();};
+  const step=now=>{
+    const dt=Math.min(.05,(now-last)/1000),s=(now-t0)/1000;last=now;
+    ctx.clearRect(0,0,W,H);let left=0;
+    for(const p of P){
+      p.y+=p.vy*dt;p.x+=(p.vx+Math.sin(s*p.sw+p.ph)*p.sa)*dt;p.rot+=p.vr*dt;
+      if(p.y>H+30)continue;left++;if(p.y<-30)continue;
+      const f=Math.cos(s*p.fl+p.ph);
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.scale(1,Math.abs(f)<.08?.08:f);ctx.fillStyle=p.c;
+      if(p.k===1){ctx.beginPath();ctx.arc(0,0,p.w/2,0,6.283);ctx.fill();}else ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    }
+    if(left&&s<9)requestAnimationFrame(step);else end();
+  };
+  requestAnimationFrame(step);
+}
+try{document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'){_bdfxAway=Date.now();return;}
+  if(_bdfxAway&&Date.now()-_bdfxAway>=BDFX_AWAY_MS&&_bootDone){_bdfxFor='';_bdfx();}
+  _bdfxAway=0;
+});}catch(_){}
 function setSession(c){
   try{_custSeen(c);}catch(_){}
   // Storage can THROW (Safari "Block All Cookies", old private mode, quota). The customer
@@ -7623,6 +7704,7 @@ async function doLogin(){
       closeAuthModal();prefillFromAccount();renderTopbarRight();renderRegister();renderMyRides();if(S.view!=='customer'){renderCustomerTabs();goLanding();} // signing in on the link lands on PICK YOUR EVENT, sections bar ready
       // No device log entry (2026-10-05): it kept the rider's name on a shared tablet; the server records the sign-in (customer_activity).
       toast(`${t('toastWelcomeBack')}, ${customer.name}!`);
+      _bdfx();
       return;
     }
   }catch(e){_authFail('exception',e);}
@@ -29853,6 +29935,8 @@ function _artIcon(kind,px){
 // in for an icon (the week streak's flame emoji broke the no-emoji rule). _cuIc(name, px); currentColor inks
 // it; .cu-ic-flip mirrors the ones that point along the line of reading in Arabic and Urdu.
 const _CU={
+  // the birthday week's line (_bdfxHi, 2026-11-15): one candle on a two-layer cake, icing along the top layer
+  cake:'<path d="M12 6.2v3.3M12 2.6c.9.9 1.2 1.7.6 2.3a.85.85 0 0 1-1.2 0c-.6-.6-.3-1.4.6-2.3ZM4.5 20.6v-8.4a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8.4M4.5 14.4c1.25.9 2.5.9 3.75 0s2.5-.9 3.75 0 2.5.9 3.75 0 2.5-.9 3.75 0M2.8 20.6h18.4"/>',
   // a Petromin night's three speed stripes, its kind's mark (2026-11-13)
   stripes:'<path d="M4 18 9 6M10 18l5-12M16 18l5-12"/>',
   // the account menu's rows (2026-11-10)
@@ -75948,6 +76032,7 @@ function _bikeHereInstead(code,kind){try{sessionStorage.setItem('cq_bike_here','
   if(_afxTok&&!_isStaffUrl)try{_afxOpen(_afxTok);}catch(e){}
   if(_wlcTok&&!_isStaffUrl)try{_wlcOpen(_wlcTok);}catch(e){}
   if(_lapScan&&!_isStaffUrl)try{_lapLoad();}catch(e){}
+  if(!_isStaffUrl&&target!=='staff'&&target!=='pin')_bdfx(); // the birthday week's confetti, each time the app opens
 })();
 
 

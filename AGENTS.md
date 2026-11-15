@@ -4184,3 +4184,19 @@ the way all graphs and tables and visualizations are aligned and their design".
   hover/tap/arrows (`_ckInit`) and "Show the numbers" under each chart. Ranked bars are one colour (`_ckBarC` keeps a red or
   amber status) on one grid per row. Every staff table lines its quantities up at the end (`_ckAlignTables`, from
   `goStaff`); a table that lays itself out says `data-noalign`.
+
+## The birthday week (2026-11-15)
+
+The user: "in birthday week of the customer make the screen throw confetti from the top to the bottom of the page
+everytime he opens the website". Their picks: the week is the 3 days before the birthday, the day and the 3 after
+(Saudi dates, `todayStr()`; 29 February is kept on 28 February in a common year), with a "Happy birthday, {name}!"
+line (`bdfxHi`), on micromobility.sa too (mm-platform `components/account/BirthdayConfetti.tsx`, `lib/birthday.ts`,
+`GET /api/account/birthday`, which reads the account on the server and sends only on/off and the first name).
+- `_bdfx()` plays it for a signed-in rider whose birth date is saved: at the boot (not on a staff view, the PIN screen or a
+  staff device), after a sign-in on the page, and when the app comes back after 30 minutes away. Once per open per account.
+- `_bdfxRain()` is a full-screen canvas (`.bdfx-cv`, pointer-events none) whose pieces fall from above the top edge out
+  past the bottom and remove it; `_bdfxHi()` is the centred line (`.bdfx-hi`, the rider set's monoline `cake`). With
+  reduced motion the line comes alone and stands still (the page-wide rule cuts animations to 1e-5s, so it carries
+  `animation:none!important` and a timer takes it).
+- Under webdriver it plays only when `window.__bdfx` is set, so the suite's fixed test birth dates never put confetti on
+  another spec's page. `tests/birthday-confetti.spec.ts`.

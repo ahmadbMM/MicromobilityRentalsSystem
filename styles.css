@@ -5277,6 +5277,21 @@
     body:not(.view-staff) .toast.error::before{background:#ff6f66;}
     body:not(.view-staff) .toast.warning::before{background:#f2b43f;}
 
+    /* ── Birthday week (2026-11-15, _bdfx): confetti over everything, the line in the middle, taps go through both ── */
+    .bdfx-cv{position:fixed;inset:0;width:100%;height:100%;z-index:100000;pointer-events:none;}
+    .bdfx-hi{position:fixed;left:50%;top:50%;z-index:100001;transform:translate(-50%,-50%);display:flex;align-items:center;gap:12px;
+      width:max-content;max-width:min(86vw,440px);padding:18px 24px;border-radius:26px;
+      background:#1A1919;color:#FBF9F4;font-size:21px;font-weight:700;line-height:1.3;text-align:start;
+      box-shadow:0 0 0 1px rgba(251,249,244,.16),0 8px 28px rgba(26,25,25,.30);pointer-events:none; /* the ring holds it on a dark page or sheet */
+      animation:bdfxHi 4.6s cubic-bezier(.2,.8,.2,1) both;}
+    .bdfx-hi .cu-ic{flex:none;color:#03FF89;}
+    @keyframes bdfxHi{
+      0%{opacity:0;transform:translate(-50%,-50%) scale(.9);}
+      10%,84%{opacity:1;transform:translate(-50%,-50%) scale(1);}
+      100%{opacity:0;transform:translate(-50%,-50%) scale(.98);}}
+    /* the page-wide rule above cuts every animation to 1e-5s, which would take the line away at once: it stands still and _bdfxHi's timer takes it */
+    @media (prefers-reduced-motion:reduce){.bdfx-hi{animation:none!important;}}
+
     /* ── Modals: 18px, in the middle of the screen on a phone too ─────────── */
     body:not(.view-staff) .modal-backdrop,
     body:not(.view-staff) .auth-backdrop,
