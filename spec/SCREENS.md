@@ -66,7 +66,7 @@ Each has a `title` and an `aria-label` ending "(opens in a new tab)".
 
 | Element | Purpose |
 |---|---|
-| `#loading-screen` | The brand loading state (`.mm-loading`): `#1A1919` ground, neon `#03FF89` mark in a rotating ring. Textless; `aria-label` ("Loading" / "جارٍ التحميل" / "Cargando" …) is set **before the app script parses**. Min 250 ms on screen, 180 ms fade. Auto-hides after **5 s** even if boot stalls. `window.mmLoading.show()/.hide()` drives every other full-screen wait |
+| `#loading-screen` | The brand loading state (`.mm-loading`), "Ride the line": paper `#FBF9F4` ground, the mark at 16% `#077A4B` as a road and a light (14 dots, transform and opacity only) riding its line every 2.1 s; `#1A1919` and neon `#03FF89` under the dark staff theme; no light and the mark at 50% under reduced motion. The iPhone launch images in `splash/` are its first frame. Textless; `aria-label` ("Loading" / "جارٍ التحميل" / "Cargando" …) is set **before the app script parses**. Min 250 ms on screen, 180 ms fade. Auto-hides after **5 s** even if boot stalls. `window.mmLoading.show()/.hide()` drives every other full-screen wait |
 | `#toast-container` | `role="status" aria-live="polite"`. `toast(msg, kind)` — kinds: default (green edge), `error` (red), `warning` (grey) |
 | Undo bar (`#undo-bar-btn`) | `showUndoBar()` — appears after every destructive staff action with a countdown; copy `undoBtn`, `undoneMsg`, `undoFailed` |
 | `#confirm-modal` | Generic confirm dialog (`confirmDialog({title, body, confirmLabel, confirmClass, onConfirm})`). **`z-index:300`** so it outranks whatever raised it |

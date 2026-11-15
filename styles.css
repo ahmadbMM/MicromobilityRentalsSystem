@@ -1591,48 +1591,72 @@
     .queue-table tbody tr.row-noshow-cancel td{border-bottom-color:rgba(var(--red-rgb),.12)!important;}
     .queue-table tbody tr.row-done-paid{background:rgba(var(--green-rgb),.05);}
     /* ── Brand loading state ──────────────────────────────────────────────────
-       A flat ground with a neon mark inside a rotating ring. The mark is a CSS MASK
-       over a white single-colour asset - that is what tints it green, and it is why
-       the ring and the mark size independently of each other. */
+       Ride the line (2026-11-15, the user's pick over the ring): the mark is one unbroken line, like a
+       route, and a light rides it from the foot of the first stem to the end of the foot, then comes
+       round again. The mark sits dim as the road. The light is 14 dots under the same CSS mask, each a
+       step behind the one before and fainter, so together they read as one light with a tail.
+       Only transform and opacity move. A phone runs those off the main thread, so the light keeps
+       riding while app.js compiles, which is when this screen is up; a line drawn with
+       stroke-dashoffset repaints on the main thread and would freeze right then.
+       The ground is the rider app's paper, so a rider goes from the launch image (splash/, drawn from
+       this screen's first frame) to the app with no dark frame between. A device in the dark staff
+       theme keeps a dark ground and the neon. The mark is never rotated (brand rule). */
     .mm-loading{--mm-mark:url('assets/brand-mark-white.svg');
-      /* --mm-ratio is the mark's share of the ring, and the only number that decides how big
-         the logo looks. Every size below sets the RING alone and the mark follows, so the five
-         variants can never drift out of proportion with each other again. */
-      --mm-ratio:.52;
+      /* --mm-w is the mark's width, the only size here; the sizes below set it alone. */
+      --mm-w:88px;--mm-ground:#FBF9F4;--mm-ink:#077A4B;--mm-road:.16;
       position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-      background:#1A1919;overflow:hidden;z-index:9999;transition:opacity .18s linear;}
-    .mm-loading__spinner{--mm-ring:132px;position:relative;width:var(--mm-ring);height:var(--mm-ring);display:inline-flex;align-items:center;justify-content:center;}
-    .mm-loading__ring{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(251,249,244,.12);border-top-color:#03FF89;animation:mmSpin 1s linear infinite;}
-    .mm-loading__mark{width:calc(var(--mm-ring)*var(--mm-ratio));height:calc(var(--mm-ring)*var(--mm-ratio));background:#03FF89;
+      background:var(--mm-ground);overflow:hidden;z-index:9999;transition:opacity .18s linear;}
+    html[data-staff-theme="dark"] .mm-loading:not(.mm-loading--inline){--mm-ground:#1A1919;--mm-ink:#03FF89;--mm-road:.2;}
+    .mm-loading__mark{position:relative;width:var(--mm-w);aspect-ratio:408/360;}
+    .mm-loading__road,.mm-loading__rider{position:absolute;inset:0;
       -webkit-mask:var(--mm-mark) center/contain no-repeat;mask:var(--mm-mark) center/contain no-repeat;}
+    .mm-loading__road{background:var(--mm-ink);opacity:var(--mm-road);}
+    /* A dot is 25.8 mark units across (the line is 23.8 of the mark's 201; the mask trims the rest).
+       The keyframes move its top-left corner in its own widths, which puts its centre on the line at
+       every size. They start below the first stem's end and finish past the foot's, both outside the
+       mask, so the light rides in and out instead of popping. Written by walking the line at an even
+       speed (the stems, three 15.4 bends and the 34.3 bend into the foot). */
+    .mm-loading__rider i{position:absolute;left:0;top:0;width:12.84%;aspect-ratio:1;border-radius:50%;
+      background:var(--mm-ink);animation:mmRide 2.1s linear infinite backwards;}
+    .mm-loading__rider i:nth-child(2){animation-delay:14ms;opacity:.5;}
+    .mm-loading__rider i:nth-child(3){animation-delay:28ms;opacity:.4;}
+    .mm-loading__rider i:nth-child(4){animation-delay:42ms;opacity:.32;}
+    .mm-loading__rider i:nth-child(5){animation-delay:56ms;opacity:.25;}
+    .mm-loading__rider i:nth-child(6){animation-delay:70ms;opacity:.2;}
+    .mm-loading__rider i:nth-child(7){animation-delay:84ms;opacity:.16;}
+    .mm-loading__rider i:nth-child(8){animation-delay:98ms;opacity:.12;}
+    .mm-loading__rider i:nth-child(9){animation-delay:112ms;opacity:.09;}
+    .mm-loading__rider i:nth-child(10){animation-delay:126ms;opacity:.07;}
+    .mm-loading__rider i:nth-child(11){animation-delay:140ms;opacity:.05;}
+    .mm-loading__rider i:nth-child(12){animation-delay:154ms;opacity:.035;}
+    .mm-loading__rider i:nth-child(13){animation-delay:168ms;opacity:.025;}
+    .mm-loading__rider i:nth-child(14){animation-delay:182ms;opacity:.015;}
+    @keyframes mmRide{0%{transform:translate(0.8%,701.9%)}18.15%{transform:translate(0.8%,61.2%)}18.59%{transform:translate(2.8%,45.8%)}19.03%{transform:translate(8.8%,31.4%)}19.47%{transform:translate(18.3%,19%)}19.91%{transform:translate(30.6%,9.5%)}20.35%{transform:translate(45%,3.6%)}20.8%{transform:translate(60.5%,1.6%)}21.24%{transform:translate(75.9%,3.6%)}21.68%{transform:translate(90.3%,9.5%)}22.12%{transform:translate(102.7%,19%)}22.56%{transform:translate(112.2%,31.4%)}23%{transform:translate(118.1%,45.8%)}23.44%{transform:translate(120.2%,61.2%)}36.71%{transform:translate(120.2%,529.5%)}37.15%{transform:translate(122.2%,544.9%)}37.59%{transform:translate(128.2%,559.3%)}38.03%{transform:translate(137.6%,571.7%)}38.47%{transform:translate(150%,581.2%)}38.91%{transform:translate(164.4%,587.1%)}39.35%{transform:translate(179.8%,589.1%)}39.8%{transform:translate(195.3%,587.1%)}40.24%{transform:translate(209.7%,581.2%)}40.68%{transform:translate(222.1%,571.7%)}41.12%{transform:translate(231.5%,559.3%)}41.56%{transform:translate(237.5%,544.9%)}42%{transform:translate(239.5%,529.5%)}55.26%{transform:translate(239.5%,61.2%)}55.71%{transform:translate(241.6%,45.8%)}56.15%{transform:translate(247.5%,31.4%)}56.59%{transform:translate(257%,19%)}57.03%{transform:translate(269.4%,9.5%)}57.47%{transform:translate(283.8%,3.6%)}57.91%{transform:translate(299.2%,1.6%)}58.35%{transform:translate(314.7%,3.6%)}58.79%{transform:translate(329.1%,9.5%)}59.24%{transform:translate(341.4%,19%)}59.68%{transform:translate(350.9%,31.4%)}60.12%{transform:translate(356.9%,45.8%)}60.56%{transform:translate(358.9%,61.2%)}71.74%{transform:translate(358.9%,455.8%)}72.72%{transform:translate(363.4%,490.2%)}73.7%{transform:translate(376.7%,522.3%)}74.69%{transform:translate(397.9%,549.8%)}75.67%{transform:translate(425.4%,570.9%)}76.65%{transform:translate(457.5%,584.2%)}77.63%{transform:translate(491.9%,588.8%)}86%{transform:translate(787.2%,588.8%)}to{transform:translate(787.2%,588.8%)}}
+    /* The button spinner (--spin-track, in the customer system) turns on this. */
     @keyframes mmSpin{to{transform:rotate(360deg);}}
     @media (max-width:400px){
-      .mm-loading__spinner{--mm-ring:112px;}
+      .mm-loading{--mm-w:76px;}
     }
     @media (min-width:1025px){
-      .mm-loading__spinner{--mm-ring:160px;}
+      .mm-loading{--mm-w:104px;}
     }
-    /* Landscape phone: the spinner stays centred. Never scroll, never letterbox - the
-       container is fixed and clipped, so there is nothing to do but keep the ring
-       inside a 480px-tall window. */
+    /* Landscape phone: the mark stays centred and the screen never scrolls. */
     @media (max-height:480px){
-      .mm-loading__spinner{--mm-ring:96px;}
+      .mm-loading{--mm-w:64px;}
     }
-    /* Reduced motion: no rotation. The ring reads as a complete green circle at 40%
-       so the screen still says "loading" rather than "finished". */
+    /* A low-memory phone (html.lite) rides with half the tail. */
+    html.lite .mm-loading__rider i:nth-child(n+8){display:none;}
+    /* Reduced motion: no light; the whole mark shows at half strength, so the screen still reads as
+       waiting rather than as a logo. */
     @media (prefers-reduced-motion: reduce){
-      .mm-loading__ring{animation:none;border-color:#03FF89;opacity:.4;}
+      .mm-loading__rider{display:none;}
+      .mm-loading__road{opacity:.5;}
     }
-    /* Inline variant - the in-panel wait that replaced the shimmer skeletons. It drops the
-       ground because it sits inside a staff panel that is white in one theme and near-black
-       in the other, so it borrows the panel's own tint instead. */
-    .mm-loading--inline{position:relative;inset:auto;z-index:0;background:none;min-height:220px;padding:36px 16px;}
-    .mm-loading--inline .mm-loading__spinner{--mm-ring:92px;}
-    /* A fixed neutral track, not a themed one: this block is injected into the staff panel,
-       the customer views and the landing, and each carries a different --tint. Mid-grey at 28%
-       reads on white and on near-black alike. */
-    .mm-loading--inline .mm-loading__ring{border-width:2px;border-color:rgba(128,130,128,.28);border-top-color:var(--green);}
-    .mm-loading--inline .mm-loading__mark{background:var(--green);}
+    /* Inline variant - the in-panel wait that stands in for a list. It drops the ground because it
+       sits inside a staff panel that is white in one theme and near-black in the other, and in the
+       rider views; the light takes the panel's own green. */
+    .mm-loading--inline{position:relative;inset:auto;z-index:0;background:none;min-height:220px;padding:36px 16px;
+      --mm-w:44px;--mm-ink:var(--green);--mm-road:.16;}
     .queue-table tbody tr.sess-group-hdr td{
       background:var(--s2);border-top:2px solid rgba(var(--green-rgb),.18);border-bottom:1px solid rgba(var(--tint-rgb),.06);
       padding:10px 16px;font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);letter-spacing:0;}

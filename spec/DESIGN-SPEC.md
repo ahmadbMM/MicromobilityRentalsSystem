@@ -329,7 +329,7 @@ font-size:12px; font-weight:700; color:var(--muted); line-height:1.6`.
 
 - `.empty-state` — centred, `52px 24px` padding, `--muted`, 14px/600, letter-spacing .1px.
 - `.empty-illustration` with `.empty-illus-icon` / `-title` / `-sub` / `-action`.
-- In-panel wait: `skeletonList()` renders `.mm-loading--inline` (the brand spinner, no ground),
+- In-panel wait: `skeletonList()` renders `.mm-loading--inline` (the riding light at 44px, no ground, in the panel's `--green`),
   gated on `S.dataLoaded` so it shows before the first load. It replaced the `.sk-row` shimmer bars.
 - `.rides-empty`, `.rides-zero`, `.no-sessions-msg`.
 

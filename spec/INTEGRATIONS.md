@@ -171,7 +171,7 @@ function _isUnreachable(){ return !!S._netDown && navigator.onLine !== false; }
 
 `name` "MicroMobility Rentals", `short_name` "MM Rentals", `start_url` `./`, `scope` `./`,
 `display` **standalone**, `orientation` **portrait**, `background_color` and `theme_color`
-both `#08090b`, icons 192/512 plus a 512 `maskable`.
+both `#FBF9F4` (the loading screen's paper, since 2026-11-15), icons 192/512 plus a 512 `maskable`.
 
 ### 3.2 Service worker ([service-worker.js](../service-worker.js))
 

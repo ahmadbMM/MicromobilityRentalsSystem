@@ -16,8 +16,10 @@ in [SCREENS.md](SCREENS.md).
    site renders with) and clears any stored theme preference from earlier builds.
 2. It also reads `?lang=` or `localStorage.cq_lang`; for `ar` it sets `dir="rtl"` immediately and
    **starts fetching `lang/ar.json`** before the app script parses.
-3. `#loading-screen` shows the brand loading state: the `#1A1919` ground and a neon-green mark
-   inside a rotating ring. No text — the chosen language only sets the container's `aria-label`.
+3. `#loading-screen` shows the brand loading state, "Ride the line": the rider app's paper ground,
+   the mark dim as a road and a green light riding its line (a dark ground and neon on a device in
+   the dark staff theme). On an installed iPhone the launch image is this screen's first frame.
+   No text — the chosen language only sets the container's `aria-label`.
    - **[AUTO]** If boot stalls, the loading screen force-hides after **5 seconds**.
    - It stays up for at least **250 ms** and fades out over **180 ms**, so a fast load does not flash.
 4. `_sbReady` waits for supabase-js.

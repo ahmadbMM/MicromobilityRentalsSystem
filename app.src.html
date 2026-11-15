@@ -138,18 +138,21 @@
   <!-- iOS PWA launch (splash) screens, per device. iOS shows one only when its pixel size is
        exactly the device's screen (width x height x pixel ratio, the size in the file name);
        the dark set was once exported at twice that, so every one was ignored. ?v= moves with
-       the bytes, since /splash/ is cached as immutable. -->
-  <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/iphone-640x1136.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/iphone-750x1334.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/iphone-828x1792.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1125x2436.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1170x2532.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1179x2556.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1206x2622.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1242x2688.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1284x2778.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1290x2796.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1320x2868.png?v=2">
+       the bytes, since /splash/ is cached as immutable. Since 2026-11-15 (v=3) each one is the
+       loading screen's first frame: the paper ground and the dim mark, at the size the loading
+       screen gives that width, half a status bar below the screen's centre because the page
+       starts under the bar. -->
+  <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/iphone-640x1136.png?v=3">
+  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/iphone-750x1334.png?v=3">
+  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/iphone-828x1792.png?v=3">
+  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1125x2436.png?v=3">
+  <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1170x2532.png?v=3">
+  <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1179x2556.png?v=3">
+  <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1206x2622.png?v=3">
+  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1242x2688.png?v=3">
+  <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1284x2778.png?v=3">
+  <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1290x2796.png?v=3">
+  <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1320x2868.png?v=3">
   <!-- crossorigin because the loading screen uses this file as a CSS mask, and masks are
        fetched in CORS mode: without it the preload's credentials mode differs, Chromium
        discards it and fetches the mark a second time. -->
@@ -168,9 +171,11 @@
 <body>
 <button type="button" id="skip-main" class="skip-link" data-on-click='["_skipToMain"]'>Skip to content</button>
 <div id="loading-screen" class="mm-loading" role="status" aria-live="polite" aria-label="Loading">
-  <div class="mm-loading__spinner" aria-hidden="true">
-    <span class="mm-loading__ring"></span>
-    <span class="mm-loading__mark"></span>
+  <!-- Ride the line: the dim mark is the road, the 14 dots are one light with a tail (styles.css,
+       "Brand loading state"). skeletonList() writes the same markup for the in-panel wait. -->
+  <div class="mm-loading__mark" aria-hidden="true">
+    <span class="mm-loading__road"></span>
+    <span class="mm-loading__rider"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
   </div>
   <script>try{var _ql=new URLSearchParams(location.search).get('lang');var _ok=['en','ar','fr','es','pt','ur','hi','tl','ne','bn'];var _sv=localStorage.getItem('cq_lang');if(_ok.indexOf(_sv)<0||(_sv==='en'&&localStorage.getItem('cq_lang_pick')!=='1'))_sv='';var _bl=_ok.indexOf(_ql)>=0?_ql:_sv;if(!_bl){var _nl=navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||''];for(var _i=0;_i<_nl.length&&!_bl;_i++){var _c=String(_nl[_i]||'').toLowerCase();if(_c==='fil'||_c.indexOf('fil-')===0)_c='tl';_c=_c.split('-')[0];if(_ok.indexOf(_c)>=0)_bl=_c;}}if(_bl){document.documentElement.lang=_bl;if(_bl==='ar'||_bl==='ur')document.documentElement.dir='rtl';}
   // The screen carries no text now, but its accessible name is still announced, and it is
@@ -34653,7 +34658,7 @@ function _contactCell(phone,entry){
 
 // The in-panel wait. It is the same component as the full-screen one, minus the ground, so a
 // tab that is still fetching reads as the brand rather than as grey bars.
-function skeletonList(){return`<div class="mm-loading mm-loading--inline" role="status" aria-live="polite" aria-label="${esc(t('loadingLabel'))}"><div class="mm-loading__spinner" aria-hidden="true"><span class="mm-loading__ring"></span><span class="mm-loading__mark"></span></div></div>`;}
+function skeletonList(){return`<div class="mm-loading mm-loading--inline" role="status" aria-live="polite" aria-label="${esc(t('loadingLabel'))}"><div class="mm-loading__mark" aria-hidden="true"><span class="mm-loading__road"></span><span class="mm-loading__rider">${'<i></i>'.repeat(14)}</span></div></div>`;}
 // ── Staff walk-in: create a queue entry on the spot (no customer account) so walk-ups can rent bikes and buy items ──
 
 // ── Community "Add rider": staff hand-pick registered customers onto a Saturday session ──
