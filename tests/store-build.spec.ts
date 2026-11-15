@@ -203,6 +203,105 @@ test.describe('@staff:store the order sheet: out for delivery, the SMSA label, a
   });
 });
 
+// Void cards and refund (the owner, 2026-11-15; staff_store_order_gift_refund): a gift card order is delivered at once and
+// has no Cancel, and refunding its payment would leave the codes to spend. The sheet offers one step that voids the cards
+// still holding a balance and refunds only what is left on them, with the figures the server gives (gift_refund).
+test.describe('@staff:store Void cards and refund', () => {
+  const json = (body: unknown) => ({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const card = (id: string, code: string, x: Record<string, unknown> = {}) =>
+    ({ id, code, amount: 100, balance: 100, status: 'active', expires_at: '2027-11-15T09:00:00Z', masked: false, ...x });
+  // the server's answers: the order as it is, then as the action leaves it (also what a re-read finds afterwards)
+  async function server(page: Page, before: Record<string, unknown>, after: Record<string, unknown>) {
+    let done = false;
+    await page.route(/\/rest\/v1\/rpc\/staff_store_orders/, (r) => r.fulfill(json([done ? after : before])));
+    await page.route(/\/rest\/v1\/rpc\/staff_store_order_gift_refund/, (r) => { done = true; return r.fulfill(json(after)); });
+  }
+
+  test('a gift card order: no Cancel; the unspent value shown, voided and refunded as a refund owed the sheet then sends', async ({ page }) => {
+    const seen = rpcCalls(page);
+    const o = order('o7', 1007, 'delivered', { fulfil: 'digital', delivered_at: NOW, subtotal: 200, total: 200, vat: 0,
+      items: [{ id: 21, name: 'Gift card', variant: null, qty: 2, unit_price: 100, product_id: 'gc', variant_id: 'vgc', image: null, slug: 'gift-card', gift_card: true, reviewed: false }],
+      gift_cards: [card('g1', 'GC-AAAA-BBBB-CCCC'), card('g2', 'GC-DDDD-EEEE-FFFF', { balance: 40 })],
+      gift_refund: { cards: 2, unspent: 140, refund: 140, card: 140, wallet: 0 } });
+    const after = { ...o, gift_cards: [card('g1', 'GC-AAAA-BBBB-CCCC', { status: 'void', balance: 0 }), card('g2', 'GC-DDDD-EEEE-FFFF', { status: 'void', balance: 0 })],
+      gift_refund: { cards: 0, unspent: 0, refund: 0, card: 0, wallet: 0 }, refunds: [{ id: 'rf7', amount: 140, dest: null, status: 'due', at: NOW }],
+      events: [...(o.events as unknown[]), { at: NOW, status: 'gift_void', note: '140.00 SAR', by: 'Spec Staff', public: false }] };
+    await staff(page, { 'rpc:staff_store_orders': [o] });
+    await server(page, o, after);
+    await page.evaluate(`setStaffTab('store')`);
+    await page.locator('#tab-store .sto-pills .filter-pill', { hasText: 'All' }).click();
+    await page.locator('#tab-store .sto-row', { hasText: 'MM-1007' }).click();
+    const sh = page.locator('#sto-modal [role="dialog"]');
+    await expect(sh.locator('button', { hasText: 'Cancel order' })).toHaveCount(0);
+    await expect(sh.locator('button', { hasText: /^Refund…$/ })).toHaveCount(0); // nothing owed: no plain refund of a gift card order
+    await sh.locator('button', { hasText: 'Void cards and refund…' }).click();
+    const form = sh.locator('.sto-form');
+    await expect(form.locator('.sto-kv', { hasText: 'Gift cards to void' })).toContainText('2');
+    await expect(form.locator('.sto-kv', { hasText: 'Unspent' })).toContainText('SAR 140');
+    await expect(form.locator('.sto-kv', { hasText: 'To refund' })).toContainText('SAR 140');
+    await sh.locator('.sto-acts button', { hasText: /^Void cards and refund$/ }).click();
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_store_order_gift_refund').length).toBe(1);
+    expect(seen.find((c) => c.name === 'staff_store_order_gift_refund')!.body).toEqual({ p_order: 'o7', p_op: 'Spec Staff', p_approval: null });
+    await expect(page.locator('.toast').last()).toContainText('MM-1007: gift cards voided');
+    await expect(sh.locator('.sto-due')).toContainText('Refund owed: SAR 140');
+    await expect(sh.locator('button', { hasText: 'Void cards and refund…' })).toHaveCount(0);
+    await expect(sh.locator('button', { hasText: /^Refund…$/ })).toBeVisible(); // the refund owed, sent from the sheet
+    await expect(sh.locator('.sto-tl li', { hasText: 'Gift cards voided' })).toContainText('Gift cards voided · 140.00 SAR');
+    await expect(sh).toContainText('GC-AAAA-BBBB-CCCC');
+  });
+
+  test("a mixed order over the manager limit asks a manager's PIN; staff without the refund right are not offered it", async ({ page }) => {
+    const seen = rpcCalls(page);
+    const o = order('o8', 1008, 'paid', { subtotal: 400, total: 400, wallet_paid: 350,
+      items: [{ id: 31, name: 'Trail lamp', variant: null, qty: 1, unit_price: 200, product_id: 'pl', variant_id: 'vl', image: null, slug: 'trail-lamp', gift_card: false, reviewed: false },
+        { id: 32, name: 'Gift card', variant: null, qty: 1, unit_price: 200, product_id: 'gc', variant_id: 'vgc', image: null, slug: 'gift-card', gift_card: true, reviewed: false }],
+      // 50 of the card spent elsewhere: 150 back, 50 owed to the card (all it paid), 100 to the wallet
+      gift_cards: [card('g3', 'GC-GGGG-HHHH-JJJJ', { amount: 200, balance: 150 })], gift_refund: { cards: 1, unspent: 150, refund: 150, card: 50, wallet: 100 } });
+    const after = { ...o, gift_cards: [card('g3', 'GC-GGGG-HHHH-JJJJ', { amount: 200, status: 'void', balance: 0 })], gift_refund: { cards: 0, unspent: 0, refund: 0, card: 0, wallet: 0 } };
+    const ops = [{ name: 'Spec Staff', has_pin: false }, { name: 'Huda', has_pin: true }];
+    await staff(page, { 'rpc:staff_store_orders': [o], 'rpc:staff_operator_list': ops, 'rpc:staff_pin_approve': { ok: true, required: true, token: 'mgr-tok' } });
+    await server(page, o, after);
+    await page.evaluate(`S._opPins=${JSON.stringify(ops)};S._opPinsAt=Date.now();S._staffAuthed=true;S.staffOptions={...(S.staffOptions||{}),biz:{mgr_over:100,mgr_for:{refund:true},approvers:['Huda']}};_listOk.opts=true;_bizFromOpts();`);
+    await page.evaluate(`setStaffTab('store')`);
+    await page.locator('#tab-store .sto-row', { hasText: 'MM-1008' }).click();
+    const sh = page.locator('#sto-modal [role="dialog"]');
+    await expect(sh.locator('button', { hasText: 'Cancel order' })).toBeVisible(); // the goods keep their own way
+    await sh.locator('button', { hasText: 'Void cards and refund…' }).click();
+    await expect(sh.locator('.sto-form .sto-kv', { hasText: 'To refund' })).toContainText('SAR 150');
+    await sh.locator('.sto-acts button', { hasText: /^Void cards and refund$/ }).click();
+    const gate = page.locator('#op-gate-modal .op-gate');
+    await expect(gate).toContainText('Manager approval: Void cards and refund');
+    await expect(gate).toContainText('Huda'); // the one approver with a PIN, asked straight away
+    await page.evaluate(`_opgKey('1');_opgKey('2');_opgKey('3');_opgKey('4')`);
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_store_order_gift_refund').length).toBe(1);
+    expect(seen.find((c) => c.name === 'staff_store_order_gift_refund')!.body).toEqual({ p_order: 'o8', p_op: 'Huda', p_approval: 'mgr-tok' });
+    await expect(sh.locator('button', { hasText: 'Void cards and refund…' })).toHaveCount(0);
+    // staff without the refund right never see it
+    await page.evaluate(`_stoClose();S.staffRole='staff';S._myCaps={can_refund:false};`);
+    await page.route(/\/rest\/v1\/rpc\/staff_store_orders/, (r) => r.fulfill(json([o])));
+    await page.evaluate(`_stoLoad(true)`);
+    await page.locator('#tab-store .sto-row', { hasText: 'MM-1008' }).click();
+    await expect(sh.locator('button', { hasText: 'Delivered' }).or(sh.locator('button', { hasText: 'Preparing' })).first()).toBeVisible();
+    await expect(sh.locator('button', { hasText: 'Void cards and refund…' })).toHaveCount(0);
+  });
+
+  test('a refusal of the database is said in the form', async ({ page }) => {
+    const o = order('o9', 1009, 'delivered', { fulfil: 'digital', delivered_at: NOW, gift_cards: [card('g4', 'GC-KKKK-LLLL-MMMM')],
+      gift_refund: { cards: 1, unspent: 100, refund: 100, card: 100, wallet: 0 } });
+    await staff(page, { 'rpc:staff_store_orders': [o] });
+    await page.route(/\/rest\/v1\/rpc\/staff_store_order_gift_refund/, (r) => r.fulfill({ status: 403, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
+      body: JSON.stringify({ code: '42501', message: 'CAP_REFUND', details: null, hint: null }) }));
+    await page.evaluate(`setStaffTab('store')`);
+    await page.locator('#tab-store .sto-pills .filter-pill', { hasText: 'All' }).click();
+    await page.locator('#tab-store .sto-row', { hasText: 'MM-1009' }).click();
+    const sh = page.locator('#sto-modal [role="dialog"]');
+    await sh.locator('button', { hasText: 'Void cards and refund…' }).click();
+    await sh.locator('.sto-acts button', { hasText: /^Void cards and refund$/ }).click();
+    await expect(sh.locator('.sto-form .sto-err')).toBeVisible();
+    await expect(sh.locator('.sto-acts button', { hasText: /^Void cards and refund$/ })).toBeEnabled();
+  });
+});
+
 test.describe('@staff:store returns, back-in-stock requests, reviews', () => {
   const rets = [
     { id: 'rt1', order_id: 'o4', order_no: 1004, name: 'Huda Buyer', phone: '966501112233', kind: 'return', items: [{ item_id: 11, name: 'Trail helmet', variant: 'M', qty: 1, unit_price: 200 }],

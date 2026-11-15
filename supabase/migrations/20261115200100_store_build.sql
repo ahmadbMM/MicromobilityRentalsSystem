@@ -74,6 +74,12 @@
 --     codes (GC-••••-••••-<last 4>, masked true; amount, balance, status and expiry as before) unless
 --     store_order_get gets that key (new last argument p_gift, default null) or the signed-in account that placed the
 --     order reads customer_orders. Staff reads keep the whole codes, to send a lost one on WhatsApp.
+-- 12. Void cards and refund (the owner, 2026-11-15): a gift card order is delivered at once and has no Cancel, and a
+--     refund of an order's payment left the cards it bought spendable (paid twice). staff_store_order_gift_refund
+--     voids every card the order bought that still holds a balance and refunds only that unspent value, no more than is
+--     left of what the order paid (the card's part owed in Payments > Refunds, the wallet's at once), with the refund
+--     right, the PIN and a manager over the limit; a second call changes nothing. The staff copy of the order says what
+--     it would void and refund (gift_refund).
 --
 -- Rebuilt from the text in this repo (never prosrc): store_checkout 20261110235200 (6); _pay_apply 20261111235200 (2);
 -- _pay_release 20261110235200 (2); staff_store_order_cancel 20261110150000 with 20261110235500's patch (1);
@@ -629,6 +635,34 @@ language sql stable security definer set search_path = public as $$
 $$;
 revoke execute on function public._store_order_gifts(store_orders, boolean, boolean) from public, anon, authenticated;
 
+-- What "Void cards and refund" (staff_store_order_gift_refund, section 9) would do to an order now: the cards it bought
+-- that still hold a balance (cards), what is left on them (unspent), and the refund, which is that unspent value and no
+-- more than is left of what the order paid (its card payment less what came back or is on its way, as
+-- staff_store_return_decide counts it, and the wallet's part less what went back): card first, then wallet. The staff
+-- copy of the order carries it (gift_refund), so the sheet shows the figure before staff confirm.
+create or replace function public._store_gift_refund_plan(o store_orders) returns jsonb
+language plpgsql stable security definer set search_path = public as $$
+declare p payments%rowtype; n int; unspent numeric; card_room numeric := 0; wal_room numeric := 0; amt numeric; c numeric;
+begin
+  select count(*), coalesce(sum(g.balance), 0) into n, unspent
+    from store_gift_cards g where g.order_id = o.id and g.status = 'active' and g.balance > 0;
+  select * into p from payments where id = o.payment_id;
+  if p.id is not null and p.status in ('paid', 'partly_refunded') then
+    card_room := greatest(round(p.amount - p.refunded - coalesce((select sum(x.amount) from payment_refunds x
+                   where x.payment_id = p.id and x.provider_id is not distinct from p.provider_id
+                     and ((x.status = 'pending' and x.dest = 'card') or (x.status = 'done' and x.dest = 'wallet')
+                          or x.status in ('due', 'failed'))), 0), 2), 0);
+  end if;
+  if o.wallet_paid > 0 and o.customer_id is not null then
+    select greatest(coalesce(-sum(l.amount), 0), 0) into wal_room from wallet_ledger l
+     where l.receipt_id = 'ord-' || o.no and l.kind in ('sale', 'sale_back');
+  end if;
+  amt := round(least(unspent, card_room + wal_room), 2);
+  c := least(amt, card_room);
+  return jsonb_build_object('cards', n, 'unspent', unspent, 'refund', amt, 'card', c, 'wallet', amt - c);
+end $$;
+revoke execute on function public._store_gift_refund_plan(store_orders) from public, anon, authenticated;
+
 create or replace function public._store_order_json(o store_orders, p_staff boolean default false) returns jsonb
 language sql stable security definer set search_path = public as $$
   select jsonb_build_object(
@@ -664,6 +698,8 @@ language sql stable security definer set search_path = public as $$
     'invoice', case when o.invoice_no is not null then 'INV-' || case when length(o.invoice_no::text) >= 6 then o.invoice_no::text
                                                                     else lpad(o.invoice_no::text, 6, '0') end end,
     'gift_card_id', case when p_staff then o.gift_card_id end,
+    -- staff only: what Void cards and refund would void and refund now (null for an order that bought no gift cards)
+    'gift_refund', case when p_staff and exists (select 1 from store_gift_cards g where g.order_id = o.id) then _store_gift_refund_plan(o) end,
     'gift_card_code', case when p_staff then (select g.code from store_gift_cards g where g.id = o.gift_card_id) end,
     'delivered_at', (select e.at from store_order_events e where e.order_id = o.id and e.status = 'delivered' order by e.id limit 1),
     'returns', coalesce((select jsonb_agg(jsonb_build_object('id', r.id, 'kind', r.kind, 'status', r.status, 'items', r.items, 'reason', r.reason,
@@ -2057,6 +2093,58 @@ end $$;
 revoke execute on function public.staff_store_gift_card_extend(uuid, date, text, text) from public, anon;
 grant execute on function public.staff_store_gift_card_extend(uuid, date, text, text) to authenticated;
 
+-- Void cards and refund (the owner, 2026-11-15), for an order that bought gift cards: a gift card order is delivered at
+-- once, so it has no Cancel, and refunding its payment while its codes still work pays twice. One step instead: every card
+-- the order bought that still holds a balance is voided (balance zeroed, as staff_store_gift_card_void does; its 'void'
+-- move keeps the amount), and only that unspent value is refunded, never more than is left of what the order paid
+-- (_store_gift_refund_plan): the card's part as a refund owed on the order's payment (Payments > Refunds sends it, the
+-- existing flow), the wallet's at once, as a return's refund. What the cards already paid for elsewhere stays spent; of a
+-- mixed order only the gift cards' unspent value goes back. Admins or the refund right, the PIN, and a manager over the
+-- manager limit. A second call finds nothing to void and changes nothing. A staff-only order event 'gift_void' says the
+-- value voided (the customer reads the cards as void and the refunds as every refund).
+create or replace function public.staff_store_order_gift_refund(p_order uuid, p_op text default null, p_approval text default null)
+returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare o store_orders%rowtype; p payments%rowtype; g store_gift_cards%rowtype; plan jsonb; who text; amt numeric; c numeric; w numeric;
+begin
+  if not is_staff() then raise exception 'STAFF_ONLY' using errcode = '42501'; end if;
+  if not is_admin() and not _staff_cap('can_refund') then raise exception 'CAP_REFUND' using errcode = '42501'; end if;
+  if not _pin_ok(p_op, p_approval) then raise exception 'PIN_REQUIRED' using errcode = '42501'; end if;
+  select * into o from store_orders where id = p_order for update;
+  if o.id is null then raise exception 'NOT_FOUND' using errcode = 'P0002'; end if;
+  /* the cards locked first: a checkout spending one waits, and this reads what is left once it is done */
+  perform 1 from store_gift_cards where order_id = o.id and status = 'active' order by id for update;
+  plan := _store_gift_refund_plan(o);
+  if (plan ->> 'cards')::int = 0 then return _store_order_json(o, true); end if;
+  amt := (plan ->> 'refund')::numeric; c := (plan ->> 'card')::numeric; w := (plan ->> 'wallet')::numeric;
+  if amt > 0 and not _mgr_ok('refund', amt, p_approval) then raise exception 'MANAGER_REQUIRED' using errcode = '42501'; end if;
+  select left(coalesce(p_op, nullif(btrim(s.display_name), ''), 'Staff'), 60) into who from staff s where s.user_id = auth.uid();
+  who := coalesce(who, left(coalesce(p_op, 'Staff'), 60));
+  for g in select * from store_gift_cards where order_id = o.id and status = 'active' and balance > 0 order by created_at, code loop
+    insert into store_gift_card_moves (card_id, order_id, amount, kind, by_name) values (g.id, o.id, -g.balance, 'void', who);
+    update store_gift_cards set status = 'void', balance = 0, voided_at = now(), void_reason = 'voided and refunded' where id = g.id;
+  end loop;
+  if c > 0 then
+    select * into p from payments where id = o.payment_id;
+    insert into payment_refunds (payment_id, provider_id, amount, status, reason, order_id, by_user, by_name)
+    values (p.id, p.provider_id, c, 'due', 'gift cards voided', o.id, auth.uid(), who);
+    perform _pay_event(p.id, 'staff', 'refund_due', null, c::text);
+  end if;
+  if w > 0 then
+    perform set_config('mm.wallet_op', left(who, 40), true);
+    perform set_config('mm.wallet_note', 'gift cards voided MM-' || o.no, true);
+    perform _wallet_post(_wallet_owner(o.customer_id), w, 'sale_back', null, null, null, 'ord-' || o.no, null);
+    perform set_config('mm.wallet_op', '', true);
+    perform set_config('mm.wallet_note', '', true);
+    insert into store_order_events (order_id, status, note, by_name) values (o.id, 'refund', w::text || ' SAR · wallet', who);
+  end if;
+  insert into store_order_events (order_id, status, note, public, by_name)
+  values (o.id, 'gift_void', (plan ->> 'unspent') || ' SAR', false, who);
+  return _store_order_json(o, true);
+end $$;
+revoke execute on function public.staff_store_order_gift_refund(uuid, text, text) from public, anon;
+grant execute on function public.staff_store_order_gift_refund(uuid, text, text) to authenticated;
+
 -- ── Checks ────────────────────────────────────────────────────────────────────────────────────────
 -- every definer function written here is still SECURITY DEFINER with its search_path; the inner ones no client may
 -- run; the staff ones not anon; the website's ones reachable; every new table under row security
@@ -2072,7 +2160,8 @@ begin
       'public._store_return_json(public.store_return_requests)', 'public._store_gift_json(public.store_gift_cards)',
       'public._pay_apply(public.payments)', 'public._pay_release(public.payments,text)',
       'public._store_order_gifts(public.store_orders,boolean,boolean)', 'public.store_order_get(text,bigint,text,text)',
-      'public.customer_orders(text,text)',
+      'public.customer_orders(text,text)', 'public._store_gift_refund_plan(public.store_orders)',
+      'public.staff_store_order_gift_refund(uuid,text,text)',
       'public.store_checkout(text,text,text,jsonb)', 'public.store_promo_check(text,text,jsonb)',
       'public.store_gift_card_check(text,text)', 'public.store_stock_request(text,uuid,text,text,text)',
       'public.store_return_request(text,bigint,text,text,jsonb,text,text)',
@@ -2100,7 +2189,7 @@ begin
       'public._store_give_back(public.store_orders,text,boolean)', 'public._store_stock_req_json(public.store_stock_requests)',
       'public._store_return_json(public.store_return_requests)', 'public._store_gift_json(public.store_gift_cards)',
       'public._pay_apply(public.payments)', 'public._pay_release(public.payments,text)', 'public._store_invoice(uuid)',
-      'public._store_order_gifts(public.store_orders,boolean,boolean)'] loop
+      'public._store_order_gifts(public.store_orders,boolean,boolean)', 'public._store_gift_refund_plan(public.store_orders)'] loop
     if has_function_privilege('anon', f, 'execute') or has_function_privilege('authenticated', f, 'execute') then
       raise exception '% is executable by a client', f;
     end if;
@@ -2111,7 +2200,7 @@ begin
       'public.staff_store_stock_requests(text)', 'public.staff_store_stock_request_set(uuid,text)', 'public.staff_store_returns(text)',
       'public.staff_store_return_decide(uuid,boolean,numeric,text,text,text)', 'public.staff_store_review_set(uuid,text)',
       'public.staff_store_gift_card_issue(numeric,text,text,text)', 'public.staff_store_gift_card_void(uuid,text,text,text)',
-      'public.staff_store_gift_card_extend(uuid,date,text,text)'] loop
+      'public.staff_store_gift_card_extend(uuid,date,text,text)', 'public.staff_store_order_gift_refund(uuid,text,text)'] loop
     if has_function_privilege('anon', f, 'execute') then raise exception '% is executable by anon', f; end if;
     if not has_function_privilege('authenticated', f, 'execute') then raise exception 'staff cannot reach %', f; end if;
   end loop;
@@ -2164,7 +2253,7 @@ notify pgrst, 'reload schema';
 --           and p.proname in ('store_promo_check','store_gift_card_check','store_stock_request','store_return_request',
 --                             'store_review_add','staff_store_stock_requests','staff_store_stock_request_set','staff_store_returns',
 --                             'staff_store_return_decide','staff_store_review_set','staff_store_gift_card_issue',
---                             'staff_store_gift_card_void','staff_store_gift_card_extend')) as new_definer_functions_13,
+--                             'staff_store_gift_card_void','staff_store_gift_card_extend','staff_store_order_gift_refund')) as new_definer_functions_14,
 --        (select count(*) from store_orders where paid_at is not null and invoice_no is null) as paid_without_invoice_0,
 --        (select last_no from store_invoice_counter) = (select coalesce(max(invoice_no), 0) from store_orders) as invoice_counter_true,
 --        public._store_delivery_fee('digital', 100) as digital_fee_0,
