@@ -67,21 +67,30 @@
 --     goes; _pay_apply takes a late order's gift card part and code use again and issues its
 --     gift cards; _pay_release gives them back; pay_refund_done and staff_pay_refund_begin count a gift card's part when
 --     they decide an order is refunded whole.
+-- 11. Gift card codes stay with the buyer. A code is the money (anyone who types it spends it), and the order JSON gave
+--     every code an order bought to anyone holding its track key, which store_order_track hands out for the order
+--     number (sequential) and the buyer's phone. Now an order that buys gift cards gets its own random gift_key
+--     (gen_random_uuid's bytes), returned by store_checkout to the buyer's checkout only; every customer read masks the
+--     codes (GC-••••-••••-<last 4>, masked true; amount, balance, status and expiry as before) unless
+--     store_order_get gets that key (new last argument p_gift, default null) or the signed-in account that placed the
+--     order reads customer_orders. Staff reads keep the whole codes, to send a lost one on WhatsApp.
 --
 -- Rebuilt from the text in this repo (never prosrc): store_checkout 20261110235200 (6); _pay_apply 20261111235200 (2);
 -- _pay_release 20261110235200 (2); staff_store_order_cancel 20261110150000 with 20261110235500's patch (1);
 -- staff_pay_refund_begin 20261110235200 with 20261110235500's patch (3b); pay_refund_done 20261110235200 with
 -- 20261110235500's patch (3a); _store_order_json, _store_delivery_fee, staff_store_order_set, staff_store_orders,
--- pay_settle and pay_view 20261110150000. Each keeps SECURITY DEFINER and its search_path (the check at the end says
--- so); the texts 20261110235500 patched keep its mark, so a re-run of that file still changes nothing.
+-- pay_settle, pay_view, store_order_get (one argument added, so the three-argument one is dropped) and customer_orders
+-- 20261110150000. Each keeps SECURITY DEFINER and its search_path (the check at the end says so); the texts
+-- 20261110235500 patched keep its mark, so a re-run of that file still changes nothing.
 --
 -- Idempotent (create ... if not exists, create or replace, constraints dropped and added again, seeds on conflict do
 -- nothing). Tested on a throwaway local Postgres 17 with stubs of what it reads, applied twice.
 -- Rollback idea: re-run 20261110150000's, 20261110235200's, 20261110235500's and 20261111235200's definitions of the
--- rebuilt functions in that order; drop the functions this file adds, the triggers store_products_guard and
--- store_promo_codes_guard, the tables store_gift_card_moves, store_gift_cards, store_promo_codes, store_reviews,
--- store_return_requests, store_stock_requests and store_invoice_counter, and the columns added in 3 and 4 (no order may
--- be 'out' or 'digital' then); put back the 12-photo, slug and status/fulfil checks.
+-- rebuilt functions in that order (dropping store_order_get(text,bigint,text,text) first); drop the functions this
+-- file adds, the triggers store_products_guard and store_promo_codes_guard, the tables store_gift_card_moves,
+-- store_gift_cards, store_promo_codes, store_reviews, store_return_requests, store_stock_requests and
+-- store_invoice_counter, and the columns added in 3 and 4 (no order may be 'out' or 'digital' then); put back the
+-- 12-photo, slug and status/fulfil checks.
 -- ============================================================================
 
 begin;
@@ -557,6 +566,8 @@ alter table public.store_orders add column if not exists gift boolean not null d
 alter table public.store_orders add column if not exists gift_note text;
 alter table public.store_orders add column if not exists slot jsonb;
 alter table public.store_orders add column if not exists invoice_no bigint unique;
+-- the secret that shows the codes of the gift cards an order bought (section 6): only an order that buys gift cards has one
+alter table public.store_orders add column if not exists gift_key text;
 
 alter table public.store_orders drop constraint if exists store_orders_discount_check;
 alter table public.store_orders add constraint store_orders_discount_check check (discount >= 0);
@@ -569,6 +580,8 @@ alter table public.store_orders drop constraint if exists store_orders_gift_paid
 alter table public.store_orders add constraint store_orders_gift_paid_check check (gift_paid >= 0);
 alter table public.store_orders drop constraint if exists store_orders_gift_note_check;
 alter table public.store_orders add constraint store_orders_gift_note_check check (gift_note is null or length(gift_note) <= 200);
+alter table public.store_orders drop constraint if exists store_orders_gift_key_check;
+alter table public.store_orders add constraint store_orders_gift_key_check check (gift_key is null or gift_key ~ '^[0-9a-f]{32}$');
 alter table public.store_orders drop constraint if exists store_orders_slot_check;
 alter table public.store_orders add constraint store_orders_slot_check
   check (slot is null or (jsonb_typeof(slot) = 'object' and pg_column_size(slot) < 200));
@@ -599,6 +612,23 @@ update public.store_order_items i
  where sp.id = i.product_id and (i.image is null or i.slug is null);
 
 -- ── 6. The order as its pages and the staff page read it ──────────────────────────────────────────
+-- The gift cards an order bought, once it is paid. A card's code is the money itself (anyone who types it spends it), so
+-- the whole code goes only to staff (p_staff, who send a lost code on WhatsApp) and to the buyer (p_full: the order's
+-- gift key, which store_checkout gives the buyer's checkout alone, or the signed-in account that placed the order). The
+-- track key is not enough: store_order_track hands it to anyone with the order number (sequential) and the phone.
+-- Everyone else reads GC-••••-••••-<the last 4> with masked true, beside the amount, balance, status and expiry.
+create or replace function public._store_order_gifts(o store_orders, p_full boolean, p_staff boolean) returns jsonb
+language sql stable security definer set search_path = public as $$
+  select case when o.paid_at is null then '[]'::jsonb else
+    coalesce((select jsonb_agg(jsonb_build_object('code', case when (p_full or p_staff) is true then g.code else 'GC-••••-••••-' || right(g.code, 4) end,
+                                                  'masked', (p_full or p_staff) is not true,
+                                                  'amount', g.amount, 'balance', g.balance, 'status', g.status, 'expires_at', g.expires_at)
+                               || case when p_staff then jsonb_build_object('id', g.id) else '{}'::jsonb end
+                               order by g.created_at, g.code)
+                from store_gift_cards g where g.order_id = o.id), '[]'::jsonb) end
+$$;
+revoke execute on function public._store_order_gifts(store_orders, boolean, boolean) from public, anon, authenticated;
+
 create or replace function public._store_order_json(o store_orders, p_staff boolean default false) returns jsonb
 language sql stable security definer set search_path = public as $$
   select jsonb_build_object(
@@ -641,13 +671,9 @@ language sql stable security definer set search_path = public as $$
                            || case when p_staff then jsonb_build_object('staff_note', r.staff_note, 'decided_by', r.decided_by) else '{}'::jsonb end
                            order by r.created_at)
                          from store_return_requests r where r.order_id = o.id), '[]'::jsonb),
-    -- the gift cards this order bought, once it is paid (their codes are what the buyer gives)
-    'gift_cards', case when o.paid_at is null then '[]'::jsonb else
-                    coalesce((select jsonb_agg(jsonb_build_object('code', g.code, 'amount', g.amount, 'balance', g.balance, 'status', g.status,
-                                                                  'expires_at', g.expires_at)
-                                               || case when p_staff then jsonb_build_object('id', g.id) else '{}'::jsonb end
-                                               order by g.created_at, g.code)
-                                from store_gift_cards g where g.order_id = o.id), '[]'::jsonb) end,
+    -- the gift cards this order bought, once it is paid: whole codes for staff, masked for every customer read
+    -- (store_order_get with the gift key and customer_orders put the buyer's whole codes back)
+    'gift_cards', _store_order_gifts(o, p_staff, p_staff),
     -- X09: every refund and where it went. Refunds of the order's payments (one owed is staff's only), the wallet's
     -- part given back (a give-back the order took again when it was paid late is left out), the gift card's part given
     -- back or refunded (the same). A wallet refund staff send in Payments is a payment_refunds row, never counted twice.
@@ -670,6 +696,40 @@ language sql stable security definer set search_path = public as $$
                              and m2.kind = 'spend' and m2.id > m.id)) x), '[]'::jsonb))
 $$;
 revoke execute on function public._store_order_json(store_orders, boolean) from public, anon, authenticated;
+
+-- The order's page for the website's server, by its number and track key (rebuilt from 20261110150000): p_gift, the
+-- order's gift key, shows the whole codes of the gift cards it bought; without it, or with any other, they are masked.
+-- Its three arguments keep their names and order; the three-argument function goes first, so a call never finds two.
+drop function if exists public.store_order_get(text, bigint, text);
+create or replace function public.store_order_get(p_key text, p_no bigint, p_track text, p_gift text default null) returns jsonb
+language plpgsql stable security definer set search_path = public as $$
+declare o store_orders%rowtype; j jsonb;
+begin
+  if not _pay_key_ok(p_key) then raise exception 'NOT_AUTHORIZED' using errcode = '42501'; end if;
+  select * into o from store_orders where no = p_no and track_key = p_track;
+  if o.id is null then return null; end if;
+  j := _store_order_json(o);
+  if o.gift_key is not null and p_gift = o.gift_key then
+    j := j || jsonb_build_object('gift_cards', _store_order_gifts(o, true, false));
+  end if;
+  return j;
+end $$;
+revoke execute on function public.store_order_get(text, bigint, text, text) from public;
+grant execute on function public.store_order_get(text, bigint, text, text) to anon, authenticated;
+
+-- A signed-in account's orders (rebuilt from 20261110150000): each one is the account's own (placed signed in, so
+-- store_checkout tied it to the account), so the account sees the whole codes of the gift cards it bought.
+-- store_order_track (by number and phone) is not rebuilt: it answers the masked JSON above.
+create or replace function public.customer_orders(p_id text, p_token text) returns jsonb
+language plpgsql stable security definer set search_path = public as $$
+begin
+  if not _cust_token_ok(p_id, p_token) then return null; end if;
+  return coalesce((select jsonb_agg(_store_order_json(o) || jsonb_build_object('key', o.track_key, 'gift_cards', _store_order_gifts(o, true, false))
+                                    order by o.created_at desc)
+                     from (select * from store_orders where customer_id = p_id order by created_at desc limit 50) o), '[]'::jsonb);
+end $$;
+revoke execute on function public.customer_orders(text, text) from public;
+grant execute on function public.customer_orders(text, text) to anon, authenticated;
 
 -- ── 7. Discounts and gift cards: the shared rules ─────────────────────────────────────────────────
 -- The bundle prices (F31) a set of lines earns, only with the licence: p_lines = [{product, unit, qty}] (never gift
@@ -944,8 +1004,10 @@ begin
 
   fee := _store_delivery_fee(fulfil, sub - disc);
   if fee is null then raise exception 'STORE_FULFIL' using errcode = 'P0001'; end if;
+  /* an order that buys gift cards gets its gift key: the whole codes, for the buyer's checkout alone (section 6) */
   update store_orders set subtotal = sub, discount = disc, discounts = offs, promo_code = pc ->> 'code',
-         delivery_fee = fee, total = round(sub - disc + fee, 2)
+         delivery_fee = fee, total = round(sub - disc + fee, 2),
+         gift_key = case when ngift > 0 then replace(gen_random_uuid()::text, '-', '') end
    where id = o.id returning * into o;
 
   /* a gift card pays first (F57): not for gift cards; it leaves the card at least 1 SAR, as the wallet does */
@@ -991,13 +1053,13 @@ begin
     insert into receipt_numbers (receipt_id) values ('ord-' || o.no) on conflict (receipt_id) do nothing;
     perform _store_paid(o);
     select * into o from store_orders where id = o.id;
-    return jsonb_build_object('order', _store_order_json(o), 'key', o.track_key, 'payment', null);
+    return jsonb_build_object('order', _store_order_json(o), 'key', o.track_key, 'payment', null, 'gift_key', o.gift_key);
   end if;
   if due < 1 then raise exception 'PAY_TOO_SMALL' using errcode = 'P0001'; end if;
   p := _pay_new('order', o.id::text, array[o.id::text], jsonb_build_array(jsonb_build_object('id', o.id, 'amount', due)),
                 p_id, due, 'Order MM-' || o.no, mins, true, lang);
   update store_orders set payment_id = p.id, expires_at = p.expires_at where id = o.id returning * into o;
-  return jsonb_build_object('order', _store_order_json(o), 'key', o.track_key, 'payment', _pay_json(p));
+  return jsonb_build_object('order', _store_order_json(o), 'key', o.track_key, 'payment', _pay_json(p), 'gift_key', o.gift_key);
 end $function$;
 revoke execute on function public.store_checkout(text, text, text, jsonb) from public;
 grant execute on function public.store_checkout(text, text, text, jsonb) to anon, authenticated;
@@ -2009,6 +2071,8 @@ begin
       'public._store_give_back(public.store_orders,text,boolean)', 'public._store_stock_req_json(public.store_stock_requests)',
       'public._store_return_json(public.store_return_requests)', 'public._store_gift_json(public.store_gift_cards)',
       'public._pay_apply(public.payments)', 'public._pay_release(public.payments,text)',
+      'public._store_order_gifts(public.store_orders,boolean,boolean)', 'public.store_order_get(text,bigint,text,text)',
+      'public.customer_orders(text,text)',
       'public.store_checkout(text,text,text,jsonb)', 'public.store_promo_check(text,text,jsonb)',
       'public.store_gift_card_check(text,text)', 'public.store_stock_request(text,uuid,text,text,text)',
       'public.store_return_request(text,bigint,text,text,jsonb,text,text)',
@@ -2035,7 +2099,8 @@ begin
       'public._store_promo_off(text,numeric,boolean)', 'public._store_gift_code()', 'public._store_paid(public.store_orders)',
       'public._store_give_back(public.store_orders,text,boolean)', 'public._store_stock_req_json(public.store_stock_requests)',
       'public._store_return_json(public.store_return_requests)', 'public._store_gift_json(public.store_gift_cards)',
-      'public._pay_apply(public.payments)', 'public._pay_release(public.payments,text)', 'public._store_invoice(uuid)'] loop
+      'public._pay_apply(public.payments)', 'public._pay_release(public.payments,text)', 'public._store_invoice(uuid)',
+      'public._store_order_gifts(public.store_orders,boolean,boolean)'] loop
     if has_function_privilege('anon', f, 'execute') or has_function_privilege('authenticated', f, 'execute') then
       raise exception '% is executable by a client', f;
     end if;
@@ -2054,9 +2119,13 @@ begin
       'public.store_checkout(text,text,text,jsonb)', 'public.store_promo_check(text,text,jsonb)', 'public.store_gift_card_check(text,text)',
       'public.store_stock_request(text,uuid,text,text,text)', 'public.store_return_request(text,bigint,text,text,jsonb,text,text)',
       'public.store_review_add(text,bigint,text,uuid,integer,text,text)', 'public.pay_settle(text,uuid,text,text,integer,text,jsonb,text)',
-      'public.pay_view(text,uuid)', 'public.pay_refund_done(text,uuid,boolean,integer,text)'] loop
+      'public.pay_view(text,uuid)', 'public.pay_refund_done(text,uuid,boolean,integer,text)',
+      'public.store_order_get(text,bigint,text,text)', 'public.customer_orders(text,text)'] loop
     if not has_function_privilege('anon', f, 'execute') then raise exception 'the website cannot reach %', f; end if;
   end loop;
+  if to_regprocedure('public.store_order_get(text,bigint,text)') is not null then
+    raise exception 'store_order_get(text,bigint,text) is still there beside the four-argument one';
+  end if;
   foreach t in array array['store_stock_requests', 'store_return_requests', 'store_reviews', 'store_promo_codes',
                            'store_gift_cards', 'store_gift_card_moves', 'store_invoice_counter'] loop
     if not (select c.relrowsecurity from pg_class c where c.oid = ('public.' || t)::regclass) then
@@ -2085,7 +2154,9 @@ notify pgrst, 'reload schema';
 --           and column_name in ('kind','condition','warranty_months','key_specs','box','fit','faq','sizes','image_meta','goes_with',
 --                               'compare_with','bundle','sale_from','sale_to')) as product_columns_14,
 --        (select count(*) from information_schema.columns where table_schema = 'public' and table_name = 'store_orders'
---           and column_name in ('discount','discounts','promo_code','gift_paid','gift_card_id','gift','gift_note','slot','invoice_no')) as order_columns_9,
+--           and column_name in ('discount','discounts','promo_code','gift_paid','gift_card_id','gift','gift_note','slot','invoice_no','gift_key')) as order_columns_10,
+--        to_regprocedure('public.store_order_get(text,bigint,text,text)') is not null
+--          and to_regprocedure('public.store_order_get(text,bigint,text)') is null as order_get_gift_key_true,
 --        (select count(*) from pg_class c where c.relnamespace = 'public'::regnamespace and c.relrowsecurity
 --           and c.relname in ('store_stock_requests','store_return_requests','store_reviews','store_promo_codes',
 --                             'store_gift_cards','store_gift_card_moves','store_invoice_counter')) as secured_tables_7,
