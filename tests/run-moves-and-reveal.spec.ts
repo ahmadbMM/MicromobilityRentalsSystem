@@ -55,6 +55,7 @@ test.describe('@staff:sessions a ride moved to another date takes its announce t
     await expect(page.locator('#es-reveal')).toHaveValue('2099-10-30T20:00'); // a week on, the same Riyadh time
     await expect(page.locator('#es-reveal-note')).toContainText('Breakfast spot hidden until');
     await page.getByRole('button', { name: 'Save changes' }).click();
+    await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
     await expect.poll(() => revealPatch(sw))
       .toMatchObject({ url: expect.stringContaining('id=eq.2099-10-31'), body: { reveal_at: '2099-10-30T17:00:00.000Z' } });
     await page.waitForFunction('S.editSessionId===null&&S.undoStack.length>0');
@@ -67,7 +68,8 @@ test.describe('@staff:sessions a ride moved to another date takes its announce t
   test('a move set without the box moves the time too, back as well as on; a time typed in the edit is written as typed', async ({ page }) => {
     await boot(page, { sessions: [sat({ reveal_at: FRI_8PM })] });
     const sw = writesTo(page, 'sessions');
-    await page.evaluate(`setStaffTab('sessions');startEditSession('${SAT}');S.editSessDate='2099-10-17';saveSessionEdit()`);
+    await page.evaluate(`setStaffTab('sessions');startEditSession('${SAT}');S.editSessDate='2099-10-17';void saveSessionEdit()`);
+    await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
     await expect.poll(() => revealPatch(sw))
       .toMatchObject({ url: expect.stringContaining('id=eq.2099-10-17'), body: { reveal_at: '2099-10-16T17:00:00.000Z' } });
     await page.waitForFunction('S.editSessionId===null');
@@ -77,6 +79,7 @@ test.describe('@staff:sessions a ride moved to another date takes its announce t
     await page.locator('#es-date').fill('2099-10-31');
     await expect(page.locator('#es-reveal')).toHaveValue('2099-10-29T18:00'); // the staffer's own time stays put
     await page.getByRole('button', { name: 'Save changes' }).click();
+    await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
     await expect.poll(() => revealPatch(sw)).toMatchObject({ body: { reveal_at: '2099-10-29T15:00:00.000Z' } });
   });
 
@@ -88,6 +91,7 @@ test.describe('@staff:sessions a ride moved to another date takes its announce t
     await page.locator('#es-date').fill('2099-10-31');
     await expect(page.locator('#es-reveal')).toHaveValue('');
     await page.getByRole('button', { name: 'Save changes' }).click();
+    await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
     await expect.poll(() => sw.find((x) => x.method === 'POST') || null).toMatchObject({ body: { id: '2099-10-31', reveal_at: null } });
     await page.waitForFunction('S.editSessionId===null');
     expect(revealPatch(sw)).toBeNull();

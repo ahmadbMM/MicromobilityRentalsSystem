@@ -38,7 +38,8 @@ test.describe('@staff:sessions rb1 fixes (2026-10-05)', () => {
   test('a second tap on Save while a date move is on the wire moves the ride once', async ({ page }) => {
     await staff(page, { sessions: [satRide] });
     const sw = writesTo(page, 'sessions');
-    await page.evaluate(`startEditSession('2099-02-06');S.editSessDate='2099-02-13';saveSessionEdit();saveSessionEdit()`);
+    await page.evaluate(`startEditSession('2099-02-06');S.editSessDate='2099-02-13';saveSessionEdit();void saveSessionEdit()`);
+    await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
     await expect.poll(() => sw.filter((w) => w.method === 'DELETE').length).toBe(1);
     await page.waitForFunction('S.editSessionId===null');
     await page.waitForTimeout(300);
@@ -49,7 +50,8 @@ test.describe('@staff:sessions rb1 fixes (2026-10-05)', () => {
   test('a date move takes the invitations and badges of the ride along, and Undo brings them back', async ({ page }) => {
     await staff(page, { sessions: [satRide] });
     const ca = writesTo(page, 'community_applications'), cb = writesTo(page, 'customer_badges');
-    await page.evaluate(`startEditSession('2099-02-06');S.editSessDate='2099-02-13';saveSessionEdit()`);
+    await page.evaluate(`startEditSession('2099-02-06');S.editSessDate='2099-02-13';void saveSessionEdit()`);
+    await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
     await page.waitForFunction('S.editSessionId===null&&S.undoStack.length>0');
     await expect.poll(() => ca.length).toBe(1);
     expect(ca[0]).toMatchObject({ method: 'PATCH', body: { invited_session: '2099-02-13' } });
@@ -76,7 +78,8 @@ test.describe('@staff:sessions rb1 fixes (2026-10-05)', () => {
       ? r.fulfill({ status: 404, headers: head, body: JSON.stringify({ code: 'PGRST205', message: "Could not find the table 'public.customer_badges' in the schema cache" }) })
       : r.fallback()));
     const sw = writesTo(page, 'sessions');
-    await page.evaluate(`startEditSession('2099-02-06');S.editSessDate='2099-02-13';saveSessionEdit()`);
+    await page.evaluate(`startEditSession('2099-02-06');S.editSessDate='2099-02-13';void saveSessionEdit()`);
+    await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
     await expect.poll(() => sw.filter((w) => w.method === 'DELETE').length).toBe(1); // the old row goes as before
     await page.waitForFunction('S.editSessionId===null');
     await expect(page.locator('#err-bar-el')).toHaveCount(0);
@@ -88,7 +91,8 @@ test.describe('@staff:sessions rb1 fixes (2026-10-05)', () => {
       ? r.fulfill({ status: 403, headers: head, body: JSON.stringify({ code: '42501', message: 'new row violates row-level security policy for table "community_applications"' }) })
       : r.fallback()));
     const sw = writesTo(page, 'sessions');
-    await page.evaluate(`startEditSession('2099-02-06');S.editSessDate='2099-02-13';saveSessionEdit()`);
+    await page.evaluate(`startEditSession('2099-02-06');S.editSessDate='2099-02-13';void saveSessionEdit()`);
+    await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
     await expect.poll(() => sw.filter((w) => w.method === 'DELETE').length).toBe(1);
     await expect(page.locator('#err-bar-el')).toBeVisible();
   });

@@ -28,7 +28,10 @@ function sent(page: Page) {
 }
 const moves = (l: Sent[]) => l.filter((x) => x.url.includes('/rpc/staff_move_session'));
 const on = (l: Sent[], table: string, method: string) => l.filter((x) => x.method === method && new RegExp(`/rest/v1/${table}\\b`).test(x.url));
-const moveDate = (page: Page) => page.evaluate(`startEditSession('${ride.id}');S.editSessDate='${D2}';renderSessions();_saveSessionEdit()`);
+const moveDate = async (page: Page) => {
+  await page.evaluate(`startEditSession('${ride.id}');S.editSessDate='${D2}';renderSessions();void _saveSessionEdit()`);
+  await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
+};
 
 test.describe('@staff:sessions a ride\'s new date', () => {
   test('goes to the server in one call, and the edit lands on the id it answers', async ({ page }) => {

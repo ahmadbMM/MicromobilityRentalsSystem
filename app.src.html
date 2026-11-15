@@ -32730,6 +32730,47 @@ function _stockEvName(v){
 // One save at a time, as addSession (2026-10-05): a second tap on Save while a date move was on the
 // wire ran the whole move again, and its 23505 retry put a copy of the ride on '<date>-2'.
 function saveSessionEdit(){return _busyRun('sessEdit',_saveSessionEdit);}
+// A new date in the editor is asked about before anything is written (the user, 2026-11-15: "whenever i clone a session to a
+// new date it changes the same original session to the new date and doesn't create a new one"). Save moved the ride and its
+// bookings unasked: on 14 November a Saturday ride and a pool session, bookings and all, were moved a week on that way when a
+// copy was meant, and put back by Undo. Move, as before; Clone, the new-session form as Clone fills it
+// from this ride, with what was typed here and the new date, the ride itself left as it is; or Cancel, the editor still open.
+let _esMvRes=null;
+function _esMoveDone(v){const r=_esMvRes;_esMvRes=null;closeConfirm();if(r)r(v);}
+function _on__esMove_bg(event,el){if(event.target===el)_esMoveDone(null)}
+function _esMoveAsk(sess,newDate){
+  return new Promise(res=>{
+    if(_esMvRes){const p=_esMvRes;_esMvRes=null;try{p(null);}catch(_){}}
+    const m=document.getElementById('confirm-modal');if(!m){res('move');return;}
+    _esMvRes=res;
+    const n=(_qBySession().get(sess.id)||[]).filter(e=>e.status!=='cancelled'&&e.status!=='removed').length;
+    m.style.display='block';
+    m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on__esMove_bg',_EV,_EL)}"><div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="es-mv-t">
+      <div class="${n?'chrome-dh10':'chrome-dh18'}"><div class="chrome-dt" id="es-mv-t">${esc(t('n6rMoveAsk').replace('{0}',_evName(sess)).replace('{1}',shortDate(_ssDay(sess))).replace('{2}',shortDate(newDate)))}</div></div>
+      ${n?`<div class="chrome-dbody">${esc(t('n6rMoveRiders').replace('{0}',String(n)))}</div>`:''}
+      <div class="chrome-dact"><button type="button" class="btn-secondary" data-on-click="${_on('_esMoveDone',null)}">${t('cancelBtn')}</button><button type="button" id="es-mv-copy" class="btn-secondary" data-on-click="${_on('_esMoveDone','copy')}">${t('cloneSessBtn')}</button><button type="button" id="es-mv-move" class="btn-primary" data-on-click="${_on('_esMoveDone','move')}">${t('n6rMoveGo')}</button></div>
+    </div></div>`;
+  });
+}
+// The editor's fields that the new-session form has under the same name (newSess<X> for editSess<X>), carried into the copy.
+// Not carried, as Clone does not: the date (the new one is set), Petromin's invitation (each night has its own), the status
+// (a new session is made as the form's When riders can book says) and the volunteer block.
+const ES_COPY_KEYS=['Title','TitleAr','Desc','Price','OpenAll','Spots','StartTime','EndTime','Collect','WlCollect','Mode','Total','TypeSizes','TypeCaps','AssignedIds','Addons','Lockers','MapUrl','BfSel','BfName','BfUrl','Route','Gender','Km'];
+function _esCopyToNew(sess,newDate,prevDate){
+  const pe=document.getElementById('es-price');if(pe)S.editSessPrice=pe.value; // read off the page by the editor's save, so here too
+  const wl=_readWlCap('es'),keep={};
+  ES_COPY_KEYS.forEach(k=>{const v=S['editSess'+k];if(v!==undefined)keep[k]=v&&typeof v==='object'?JSON.parse(JSON.stringify(v)):v;});
+  ['Feat','BfMem'].forEach(k=>{if(typeof S['editSess'+k]==='boolean')keep[k]=S['editSess'+k];}); // a switch left alone follows the ride, as on Clone
+  // The announce time as the editor holds it: typed in this edit, written as typed; untouched, the ride's own moved to the new date.
+  const rv=!_hasBreakfast(sess)?'':S.editSessReveal===_revealLocal(sess.reveal_at)?_revealLocal(_revealMove(sess.reveal_at,prevDate,newDate)):(S.editSessReveal||'');
+  S.editSessFollow=false;S._vsf=null;
+  cloneSession(sess.id);
+  if(!S.showAddSession)return;
+  Object.keys(keep).forEach(k=>{S['newSess'+k]=keep[k];});
+  S.newSessWlMode=wl?wl.m:'count';S.newSessWlVal=wl?String(wl.v):'';
+  S.newSessReveal=rv;S.newSessDate=newDate;
+  renderSessions();
+}
 // Fewer places than riders booked (the staff review, 2026-10-28, S02-core2-06): a session edit, or a template pushed to its future
 // rides, that cuts the places below the riders holding them asks first and names the rides. The database reacts only to a raise
 // (sessions_capacity_promote): a cut left the ride over-booked without a word. Places are counted as spotsLeft counts them.
@@ -32867,6 +32908,11 @@ async function _saveSessionEdit(){
   if(_rideKind(sess)==='petromin')Object.assign(slots,_pmInvSlot('editSessInv'));
   if(esCollect&&!_twoTimesSess(sess))slots._collect=esCollect; // a gathering ride has no bike collection time
   if(esWlCollect!==undefined)slots._wlCollect=esWlCollect; // the waitlist's own (_wlCollectTime)
+  if(newDate!==_prevDate){ // a new date: move the ride, or clone it onto that date (_esMoveAsk)
+    const _mv=await _esMoveAsk(sess,newDate);
+    if(_mv==='copy'){_esCopyToNew(sess,newDate,_prevDate);return;}
+    if(_mv!=='move')return;
+  }
   if(!await _dkYCapOk([[sess,total]]))return; // fewer places than riders booked: asked first (S02-core2-06)
   if(newDate!==_prevDate&&!await _n6sClashGate([{...sess,session_date:newDate,bike_slots:JSON.stringify(slots)}],oldId))return; // a move onto a clash is asked first (SS06)
   const _esFb=S.editSessStatus==='fbk',newStatus=_esFb?'closed':(S.editSessStatus||sess.status);

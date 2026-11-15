@@ -142,7 +142,8 @@ test.describe('@staff:sessions only what changed is read again', () => {
   test('a date move still reloads everything: the bookings moved too', async ({ page }) => {
     await staff(page);
     const l = sent(page);
-    await page.evaluate(`startEditSession('${D1}-s');S.editSessDate='${D2}';renderSessions();_saveSessionEdit()`);
+    await page.evaluate(`startEditSession('${D1}-s');S.editSessDate='${D2}';renderSessions();void _saveSessionEdit()`);
+    await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
     await expect.poll(() => reads(l, 'queue_entries').length).toBeGreaterThan(0);
   });
 });

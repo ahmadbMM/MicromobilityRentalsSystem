@@ -2874,6 +2874,13 @@ The line-by-line hunt of d0e27984 (the owner: "fix them all"). Behaviour that ch
   ledger, kudos, live positions, Petromin counters); only `ok===true` counts as moved, and the old writes remain for a
   database without the function. A new table naming a session belongs in that function. `customer_badges` and
   `customer_ig_followers` are on the staff-ref broadcast, so `_rrTtl()` re-reads them every 30 minutes while it is joined.
+  **The editor asks before a date move (2026-11-15, `_esMoveAsk`):** Save with a new date opens "Move X from A to B?"
+  (the booking count when it has any) with Cancel / Clone / Move (`#es-mv-copy`, `#es-mv-move`); nothing is written
+  until Move. Clone (`_esCopyToNew`) opens the new-session form as `cloneSession` fills it, then the editor's values of
+  the same name (`ES_COPY_KEYS`, editSess<X> -> newSess<X>), the waitlist cap, the announce time moved to the new date,
+  and that date; the ride is untouched. Two rides were moved by mistake this way when a copy was meant. A spec that
+  saves the editor on a new date clicks `#es-mv-move`, and must not await the save inside `page.evaluate` (it waits on
+  the question). The calendar's drag still moves after its own confirm (`_n6rMove`).
 - **The kiosk's confirm step asks what Find never shows**: the last 4 of the account's first emergency contact, else
   its birth year, else (neither on file) the phone's last 4 as before. Tries count for the whole visit.
 - **A Saturday ride's check-in takes no premium-bike deposit** (`_ciSatRender` has no deposit field).

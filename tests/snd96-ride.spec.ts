@@ -278,7 +278,8 @@ test('moving its date keeps its mark, so the move cannot land on another ride', 
   await waitForSb(page);
   await page.waitForFunction(`allSessions().length>1`);
   const writes = sessionWrites(page);
-  await page.evaluate(`S.editSessionId='2099-01-14-nd';S.editSessDate='2099-01-21';S.editSessStatus='open';S.editSessMode='total';S.editSessTotal=40;saveSessionEdit()`);
+  await page.evaluate(`S.editSessionId='2099-01-14-nd';S.editSessDate='2099-01-21';S.editSessStatus='open';S.editSessMode='total';S.editSessTotal=40;void saveSessionEdit()`);
+  await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
   await expect.poll(() => writes.some((w) => w.id)).toBe(true);
   expect(writes.find((w) => w.id)?.id).toBe('2099-01-21-nd');
 });

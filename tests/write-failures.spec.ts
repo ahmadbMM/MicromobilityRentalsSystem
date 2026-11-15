@@ -223,8 +223,10 @@ test.describe('session writes stop pretending to have worked', () => {
       // plain-count mode: the default asks for assigned bikes, which this fixture has none of
       S.editSessMode = 'total'; S.editSessTotal = '10';
       S.editSessDate = '2099-03-01';
-      await saveSessionEdit();
+      void saveSessionEdit();
     })()`);
+    await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
+    await page.waitForFunction("!_busyKeys.has('sessEdit')"); // the save has finished
 
     // The insert is attempted and refused...
     expect(seen).toContain('POST sessions');

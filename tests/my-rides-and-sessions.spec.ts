@@ -73,7 +73,8 @@ const satRide = {
 test('undoing a date move brings the ride back as it was, not as a bare circuit night', async ({ page }) => {
   await staff(page, { sessions: [satRide] });
   const sw = writesTo(page, 'sessions');
-  await page.evaluate(`startEditSession('2099-02-06');S.editSessDate='2099-02-13';saveSessionEdit()`);
+  await page.evaluate(`startEditSession('2099-02-06');S.editSessDate='2099-02-13';void saveSessionEdit()`);
+  await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
   await expect.poll(() => sw.filter((w) => w.method === 'DELETE').length).toBe(1);
   const moved = sw.find((w) => w.method === 'POST')!.body;
   expect(moved).toMatchObject({ id: '2099-02-13', event_kind: 'community', ride_kind: 'saturday', needs_approval: true, spots: 25, addons: '["gel"]' });
@@ -113,7 +114,8 @@ test('moving a Petromin night takes its registrations along before the old row g
   await staff(page, { sessions: [pw] });
   const rr = writesTo(page, 'rider_registrations');
   const sw = writesTo(page, 'sessions');
-  await page.evaluate(`S.editSessionId='2099-02-04-pw';S.editSessDate='2099-02-11';S.editSessStatus='open';S.editSessMode='total';S.editSessTotal=20;saveSessionEdit()`);
+  await page.evaluate(`S.editSessionId='2099-02-04-pw';S.editSessDate='2099-02-11';S.editSessStatus='open';S.editSessMode='total';S.editSessTotal=20;void saveSessionEdit()`);
+  await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
   await expect.poll(() => sw.filter((w) => w.method === 'DELETE').length).toBe(1);
   expect(rr).toHaveLength(1);
   expect(rr[0].body).toEqual({ session_id: '2099-02-11-pw' });
@@ -127,7 +129,8 @@ test('if the registrations cannot move, the old Petromin row is kept', async ({ 
   await waitForSb(page);
   await page.waitForFunction('allSessions().length>0');
   const sw = writesTo(page, 'sessions');
-  await page.evaluate(`S.editSessionId='2099-02-04-pw';S.editSessDate='2099-02-11';S.editSessStatus='open';S.editSessMode='total';S.editSessTotal=20;saveSessionEdit()`);
+  await page.evaluate(`S.editSessionId='2099-02-04-pw';S.editSessDate='2099-02-11';S.editSessStatus='open';S.editSessMode='total';S.editSessTotal=20;void saveSessionEdit()`);
+  await page.locator('#es-mv-move').click(); // a new date asks Move or Clone (_esMoveAsk)
   await expect.poll(() => sw.filter((w) => w.method === 'POST').length).toBe(1);
   await page.waitForTimeout(400);
   expect(sw.filter((w) => w.method === 'DELETE')).toHaveLength(0);         // nothing nulled by the FK
