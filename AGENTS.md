@@ -2210,8 +2210,11 @@ scope: the report's "Later" list, dark mode, push (stays off), anything legal.
 ## Staff rate volunteers (2026-11-15, migration 20261115230000)
 
 The user: "add a feature that allows staff to rate volunteers and for them to have an average rating and add comments with
-the rating, request a rating for each volunteer after each volunteering experience".
-- **Database**: `volunteer_ratings`, one row per shift worked (`shift_id` unique): `rating` 1-5, `comment` <= 500, `rated_by`
+the rating, request a rating for each volunteer after each volunteering experience". **Out of 10 since 2026-11-16**
+(migration 20261116150000; the user: "let volunteers ratings be out of 10 not 5"): the check and `staff_volunteer_rate` take
+1-10 (a rating given on the old scale is doubled once, while the check still says 5; there were none). The volunteers' own
+rating of an event (`volunteer_feedback`, the portal, `_vxStars`) stays five stars.
+- **Database**: `volunteer_ratings`, one row per shift worked (`shift_id` unique): `rating` 1-10, `comment` <= 500, `rated_by`
   (the staff name, `_vol_op`), `rated_by_user`. Policy "staff read" (`_staff_mod('volunteers')`); no client writes it. The one
   writer is `staff_volunteer_rate(p_session, p_customer, p_rating, p_comment)`: the change right on Volunteers, the shift must be
   worked (`done` or checked in, else `VOL_NOT_WORKED`), a second call rewrites in place, `p_rating` null removes it; logged as
@@ -2227,13 +2230,15 @@ the rating, request a rating for each volunteer after each volunteering experien
     (`_vrtOpen(sid,'')`, everyone waiting, one window), Shifts names the other opportunities of the last 30 days still waiting
     (`_vrtOtherHtml`, `VRT_DAYS`), and the Shifts tab's count adds them (`_vrtDueN`). Older ones are rated from their row or
     the person's window.
-  - **The rating window** (`_vrtOpen(sid,cid,back)`): per person a radio group of five stars (`.vrt-s`, `_rgKey` arrows) and an
-    optional comment; only the people given stars are saved, one call each; Remove rating asks first. `back` returns to the
+  - **The rating window** (`_vrtOpen(sid,cid,back)`): per person a radio group of ten numbered buttons, the picked one filled
+    as on the rider's own rating (`.vrt-s`, `_rgKey` arrows, named "N out of 10", `zvRtOf`) and an optional comment; only the
+    people given a score are saved, one call each; Remove rating asks first. `back` returns to the
     person's window.
   - **Where the average shows**: People's Rating column (`.vm-tbl.vm-rt`, sorts Highest / Lowest rated, the Advanced filter
-    Rating: 4 and above, Under 3, Not rated; CSV columns), an offer waiting for an answer, and the person's window (each
-    rating with its comment, who gave it and when, and the opportunities still waiting). A rated row on Shifts shows its stars
-    (`_vrtRowHtml`, the comment on hover; a tap changes it).
+    Rating: 8 and above, Under 6, Not rated; CSV columns), an offer waiting for an answer, and the person's window (each
+    rating with its comment, who gave it and when, and the opportunities still waiting). A score shows as a star and the
+    number over 10 (`_vrtScore`: "8/10", an average "8.5/10"). A rated row on Shifts shows its score (`_vrtRowHtml`, the
+    comment on hover; a tap changes it).
   - The report builder: columns Staff rating, Staff comment, Average staff rating, the sort Highest staff rating and the set
     Staff ratings (`staffrt`). Activity names `staff_rate`.
 - The stub answers `volunteer_ratings` as a database without it (`TABLES_NOT_YET_IN_DB`) unless a spec gives rows; spec

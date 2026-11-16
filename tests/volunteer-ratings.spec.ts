@@ -3,7 +3,8 @@ import { stubSupabase, unlockStaff, waitForSb, goStaffTab } from './helpers/supa
 
 // Staff rate volunteers (2026-11-15, migration 20261115230000; the user: "add a feature that allows staff to rate volunteers
 // and for them to have an average rating and add comments with the rating, request a rating for each volunteer after each
-// volunteering experience"). One rating for each shift worked, 1 to 5 stars and an optional comment; the average on People,
+// volunteering experience"). One rating for each shift worked, out of 10 since 2026-11-16 (20261116150000; "let volunteers ratings
+// be out of 10 not 5") and an optional comment; the average on People,
 // on an offer waiting for an answer and in the person's window; the request once their part is over: Rate on the row, Rate
 // the team, the line on Shifts naming the opportunities of the last 30 days still waiting, and the Shifts tab's count. All
 // Supabase traffic is stubbed; the dates are relative to now (Saudi time), so nothing turns over at midnight.
@@ -36,9 +37,9 @@ const shifts = [
 const rate = (id: number, shift: number, sid: string, cid: string, rating: number, comment: string | null, by: string) =>
   ({ id, shift_id: shift, session_id: sid, customer_id: cid, rating, comment, rated_by: by, created_at: ago(40), updated_at: ago(40) });
 const volunteer_ratings = [
-  rate(1, 1, PAST, 'c1', 4, 'Calm at the gate', 'Malik'),
-  rate(2, 4, OLD, 'c1', 1, null, 'Huda'),
-  rate(3, 5, OLD, 'c6', 5, 'Brilliant', 'Malik'),
+  rate(1, 1, PAST, 'c1', 8, 'Calm at the gate', 'Malik'),
+  rate(2, 4, OLD, 'c1', 3, null, 'Huda'),
+  rate(3, 5, OLD, 'c6', 10, 'Brilliant', 'Malik'),
 ];
 const sw = (sid: string, closes: string) => ({ session_id: sid, enabled: true, closes_at: closes, opens_at: null, needed: 5, signup_open: true, caps: { checkin: true }, hours_mode: 'clock', roles: [] });
 const award = (id: number, sid: string, cid: string, on: string) => ({ id, customer_id: cid, session_id: sid, hours: 3, worked_on: on, source: 'session' });
@@ -72,9 +73,9 @@ const order = (page: Page) => page.locator('#vm-list .vm-row').evaluateAll((rs) 
 const saved = (o: Record<string, unknown>) => ({ ok: true, id: 9, shift_id: 2, created_at: ago(0), updated_at: ago(0), rated_by: 'Malik', ...o });
 
 test.describe('@staff:volunteers Staff rate volunteers (2026-11-15)', () => {
-  test('Shifts asks for the ratings still owed, and Rate the team saves each one given stars', async ({ page }) => {
+  test('Shifts asks for the ratings still owed, and Rate the team saves each one given a score', async ({ page }) => {
     const sent = calls(page, ['staff_volunteer_rate']);
-    await staff(page, { 'rpc:staff_volunteer_rate': saved({ rating: 5, comment: 'Kind and quick', avg: 5, n: 1 }) });
+    await staff(page, { 'rpc:staff_volunteer_rate': saved({ rating: 9, comment: 'Kind and quick', avg: 9, n: 1 }) });
     // The page opens on tomorrow's opportunity: the Shifts count is the offer waiting plus the one rating owed, and the line
     // names the opportunity three days ago (the one two months ago is older than the request covers).
     await expect(tab(page, /Shifts/).locator('.vx-tab-n')).toHaveText('2');
@@ -83,27 +84,31 @@ test.describe('@staff:volunteers Staff rate volunteers (2026-11-15)', () => {
     await expect(line.getByRole('button')).toHaveCount(1);
     await expect(line.getByRole('button')).toContainText('· 1');
     // The offer waiting for an answer carries the person's average, to decide on it.
-    await expect(row(page, 'c6').locator('.vrt-avg')).toContainText('5.0');
+    await expect(row(page, 'c6').locator('.vrt-avg')).toContainText('10.0/10');
     await line.getByRole('button').click();
     await expect(dlg(page)).toContainText('Rate the team');
     await expect(dlg(page).locator('.vrt-row')).toHaveCount(1); // only Omar: Sara is rated, Nora never came
     await dlg(page).getByRole('button', { name: 'Save rating' }).click();
-    await expect(toast(page)).toContainText('Choose the stars first.');
+    await expect(toast(page)).toContainText('Choose a score first.');
     expect(sent).toHaveLength(0);
     const g = dlg(page).getByRole('radiogroup', { name: 'Rating · Omar Saleh' });
-    await g.getByRole('radio', { name: '5 out of 5' }).click();
-    await expect(g.getByRole('radio', { name: '5 out of 5' })).toHaveAttribute('aria-checked', 'true');
-    await expect(g.locator('.vrt-s.on')).toHaveCount(5);
+    await expect(g.getByRole('radio')).toHaveCount(10);
+    await expect(g.getByRole('radio')).toHaveText(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
+    await g.getByRole('radio', { name: '9 out of 10' }).click();
+    await expect(g.getByRole('radio', { name: '9 out of 10' })).toHaveAttribute('aria-checked', 'true');
+    await expect(g.locator('.vrt-s.on')).toHaveCount(1);
+    await expect(g.locator('.vrt-s.on')).toHaveText('9');
     await dlg(page).locator('.vrt-row[data-cust="c2"] textarea').fill('  Kind and quick ');
     await dlg(page).getByRole('button', { name: 'Save rating' }).click();
     await expect.poll(() => sent.length).toBe(1);
-    expect(sent[0].body).toEqual({ p_session: PAST, p_customer: 'c2', p_rating: 5, p_comment: 'Kind and quick' });
+    expect(sent[0].body).toEqual({ p_session: PAST, p_customer: 'c2', p_rating: 9, p_comment: 'Kind and quick' });
     await expect(toast(page)).toContainText('Rating saved.');
     await expect(dlg(page)).toBeHidden();
-    // On that opportunity now: Omar's row shows his five stars, nobody is left to rate, and the count is the offer alone.
+    // On that opportunity now: Omar's row shows his 9 out of 10, nobody is left to rate, and the count is the offer alone.
     await expect(page.locator('#tab-volunteers .vd-sel')).toHaveValue(PAST);
-    await expect(row(page, 'c2').locator('.vrt-chip .vx-star.on')).toHaveCount(5);
-    await expect(row(page, 'c1').locator('.vrt-chip .vx-star.on')).toHaveCount(4);
+    await expect(row(page, 'c2').locator('.vrt-chip .vrt-sc')).toHaveText('9/10');
+    await expect(row(page, 'c2').getByRole('img', { name: '9 out of 10' })).toBeVisible();
+    await expect(row(page, 'c1').locator('.vrt-chip .vrt-sc')).toHaveText('8/10');
     await expect(page.locator('#tab-volunteers .vrt-team')).toHaveCount(0);
     await expect(page.locator('#vd-list .vrt-rate')).toHaveCount(0);
     await expect(tab(page, /Shifts/).locator('.vx-tab-n')).toHaveText('1');
@@ -120,13 +125,13 @@ test.describe('@staff:volunteers Staff rate volunteers (2026-11-15)', () => {
     await row(page, 'c1').locator('.vrt-chip').click();
     await expect(dlg(page)).toContainText('Rate Sara Haddad');
     const g = dlg(page).getByRole('radiogroup', { name: 'Rating · Sara Haddad' });
-    await expect(g.getByRole('radio', { name: '4 out of 5' })).toHaveAttribute('aria-checked', 'true');
+    await expect(g.getByRole('radio', { name: '8 out of 10' })).toHaveAttribute('aria-checked', 'true');
     await expect(dlg(page).locator('textarea')).toHaveValue('Calm at the gate');
-    await g.getByRole('radio', { name: '4 out of 5' }).focus();
+    await g.getByRole('radio', { name: '8 out of 10' }).focus();
     await page.keyboard.press('ArrowLeft');
-    await expect(g.getByRole('radio', { name: '3 out of 5' })).toHaveAttribute('aria-checked', 'true');
-    await expect(g.getByRole('radio', { name: '3 out of 5' })).toBeFocused();
-    await expect(g.locator('.vrt-s.on')).toHaveCount(3);
+    await expect(g.getByRole('radio', { name: '7 out of 10' })).toHaveAttribute('aria-checked', 'true');
+    await expect(g.getByRole('radio', { name: '7 out of 10' })).toBeFocused();
+    await expect(g.locator('.vrt-s.on')).toHaveText('7');
     // Remove asks first; No goes back to the rating window as it was.
     await dlg(page).getByRole('button', { name: 'Remove rating' }).click();
     await expect(page.locator('#confirm-modal')).toContainText('Remove this rating?');
@@ -147,9 +152,9 @@ test.describe('@staff:volunteers Staff rate volunteers (2026-11-15)', () => {
     await staff(page);
     await tab(page, /People/).click();
     await expect(page.locator('#vm-list .vx-th')).toContainText('Rating');
-    await expect(person(page, 'c1').locator('.vm-rt-c')).toContainText('2.5');
+    await expect(person(page, 'c1').locator('.vm-rt-c')).toContainText('5.5/10');
     await expect(person(page, 'c1').locator('.vm-rt-c')).toContainText('(2)');
-    await expect(person(page, 'c6').locator('.vm-rt-c')).toContainText('5.0');
+    await expect(person(page, 'c6').locator('.vm-rt-c')).toContainText('10.0/10');
     await expect(person(page, 'c2').locator('.vm-rt-c')).toBeEmpty();
     await page.locator('#vm-bar .f-show').click();
     await page.locator('#vm-bar select[aria-label="Sort"]').selectOption('rateHi');
@@ -158,20 +163,22 @@ test.describe('@staff:volunteers Staff rate volunteers (2026-11-15)', () => {
     expect(await order(page)).toEqual(['c1', 'c6', 'c3', 'c2']);
     await page.locator('#vm-bar .filter-toggle:not(.f-show)').click();
     const f = page.locator('#vm-bar select[aria-label="Rating"]');
-    await f.selectOption('3');
-    expect(await order(page)).toEqual(['c1']);
-    await f.selectOption('4');
-    expect(await order(page)).toEqual(['c6']);
+    await expect(f.locator('option')).toHaveText(['Any', '8 and above', 'Under 6', 'Not rated']);
+    await f.selectOption('6');
+    expect(await order(page)).toEqual(['c1']); // 5.5
+    await f.selectOption('8');
+    expect(await order(page)).toEqual(['c6']); // 10
     await f.selectOption('none');
     expect((await order(page)).sort()).toEqual(['c2', 'c3']);
     await f.selectOption('');
     // Sara's window: the average, then each rating, the newest opportunity first, with who gave it.
     await person(page, 'c1').getByRole('button', { name: 'Manage · Sara Haddad' }).click();
-    await expect(dlg(page).locator('.vrt-h')).toContainText('2.5');
+    await expect(dlg(page).locator('.vrt-h')).toContainText('5.5/10');
     const rs = dlg(page).locator('#vm-rt .vrt-p-row');
     await expect(rs).toHaveCount(2);
     await expect(rs.nth(0)).toHaveAttribute('data-sess', PAST);
     await expect(rs.nth(0)).toContainText('Calm at the gate');
+    await expect(rs.nth(0).locator('.vrt-sc')).toHaveText('8/10');
     await expect(rs.nth(0)).toContainText('Rated by Malik');
     await expect(rs.nth(1)).toContainText('Rated by Huda');
     // Omar's: the two opportunities he worked, neither rated, each with Rate (the one two months ago too); Cancel comes back.
@@ -212,6 +219,6 @@ test.describe('@staff:volunteers Staff rate volunteers (2026-11-15)', () => {
     expect(await page.evaluate(`Object.keys(_vbOpts().cols).filter(k=>_vbOpts().cols[k]).join(',')`)).toBe('seq,name,role,srate,scomm,savg');
     await expect.poll(() => page.evaluate('!!(S._vb&&S._vb.d)')).toBe(true);
     expect(await page.evaluate(`(()=>{const b=_vbBuild(S._vb.d,_vbOpts());return b.rows.map(r=>[r.c.name,_vbCell('srate',r),_vbCell('scomm',r),_vbCell('savg',r)].join('|')).join(',');})()`))
-      .toBe('Sara Haddad|4|Calm at the gate|2.5,Nora Ali|||,Omar Saleh|||');
+      .toBe('Sara Haddad|8|Calm at the gate|5.5,Nora Ali|||,Omar Saleh|||');
   });
 });
