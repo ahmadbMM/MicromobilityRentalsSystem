@@ -4346,3 +4346,28 @@ a switch; admins write the texts; the circuit's running hours are fixed text in 
     saved texts (site_content 'msg.templates') work for them as for every message.
 - `tests/week-announce.spec.ts`; specs that read cards of several weeks move the week (session-strip, staff-colours,
   session-marks, session-gender-staff, staff-a11y-names, queue-pass2).
+
+## Help and Help on the ride (2026-11-16, no migration)
+The user picked two of the booking app's new-section ideas ("do 1 5"). Spec: `tests/rider-help.spec.ts`
+(`@customer:bookings`, `@customer:account`, `@staff:messages`).
+- **Help on the ride** (`_rhRows`, `_rhHtml`, `_rhOpen`, `_rhWaHref`, `RH_MSG`, `RH_BIZ` in app.src.html). A booking that
+  holds a place (waiting, active, done; never waitlist, cancelled or a blood donation) has "Need help?" on its ticket
+  (above the bike report's button, not on `opts.card`) from an hour before the session's first time (the gathering, else
+  the start) until 3 hours after `_brpEnd`. Its pop-up is **drawn by the page, not a lazy file**, so it opens with no
+  signal; it reuses the bike report's styles (`:is(#brp-modal,#rh-modal)`). What is wrong as radios (no bike choice when
+  `_needsBike` is false), WhatsApp us (wa.me on the business line 966566668818, a message naming the choice, the account,
+  the session and, once `getCurrentPosition` answers, `My location: https://maps.google.com/?q=lat,lng`; Arabic on an
+  Arabic page, English on every other, since the team reads those two), Call us, Ambulance 997, Close. **Nothing is stored
+  or sent by the app**: the location only goes into the message the rider chooses to send, so the Privacy Notice has no
+  row for it. The ride lead (a rider staff marked) is never offered as a contact: members see nothing of each other.
+- **Account > Help** (`ACC_PAGES` `help`, `/account/help`, the row above Tech support; `rider-help.js`, `RH_V`, fetched by
+  `_rhPageOpen`, hand-written with its words in ten languages like the other lazy rider modules). Answers: site_content
+  `help.topics.rides` (a list of `{q:{en,ar},a:{en,ar}}`), the website's Help > "Rides & bookings" tab that staff edit in
+  Website > Help; English and Arabic as staff wrote them, any other language this file's translation of an answer left as
+  shipped (matched on the shipped English), else staff's English. With nothing saved, `RH_QA`, which must stay
+  identical to the website's defaults in apps/web/src/content/pages/help.ts. No refund or age answers: neither is
+  settled for every experience. A message goes through `site_message_send` (kind `help`, topic `app`, the account's
+  name, a mobile in the function's shape (a stored `05xxxxxxxx` is sent as `+9665…`) and/or the email, `customer_id` +
+  token), shown to staff in Messages as "Booking app" (`SM_HELP_TOPIC` also names the website tab `rides`). The page then
+  shows the reference (`M-0042`) in place of the form, no toast; what is typed survives `renderAccount` (`S._rhM.text`).
+- Customer budget 364 -> 366 for the inline pop-up (see `scripts/split-staff.mjs`).
