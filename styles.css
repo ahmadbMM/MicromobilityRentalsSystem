@@ -15426,3 +15426,55 @@ body.view-staff .rb-prev{display:none;}
 body.view-staff .rb-prev-h{font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);}
 body.view-staff .rb-prev-f{position:relative;height:min(72vh,660px);overflow:hidden;border-radius:var(--sf-r-ctl);background:var(--bg);box-shadow:var(--sf-sh-1);}
 body.view-staff .rb-frame{position:absolute;top:0;left:0;width:250%;height:250%;border:0;transform:scale(.4);transform-origin:0 0;pointer-events:none;}
+
+/* The week on Bookings (the user, 2026-11-16): seven day columns, Sunday to Saturday, each day's session cards under
+   it. On a phone the head and the days are in a pop-up (.wk-pop) from the Week button beside the session picker, so the
+   first rider stays inside the 400px fold budget. The week's WhatsApp announcements open from its head. */
+body.view-staff #sess-strip.wk-strip{margin:0 0 12px;}
+body.view-staff :is(#sess-strip,.wk-pop) .wk-head{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 8px;}
+body.view-staff :is(#sess-strip,.wk-pop) .wk-title{font-size:var(--sf-fs-md);font-weight:600;min-width:0;}
+body.view-staff :is(#sess-strip,.wk-pop) .wk-nav{display:inline-flex;align-items:center;justify-content:center;min-width:32px;padding-inline:6px;}
+body.view-staff :is(#sess-strip,.wk-pop) .wk-next svg{transform:scaleX(-1);}
+html[dir="rtl"] body.view-staff :is(#sess-strip,.wk-pop) .wk-prev svg{transform:scaleX(-1);}
+html[dir="rtl"] body.view-staff :is(#sess-strip,.wk-pop) .wk-next svg{transform:none;}
+body.view-staff :is(#sess-strip,.wk-pop) .wk-ann{margin-inline-start:auto;display:inline-flex;align-items:center;gap:6px;}
+body.view-staff #sess-strip .wk-grid{display:grid;grid-template-columns:repeat(7,minmax(150px,1fr));gap:6px;overflow-x:auto;padding-bottom:2px;}
+body.view-staff #sess-strip .wk-day{display:flex;flex-direction:column;gap:6px;min-width:0;padding:6px;border-radius:var(--sf-r-ctl);background:var(--sf-sunken);}
+/* today: the card's own white with a green ring (green ink on the green wash read 4.3:1) */
+body.view-staff #sess-strip .wk-day.wk-today{background:var(--sf-card);box-shadow:inset 0 0 0 1px var(--sf-green-ink);}
+body.view-staff :is(#sess-strip,.wk-pop) .wk-dh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px;font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);}
+body.view-staff :is(#sess-strip,.wk-pop) .wk-dn{color:var(--text);}
+body.view-staff :is(#sess-strip,.wk-pop) .wk-today :is(.wk-dh,.wk-dn){color:var(--sf-green-ink);}
+body.view-staff :is(#sess-strip,.wk-pop) .wk-none{font-size:var(--sf-fs-xs);color:var(--muted);padding:4px 2px;}
+body.view-staff #sess-strip .wk-day .sess-summary-chip{flex:none;width:100%;min-width:0;max-width:none;}
+body.view-staff #sess-strip .wk-day .sess-summary-chip.pm-night{display:flex;flex-direction:column;align-items:stretch;}
+body.view-staff #sess-strip .wk-day .pm-night .pm-tiles{grid-template-columns:1fr;gap:4px;margin-top:6px;} /* one under another: two to a row cut "0 registrations" short */
+/* A card in a day column (about 150px): the name wraps by word beside the mark, the status and who it is for go under it */
+body.view-staff #sess-strip .wk-day .sess-chip-top{flex-wrap:wrap;align-items:flex-start;gap:4px 6px;}
+body.view-staff #sess-strip .wk-day .sess-chip-top .sess-chip-event{flex:1 1 90px;overflow-wrap:break-word;word-break:normal;}
+body.view-staff #sess-strip .wk-day .sess-chip-top .sess-chip-badge{margin-inline-start:0;}
+body.view-staff #sess-strip .wk-day .sess-summary-chip.th-jcc .sess-chip-foot{padding-inline-end:24px;}
+/* the phone: the session picker and the Week button on one line */
+body.view-staff #sess-strip .wk-mbar{display:flex;align-items:stretch;gap:6px;}
+body.view-staff #sess-strip .wk-mbar .spk{flex:1 1 auto;min-width:0;}
+body.view-staff #sess-strip .wk-open{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding-inline:12px;}
+@media(max-width:767px){
+  body.view-staff #sess-strip .wk-head{display:none;}
+}
+body.view-staff .wk-pop .wk-list{display:flex;flex-direction:column;gap:8px;max-height:min(62vh,560px);overflow-y:auto;}
+body.view-staff .wk-pop .wk-lday{display:flex;flex-direction:column;gap:4px;}
+body.view-staff .wk-pop .wk-row{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;flex:none;padding:6px 10px;border:1px solid var(--sf-line);border-inline-start:3px solid var(--sf-green-ink);border-radius:var(--sf-r-ctl);background:var(--sf-card);color:inherit;font:inherit;text-align:start;cursor:pointer;}
+body.view-staff .wk-pop .wk-row.ss-full{border-inline-start-color:#d4a017;}
+body.view-staff .wk-pop .wk-row.ss-closed{border-inline-start-color:var(--sf-ctl);}
+body.view-staff .wk-pop .wk-row.active-sess{border-color:var(--sf-green-ink);box-shadow:0 0 0 2px var(--sf-accent-wash);}
+body.view-staff .wk-pop .wk-row .smk{flex:none;width:20px;height:20px;}
+body.view-staff .wk-pop .wk-rn{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--sf-fs-sm);font-weight:600;}
+body.view-staff .wk-pop .wk-rt{flex:none;white-space:nowrap;font-size:var(--sf-fs-xs);color:var(--muted);}
+body.view-staff .wk-pop .wk-rs{flex:none;font-size:var(--sf-fs-xs);}
+body.view-staff .wk-pop .wk-earlier{margin-top:4px;font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);}
+/* The announcements dialog: a type with no text says so, with Write it for an admin */
+body.view-staff .ann-miss{margin:8px 0;padding:10px 12px;border-radius:var(--sf-r-ctl);background:var(--sf-sunken);font-size:var(--sf-fs-sm);}
+body.view-staff .ann-miss p{margin:0 0 6px;}
+body.view-staff .ann-miss ul{margin:0 0 6px;padding:0;list-style:none;}
+body.view-staff .ann-miss li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;}
+body.view-staff .ann-box .rm-list{max-height:min(60vh,520px);overflow-y:auto;}

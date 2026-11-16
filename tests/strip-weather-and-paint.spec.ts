@@ -24,15 +24,16 @@ test('the chip shows the forecast, amber when it bites, silent when absent', asy
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction(`getQueue().length>0`);
-  await page.evaluate(`localStorage.removeItem('cq_weather_fc');setStaffTab('queue');S.queueView='bookings';renderStaffQueue()`);
+  await page.evaluate(`localStorage.removeItem('cq_weather_fc');setStaffTab('queue');S.queueView='bookings';S._wkSun=_wkSunOf('${D1}');renderStaffQueue()`); // the week of 1-2 Jan (the strip is a week since 2026-11-16)
   await expect.poll(() => page.evaluate(`!!S.weatherFc`), { timeout: 5000 }).toBe(true);
   await page.evaluate(`renderStaffQueue()`);
-  const chips = await page.evaluate(`[...document.querySelectorAll('.sess-chip-date')].map(c=>c.innerText)`) as string[];
-  expect(chips.find((c) => c.includes('1 Jan'))).toContain('43°');
-  expect(chips.find((c) => c.includes('2 Jan'))).toContain('31');      // windy day carries the wind
+  // each card's time line by its session (the day is its column's heading since 2026-11-16)
+  const chips = await page.evaluate(`Object.fromEntries([...document.querySelectorAll('#sess-strip .sess-summary-chip')].map(c=>[c.dataset.sid,c.querySelector('.sess-chip-date').innerText]))`) as Record<string, string>;
+  expect(chips[D1]).toContain('43°');
+  expect(chips[D2]).toContain('31');      // windy day carries the wind
   // the wind is drawn (2026-10-09; it was the Batak letter ᯓ, which no screen reader or font names)
-  expect(await page.evaluate(`[...document.querySelectorAll('.sess-chip-date')].some(c=>c.innerText.includes('2 Jan')&&!!c.querySelector('.rq-wx-warn svg'))`)).toBe(true);
-  expect(chips.join(' ')).not.toContain('ᯓ');
+  await expect(page.locator(`#sess-strip .sess-summary-chip[data-sid="${D2}"] .sess-chip-date .rq-wx-warn svg`)).toHaveCount(1);
+  expect(Object.values(chips).join(' ')).not.toContain('ᯓ');
 });
 
 test('no forecast, no problem — the strip renders bare', async ({ page }) => {
@@ -42,8 +43,9 @@ test('no forecast, no problem — the strip renders bare', async ({ page }) => {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction(`getQueue().length>0`);
-  await page.evaluate(`localStorage.removeItem('cq_weather_fc');S.weatherFc=null;setStaffTab('queue');S.queueView='bookings';renderStaffQueue()`);
+  await page.evaluate(`localStorage.removeItem('cq_weather_fc');S.weatherFc=null;setStaffTab('queue');S.queueView='bookings';S._wkSun=_wkSunOf('${D1}');renderStaffQueue()`);
   await page.waitForTimeout(400);
+  await expect(page.locator('#sess-strip .sess-summary-chip')).toHaveCount(2);
   const chips = await page.evaluate(`[...document.querySelectorAll('.sess-chip-date')].map(c=>c.innerText).join('|')`) as string;
   expect(chips).not.toContain('°');
   await expect(page.locator('#q-results .queue-table')).toHaveCount(1);  // the roster survived (hidden on mobile, where cards render)

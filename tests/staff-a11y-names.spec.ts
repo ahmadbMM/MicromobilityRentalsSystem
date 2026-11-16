@@ -124,7 +124,7 @@ test.describe('@staff:a11y names, focus and keyboard', () => {
   // a button holds phrasing content only); the bike picker's table rows stay rows, focusable, answering Enter.
   test('session chips and bike cards are real buttons; the bike picker\'s rows answer Enter like a click', async ({ page }) => {
     await boot(page);
-    await page.evaluate(`S.sfSession='all';renderStaffQueue()`);
+    await page.evaluate(`S.sfSession='all';S._wkSun=_wkSunOf('${S2}');renderStaffQueue()`); // the week S2 is in (2026-11-16)
     const chip = page.locator(`#tab-queue button.sess-summary-chip[data-on-click*="${S2}"]`).first();
     await expect(chip).toHaveAttribute('type', 'button');
     await expect(chip).not.toHaveAttribute('role', /.*/);

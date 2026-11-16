@@ -4301,3 +4301,48 @@ line (`bdfxHi`), on micromobility.sa too (mm-platform `components/account/Birthd
   `animation:none!important` and a timer takes it).
 - Under webdriver it plays only when `window.__bdfx` is set, so the suite's fixed test birth dates never put confetti on
   another spec's page. `tests/birthday-confetti.spec.ts`.
+
+## The week on Bookings and its WhatsApp announcements (2026-11-16)
+
+The user: "create a weekly view for the session cards on top of the page of bookings and add a weekly announcement
+template that fills automatically depending on the sessions of the week starting from sunday until saturday, dont
+extract the announcement if there was a new session ask the staff to update it if this happens, and create a template
+for each session for whatsapp annoucement". Their picks (all the recommended ones): seven day columns that REPLACE the
+row of every open session; a type with no block stops the week's message; one message per type; English with Arabic on
+a switch; admins write the texts; the circuit's running hours are fixed text in its block.
+- **The week** (`_sessStripHtml`, desk core): `#sess-strip` is a head (`‹ week ›`, This week when another week shows,
+  Announcements) and seven `.wk-day` columns, Sunday to Saturday, each holding its sessions' cards (`_sessChipHtml`,
+  the row's card; its time line no longer starts with the day, the column's heading says it, with Today and Tomorrow
+  in words). Every non-deleted session of the week shows, closed ones grey; a non-admin still sees no ride staff
+  approve, as the row hid them. On a phone (`.wk-list`, under 768px) the days with sessions are rows (`.wk-row`), today
+  first and the days already gone under "Earlier this week"; the phone's session picker stays below them.
+- **Which week**: `S._wkSun` once staff use the arrows (`_wkGo(-1|1)`, `_wkGo(0)` = this week); otherwise the week of
+  the picked session (`S.sfSession`, or `S.ridersSession` on the Petromin page), else today's - so the page still opens
+  on the current session's week (`_currentSessId`). `setSfSession` with a session of another week clears `S._wkSun`, so
+  the phone's picker brings its week. Specs that look for a card of another week set `S._wkSun=_wkSunOf(day)` first.
+- **The announce part** (`staff-parts/announce.js`, entries `_annOpen` and `_annDef`; fetched with Bookings or
+  Settings): the dialog lists the week's message, then each session of the week (not cancelled, not a draft). A
+  session's TYPE is `_annType`: its kind, the pool split into `swim_m` / `swim_f` / `swim` by `gender_only`.
+  - The week's message is `wk_head` + one `wk_<type>` block per session (day order, then start time) + `wk_foot`
+    (`{jcc_days}` = the days with a circuit or Petromin night). A type with no text in the language shown
+    (`_annSrc`: the admins' `_tplOver`, else the built-in) makes it `{miss:[types]}`: an admin gets Write it per type
+    (the templates editor; closing it comes back through `S._afterConfirm`), anyone else "Ask an admin". An extra
+    Petromin night on a Monday is just another Petromin block. A language is missing on its own: an English-only
+    block the admins wrote leaves the Arabic message asking.
+  - Each session's own message is `ann_<type>`; the Saturday ride's is its ride details (`_rmRideText`, rm_ride).
+  - Fill-ins (`ANN_FILLS`, `_annVars`): title (title_ar in Arabic, else the type's name), day, date ("16th of November" /
+    "16 نوفمبر"), time ("7:00 PM – 9:00 PM"), start_time, end_time, meet_time (a ride that gathers stores "gathering -
+    start": meet_time / start_time; the farm's arrival / dinner), bikes_from (`sessionCollectTime`, bike kinds only),
+    place, place_link (meet_url, the pin, or the circuit's for jcc / Petromin), instagram (`bike_slots._ig`),
+    booking_link. A line whose fill-in is empty is left out (`_tplFill`).
+  - The built-in texts are `ANN_TPL` in the part (en + ar): wk_ head, foot, jcc, petromin, saturday, swim_m, swim_f
+    (the user's "option A" schedule of 2026-11-16) and ann_ jcc, petromin (micromobility.sa/petromin), swim_m (the
+    owner's pool message of 2026-11-12), swim_f, yoga, farm, event. **`ANN_HAS` in the core lists the same ids** (Settings
+    shows those, and any type the admins wrote: `_tplListed`); a spec fails when they differ. No emoji in them, and the
+    booking link stays just above the place (as the Saturday ride's, 2026-11-14): `_tplDefault` leaves wk_/ann_ out
+    of `_bkFirst`. `_tplDefault` and `_tplOpen` reach the texts through `_annDef`, the part's stand-in, so `_tplOpen`
+    fetches the part before the editor opens.
+  - `TPL` gains `tplgWk` and `tplgAnn` (ANN_TYPES, one row per type), so the templates editor, Customized and the
+    saved texts (site_content 'msg.templates') work for them as for every message.
+- `tests/week-announce.spec.ts`; specs that read cards of several weeks move the week (session-strip, staff-colours,
+  session-marks, session-gender-staff, staff-a11y-names, queue-pass2).

@@ -42,6 +42,9 @@ async function bookings(page: Page, width = 1440) {
 }
 const bg = (page: Page, sel: string) => page.locator(sel).first().evaluate((el) => getComputedStyle(el).backgroundColor);
 const img = (page: Page, sel: string) => page.locator(sel).first().evaluate((el) => getComputedStyle(el).backgroundImage);
+// The strip is a week since 2026-11-16 (Sunday to Saturday): these rides fall in four weeks, so a check moves to the ride's week.
+const week = (page: Page, day: string) => page.evaluate(`S._wkSun=_wkSunOf('${day}');renderStaffQueue()`);
+const WEEKS = ['2099-09-23', '2099-10-17', J, '2099-10-28'];
 
 test.describe('@staff:bookings Bookings in colour', () => {
   test('each ride chip wears its event’s look, with its mark', async ({ page }) => {
@@ -65,15 +68,19 @@ test.describe('@staff:bookings Bookings in colour', () => {
     await expect(page.locator(`#sess-strip .pm-chip`)).toHaveCount(0);
     // the community rides keep their own name colour: Petromin red, not the staff green
     expect(await page.locator(`${chip('2099-10-22-pm')} .sess-chip-event`).evaluate((el) => getComputedStyle(el).color)).toBe('rgb(163, 59, 46)');
+    // the picked ride is ringed
+    expect(await page.locator(chip(J)).evaluate((el) => getComputedStyle(el).boxShadow)).toContain('0px 0px 0px 2px');
+    await week(page, '2099-10-17');
     await expect(page.locator(chip('2099-10-17-rh'))).toHaveClass(/\bth-runher\b/);
     expect(await img(page, chip('2099-10-17-rh'))).toContain('radial-gradient');
     await expect(page.locator(`${chip('2099-10-17-rh')} .smk.ev-runher`)).toHaveCount(1);
-    await expect(page.locator(chip('2099-09-23-nd'))).toHaveClass(/\bth-plain\b/);
-    expect(await bg(page, chip('2099-09-23-nd'))).toBe('rgb(255, 255, 255)');
+    await week(page, '2099-10-28');
     await expect(page.locator(chip('2099-10-28-ev'))).toHaveClass(/\bth-event\b/);
     await expect(page.locator(`${chip('2099-10-28-ev')} .smk.ev-event`)).toHaveCount(1);
-    // the picked ride is ringed, and hovering keeps the look
-    expect(await page.locator(chip(J)).evaluate((el) => getComputedStyle(el).boxShadow)).toContain('0px 0px 0px 2px');
+    await week(page, '2099-09-23');
+    await expect(page.locator(chip('2099-09-23-nd'))).toHaveClass(/\bth-plain\b/);
+    expect(await bg(page, chip('2099-09-23-nd'))).toBe('rgb(255, 255, 255)');
+    // hovering keeps the look
     await page.locator(chip('2099-09-23-nd')).hover();
     expect(await bg(page, chip('2099-09-23-nd'))).toBe('rgb(255, 255, 255)');
     // the Sessions view is an agenda (2026-11-10): plain rows, each with its kind's mark, no card themes
@@ -89,9 +96,12 @@ test.describe('@staff:bookings Bookings in colour', () => {
     test(`the places left read at 4.5:1 or better on every ride chip (${theme})`, async ({ page }) => {
       if (theme !== 'light') await page.addInitScript((th) => localStorage.setItem('cq_staff_theme', th), theme);
       await bookings(page);
+      const got: { th: string; ratio: number }[] = [];
+      for (const wk of WEEKS) {
+      await week(page, wk);
       const lines = page.locator('#sess-strip .sess-summary-chip .n6c-left');
       await expect(lines.first()).toBeVisible();
-      const got = await lines.evaluateAll((els) => els.map((el) => {
+      got.push(...await lines.evaluateAll((els) => els.map((el) => {
         const chip = el.closest('.sess-summary-chip') as HTMLElement;
         const lum = (css: string) => {
           const [r, g, b] = (css.match(/[\d.]+/g) || []).slice(0, 3).map((v) => { const c = Number(v) / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
@@ -99,7 +109,8 @@ test.describe('@staff:bookings Bookings in colour', () => {
         };
         const a = lum(getComputedStyle(el).color), b = lum(getComputedStyle(chip).backgroundColor);
         return { th: [...chip.classList].find((k) => k.startsWith('th-')) || '', ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) };
-      }));
+      })));
+      }
       expect(got.map((x) => x.th)).toEqual(expect.arrayContaining(['th-plain', 'th-comm', 'th-runher', 'th-event']));
       for (const x of got) expect(x.ratio, x.th).toBeGreaterThanOrEqual(4.5);
     });

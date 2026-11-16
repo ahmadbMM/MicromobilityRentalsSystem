@@ -35,7 +35,8 @@ test('the fill-ins are filled, and a line whose fill-in is empty is left out', a
 test('every message template opens with the booking app\'s link, in every language', async ({ page }) => {
   await boot(page);
   await page.waitForFunction(`typeof globalThis['_remDef'+'ault']==='function'`);
-  const bad = await page.evaluate(`(()=>{const out=[];for(const[,list]of TPL)for(const[id]of list)if(id!=='lm_anniv')for(const g of _tplLangs()){
+  // The WhatsApp announcements (wk_, ann_; 2026-11-16) keep it just above the place, as the Saturday ride does: tests/week-announce.spec.ts
+  const bad = await page.evaluate(`(()=>{const out=[];for(const[,list]of TPL)for(const[id]of list)if(id!=='lm_anniv'&&!/^(wk|ann)_/.test(id))for(const g of _tplLangs()){
     const v=_tplDefault(id,g);if(!v.trim()){out.push(id+'/'+g+' empty');continue;}
     const ok=id==='rm_ride'?v.includes(g==='ar'?'الحجز:\\n{booking_link}\\n\\nموقع التجمّع:\\n{meet_link}':'Booking:\\n{booking_link}\\n\\nMeet Up Location:\\n{meet_link}'):v.startsWith('https://experiences.micromobility.sa/\\n\\n');
     if(!ok)out.push(id+'/'+g+': '+v.slice(0,40));}return out;})()`);
@@ -80,7 +81,7 @@ test('an admin edits a message on Settings and it is saved for everyone', async 
   });
   await page.evaluate(`setStaffTab('settings')`);
   const sec = page.locator('#tab-settings .set-card', { hasText: 'Message templates' });
-  await expect(sec.locator('.tpl-row')).toHaveCount(36); // 2026-11-13: lm_anniv, the first-ride anniversary card's line (F16); 2026-11-07: remind_late (BK13); 2026-10-09: the two messages to a selection (seg_ops, seg_news); R7: remind_24h, remind_2h, wl_offer
+  await expect(sec.locator('.tpl-row')).toHaveCount(50); // 2026-11-16: the 14 WhatsApp announcements with a built-in text (ANN_HAS); 2026-11-13: lm_anniv, the first-ride anniversary card's line (F16); 2026-11-07: remind_late (BK13); 2026-10-09: the two messages to a selection (seg_ops, seg_news); R7: remind_24h, remind_2h, wl_offer
   await sec.locator('.tpl-row[data-tpl="bd_wish"]').click();
   const ed = page.locator('#confirm-modal .tpl-box');
   await expect(ed.locator('#tpl-text')).toHaveValue(/Happy birthday, \{first_name\}!/); // the built-in text, its fill-in showing
@@ -108,6 +109,9 @@ test('Front desk does not see the templates', async ({ page }) => {
 
 test('every message opens in the editor with Arabic text on its Arabic tab', async ({ page }) => {
   await boot(page);
-  const empty = await page.evaluate(`(()=>{const out=[];TPL.forEach(([,l])=>l.forEach(([id])=>{if(!/[\\u0600-\\u06FF]/.test(_tplDefault(id,'ar')))out.push(id);}));return out;})()`);
+  // The announcements' built-in texts come with their part (2026-11-16); a type with none (ANN_HAS lists those with one) is
+  // written by the admins, and until then its announcement asks for it.
+  await page.evaluate(`_annDef('wk_head','ar')`);
+  const empty = await page.evaluate(`(()=>{const out=[];TPL.forEach(([,l])=>l.forEach(([id])=>{if(/^(wk|ann)_/.test(id)&&!ANN_HAS.includes(id))return;if(!/[\\u0600-\\u06FF]/.test(_tplDefault(id,'ar')))out.push(id);}));return out;})()`);
   expect(empty).toEqual([]);
 });

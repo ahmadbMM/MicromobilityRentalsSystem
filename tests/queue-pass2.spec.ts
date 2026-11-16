@@ -105,11 +105,18 @@ test('a paid session closing leaves its riders alone', async ({ page }) => {
   expect(patches).toHaveLength(0);
 });
 
-test("tonight's session leads the strip and is the large chip", async ({ page }) => {
+// Since 2026-11-16 the strip is the week (Sunday to Saturday): tonight's session is the large card under Today, and a
+// session of another week is in that week, a plain card.
+test("tonight's session is the large card, under Today in its week", async ({ page }) => {
   await boot(page, [row('q1')]);
-  const chips = page.locator('.sess-summary-bar .sess-summary-chip');
-  await expect(chips.first()).toHaveClass(/today-sess/);
-  await expect(chips.nth(1)).not.toHaveClass(/today-sess/);
+  const s1 = page.locator(`#sess-strip .sess-summary-chip[data-sid="${S1}"]`);
+  await expect(s1).not.toHaveClass(/today-sess/);
+  await expect(page.locator('#sess-strip .wk-today')).toHaveCount(0);
+  await page.evaluate('_wkGo(0)');
+  const tonight = page.locator('#sess-strip .wk-day.wk-today .sess-summary-chip');
+  await expect(tonight).toHaveCount(1);
+  await expect(tonight).toHaveClass(/today-sess/);
+  await expect(page.locator(`#sess-strip .sess-summary-chip[data-sid="${S1}"]`)).toHaveCount(0);
 });
 
 test('a reserved rider shows the held bike under the status', async ({ page }) => {

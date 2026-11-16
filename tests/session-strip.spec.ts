@@ -24,14 +24,15 @@ const sessions = [
     spots: 20, bike_slots: '{"_time":"17:00 - 19:00","_total":20}' },
 ];
 
-async function strip(page: import('@playwright/test').Page, width: number) {
+// Since 2026-11-16 the strip is a week, Sunday to Saturday: the Saturday ride (5 Sep) ends one week, the rest are the next.
+async function strip(page: import('@playwright/test').Page, width: number, day = '2026-09-06') {
   await page.setViewportSize({ width, height: 900 });
   await stubSupabase(page, { sessions, queue_entries: [], bikes: [] });
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction(`allSessions().length>0`);
-  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';renderStaffQueue();S.queueView='bookings';renderStaffQueue()`);
+  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';renderStaffQueue();S.queueView='bookings';S._wkSun=_wkSunOf('${day}');renderStaffQueue()`);
   await page.waitForTimeout(300);
 }
 
@@ -52,12 +53,16 @@ async function overlaps(page: import('@playwright/test').Page) {
 for (const width of [1900, 1440, 1280, 1024, 820]) {
   test(`no chip text runs under its status badge at ${width}px`, async ({ page }) => {
     await strip(page, width);
+    await expect(page.locator('#sess-strip .sess-summary-chip')).toHaveCount(4);
+    expect(await overlaps(page)).toEqual([]);
+    await page.evaluate(`S._wkSun=_wkSunOf('2026-09-05');renderStaffQueue()`);
+    await expect(page.locator('#sess-strip .sess-summary-chip')).toHaveCount(1);
     expect(await overlaps(page)).toEqual([]);
   });
 }
 
 test('@staff:bookings the long Saturday line is shown in full when there is room', async ({ page }) => {
-  await strip(page, 1900);
+  await strip(page, 1900, '2026-09-05');
   const date = page.locator('.sess-summary-chip', { hasText: 'SATURDAY' }).locator('.sess-chip-date');
   await expect(date).toContainText('Gathering');
   await expect(date).toContainText('Start');

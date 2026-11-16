@@ -190,7 +190,7 @@ test.describe('@staff:sessions pool gender', () => {
     await page.evaluate(`selectSessionDetail('${SWIM_F}')`);
     await expect(page.locator('.sess-detail-head .sg-chip')).toHaveText('Women only');
     // Bookings: the strip's chip, its title, and the phone's picker
-    await page.evaluate(`S.queueView='bookings';S.sfSession='all';renderStaffQueue()`);
+    await page.evaluate(`S.queueView='bookings';S.sfSession='all';S._wkSun=_wkSunOf('2099-03-05');renderStaffQueue()`); // the week it is in
     const chip = page.locator(`.sess-summary-chip[data-on-click*='"${SWIM_F}"']`);
     await expect(chip.locator('.sg-chip')).toHaveText('Women only');
     await expect(chip).toHaveAttribute('title', /Women only/);

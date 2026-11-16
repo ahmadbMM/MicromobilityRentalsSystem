@@ -128,6 +128,7 @@ test.describe('@staff:sessions telling sessions apart', () => {
     await expect(rows.first().locator('.sess-ag-t')).toContainText('·');
   });
 
+  // Since 2026-11-16 the cards stand in their day's column of the week, whose heading says Today and Tomorrow in words.
   test('each Bookings card leads with the mark and the name, Today and Tomorrow in words', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await boot(page);
@@ -135,9 +136,12 @@ test.describe('@staff:sessions telling sessions apart', () => {
     const chip = (id: string) => page.locator(`#sess-strip .sess-summary-chip[data-sid="${id}"]`); // a Petromin night's card is a group of tiles, not a button (2026-11-12)
     await expect(chip(TODAY).locator('.smk.ev-jcc')).toHaveCount(1);
     await expect(chip(TODAY).locator('.sess-chip-event')).toHaveText('Jeddah Corniche Circuit');
-    await expect(chip(TODAY).locator('.sess-chip-date')).toContainText('Today');
-    await expect(chip('2099-03-04-pw').locator('.sess-chip-date')).toContainText('Tomorrow');
-    await expect(chip('2099-03-05').locator('.sess-chip-date')).toContainText('Thu 5 Mar');
+    const day = (id: string) => page.locator(`#sess-strip .wk-day:has(.sess-summary-chip[data-sid="${id}"]) .wk-dh`);
+    await expect(day(TODAY)).toContainText('Today');
+    await expect(day('2099-03-04-pw')).toContainText('Tomorrow');
+    await expect(day('2099-03-05')).toContainText(/Thu\s*5 Mar/);
+    await expect(day('2099-03-05')).not.toContainText('Tomorrow');
+    await expect(chip(TODAY).locator('.sess-chip-date')).toContainText('9 PM');
   });
 });
 
@@ -214,7 +218,8 @@ test.describe('@staff:sessions sessions in order and in colour', () => {
     await expect(card('2099-03-05-pw').locator('.sess-chip-foot .n6c-left')).toHaveText(/W 1/);
     await expect(card('2099-03-05-pw').locator('.ssx-wl')).toHaveCount(0);
     await expect(page.locator('#sess-strip .ssx-code')).toHaveCount(0);
-    expect((await card(TODAY).boundingBox())!.height).toBeLessThan(100);
+    // a day's column of the week is about 150px wide at 1440 (2026-11-16), so the name and the status take a line each
+    expect((await card(TODAY).boundingBox())!.height).toBeLessThan(150);
   });
 
   test('the roster with every session, the Dashboard and the scanner name a session the same way', async ({ page }) => {
