@@ -1279,6 +1279,16 @@ brought the template look back. Fixed, and guarded so it stays fixed:
 - **The session picker is days with rows** (`_sessDays`): each day is a heading (Today / Tomorrow in words) and
   its sessions are rows that lead with the time. A row says its status only when it is news (places left under
   four, the waitlist, turned down, not open yet); "Available" is never shown. The date is not repeated in a row.
+- **Reserve's calendar view (2026-11-16, the user: "add a calendar view in reserve section for customers").** A list of
+  two or more dates (counted before the kind switch narrows it, `_rcMany`) carries a List / Calendar switch at the end
+  of the kind row (`.reg-tools`, `_rcViewHtml`; the staff side's words `calViewList`, `calViewCal`, `calPrev`,
+  `calNext`, `shGrpView`, which the build now ships to riders too). The choice is kept on the phone (`S.regView`,
+  `localStorage.cq_reg_view`). Calendar (`_rcPlan`, `_rcMonthHtml`) draws one month, weeks from Sunday: a day with
+  sessions is a button with a mark per kind (`.rc-marks i.ev-<kind>`), the rider's own place ticked (`_heldSt`), the
+  picked session's day ringed green (`.sel`), today ringed; under it that day's sessions alone, by `_sessDays` with the
+  list's rows (no Featured heading). A day only shows (`_rcPick`); the row still picks, so its gates answer as in the
+  list. The arrows step to the month before or after that has sessions (`_rcMove`); arrow keys, Home/End and
+  PageUp/PageDown move along the days (`_rcKey`). `tests/reserve-calendar.spec.ts`.
 - **My Bookings with nothing booked** shows a drawn bike, one line and the next open circuit night as a button
   (`_nextOpenRide`, `_bookNextOpen`), not a big grey 0.
 - **My Account says the record in words**: rides and tier with what the next tier takes (no bar), the weeks with

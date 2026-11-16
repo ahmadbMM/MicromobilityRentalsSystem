@@ -19251,6 +19251,81 @@ function _sessDays(list,row){
     return`<section class="sess-day"><h3 class="sess-day-h">${dw?`<strong class="sess-card-dw">${esc(dw)}</strong> &middot; `:''}${esc(dayLabel(g.s.day))} &middot; ${esc(_dayNoYear(g.d))}</h3>
       <div class="sess-day-list">${g.l.map(row).join('')}</div></section>`;}).join('');
 }
+// ── The Reserve calendar (the user, 2026-11-16: "add a calendar view in reserve section for customers") ─────────────
+// Step one's dates as a month beside the list (S.regView, kept on the phone as cq_reg_view). A day with sessions is a
+// button with one mark per kind (the kind's colour), and the rider's own booking, today and the picked session's day
+// are marked too; tapping it shows that day's sessions under the month, drawn by _sessDays as the list draws them
+// (the same rows, the same radio group). A day only shows: picking stays on the row, whose gates (members, age, the
+// Saturday code) answer as they do in the list. The arrows step to the month before or after that has sessions.
+function _rcOn(){
+  if(S.regView==null){let v='';try{v=localStorage.getItem('cq_reg_view')||'';}catch(e){}S.regView=v==='cal'?'cal':'list';}
+  return S.regView==='cal';
+}
+function _rcView(v){
+  S.regView=v==='cal'?'cal':'list';try{localStorage.setItem('cq_reg_view',S.regView);}catch(e){}
+  renderRegister();
+}
+function _rcViewHtml(){
+  const on=_rcOn(),b=(v,ic,k)=>{const p=(v==='cal')===on;return`<button type="button" id="rc-v-${v}" class="rc-v${p?' on':''}" aria-pressed="${p}" aria-label="${esc(t(k))}" title="${esc(t(k))}" data-on-click="${_on('_rcView',v)}">${_cuIc(ic,18)}</button>`;};
+  return`<div class="rc-views" role="group" aria-label="${esc(t('shGrpView'))}">${b('list','rows','calViewList')}${b('cal','cal','calViewCal')}</div>`;
+}
+function _rcDay(s){return String(s.session_date||s.id).slice(0,10);}
+// The day shown: the one tapped, else the picked session's, else the first with sessions (a kind switched to may not
+// have the day tapped before). Its month is the month drawn.
+function _rcPlan(list){
+  const by={};list.forEach(s=>{const d=_rcDay(s);(by[d]=by[d]||[]).push(s);});
+  const days=Object.keys(by).sort(),ss=list.find(x=>x.id===S.selSession),selD=ss?_rcDay(ss):'';
+  const day=_own(by,S.regCalDay)?S.regCalDay:selD||days[0];
+  S._rcDays=days;S._rcShown=day;
+  return{by,days,day,selD,list:by[day]};
+}
+function _rcLong(iso){try{return new Date(iso+'T12:00:00+03:00').toLocaleDateString(_locale(),{weekday:'long',day:'numeric',month:'long',timeZone:KSA_TZ});}catch(e){return iso;}}
+function _rcMonthHtml(p){
+  const ym=p.day.slice(0,7),[y,m]=ym.split('-').map(Number),td=todayStr();
+  const months=[...new Set(p.days.map(d=>d.slice(0,7)))],mi=months.indexOf(ym);
+  const n=new Date(Date.UTC(y,m,0)).getUTCDate(),lead=new Date(Date.UTC(y,m-1,1)).getUTCDay(); // weeks start on Sunday, as in Saudi Arabia
+  let title=ym,dow='';
+  try{title=new Date(Date.UTC(y,m-1,15,12)).toLocaleDateString(_locale(),{month:'long',year:'numeric',timeZone:'UTC'});}catch(e){}
+  for(let i=0;i<7;i++){let w='';try{w=new Date(Date.UTC(2024,0,7+i,12)).toLocaleDateString(_locale(),{weekday:'narrow',timeZone:'UTC'});}catch(e){}dow+=`<span class="rc-dow">${esc(w)}</span>`;}
+  let cells='<span class="rc-pad"></span>'.repeat(lead);
+  for(let d=1;d<=n;d++){
+    const iso=`${ym}-${String(d).padStart(2,'0')}`,l=p.by[iso],cl=(iso===td?' today':'')+(iso<td?' past':'');
+    if(!l){cells+=`<span class="rc-day${cl}">${d}</span>`;continue;}
+    const on=iso===p.day,ks=[...new Set(l.map(_rideKind))].slice(0,3),h=l.map(_heldSt).find(Boolean)||'',fb=l.every(_sessFb);
+    const lbl=[_rcLong(iso),[...new Set(l.map(_evTitle))].join(', '),h?t(h==='ok'?'tkStBooked':h==='wl'?'wlOnList':'statusReserved'):fb?t('sessFbk'):''].filter(Boolean).join(' · ');
+    cells+=`<button type="button" id="rc-d-${iso}" class="rc-day has${cl}${on?' on':''}${iso===p.selD?' sel':''}${h?' mine':''}${fb?' fb':''}" data-day="${iso}" aria-pressed="${on}" aria-label="${esc(lbl)}" tabindex="${on?0:-1}" data-on-click="${_on('_rcPick',iso)}">${d}${h?`<span class="rc-mine" aria-hidden="true">${_cuIc('tick',10)}</span>`:''}<span class="rc-marks" aria-hidden="true">${ks.map(k=>`<i class="ev-${k}"></i>`).join('')}</span></button>`;
+  }
+  const nav=(id,f,ic,k)=>{const off=mi+f<0||mi+f>=months.length;return`<button type="button" id="${id}" class="rc-nav" aria-label="${esc(t(k))}"${off?' disabled':''} data-on-click="${_on('_rcMove',f)}">${_cuIc(ic,18,1)}</button>`;};
+  return`<section class="rc-cal" aria-labelledby="rc-t">
+    <div class="rc-head">${nav('rc-prev',-1,'back','calPrev')}<h2 class="rc-t" id="rc-t" aria-live="polite">${esc(title)}</h2>${nav('rc-next',1,'go','calNext')}</div>
+    <div class="rc-grid" id="rc-grid" data-on-keydown="${_on('_rcKey',_EV,_EL)}"><div class="rc-dows" aria-hidden="true">${dow}</div>${cells}</div>
+  </section>`;
+}
+function _rcPick(iso){S.regCalDay=iso;renderRegister();}
+function _rcMove(f){
+  const days=S._rcDays||[],cur=String(S._rcShown||'').slice(0,7),months=[...new Set(days.map(d=>d.slice(0,7)))],to=months[months.indexOf(cur)+f];
+  if(!to)return;
+  S.regCalDay=days.find(d=>d.startsWith(to));renderRegister();
+  const b=document.getElementById(f<0?'rc-prev':'rc-next');
+  if(!b||b.disabled){const d=document.querySelector('#rc-grid .rc-day.on');if(d)try{d.focus({preventScroll:true});}catch(e){}}
+}
+// Arrow keys move along the days that have sessions (the next one, or a week on: the nearest from there), mirrored in
+// Arabic and Urdu; Home and End the month's first and last; Page Up and Page Down the month before and after.
+function _rcKey(ev){
+  const k=ev.key,b=ev.target&&ev.target.closest&&ev.target.closest('.rc-day.has');if(!b)return;
+  if(k==='PageUp'||k==='PageDown'){ev.preventDefault();_rcMove(k==='PageUp'?-1:1);return;}
+  const all=[...b.parentNode.querySelectorAll('.rc-day.has')],i=all.indexOf(b),dn=x=>Number(x.dataset.day.slice(8)),d=dn(b);
+  let to=null;
+  if(k==='ArrowRight'||k==='ArrowLeft')to=all[i+((k==='ArrowRight')!==(getComputedStyle(b).direction==='rtl')?1:-1)];
+  else if(k==='ArrowDown')to=all.find(x=>dn(x)>=d+7);
+  else if(k==='ArrowUp')to=all.filter(x=>dn(x)<=d-7).pop();
+  else if(k==='Home')to=all[0];
+  else if(k==='End')to=all[all.length-1];
+  else return;
+  ev.preventDefault();
+  if(!to||to===b)return;
+  b.tabIndex=-1;to.tabIndex=0;try{to.focus();}catch(e){}
+}
 // What the step-1 Continue bar says about the ride picked, so a ride scrolled out of view is still named.
 function _regFootSum(s){
   const d=String(s.session_date||s.id).slice(0,10);let dm='';
@@ -19326,11 +19401,13 @@ function renderRegister(){
   // already picked stays picked. A kind no longer on the list reads as All.
   const _ko=k=>{const i=COMM_MARKS.indexOf(k);return i<0?99:i;},_kinds=[...new Set(available.map(_rideKind))].sort((a,b)=>_ko(a)-_ko(b));
   const _kf=_kinds.length>1&&_kinds.includes(S.regKind)?S.regKind:null;
+  const _rcMany=new Set(available.map(_rcDay)).size>1; // the calendar is offered for two dates or more, counted before the kind narrows them
   if(_kf)available=available.filter(x=>_rideKind(x)===_kf);
   if(S.selSession&&!_bwOpen(_sessDisp(S.selSession)))S.selSession=null; // not open yet: nothing to book on
   // Featured dates lead the list under a heading of their own; the rest follow in date order (_featured, 2026-11-13).
   const _feat=available.filter(_featured),_rest=_feat.length?available.filter(s=>!_featured(s)):available;
-  const _first=(_feat.concat(_rest).find(x=>!_sessFb(x)&&!_bwOpensText(x)&&!_isDefe(x))||{}).id; // the row that holds the tab stop while none is picked (row 11): the first one on the page
+  const _rc=_rcMany&&available.length&&_rcOn()?_rcPlan(available):null; // the calendar view: its month, and the day whose sessions show under it
+  const _first=((_rc?_rc.list:_feat.concat(_rest)).find(x=>!_sessFb(x)&&!_bwOpensText(x)&&!_isDefe(x))||{}).id; // the row that holds the tab stop while none is picked (row 11): the first one on the page
   ensureBikeSizes();
   // No bike anywhere in what is in front of the rider (2026-10-18): the picked session, else the event card's
   // dates (a card that is bike-free, or a list whose every date is). The steps then say session and participant.
@@ -19398,7 +19475,8 @@ function renderRegister(){
         </button>${_dt}</div>`;
       };
   const sessCards=available.length
-    ? (_feat.length?`<section class="sess-feat" aria-labelledby="sess-feat-h"><h2 class="sess-sec-h" id="sess-feat-h">${_cuIc('star',16)}<span>${t('featTitle')}</span></h2>${_sessDays(_feat,_row)}</section>${_rest.length?`<h2 class="sess-sec-h sess-sec-rest">${t('featRest')}</h2>`:''}`:'')+_sessDays(_rest,_row)
+    ? _rc?_sessDays(_rc.list,_row) // the calendar's day: its sessions alone, as the list draws them
+    : (_feat.length?`<section class="sess-feat" aria-labelledby="sess-feat-h"><h2 class="sess-sec-h" id="sess-feat-h">${_cuIc('star',16)}<span>${t('featTitle')}</span></h2>${_sessDays(_feat,_row)}</section>${_rest.length?`<h2 class="sess-sec-h sess-sec-rest">${t('featRest')}</h2>`:''}`:'')+_sessDays(_rest,_row)
     : _sessLoadFailed()
     ? _loadErr(t('errConnection'),_on("_sessRetry"),{cls:'sess-load-err'})
     : !S.dataLoaded
@@ -19714,11 +19792,11 @@ function renderRegister(){
   // Step one's Back is the page's own, at the top (the user, 2026-11-11: "return the back button"); its bar holds Continue.
   const panel1=`
     ${stepHeader(t(_soleSess?(_ncSel?'regStep1TitleOneSess':'regStep1TitleOne'):_mixList?'regStep1TitleDate':(_ncSel?'regStep1TitleSess':'regStep1Title')),'',_ev==='community'&&!_soleSess?esc(t('landCommTitle')):'')}
-    ${(_kinds.length>1&&!_soleSess)?_regKindsHtml(_kinds,_kf):''}
+    ${_soleSess||!available.length||!(_rcMany||_kinds.length>1)?'':`<div class="reg-tools">${_kinds.length>1?_regKindsHtml(_kinds,_kf):''}${_rcMany?_rcViewHtml():''}</div>`}
     ${usualBtn}
     ${branchFilter}
     <div class="session-picker-wrap" id="session-picker-wrap">
-      ${_soleSess?_soleSessHtml(_soleSess):_pickable?`<div class="session-cards-grid" role="radiogroup" aria-labelledby="reg-h" data-on-keydown="${_on('_rgKey',_EV,_EL)}">${sessCards}</div>`:`<div class="session-cards-grid">${sessCards}</div>`}
+      ${_soleSess?_soleSessHtml(_soleSess):(_rc?_rcMonthHtml(_rc):'')+(_pickable?`<div class="session-cards-grid" role="radiogroup" aria-labelledby="reg-h" data-on-keydown="${_on('_rgKey',_EV,_EL)}">${sessCards}</div>`:`<div class="session-cards-grid">${sessCards}</div>`)}
       ${(()=>{ // community ride staff-marked FULL: reservations still work but land on the waitlist - say so up front
         if(!S.selSession)return'';
         const _cs=_sessDisp(S.selSession);
@@ -31005,6 +31083,7 @@ const _CU={
   chain:'<rect x="2.6" y="8.4" width="10.2" height="7.2" rx="3.6"/><rect x="11.2" y="8.4" width="10.2" height="7.2" rx="3.6"/>',
   pin:'<path d="M12 21.2s-6.6-5.7-6.6-11.1a6.6 6.6 0 0 1 13.2 0c0 5.4-6.6 11.1-6.6 11.1z"/><circle cx="12" cy="10.1" r="2.3"/>',
   cal:'<rect x="3.6" y="5.2" width="16.8" height="15.2" rx="2.6"/><path d="M3.6 10.1h16.8M8.2 3.2v4M15.8 3.2v4"/>',
+  rows:'<path d="M9.4 6.4h10.4M9.4 12h10.4M9.4 17.6h10.4M4.6 6.4h.2M4.6 12h.2M4.6 17.6h.2"/>', // Reserve's list view (2026-11-16)
   back:'<path d="M14.6 5.4L8 12l6.6 6.6"/>',
   go:'<path d="M9.4 5.4L16 12l-6.4 6.6"/>',
   bike:'<circle cx="5.9" cy="15.6" r="3.9"/><circle cx="18.1" cy="15.6" r="3.9"/><path d="M5.9 15.6L9.4 8.7l2.3 6.9zM9.4 8.7h6.4l-4.1 6.9M15.8 8.7l2.3 6.9M9.4 8.7L8.9 6.6M7.5 6.6h3M15.8 8.7l-.7-2.5h2.7"/>',

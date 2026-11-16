@@ -10221,6 +10221,36 @@ body:not(.view-staff) .sr-st{fill:var(--card);stroke:var(--k-sat);stroke-width:2
 body:not(.view-staff) .sr-tn,body:not(.view-staff) .sr-pill rect{fill:var(--k-sat);}
 body:not(.view-staff) .sr-pill text{fill:var(--card);font-size:10px;font-weight:600;}
 body:not(.view-staff) .sr-lb{fill:var(--ink-2);font-size:10px;font-weight:500;}
+/* ── Reserve's calendar (2026-11-16): the List / Calendar switch at the end of the kind row, then a month whose days
+   with sessions are buttons carrying one mark per kind; the day shown in ink, the picked session's day ringed green ── */
+body:not(.view-staff) .reg-tools{display:flex;align-items:flex-start;gap:8px;margin:0 0 14px;}
+body:not(.view-staff) .reg-tools>.reg-kinds{flex:1 1 auto;min-width:0;margin:0;}
+body:not(.view-staff) .rc-views{flex:none;display:inline-flex;gap:2px;margin-inline-start:auto;padding:3px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);}
+body:not(.view-staff) .rc-v{display:inline-grid;place-items:center;width:38px;height:36px;padding:0;border:0;border-radius:999px;background:transparent;color:var(--ink-2);cursor:pointer;}
+body:not(.view-staff) .rc-v.on{background:var(--ink);color:var(--paper);}
+body:not(.view-staff) .rc-cal{margin:0 0 18px;padding:12px 12px 14px;border-radius:var(--r-card);background:var(--card);box-shadow:var(--pl-1);}
+body:not(.view-staff) .rc-head{display:flex;align-items:center;gap:8px;margin:0 0 8px;}
+body:not(.view-staff) .rc-t{flex:1;margin:0;text-align:center;font-size:var(--fs-17);font-weight:700;color:var(--ink);}
+body:not(.view-staff) .rc-nav{flex:none;display:inline-grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:var(--r-ctl);background:var(--card-2);color:var(--ink);cursor:pointer;}
+body:not(.view-staff) .rc-nav:disabled{background:transparent;color:var(--ink-4);cursor:default;}
+body:not(.view-staff) .rc-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;}
+body:not(.view-staff) .rc-dows{display:contents;}
+body:not(.view-staff) .rc-dow{padding:2px 0 6px;text-align:center;font-size:var(--fs-12);font-weight:600;color:var(--ink-3);}
+body:not(.view-staff) .rc-day{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:46px;padding:4px 0;border:0;border-radius:var(--r-ctl);background:transparent;color:var(--ink-3);font-size:var(--fs-15);font-weight:500;font-variant-numeric:tabular-nums;line-height:1;}
+body:not(.view-staff) .rc-day.past{color:var(--ink-4);}
+body:not(.view-staff) .rc-day.today{box-shadow:inset 0 0 0 1.5px var(--line-3);}
+body:not(.view-staff) .rc-day.has{background:var(--card-2);color:var(--ink);font-weight:700;cursor:pointer;}
+body:not(.view-staff) .rc-day.has.sel{box-shadow:inset 0 0 0 2px var(--go);}
+body:not(.view-staff) .rc-day.has.on{background:var(--ink);color:var(--paper);box-shadow:none;}
+body:not(.view-staff) .rc-day.has.on.sel{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--go);}
+body:not(.view-staff) .rc-day.has:focus-visible{outline-offset:1px;}
+body:not(.view-staff) .rc-day.fb:not(.on){color:var(--ink-3);font-weight:500;}
+body:not(.view-staff) .rc-marks{display:flex;gap:3px;height:6px;}
+body:not(.view-staff) .rc-marks>i{width:6px;height:6px;border-radius:50%;background:var(--k,var(--ev,var(--go)));}
+body:not(.view-staff) .rc-day.on .rc-marks>i{box-shadow:0 0 0 1.5px var(--paper);}
+body:not(.view-staff) .rc-day.fb .rc-marks>i{opacity:.4;}
+body:not(.view-staff) .rc-mine{position:absolute;top:3px;inset-inline-end:3px;display:inline-grid;place-items:center;width:14px;height:14px;border-radius:50%;background:var(--go);color:var(--paper);}
+body:not(.view-staff) .rc-mine .cu-ic{stroke-width:3;}
 
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
