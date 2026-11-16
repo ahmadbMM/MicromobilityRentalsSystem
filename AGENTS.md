@@ -2675,6 +2675,13 @@ customers and force them even add it in the sign up page and all forms currently
   the missing parts and the temporary password is NOT shown (`_tmInviteCheck`, `_tmInviteBroken`). Before the
   function exists `staff_team_list` stands in (staff row + Auth user with that email). After an Auth upgrade,
   invite a throwaway account and sign in with it once.
+- **A customer's email can be a staff account (2026-11-16, 20261116103000).** Customers sign in through
+  `public.customers`, not Auth, but every customer who once used Google or Apple left an `auth.users` row on that
+  email (no password, no 'email' identity), and Auth allows one row per email. `staff_invite` now takes such a row
+  over instead of answering EMAIL_TAKEN: temporary password, 'email' added to its providers and identities, its
+  sessions deleted, then the staff row as usual (answer `linked: true`). The customer account is untouched. Only a
+  row that already has a staff row is refused. A staffer changing their OWN email onto such an address
+  (`staff_set_own_email`) is still refused: that would be two Auth users on one email.
 
 ## On the house is approved on the server (2026-10-09)
 - `staff_set_house(booking, on, op, approval)` (20261009205000) is the desk's door for a hand-chosen ride on
