@@ -218,8 +218,9 @@ test.describe('@staff:sessions sessions in order and in colour', () => {
     await expect(card('2099-03-05-pw').locator('.sess-chip-foot .n6c-left')).toHaveText(/W 1/);
     await expect(card('2099-03-05-pw').locator('.ssx-wl')).toHaveCount(0);
     await expect(page.locator('#sess-strip .ssx-code')).toHaveCount(0);
-    // a day's column of the week is about 150px wide at 1440 (2026-11-16), so the name and the status take a line each
-    expect((await card(TODAY).boundingBox())!.height).toBeLessThan(150);
+    // a day's column of the week is about 150px wide at 1440 (2026-11-16), so the name and the status take a line each:
+    // 140px here, 155px on CI's Linux fonts
+    expect((await card(TODAY).boundingBox())!.height).toBeLessThan(170);
   });
 
   test('the roster with every session, the Dashboard and the scanner name a session the same way', async ({ page }) => {
