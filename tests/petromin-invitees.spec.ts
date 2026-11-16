@@ -173,4 +173,67 @@ test.describe('@staff:bookings Petromin invitees', () => {
     expect(await page.evaluate('[S.queueView,S.sfSession,S.sfSearch]')).toEqual(['bookings', N1, '7']);
     expect(errs).toEqual([]);
   });
+
+  // The user, 2026-11-16: "why does bookings doesn't show the tags a user holds not even the stripe and design change".
+  // The night's one list draws a booking as its Bookings row does: the tag bands down the start edge and the marks after
+  // the name; a rider with no tag gets neither.
+  test('a booking on the night\'s one list wears its rider\'s tags: the bands and the marks after the name', async ({ page, isMobile }) => {
+    const errs: string[] = [];
+    page.on('pageerror', (e) => errs.push(`${e.name}: ${e.message}`));
+    const tags = [
+      { id: 'tag_saturday', slug: 'saturday', name: 'Community', color: '#0c7a3d', locked: true, auto_grant: false },
+      { id: 'tag_influencer', slug: 'influencer', name: 'Influencer', color: '#862e9c', locked: true, auto_grant: false },
+      { id: 'tag_imc', slug: 'imc', name: 'IMC', color: '#0e5592', locked: true, auto_grant: false },
+    ];
+    const cust = (id: string, name: string) => ({ id, name, email: id + '@example.test', phone: '+9665000001' + id.slice(-2), height: 170, created_at: '2026-01-01T00:00:00Z' });
+    const customers = [cust('cust-m1', 'Mona Member'), cust('cust-i2', 'Ivan Influencer'), cust('cust-n3', 'Nora Nobody'), cust('cust-c4', 'Imad Invited')];
+    const customer_tags = [
+      { customer_id: 'cust-m1', tag_id: 'tag_saturday', added_by: 'staff', added_at: 1 },
+      { customer_id: 'cust-i2', tag_id: 'tag_saturday', added_by: 'staff', added_at: 1 },
+      { customer_id: 'cust-i2', tag_id: 'tag_influencer', added_by: 'staff', added_at: 1 },
+      { customer_id: 'cust-c4', tag_id: 'tag_imc', added_by: 'staff', added_at: 1 },
+    ];
+    const bk = (id: string, n: number, cid: string, name: string, o: Record<string, unknown> = {}) =>
+      entry({ id, queue_num: n, name, customer_id: cid, phone: '+96650000020' + n, via: null, walk_in: false, ...o });
+    await stubSupabase(page, {
+      sessions, tags, customers, customer_tags, rider_registrations: [], queue_entries: [
+        bk('tagaaaaaaaaaaa1', 1, 'cust-m1', 'Mona Member'),
+        bk('tagaaaaaaaaaaa2', 2, 'cust-i2', 'Ivan Influencer'),
+        bk('tagaaaaaaaaaaa3', 3, 'cust-n3', 'Nora Nobody'),
+        bk('tagaaaaaaaaaaa4', 4, 'cust-c4', 'Imad Invited', { invite_no: 'I-001', via: 'invite' }),
+      ],
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('(S.customers||[]).length>0&&(S.customerTags||[]).length>0&&(S.tags||[]).length>0');
+    await page.evaluate(`(()=>{setStaffTab('queue');openPetrominPage(${JSON.stringify(N1)},'all');})()`);
+    const tr = (id: string) => page.locator(`#pm-host tbody tr[data-id="${id}"]`);
+    await expect(page.locator('#pm-host tbody tr')).toHaveCount(4);
+    // a member: the green band and the community's mark
+    await expect(tr('tagaaaaaaaaaaa1')).toHaveClass(/\bcm-row-mark\b/);
+    await expect(tr('tagaaaaaaaaaaa1')).not.toHaveClass(/\binf-row\b/);
+    await expect(tr('tagaaaaaaaaaaa1').locator('.cm-mk')).toHaveCount(1);
+    await expect(tr('tagaaaaaaaaaaa1').locator('.inf-mk')).toHaveCount(0);
+    // a member who is an influencer: both bands, both marks
+    await expect(tr('tagaaaaaaaaaaa2')).toHaveClass(/\bcm-row-mark\b/);
+    await expect(tr('tagaaaaaaaaaaa2')).toHaveClass(/\binf-row\b/);
+    await expect(tr('tagaaaaaaaaaaa2').locator('.cm-mk')).toHaveCount(1);
+    await expect(tr('tagaaaaaaaaaaa2').locator('.inf-mk')).toHaveAttribute('title', 'Influencer');
+    // no tag, nothing
+    await expect(tr('tagaaaaaaaaaaa3')).not.toHaveClass(/\b(cm-row-mark|inf-row)\b/);
+    await expect(tr('tagaaaaaaaaaaa3').locator('.cm-mk, .inf-mk, .imc-mk')).toHaveCount(0);
+    // an invitee with an account: its tags too
+    await expect(tr('tagaaaaaaaaaaa4')).toHaveClass(/\binv-row\b/);
+    await expect(tr('tagaaaaaaaaaaa4').locator('.imc-mk')).toHaveCount(1);
+    if (!isMobile) {
+      const sh = (id: string) => tr(id).locator('td').first().evaluate((el) => getComputedStyle(el).boxShadow);
+      expect(await sh('tagaaaaaaaaaaa1')).toContain('rgb(12, 122, 61)');
+      const both = await sh('tagaaaaaaaaaaa2');
+      expect(both).toContain('rgb(12, 122, 61)');
+      expect(both).toContain('rgb(134, 46, 156)');
+      expect(await sh('tagaaaaaaaaaaa3')).not.toContain('rgb(12, 122, 61)');
+    }
+    expect(errs).toEqual([]);
+  });
 });

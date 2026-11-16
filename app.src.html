@@ -59711,15 +59711,19 @@ function _invOpen(id){
 }
 // The unified list: every Petromin night, every company and the invitees.
 function _pmAllNights(){S.ridersSession='all';S.ridersCompany='all';S.ridersFilter='all';_saveQueueView();renderStaffQueue();}
+// A booking's row wears what its row on Bookings wears (the user, 2026-11-16: "why does bookings doesn't show the tags a
+// user holds not even the stripe and design change"): the tag bands down its start edge (a member's green, the influencer's
+// plum, the food blogger's teal, the food worker's slate, a BD- booking's red, a partner's rose) and the tag marks after the
+// name, in the roster's order. The registrations' rows are not accounts and carry none.
 function _invRowHtml(r){
   const e=_qGet(r._inv);if(!e)return'';
   const sess=_sessDisp(e.sessionId),b=getAssignedBikes(e)[0];
   const exp=e.status==='waiting'||e.status==='waitlist';
   const inv=!!e.inviteNo;
-  return`<tr class="${inv?'inv-row':'bk-row'}" data-id="${esc(e.id)}">
+  return`<tr class="${inv?'inv-row':'bk-row'}${_ptnRow(e)}${_cmRow(e)}${_infRow(e)}${_foodRow(e)}${_fwkRow(e)}${_bdfRow(e)}" data-id="${esc(e.id)}">
     <td><button type="button" class="status-badge badge-active iv-bno" data-on-click="${_on("_invOpen",e.id)}">${esc(r.booking_no)}</button>${e.status==='waitlist'?`<div class="iv-sub">${esc(t('statusWaitlist'))}</div>`:''}</td>
     <td>${inv?`<span class="walk-in-badge inv-badge">${esc(t('invCo'))}</span>${e.inviteCo?`<div class="iv-sub iv-co" dir="auto">${esc(e.inviteCo)}</div>`:''}`:`<span class="walk-in-badge bk-badge">${esc(t('tabQueue'))}</span>`}</td>
-    <td>${esc(e.name)}${e.phone?`<div class="iv-fs12">${_piiLink('phone',e.phone,null,e.id,'https://wa.me/'+_waDigits(e.phone),'whatsapp','iv-link',' target="_blank" rel="noopener" dir="ltr"')}</div>`:''}</td>
+    <td>${esc(e.name)}${_ptnChip(e,1)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_infChip(e)}${_foodChip(e)}${_fwkChip(e)}${_imcChip(e)}${_blkChip(e)}${e.phone?`<div class="iv-fs12">${_piiLink('phone',e.phone,null,e.id,'https://wa.me/'+_waDigits(e.phone),'whatsapp','iv-link',' target="_blank" rel="noopener" dir="ltr"')}</div>`:''}</td>
     <td>${e.height?`${esc(String(e.height))} ${t('cmUnit')}`:`<span class="iv-muted">·</span>`}</td>
     <td>${typeBadge(r.type_preference)}</td>
     <td>${shortDate(String(e.sessionId).slice(0,10))}${sess?`<div class="iv-sub"><bdi>${esc(sessionTime(sess))}</bdi></div>`:''}</td>

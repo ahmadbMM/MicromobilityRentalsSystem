@@ -582,7 +582,10 @@ account), the invitee pays the standard fare at the desk, micromobility.sa/petro
   Petromin page lists invitees as rows of company `INV_CO` ('Invitees', `_invRows`, `_invRowHtml`: Check in opens the
   booking's check-in, Return its return, the number opens it on Bookings via `_invOpen`); the Company filter has
   Invitees; "All Petromin nights" (`_pmAllNights`) is the unified list of every night, company and invitee. Invitees
-  are never on the billing report (they pay). `tests/petromin-invitees.spec.ts`.
+  are never on the billing report (they pay). A booking's row there (invitee or company Bookings) wears what its
+  Bookings row wears (2026-11-16): the tag bands (`_cmRow`, `_infRow`, `_foodRow`, `_fwkRow`, `_bdfRow`, `_ptnRow`) and
+  the marks after the name in the roster's order; a new tag mark on the roster goes into `_invRowHtml` too. The
+  registrations' rows are not accounts and carry none. `tests/petromin-invitees.spec.ts`.
 
 ## One Petromin page (2026-11-13, migrations 20261113150000 and 20261113150100)
 
