@@ -50,15 +50,17 @@ test.describe('@customer:members mentorship', () => {
     await expect(page.locator('#hub-body .mt-card')).toHaveCount(0);
   });
 
-  test('the list names nobody; I can help asks for the mentor registration first, then the offer', async ({ page }) => {
+  // The user, 2026-11-18: "i want mentees to be anonymous, only show their university and major" (20261118120000).
+  test('the list names nobody and shows only the university and major; I can help asks for the mentor registration first, then the offer', async ({ page }) => {
     const sent = rpcSent(page);
-    const state = await member(page, mt());
+    const state = await member(page, mt({ profiles: [prof(3, { goal: 'Work in design' }), prof(7, { university: 'Concordia University', field: 'Industrial Engineering', city: 'Montreal', country: 'CA' })] }));
     await page.locator('.mt-card').getByRole('button', { name: 'See the students' }).click();
     const cards = page.locator('#hub-body .mt-prof');
     await expect(cards).toHaveCount(2);
     await expect(cards.first()).toContainText('Profile 3');
     await expect(cards.first()).toContainText('IE University');
-    await expect(cards.first()).toContainText('Madrid, Spain');
+    await expect(cards.first()).toContainText('Business Administration');
+    for (const hidden of ['Madrid', 'Spain', '2026', 'CV review', 'Work in design']) await expect(cards.first()).not.toContainText(hidden); // even if an old database sends them
     await expect(page.locator('#hub-body')).not.toContainText('Lina');
     await cards.nth(1).getByRole('button', { name: 'I can help' }).click();
     const dlg = page.getByRole('dialog', { name: 'Register as a mentor' });
@@ -76,6 +78,9 @@ test.describe('@customer:members mentorship', () => {
     await expect.poll(() => sent.find((x) => x.fn === 'mentor_join')?.body).toMatchObject({ p_university: 'KAU', p_field: 'Marketing', p_work: 'Advertising', p_helps: ['cv'], p_about: 'I work in advertising.', p_ok: true });
     const offer = page.getByRole('dialog', { name: 'Profile 7' });
     await expect(offer).toBeVisible();
+    await expect(offer.locator('.mt-sum')).toContainText('Industrial Engineering');
+    await expect(offer.locator('.mt-sum')).not.toContainText('Montreal');
+    await expect(offer.getByRole('button', { name: 'Lived or studied in this city' })).toHaveCount(0); // the mentor never sees the city
     await expect(offer.getByRole('button', { name: 'CV review' })).toHaveAttribute('aria-pressed', 'true'); // the registration's help, picked already
     await offer.getByRole('button', { name: 'Same university' }).click();
     await offer.getByLabel('How could your experience help?').fill('I can review your CV.');
@@ -124,6 +129,8 @@ test.describe('@customer:members mentorship', () => {
     await member(page, mt({ mentor: mentorReg, offers: [{ id: 'mo_2', num: 3, university: 'IE University', field: 'BBA', city: 'Madrid', country: 'ES', class_year: 2026, status: 'offered', name: null, wa: null, at: null, due: false }] }), { 'rpc:mentor_quit': { ok: true } });
     await page.locator('.mt-card').getByRole('button', { name: 'See the students' }).click();
     await expect(page.locator('.mt-list')).toContainText('Offer sent');
+    await expect(page.locator('.mt-list')).toContainText('IE University');
+    await expect(page.locator('.mt-list')).not.toContainText('Madrid');
     await expect(page.locator('.mt-me')).toContainText('KAU');
     await page.locator('.mt-me').getByRole('button', { name: 'Leave the programme' }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Leave the programme' }).click();
@@ -186,6 +193,16 @@ test.describe('@staff:community mentorship', () => {
     await dlg.getByLabel('Line the student sees').fill('Studied at IE, works in banking');
     await dlg.getByRole('button', { name: 'Propose' }).click();
     await expect.poll(() => w.find((x) => x.method === 'PATCH')?.body).toMatchObject({ status: 'proposed', summary: 'Studied at IE, works in banking' });
+  });
+
+  test('Copy for WhatsApp gives each open profile as its number, university and major only', async ({ page }) => {
+    await staff(page);
+    await page.evaluate(`window.__copied=null;Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:(x)=>{window.__copied=x;return Promise.resolve();}}})`);
+    await page.locator('#tab-community .filter-pill', { hasText: /^Open/ }).click();
+    await page.locator('#mts-copy').click();
+    const txt = String(await page.evaluate('window.__copied'));
+    expect(txt).toContain('*Profile 3*\nIE University\nBBA\n');
+    for (const hidden of ['Madrid', 'Spain', 'Class of', 'University of Reading']) expect(txt).not.toContain(hidden);
   });
 
   test('Mentors lists who registered; a profile is added for a student account', async ({ page }) => {

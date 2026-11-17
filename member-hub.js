@@ -774,7 +774,10 @@ async function _yrShare() {
 // the profile they can help and we match them and make them contact with them" (migration 20261114050000).
 // One card in the feed opens a page of its own (S._hubView 'mentor'): the member's matches (first name, WhatsApp and the
 // "Still in touch?" check two weeks after the match, then monthly), their own request with the offers staff proposed to
-// them (Accept or Not now), their own offers, and the open profiles, which carry no name. A member starting university
+// them (Accept or Not now), their own offers, and the open profiles, which carry no name. The user, 2026-11-18: "i want
+// mentees to be anonymous, only show their university and major": a mentee's profile shows mentors its number, university
+// and field and nothing else (city, country, year, help and goal reach staff only; migration 20261118120000), so the offer
+// form has no "Same city" either. A member starting university
 // asks for a mentor here; staff publish it. A name and number cross only an accepted match (the one exception to
 // "members see nobody", the user's own request); the read is mentor_feed, apart from hub_feed, and never kept on the phone.
 // The user's two registrations (the same day: "Mentee registration", "Mentor registration & choosing from mentees list"):
@@ -962,7 +965,7 @@ function _mtMatchHtml(x, side, o) {
   const wa = String(x.wa || '').replace(/\D/g, '');
   const chk = x.due ? `<div class="mt-check"><span class="hub-k"><bdi>${esc(_hF('mtCheckQ', x.name || ''))}</bdi></span><div class="mt-acts">${MT_CHECKS.map(([v, k]) => `<button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_mtCheck', x.id, v)}">${_hT(k)}</button>`).join('')}</div></div>` : '';
   const about = side === 'mentor' && o
-    ? `<div class="mt-line">${esc(_hF('mtProfile', o.num))} · <bdi>${esc(o.university || '')}</bdi></div><div class="hub-meta"><bdi>${esc(o.field || '')}</bdi> · ${_mtWhere(o)}</div>`
+    ? `<div class="mt-line">${esc(_hF('mtProfile', o.num))} · <bdi>${esc(o.university || '')}</bdi></div><div class="hub-meta"><bdi>${esc(o.field || '')}</bdi></div>`
     : `${x.summary ? `<p class="mt-goal"><bdi>${esc(x.summary)}</bdi></p>` : ''}${_mtChips(x.links, MT_LINK_K)}`;
   return `<div class="hub-card mt-match"><span class="hub-k">${_hT(side === 'student' ? 'mtYourMentor' : 'mtYourStudent')}</span>
     <strong class="hub-name"><bdi>${esc(x.name || '')}</bdi></strong>${about}
@@ -993,7 +996,6 @@ function _mtProfHtml(p) {
   const st = p.offered;
   return `<div class="hub-card mt-prof"><span class="hub-k">${esc(_hF('mtProfile', p.num))}</span>
     <strong class="hub-name"><bdi>${esc(p.university || '')}</bdi></strong><div class="mt-line"><bdi>${esc(p.field || '')}</bdi></div>
-    <div class="hub-meta">${_mtWhere(p)}</div>${_mtChips(p.helps, MT_HELP_K)}${p.goal ? `<p class="mt-goal"><bdi>${esc(p.goal)}</bdi></p>` : ''}
     ${st ? `<span class="mt-pill">${_hT(st === 'matched' ? 'mtStMatched' : st === 'proposed' ? 'mtStProposed' : 'mtStOffered')}</span>`
       : `<button type="button" class="btn-primary hub-wide" data-on-click="${_on('_mtOfferOpen', p.num)}">${_hT('mtCanHelp')}</button>`}</div>`;
 }
@@ -1063,8 +1065,8 @@ function _mtOfferOpen(num) {
   const d = _mtData(), p = d && (d.profiles || []).find((x) => x.num === num); if (!p) return;
   if (!d.mentor) { _mtJoinOpen(num); return; }
   S._mtNum = num;
-  _mtModal('mt-of', _hF('mtProfile', num), `<div class="mt-sum"><strong><bdi>${esc(p.university || '')}</bdi></strong><span><bdi>${esc(p.field || '')}</bdi></span><span>${_mtWhere(p)}</span></div>
-    ${_mtChipGroup('links', MT_LINKS, MT_LINK_K, [], _hT('mtLinksQ'))}
+  _mtModal('mt-of', _hF('mtProfile', num), `<div class="mt-sum"><strong><bdi>${esc(p.university || '')}</bdi></strong><span><bdi>${esc(p.field || '')}</bdi></span></div>
+    ${_mtChipGroup('links', MT_LINKS.filter((k) => k !== 'city'), MT_LINK_K, [], _hT('mtLinksQ'))}
     ${_mtChipGroup('helps', MT_HELPS, MT_HELP_K, Array.isArray(d.mentor.helps) ? d.mentor.helps : [], _hT('mtHelpsQ'))}
     ${_mtField('note', _hT('mtNoteQ'), `<textarea id="mt-note" maxlength="500" rows="4" data-on-input="${_on('_mtClr', _EL)}"></textarea>`)}`, '_mtOfferSend');
 }
