@@ -155,6 +155,7 @@ with expected(fname, want_definer, note) as (values
   ('petromin_guest_book', true, 'Petromin guests: anon with the account''s token, books through customer_create_booking onto a members-only night and writes the I- number and company (20261113150000)'),
   ('_invite_next', true, 'Petromin invitees: writes rider_night_counters; no client execute (20261112234500)'),
   ('_invite_no_guard', true, 'Petromin invitees: trigger, numbers a booking moved to another night; no client execute (20261112234500)'),
+  ('_pm_visitor_guard', true, 'Petromin visitor: trigger, staff-only mark that makes a booking free; no client execute (20261117120000)'),
   ('_promo_count',           true,  'writes promo_codes.uses'),
   ('_promo_free_drop',       true,  'trigger: takes the code off a booking that is free anyway (own bike, free ride, on the house); no client execute (20261110235950)'),
   ('_promo_valid',           true,  'reads promo_codes; revoked from anon+authenticated on purpose'),

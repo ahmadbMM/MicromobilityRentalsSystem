@@ -11657,6 +11657,8 @@ body.kiosk-on{overflow:hidden;}
 .kiosk-badge{background:rgba(var(--green-rgb),.14);color:var(--sf-green-ink);}
 /* A Petromin invitee's walk-in (micromobility.sa/petromin-invite, 2026-11-12): "Invitee I-001", blue so it reads apart from the kiosk's green */
 .inv-badge{background:rgba(var(--blue-rgb),.14);color:rgb(var(--blue-rgb));white-space:nowrap;}
+/* A Petromin night's visitor (2026-11-17): a member's booking staff made free; purple, apart from the invitee's blue */
+.pmv-badge{background:rgba(var(--purple-rgb),.14);color:rgb(var(--purple-rgb));white-space:nowrap;}
 /* the company a guest typed at micromobility.sa/petromin, after their I- number: a long one is cut, its title says it whole */
 .inv-co{display:inline-block;max-width:14em;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;}
 #tab-settings .set-kiosk{margin-top:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;}

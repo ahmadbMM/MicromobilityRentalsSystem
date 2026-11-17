@@ -620,6 +620,25 @@ keeps the I- number and the Invitee mark, and types the company they are from.
   counts of the two pages that were turned off ('dukan', 'pminvite') are no longer shown.
   `tests/petromin-form-steps.spec.ts`, `tests/petromin-invitees.spec.ts`, `tests/petromin-guest-account.spec.ts`.
 
+## A Petromin night's visitor (2026-11-17, migration 20261117120000)
+
+The user: "add a visitor choice in petromin nights that only staff can see and give to members and consider it free 0 sar".
+- **The mark** is `queue_entries.pm_visitor` (`pmVisitor` on the entry; `entryToDB` sends it only when true). Staff give
+  it from a member's booking menu on Bookings (`_mVis`, `_pmVisOffer`: an account, not a guest's I- booking, on a
+  Petromin night, not paid online), asked first (`_pmVisToggle`); the same item takes it away. Petromin nights take no
+  Add rider (2026-10-07), so members book themselves and staff then give it.
+- **The database** (`_pm_visitor_guard`, trigger `queue_entries_pm_visitor`, before the price and house triggers): only
+  staff change it; only on a Petromin night (moved to another kind of session, or moved by the rider to another night,
+  it goes); a visitor is paid at 0 with no method or split, its code dropped (returned); a booking paid with money or
+  wallet money is refused `VISITOR_PAID` (the desk sets Pending first; `_errMessage` says `pmVisPaid`); taken away, the
+  fare comes back (or the account's own house terms). `_house_guard` / `_house_insert_guard` let a visitor through
+  without the manager's approval. `my_bookings` hands riders false: they see a free ride, never the word.
+- **Staff screens**: "Visitor" (`_pmVisChip`, `.pmv-badge`, purple) through `_kioskTag` on the roster, phone cards and
+  History; `_ownFree` covers a visitor, so no pay pill, the price cell reads Free and bulk pay skips them; the check-in
+  asks no payment (reads Free) and the bike pop-up has no payment line. On the Petromin page a visitor is company
+  `VIS_CO` ('Visitors', `_pmCoLabel` -> `pmVisCo`) with its own Company filter option; never on the billing report.
+  `tests/petromin-visitor.spec.ts`.
+
 ## Badges staff give (2026-09-29)
 
 Migration 20260929000000: `badges` (the catalogue) and `customer_badges` (who holds which, with a note
