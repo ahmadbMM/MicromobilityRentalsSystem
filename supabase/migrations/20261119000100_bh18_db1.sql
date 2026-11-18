@@ -633,7 +633,7 @@ create trigger sessions_lockers_cancelled after update of cancelled_at, status o
                      or (new.status = 'deleted' and old.status is distinct from 'deleted'))
   execute function public._lk_session_cancelled();
 
--- ── 7. A returned booking removed: its Petromin / Dukan registration is no longer billed (sql03-2) ─────────────────
+-- ── 7. _rider_reg_follow_booking re-created unchanged (sql03-2 is the owner's call) ────────────────────────────────
 -- _rider_reg_follow_booking from 20261028140000_staff_review_money.sql, unchanged (owner's call, see item 7).
 create or replace function public._rider_reg_follow_booking()
 returns trigger
