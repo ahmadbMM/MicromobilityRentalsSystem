@@ -41458,12 +41458,14 @@ const RIDER_CO_LOGO={Petromin:['/assets/petromin-logo.png',58,24],Petrolube:['/a
 function _riderCoMark(co,cls){const lg=RIDER_CO_LOGO[co];return lg?`<img class="${cls}" src="${lg[0]}" alt="${esc(co)}" width="${lg[1]}" height="${lg[2]}" loading="lazy" decoding="async">`:`<span class="pm-tile-lbl">${esc(co)}</span>`;}
 // The tiles on a Petromin night's card (2026-11-12): Bookings opens the night's queue; each company's tile opens the
 // night's registrations of that company alone (the Petromin page with its Company filter set). Pressed is the one on show.
+// All leads them (the user, 2026-11-18: "do 1 2 3"): the night's one list, which a click on the card's lines opened with
+// nothing on the card to say so.
 function _pmTilesHtml(sid,nWait){
   _pmEnsureRiders(); // the tiles count registrations
   const regs=(S.riders||[]).filter(r=>r.session_id===sid),onPm=S.queueView==='petromin'&&S.ridersSession===sid;
   const tile=(on,click,head,count,title)=>`<button type="button" class="pm-tile${on?' on':''}" aria-pressed="${on?'true':'false'}" data-on-click="${click}" title="${esc(title)}"><span class="pm-tile-h">${head}</span><span class="pm-tile-n">${count}</span></button>`;
   const bOn=S.queueView!=='petromin'&&S.sfSession===sid;
-  return`<span class="pm-tiles">${tile(bOn,_on("setSfSession",sid),`<span class="pm-tile-lbl">${esc(t('tabQueue'))}</span>`,nWait==null?'&nbsp;':`${nWait} ${esc(t('waitingStat').toLowerCase())}`,t('tabQueue'))}${
+  return`<span class="pm-tiles">${tile(_pmAllOn(sid),_on("_pmNightAll",null,sid),`<span class="pm-tile-lbl">${esc(t('ridersFilterAll'))}</span>`,S.ridersLoaded?String(_pmAllRows().filter(r=>r.session_id===sid).length):'&nbsp;',t('ridersFilterAll'))}${tile(bOn,_on("setSfSession",sid),`<span class="pm-tile-lbl">${esc(t('tabQueue'))}</span>`,nWait==null?'&nbsp;':`${nWait} ${esc(t('waitingStat').toLowerCase())}`,t('tabQueue'))}${
     RIDER_COMPANIES.map(co=>{const n=regs.filter(r=>_riderCo(r)===co).length;
       return tile(onPm&&S.ridersCompany===co,_on("openPetrominPage",sid,co),_riderCoMark(co,'pm-tile-logo'),S.ridersLoaded?`${n} ${esc(t('pmRegistered'))}`:'&nbsp;',co);}).join('')}</span>`;
 }
@@ -41481,7 +41483,8 @@ function _pmAllBtnOpen(sid){return`<button type="button" class="sess-chip-info p
 function _pmOptHtml(sid){
   const s=_sessDisp(sid);if(!s)return'';
   const regs=(S.riders||[]).filter(r=>r.session_id===sid),cur=S.queueView==='petromin'&&S.ridersSession===sid?(S.ridersCompany||'all'):null;
-  const opt=(co,lbl,n)=>`<option value="pm:${esc(sid)}|${esc(co)}"${cur===co?' selected':''}>${esc(lbl)} · ${esc(_sessDayWord(s))}${S.ridersLoaded?` — ${n}${co==='all'?'':' '+t('pmRegistered')}`:''}</option>`;
+  // data-pmn: the count the picker's row under the night says (_spkPmRow)
+  const opt=(co,lbl,n)=>`<option value="pm:${esc(sid)}|${esc(co)}"${cur===co?' selected':''}${S.ridersLoaded?` data-pmn="${esc(co==='all'?String(n):n+' '+t('pmRegistered'))}"`:''}>${esc(lbl)} · ${esc(_sessDayWord(s))}${S.ridersLoaded?` — ${n}${co==='all'?'':' '+t('pmRegistered')}`:''}</option>`;
   // All: the card's own list on a phone - the night's bookings and every company in one (2026-11-13)
   return opt('all',t('ridersFilterAll'),_pmAllRows().filter(r=>r.session_id===sid).length)+RIDER_COMPANIES.map(co=>opt(co,co,regs.filter(r=>_riderCo(r)===co).length)).join('');
 }
@@ -41591,24 +41594,36 @@ function _spkRow(o,s,on){
   }else inner=`<span class="spk-r-txt"><span class="spk-r-nm">${esc(o.textContent)}</span></span>`;
   return`<button type="button" class="spk-row${on?' on':''}"${on?' aria-current="true"':''}${o.disabled?' disabled':''} data-on-click="${_on('_spkPick',o.value)}">${inner}${on?`<span class="spk-r-tick">${_cuIc('tick',14)}</span>`:''}</button>`;
 }
+// A Petromin night's own choice under its row (pm:<night>|<company>, _pmOptHtml): All or the company's mark, and its count.
+function _spkPmRow(o,on){
+  const co=String(o.value).split('|')[1]||'all',n=o.getAttribute('data-pmn');
+  return`<button type="button" class="spk-row spk-pm${on?' on':''}"${on?' aria-current="true"':''} data-on-click="${_on('_spkPick',o.value)}"><span class="spk-r-txt"><span class="spk-r-nm">${co==='all'?esc(t('ridersFilterAll')):_riderCoMark(co,'spk-pm-logo')}</span></span>${n?`<span class="spk-r-left">${esc(n)}</span>`:''}${on?`<span class="spk-r-tick">${_cuIc('tick',14)}</span>`:''}</button>`;
+}
 // The rows: what is no session ("All sessions", the shop) first as the dropdown has it, then the sessions in the one
 // staff order (_sessOrder: today on, then the past latest first) whatever order the dropdown was written in - a heading
-// whenever the day changes, and one where the past begins.
+// whenever the day changes, and one where the past begins. A Petromin night's All and companies sit right under that
+// night's row (the user, 2026-11-18: "do 1 2 3"): they led the list as loose rows, away from their night, and the
+// picker scrolled past them to the night it had on.
 function _spkRowsHtml(sel,q){
   const w=String(q||'').toLowerCase().split(/\s+/).filter(Boolean),cur=sel.value,td=todayStr();
   let out='',lastDay=null,sawComing=false,pastShown=false,n=0;
   const all=[...sel.options].map(o=>({o,s:o.value?_sessGet(o.value):null}));
-  const rows=all.filter(r=>!r.s).concat(all.filter(r=>r.s).sort((a,b)=>_sessOrder(a.s,b.s)));
+  const hasS=new Set(all.filter(r=>r.s).map(r=>r.o.value)),kids=new Map();
+  const loose=all.filter(r=>{if(r.s)return false;const m=/^pm:([^|]+)\|/.exec(r.o.value);if(!m||!hasS.has(m[1]))return true;
+    let a=kids.get(m[1]);if(!a)kids.set(m[1],a=[]);a.push(r.o);return false;});
+  const rows=loose.concat(all.filter(r=>r.s).sort((a,b)=>_sessOrder(a.s,b.s)));
+  const hit=h=>!w.length||w.every(x=>h.includes(x));
   rows.forEach(({o,s})=>{
     const v=o.value;
     const hay=(s?[_sessLabel(s),_evName(s),sessionTime(s),_sessDayHead(s),dayLabel(s.day),_sgTxt(s),s.location||''].join(' '):o.textContent).toLowerCase();
-    if(w.length&&!w.every(x=>hay.includes(x)))return;
+    const own=hit(hay),ks=(s&&kids.get(v))||[],kv=own?ks:ks.filter(k=>hit(k.textContent.toLowerCase())); // a company typed keeps its night above it
+    if(!own&&!kv.length)return;
     if(s){
       const d=_ssDay(s);
       if(d>=td)sawComing=true;else if(sawComing&&!pastShown){out+=`<div class="spk-gh spk-gh-past">${esc(t('ssRPast'))}</div>`;pastShown=true;lastDay=null;}
       if(d!==lastDay){out+=`<div class="spk-gh">${esc(_sessDayHead(s))}</div>`;lastDay=d;}
     }else lastDay=null;
-    n++;out+=_spkRow(o,s,v===cur);
+    n++;out+=_spkRow(o,s,v===cur)+kv.map(k=>_spkPmRow(k,k.value===cur)).join('');
   });
   return n?out:`<div class="spk-none">${esc(t('spkNone'))}</div>`;
 }
@@ -61589,7 +61604,6 @@ async function _rwFinish(d,res,r){
 }
 
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
-function _on_renderRiders_1(event,el){S.ridersCompany=el.value;renderRiders()}
 function _on_renderRiders_2(event,el){S.ridersType=el.value;renderRiders()}
 // Partner companies' employee lists (corporate_roster, migration 20261009182000; imported on this page by
 // admins, openRosterImport). Beside each registration: whether its employee id is on its company's list.
@@ -61701,6 +61715,22 @@ async function _rimGo(){
 // Every night with registrations, plus the open Petromin nights (tonight's page exists before anyone registers), the
 // latest first: the Petromin page's night picker, and on a phone the ride picker's Petromin part.
 function _pmNightIds(){return[...new Set([...(S.riders||[]).map(r=>r.session_id).filter(Boolean),..._pmNights().filter(_sessLive).map(x=>x.id),...(S.ridersSession&&S.ridersSession!=='all'?[S.ridersSession]:[])])].sort().reverse();}
+// The night's groups as one row of choices over the list (the user, 2026-11-18: "do 1 2 3", after asking "why on petromin
+// sessions can't i select what company to show its bookings or all at once"): All, the night's Bookings, each company by
+// its mark, and the invitees and visitors when there are any, each with its count, the one on show pressed. It was the
+// Company dropdown inside Filters. The counts are the night's (or every night's), whatever the status pills say.
+function _pmCoRowHtml(all){
+  const rows=S.ridersSession&&S.ridersSession!=='all'?all.filter(r=>r.session_id===S.ridersSession):all,cur=S.ridersCompany||'all';
+  const cnt=new Map();rows.forEach(r=>{const c=String(r.company||'').trim();if(c)cnt.set(c,(cnt.get(c)||0)+1);});
+  const cos=[...new Set([BK_CO,...RIDER_COMPANIES,INV_CO,VIS_CO,...cnt.keys(),cur])].filter(c=>c!=='all'&&(c===BK_CO||RIDER_COMPANIES.includes(c)||cnt.get(c)||c===cur));
+  const btn=(co,lbl,n)=>`<button type="button" class="pm-co${cur===co?' active':''}" aria-pressed="${cur===co?'true':'false'}" data-co="${esc(co)}" data-on-click="${_on("_pmCoPick",co)}">${lbl}<span class="num">${n}</span></button>`;
+  return`<div class="pm-co-row" role="group" aria-label="${esc(t('ridersCompany'))}">${btn('all',esc(t('ridersFilterAll')),rows.length)}${cos.map(co=>btn(co,RIDER_COMPANIES.includes(co)?_riderCoMark(co,'pm-co-logo'):esc(_pmCoLabel(co)),cnt.get(co)||0)).join('')}</div>`;
+}
+// The page is drawn again (the card's tiles say the company too), so the focus goes back to the choice.
+function _pmCoPick(co){
+  openPetrominPage(S.ridersSession,co);
+  const b=document.querySelector(`.pm-co-row [data-co="${CSS.escape(String(co))}"]`);if(b)b.focus();
+}
 function renderRiders(_resultsOnly){
   const host=document.getElementById('pm-host');if(!host)return;
   // A failed read waits 15 s before the page asks again: it repainted, asked again and toasted at once, without end (bug hunt 2026-10-28)
@@ -61789,6 +61819,7 @@ function renderRiders(_resultsOnly){
       <div class="iv-pm-btns pm-n${_pmBtns.length}">${_pmBtns.join('')}</div>
     </div>
     ${_qvPillsHtml()}${_strip}
+    ${_pmCoRowHtml(all)}
     <div class="filter-bar"><div class="filter-row">
       <div class="${_srchCls('riders',S.ridersSearch)}" data-srch="riders">${_artIcon('search',13)}
         <input id="riders-search-input" class="search-input" aria-label="${esc(t('ridersSearch'))}" placeholder="${esc(t('ridersSearch'))}" value="${esc(S.ridersSearch)}" data-on-input="${_on("setRidersSearch",_P("value"))}">
@@ -61797,8 +61828,7 @@ function renderRiders(_resultsOnly){
       ${sessSel?`<label class="filter-sess${_strip?' filter-sess-dup':''}"><span class="filter-field-lbl">${t('colSession')}</span>${sessSel}</label>`:''}
       
       ${pill('all',t('ridersFilterAll'),night.length)}${pill('waiting',t('ridersFilterWaiting'),nWait)}${pill('riding',t('ridersFilterRiding'),nOut)}${pill('returned',t('ridersFilterReturned'),nDone)}
-    ${_fPanel('riders',_fField(t('ridersCompany'),`<select class="filter-select" aria-label="${esc(t('ridersCompany'))}" data-on-change="${_on("_on_renderRiders_1",_EV,_EL)}">${['all',...new Set([...RIDER_COMPANIES,INV_CO,VIS_CO,BK_CO,...all.map(r=>String(r.company||'').trim()).filter(Boolean)])].map(v=>`<option value="${esc(v)}"${(S.ridersCompany||'all')===v?' selected':''}>${v==='all'?t('filterAll'):esc(_pmCoLabel(v))}</option>`).join('')}</select>`)
-      +_fField(t('bikeTypeLabel'),`<select class="filter-select" aria-label="${esc(t('bikeTypeLabel'))}" data-on-change="${_on("_on_renderRiders_2",_EV,_EL)}">${['all','Road','Hybrid','Mountain','Road Carbon','Kids'].map(v=>`<option value="${esc(v)}"${(S.ridersType||'all')===v?' selected':''}>${v==='all'?t('filterAll'):typeLabel(v)}</option>`).join('')}</select>`),'',_fS(S,'ridersCompany=all ridersType=all'))}
+    ${_fPanel('riders',_fField(t('bikeTypeLabel'),`<select class="filter-select" aria-label="${esc(t('bikeTypeLabel'))}" data-on-change="${_on("_on_renderRiders_2",_EV,_EL)}">${['all','Road','Hybrid','Mountain','Road Carbon','Kids'].map(v=>`<option value="${esc(v)}"${(S.ridersType||'all')===v?' selected':''}>${v==='all'?t('filterAll'):typeLabel(v)}</option>`).join('')}</select>`),'',_fS(S,'ridersType=all'))}
     </div></div>
     <div id="riders-results">${results}</div>`;
 }

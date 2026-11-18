@@ -5834,6 +5834,15 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .pm-night .pm-ti
 /* the marks sit on a white plate of their own, so a dark card keeps them legible */
 .pm-tile-logo{display:block;height:12px;width:auto;max-width:100%;object-fit:contain;background:#fff;border-radius:var(--sf-r-xs,4px);padding:2px 4px;box-sizing:content-box;}
 .pfs-form-logo{display:block;height:18px;width:auto;max-width:100%;object-fit:contain;background:#fff;border-radius:var(--sf-r-xs,4px);padding:2px 4px;box-sizing:content-box;}
+/* The Petromin list's groups over the list (2026-11-18): All, Bookings, each company's mark, the invitees and visitors,
+   drawn as the staff tab rows are (an underline under the one on show); a phone wraps them onto a second line. */
+.pm-co-row{display:flex;flex-wrap:wrap;align-items:stretch;margin:0 0 10px;}
+.pm-co-row>.pm-co{display:inline-flex;align-items:center;font-family:var(--font-body);font-size:var(--sf-fs-sm);cursor:pointer;} /* not a .filter-pill: those are the status pills beside the search */
+.pm-co-row>.pm-co:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+.pm-co-logo{display:block;height:16px;width:auto;max-width:100%;object-fit:contain;background:#fff;border-radius:var(--sf-r-xs,4px);padding:2px 4px;box-sizing:content-box;}
+/* a Petromin night's All and companies in the session picker, under the night's own row */
+#spk-pop .spk-row.spk-pm{min-height:40px;padding-inline-start:46px;}
+.spk-pm-logo{display:block;height:14px;width:auto;max-width:100%;object-fit:contain;background:#fff;border-radius:var(--sf-r-xs,4px);padding:2px 4px;box-sizing:content-box;}
 .pm-tile-lbl{font-size:var(--sf-fs-xs,12px);font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
 .pm-tile-n{font-size:var(--sf-fs-xs,11px);line-height:1.15;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-variant-numeric:tabular-nums;}
 .pm-tile.on .pm-tile-n{color:var(--green);}
@@ -13152,6 +13161,11 @@ body.view-staff #pm-host .filter-pill>.iv-o7{margin-inline-start:.35em;}
   body.view-staff #pm-host .iv-pm-btns.pm-n3{grid-template-columns:repeat(3,minmax(0,1fr));}
   body.view-staff #pm-host .iv-pm-btns.pm-n5>.btn-sm:last-child{grid-column:1/-1;} /* five (an admin's, with Form steps): the last a whole row, not half of one */
   body.view-staff #pm-host .iv-pm-btns>.btn-sm{width:100%;min-width:0;margin:0;padding-inline:6px;white-space:normal;line-height:1.15;text-align:center;justify-content:center;}
+  /* the title and its marks above the buttons (2026-11-18): side by side, the buttons' grid took the whole width and lay
+     over the logos and the title, squeezed to a letter a line */
+  body.view-staff #tab-queue #pm-host>.section-header{flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:10px;} /* over Bookings' own header row (#tab-queue .section-header) */
+  body.view-staff #tab-queue #pm-host>.section-header>div:first-child{display:block;width:100%;}
+  body.view-staff #pm-host .pm-logo-lg{height:28px;}
 }
 /* The Arena Heros race: you must have a partner (the owner, 2026-11-02): said loud on the card, the athlete step and the review */
 .ar-must{margin:0 0 14px;padding:10px 12px;border:2px solid #e3262f;background:rgba(227,38,47,.14);font-size:14px;font-weight:800;line-height:1.4;color:#fff;}
@@ -14954,18 +14968,18 @@ body.view-staff .sess-detail-stats :is(.sess-ds-lbl,.sess-ds-fleetval){white-spa
 
 /* 24 One sub-tab style: a section's own views read as tabs (text over an ink underline), never like the filter chips
    beside them (Sessions' layouts, Analytics' views, People's groups, History, Inventory, Volunteers, the account window). */
-body.view-staff :is(#tab-analytics .an-navgrp,#tab-volunteers .vx-tabs,.sess-view-toggle,.cmy-nav,.hist-tabs,.inv-tabs,.vl-st-tabs,.ah-tabs){
+body.view-staff :is(#tab-analytics .an-navgrp,#tab-volunteers .vx-tabs,.sess-view-toggle,.cmy-nav,.hist-tabs,.inv-tabs,.vl-st-tabs,.ah-tabs,.pm-co-row){
   gap:2px;box-shadow:none;background:transparent;border-radius:0;padding:0;}
-body.view-staff :is(#tab-analytics .an-nav-btn,#tab-volunteers .vx-tab,.sess-view-toggle .view-toggle-btn,.cmy-nav>.filter-pill,.hist-tabs>.filter-pill,.inv-tabs>.filter-pill,.vl-st-tabs>.filter-pill,.ah-tabs>.filter-pill){
+body.view-staff :is(#tab-analytics .an-nav-btn,#tab-volunteers .vx-tab,.sess-view-toggle .view-toggle-btn,.cmy-nav>.filter-pill,.hist-tabs>.filter-pill,.inv-tabs>.filter-pill,.vl-st-tabs>.filter-pill,.ah-tabs>.filter-pill,.pm-co-row>.pm-co){
   background:transparent;border:0;border-bottom:2px solid transparent;border-radius:0;box-shadow:none;color:var(--muted);
   font-weight:500;padding:0 10px;min-height:var(--sf-ctl-size);transform:none;}
-body.view-staff :is(#tab-analytics .an-nav-btn,#tab-volunteers .vx-tab,.sess-view-toggle .view-toggle-btn,.cmy-nav>.filter-pill,.hist-tabs>.filter-pill,.inv-tabs>.filter-pill,.vl-st-tabs>.filter-pill,.ah-tabs>.filter-pill):hover{
+body.view-staff :is(#tab-analytics .an-nav-btn,#tab-volunteers .vx-tab,.sess-view-toggle .view-toggle-btn,.cmy-nav>.filter-pill,.hist-tabs>.filter-pill,.inv-tabs>.filter-pill,.vl-st-tabs>.filter-pill,.ah-tabs>.filter-pill,.pm-co-row>.pm-co):hover{
   background:transparent;color:var(--text);border-bottom-color:var(--sf-line2);}
-body.view-staff :is(#tab-analytics .an-nav-btn.active,#tab-volunteers .vx-tab[aria-pressed="true"],.sess-view-toggle .view-toggle-btn.active,.cmy-nav>.filter-pill.active,.hist-tabs>.filter-pill.active,.inv-tabs>.filter-pill.active,.vl-st-tabs>.filter-pill.active,.ah-tabs>.filter-pill.active){
+body.view-staff :is(#tab-analytics .an-nav-btn.active,#tab-volunteers .vx-tab[aria-pressed="true"],.sess-view-toggle .view-toggle-btn.active,.cmy-nav>.filter-pill.active,.hist-tabs>.filter-pill.active,.inv-tabs>.filter-pill.active,.vl-st-tabs>.filter-pill.active,.ah-tabs>.filter-pill.active,.pm-co-row>.pm-co.active){
   background:transparent;color:var(--text);border-bottom-color:var(--text);font-weight:600;box-shadow:none;}
 
 /* 24 One count badge: a spaced pill after its label (no "Models0" glued digits). */
-body.view-staff :is(.filter-pill,.an-nav-btn,.view-toggle-btn,.sort-pill)>.num,
+body.view-staff :is(.filter-pill,.an-nav-btn,.view-toggle-btn,.sort-pill,.pm-co)>.num,
 body.view-staff :is(.ah-n,.vx-tab-n),body.view-staff .filter-pill .tab-badge{
   display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:18px;padding:0 6px;margin-inline-start:6px;
   border-radius:var(--sf-r-pill);background:var(--sf-chip);color:var(--text);box-shadow:inset 0 0 0 1px var(--sf-line2);

@@ -137,15 +137,16 @@ test.describe('@staff:bookings Petromin visitor', () => {
     expect(await labels(page, 'mem1')).toContain('Edit');
   });
 
-  test('the Petromin page lists a visitor as company Visitors, and the Company filter keeps them alone', async ({ page }) => {
+  test('the Petromin page lists a visitor as company Visitors, and the Company choice keeps them alone', async ({ page }) => {
     const { errs } = await boot(page);
     await page.evaluate(`openPetrominPage(${JSON.stringify(PM)},'all')`);
     const visi = page.locator('#pm-host tr[data-id="visi"]');
     await expect(visi.locator('.pmv-badge')).toHaveText('Visitor');
     await expect(page.locator('#pm-host tr[data-id="mem1"] .bk-badge')).toHaveCount(1);
-    const pick = page.locator('#pm-host select[aria-label="Company"]').first();
-    await expect(pick.locator('option[value="Visitors"]')).toHaveText('Visitors');
-    await page.evaluate(`openPetrominPage(${JSON.stringify(PM)},'Visitors')`);
+    const pick = page.locator('#pm-host .pm-co-row .pm-co[data-co="Visitors"]');
+    await expect(pick).toHaveText(/^Visitors\s*1$/);
+    await pick.click();
+    await expect(page.locator('#pm-host .pm-co-row .pm-co[data-co="Visitors"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#pm-host tbody tr')).toHaveCount(1);
     await expect(page.locator('#pm-host tbody tr[data-id="visi"]')).toHaveCount(1);
     expect(errs).toEqual([]);

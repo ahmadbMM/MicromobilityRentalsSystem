@@ -611,6 +611,16 @@ account), the invitee pays the standard fare at the desk, micromobility.sa/petro
   Bookings row wears (2026-11-16): the tag bands (`_cmRow`, `_infRow`, `_foodRow`, `_fwkRow`, `_bdfRow`, `_ptnRow`) and
   the marks after the name in the roster's order; a new tag mark on the roster goes into `_invRowHtml` too. The
   registrations' rows are not accounts and carry none. `tests/petromin-invitees.spec.ts`.
+- **Picking a group (2026-11-18).** The user: "why on petromin sessions can't i select what company to show its bookings
+  or all at once", then "do 1 2 3". (1) The Petromin page's Company choice is a row over the list (`_pmCoRowHtml`,
+  `.pm-co-row`, drawn as the staff tab rows): All, Bookings (`BK_CO`), Petromin, Petrolube and Dukan by their marks, then
+  Invitees, Visitors and any other company only when the night has some, each with the count of the night (or of every
+  night) whatever the status pills say; `_pmCoPick` goes through `openPetrominPage`, so the card's tiles follow. The
+  dropdown inside Filters is gone (Filters keeps Bike type). (2) The night's card leads its tiles with All (the one list,
+  `_pmNightAll`; its count is the bare number, as the phone's option says it). (3) The session picker (`_spkRowsHtml`)
+  puts a night's `pm:<night>|<company>` options right under that night's row (`_spkPmRow`, `.spk-pm`, the count from the
+  option's `data-pmn`); a pm: option whose night is not in the dropdown stays at the top. On a phone the page's title
+  and its marks sit above its buttons. `tests/petromin-company-row.spec.ts`.
 
 ## One Petromin page (2026-11-13, migrations 20261113150000 and 20261113150100)
 

@@ -63,8 +63,8 @@ test.describe('@staff:bookings Bookings in colour', () => {
       await expect(page.locator(chip(id))).toHaveClass(/\bth-comm\b/);
       expect(await img(page, chip(id))).toContain('mm-pattern');
     }
-    // a Petromin night is one card with its tiles (2026-11-12): Bookings and each company's registrations
-    await expect(page.locator(`${chip('2099-10-22-pm')} .pm-tile`)).toHaveCount(4);
+    // a Petromin night is one card with its tiles (2026-11-12): All (2026-11-18), Bookings and each company's registrations
+    await expect(page.locator(`${chip('2099-10-22-pm')} .pm-tile`)).toHaveCount(5);
     await expect(page.locator(`#sess-strip .pm-chip`)).toHaveCount(0);
     // the community rides keep their own name colour: Petromin red, not the staff green
     expect(await page.locator(`${chip('2099-10-22-pm')} .sess-chip-event`).evaluate((el) => getComputedStyle(el).color)).toBe('rgb(163, 59, 46)');

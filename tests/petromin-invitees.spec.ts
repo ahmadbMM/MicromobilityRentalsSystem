@@ -91,9 +91,8 @@ test.describe('@staff:bookings Petromin invitees', () => {
     await expect(rows).toHaveCount(6);
     await expect(page.locator('#pm-host button', { hasText: 'All Petromin nights' })).toHaveCount(0);
 
-    // the company filter has Invitees: only the invitees, of every night
-    await page.locator('[aria-controls="fm-riders"]').click();
-    await page.locator('#pm-host select[aria-label="Company"]').selectOption('Invitees');
+    // the Company choices have Invitees: only the invitees, of every night
+    await page.locator('#pm-host .pm-co-row .pm-co[data-co="Invitees"]').click();
     await expect(rows).toHaveCount(3);
     await expect(page.locator('#pm-host tr.inv-row')).toHaveCount(3);
     await expect(page.locator('#pm-host h1')).toContainText('Invitees');
@@ -138,7 +137,7 @@ test.describe('@staff:bookings Petromin invitees', () => {
     await page.evaluate(`(()=>{setStaffTab('queue');S.queueView='bookings';setSfSession(${JSON.stringify(N1)});})()`);
     const CARD = `#tab-queue .sess-bar-desktop .pm-night[data-sid="${N1}"]`;
     // a tile opens its own list, never the whole one
-    await page.locator(`${CARD} button.pm-tile`).nth(1).click();
+    await page.locator(`${CARD} button.pm-tile`).nth(2).click();
     expect(await page.evaluate('[S.queueView,S.ridersSession,S.ridersCompany]')).toEqual(['petromin', N1, 'Petromin']);
     await expect(page.locator(`${CARD} .pm-night-all`)).toHaveAttribute('aria-pressed', 'false');
     // the card's lines (a button, for the keyboard too): every row of the night
@@ -146,7 +145,8 @@ test.describe('@staff:bookings Petromin invitees', () => {
     await page.locator(`${CARD} .pm-night-all`).click();
     expect(await page.evaluate('[S.queueView,S.ridersSession,S.ridersCompany,S.ridersFilter]')).toEqual(['petromin', N1, 'all', 'all']);
     await expect(page.locator(`${CARD} .pm-night-all`)).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator(`${CARD} button.pm-tile[aria-pressed="true"]`)).toHaveCount(0);
+    await expect(page.locator(`${CARD} button.pm-tile[aria-pressed="true"]`)).toHaveCount(1);       // the All tile (2026-11-18)
+    await expect(page.locator(`${CARD} button.pm-tile`).nth(0)).toHaveAttribute('aria-pressed', 'true');
     const rows = page.locator('#pm-host tbody tr');
     await expect(rows).toHaveCount(4);
     await expect(page.locator('#pm-host tr.inv-row')).toHaveCount(2);
@@ -159,13 +159,12 @@ test.describe('@staff:bookings Petromin invitees', () => {
     await expect(walk.locator('button', { hasText: 'Check in' })).toHaveCount(1);
     await expect(rows.filter({ hasText: 'Amal Employee' })).toHaveCount(1);
     // the padding of the card (not a tile, not its lines) opens the same list
-    await page.locator(`${CARD} button.pm-tile`).nth(0).click();
+    await page.locator(`${CARD} button.pm-tile`).nth(1).click();
     expect(await page.evaluate('S.queueView')).toBe('bookings');
     await page.locator(CARD).click({ position: { x: 3, y: 3 } });
     expect(await page.evaluate('[S.queueView,S.ridersSession,S.ridersCompany]')).toEqual(['petromin', N1, 'all']);
-    // the company filter has Bookings: the plain bookings alone
-    await page.locator('[aria-controls="fm-riders"]').click();
-    await page.locator('#pm-host select[aria-label="Company"]').selectOption('Bookings');
+    // the Company choices have Bookings: the plain bookings alone
+    await page.locator('#pm-host .pm-co-row .pm-co[data-co="Bookings"]').click();
     await expect(rows).toHaveCount(1);
     await expect(page.locator('#pm-host h1')).toContainText('Bookings');
     // its number opens it on Bookings, found by that number on its night

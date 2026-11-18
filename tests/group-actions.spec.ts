@@ -143,19 +143,20 @@ test('a Petromin night is one card: its Bookings and each company\'s registratio
   const CARD = '#tab-queue .sess-bar-desktop .sess-summary-chip[data-sid="2099-02-11-pw"]';
   const card = page.locator(CARD), tiles = page.locator(`${CARD} button.pm-tile`);
   await expect(card).toHaveAttribute('role', 'group');                  // a group of buttons, not a button
-  await expect(tiles).toHaveCount(4);
-  await expect(tiles.nth(0)).toContainText('Bookings');
-  await expect(tiles.nth(1).locator('img')).toHaveAttribute('alt', 'Petromin');
-  await expect(tiles.nth(2).locator('img')).toHaveAttribute('alt', 'Petrolube');
-  await expect(tiles.nth(3).locator('img')).toHaveAttribute('alt', 'Dukan');
-  await expect(tiles.nth(1)).toContainText('3 registered');
-  await expect(tiles.nth(2)).toContainText('0 registered');
-  await expect(tiles.nth(3)).toContainText('1 registered');
+  await expect(tiles).toHaveCount(5);
+  await expect(tiles.nth(0)).toContainText('All');                    // the night's one list (2026-11-18)
+  await expect(tiles.nth(1)).toContainText('Bookings');
+  await expect(tiles.nth(2).locator('img')).toHaveAttribute('alt', 'Petromin');
+  await expect(tiles.nth(3).locator('img')).toHaveAttribute('alt', 'Petrolube');
+  await expect(tiles.nth(4).locator('img')).toHaveAttribute('alt', 'Dukan');
+  await expect(tiles.nth(2)).toContainText('3 registered');
+  await expect(tiles.nth(3)).toContainText('0 registered');
+  await expect(tiles.nth(4)).toContainText('1 registered');
   // Petromin's tile: the night's Petromin registrations alone, under Petromin's mark.
-  await tiles.nth(1).dispatchEvent('click');                            // phones reach the same page from the dropdown
+  await tiles.nth(2).dispatchEvent('click');                            // phones reach the same page from the dropdown
   expect(await page.evaluate('[S.queueView,S.ridersSession,S.ridersCompany]')).toEqual(['petromin', '2099-02-11-pw', 'Petromin']);
-  await expect(tiles.nth(1)).toHaveAttribute('aria-pressed', 'true');
-  await expect(tiles.nth(0)).toHaveAttribute('aria-pressed', 'false');
+  await expect(tiles.nth(2)).toHaveAttribute('aria-pressed', 'true');
+  await expect(tiles.nth(1)).toHaveAttribute('aria-pressed', 'false');
   await expect(page.locator('#pm-host .pm-logo-lg')).toHaveAttribute('alt', 'Petromin');
   await expect(page.locator('#pm-host tbody tr')).toHaveCount(2);            // one party folded, one solo
   // The folded party: Return all and Undo check-in, without opening it.
@@ -168,7 +169,7 @@ test('a Petromin night is one card: its Bookings and each company\'s registratio
   await page.locator('#confirm-modal button', { hasText: 'Return all' }).click();
   await expect.poll(() => regWrites.length).toBe(2);
   // Dukan's tile: its employee, numbered D-, and no badge shown (the phone stands in for it in the database).
-  await tiles.nth(3).dispatchEvent('click');
+  await tiles.nth(4).dispatchEvent('click');
   expect(await page.evaluate('S.ridersCompany')).toBe('Dukan');
   await expect(page.locator('#pm-host .pm-logo-lg')).toHaveAttribute('alt', 'Dukan');
   await expect(page.locator('#pm-host tbody tr')).toHaveCount(1);
@@ -176,10 +177,10 @@ test('a Petromin night is one card: its Bookings and each company\'s registratio
   await expect(page.locator('#pm-host tbody tr').first()).toContainText('Dukan Worker');
   await expect(page.locator('#pm-host tbody tr').first()).not.toContainText('DK500000013');
   // The Bookings tile leaves the page for the night's own queue; another ride's card does too.
-  await tiles.nth(0).dispatchEvent('click');
+  await tiles.nth(1).dispatchEvent('click');
   expect(await page.evaluate('[S.queueView,S.sfSession]')).toEqual(['bookings', '2099-02-11-pw']);
   await expect(page.locator('#pm-host')).toHaveCount(0);
-  await expect(tiles.nth(0)).toHaveAttribute('aria-pressed', 'true');
+  await expect(tiles.nth(1)).toHaveAttribute('aria-pressed', 'true');
   await page.evaluate(`openPetrominPage('2099-02-11-pw')`);
   await page.evaluate(`setSfSession('${D}')`);
   expect(await page.evaluate('S.queueView')).toBe('bookings');
@@ -189,8 +190,8 @@ test('a Petromin night is one card: its Bookings and each company\'s registratio
 test('with no Petromin night open, the latest night with registrations keeps its card and its tiles', async ({ page }) => {
   await queue(page, { sessions: [sessions[0], { ...sessions[1], status: 'closed' }] });
   const tiles = page.locator('#tab-queue .sess-bar-desktop .pm-night[data-sid="2099-02-11-pw"] button.pm-tile');
-  await expect(tiles).toHaveCount(4);
-  await tiles.nth(3).dispatchEvent('click');
+  await expect(tiles).toHaveCount(5);
+  await tiles.nth(4).dispatchEvent('click');
   expect(await page.evaluate('[S.queueView,S.ridersSession,S.ridersCompany]')).toEqual(['petromin', '2099-02-11-pw', 'Dukan']);
 });
 
