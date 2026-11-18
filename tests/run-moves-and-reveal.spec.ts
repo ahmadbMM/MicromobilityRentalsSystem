@@ -139,6 +139,11 @@ test.describe('@staff:bookings moving riders onto Run for Her asks what adding t
     for (const id of ['e1', 'e2']) expect(patchesOf(qw, id)[0]).toMatchObject({ session_id: RUN, run_km: 3, type_preference: 'None' });
     expect(patchesOf(qw, 'e2')[0]).toMatchObject({ name: 'Nora Saleh' });
     await page.waitForFunction('S.undoStack.length>0');
+    // Undo reads the party as it stands first and writes nothing for a member changed elsewhere (bug hunt 2026-11-18):
+    // the server would answer with the party on the run, where the move left it
+    await page.route(/\/rest\/v1\/queue_entries\?select=id(%2C|,)status(%2C|,)session_id(%2C|,)paid/, (r) => r.fulfill({
+      status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
+      body: JSON.stringify(['e1', 'e2'].map((id) => ({ id, status: 'waiting', session_id: RUN, paid: false }))) }));
     await page.evaluate('doUndo()');
     await expect.poll(() => qw.filter((x) => x.method === 'PATCH').length).toBe(4);
     for (const id of ['e1', 'e2']) expect(patchesOf(qw, id)[1]).toMatchObject({ session_id: JCC, run_km: null });

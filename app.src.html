@@ -45461,7 +45461,7 @@ async function _gatedRpc(what,fn,opt){
   if(r&&r.error&&/PIN_REQUIRED|MANAGER_REQUIRED/.test(String(r.error.message||''))){
     // the operator list read again: a PIN set on another device within the minute it is kept showed no keypad, and the
     // second try was refused as the first (bug hunt 2026-11-18)
-    _pinOk={name:'',at:0,token:null};S._opPinsAt=0;
+    _pinOk={name:'',at:0,token:null};S._opPinsAt=Date.now()-60001; // read again, but a failed read keeps the list this device has (0 read as ten minutes old: refused)
     const o2=/MANAGER_REQUIRED/.test(String(r.error.message||''))?{...(opt||{}),force:true}:opt;
     if(!await _pinApprove(what,o2))return null;
     mgr=mgr||_mgrNeeded(o2);

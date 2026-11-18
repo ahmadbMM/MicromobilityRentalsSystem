@@ -59,7 +59,8 @@ test('the keypad hands the approval token on, and the RPC calls carry it with th
 });
 
 test('PIN_REQUIRED from the server asks the keypad again and repeats the call with the new token', async ({ page }) => {
-  await boot(page, { 'rpc:staff_pin_approve': ok({ required: true, token: 'tok-2' }) });
+  // after a PIN_REQUIRED the operator list is read again (bug hunt 2026-11-18): the server still lists this operator's PIN
+  await boot(page, { 'rpc:staff_pin_approve': ok({ required: true, token: 'tok-2' }), 'rpc:staff_operator_list': [{ name: 'Spec Staff', has_pin: true }] });
   let n = 0;
   await page.route(/\/rest\/v1\/rpc\/staff_set_price/, (r) => {
     n++;
