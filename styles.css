@@ -9020,6 +9020,12 @@ body:not(.view-staff) .myr-bd{display:flex;align-items:center;gap:10px;width:100
 body:not(.view-staff) .myr-bd-t{flex:1;font-size:var(--fs-15);font-weight:700;}
 body:not(.view-staff) .myr-bd-n{font-size:var(--fs-15);font-weight:600;font-variant-numeric:tabular-nums;}
 body:not(.view-staff) .myr-bd .cu-ic{color:var(--ink-2);}
+/* My records (2026-11-18, _recHtml): two tiles a row, each a big number, its name and one short value. */
+body:not(.view-staff) .rec-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+body:not(.view-staff) .rec-t{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border-radius:var(--r-ctl);background:var(--card-3);}
+body:not(.view-staff) .rec-n{font-size:var(--fs-26);font-weight:700;line-height:1.15;color:var(--ink);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .rec-l{font-size:var(--fs-13);font-weight:600;color:var(--ink);}
+body:not(.view-staff) .rec-v{font-size:var(--fs-13);color:var(--ink-2);}
 /* Personal landmarks (new features build F16, 2026-11-13). The first ride's anniversary: a card that leads Stats for
    its week - the years, the first ride's date, the team's line and the team's name. The kinds tried: a checklist under
    By event, a tick in the action green on a kind done and an empty ring until then. */

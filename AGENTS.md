@@ -1667,6 +1667,23 @@ the last row, and menu and page side by side on a wide screen. The website's /ac
   are not clickable. `tests/account-parts.spec.ts`, `tests/account-menu.spec.ts`.
 - The website's /account mirrors the three parts (mm-platform); the menu rework is not mirrored yet.
 
+## My records on Stats (2026-11-18)
+The user, 2026-11-18 (the community features round): "My records in Stats: most Saturdays in a row, best month, and bike
+types and routes tried. Only the member sees them. It stays in Stats because the streak line on home was removed for
+good." No database change, no read of its own.
+- **Where**: Account > Stats, a card "My records" (`_recHtml`, `.rec`) after Your rides (`_myrStats`), for every rider (not
+  only members) with two or more finished sessions: `done` or checked in (`active`), one row per session (the rider's
+  own, the lowest number, as `_myrNights` picks), from the bookings this device holds.
+- **Tiles** (a big number, its name, at most one short value; `recTitle`, `recSat`, `recMonth`, `recTypes`, `recOf`,
+  `recRoutes`, ten languages): Saturdays in a row = the longest run ever of consecutive weeks (Sunday to Saturday,
+  `_bdgWk`) each with a finished `saturday`-kind session, from 2, valued with the month and year the run ended (the
+  first of equal runs); never a current streak. Best month = the calendar month with the most finished sessions of any
+  kind ("sessions", not rides), from 2, the earliest of a tie, valued with the month and year. Bike types tried =
+  distinct `resolvedType` on bike sessions (`_ncEntry` false) among the fleet's types (`BIKE_INFO`, five), said
+  "3 of 5". Routes ridden = distinct `route_slug` of finished sessions (a session this device does not hold is
+  skipped), from 1. A tile under its threshold is left out; no tile, no card.
+- Tests: `tests/my-records.spec.ts`. Website: the /account Stats part would need the same four tiles (not mirrored yet).
+
 ## Vendors (F&B, 2026-10-03; first named "F&B Partners", every internal name renamed to vendor(s) the same day)
 
 Cafés and restaurants ("venues") reserve the Saturdays our Saturday social ride's riders come to them for
