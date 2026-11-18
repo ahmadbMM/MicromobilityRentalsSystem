@@ -61,6 +61,8 @@ test.describe('@customer:bf the breakfast venue on the rider’s side', () => {
     await page.evaluate(`S.view='customer'; setCustTab('myrides')`);
     const m = page.locator('#rate-modal');
     await expect(m.locator('#rgl-breakfast')).toHaveText('Breakfast at Harbour Cafe');
+    await expect(m.locator('#rgl-bf_restaurant')).toHaveCount(0); // the parts wait for a low breakfast (2026-11-18)
+    await m.locator('#rgq-breakfast .rg-b[data-v="7"]').click();
     await expect(m.locator('#rgl-bf_restaurant')).toHaveText('Restaurant');
     // "I did not stay for breakfast" keeps the venue's name on the box
     await m.locator('.rg-skip').click();
