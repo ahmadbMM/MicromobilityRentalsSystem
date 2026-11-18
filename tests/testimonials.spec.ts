@@ -357,10 +357,12 @@ test.describe('@customer:testimonials the old comment', () => {
   });
 
   test('No thanks answers no; with the switch off nothing is asked', async ({ page }) => {
-    const db: RiderDb = { mine: mine({ ask: ASK }), calls: [] };
+    // an untitled ride (every Saturday on production) is named by its kind
+    const db: RiderDb = { mine: mine({ ask: { ...ASK, title: null, title_ar: null } }), calls: [] };
     await rider(page, db, { site_content: [ON] });
     const ask = page.locator('#tst-ask .tst-ask');
     await expect(ask).toBeVisible();
+    await expect(ask.locator('.rg-meta')).toContainText('Saturday community ride');
     await ask.locator('.tst-ask-no').click();
     await expect(page.locator('#tst-ask .tst-ask')).toHaveCount(0);
     expect(calls(db, 'testimonial_old_answer')[0].body).toMatchObject({ p_entry: 'q-old', p_yes: false, p_consent: false });

@@ -389,7 +389,8 @@ function _tstAskShow(d) {
 }
 function _tstAskPaint(first) {
   const A = S._tma, dep = _tstDep(); if (!A || !dep.askHost) return;
-  const a = A.ask, title = (S.lang === 'ar' && a.title_ar) || a.title || '', when = a.date ? _tstDate(a.date) : '', off = A.busy ? ' disabled' : '';
+  // an untitled ride (every Saturday, most sessions) is named by its kind
+  const a = A.ask, title = (S.lang === 'ar' && a.title_ar) || a.title || (TST_ABOUT.includes(a.about) && a.about !== 'other' ? _tstT('ab_' + a.about) : ''), when = a.date ? _tstDate(a.date) : '', off = A.busy ? ' disabled' : '';
   dep.askHost(`<div class="auth-backdrop"><div class="pg-box fx-box tst-ask" role="dialog" aria-modal="true" aria-labelledby="tst-ask-t" tabindex="-1">
     <h2 id="tst-ask-t" class="pg-title">${_tstT('askT')}</h2>
     ${title || when ? `<div class="rg-meta">${esc([title, when].filter(Boolean).join(' · '))}</div>` : ''}
