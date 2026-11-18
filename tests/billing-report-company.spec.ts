@@ -129,3 +129,23 @@ test('a report opened before the riders arrive fills in when they do', async ({ 
   await expect(min.locator('button').first()).toBeEnabled();
   await expect(page.locator('#rider-rep-noco')).toContainText('no company');
 });
+
+test('Dukan is billed 57.5 a bike, Road 75, while Petromin stays at 50', async ({ page }) => {
+  // The user, 2026-11-18: "change dukan billing report to pay 57.5 per bike not 50" (_dukan_fare, 20261118150000).
+  await openReport(page);
+  const got = await page.evaluate(`(() => {
+    S.riders.push({ id: 90, source: 'petromin', session_id: '${SESS}', company: 'Dukan', matched_entry_id: 'q-dk', type_preference: 'Hybrid' });
+    S.riders.push({ id: 91, source: 'petromin', session_id: '${SESS}', company: 'Petromin', matched_entry_id: 'q-pm', type_preference: 'Hybrid' });
+    const bk = (id) => ({ id, sessionId: '${SESS}' });
+    return [
+      _riderPrice({ company: 'Dukan', type_preference: 'Mountain', price: null }),
+      _riderPrice({ company: 'Dukan', type_preference: 'Road', price: null }),
+      _riderPrice({ company: 'Petromin', type_preference: 'Mountain', price: null }),
+      priceForEntryType(bk('q-dk'), 'Hybrid'),
+      priceForEntryType(bk('q-dk'), 'Road'),
+      priceForEntryType(bk('q-pm'), 'Hybrid'),
+      priceForEntryType(bk('q-none'), 'Hybrid'),
+    ];
+  })()`);
+  expect(got).toEqual([57.5, 75, 50, 57.5, 75, 50, 57.5]);
+});

@@ -5347,15 +5347,29 @@ const PREMIUM_TIERS={'Road Carbon':'Road'}; // tier -> fleet type it is fulfille
 function priceForType(ty){return RIDE_PRICES[ty]??DEFAULT_PRICE;}
 // Whether a booking is a Petromin employee's. Reads S.riders, which the staff side loads with
 // the Riders tab or before checking a rider in on a ride that takes registrations.
-function _isEmployeeBooking(e){
-  if(!e||!e.id)return false;
-  const sess=_sessGet(e.sessionId),kind=sess&&sess.ride_kind;
-  return!!kind&&(S.riders||[]).some(r=>r.matched_entry_id===e.id&&r.source===kind);
+// The registration a booking is an employee's by (the lowest id, as _booking_fare picks), or null.
+function _employeeReg(e){
+  if(!e||!e.id)return null;
+  const sess=_sessGet(e.sessionId),kind=sess&&sess.ride_kind;if(!kind)return null;
+  let hit=null;for(const r of S.riders||[])if(r.matched_entry_id===e.id&&r.source===kind&&(!hit||Number(r.id)<Number(hit.id)))hit=r;
+  return hit;
+}
+function _isEmployeeBooking(e){return!!_employeeReg(e);}
+// Dukan's employees pay their own fare: 57.5 a bike, Road as anyone's (the user, 2026-11-18: "change dukan billing
+// report to pay 57.5 per bike not 50"; the database's _dukan_fare, migration 20261118150000).
+const DUKAN_FARE=57.5;
+function _dukanFare(ty){return ty==='Road'?(EMPLOYEE_PRICES.Road??priceForType('Road')):DUKAN_FARE;}
+// An employee's fare for a type on this booking, or null when the booking is no employee's or the type has none:
+// Dukan's on the types _employee_fare covers, everyone else's EMPLOYEE_PRICES.
+function _empFare(e,ty){
+  const r=_employeeReg(e);if(!r)return null;
+  if(_riderCo(r)==='Dukan')return['Hybrid','Mountain','Kids','Any','Road'].includes(ty)?_dukanFare(ty):null;
+  return EMPLOYEE_PRICES[ty]??null;
 }
 // The fare for a type ON A GIVEN BOOKING. Use this wherever the booking is in hand; priceForType
 // alone would overcharge a Petromin employee by 7.5.
 function priceForEntryType(e,ty){
-  return(_isEmployeeBooking(e)&&EMPLOYEE_PRICES[ty]!=null)?EMPLOYEE_PRICES[ty]:priceForType(ty);
+  const f=_empFare(e,ty);return f!=null?f:priceForType(ty);
 }
 function priceForTypeMax(ty){return RIDE_PRICES_MAX[ty]??DEFAULT_PRICE;}
 // ── Business settings (2026-10-09) ──────────────────────────────────────────────────────────────
@@ -5606,7 +5620,7 @@ function _entryFallbackPrice(entry){
   const bikeIds=getAssignedBikeIds(entry);
   if(bikeIds.length){
     const bikes=bikeIds.map(id=>bikeById(id)).filter(Boolean);
-    if(bikes.length){const emp=_isEmployeeBooking(entry);return bikes.reduce((s,b)=>s+(emp&&EMPLOYEE_PRICES[b.type]!=null?EMPLOYEE_PRICES[b.type]:priceForBike(b)),0);}
+    if(bikes.length)return bikes.reduce((s,b)=>{const f=_empFare(entry,b.type);return s+(f!=null?f:priceForBike(b));},0);
   }
   return priceForEntryType(entry,entry.typePreference);
 }
@@ -57453,8 +57467,7 @@ async function _confirmAssignRun(){
     // tab, so on that ride they are fetched first if this device has not got them yet.
     const _rs=_sessDisp(rider.sessionId);
     if(!S.ridersLoaded&&_rs&&_rs.ride_kind==='petromin')await loadRiders();
-    const _emp=_isEmployeeBooking(rider);
-    priceUpdate.price=selected.reduce((s,b)=>s+(_emp&&EMPLOYEE_PRICES[b.type]!=null?EMPLOYEE_PRICES[b.type]:priceForBike(b)),0);
+    priceUpdate.price=selected.reduce((s,b)=>{const f=_empFare(rider,b.type);return s+(f!=null?f:priceForBike(b));},0);
   }
   const isReassign=rider&&rider.status==='active';
   
@@ -60781,7 +60794,7 @@ function riderUndoReturn(id){return _riderAct([id],{checked_out_at:null,checked_
 // it. Admin only; the riders' page never sees this.
 // Dukan's employees register for the Petromin nights (2026-11-12, migration 20261112210000), since 2026-11-13 on
 // micromobility.sa/petromin by picking Dukan on its first step: name, phone, height and bike, numbered D-001 up each
-// night, billed to Dukan like the other two.
+// night, billed to Dukan like the other two, at 57.5 a bike since 2026-11-18 (Road 75; _dukanFare, 20261118150000).
 const RIDER_COMPANIES=['Petromin','Petrolube','Dukan'];
 function _riderCo(r){const c=String((r&&r.company)||'').trim().toLowerCase();return RIDER_COMPANIES.find(x=>x.toLowerCase()===c)||'';}
 // A Dukan registration has no badge: the database keys it by the phone ('DK' and its last nine digits), which staff
@@ -60806,7 +60819,7 @@ function _riderReportRows(co){
   rows.sort((a,b)=>String(a.session_id||'').localeCompare(String(b.session_id||''))||(_riderNoNum(a)-_riderNoNum(b))||(_riderPartyNo(a)-_riderPartyNo(b)));
   return rows;
 }
-function _riderPrice(r){return r.price!=null?Number(r.price):(EMPLOYEE_PRICES[r.type_preference]??priceForType(r.type_preference));} // the employee fare, as _rider_price sets it
+function _riderPrice(r){return r.price!=null?Number(r.price):_riderCo(r)==='Dukan'?_dukanFare(r.type_preference):(EMPLOYEE_PRICES[r.type_preference]??priceForType(r.type_preference));} // the employee fare, as _rider_price (Dukan: _dukan_fare) sets it
 function _ridersRepScope(){const s=_pmbScope();return s==='night'?shortDate(S.ridersSession.slice(0,10)):s==='all'?t('ridersFilterAll'):_anMonthLbl(s);}
 function openRidersReport(){S._ridersRepOpen=true;S._ridersRepHtml='';S._pmbScope='';_renderRidersReport();} // opens on the page's night, as before
 function closeRidersReport(){S._ridersRepOpen=false;S._ridersRepHtml='';const m=document.getElementById('rider-report-modal');if(m){m.style.display='none';m.innerHTML='';}}
