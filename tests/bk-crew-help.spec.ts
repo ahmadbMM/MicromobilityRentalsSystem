@@ -198,8 +198,11 @@ test.describe('@staff:bookings Tonight\'s crew', () => {
     await expect(dlg.getByRole('checkbox', { name: 'Crew set' })).toHaveAttribute('aria-checked', 'true');
     await expect(dlg.locator('.ck-li').filter({ hasText: 'Crew set' })).toContainText('1 on the crew');
     await expect(chip).toHaveText(/Crew \(1\)/);
-    // the item's button opens the crew
+    // the item's button opens the crew; the pop-up reads the night's crew again as it opens, and that answer lands before
+    // another desk changes it (under load it could be served before the removal and arrive after it: 2026-11-18)
+    const reread = page.waitForResponse((r) => r.url().includes('/rest/v1/session_crew') && r.request().method() === 'GET');
     await dlg.locator('.ck-li').filter({ hasText: 'Crew set' }).getByRole('button', { name: 'Tonight\'s crew' }).click();
+    await reread;
     await expect(sheet(page)).toContainText('Lina Lead');
     // a removal on another desk takes it off again
     held.splice(0, 1);
