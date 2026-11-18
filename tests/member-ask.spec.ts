@@ -263,6 +263,45 @@ test.describe('@customer:members Ask in the Community tab', () => {
     ]);
   });
 
+  test('a number with thousands grouped is one number, never a decimal: 1,000 is a thousand (web-lib1-2)', async ({ page }) => {
+    const sent = rpcSent(page);
+    const pg = askPage([
+      q(1, 'number', { config: { min: 0, max: 20000, step: 1 } }),
+      q(2, 'number', { config: { min: 0, max: 10, step: 0.5 } }),
+      q(3, 'number', { config: { min: 0, max: 20000, step: 1 } }),
+    ]);
+    await member(page, { list: list([card('farm-ideas', { questions: 3 })]), page: pg });
+    await openPage(page);
+    await page.locator('#ak-in-1').fill('1,000');
+    await page.locator('#ak-q-1').getByRole('button', { name: 'Send' }).click();
+    await page.locator('#ak-in-2').fill('1,5'); // a decimal comma where the question takes halves
+    await page.locator('#ak-q-2').getByRole('button', { name: 'Send' }).click();
+    await page.locator('#ak-in-3').fill('١٬٢٠٠'); // Arabic digits and the Arabic thousands separator
+    await page.locator('#ak-q-3').getByRole('button', { name: 'Send' }).click();
+    await expect.poll(() => sent.filter((x) => x.fn === 'ask_send').map((x) => [x.body.p_question, x.body.p_value])).toEqual([
+      [1, { n: 1000 }],
+      [2, { n: 1.5 }],
+      [3, { n: 1200 }],
+    ]);
+  });
+
+  test('a pin answered while the database sends no results keeps its picture and its pin (web-lib1-1)', async ({ page }) => {
+    const mine = { 1: [{ id: 3, value: { x: 0.25, y: 0.5 }, body: '', status: 'approved', answered: false, score: null, created_at: '2026-11-13T09:00:00Z', votes: 0 }] };
+    const st = { list: list([card('farm-ideas', { questions: 1, answered: 1 })]), page: askPage([q(1, 'pin', { image: 'https://img.test/map.svg' })], { mine }) as Doc };
+    await member(page, st);
+    await openPage(page);
+    const q1 = page.locator('#ak-q-1');
+    await expect(q1.locator('img')).toHaveCount(1);
+    await expect(q1.locator('.ak-pm')).toBeVisible();
+    await expect(q1.locator('.ak-res')).toHaveCount(0);
+    // the results come: the pin stands on the results' own picture, once
+    st.page = askPage([q(1, 'pin', { image: 'https://img.test/map.svg' })], { mine, live: live({ ver: 2, results: { 1: { n: 2, pins: [[0.25, 0.5], [0.7, 0.2]] } } }) });
+    await page.evaluate('S._ak.readAt=0;_akPollNow()');
+    await expect(q1.locator('.ak-res .ak-pd')).toHaveCount(2);
+    await expect(q1.locator('img')).toHaveCount(1);
+    await expect(q1.locator('.ak-res .ak-pm')).toBeVisible();
+  });
+
   test('upvotes on someone else\'s answer and reactions when the page has them', async ({ page }) => {
     const sent = rpcSent(page);
     const pg = askPage([q(3, 'qa')], {

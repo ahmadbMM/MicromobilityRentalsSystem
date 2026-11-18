@@ -53,7 +53,7 @@ function _sMonth(ymd) { // "2026-11-30" -> "November 2026" in the page's languag
 // night that made the count. A night without a day leaves it out rather than guess. Any other badge earned by riding (a
 // streak, a distance, a place in the queue) has no one day the app can name: its picture carries none.
 const SHR_NIGHTS = { first_lap: 1, regular: 5, podium: 10, corniche25: 25 };
-const SHR_SATS = { rolling_start: 1, slipstream: 5, paceline: 10, peloton: 25, grand_tour: 50, hall_of_fame: 100 };
+const SHR_SATS = { rolling_start: 1, tailwind: 2, momentum: 3, slipstream: 5, paceline: 10, peloton: 25, grand_tour: 50, hall_of_fame: 100 };
 function _shrRodeOn(c, slug) {
   const sat = SHR_SATS[slug], n = SHR_NIGHTS[slug] || sat;
   if (!n) return '';

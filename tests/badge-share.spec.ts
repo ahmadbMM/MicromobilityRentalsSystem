@@ -180,6 +180,19 @@ test.describe('@customer:account share a badge, a title or a finished challenge'
     await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Badge earned · Front Row · Level 1 of 5$/);
   });
 
+  // The Saturday ladder shows its highest level reached: two rides show Tailwind, three Momentum.
+  for (const [n, name, day] of [[2, 'Tailwind', '8 Aug'], [3, 'Momentum', '15 Aug']] as const) {
+    test(`${name} carries the day of Saturday ride ${n} (web-lib6-3)`, async ({ page }) => {
+      const days = ['2026-08-01', '2026-08-08', '2026-08-15'].slice(0, n); // Saturdays before the rating gate's first day
+      const ss = days.map((d) => ({ ...sat(d), status: 'closed' }));
+      const qs = days.map((d, i) => ({ ...queue_entries[0]!, id: `s${i}`, session_id: d, session_date: d, session_day: 'Saturday', queue_num: 1 }));
+      await rider(page, { sessions: ss, queue_entries: qs, 'rpc:customer_my_badges': [] });
+      await cannotShare(page);
+      await shareBadge(page, name);
+      await expect(pic(page)).toHaveAttribute('alt', new RegExp(`· ${name} · Level ${n} of 8 · ${day}\\w* 2026$`));
+    });
+  }
+
   test('a share the phone refuses saves the picture; a sheet the rider closes does nothing', async ({ page }) => {
     await rider(page);
     await canShare(page);

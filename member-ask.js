@@ -218,13 +218,18 @@ function _akShapeP(c, points) {
   if (!cf.options.length || sum > cf.total) return _akNo('invalid');
   return sum < 1 ? _akNo('empty') : _akYes({ p });
 }
-function _akTyped(raw) {
-  const text = _akLat(raw).replace(/[,٫]/g, '.').trim();
+// A number as typed: Arabic digits and a decimal comma read too. Thousands grouped ("1,000", "12,500.5", "١٬٠٠٠") read
+// as one number: the Arabic separator always, a comma when a decimal point follows or the question takes whole numbers
+// (`whole`), as the website's shapeNumber (bug hunt 2026-11-18 web-lib1-2: "1,000" was sent as 1).
+function _akTyped(raw, whole) {
+  let text = _akLat(raw).trim();
+  if (/^-?\d{1,3}(?:[,٬]\d{3})+(?:[.٫]\d+)?$/.test(text) && (whole || /[٬.٫]/.test(text))) text = text.replace(/[,٬]/g, '');
+  text = text.replace(/[,٫]/g, '.');
   if (!text) return null;
   return /^-?\d+(?:\.\d+)?$/.test(text) && Number.isFinite(Number(text)) ? Number(text) : 'bad';
 }
 function _akShapeN(c, raw) {
-  const cf = _akCfgN(c), n = _akTyped(raw);
+  const cf = _akCfgN(c), n = _akTyped(raw, Number.isInteger(cf.step) && Number.isInteger(cf.min));
   if (n === null) return _akNo('empty');
   if (n === 'bad' || n < cf.min || n > cf.max) return _akNo('invalid');
   const steps = (n - cf.min) / cf.step;
@@ -634,7 +639,9 @@ function _akStepGo(by) {
 // One question: what it asks, its clock, where it is answered, what went wrong or the page's thanks, the member's own
 // written answers, the results, the reactions.
 function _akQBlock(a, full, q) {
-  const k = q.id, st = _akState(q, full), shown = _akShown(q, full), result = full.live ? full.live.results[String(k)] : undefined;
+  // drawn only when the database sent the results, as the website's AskQuestion (bug hunt 2026-11-18 web-lib1-1): a pin
+  // answered while none came keeps its form, its pin and its picture, and a revealed answer keeps its line
+  const k = q.id, st = _akState(q, full), result = full.live ? full.live.results[String(k)] : undefined, shown = _akShown(q, full) && result != null;
   const shut = !q.open && _akPageOpen(full) && q.kind !== 'info';
   const same = q.title.trim() === full.page.title.trim();
   const formed = (st === 'open' || st === 'change' || st === 'done' || st === 'shut') && !(q.kind === 'pin' && (st === 'done' || st === 'shut') && shown);
