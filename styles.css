@@ -14909,6 +14909,39 @@ body.view-staff.view-staff :is(#pay-rf,#sto-dlg) .confirm-box{width:min(var(--sf
   #sto-pe .sto-cm::before{content:attr(data-l);flex:0 0 40%;color:var(--muted);font-size:var(--sf-fs-xs);}
   #sto-pe .sto-img{width:100%;}
 }
+/* the store's staff screens of 2026-11-18 ("do all"): "I'm here" at the top of Orders and on the rail, the sheet's way facts,
+   company, build and claims, the quotes and their editor, the warranty claims */
+#tab-store .sto-arr{display:flex;flex-direction:column;gap:4px;padding:8px 12px;margin-bottom:10px;border:1px solid var(--green);border-radius:var(--sf-r-ctl);}
+#tab-store .sto-arr-r{display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;}
+#tab-store .sto-arr-o{min-height:44px;padding:0;border:none;background:transparent none;color:var(--text);font:inherit;text-align:start;cursor:pointer;}
+#tab-store .sto-arr-r>:last-child{margin-inline-start:auto;}
+#tab-store .sto-arr-seen{opacity:.7;}
+#tab-store .sto-cl-b{flex:2 1 240px;font-size:var(--sf-fs-sm);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+:root body.view-staff #staff-tab-nav .tab-btn .tab-badge.sto-arr-badge{background:var(--green);color:var(--bg);border-color:var(--green);} /* over both themes' rail badge */
+.sto-pill:is(.sto-p-cl-open,.sto-p-cl-in_progress,.sto-p-q-open,.sto-p-learn){border-color:var(--orange);color:var(--orange);}
+.sto-pill:is(.sto-p-cl-resolved,.sto-p-q-used){border-color:var(--green);color:var(--green);}
+.sto-pill:is(.sto-p-cl-refused,.sto-p-q-expired,.sto-p-q-void){color:var(--muted);}
+:is(#sto-modal,#sto-dlg) .sto-pics{display:flex;gap:8px;flex-wrap:wrap;}
+:is(#sto-modal,#sto-dlg) .sto-pics img,:is(#sto-modal,#sto-dlg) .sto-pic-w{width:88px;height:88px;object-fit:cover;border-radius:var(--sf-r-ctl);background:var(--s1);display:flex;align-items:center;justify-content:center;color:var(--muted);}
+#sto-modal .sto-pic{position:relative;display:inline-flex;}
+#sto-modal .sto-pic>button{position:absolute;top:2px;inset-inline-end:2px;}
+:is(#sto-modal,#sto-dlg) .sto-cks{display:flex;gap:4px 14px;flex-wrap:wrap;}
+#sto-modal .sto-ck{display:inline-flex;align-items:center;gap:4px;font-size:var(--sf-fs-sm);color:var(--muted);}
+#sto-modal .sto-ck-on{color:var(--green);}
+#sto-modal .sto-chk{display:flex;align-items:center;gap:8px;min-height:44px;font-size:var(--sf-fs-md);cursor:pointer;}
+#sto-modal .sto-chk input[type=checkbox]{-webkit-appearance:checkbox;appearance:auto;display:block;position:static;flex:none;width:18px;height:18px;min-height:0;margin:0;padding:0;opacity:1;}
+:is(#sto-modal,#sto-dlg) .sto-link{display:inline-flex;align-items:center;gap:6px;text-decoration:none;align-self:flex-start;}
+:is(#sto-modal,#sto-dlg) .sto-pre{white-space:pre-wrap;}
+#sto-modal .sto-bulk-row,#sto-dlg .sto-bulk-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+#sto-dlg .sto-note-save{align-self:flex-start;}
+#sto-dlg .sto-q-link{width:100%;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--sf-fs-sm);}
+#sto-dlg .sto-qe-ls{display:flex;flex-direction:column;gap:6px;}
+#sto-dlg .sto-qe-l{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1.2fr) 72px auto;gap:6px;align-items:center;padding:6px 8px;border:1px solid var(--border);border-radius:var(--sf-r-ctl);}
+#sto-dlg .sto-chips{display:flex;gap:6px;flex-wrap:wrap;}
+@media (max-width:767px){
+  #sto-dlg .sto-qe-l{grid-template-columns:minmax(0,1fr) 72px auto;}
+  #sto-dlg .sto-qe-l>b{grid-column:1 / -1;}
+}
 /* Payments */
 #tab-payments .pay-list{display:flex;flex-direction:column;}
 #tab-payments .pay-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 4px;border-top:1px solid var(--border);}

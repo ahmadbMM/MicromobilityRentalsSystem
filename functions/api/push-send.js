@@ -26,6 +26,11 @@ const PUSH_LIMIT = 30;
 // as functions/_middleware.js's SITE_ORIGIN is: change the address there.
 const SITE_ORIGIN = 'https://experiences.micromobility.sa';
 const PUSH_WINDOW_MIN = 10;
+// A store order's status (2026-11-18, the website's N04): the customer turned it on for that order on its page on the
+// website (store_after_push), so the tap opens that page there, never the booking app. The staging database's orders open
+// on the staging website.
+const STORE_URL = /^\/store\/order\/(\d{1,9})\?k=([0-9a-f]{32})$/;
+const webOrigin = (supa) => (/jkfhiszcnuvoftvkzaye/.test(String(supa || '')) ? 'https://staging.micromobility.sa' : 'https://micromobility.sa');
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -40,6 +45,8 @@ export async function onRequestPost(context) {
   if (body && body.drain === true) return drain(request, env, PUB, PRIV, SERVICE);
   const { staffToken, customerId, title, message, url, tag, lang } = body || {};
   if (!staffToken || !customerId || !title) return json({ ok: false, error: 'missing fields' }, 400);
+  const store = body.store === true, so = store ? STORE_URL.exec(String(url || '')) : null;
+  if (store && !so) return json({ ok: false, error: 'bad url' }, 400);
 
   const SUPA = env.SUPABASE_URL || 'https://qpffkzmsfyilicwcsszz.supabase.co';
   const ANON = env.SUPABASE_ANON_KEY;
@@ -52,7 +59,7 @@ export async function onRequestPost(context) {
   const who = await fetch(`${SUPA}/rest/v1/rpc/_staff_mod`, {
     method: 'POST',
     headers: { apikey: ANON, Authorization: `Bearer ${staffToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ p_mod: 'queue', p_edit: true }),
+    body: JSON.stringify({ p_mod: store ? 'store' : 'queue', p_edit: true }), // a store order's status: the staff who may work the Store
   });
   if (!who.ok || (await who.json().catch(() => null)) !== true) return json({ ok: false, error: 'not staff' }, 403);
 
@@ -78,9 +85,17 @@ export async function onRequestPost(context) {
   if (!Number.isFinite(used)) return json({ ok: false, error: 'rate check failed' }, 503); // refused rather than unmetered
   if (used >= PUSH_LIMIT) return json({ ok: false, error: 'rate limited', limit: PUSH_LIMIT, minutes: PUSH_WINDOW_MIN }, 429);
 
+  // A store order's status goes only to the account that asked for it on that order's page (store_after_push), and only
+  // while that order is the one the address names (its number and key): the customer's own choice, for that order alone.
+  if (store) {
+    const ok = await storeAsked(SUPA, SERVICE, customerId, so[1], so[2]);
+    if (ok === null) return json({ ok: false, error: 'lookup failed' }, 502);
+    if (!ok) return json({ ok: true, sent: 0, reason: 'not asked' });
+  }
   // The rider's own choice first: a staff push is about their rides, and a rider who switched "My rides" off (and kept
   // Community on, so the browser stays subscribed) is not sent one - the hold _push_outbox_gate puts on the database's
   // own 'rides' pushes (20261114000200_push_consent). Service-role reads: neither table is readable with the anon key.
+  // A store order's notification is not about rides: the order's own switch above decides it.
   const prefsRes = await fetch(
     `${SUPA}/rest/v1/push_prefs?customer_id=eq.${encodeURIComponent(customerId)}&select=rides`,
     { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` } },
@@ -88,7 +103,7 @@ export async function onRequestPost(context) {
   if (!prefsRes.ok) return json({ ok: false, error: 'lookup failed' }, 502);
   const prefs = await prefsRes.json().catch(() => null);
   if (!Array.isArray(prefs)) return json({ ok: false, error: 'lookup failed' }, 502);
-  if (prefs[0] && prefs[0].rides === false) return json({ ok: true, sent: 0, reason: 'rides off' });
+  if (!store && prefs[0] && prefs[0].rides === false) return json({ ok: true, sent: 0, reason: 'rides off' });
   // A browser that failed three times is skipped, as the gate skips it.
   const subsRes = await fetch(
     `${SUPA}/rest/v1/push_subscriptions?customer_id=eq.${encodeURIComponent(customerId)}&fail_count=lt.3&select=*`,
@@ -98,7 +113,7 @@ export async function onRequestPost(context) {
   const subs = await subsRes.json();
   if (!Array.isArray(subs) || !subs.length) return json({ ok: true, sent: 0, reason: 'no subscriptions' });
 
-  const origin = SITE_ORIGIN;
+  const origin = store ? webOrigin(SUPA) : SITE_ORIGIN;
   // The record first: a send that is not on record is not sent.
   const logRes = await fetch(`${SUPA}/rest/v1/staff_actions?select=id`, {
     method: 'POST',
@@ -197,6 +212,22 @@ async function drain(request, env, PUB, PRIV, SERVICE) {
     done++;
   }
   return json({ ok: true, drained: done, sent });
+}
+
+// Did this customer ask for this order's status (the order named by its number and its track key)? null: not known.
+async function storeAsked(supa, service, customerId, no, key) {
+  const h = { headers: { apikey: service, Authorization: `Bearer ${service}` } };
+  try {
+    const o = await fetch(`${supa}/rest/v1/store_orders?no=eq.${encodeURIComponent(no)}&track_key=eq.${encodeURIComponent(key)}&select=id`, h);
+    if (!o.ok) return null;
+    const rows = await o.json().catch(() => null);
+    if (!Array.isArray(rows)) return null;
+    if (!rows[0] || !rows[0].id) return false;
+    const a = await fetch(`${supa}/rest/v1/store_after_push?order_id=eq.${encodeURIComponent(rows[0].id)}&customer_id=eq.${encodeURIComponent(customerId)}&select=order_id`, h);
+    if (!a.ok) return null;
+    const got = await a.json().catch(() => null);
+    return Array.isArray(got) ? got.length > 0 : null;
+  } catch { return null; }
 }
 
 // One payload for every browser (R18, 2026-11-13), in the Declarative Web Push shape: {"web_push": 8030, "notification":
