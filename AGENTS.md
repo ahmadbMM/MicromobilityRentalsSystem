@@ -1075,6 +1075,32 @@ season badge, an Eid ride and a Ramadan look for the tab". Migration `2026111821
   `ssnEid` in `HUB_T`. No Hijri dates anywhere (the owner declined them). A database without `hub_season`, a refusal or a
   failed read: no card, nothing said. The rider side has one light look, so the accent has one set of tokens (`--ssn-*`).
 
+## Club calendar (2026-11-18)
+
+The user picked, 2026-11-18: "Club calendar: the Calendar row would also offer every upcoming Saturday ride and featured
+session, not just the rider's own bookings. It uses the existing calendar address." Migration
+`20261118211000_club_calendar.sql`; spec `tests/club-calendar.spec.ts` (F27's own `tests/calendar-feed.spec.ts` still holds).
+
+- **Same address, one subscription.** The Calendar pop-up (`calendar-feed.js`) has a "Club sessions too" switch under Add to
+  my calendar (the Wallet's `.cw-sw` look, `#calf-club`, `_calfClub`; words `CALF_T.club`), kept on the server:
+  `calendar_feeds.club` (default off) written by `calendar_club_set(p_id, p_token, p_on)`; `calendar_link`'s `get`/`new`
+  answers now carry `club`, and the switch shows only when they do (an older database: no switch). A replaced address keeps
+  it. A refusal puts the switch back and says so; success says nothing.
+- **What `calendar_feed` adds** when the row has `club` on (rows marked `club: true`, after the bookings): sessions shown to
+  riders (open or full, or closed as Full, no waitlist: `_fbk`, not called off, not a draft, no timer) from today to 60 days
+  ahead that are (a) a Saturday Social Ride, only for an active member, or (b) featured as the app's `_featured(s)` reads
+  it (`_featOk` kinds: saturday, petromin, swim, defe5k, yoga, farm; `bike_slots._feat`, else `FEAT_KINDS`); never one the
+  rider holds (waiting or active: it is in the feed as their booking; a waitlisted one does come as a club event); gendered
+  ones to that gender only; members-only community sessions to members only; a private event (`required_tag_id`) to its
+  tag's holders only. At most 60. Keep the kind lists in step with `_rideKind`, `_evMatch` and `FEAT_KINDS`.
+- **Each club event** (`functions/api/ics.js`, `feedEvent` with `r.club`): UID `club-<session id>` (a session the rider then
+  books shows once, as the booking), named and timed as a booking is, `FEED_WORDS` only (no new word); DESCRIPTION opens
+  with the booking app's link to it (`/?ev=community&session=<id>`, the booking link first), URL is that link, no VALARM
+  (`ev.alarm === false`) and no "show your ticket" line. Never a breakfast spot (the function reads no breakfast column);
+  while `reveal_at` is ahead neither the place nor the meeting point (booking rows keep their meeting point, as before).
+- The key stays as secret as before (body of a POST, no log line); the limits are the feed's own (60 per 5 minutes per
+  caller, 60 an hour per key).
+
 ## New features build (2026-11-13/14)
 
 Sixteen items the owner marked "Build now" on 2026-11-13, released together. Specs (`tests/`, `.spec.ts`): first-five-rides, still-coming,

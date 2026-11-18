@@ -223,6 +223,7 @@ with expected(fname, want_definer, note) as (values
   ('staff_mark_pwd_changed', true,  'writes staff.must_change_pwd'),
   ('my_bookings',            true,  'reads the caller''s own rows past RLS'),
   ('calendar_link',          true,  'the rider''s calendar address: reads and writes calendar_feeds, which nobody can read; token-checked (20261114082700)'),
+  ('calendar_club_set',      true,  'the rider''s club sessions switch: writes calendar_feeds, which nobody can read; token-checked (20261118211000)'),
   ('calendar_feed',          true,  'what the calendar address serves: reads calendar_feeds, queue_entries and sessions by the address''s key (20261114082700)'),
   ('customer_fix_fields',    true,  'reads customers.fix_fields; the table is staff-only'),
   ('customer_fix_save',      true,  'writes the flagged customers columns, clears the flags, records the history'),

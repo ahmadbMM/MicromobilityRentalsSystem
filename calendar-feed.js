@@ -7,6 +7,11 @@
 // A file of its own, fetched only when the row is opened (_calfLoad in app.src.html), with its own words in all ten
 // languages. Hand-written, not generated; the build stamps its address (CALF_V). The build's handler, inline-style and
 // emoji checks do not read it: no on...= attribute, no style= attribute and no emoji may be written here.
+// Club sessions (2026-11-18, the user picked "Club calendar: the Calendar row would also offer every upcoming Saturday ride
+// and featured session, not just the rider's own bookings. It uses the existing calendar address."): a switch under Add to
+// my calendar, "Club sessions too", kept on the server (calendar_club_set, migration 20261118211000). The same address
+// then also lists the Saturday rides (to a member) and the featured dates of the next 60 days. It shows only when
+// calendar_link's answer says where the switch stands (a database before that migration answers without it).
 /* global S, sb, esc, _on */
 const CALF_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 const CALF_T = {
@@ -16,11 +21,12 @@ const CALF_T = {
   replace: ['Replace the address', 'استبدال العنوان', 'Remplacer l’adresse', 'Reemplazar la dirección', 'Substituir o endereço', 'پتہ تبدیل کریں', 'पता बदलें', 'Palitan ang address', 'ठेगाना बदल्नुहोस्', 'ঠিকানা বদলান'],
   askTitle: ['Replace the address?', 'استبدال العنوان؟', 'Remplacer l’adresse ?', '¿Reemplazar la dirección?', 'Substituir o endereço?', 'پتہ تبدیل کریں؟', 'पता बदलें?', 'Palitan ang address?', 'ठेगाना बदल्ने?', 'ঠিকানা বদলাবেন?'],
   askBody: ['The old address stops working. A calendar that uses it will no longer update.', 'سيتوقف العنوان القديم عن العمل، ولن يتحدّث أي تقويم يستخدمه بعد الآن.', 'L’ancienne adresse cessera de fonctionner. Un calendrier qui l’utilise ne se mettra plus à jour.', 'La dirección anterior dejará de funcionar. Un calendario que la use ya no se actualizará.', 'O endereço antigo deixa de funcionar. Um calendário que o utilize deixará de ser atualizado.', 'پرانا پتہ کام کرنا بند کر دے گا۔ جو کیلنڈر اسے استعمال کرتا ہے وہ مزید اپ ڈیٹ نہیں ہوگا۔', 'पुराना पता काम करना बंद कर देगा। जो कैलेंडर उसका इस्तेमाल करता है, वह आगे अपडेट नहीं होगा।', 'Hindi na gagana ang lumang address. Hindi na mag-a-update ang kalendaryong gumagamit nito.', 'पुरानो ठेगानाले काम गर्न छोड्नेछ। त्यो प्रयोग गर्ने पात्रो अब अपडेट हुने छैन।', 'পুরোনো ঠিকানা আর কাজ করবে না। যে ক্যালেন্ডার সেটি ব্যবহার করে, তা আর আপডেট হবে না।'],
+  club: ['Club sessions too', 'جلسات النادي أيضًا', 'Les séances du club aussi', 'También las sesiones del club', 'Também as sessões do clube', 'کلب کے سیشن بھی', 'क्लब के सत्र भी', 'Pati ang mga session ng club', 'क्लबका सत्रहरू पनि', 'ক্লাবের সেশনও'],
   err: ['We could not do that. Please try again.', 'تعذّر ذلك. يرجى المحاولة مرة أخرى.', 'Action impossible. Veuillez réessayer.', 'No se pudo hacer. Inténtalo de nuevo.', 'Não foi possível. Tente novamente.', 'یہ نہیں ہو سکا۔ دوبارہ کوشش کریں۔', 'यह नहीं हो सका। फिर कोशिश करें।', 'Hindi ito nagawa. Pakisubukang muli.', 'यो हुन सकेन। फेरि प्रयास गर्नुहोस्।', 'এটি করা যায়নি। আবার চেষ্টা করুন।'],
 };
 const CALF_KEY = /^[0-9a-f]{64}$/;
 // The dispatcher's markers (app.src.html _EL, _EV), written here so this file leans on nothing but _on itself.
-const _CALF_EL = { '@': 'this' }, _CALF_EV = { '@': 'event' };
+const _CALF_EL = { '@': 'this' }, _CALF_EV = { '@': 'event' }, _CALF_ON = { '@': 'checked' };
 function _calfT(k) {
   const row = CALF_T[k] || [''], i = CALF_LANGS.indexOf(S.lang);
   return row[i < 0 ? 0 : i] || row[0];
@@ -33,18 +39,23 @@ function _calfIc(k, px) { const d = _calfDep(); return d.ic ? d.ic(k, px) : ''; 
 function _calfHost() { return document.getElementById('acc-pwd-modal'); }
 // The address without its scheme: this site's /api/ics with the rider's key.
 function _calfAddr(key) { return location.host + '/api/ics?k=' + encodeURIComponent(key); }
-// The rider's key from the database: 'get' answers it (made on the first ask), 'new' replaces it. '' when it did not come.
+// The rider's key from the database: 'get' answers it (made on the first ask), 'new' replaces it. key '' when it did not
+// come; club true/false where the switch stands, null from a database without it.
 function _calfAsk(op) {
-  const d = _calfDep(), c = d.cust ? d.cust() : null;
-  if (!c || !c.id || !c.session_token || !sb) return Promise.resolve('');
+  const d = _calfDep(), c = d.cust ? d.cust() : null, none = { key: '', club: null };
+  if (!c || !c.id || !c.session_token || !sb) return Promise.resolve(none);
   return Promise.resolve(sb.rpc('calendar_link', { p_id: c.id, p_token: c.session_token, p_lang: S.lang, p_op: op }))
-    .then((r) => { const k = r && !r.error && r.data && r.data.ok === true ? String(r.data.key || '') : ''; return CALF_KEY.test(k) ? k : ''; }, () => '');
+    .then((r) => {
+      const x = r && !r.error && r.data && r.data.ok === true ? r.data : null, k = x ? String(x.key || '') : '';
+      return CALF_KEY.test(k) ? { key: k, club: typeof x.club === 'boolean' ? x.club : null } : none;
+    }, () => none);
 }
 function _calfPaint() {
   const P = S._calfP, m = _calfHost(); if (!P || !m) return;
   const w = _calfW();
   const body = P.key
     ? `<a class="pg-btn" id="calf-add" href="${esc('webcal://' + _calfAddr(P.key))}">${_calfIc('cal', 18)}<span>${esc(_calfT('add'))}</span></a>
+      ${P.club === null ? '' : `<label class="cw-sw calf-club"><input type="checkbox" role="switch" id="calf-club"${P.club ? ' checked' : ''}${P.clubBusy ? ' disabled' : ''} data-on-change="${_on('_calfClub', _CALF_ON)}"><span class="cw-sw-box" aria-hidden="true"></span><span class="cw-sw-txt"><b>${esc(_calfT('club'))}</b></span></label>`}
       <div class="calf-acts">
         <button type="button" class="btn-secondary" id="calf-copy" data-on-click="${_on('_calfCopy')}">${esc(_calfT('copy'))}</button>
         <button type="button" class="btn-secondary" id="calf-new" data-on-click="${_on('_calfNew')}">${esc(_calfT('replace'))}</button>
@@ -67,11 +78,11 @@ function _calfPaint() {
 }
 async function _calfOpen() {
   if (!_calfHost()) return;
-  const P = { key: '', err: false, busy: false }; S._calfP = P;
+  const P = { key: '', club: null, err: false, busy: false }; S._calfP = P;
   _calfPaint();
-  const key = await _calfAsk('get');
+  const { key, club } = await _calfAsk('get');
   if (S._calfP !== P) return; // closed meanwhile, or opened again
-  P.key = key; P.err = !key;
+  P.key = key; P.club = club; P.err = !key;
   _calfPaint();
   try { const b = document.getElementById(key ? 'calf-add' : 'calf-retry'); if (b) b.focus({ preventScroll: true }); } catch (_) {}
 }
@@ -106,12 +117,28 @@ async function _calfNew() {
   if (!yes || S._calfP !== P) return;
   const lock = (on) => { P.busy = on; ['calf-copy', 'calf-new'].forEach((id) => { const b = document.getElementById(id); if (b) b.disabled = on; }); };
   lock(true); _calfErr(''); _calfNote('');
-  const key = await _calfAsk('new');
+  const { key } = await _calfAsk('new');
   if (S._calfP !== P) return;
   lock(false);
   if (!key) { _calfErr(_calfT('err')); return; }
   P.key = key;
   const a = document.getElementById('calf-add'); if (a) a.setAttribute('href', 'webcal://' + _calfAddr(key));
   try { const b = document.getElementById('calf-new'); if (b) b.focus({ preventScroll: true }); } catch (_) {}
+}
+// The switch: written at once, the box already showing the rider's choice; a refusal puts it back and says so. Nothing
+// is said when it worked (the owner's rule: no confirmation after an action).
+async function _calfClub(on) {
+  const P = S._calfP, d = _calfDep(), c = d.cust ? d.cust() : null;
+  if (!P || !P.key || P.club === null || P.clubBusy || !c || !c.session_token || !sb) return;
+  const want = on === true, box = () => document.getElementById('calf-club');
+  P.clubBusy = true; _calfErr('');
+  { const b = box(); if (b) b.disabled = true; }
+  let r; try { r = await sb.rpc('calendar_club_set', { p_id: c.id, p_token: c.session_token, p_on: want }); } catch (e) { r = { error: e }; }
+  if (S._calfP !== P) return;
+  P.clubBusy = false;
+  const ok = !!(r && !r.error && r.data && r.data.ok === true);
+  if (ok) P.club = r.data.club === true;
+  const b = box(); if (b) { b.disabled = false; b.checked = P.club === true; }
+  if (!ok) _calfErr(_calfT('err'));
 }
 window._calfOpen = _calfOpen;

@@ -7340,6 +7340,8 @@ body .vendor-dlg textarea.vendor-pw-msg{width:100%;min-height:170px;box-sizing:b
 #acc-pwd-modal .calf-acts .btn-secondary{width:100%;justify-content:center;border-radius:999px;}
 #acc-pwd-modal .calf-note:empty{display:none;}
 #acc-pwd-modal .calf-note.calf-addr{overflow-wrap:anywhere;user-select:all;-webkit-user-select:all;}
+/* Club sessions too (2026-11-18): the Wallet's own switch (.cw-sw), under Add to my calendar */
+#acc-pwd-modal .calf-club{position:relative;margin-top:12px;}
 
 /* ── Filter button and folded search, 2026-09-22 ──
    A view's filter dropdowns open under its Filter button (_fPanel), each with its name above it; the

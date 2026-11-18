@@ -80,7 +80,8 @@ function icsEvent(ev, seq, now) {
     ...(ev.lo ? [`LOCATION:${esc(ev.lo)}`] : []),
     `DESCRIPTION:${esc(ev.de)}`,
     `URL:${ev.url}`,
-    'BEGIN:VALARM', 'TRIGGER:-PT2H', 'ACTION:DISPLAY', `DESCRIPTION:${esc(ev.al || ev.ti)}`, 'END:VALARM',
+    // a club session the rider has not booked rings no alarm (2026-11-18): only their own bookings do
+    ...(ev.alarm === false ? [] : ['BEGIN:VALARM', 'TRIGGER:-PT2H', 'ACTION:DISPLAY', `DESCRIPTION:${esc(ev.al || ev.ti)}`, 'END:VALARM']),
     'END:VEVENT'];
 }
 
@@ -106,6 +107,14 @@ function text(msg, status) {
 //   the language the rider had when they last opened the pop-up. What a session is called, when it starts and ends
 //   and where it meets follow the page (app.src.html: _rideKind, KIND_TRAITS, downloadBookingICS, _venueName, fmt12h):
 //   keep them in step. No price, no name, nobody else's booking.
+// - Club sessions (2026-11-18, the user picked "Club calendar: the Calendar row would also offer every upcoming Saturday
+//   ride and featured session, not just the rider's own bookings. It uses the existing calendar address."): when the
+//   rider turned on "Club sessions too" in the pop-up, calendar_feed (20261118211000) also sends the Saturday rides (to
+//   a member) and the featured dates they may see in the next 60 days, less what they hold, each marked club. Each is
+//   its own event: UID club-<session> (a session they then book shows once, as the booking), named and timed as a
+//   booking is, its place as the page names it, but never a breakfast spot, and no place or meeting point at all while
+//   the spot is not told yet; the description opens with the booking app's link to that session (the booking link
+//   first), the URL is that link, and it rings no alarm. No "your ticket" line: it is not booked.
 const FEED_KEY = /^[0-9a-f]{64}$/;
 const FEED_MAX = 60, FEED_WINDOW_MS = 5 * 60000;
 const _feedBy = new Map(); // caller -> { at, n }
@@ -243,6 +252,8 @@ function feedEvent(r, w, lang, origin) {
   if (!r || typeof r !== 'object') return null;
   const day = String(r.date || '').slice(0, 10), id = String(r.id || '').replace(/[^\w-]/g, '').slice(0, 64);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !id) return null;
+  // A club session (20261118211000): its id is the session's, and it opens the booking app on that date.
+  const club = r.club === true, page = club ? `${origin}/?ev=community&session=${encodeURIComponent(id)}` : '';
   const kind = feedKind(r), gathers = FEED_GATHERS.has(kind), bike = !FEED_NO_BIKE.has(kind);
   // The times as the booking's own file writes them (downloadBookingICS): a session that gathers stores "gathering,
   // then start", so it begins at the gathering and ends two hours after the start; every other stores "start, end".
@@ -257,19 +268,19 @@ function feedEvent(r, w, lang, origin) {
   // A ride whose spot is not told yet comes without its location (calendar_feed blanks it): it names none.
   const comm = r.ek === 'community' && r.rk !== 'snd96';
   const meetsAt = (comm && r.appr !== false) || kind === 'runher' || kind === 'defe5k' || kind === 'arena';
-  const link = feedUrl(r.meet), meet = (meetsAt || kind === 'yoga' || kind === 'farm') && link ? link : '';
+  const link = club && r.held ? '' : feedUrl(r.meet), meet = (meetsAt || kind === 'yoga' || kind === 'farm') && link ? link : '';
   let lo = meet;
   if (!lo && !r.held) {
     const loc = feedText(r.loc) || (kind === 'runher' ? 'JYC' : kind === 'vlap' || kind === 'defe5k' || kind === 'blood' ? 'JCC' : '');
     lo = Object.prototype.hasOwnProperty.call(FEED_VENUE, loc) ? w(FEED_VENUE[loc]) : loc || w('jcc');
   }
-  const de = [];
+  const de = club ? [page] : [];
   if (gathers && m) de.push(`${w(kind === 'vlap' ? 'doors' : kind === 'farm' ? 'arrive' : 'gather')} ${feedTime(m[1], m[2], lang)} · ${w(kind === 'vlap' ? 'heat' : kind === 'farm' ? 'dinner' : 'start')} ${feedTime(m[3], m[4], lang)}`);
-  de.push(w(gathers ? (bike ? 'dRide' : 'dMeet') : bike ? 'dBike' : 'dVisit'));
+  if (!club) de.push(w(gathers ? (bike ? 'dRide' : 'dMeet') : bike ? 'dBike' : 'dVisit'));
   if (meet) de.push(`${w('meet')}: ${meet}`);
   const endMs = base + e * 6e4;
   return {
-    uid: `booking-${id}@micromobility.sa`, st: icsStamp(base + s * 6e4), en: icsStamp(endMs), endMs,
-    ti: name, lo, de: de.join('\n'), al: w('alarm').replace('{0}', () => name), url: `${origin}/my-bookings`,
+    uid: `${club ? 'club' : 'booking'}-${id}@micromobility.sa`, st: icsStamp(base + s * 6e4), en: icsStamp(endMs), endMs,
+    ti: name, lo, de: de.join('\n'), al: w('alarm').replace('{0}', () => name), url: page || `${origin}/my-bookings`, alarm: !club,
   };
 }
