@@ -212,6 +212,8 @@ test.describe('@staff:sessions members book first', () => {
     expect(d.status).toBe('closed');
     expect('public_at' in d).toBe(false);
     expect(slotsOf(d)._mfh).toBe(6);
+    // the draft's save closes the form when it lands: wait for it, or under load it closes the clone's form below
+    await page.waitForFunction(`!_busyKeys.has('addSession')&&!S.showAddSession`);
     // a members-only kind offers no switch; a clone of a session that has it starts without
     await page.evaluate(`S.showAddSession=true;S.newSessEvent='community';renderSessions()`);
     await expect(page.locator('#ns-mf')).toHaveCount(0);
