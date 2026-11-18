@@ -173,3 +173,21 @@ test('@staff:sessions a session called off shows Cancelled, and offers no second
   await expect(page.locator('#tab-sessions')).not.toContainText('Cancel session');
   expect(await sessTools(page)).not.toContain('Cancel session');
 });
+
+test('@staff:sessions the approval keypad opens above the cancel dialog, and backing out of the dialog refuses it', async ({ page }) => {
+  await boot(page, [e('a', 'waiting', { paid: true, pay_method: 'card' })]);
+  const sent: string[] = [];
+  page.on('request', (r) => { if (r.url().includes('/rpc/staff_cancel_session')) sent.push(r.url()); });
+  await page.evaluate(`S._opPins=[{name:'Spec Staff',has_pin:true}];S._opPinsAt=Date.now()`);
+  await page.evaluate(`showCancelNight('${FUT}')`);
+  await page.locator('#cancel-night-modal').getByRole('button', { name: /Cancel 1 booking/ }).click();
+  const gate = page.locator('#op-gate-modal .op-gate');
+  await expect(gate).toBeVisible();
+  // on top: the middle of the screen is the keypad's, not the cancel dialog's scrim
+  expect(await page.evaluate(`!!document.elementFromPoint(innerWidth/2,innerHeight/2).closest('#op-gate-modal')`)).toBe(true);
+  await page.evaluate('closeCancelNight()');
+  await expect(gate).toBeHidden();
+  await page.waitForTimeout(300);
+  expect(sent).toEqual([]);
+  expect(await page.evaluate('!!S._cnBusy')).toBe(false);
+});

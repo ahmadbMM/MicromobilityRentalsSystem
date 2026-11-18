@@ -76,3 +76,54 @@ test.describe('@staff:approvals', () => {
     await expect.poll(() => n).toBe(2);
   });
 });
+
+test.describe('@staff:approvals bug hunt 2026-11-18', () => {
+  test("a manager's approval covers its own action only: another kind or more money asks again, and its call spends it", async ({ page }) => {
+    await boot(page, { mgr_over: 100, mgr_for: { refund: true, house: true }, approvers: ['Huda'] },
+      { 'rpc:staff_pin_approve': { ok: true, required: true, token: 'mgr-tok' }, 'rpc:staff_set_house': { ok: true } });
+    const gate = page.locator('#op-gate-modal .op-gate');
+    await page.evaluate(`window.__a=undefined;_pinApprove('House',{kind:'house',amount:150}).then(v=>{window.__a=v;});0`);
+    await expect(gate).toContainText('Manager approval');
+    await page.evaluate(`_opgKey('1');_opgKey('2');_opgKey('3');_opgKey('4')`);
+    await expect.poll(() => page.evaluate('window.__a')).toBe(true);
+    // the same action's own call, seconds later: no keypad
+    expect(await page.evaluate(`_pinApprove('House',{kind:'house',amount:150})`)).toBe(true);
+    // a refund of 2,000 in the same seconds is not what the manager approved
+    await page.evaluate(`window.__b=undefined;_pinApprove('Refund',{kind:'refund',amount:2000}).then(v=>{window.__b=v;});0`);
+    await expect(gate).toContainText('Manager approval: Refund');
+    await page.evaluate(`_opgBack()`);
+    await expect.poll(() => page.evaluate('window.__b')).toBe(false);
+    // nor a dearer house
+    await page.evaluate(`window.__c=undefined;_pinApprove('House',{kind:'house',amount:400}).then(v=>{window.__c=v;});0`);
+    await expect(gate).toContainText('Manager approval');
+    await page.evaluate(`_opgBack()`);
+    await expect.poll(() => page.evaluate('window.__c')).toBe(false);
+    // the approved house's call goes under the manager, and after it the approval is spent
+    const calls = rpcs(page);
+    await page.evaluate('_pinOk.at=Date.now()'); // its own call within the seconds it is held for, however slow this machine is
+    expect(await page.evaluate(`_gatedRpc('House',a=>sb.rpc('staff_set_house',{p_booking_id:'q1',p_on:true,...a}),{kind:'house',amount:150}).then(r=>!!r&&!r.error)`)).toBe(true);
+    expect(calls.find((c) => c.name === 'staff_set_house')!.body).toMatchObject({ p_op: 'Huda', p_approval: 'mgr-tok' });
+    await page.evaluate(`window.__d=undefined;_pinApprove('House',{kind:'house',amount:150}).then(v=>{window.__d=v;});0`);
+    await expect(gate).toContainText('Manager approval');
+    await page.evaluate(`_opgBack()`);
+    await expect.poll(() => page.evaluate('window.__d')).toBe(false);
+  });
+
+  test('PIN_REQUIRED reads the operator list again: a PIN set on another device brings the keypad', async ({ page }) => {
+    // this device's list (read seconds ago) says no PIN; the server's says one was set since
+    await boot(page, {}, { 'rpc:staff_operator_list': [{ name: 'Spec Staff', has_pin: true }], 'rpc:staff_pin_approve': { ok: true, required: true, token: 'op-tok' } });
+    let n = 0;
+    const sent: Record<string, unknown>[] = [];
+    await page.route(/\/rest\/v1\/rpc\/staff_set_price/, (r) => {
+      n++; sent.push(r.request().postDataJSON());
+      if (n === 1) return r.fulfill({ status: 403, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: '42501', message: 'PIN_REQUIRED', details: null, hint: null }) });
+      return r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ ok: true }) });
+    });
+    await page.evaluate(`_gatedRpc('Price',a=>sb.rpc('staff_set_price',{p_booking_id:'q1',p_price:1,...a}));0`);
+    const gate = page.locator('#op-gate-modal .op-gate');
+    await expect(gate).toBeVisible();
+    await page.evaluate(`_opgKey('1');_opgKey('2');_opgKey('3');_opgKey('4')`);
+    await expect.poll(() => n).toBe(2);
+    expect(sent[1]).toMatchObject({ p_op: 'Spec Staff', p_approval: 'op-tok' });
+  });
+});

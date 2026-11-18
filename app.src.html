@@ -42282,7 +42282,9 @@ function _vtStaffImg(f){return new Promise((ok,no)=>{
     let q=.82,u=cv.toDataURL('image/jpeg',q);while(u.length>2500000&&q>.4){q-=.12;u=cv.toDataURL('image/jpeg',q);}ok(u);};im.src=rd.result;};
   rd.readAsDataURL(f);});}
 async function _vtStaffPick(id,el){
-  const e=_qGet(id)||getQueue().find(x=>x.id===id),f=el&&el.files&&el.files[0];if(!e||!f||S._vtRcBusy)return;
+  const e=_qGet(id)||getQueue().find(x=>x.id===id),f=el&&el.files&&el.files[0];
+  if(f)try{el.value='';}catch(_){} // emptied at once: the same picture picked again after a failed upload is sent again (bug hunt 2026-11-18)
+  if(!e||!f||S._vtRcBusy)return;
   let img='';try{img=await _vtStaffImg(f);}catch(_){toast(t('vtRcptBad'),'error');return;}
   S._vtRcBusy=true;
   let r=null;try{r=await sb.rpc('staff_vl_receipt_put',{p_entry_id:id,p_img:img});}catch(x){r={error:x};}
@@ -42524,7 +42526,9 @@ function renderStaffQueue(_resultsOnly){
     if(S.sfSession==='all')return null;const cur=_sessDisp(S.sfSession);if(!cur)return null;
     const m=String(cur.session_date||cur.id).match(/^(\d{4})-(\d{2})-(\d{2})/);if(!m)return null;
     const pd=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]-7)).toISOString().slice(0,10);
-    const prev=allSessions().find(x=>String(x.session_date||x.id).slice(0,10)===pd&&_isCommunity(x)===_isCommunity(cur))||null;
+    // never a deleted one, the same kind of ride, and of several the one that starts at the same time (bug hunt 2026-11-18)
+    const cands=allSessions().filter(x=>x.status!=='deleted'&&x.id!==cur.id&&String(x.session_date||x.id).slice(0,10)===pd&&_isCommunity(x)===_isCommunity(cur)&&_rideKind(x)===_rideKind(cur));
+    const prev=cands.find(x=>_soStart(x)===_soStart(cur))||cands[0]||null;
     if(!prev)return null;
     // Last week's riders counted as this week's are (2026-10-05): without the Petromin page's riders
     // and, for Front Desk, the Saturday side - a Petromin night compared its roster with last week's
@@ -43624,6 +43628,13 @@ async function _cnHeldLoad(sid){
   const held=S._cnHeld||(S._cnHeld={}),k=e=>e.id+'|'+(e.cancelledAt||'');
   const want=(_qBySession().get(sid)||[]).filter(e=>e.status==='cancelled'&&e.paid&&e.customerId&&!['wallet','online','transfer'].includes(e.pay_method||'')&&!(k(e) in held));
   if(!want.length)return false;
+  // The server's own sum per booking first (staff_cancel_held): staff_wallet below holds an account's newest 200 moves only,
+  // so a wallet part paid before them read as nothing and the whole price as the desk's (bug hunt 2026-11-18).
+  if(!S._cnHeldNoDb){
+    let r;try{r=await sb.rpc('staff_cancel_held',{p_ids:want.map(e=>e.id)});}catch(e){r={error:e};}
+    if(r&&!r.error&&r.data&&typeof r.data==='object'&&!Array.isArray(r.data)){want.forEach(e=>{held[k(e)]=Math.max(0,Number(r.data[e.id])||0);});return true;}
+    if(r&&r.error&&_rpcAbsent(r.error))S._cnHeldNoDb=true;
+  }
   const byCust=new Map();want.forEach(e=>{const a=byCust.get(e.customerId)||[];a.push(e);byCust.set(e.customerId,a);});
   let got=false;
   await Promise.all([...byCust].map(async([cid,es])=>{
@@ -43727,7 +43738,10 @@ function showCancelNight(sid){
 // The links carry the message as it stands NOW: they used to be written once when the modal
 // opened, so a staffer who added the new date to the text still sent every rider the default.
 function _cnSyncLinks(){const q=encodeURIComponent(S._cnMsg||'');document.querySelectorAll('#cancel-night-modal a[data-wa]').forEach(a=>{a.href='https://wa.me/'+a.getAttribute('data-wa')+'?text='+q;});}
-function closeCancelNight(){const m=document.getElementById('cancel-night-modal');if(m){m.style.display='none';m.innerHTML='';}}
+function closeCancelNight(){
+  if(S._cnBusy&&S._opg&&(S._opg.approve||S._opg.after))_opGateDone(); // backed out while its keypad waits: refused, so a PIN typed after cannot still cancel the night (bug hunt 2026-11-18)
+  const m=document.getElementById('cancel-night-modal');if(m){m.style.display='none';m.innerHTML='';}
+}
 async function _cnCopyNumbers(){
   const nums=[...new Set(_cnLiveRows(S._cnSid).map(e=>e.phone).filter(Boolean))].join('\n');
   try{await navigator.clipboard.writeText(nums);toast(t('cnCopiedToast'));}
@@ -44073,7 +44087,9 @@ async function closeOutSession(sid){
       // done and the no-shows, one answer per rider. A database without it: the writes as before, the returns two or
       // three at a time. Either way every rider it could not settle is said, by name, not only the first.
       const ops=new Map(back.map(x=>[x.e.id,_opId()]));let co=null,nsErr=false;const fails=[];
-      if(!S._bwOff&&!_isOffline()){
+      // nothing to send (every rider still out on unmarked bikes): no call, whose empty answer read as a database without the
+      // function and turned the desk's bulk writes off for the rest of the tab (bug hunt 2026-11-18)
+      if(!S._bwOff&&!_isOffline()&&(back.length||toFin.length||toNs.length)){
         let r;try{r=await _rpcOp('staff_close_out',{p_session_id:sid,p_returns:back.map(x=>({id:x.e.id,cond:x.cond,notes:x.notes,op:ops.get(x.e.id),mins:_retMins(x.e),missing:getAssignedBikeIds(x.e).filter(b=>missing.includes(b))})),p_done:toFin.map(e=>e.id),p_noshow:toNs.map(e=>e.id)});}catch(e){r={error:e};}
         if(r&&(r.error?_rpcAbsent(r.error):!(Array.isArray(r.data)&&r.data.length)))S._bwOff=true; // absent, or not one row per rider: as before
         else if(r&&r.error){_writeErr(r,'close out');await loadDataLight();renderStaffQueue();return;} // nothing settled, or the answer lost: the night as the server has it
@@ -44844,11 +44860,12 @@ function _logEach(es,lab,k){
   if(S.fullLog.length>2000)S.fullLog=S.fullLog.slice(-2000);
   _saveFullLog();
   // a database before a column takes the lines without it, as logAction does: client_id first, then kind/entity
-  const send=()=>sb.from('staff_actions').insert(rows.map(x=>({...x.r,...(S._saCols!==false?x.m:{}),...(S._saCid===false?{}:{client_id:x.cid})})));
-  const again=r=>{const er=r&&r.error;if(!er||!/42703|PGRST204|column/i.test(String(er.code||'')+' '+String(er.message||'')))return;
+  const body=()=>rows.map(x=>({...x.r,...(S._saCols!==false?x.m:{}),...(S._saCid===false?{}:{client_id:x.cid})}));
+  const send=()=>sb.from('staff_actions').insert(body());
+  const again=r=>{const er=r&&r.error;if(!er){_saFlush();return;}if(!/42703|PGRST204|column/i.test(String(er.code||'')+' '+String(er.message||''))){_saKeep(er,body());return;} // kept and sent again, as logAction's
     if(S._saCid!==false&&/client_id/.test(er.message||''))S._saCid=false;else if(S._saCols!==false)S._saCols=false;else return;
-    return send().then(again,()=>{});};
-  try{if(sb)send().then(again,()=>{});}catch(_){}
+    return send().then(again,()=>_saKeep(null,body()));};
+  try{if(sb)send().then(again,()=>_saKeep(null,body()));}catch(_){}
   if(S.staffTab==='history'&&S.histView==='log')renderLogs();
 }
 async function bulkSfCheckin(){
@@ -45374,7 +45391,7 @@ async function _opgKey(d){
   if(approving&&((r&&r.error&&_rpcAbsent(r.error))||(r&&!r.error&&!_shaped(r)))){try{r=await sb.rpc('staff_check_operator_pin',{p_name:name,p_pin:pin});}catch(e){r={error:e};}} // a database before the tokens (or an answer that is not one): the check alone
   G.busy=false;if(S._opg!==G||G.pick!==name)return;
   const v=r&&!r.error?r.data:null;
-  if(v&&(v.ok||v.reason==='no_pin')){if(G.approve){const ap=G.approve;G.approve=null;_pinOk={name,at:Date.now(),token:(v&&v.token)||null,mgr:!!ap.mgr};if(ap.mgr)logAction(t('mgrApprovedLog').replace('{0}',name).replace('{1}',ap.what));_opGateDone();ap.res(true);return;}if(G.after)_pinOk={name,at:Date.now(),token:(v&&v.token)||null};setOpName(name);_opGateDone();return;} // no_pin: cleared while the keypad was open
+  if(v&&(v.ok||v.reason==='no_pin')){if(G.approve){const ap=G.approve;G.approve=null;_pinOk={name,at:Date.now(),token:(v&&v.token)||null,mgr:!!ap.mgr,kind:ap.kind||null,amount:Number(ap.amount)||0};if(ap.mgr)logAction(t('mgrApprovedLog').replace('{0}',name).replace('{1}',ap.what));_opGateDone();ap.res(true);return;}if(G.after)_pinOk={name,at:Date.now(),token:(v&&v.token)||null};setOpName(name);_opGateDone();return;} // no_pin: cleared while the keypad was open
   G.digits='';G.shake=true;
   G.msg=!v?t('errConnection'):v.reason==='locked'?t('opPinLocked').replace('{0}',v.seconds||60):v.left!=null?t('opPinWrong').replace('{0}',v.left):t('opPinWrongPlain'); // an answer without a count no longer reads 'undefined tries left'
   _opGateRender();
@@ -45423,13 +45440,18 @@ function _pinArgs(opt){
 }
 async function _gatedRpc(what,fn,opt){
   if(!await _pinApprove(what,opt))return null;
+  let mgr=_mgrNeeded(opt);
   let r;try{r=await fn(_pinArgs(opt));}catch(e){r={error:e};}
   if(r&&r.error&&/PIN_REQUIRED|MANAGER_REQUIRED/.test(String(r.error.message||''))){
-    _pinOk={name:'',at:0,token:null};
+    // the operator list read again: a PIN set on another device within the minute it is kept showed no keypad, and the
+    // second try was refused as the first (bug hunt 2026-11-18)
+    _pinOk={name:'',at:0,token:null};S._opPinsAt=0;
     const o2=/MANAGER_REQUIRED/.test(String(r.error.message||''))?{...(opt||{}),force:true}:opt;
     if(!await _pinApprove(what,o2))return null;
+    mgr=mgr||_mgrNeeded(o2);
     try{r=await fn(_pinArgs(o2));}catch(e){r={error:e};}
   }
+  if(mgr&&_pinOk.mgr)_pinOk={name:'',at:0,token:null}; // a manager's approval is spent on the action it was given for (bug hunt 2026-11-18)
   if(r&&r.error)r.error.said=_rpcSay(r.error);
   return r;
 }
@@ -45474,14 +45496,15 @@ async function _pinApprove(what,opt){
   }
   const me=list?list.find(o=>o.name===name):null;
   if(_mgrNeeded(opt)){
-    // a manager's approval covers the one action it was given for (its calls follow within seconds)
-    if(_pinOk.mgr&&_pinOk.token&&Date.now()-_pinOk.at<20000&&!(opt&&opt.force))return true;
+    // a manager's approval covers the one action it was given for (its calls follow within seconds): the same kind, no more
+    // money; another refund or house asks again (bug hunt 2026-11-18)
+    if(_pinOk.mgr&&_pinOk.token&&Date.now()-_pinOk.at<20000&&!(opt&&opt.force)&&_pinOk.kind===opt.kind&&(Number(opt.amount)||0)<=(Number(_pinOk.amount)||0))return true;
     const apv=_mgrList(list);
     if(!apv.length){toast(t('mgrNoneMsg'),'error');return false;}
     return new Promise(res=>{
       const m=document.getElementById('op-gate-modal');if(!m){res(false);return;}
       if(S._opg&&S._opg.approve)_opGateDone();
-      S._opg={switching:true,approve:{what:String(what||''),res,mgr:true},list:apv,missing:false,pick:apv.length===1?apv[0].name:null,digits:'',msg:'',busy:false,shake:false};
+      S._opg={switching:true,approve:{what:String(what||''),res,mgr:true,kind:opt.kind,amount:Number(opt.amount)||0},list:apv,missing:false,pick:apv.length===1?apv[0].name:null,digits:'',msg:'',busy:false,shake:false};
       m.style.display='flex';_opGateRender();
     });
   }
@@ -45978,6 +46001,7 @@ function _svPick(sec,id){
   // session reopened last week's closed ride; only a ride that is still today or ahead is restored.
   let st=v&&v.state;
   if(sec==='queue'&&st&&typeof st==='object'&&st.sfSession&&st.sfSession!=='all'&&!allSessions().some(x=>x.id===st.sfSession&&!_sessPastDay(x))){st={...st};delete st.sfSession;}
+  if(v&&sec==='queue'&&st&&st.sfSession&&st.sfSession!==S.sfSession){S.sfSelected=[];_sfDayGuard(st.sfSession);} // another ride: its ticks go, as setSfSession drops them (bug hunt 2026-11-18)
   if(v){_n6pSvZero(sec);_svSet(sec,st);} // every key the view does not name goes back to its default first (staff review 2026-11-06, PP01)
   const d=SV_SECS[sec];if(d)d.r();
 }
@@ -46489,19 +46513,33 @@ async function _tplEdSave(){
     // Its own read, and one that fails stops the save (2026-10-05): _tplLoad keeps this device's
     // copy when its read fails, and that copy written over the server wiped the messages other
     // admins had saved since.
-    const cur=await sb.from('site_content').select('value').eq('key',TPL_KEY).maybeSingle();
-    if(_writeErr(cur,'message template',()=>_tplEdSave())){if(b)b.disabled=false;return;}
-    const sv=cur.data&&cur.data.value;
-    const all=(sv&&typeof sv==='object'&&!Array.isArray(sv))?{...sv}:{};
-    // The languages this editor opened are written; the others keep what the server holds.
-    const mine=all[E.id]&&typeof all[E.id]==='object'&&!Array.isArray(all[E.id])?{...all[E.id]}:{};
-    S._tpl={...all};
-    // Only a language changed in this editor is written (bug hunt 2026-10-28): the untouched one held this
-    // device's copy, stale or (read failed) the built-in text, and wiped another admin's newer text.
-    const _nrm=x=>String(x||'').replace(/\r/g,'').trim();
-    Object.keys(E.text).forEach(g=>{const v=_nrm(E.text[g]);if(E.orig&&_own(E.orig,g)&&v===_nrm(E.orig[g]))return;if(v&&v!==_tplDefault(E.id,g).trim())mine[g]=v;else delete mine[g];});
-    if(Object.keys(mine).length)all[E.id]=mine;else delete all[E.id];
-    if(await _wr(sb.from('site_content').upsert({key:TPL_KEY,value:all,updated_by:_opName()||null}),'message template')){if(b)b.disabled=false;return;}
+    // Written only over the row as it was read (its updated_at), else read and merged again (bug hunt 2026-11-18): two admins
+    // whose reads both came before either write lost the first one's save to the second's whole object.
+    let all=null,stamp;
+    for(let n=0;all===null;n++){
+      const cur=await sb.from('site_content').select('value,updated_at').eq('key',TPL_KEY).maybeSingle();
+      if(_writeErr(cur,'message template',()=>_tplEdSave())){if(b)b.disabled=false;return;}
+      // read again with the stamp the last try was written against: no other save came between, the write itself was refused
+      if(n&&cur.data&&cur.data.updated_at===stamp){toast(t('errWritePerm'),'error');if(b)b.disabled=false;return;}
+      stamp=cur.data?cur.data.updated_at:null;
+      const sv=cur.data&&cur.data.value;
+      const nx=(sv&&typeof sv==='object'&&!Array.isArray(sv))?{...sv}:{};
+      // The languages this editor opened are written; the others keep what the server holds.
+      const mine=nx[E.id]&&typeof nx[E.id]==='object'&&!Array.isArray(nx[E.id])?{...nx[E.id]}:{};
+      S._tpl={...nx};
+      // Only a language changed in this editor is written (bug hunt 2026-10-28): the untouched one held this
+      // device's copy, stale or (read failed) the built-in text, and wiped another admin's newer text.
+      const _nrm=x=>String(x||'').replace(/\r/g,'').trim();
+      Object.keys(E.text).forEach(g=>{const v=_nrm(E.text[g]);if(E.orig&&_own(E.orig,g)&&v===_nrm(E.orig[g]))return;if(v&&v!==_tplDefault(E.id,g).trim())mine[g]=v;else delete mine[g];});
+      if(Object.keys(mine).length)nx[E.id]=mine;else delete nx[E.id];
+      const row={value:nx,updated_by:_opName()||null};
+      let w;try{w=await(cur.data?sb.from('site_content').update(row).eq('key',TPL_KEY).eq('updated_at',stamp).select('key'):sb.from('site_content').insert({key:TPL_KEY,...row}).select('key'));}catch(e){w={error:e};}
+      const lost=cur.data?!!w&&!w.error&&!(Array.isArray(w.data)&&w.data.length):!!(w&&w.error&&_errKind(w.error)==='dup');
+      if(lost&&n<4)continue;
+      if(lost){toast(t('errSomethingWrong'),'error');if(b)b.disabled=false;return;}
+      if(_writeErr(w,'message template')){if(b)b.disabled=false;return;}
+      all=nx;
+    }
     S._tpl=all;
     logAction(t('tplSaved')+': '+t(_tplDef(E.id)[1]));
     toast(t('tplSaved'),'success');_tplEdClose();if(S.staffTab==='settings')renderSettings();else if(_pplOn('applications')||_pplOn('learning'))renderCommunity(); // also opened from Applications (2026-10-07)
@@ -46871,9 +46909,11 @@ async function _ptLoad(){
       sb.from('part_timer_kinds').select('id,name,rate,active').order('name'),
       _pagedAll(()=>sb.from('part_timer_payouts').select('id,part_timer_id,paid_on,method,note,hours,amount,entries').order('paid_on',{ascending:false}).order('id',{ascending:false}))]);
     const err=[a,b,c,k,p].map(x=>x&&x.error).find(Boolean);
-    if(err){P.missing=_ptMissing(err);if(!P.missing){console.error('part-timers load',err);toast(t('errConnection'),'error');}P.people=P.people||[];P.shifts=P.shifts||[];}
-    else{P.missing=false;P.people=a.data||[];P.shifts=b.data||[];P.accts=c.data||[];P.kinds=k.data||[];P.payouts=p.data||[];}
-  }catch(e){P.people=P.people||[];P.shifts=P.shifts||[];}
+    // A failed read keeps what this page had, and a first one drawn as an error with a retry (bug hunt 2026-11-18): it drew an
+    // empty page (every name '-', the paid entries still owed) that nothing read again.
+    if(err){P.missing=_ptMissing(err);if(!P.missing){console.error('part-timers load',err);toast(t('errConnection'),'error');P.loadErr=true;}else{P.people=P.people||[];P.shifts=P.shifts||[];}}
+    else{P.missing=false;P.loadErr=false;P.people=a.data||[];P.shifts=b.data||[];P.accts=c.data||[];P.kinds=k.data||[];P.payouts=p.data||[];}
+  }catch(e){P.loadErr=true;}
   finally{P.busy=false;}
   if(S.staffTab==='team')renderTeam();
 }
@@ -47314,7 +47354,12 @@ async function _ptPay(ids){
   const got=Array.isArray(r.data)?r.data:[];
   got.forEach(po=>logAction(`${t('ptPayDone').replace('{0}',_ptName(po.part_timer_id))} · ${_ptH(po.hours)} · ${_money(po.amount,_NOISO)} · ${_ptMethod(po.method)} · ${po.paid_on}`));
   toast(`✓ ${t('ptPayDone').replace('{0}',got.map(po=>_ptName(po.part_timer_id)).join(', '))}`);
-  pay.note='';pay.day=todayStr();pay.dayAuto=true;P.people=null;_ptLoad(); // the entries now carry their payment; the next one is dated today again
+  // the entries carry their payment here at once, then the server's copy is read (bug hunt 2026-11-18): emptied first, a read
+  // that failed showed them still owed
+  const by=new Map(got.map(po=>[po.part_timer_id,po.id])),want=new Set(ids.map(String));
+  P.shifts=(P.shifts||[]).map(x=>x.payout_id==null&&want.has(String(x.id))&&by.has(x.part_timer_id)?{...x,payout_id:by.get(x.part_timer_id)}:x);
+  P.payouts=[...got,...(P.payouts||[]).filter(po=>!got.some(g=>g.id===po.id))];
+  pay.note='';pay.day=todayStr();pay.dayAuto=true;if(S.staffTab==='team')renderTeam();_ptLoad(); // the next one is dated today again
 }
 // ── Payments: one row per payment, with its slip and an undo ──
 function _ptPaymentsHtml(){
@@ -47331,7 +47376,8 @@ function _ptUnpay(id){
     const r=await sb.rpc('staff_pt_unpay',{p_payout_id:id});
     if(_writeErr(r,'part-timer unpay'))return;
     logAction(`${t('ptUndone')}: ${_ptName(po.part_timer_id)} · ${po.paid_on} · ${_money(po.amount,_NOISO)}`);toast(`✓ ${t('ptUndone')}`);
-    P.people=null;_ptLoad();
+    P.shifts=(P.shifts||[]).map(x=>x.payout_id===id?{...x,payout_id:null}:x);P.payouts=(P.payouts||[]).filter(x=>x.id!==id); // as the payment's
+    if(S.staffTab==='team')renderTeam();_ptLoad();
   }});
 }
 // ── Pay slip (a payment) and statement (one person's entries in the choice), printed like every report ──
@@ -47372,7 +47418,7 @@ function _ptCsv(){
 }
 function _ptHtml(){
   const P=_pt();
-  if(P.people===null){if(!P.busy)_ptLoad();return skeletonList();}
+  if(P.people===null){if(P.loadErr&&!P.busy)return _loadErr(esc(t('errConnection')),_on("_ptLoad"));if(!P.busy)_ptLoad();return skeletonList();}
   if(P.missing)return`<div class="tm-note">${t('dbPending')}</div>`;
   return _ptLogHtml()+_ptTotalsHtml()+_ptPaymentsHtml()+_ptPeopleHtml()+_ptKindsHtml();
 }
@@ -47398,7 +47444,7 @@ function _tmToggle(uid,kind,k){
   const i=list.indexOf(k);if(i>=0)list.splice(i,1);else list.push(k);
   d[kind]=list;_tmNorm(d);renderTeam();
 }
-function _tmRole(uid,v){const d=_tmDraft(uid);if(!d)return;d.role=_roleNorm(v,'frontdesk');if(d.role==='owner')d.edit=[];_tmNorm(d);renderTeam();} // an owner reads everything and changes nothing, until the admin ticks a section
+function _tmRole(uid,v){const d=_tmDraft(uid);if(!d)return;const was=d.role;d.role=_roleNorm(v,'frontdesk');if(d.role==='owner')d.edit=[];else if(was==='owner')d.edit=null;_tmNorm(d);renderTeam();} // leaving Owner: its empty change list goes, the new role changes everything it opens, as _tmPreset (bug hunt 2026-11-18) // an owner reads everything and changes nothing, until the admin ticks a section
 // The lists a Save writes (staff round s10, item 42): an admin's stay null (every section), a volunteer's are the database's
 // own; every other role's are written out, never null, so the database never reads "everything" into an account. A draft's
 // null ("every section its role allows") is the role's sections, and a null edit list is the sections it opens.
@@ -47486,6 +47532,27 @@ function _saMeta(m){if(!m)return null;const o={};if(m.k)o.kind=String(m.k).slice
 // within a minute lost a line, or showed one twice). meta.cid names it (an undo from the Log: 'u:<the line undone>').
 // Returns the id. A database before the column takes the line without it. _logCid makes one (_ciLogEach uses it too).
 function _logCid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+// Lines the shared table did not take for the network or a server error are kept on this device (cq_sa_out) and sent
+// again, one at a time, with the next line that lands; the unique client_id drops one that had landed after all (bug
+// hunt 2026-11-18). A refusal (rights, a rule) is not kept, nor a line without a client id (it could go in twice).
+function _saOutGet(){try{const l=JSON.parse(localStorage.getItem('cq_sa_out')||'[]');return Array.isArray(l)?l.filter(x=>x&&x.r&&x.r.client_id):[];}catch(_){return[];}}
+function _saOutSet(l){try{if(l.length)localStorage.setItem('cq_sa_out',JSON.stringify(l.slice(-200)));else localStorage.removeItem('cq_sa_out');}catch(_){}}
+function _saKeep(err,rows){
+  const k=err?_errKind(err):'net';if(k!=='net'&&k!=='unknown')return;
+  const l=_saOutGet(),have=new Set(l.map(x=>x.r.client_id));
+  (rows||[]).forEach(r=>{if(r&&r.client_id&&!have.has(r.client_id)){have.add(r.client_id);l.push({r,n:0});}});_saOutSet(l);
+}
+async function _saFlush(){
+  if(S._saBusy||!sb||_isOffline()||!_saOutGet().length)return;S._saBusy=true;
+  try{
+    for(const w of _saOutGet().slice(0,20)){
+      let r;try{r=await sb.from('staff_actions').insert(w.r);}catch(e){r={error:e};}
+      const k=r&&r.error?_errKind(r.error):'';if(k==='net')break; // still no way through: kept for the next time
+      // in, already there, refused for good, or a fifth failure: off the list
+      _saOutSet(_saOutGet().filter(x=>x.r.client_id!==w.r.client_id||(k==='unknown'&&++x.n<5)));
+    }
+  }finally{S._saBusy=false;}
+}
 function logAction(label,meta){
   if(S._rxPrev)return; // a builder's preview is not a print
   if(!label)return;
@@ -47505,10 +47572,11 @@ function logAction(label,meta){
     let x={...row,...(_m&&S._saCols!==false?_m:{}),...(S._saCid===false?{}:{client_id:cid})};
     ins(x).then(r=>{
       // no such column yet: said once for the page, and the line goes in without it (client_id first, then kind/entity/amount)
-      const e=r&&r.error;if(!e||!/42703|PGRST204|column/i.test(String(e.code||'')+' '+String(e.message||'')))return;
+      const e=r&&r.error;if(!e){_saFlush();return;}
+      if(!/42703|PGRST204|column/i.test(String(e.code||'')+' '+String(e.message||''))){_saKeep(e,[x]);return;}
       if(x.client_id&&/client_id/.test(e.message||'')){S._saCid=false;delete x.client_id;}else{S._saCols=false;x=row;}
       ins(x).then(()=>{},()=>{});
-    },()=>{});
+    },()=>_saKeep(null,[x]));
   }}catch(_){}
   if(S.view==='staff'&&S.staffTab==='history'&&S.histView==='log')renderLogs();
   return cid;
@@ -47550,16 +47618,17 @@ async function doUndo(){
   // Claimed BEFORE the await, as the Logs view does: marked only once the reversal had finished,
   // the second or so it takes left the Logs view free to run it again.
   if(logEntry)logEntry.undone=true;
-  let ok=false;
-  try{ok=(await item.fn())!==false;}catch(e){ok=false;}
+  let ok=false,no=false;
+  try{const v=await item.fn();no=v==='declined';ok=v!==false&&!no;}catch(e){ok=false;}
   if(ok){
     toast(t('undoneMsg'));
   }else{
     // Refused (a reversal answers false when its write fails) or threw: nothing was reversed,
-    // so the action stays undoable everywhere instead of reading "Undone".
+    // so the action stays undoable everywhere instead of reading "Undone". 'declined': staff said
+    // no to its question, which is no failure (bug hunt 2026-11-18).
     if(logEntry)logEntry.undone=false;
     S.undoStack.push(item);
-    toast(t('undoFailed'),'error');
+    if(!no)toast(t('undoFailed'),'error');
   }
   renderTopbarRight();
   if(S.staffTab==='history'&&S.histView==='log')renderLogs();
@@ -48440,7 +48509,8 @@ async function confirmLogUndo(logId){
   const _back=()=>{item.undone=false;if(_su&&!S.undoStack.includes(_su))S.undoStack.splice(Math.min(_at,S.undoStack.length),0,_su);};
   try{
     // Claimed above so two buttons cannot run one reversal; hand it back if it was refused.
-    if(await item.fn()===false){_back();toast(t('undoFailed'),'error');renderTopbarRight();if(S.staffTab==='history'&&S.histView==='log')renderLogs();return;}
+    const v=await item.fn();
+    if(v===false||v==='declined'){_back();if(v===false)toast(t('undoFailed'),'error');renderTopbarRight();if(S.staffTab==='history'&&S.histView==='log')renderLogs();return;} // 'declined': staff said no to its question
     toast(t('toastActionUndone')+item.label);
   }catch(e){
     _back(); // reversal failed — allow a retry
@@ -48481,8 +48551,12 @@ async function approveEntry(id){
   // Busy-guarded and retried: promoting from the waitlist assigns a fresh queue number
   // computed from local state; a concurrent write can take that number first and trip
   // the (session_id, queue_num) unique index, so on a duplicate we resync and retry once.
-  if(S._apprBusy)return;S._apprBusy=true;
+  // One tap per booking; another rider's Approve waits its turn instead of being dropped unsaid (bug hunt 2026-11-18). One at
+  // a time still: a promotion's queue number is worked out from this device's copy.
+  const B=S._apprBusy instanceof Set?S._apprBusy:(S._apprBusy=new Set());if(B.has(id))return;B.add(id);
+  const prev=S._apprQ||Promise.resolve();let _go;S._apprQ=new Promise(ok=>{_go=ok;});
   try{
+    await prev;
     for(let attempt=0;attempt<2;attempt++){
       // 'rejected' is approvable too: a rejected booking restored from Cancelled stays
       // marked rejected, and staff must be able to overturn that verdict from the roster.
@@ -48513,7 +48587,7 @@ async function approveEntry(id){
       renderStaffQueue();renderMyRides();
       return;
     }
-  }finally{S._apprBusy=false;}
+  }finally{B.delete(id);_go();}
 }
 // Undo an approval: the seat goes back to pending selection (status stays as-is, so the
 // rider keeps their place in the list while staff reconsider).
@@ -48556,7 +48630,7 @@ async function staffToWaitlist(id){
   pushUndo(`${t('menuToWaitlist')} · ${e.name}`,async()=>{
     // The place it freed may have gone since (bug hunt 2026-11-10): a full ride asks first, as Move to main list asks.
     if(_holdsSpot({...e,status:'waiting'},_sessDisp(e.sessionId))){const rm=await _wlMoveRoom(e.sessionId,id);
-      if(rm!==true&&!await askConfirm({title:t('mainListFullTitle'),body:`#${e.queueNum} - ${esc(e.name)}`+(rm==='offer'?`<br>${esc(t('mainListOfferOut'))}`:''),confirmLabel:t('menuToMainList'),confirmClass:'btn-muted'}))return false;}
+      if(rm!==true&&!await askConfirm({title:t('mainListFullTitle'),body:`#${e.queueNum} - ${esc(e.name)}`+(rm==='offer'?`<br>${esc(t('mainListOfferOut'))}`:''),confirmLabel:t('menuToMainList'),confirmClass:'btn-muted'}))return'declined';} // staff said no: kept undoable, not said as a failure
     const u=await sb.from('queue_entries').update({status:'waiting',...(appr?{approval:'approved'}:{})}).eq('id',id).eq('status','waitlist').select('id');
     if(_writeErr(u,'undo')||!_landed(u)){await _reloadRows([id]);renderStaffQueue();return false;}
     await _consumeAddonsOnEnter(e);

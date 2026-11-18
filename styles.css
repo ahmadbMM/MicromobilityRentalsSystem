@@ -8201,7 +8201,7 @@ html[dir="rtl"] #tab-team .pt-tile span{letter-spacing:0;}
 :is(#pin-modal,#staff-pwd-modal) .pin-err{color:var(--red);font-size:12px;font-weight:700;min-height:16px;margin-bottom:6px;}
 :is(#pin-modal,#staff-pwd-modal) .pin-w100{width:100%;}
 #op-gate-modal .opg-z290{z-index:290;}
-#op-gate-modal .opg-z290.opg-ztop{z-index:9050;} /* an approval keypad: above the money dialogs (400) and row sheets (9001) that ask for it, under the toasts (9700) */
+#op-gate-modal .opg-z290.opg-ztop{z-index:9650;} /* an approval keypad: above the money dialogs (400), row sheets (9001) and the 9500/9600 inline overlays (cancel session) that ask for it, under the toasts (9700); at 9050 the cancel dialog's keypad opened under it (bug hunt 2026-11-18) */
 #op-gate-modal .opg-w380{max-width:380px;}
 #op-gate-modal .opg-who{font-size:var(--sf-fs-sm);color:var(--muted);margin:4px 0 10px;}
 #op-gate-modal .opg-sub{font-size:var(--sf-fs-sm);color:var(--muted);margin:6px 0 14px;}

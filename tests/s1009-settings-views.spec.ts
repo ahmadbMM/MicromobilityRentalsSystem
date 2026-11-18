@@ -127,3 +127,18 @@ test.describe('@staff:inventory shared lists', () => {
     expect(w.length).toBe(2);
   });
 });
+
+test.describe('@staff:bookings saved views and ticks', () => {
+  test('a Bookings view on another ride drops the ticks made on the ride on show', async ({ page }) => {
+    const d1 = tomorrow;
+    const d2 = (() => { const d = new Date(Date.now() + 2 * 864e5); return d.toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' }); })();
+    const s = (id: string) => ({ id, day: 'Monday', session_date: id, capacity: 12, status: 'open', created_at: 1 });
+    await boot(page, { sessions: [s(d1), s(d2)], queue_entries: [{ ...q('a', d1, 'First Ride Rider'), status: 'waiting', paid: false }, { ...q('b', d2, 'Second Ride Rider'), status: 'waiting', paid: false }] });
+    await page.evaluate(`setStaffTab('queue');setSfSession('${d1}');_prefSet('views.queue',[{id:'v1',name:'Second ride',state:{sfSession:'${d2}'}},{id:'v2',name:'First ride',state:{sfSession:'${d1}',sfSort:'name'}}])`);
+    await page.evaluate(`S.sfSelected=['a']`);
+    await page.evaluate(`_svPick('queue','v2')`); // the same ride: the ticks stay
+    expect(await page.evaluate('[S.sfSession,S.sfSelected]')).toEqual([d1, ['a']]);
+    await page.evaluate(`_svPick('queue','v1')`);
+    expect(await page.evaluate('[S.sfSession,S.sfSelected]')).toEqual([d2, []]);
+  });
+});
