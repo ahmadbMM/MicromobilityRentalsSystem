@@ -31,9 +31,9 @@
 --          edit right also passes), and staff_community_new_password / staff_learn_new_password the rule of
 --          staff_set_customer_temp_password: an admin, or a manager or front desk account with that edit right. The
 --          "staff update applications" policy on community_applications asks the same edit right.
--- sql10-3  staff_fnb_decide checked a partner request's status on an unlocked copy: two staff deciding it at once (or
---          the venue cancelling it) and the last write won. It reads the request again under a lock after the date's,
---          and each write names the status it leaves (NOT_PENDING / NOT_LIVE otherwise).
+-- sql10-3  NOT in this file: the hunt read staff_fnb_decide, renamed staff_vendor_decide on 2026-10-03, and the live
+--          staff_vendor_decide already reads the request again under its lock and names the status each write leaves
+--          (20261005210200).
 -- sql10-5  staff_learn_schedule linked a learn-to-ride sign-up to the oldest account on the same phone even when that
 --          account had another email (a family phone), filled its empty fields with the learner's details and made no
 --          account for the learner. The phone match now takes only an account with no email or the same email;
@@ -62,7 +62,6 @@
 --   my_bookings             20261009200000_desk_note.sql with 20261117120000's in-place pm_visitor line
 --   petromin_guest_book     20261113150000_petromin_merged_page.sql
 --   staff_checkin           20261107100000_bookings_review.sql
---   staff_fnb_decide        20261003150000_fnb_partners.sql
 --   staff_locker_cancel     20261111235100_bh11_live_b.sql (+ p_op, p_approval; the 4-argument one dropped)
 --   staff_locker_house      20261110200000_locker_staff_edit.sql
 --   staff_merge_customers, staff_unmerge_customers, staff_move_session   20261111235100_bh11_live_b.sql
@@ -115,7 +114,6 @@ begin
     ('public.my_bookings(text,text)', '3390e30044b3f29e7a25fea2b85ea41a', '29d39bb236a591a32a5ddc0012a52c1f'),
     ('public.petromin_guest_book(text,text,text,text,text,text,text,text)', '1e2508ef7c1eff3fd461f1278d792260', 'bf6b0d89ef5a70f9ef93b05492dbd818'),
     ('public.staff_checkin(text,text,boolean,numeric,text,numeric,text,text,uuid,text)', '5db73b25c023f83951a6d616d3ec54bc', '7237c9a27e55597cd7657f17632a3ab1'),
-    ('public.staff_fnb_decide(bigint,text,text,text)', 'ab1034641c76fe84ffb12fd43055e9a7', 'cc0b801c289612d974029f05661260ee'),
     ('public.staff_locker_house(uuid,boolean,text,text)', '0653e807002edd995c8b21b8326d8558', '8aab63d9d6d7c7d57ceb967eba6688a7'),
     ('public.staff_merge_customers(text,text,text,text,text)', '407201e12effe2f5d3658d37f2c6bf68', 'c17c9f5da33684dfc4bdb692d96917cf'),
     ('public.staff_unmerge_customers(bigint)', '1a3eed720857b6db773768e236cbd86e', '4e21ff5cb31fb9c29fb2605b3e264e95'),
@@ -522,55 +520,9 @@ drop policy if exists "staff update applications" on public.community_applicatio
 create policy "staff update applications" on public.community_applications for update to authenticated
   using ((select _staff_mod('community', true))) with check ((select _staff_mod('community', true)));
 
--- ── 6. sql10-3 staff_fnb_decide: the request read again under its lock ───────────────────────────────────────────
-CREATE OR REPLACE FUNCTION public.staff_fnb_decide(p_booking bigint, p_action text, p_note text DEFAULT ''::text, p_by text DEFAULT ''::text)
- RETURNS void
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public'
-AS $function$
-declare b fnb_bookings%rowtype; cap int; n int;
-begin
-  if not is_staff() then raise exception 'STAFF_ONLY' using errcode = '42501'; end if;
-  perform set_config('fnb.actor', 'staff:' || coalesce(p_by, ''), true);
-  select * into b from fnb_bookings where id = p_booking;
-  if not found then raise exception 'NOT_FOUND' using errcode = 'P0002'; end if;
-  select capacity into cap from fnb_dates where day = b.day for update;
-  /* The request is read again under its own lock, after the date's (bh18 sql10-3) (20261119000300): two staff
-     deciding it at once, or the venue cancelling it meanwhile, passed the checks below on the first, unlocked copy
-     and the last one wrote over the other's answer (a declined venue shown confirmed). The writes also name the
-     status they leave. */
-  select * into b from fnb_bookings where id = p_booking for update;
-  if not found then raise exception 'NOT_FOUND' using errcode = 'P0002'; end if;
-  if p_action = 'confirm' then
-    if b.status <> 'pending' then raise exception 'NOT_PENDING' using errcode = 'P0001'; end if;
-    select count(*) into n from fnb_bookings where day = b.day and status = 'confirmed';
-    if n >= cap then raise exception 'DATE_FULL' using errcode = 'P0001'; end if;
-    update fnb_bookings set status = 'confirmed', staff_note = left(coalesce(p_note, ''), 500),
-           decided_by = coalesce(p_by, ''), decided_at = now(), updated_at = now() where id = b.id and status = 'pending';
-    if not found then raise exception 'NOT_PENDING' using errcode = 'P0001'; end if;
-    if n + 1 >= cap then
-      update fnb_bookings set status = 'declined', staff_note = 'another_venue', decided_by = coalesce(p_by, ''),
-             decided_at = now(), updated_at = now()
-       where day = b.day and status = 'pending' and id <> b.id;
-    end if;
-  elsif p_action = 'decline' then
-    if b.status <> 'pending' then raise exception 'NOT_PENDING' using errcode = 'P0001'; end if;
-    update fnb_bookings set status = 'declined', staff_note = left(coalesce(p_note, ''), 500),
-           decided_by = coalesce(p_by, ''), decided_at = now(), updated_at = now() where id = b.id and status = 'pending';
-    if not found then raise exception 'NOT_PENDING' using errcode = 'P0001'; end if;
-  elsif p_action = 'cancel' then
-    if b.status not in ('pending','confirmed') then raise exception 'NOT_LIVE' using errcode = 'P0001'; end if;
-    update fnb_bookings set status = 'cancelled', cancelled_by = 'mm', cancel_reason = left(coalesce(p_note, ''), 300),
-           decided_by = coalesce(p_by, ''), decided_at = now(), updated_at = now() where id = b.id and status in ('pending','confirmed');
-    if not found then raise exception 'NOT_LIVE' using errcode = 'P0001'; end if;
-  else
-    raise exception 'BAD_ACTION' using errcode = '22023';
-  end if;
-  perform _fnb_sync_day(b.day);
-end $function$;
-revoke all on function public.staff_fnb_decide(bigint, text, text, text) from public, anon;
-grant execute on function public.staff_fnb_decide(bigint, text, text, text) to authenticated;
+-- ── 6. sql10-3: nothing to do. The F&B functions were renamed (20261003190000_vendors_rename); the live
+--    staff_vendor_decide already locks the date, then the booking, and refuses a request no longer pending
+--    (20261005210200). The rebuild of the old name that stood here is gone (checked on both databases 2026-11-18).
 
 -- ── 7. sql10-5 staff_learn_schedule: a shared phone links only an account with no email or the same one ──────────
 do $ls$
@@ -1248,7 +1200,7 @@ begin
                            'public.staff_close_out(text,jsonb,text[],text[])', 'public.staff_return(text,text,text,uuid,text)',
                            'public.staff_community_approve(uuid,text,boolean)', 'public.staff_community_decide(uuid,text,text)',
                            'public.staff_community_ask_changes(uuid,text[],text,text)', 'public.staff_community_new_password(uuid)',
-                           'public.staff_learn_new_password(uuid)', 'public.staff_fnb_decide(bigint,text,text,text)',
+                           'public.staff_learn_new_password(uuid)',
                            'public.staff_learn_schedule(uuid,timestamp with time zone,text,text)',
                            'public.staff_locker_cancel(uuid,text,boolean,boolean,text,text)', 'public.staff_locker_house(uuid,boolean,text,text)',
                            'public.staff_merge_customers(text,text,text,text,text)', 'public.staff_unmerge_customers(bigint)',
