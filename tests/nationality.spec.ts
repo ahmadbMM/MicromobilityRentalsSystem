@@ -144,10 +144,12 @@ test('staff filters list Saudi Arabia twice and count it once', async ({ page })
   const picked = await page.evaluate(`[...document.querySelectorAll('#print-opts-modal select')].map(s=>[...s.options].filter(o=>o.value==='Saudi Arabia').map(o=>o.selected)).filter(a=>a.length===2)`) as boolean[][];
   expect(picked).toContainEqual([true, false]);
   await page.evaluate(`_closePrintOpts();(()=>{const o=_accOpts();o.fNationality='all';})()`);
+  await expect(page.locator('#print-opts-modal [role="dialog"]')).toHaveCount(0); // the builder is gone once closed
 
-  // The Accounts list filter: two copies, the top one selected.
+  // The Accounts list filter: two copies, the top one selected. Read in the People section itself (bug hunt 2026-11-18:
+  // the whole page's selects also took in any other dialog that has the Nationality filter).
   await page.evaluate(`S.amNat='Saudi Arabia';setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
-  const amSel = page.locator('select[aria-label="Nationality"]').filter({ has: page.locator('option[value="Egypt"]') });
+  const amSel = page.locator('#tab-community select[aria-label="Nationality"]').filter({ has: page.locator('option[value="Egypt"]') });
   await expect(amSel).toHaveCount(1);
   expect(await amSel.evaluate(el => [...(el as HTMLSelectElement).options].map(o => [o.value, o.selected]))).toEqual(
     [['', false], ['unset', false], ['Saudi Arabia', true], ['Egypt', false], ['Saudi Arabia', false], ['Yemen', false]]); // 'unset': Not set (2026-10-10)

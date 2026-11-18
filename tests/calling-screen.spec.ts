@@ -88,6 +88,40 @@ test.describe('@staff:bookings the calling screen', () => {
     expect((await sent(page)).length).toBe(1);
   });
 
+  test('two desks that take the same booking with Call next: the later call moves on to the next number (bug hunt 2026-11-18)', async ({ page }) => {
+    await boot(page);
+    await openQueue(page);
+    await joinDesk(page);
+    await page.evaluate(`_qclNext('${DAY}')`); // this desk (2) calls #7 at 15:00:00.000
+    await expect.poll(async () => (await sent(page)).length).toBe(1);
+    expect((await sent(page))[0].payload).toMatchObject({ id: 'e7cccc33', desk: 2 });
+    // desk 1 called #7 a moment later: desk 1 is the one to move on, this desk keeps #7
+    await page.evaluate(`_qclRx({sid:'${DAY}',id:'e7cccc33',num:'#7',desk:1,at:'${DAY}T15:00:00.300Z'})`);
+    await page.waitForTimeout(200);
+    expect((await sent(page)).length).toBe(1);
+    // desk 3 had called #7 before this desk: this desk calls the next number
+    await page.evaluate(`_qclRx({sid:'${DAY}',id:'e7cccc33',num:'#7',desk:3,at:'${DAY}T14:59:59.900Z'})`);
+    await expect.poll(async () => (await sent(page)).length).toBe(2);
+    expect((await sent(page))[1].payload).toMatchObject({ id: 'e8dddd44', num: '#8', desk: 2 });
+  });
+
+  test('a call taken again at another desk leaves the first desk; the screen drawn again after leaving it without Exit is filled (bug hunt 2026-11-18)', async ({ page }) => {
+    await boot(page, `/bookings/screen?s=${DAY}`);
+    const scr = page.locator('#qcl-page');
+    await expect(scr).toBeVisible();
+    await page.evaluate(`_qclRx({sid:'${DAY}',id:'e7cccc33',num:'#7',desk:1,at:'${DAY}T15:00:00.000Z'})`);
+    await page.evaluate(`_qclRx({sid:'${DAY}',id:'e7cccc33',num:'#7',desk:2,at:'${DAY}T15:02:00.000Z'})`);
+    await expect(scr.locator('.qcl-desk .qcl-num')).toHaveText(['#7']);
+    await expect(scr.locator('.qcl-desk .qcl-dk')).toContainText('Desk 2');
+    await expect(scr.locator('.qcl-list li')).toHaveCount(0);
+    // Back to Bookings (no Exit), then the screen again with no call in between
+    await page.evaluate(`S.queueView='bookings';renderStaffQueue()`);
+    await expect(page.locator('#qcl-page')).toHaveCount(0);
+    await page.evaluate(`S.queueView='screen';renderStaffQueue()`);
+    await expect(page.locator('#qcl-page .qcl-exit')).toBeVisible();
+    await expect(page.locator('#qcl-page .qcl-desk .qcl-num')).toHaveText(['#7']);
+  });
+
   test('a call the live channel cannot carry is said; the row still shows it on this desk', async ({ page }) => {
     await boot(page);
     await openQueue(page); // no staff session here: the desk channel never joined

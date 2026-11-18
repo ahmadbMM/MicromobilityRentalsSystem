@@ -93,6 +93,34 @@ test.describe('@staff:reports the reports rework', () => {
     await expect(page.locator('#tab-reports .rp2-card[data-rp2="day"]')).toBeVisible();
   });
 
+  test('Reprint follows Open, a money line with no copy says so once, a picked session survives the history coming in (bug hunt 2026-11-18)', async ({ page }) => {
+    await stubSupabase(page, { sessions, queue_entries, report_log: [], report_copies: [] });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('reports')`);
+    await page.waitForFunction('_rp2().logAt>0&&!_rp2().busy');
+    // a session picked in a card stays picked when the body is drawn again (the history or the automatic ones landing)
+    await page.evaluate(`(()=>{const s=document.getElementById('rp2-s-session');s.value='s0';s.dispatchEvent(new Event('change',{bubbles:true}));})()`);
+    await page.evaluate('_rp2Paint()');
+    await expect(page.locator('#rp2-s-session')).toHaveValue('s0');
+    // a colleague's lines: the account report is People's, and this account has no People
+    const line = (id: number, report: string, money = false) => ({ id, no: `MM-RPT-2099-000${id}`, report, title: report, money, via: 'print', rows: 1, by_user: 'u9', by_name: 'Spec Colleague', at: '2099-02-01T10:00:00Z', opts: {} });
+    await page.evaluate(`(()=>{const R=_rp2();R.log=${JSON.stringify([line(11, 'acc'), line(12, 'day'), line(13, 'monthly', true)])};R.logAt=Date.now();S._myView=['queue','sessions','reports'];R.area='hist';_rp2Paint();})()`);
+    const rows = page.locator('#tab-reports .rp2-hist tbody tr');
+    await expect(rows).toHaveCount(3);
+    await expect(rows.nth(0).getByRole('button')).toHaveCount(0); // no Reprint on a report this account cannot open
+    await expect(rows.nth(1).getByRole('button', { name: 'Reprint' })).toBeVisible();
+    await page.evaluate('_rp2Reprint(11)');
+    await expect(page.locator('#toast-container')).toContainText('Admin only.');
+    await expect(page.locator('#print-opts-modal .modal-box')).toHaveCount(0); // the accounts report builder never opened
+    // an automatic money report whose copy is missing: said once, nothing remade
+    await page.evaluate(`document.getElementById('toast-container').innerHTML=''`);
+    await page.evaluate('_rp2Reprint(13)');
+    await expect(page.locator('#toast-container .toast')).toHaveCount(1);
+    await expect(page.locator('#toast-container')).toContainText("can't be made again");
+  });
+
   test('the builder has the saved setups and draws the report beside the choices', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
     await boot(page);

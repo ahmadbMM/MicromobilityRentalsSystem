@@ -174,6 +174,26 @@ test.describe('analytics growth', () => {
     expect(out.noCost).toBe(false); // no cost mapped → card stays hidden
   });
 
+  test('gross margin leaves out the items that have no cost (bug hunt 2026-11-18)', async ({ page }) => {
+    const out = await page.evaluate(() => {
+      const cost = { w: 1 };
+      // @ts-expect-error app globals
+      const m = _anMargin([
+        { item_id: 'w', qty: 10, price: 3, pay: 'paid', cat: 'Drinks' },  // 30 with a cost of 10
+        { item_id: 's', qty: 20, price: 15, pay: 'paid', cat: 'Snacks' }, // 300, no cost on file
+      ], cost);
+      // @ts-expect-error app globals
+      const d = _anMargin([
+        { item_id: 'w', qty: 10, price: 3, pay: 'paid', cat: 'Drinks' },
+        { item_id: 's', qty: 10, price: 3, pay: 'paid', cat: 'Snacks' },
+        { item_id: null, qty: 1, price: -6, pay: 'paid', cat: '__discount__' }, // half of it falls on the costed lines
+      ], cost);
+      return { m, d };
+    });
+    expect(out.m).toMatchObject({ rev: 30, cogs: 10, profit: 20, marginPct: 67, haveCost: true });
+    expect(out.d).toMatchObject({ rev: 27, cogs: 10, profit: 17 });
+  });
+
   test('Pearson correlation is +1 / -1 / ~0 for the classic cases', async ({ page }) => {
     const out = await page.evaluate(() => ({
       // @ts-expect-error app globals

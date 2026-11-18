@@ -106,6 +106,26 @@ test('report shows the ASSIGNED bike type, never "Any"', async ({ page }) => {
   expect(people.some((p) => p.type === 'Any')).toBe(false);
 });
 
+test('before the cutover a paid booking is a ride, as in every other figure (bug hunt 2026-11-18)', async ({ page }) => {
+  const row = (id: string, n: number, x: Record<string, unknown>) => ({ id, name: 'Rider ' + id, height: 170 + n, type_preference: 'Hybrid', session_id: 'old1', session_day: 'Friday', session_date: '2026-07-10', queue_num: n, price: 57.5, registered_at: '2026-07-10T10:00:00Z', ...x });
+  await stubSupabase(page, {
+    sessions: [{ id: 'old1', day: 'Friday', session_date: '2026-07-10', capacity: 12, status: 'closed', created_at: 1 }],
+    bikes: [],
+    queue_entries: [
+      row('p1', 1, { status: 'waiting', paid: true }),  // paid, never checked in: a ride before 12 August
+      row('p2', 2, { status: 'done', paid: true }),
+      row('p3', 3, { status: 'waiting', paid: false }), // not paid: no ride
+      row('p4', 4, { status: 'noshow', paid: true }),   // no-show: no ride
+    ],
+  });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.evaluate(`S.analyticsRange='all';S.anSession='all';setStaffTab('analytics')`);
+  const d = await page.evaluate(`(()=>{const x=_anHeightBikeData().find(r=>r.sess.id==='old1');return x&&{people:x.people.map(p=>p.name).sort(),hybrid:x.typeCounts.Hybrid};})()`);
+  expect(d).toEqual({ people: ['Rider p1', 'Rider p2'], hybrid: 2 });
+});
+
 test('bike-type total matches the rider/height count (all riders, not just checked-in)', async ({ page }) => {
   await stubSupabase(page, {
     sessions: [{ id: 's1', day: 'Friday', session_date: '2099-01-09', capacity: 12, status: 'open', created_at: 1 }],

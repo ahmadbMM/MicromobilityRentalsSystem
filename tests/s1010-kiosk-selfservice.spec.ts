@@ -51,6 +51,18 @@ async function enterKiosk(page: Page) {
 }
 
 test.describe('@staff:bookings s1010 kiosk: self-service walk-ins', () => {
+  test('the kiosk takes no desk keys: a section letter, N and / do nothing under it (bug hunt 2026-11-18)', async ({ page }) => {
+    await boot(page);
+    await enterKiosk(page);
+    const tab = await page.evaluate('S.staffTab');
+    await page.evaluate(`(()=>{const a=document.activeElement;if(a&&a.blur)a.blur();})()`);
+    for (const k of ['b', 's', 'n', '/']) await page.keyboard.press(k);
+    await page.waitForTimeout(150);
+    expect(await page.evaluate('S.staffTab')).toBe(tab);
+    await expect(page.locator('.ci-drawer-bg')).toHaveCount(0);
+    await expect(kiosk(page)).toBeVisible();
+  });
+
   test('kiosk mode is entered from Settings only with an operator PIN on the team', async ({ page }) => {
     await boot(page, { 'rpc:staff_operator_list': [{ name: 'Spec Staff', has_pin: false }] });
     await page.evaluate(`setStaffTab('settings')`);

@@ -191,6 +191,15 @@ test.describe('staff', () => {
     expect(at(page)).toBe('/analytics');
   });
 
+  test('Analytics > Reports moved to the Reports section: its old address lands there (bug hunt 2026-11-18)', async ({ page }) => {
+    await staff(page, '/analytics/reports');
+    await page.waitForFunction(`S.staffTab==='reports'`);
+    expect(await page.evaluate('S.anView')).toBe('overview');
+    await expect(page.locator('#tab-reports .page-title')).toBeVisible();
+    expect(await page.evaluate('_rp2().area')).toBe('auto'); // an admin: on the automatic ones, as the Analytics button opens them
+    await expect.poll(() => at(page)).toBe('/reports');
+  });
+
   test('Sessions: its layouts are /sessions, /sessions/table and /sessions/calendar (2026-11-06)', async ({ page }) => {
     await staff(page, '/sessions/calendar');
     await page.waitForFunction(`S.staffTab==='sessions'`);

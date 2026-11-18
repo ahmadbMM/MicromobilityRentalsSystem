@@ -16415,6 +16415,7 @@ function setStaffTab(tab,o){
   if(tab==='handover'){S.queueView=GIVE_BIKE_STEP?'handover':'bookings';tab='queue';} // the bikes side of the desk: a fourth pill
   if(tab==='fnb')tab='vendors'; // the section's id until 2026-10-03 (a saved address or tab)
   if(tab==='customers')tab='community'; // Customers is part of People since 2026-11-06
+  if(tab==='analytics'&&S.anView==='reports'){S.anView='overview';if(isAdmin())S._rp2Want='auto';tab='reports';} // Analytics > Reports moved to the Reports section (2026-11-13): an old address or the search lands there, as the button does
   if(tab==='riders'){S.queueView='petromin';if(!S.ridersSession||S.ridersSession==='all')S.ridersSession=_pmDefaultNight()||'all';tab='queue';} // the Riders tab is the Petromin page in Queue now
   if((tab==='store'||tab==='payments')&&S._storeReady===undefined)S._stoWant=tab; // asked before the database said it has them: opened once it does (_stoProbe)
   if(!_deskTabOk(tab)){_n6uNoTab(tab);tab=_firstTab();} // Front Desk mode: only its own sections (DESK_TABS); an account: only its own list
@@ -18712,7 +18713,7 @@ const GS_SUBS={queue:'petromin:ridersTitle',sessions:'table:ssLayTable cal:calVi
   inventory:'supplements:invSecSupplements equipment:invSecEquipment',
   community:'accounts:commTabAccounts applications:commTabApplications learning:appsLearn flagged:commTabFlagged tags:amTagsTitle badges:mrBadgesTitle titles:ttTab activities:acTab birthdays:commTabBirthdays mentors:mtsTitle wallets:cwTabWallets referrals:commTabReferrals activity:custTabActivity followups:afuTab duplicates:commTabDuplicates',
   catalog:'categories:catViewCats fields:catViewFields',vendors:'requests:vndVReq venues:vndVVen tiers:vndVTier feedback:vndVFb',
-  analytics:'revenue:anRevenue ridership:anRidership operations:anOperations fleet:anFleetSection months:anNavMonths reports:anNavReports ratings:anRatingsNav customers:anNavCustomers growth:anNavGrowth leaderboard:commTabLeaderboard community:anNavCommunity volunteers:tabVolunteers team:anNavTeam',
+  analytics:'revenue:anRevenue ridership:anRidership operations:anOperations fleet:anFleetSection months:anNavMonths ratings:anRatingsNav customers:anNavCustomers growth:anNavGrowth leaderboard:commTabLeaderboard community:anNavCommunity volunteers:tabVolunteers team:anNavTeam',
   team:'parttimers:ptTab',volunteers:'applications:zaTab roster:tabPeople sessions:zvTabSessions hours:zrTabHours activity:zvTabActivity settings:zvTabSettings',settings:'business:setTabBusiness pricing:setTabPricing'};
 // The views only some open, as their sections offer them: the admins' alone, History's money views by role, Analytics'
 // volunteers with the Volunteers section.
@@ -67484,7 +67485,7 @@ function _applyAnView(v){
   });
   cont.querySelectorAll('.an-nav-btn').forEach(b=>{const on=b.dataset.anview===v;b.classList.toggle('active',on);b.setAttribute('aria-current',on?'page':'false');});
   if(v==='leaderboard'||v==='community')_anBoardPaint();
-  else if(v==='months'||v==='reports')_anXPaint(v);
+  else if(v==='months')_anXPaint(v);
   if(v==='team')renderTeamReport(); // per staff member (2026-10-09): drawn into its host on its own data
   if(v==='volunteers')_n6wAnPaint();
   if(v==='sports')_spAnPaint(); // Sports we have (2026-11-10): drawn into its host on its own data
@@ -77361,7 +77362,7 @@ function _rp2(){return S._rp2||(S._rp2={q:'',area:'all',log:null,logErr:false,lo
 const RP2_AREAS=[['rides','rp2Rides'],['money','rp2Money'],['people','rp2People'],['events','rp2Events']];
 // [id, area, its name now, its section, the session it needs ('' none; any / sat / run / race / ptn), open(sid)]
 function _rp2Cat(){
-  const sess=(sid,then)=>{S.sfSession=sid;if(S.staffTab!=='queue')setStaffTab('queue');then();};
+  const sess=(sid,then)=>{if(!_deskTabOk('queue')){toast(t('adminOnlyMsg'),'error');return;}S.sfSession=sid;if(S.staffTab!=='queue')setStaffTab('queue');then();}; // an account without Bookings: setStaffTab bounces it, and the report must not open after
   return[
     ['session','rides',()=>t('printReportTitle'),'queue','any',sid=>sess(sid,()=>showPrintReportOptions())],
     ['roster','rides',()=>t('rp2Roster'),'queue','sat',sid=>sess(sid,()=>showPrintReportOptions())],
@@ -77414,11 +77415,12 @@ async function _rp2LogLoad(force){
 async function _rp2Reprint(id){
   const R=_rp2(),x=(R.log||[]).find(l=>String(l.id)===String(id));if(!x)return;
   const c=_rp2Cat().find(k=>k[0]===x.report);
+  if(c&&!_rp2Ok(c)){toast(t('adminOnlyMsg'),'error');return;} // a colleague's line from a section this account cannot open, as Open refuses it
   if(x.money){
     if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return;}
     let r;try{r=await sb.from('report_copies').select('html').eq('log_id',x.id).maybeSingle();}catch(e){r={error:e};}
     if(r&&!r.error&&r.data&&r.data.html){_rxView(r.data.html,{no:x.no});return;}
-    toast(t('rp2NoCopy'),'info');
+    toast(t('rp2NoCopy'),'info');return; // never remade with today's figures under the old number
   }
   if(!c){toast(t('rp2NoCopy'),'info');return;}
   const sid=x.opts&&x.opts.sid;
@@ -77427,10 +77429,12 @@ async function _rp2Reprint(id){
   c[5]('');
 }
 function _rp2Me(){try{return localStorage.getItem('cq_role_uid')||'';}catch(_){return'';}}
+// The session picked in a card, kept: the body is drawn again when the history or the automatic ones come in.
+function _rp2Pick(id,v){const R=_rp2();(R.pick||(R.pick={}))[id]=String(v||'');}
 function _rp2Name(id){const c=_rp2Cat().find(k=>k[0]===id);return c?c[2]():id;}
 function _rp2Card(c,fav){
-  const on=fav.has(c[0]),list=c[4]?_rp2Sessions(c[4]):null;
-  const pick=list?(list.length?_spk(`<select id="rp2-s-${c[0]}" class="filter-select" aria-label="${esc(t('rp2Pick'))}"><option value="">${esc(t('rp2Pick'))}</option>${list.map(s=>`<option value="${esc(s.id)}">${esc(_sessLabel(s))}</option>`).join('')}</select>`):`<span class="rp2-none">${esc(t('rp2NoSess'))}</span>`):'';
+  const on=fav.has(c[0]),list=c[4]?_rp2Sessions(c[4]):null,pk=(_rp2().pick||{})[c[0]]||'';
+  const pick=list?(list.length?_spk(`<select id="rp2-s-${c[0]}" class="filter-select" aria-label="${esc(t('rp2Pick'))}" data-on-change="${_on('_rp2Pick',c[0],_P('value'))}"><option value="">${esc(t('rp2Pick'))}</option>${list.map(s=>`<option value="${esc(s.id)}"${pk&&String(s.id)===pk?' selected':''}>${esc(_sessLabel(s))}</option>`).join('')}</select>`):`<span class="rp2-none">${esc(t('rp2NoSess'))}</span>`):'';
   return`<div class="rp2-card" data-rp2="${c[0]}">
     <div class="rp2-ch"><b class="rp2-nm">${esc(c[2]())}</b>${REPORT_MONEY[c[0]]?`<span class="rp2-tag">${esc(t('rp2AdminTag'))}</span>`:''}<button type="button" class="rp2-fav" aria-pressed="${on}" aria-label="${esc(t(on?'rp2FavOff':'rp2FavOn'))}" data-on-click="${_on('_rp2Fav',c[0])}">${_artIcon('star',15)}</button></div>
     <span class="rp2-where">${esc(t(SECTION_KEY[c[3]]||'tabReports'))}</span>
@@ -77442,10 +77446,10 @@ function _rp2HistHtml(n){
   if(R.missing)return`<div class="empty-state">${t('dbPending')}</div>`;
   if(!R.log)return`<div class="empty-state">${t(R.logErr?'errConnection':'loadingLabel')}</div>`;
   const rows=R.log.slice(0,n||150);if(!rows.length)return`<div class="empty-state">${t('rp2HistNone')}</div>`;
-  const via={print:t('repPrintNow'),pdf:'PDF',share:t('rxShare'),xlsx:'Excel',csv:'CSV'};
+  const via={print:t('repPrintNow'),pdf:'PDF',share:t('rxShare'),xlsx:'Excel',csv:'CSV'},cat=_rp2Cat(),may=x=>{const c=cat.find(k=>k[0]===x.report);return!c||_rp2Ok(c);};
   return`<div class="table-wrapper rp2-tw"><table class="rp2-hist"><thead><tr><th>${t('rxNo')}</th><th>${t('rp2HReport')}</th><th>${t('rp2HTitle')}</th><th>${t('repPreparedBy')}</th><th>${t('rp2HWhen')}</th><th>${t('rp2HVia')}</th><th></th></tr></thead><tbody>${
     rows.map(x=>`<tr><td class="rp2-no"><bdi>${esc(x.no)}</bdi></td><td>${esc(_rp2Name(x.report))}</td><td class="rp2-ttl">${esc(x.title||'')}</td><td>${esc(x.by_name||'—')}</td><td><bdi>${esc(_rxWhen(new Date(x.at)))}</bdi></td><td>${esc(via[x.via]||x.via||'')}</td>
-      <td><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_rp2Reprint',x.id)}" title="${esc(t(x.money?'rp2Copy':'rp2Today'))}">${esc(t('rp2Reprint'))}</button></td></tr>`).join('')}</tbody></table></div>`;
+      <td>${may(x)?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_rp2Reprint',x.id)}" title="${esc(t(x.money?'rp2Copy':'rp2Today'))}">${esc(t('rp2Reprint'))}</button>`:''}</td></tr>`).join('')}</tbody></table></div>`;
 }
 function renderReports(){
   const el=document.getElementById('tab-reports');if(!el)return;
@@ -77636,8 +77640,8 @@ function _rpiInboxHtml(){
 }
 // The views drawn fresh into their own host (outside the kept markup): Months and Reports.
 function _anXPaint(v){
-  const h=document.getElementById(v==='months'?'an-mo-host':'an-rp-host');if(!h)return;
-  h.innerHTML=_anMonthsView(); // Reports moved to the Reports section (2026-11-13)
+  const h=v==='months'&&document.getElementById('an-mo-host');if(!h)return;
+  h.innerHTML=_anMonthsView(); // Reports moved to the Reports section (2026-11-13): nothing is drawn into its old host
   _cssvApply(h);
 }
 // RFM bucket from recency (days since last ride) and frequency (ride count).
@@ -77709,14 +77713,17 @@ function _anSparkline(values,color,w,h){
   return`<svg class="ck-spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><polyline class="ck-spl" points="${pts}"/><circle class="ck-spd" cx="${x(v.length-1).toFixed(1)}" cy="${y(v[v.length-1]).toFixed(1)}" r="3"/></svg>`;
 }
 // Gross margin: product revenue minus cost-of-goods for sold lines that map to an item cost. Revenue is the till's
-// (_salesTotals): a discount line (negative) takes off it, and goods taken on the MM Team account, like those on the
+// (_salesTotals) for those lines: a discount line (negative) takes off it, and goods taken on the MM Team account, like those on the
 // house, bring no revenue though their cost counts (they were sales, and discounts were left out).
 function _anMargin(lines,costById){
-  let rev=0,cogs=0,haveCost=false;
+  // Only lines with a cost count (bug hunt 2026-11-18: an item with no cost counted as pure profit); the discounts given
+  // come off them in the share of the till's revenue those lines made.
+  let all=0,crev=0,disc=0,cogs=0,haveCost=false;
   (lines||[]).forEach(l=>{if(l.cat==='__cardmeta__'||l.pay==='refunded')return;const q=Number(l.qty)||0;
-    if(l.cat==='__discount__'){rev+=q*(Number(l.price)||0);return;} // the discount given (its price is negative)
-    if(q<=0)return;if(l.pay!=='house'&&l.pay!=='team')rev+=q*(Number(l.price)||0);if(l.item_id!=null&&costById[l.item_id]!=null){cogs+=q*costById[l.item_id];haveCost=true;}}); // on the house or the team's: its cost, no revenue
-  rev=Math.round(rev);cogs=Math.round(cogs);
+    if(l.cat==='__discount__'){disc+=q*(Number(l.price)||0);return;} // the discount given (its price is negative)
+    if(q<=0)return;const r=l.pay!=='house'&&l.pay!=='team'?q*(Number(l.price)||0):0;all+=r; // on the house or the team's: its cost, no revenue
+    if(l.item_id!=null&&costById[l.item_id]!=null){crev+=r;cogs+=q*costById[l.item_id];haveCost=true;}});
+  const rev=Math.round(all>0?crev+disc*crev/all:crev);cogs=Math.round(cogs);
   return{rev,cogs,profit:rev-cogs,marginPct:rev>0?Math.round((rev-cogs)/rev*100):0,haveCost};
 }
 // Lifetime value by first-ride month cohort: avg total spend per rider.
@@ -77857,7 +77864,7 @@ function _anHeightBikeData(){
   _anSessionInRange(sess);
   if(S.anSession&&S.anSession!=='all')sess=sess.filter(s=>s.id===S.anSession);
   return sess.map(s=>{
-    const riders=(_qBySession().get(s.id)||[]).filter(e=>e.status==='done'||e.status==='active'); // only riders who actually rode (checked in / completed)
+    const riders=(_qBySession().get(s.id)||[]).filter(e=>_isRide(e)); // only riders who rode, counted as every other figure counts a ride (a paid booking before the cutover)
     const _rtype=r=>{const bk=getAssignedBikes(r);const _tp=(r.typePreference&&r.typePreference!=='Any')?r.typePreference:'—';return bk.length?bk[0].type:_tp;};
     const people=riders.filter(r=>r.height!=null&&String(r.height).trim()!=='').map(r=>({name:r.name||'—',height:r.height,type:_rtype(r)})).sort((a,b)=>(Number(a.height)||0)-(Number(b.height)||0));
     // Count EVERY rider who rode, by the bike they were assigned — or, if not yet assigned, their booked
@@ -80353,6 +80360,10 @@ function _qclRx(p,own){
   if(L.some(x=>x.id===c.id&&x.at===c.at&&x.desk===c.desk))return; // the same call heard twice
   L.push(c);if(L.length>400)L.splice(0,L.length-400);
   const was=M.get(c.id);if(!was||was.at<=c.at)M.set(c.id,c);
+  // Another desk took the booking this desk just took through Call next: the later call (the higher desk on a tie) calls
+  // the next number, so each desk has its own rider. Both desks compare the same two calls, so only one moves on.
+  const nx=S._qclNx;
+  if(!own&&nx&&nx.id===c.id&&c.desk!==nx.desk&&Date.now()-nx.t<15000&&(c.at<nx.at||c.at===nx.at&&c.desk<nx.desk)){S._qclNx=null;setTimeout(()=>_qclNext(nx.sid),0);}
   if(S.view!=='staff'||S.staffTab!=='queue')return;
   if(S.queueView==='screen'){_qclScreen();if(c.sid===S._qclSid)_qclChime();}
   else if(own)renderStaffQueue();else _qPaintSoon();
@@ -80372,7 +80383,9 @@ function _qclNext(sid){
   const M=S._qcl||new Map();
   const e=(_qBySession().get(sid)||[]).filter(x=>_qclOk(x)&&!M.has(x.id)).sort((a,b)=>(a.queueNum||1e9)-(b.queueNum||1e9))[0];
   if(!e){toast(t('qclNone'),'info');return;}
-  return _qclCall(e.id);
+  const p=_qclCall(e.id),c=S._qcl&&S._qcl.get(e.id);
+  if(c)S._qclNx={sid,id:c.id,at:c.at,desk:c.desk,t:Date.now()}; // held for the check in _qclRx
+  return p;
 }
 // The screen in a window of its own; a browser that keeps it from opening shows it here instead.
 function _qclOpen(sid){
@@ -80393,13 +80406,13 @@ function _qclScreen(){
   const b=document.body.classList,first=!b.contains('qcl-mode');b.add('qcl-mode');
   let h=document.getElementById('qcl-page');
   if(!h){
-    h=document.createElement('main');h.id='qcl-page';h.setAttribute('aria-labelledby','qcl-title');
+    h=document.createElement('main');h.id='qcl-page';h.setAttribute('aria-labelledby','qcl-title');S._qclSig=''; // a new page is empty: it is filled whatever was drawn last time
     const v=document.getElementById('view-staff');if(v)v.after(h);else document.body.appendChild(h);
     h.addEventListener('pointerdown',()=>{const c=S._qclAc;if(c&&c.state==='suspended')c.resume().catch(()=>{});},{passive:true}); // a browser lets sound start after a tap
   }
   const s=_sessGet(S._qclSid),L=(S._qclL||[]).filter(c=>c.sid===S._qclSid),last=new Map();
   L.forEach(c=>{const w=last.get(c.desk);if(!w||w.at<=c.at)last.set(c.desk,c);});
-  const now=[...last.values()].sort((a,b)=>a.desk-b.desk),top=now.reduce((m,c)=>!m||c.at>=m.at?c:m,null);
+  const D=[...last.values()],now=D.filter(c=>!D.some(x=>x!==c&&x.id===c.id&&(x.at>c.at||x.at===c.at&&x.desk>c.desk))).sort((a,b)=>a.desk-b.desk),top=now.reduce((m,c)=>!m||c.at>=m.at?c:m,null);
   const on=new Set(now.map(c=>c.id)),prev=[];
   L.slice().sort((a,b)=>a.at<b.at?1:a.at>b.at?-1:0).forEach(c=>{if(prev.length<8&&!on.has(c.id)&&!prev.some(x=>x.id===c.id))prev.push(c);});
   const snd=_qclSndOn();
@@ -80996,7 +81009,7 @@ document.addEventListener('keydown',e=>{
   const tag=(e.target&&e.target.tagName||'').toLowerCase();
   if(tag==='input'||tag==='textarea'||tag==='select'||(e.target&&e.target.isContentEditable)){if(e.target.id==='ci-bike'&&/^Bracket(Left|Right)$/.test(e.code||''))_kbStaff('ci',e);return;} // no bike number holds [ or ]
   if(e.metaKey||e.ctrlKey||e.altKey)return;
-  if(S.view!=='staff'||S.staffRole==='door')return; // the Door screen has no shortcuts: no section, no row
+  if(S.view!=='staff'||S.staffRole==='door'||S._kiosk)return; // the Door screen has no shortcuts: no section, no row; nor the kiosk (N, /, R, the letters, G chords)
   // Don't hijack keys while a modal / PIN / auth overlay is open. On screen, that is: the
   // sign-in dialog's markup stays in the page hidden once drawn, and a bare "is there one"
   // check was always yes, so every shortcut here was dead.
