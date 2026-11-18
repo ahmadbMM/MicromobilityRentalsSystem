@@ -2830,6 +2830,8 @@
   "spotsLeft_many": "{0} places restantes",
   "spotsLeft_other": "{0} places restantes",
   "fewSpots": "Plus que quelques places",
+  "fwaAt": "Automatiquement à",
+  "fwaUnit": "places restantes",
   "errSomethingWrong": "Cela n’a pas fonctionné, et nous en avons reçu les détails. Réessayez, s’il vous plaît.",
   "errQNumTaken": "Ce numéro est déjà pris par une autre réservation.",
   "errLoginFirst": "Veuillez d'abord vous connecter.",

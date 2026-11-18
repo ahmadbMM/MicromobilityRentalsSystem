@@ -1143,7 +1143,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   errPhoneExists:'An account with this phone number already exists.',
   cfPhSharedThis:'Also on: {0}. Signing in with this number opens this account.',
   cfPhSharedOther:'Also on: {0}. Signing in with this number opens {1}’s account; this account signs in with its email.',
-  errConnection:'Connection error. Check your network.',pageTitle:'MicroMobility Experiences',pageTitleStaff:'MicroMobility Staff',pageDesc:'Book your bike, join a community ride, and skip the queue. Pick a location and a session in a few taps.',a11yHome:'MicroMobility home',a11yCustSections:'Customer sections',a11yCustNav:'Customer navigation',a11yStaffSections:'Staff sections',spotsLeft_zero:'{0} spots left',spotsLeft_one:'{0} spot left',spotsLeft_two:'{0} spots left',spotsLeft_few:'{0} spots left',spotsLeft_many:'{0} spots left',spotsLeft_other:'{0} spots left',fewSpots:'Few spots left',errSomethingWrong:'That didn’t work, and we’ve been sent the details. Try again.',errQNumTaken:'That number is already taken by another booking.',
+  errConnection:'Connection error. Check your network.',pageTitle:'MicroMobility Experiences',pageTitleStaff:'MicroMobility Staff',pageDesc:'Book your bike, join a community ride, and skip the queue. Pick a location and a session in a few taps.',a11yHome:'MicroMobility home',a11yCustSections:'Customer sections',a11yCustNav:'Customer navigation',a11yStaffSections:'Staff sections',spotsLeft_zero:'{0} spots left',spotsLeft_one:'{0} spot left',spotsLeft_two:'{0} spots left',spotsLeft_few:'{0} spots left',spotsLeft_many:'{0} spots left',spotsLeft_other:'{0} spots left',fewSpots:'Few spots left',fwaAt:'Automatically at',fwaUnit:'places left',errSomethingWrong:'That didn’t work, and we’ve been sent the details. Try again.',errQNumTaken:'That number is already taken by another booking.',
   errLoginFirst:'Sign in first.',
   errSelectSession:'Choose a session above.',
   errSessionClosed:'That session is no longer open.',
@@ -1835,7 +1835,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   errPhoneExists:'يوجد حساب بهذا الرقم مسبقاً.',
   cfPhSharedThis:'هذا الرقم مسجّل أيضًا في: {0}. تسجيل الدخول بهذا الرقم يفتح هذا الحساب.',
   cfPhSharedOther:'هذا الرقم مسجّل أيضًا في: {0}. تسجيل الدخول بهذا الرقم يفتح حساب {1}، وهذا الحساب يسجّل الدخول ببريده الإلكتروني.',
-  errConnection:'خطأ في الاتصال. تحقق من شبكتك.',pageTitle:'تجارب MicroMobility',pageTitleStaff:'موظفو MicroMobility',pageDesc:'احجز دراجتك وانضم إلى جولة مجتمعية دون انتظار في الطابور. اختر الموقع والجلسة ببضع نقرات.',a11yHome:'الصفحة الرئيسية لـ MicroMobility',a11yCustSections:'أقسام العميل',a11yCustNav:'تنقّل العميل',a11yStaffSections:'أقسام الموظفين',spotsLeft_zero:'لا مقاعد متبقية',spotsLeft_one:'مقعد واحد متبقي',spotsLeft_two:'مقعدان متبقيان',spotsLeft_few:'{0} مقاعد متبقية',spotsLeft_many:'{0} مقعداً متبقياً',spotsLeft_other:'{0} مقعد متبقي',fewSpots:'أماكن قليلة متبقية',errSomethingWrong:'لم تنجح العملية، ووصلتنا تفاصيل الخطأ. حاول مرة أخرى من فضلك.',errQNumTaken:'هذا الرقم مستخدم بالفعل لحجز آخر.',
+  errConnection:'خطأ في الاتصال. تحقق من شبكتك.',pageTitle:'تجارب MicroMobility',pageTitleStaff:'موظفو MicroMobility',pageDesc:'احجز دراجتك وانضم إلى جولة مجتمعية دون انتظار في الطابور. اختر الموقع والجلسة ببضع نقرات.',a11yHome:'الصفحة الرئيسية لـ MicroMobility',a11yCustSections:'أقسام العميل',a11yCustNav:'تنقّل العميل',a11yStaffSections:'أقسام الموظفين',spotsLeft_zero:'لا مقاعد متبقية',spotsLeft_one:'مقعد واحد متبقي',spotsLeft_two:'مقعدان متبقيان',spotsLeft_few:'{0} مقاعد متبقية',spotsLeft_many:'{0} مقعداً متبقياً',spotsLeft_other:'{0} مقعد متبقي',fewSpots:'أماكن قليلة متبقية',fwaAt:'تلقائياً عند',fwaUnit:'أماكن متبقية',errSomethingWrong:'لم تنجح العملية، ووصلتنا تفاصيل الخطأ. حاول مرة أخرى من فضلك.',errQNumTaken:'هذا الرقم مستخدم بالفعل لحجز آخر.',
   errLoginFirst:'الرجاء تسجيل الدخول أولاً.',
   errSelectSession:'الرجاء اختيار جلسة من الأعلى.',
   errSessionClosed:'هذه الجلسة لم تعد مفتوحة.',
@@ -3172,7 +3172,7 @@ const S={
   queue:[],bikes:[],customers:[],sessions:[],tags:[],customerTags:[],amSearch:'',amTagFilter:'',tagEdit:null,tagCustId:null,
   showAddSession:false,newSessDate:'',newSessStartTime:'21:00',newSessEndTime:'23:00',
   newSessMode:'counts',  
-  newSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},newSessTypeCaps:{},editSessTypeCaps:{},
+  newSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},newSessTypeCaps:{},editSessTypeCaps:{},newSessFewAt:'',editSessFewAt:'',
   editSessionId:null,
   editSessAssignedIds:[],
   editSessMode:'fleet',editSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},
@@ -8397,8 +8397,16 @@ function _fbkNextTxt(s){return t(_rideKind(s)==='saturday'?'sessFbkSat':'sessFbk
 // migration), and riders read it on the date's card, the event picker's card, Details and the farm's booking plate, on a
 // ride staff approve too (which never counts its places out loud). A count of three or fewer still says itself where a
 // ride counts; a full date, one closed as full and one not open yet say their own.
-function _sessFew(s){return _sessLive(s)&&!_sessFull(s)&&!!(parseSlots(s.bike_slots)||{})._few;}
+// Automatic (the user, 2026-11-18, item 4 of the staff Bookings round: "Automatic Few spots left. The switch turns itself
+// on once places left drop to a number staff set"): bike_slots._fewAt, a whole number 1-999 from the session forms' box
+// under the switch. The date then says it once the places left the rider's page counts (spotsLeft, as "N spots left"
+// reads them) are that many or fewer; a ride staff approve that names no places of its own is the switch's alone.
+function _sessFew(s){if(!_sessLive(s)||_sessFull(s))return false;const o=parseSlots(s.bike_slots)||{};if(o._few)return true;const at=_fewAtOf(o);return !!at&&_fewCounts(s)&&spotsLeft(s.id)<=at;}
 function _fewSlot(slots,on){if(on)slots._few=1;else delete slots._few;return slots;}
+function _fewAtOf(o){const n=Number(o&&o._fewAt);return Number.isInteger(n)&&n>=1&&n<=999?n:0;}
+function _fewCounts(s){return !!(_isApprovalRide(s)?(s.spots||s.capacity):s.capacity);}
+// The box as typed ('' or digits) into the slots: a whole number 1-999 kept, anything else none.
+function _fwaSlot(slots,v){const n=Math.min(999,Math.floor(Number(String(v??'').trim())||0));if(String(v??'').trim()&&n>=1)slots._fewAt=n;else delete slots._fewAt;return slots;}
 // The order of sessions in every staff list (the user, 2026-11-10: "in the sessions lists everywhere show the sessions
 // with the chronological order starting from today and moving forward for open and closed sessions ... for the past
 // sessions put them in the end starting with the most recent to the oldest"): today's and the coming sessions first,
@@ -8537,12 +8545,15 @@ function _featSessSwitch(which,ok){
   return`<div class="form-group ss-mt18 feat-sess"><label class="vm-switch"><input type="checkbox" class="web-toggle" role="switch" id="${id}"${on?' checked':''} data-on-change="${_on("_featSessSet",which,_P("checked"))}"><span><b>${esc(t('featTitle'))}</b><span class="am-meta vm-block">${esc(t('ssFeatHint'))}</span></span></label></div>`;
 }
 function _featSessSet(which,v){S[which==='edit'?'editSessFeat':'newSessFeat']=!!v;}
-// Few spots left (_sessFew): the new form's starts off; the edit form's opens on what the date has.
+// Few spots left (_sessFew): the new form's starts off; the edit form's opens on what the date has. Under it, the number
+// of places left at which it says itself (bike_slots._fewAt, 2026-11-18); empty is never.
 function _fewSessSwitch(which){
-  const ed=which==='edit',on=ed?!!S.editSessFew:!!S.newSessFew,id=ed?'es-few':'ns-few';
-  return`<div class="form-group ss-mt18 few-sess"><label class="vm-switch"><input type="checkbox" class="web-toggle" role="switch" id="${id}"${on?' checked':''} data-on-change="${_on("_fewSessSet",which,_P("checked"))}"><span><b>${esc(t('fewSpots'))}</b></span></label></div>`;
+  const ed=which==='edit',on=ed?!!S.editSessFew:!!S.newSessFew,id=ed?'es-few':'ns-few',fid=id+'at',v=String((ed?S.editSessFewAt:S.newSessFewAt)??'');
+  return`<div class="form-group ss-mt18 few-sess"><label class="vm-switch"><input type="checkbox" class="web-toggle" role="switch" id="${id}"${on?' checked':''} data-on-change="${_on("_fewSessSet",which,_P("checked"))}"><span><b>${esc(t('fewSpots'))}</b></span></label>
+    <div class="few-at"><label for="${fid}">${esc(t('fwaAt'))}</label><input type="number" id="${fid}" min="1" max="999" step="1" inputmode="numeric" value="${esc(v)}" aria-label="${esc(t('fewSpots')+' · '+t('fwaAt')+' · '+t('fwaUnit'))}" data-on-input="${_on("_fwaSet",which,_P("value"))}"><span class="few-at-u">${esc(t('fwaUnit'))}</span></div></div>`;
 }
 function _fewSessSet(which,v){S[which==='edit'?'editSessFew':'newSessFew']=!!v;}
+function _fwaSet(which,v){S[which==='edit'?'editSessFewAt':'newSessFewAt']=String(v??'').replace(/[^0-9]/g,'').slice(0,3);}
 function _esIgIn(v){S.editSessIg=v;} // the session editor's Instagram box (2026-11-13)
 // What the switch stores: nothing while it agrees with the kind's own answer, else 1 or 0.
 function _featSlot(on,kind){return !!on===FEAT_KINDS.includes(kind)?{}:{_feat:on?1:0};}
@@ -30720,6 +30731,7 @@ function startEditSession(id){
   S.editSessLockers=sess.lockers===true;
   S.editSessFeat=_featured(sess); // the Featured switch opens on what riders see (2026-11-13)
   S.editSessFew=!!(parseSlots(sess.bike_slots)||{})._few; // and Few spots left on what the date has (_sessFew, 2026-11-15)
+  {const n=_fewAtOf(parseSlots(sess.bike_slots));S.editSessFewAt=n?String(n):'';} // and the number it says itself at (2026-11-18)
   S.editSessIg=_sessIg(sess); // the venue's Instagram (2026-11-13)
   renderSessions();
   setTimeout(()=>document.getElementById('sess-edit-form')?.scrollIntoView({behavior:_sb(),block:'start'}),80);
@@ -31591,11 +31603,11 @@ function _nsFillSync(){const el=document.getElementById('ns-fill');if(el)el.text
 function _nsToggleDay(i){const d=new Set(S.newSessDays||[]);if(d.has(i))d.delete(i);else d.add(i);S.newSessDays=[...d].sort((a,b)=>a-b);renderSessions();}
 // A template is the whole form but its date and repeat, saved by name and shared by every
 // device (staff_options session_templates). Tapping one fills the form.
-const NS_TPL_KEYS=['newSessEvent','newSessRoute','newSessTitle','newSessTitleAr','newSessSpots','newSessStartTime','newSessEndTime','newSessCollect','newSessWlCollect','newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds','newSessAddons','newSessWlMode','newSessWlVal','newSessMapUrl','newSessBfSel','newSessBfName','newSessBfUrl','newSessDays','newSessDesc','newSessPrice','newSessOpenAll','newSessKm','newSessGender','newSessLockers','newSessTypeCaps','newSessBfMem'];
+const NS_TPL_KEYS=['newSessEvent','newSessRoute','newSessTitle','newSessTitleAr','newSessSpots','newSessStartTime','newSessEndTime','newSessCollect','newSessWlCollect','newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds','newSessAddons','newSessWlMode','newSessWlVal','newSessMapUrl','newSessBfSel','newSessBfName','newSessBfUrl','newSessDays','newSessDesc','newSessPrice','newSessOpenAll','newSessKm','newSessGender','newSessLockers','newSessTypeCaps','newSessBfMem','newSessFewAt'];
 // What a template that predates a key (or never had it) leaves behind: these are cleared, not kept
 // from whatever form was open before, so a 50 SAR members-only event does not become free and open,
 // and a pool session from an older template is mixed, not men or women only as the last form was (2026-10-27).
-const NS_TPL_BLANK={newSessTypeCaps:{},newSessWlCollect:null,newSessRoute:'',newSessDesc:'',newSessPrice:'',newSessOpenAll:true,newSessKm:{},newSessGender:''};
+const NS_TPL_BLANK={newSessFewAt:'',newSessTypeCaps:{},newSessWlCollect:null,newSessRoute:'',newSessDesc:'',newSessPrice:'',newSessOpenAll:true,newSessKm:{},newSessGender:''};
 const NS_EV_NAME={blood:'evBloodName',jcc:'evJccName',community:'evSatName',petromin:'evPetroName',swim:'evSwimName',workshop:'evWorkshopName',snd96:'evSnd96Name',event:'evEventName',runher:'evRunHerName',vlap:'evVlapName',arena:'evArenaName',defe5k:'evDefeName',yoga:'evYogaName',farm:'evFarmName'};
 function _nsTpls(){return _optList('session_templates').filter(x=>x&&x.id&&x.label&&x.form&&typeof x.form==='object');}
 async function _nsTplSave(){
@@ -31628,6 +31640,7 @@ async function _nsTplPush(tp,list){
   let patch=null,tplSlots=null;
   try{
     NS_TPL_KEYS.forEach(k=>{if(k in tp.form)S[k]=JSON.parse(JSON.stringify(tp.form[k]));});
+    if(!('newSessFewAt' in tp.form))S.newSessFewAt=''; // a template from before the box stamps no number of the open form's on its nights (2026-11-18)
     S.newSessAssignedIds=_liveFleetIds(Array.isArray(S.newSessAssignedIds)?S.newSessAssignedIds:[],true);
     const host=document.getElementById('tab-sessions');if(host)host.innerHTML='';
     const timeVal=`${S.newSessStartTime||'09:00'} - ${S.newSessEndTime||'11:00'}`;
@@ -31642,7 +31655,7 @@ async function _nsTplPush(tp,list){
   // bike_slots from the open form wiped or stamped them on every future night (bug hunt 2026-10-28).
   for(const x of list){
     const old=parseSlots(x.bike_slots)||{},slots={...tplSlots};delete slots._inv;delete slots._feat;delete slots._fbk;delete slots._bfm;delete slots._few; // and each night is featured, or not, as it was (2026-11-13), closed as full, or not (_sessFb), and shows its breakfast spot to whom it did (_bfOff)
-    if(old._inv)slots._inv=old._inv;if(old._km&&!('_km' in slots))slots._km=old._km;if(old._feat!=null)slots._feat=old._feat;if(old._fbk)slots._fbk=old._fbk;if(old._bfm)slots._bfm=old._bfm;if(old._few)slots._few=old._few;if(old._ig)slots._ig=old._ig;
+    if(old._inv)slots._inv=old._inv;if(old._km&&!('_km' in slots))slots._km=old._km;if(old._feat!=null)slots._feat=old._feat;if(old._fbk)slots._fbk=old._fbk;if(old._bfm)slots._bfm=old._bfm;if(old._few)slots._few=old._few;if(old._fewAt&&!('_fewAt' in slots))slots._fewAt=old._fewAt;if(old._ig)slots._ig=old._ig;
     if(!await _wr(sb.from('sessions').update({...patch,bike_slots:JSON.stringify(slots)}).eq('id',x.id).neq('status','deleted'),'update rides'))n++;
   }
   await _sessReload(list.map(x=>x.id));renderSessions();
@@ -32023,6 +32036,7 @@ function _nsCopy(s,T){
   T.newSessLockers=s.lockers===true;
   T.newSessFeat=slots._feat!=null?!!slots._feat:null; // a clone is featured as its original is; none set follows the kind (2026-11-13)
   T.newSessBfMem=!!slots._bfm; // the breakfast spot for members only, as the original's (bike_slots._bfm, 2026-11-13)
+  {const n=_fewAtOf(slots);T.newSessFewAt=n?String(n):'';} // the number Few spots left says itself at comes too, the switch does not (2026-11-18)
   if(slots._wl&&typeof slots._wl==='object'){T.newSessWlMode=slots._wl.m==='pct'?'pct':'count';T.newSessWlVal=slots._wl.v!=null?String(slots._wl.v):'';}
   else{T.newSessWlMode='count';T.newSessWlVal='';}
   const m=String((slots._time)||'09:00 - 11:00').match(/(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/);
@@ -32386,7 +32400,7 @@ async function _n6sInsertAll(rows,ctx){
 const N6S_COPY_KEEP=['capacity','bike_slots','addons','title','spots','price','meet_url','meet_name','meet_name_ar','meet_lat','meet_lng','breakfast_name','breakfast_url','event_kind','needs_approval','ride_kind','paid_ride','open_to_all','required_tag_id','description','gender_only','member_cap','location','template_id','route_slug','hide_queue','lockers']; // the meeting point's name and coordinate go with its link; a ride's status stays with its date
 function _n6sCopyRow(s,days){
   const o={};N6S_COPY_KEEP.forEach(k=>{if(k in s)o[k]=s[k];});
-  const d=_ssPlus(_ssDay(s),days),sl={...(parseSlots(s.bike_slots)||{})};delete sl._inv;delete sl._fbk;delete sl._few; // a copy starts closed and unseen, never shown as full (_sessFb) or as few left (_sessFew)
+  const d=_ssPlus(_ssDay(s),days),sl={...(parseSlots(s.bike_slots)||{})};delete sl._inv;delete sl._fbk;delete sl._few; // a copy starts closed and unseen, never shown as full (_sessFb) or as few left (_sessFew); the number it says itself at (_fewAt) comes along
   // Picked bikes the fleet no longer puts out (retired, missing) stay behind, as on a clone (_nsCopy; bug hunt 2026-11-10):
   // copied, they were places customers could book with no bike behind them, which the picker cannot show to untick. Their
   // type counts go down with them, and the places when they were the bike count. A night left with none keeps its list,
@@ -32605,7 +32619,7 @@ async function _n6sFollowApply(sess,slots,total,patch){
 // The new-session form's repeat (every week or every 2 weeks, until a date) and when riders can book (SS09, SS10).
 function _n6sSet(k,v){S[k]=v;_nsFillSync();}
 function _n6sPubSet(v){S.n6sPub=v;renderSessions();}
-function _n6sFormReset(){S.n6sEvery='1';S.n6sUntil='';S.n6sPub='draft';S.n6sOpensAt='';S.newSessFeat=null;S.newSessFew=false;} // and the Featured switch follows the kind again (2026-11-13)
+function _n6sFormReset(){S.n6sEvery='1';S.n6sUntil='';S.n6sPub='draft';S.n6sOpensAt='';S.newSessFeat=null;S.newSessFew=false;S.newSessFewAt='';} // and the Featured switch follows the kind again (2026-11-13)
 function _n6sFormHtml(){
   const ev=String(S.n6sEvery||'1'),pub=S.n6sPub||'draft',can=_n6sCol('opens_at');
   return`<div class="form-row ss-mb16 n6s-rep">
@@ -34307,6 +34321,7 @@ async function _saveSessionEdit(){
   {const ig=_igClean(S.editSessIg!=null?S.editSessIg:_sessIg(sess));if(IG_HANDLE.test(ig))slots._ig=ig;} // the venue's Instagram, kept or changed; emptied, gone (2026-11-13)
   if(_featOk(sess))Object.assign(slots,_featSlot(typeof S.editSessFeat==='boolean'?S.editSessFeat:_featured(sess),_rideKind(sess))); // Featured (2026-11-13); a form that never set it keeps what the date had
   _fewSlot(slots,typeof S.editSessFew==='boolean'?S.editSessFew:!!(parseSlots(sess.bike_slots)||{})._few); // Few spots left (_sessFew, 2026-11-15)
+  _fwaSlot(slots,typeof S.editSessFewAt==='string'?S.editSessFewAt:_fewAtOf(parseSlots(sess.bike_slots))); // and its number (2026-11-18): the editor rebuilds bike_slots, so it is carried
   if(_hasBreakfast(sess))_bfMemSlot(slots,typeof S.editSessBfMem==='boolean'?S.editSessBfMem:_bfMem(sess)); // who sees the breakfast spot (_bfMemFieldHtml, 2026-11-13)
   if(_needsBike(sess)&&!_hasRideGroups(sess))Object.assign(slots,_rgKmSlot('editSessKm',['all']));
   if(_rideKind(sess)==='petromin')Object.assign(slots,_pmInvSlot('editSessInv'));
@@ -34573,6 +34588,7 @@ function _nsSlots(timeVal,collectVal){
   }
   {const _wl=_readWlCap('ns');if(_wl)slots._wl=_wl;}
   if(S.newSessFew)slots._few=1; // Few spots left, where staff set the switch (_sessFew, 2026-11-15)
+  _fwaSlot(slots,S.newSessFewAt); // and the places left it says itself at (2026-11-18)
   if(_nsFeatOk()&&S.newSessFeat!=null)Object.assign(slots,_featSlot(S.newSessFeat,_nsKind())); // Featured, where staff set the switch (2026-11-13)
   if(_nsSeats()&&_kindHasBf(S.newSessEvent))_bfMemSlot(slots,!!S.newSessBfMem); // who sees the breakfast spot (_bfMemFieldHtml, 2026-11-13)
   if(_kindHas(_nsKind(),'bike')&&_nsKind()!=='saturday')Object.assign(slots,_rgKmSlot('newSessKm',['all']));

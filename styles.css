@@ -2913,6 +2913,10 @@
     #tab-sessions .ss-mt4{margin-top:4px;}
     #tab-sessions .ss-mt6{margin-top:6px;}
     #tab-sessions .ss-mt18{margin-top:18px;}
+    #tab-sessions .few-at{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px;font-size:var(--sf-fs-sm);}
+    #tab-sessions .few-at label{margin:0;font-size:inherit;font-weight:400;letter-spacing:0;text-transform:none;color:var(--text);}
+    #tab-sessions .few-at input{width:5.5em;min-width:0;}
+    #tab-sessions .few-at-u{color:var(--muted);}
     #tab-sessions .ss-mt28{margin-top:28px;}
     #tab-sessions .ss-minw0{min-width:0;}
     #tab-sessions .ss-fs12{font-size:var(--sf-fs-xs);}

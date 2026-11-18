@@ -2830,6 +2830,8 @@
   "spotsLeft_many": "{0} vagas restantes",
   "spotsLeft_other": "{0} vagas restantes",
   "fewSpots": "Poucas vagas restantes",
+  "fwaAt": "Automaticamente com",
+  "fwaUnit": "vagas restantes",
   "errSomethingWrong": "Não funcionou, e recebemos os detalhes. Tente de novo, por favor.",
   "errQNumTaken": "Esse número já está em outra reserva.",
   "errLoginFirst": "Entre primeiro.",

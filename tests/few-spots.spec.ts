@@ -24,8 +24,14 @@ const sat = {
 const jcc = { id: JCC, session_date: '2099-11-17', day: 'Tuesday', status: 'open', capacity: 40, created_at: 1, bike_slots: '{"_time":"21:00 - 23:00","_total":40}' };
 const fewFarm = withSlot(farm, { _few: 1 });
 
-async function custBoot(page: Page, sessions: Record<string, unknown>[], lang = '') {
-  await stubSupabase(page, { sessions, queue_entries: [], 'rpc:community_member': true });
+// Other riders' bookings as a rider's page reads them (no names, as the queue_public view).
+const pub = (sid: string, date: string, n: number, x: Record<string, unknown> = {}) => Array.from({ length: n }, (_, i) => ({
+  id: `${sid}-p${i}`, session_id: sid, session_day: 'Thursday', session_date: date, queue_num: i + 1, status: 'waiting', size: 'M',
+  type_preference: 'Road', paid: false, price: 0, assigned_bike_id: null, walk_in: false, ride_duration: null, ...x,
+}));
+
+async function custBoot(page: Page, sessions: Record<string, unknown>[], lang = '', queuePublic: Record<string, unknown>[] = []) {
+  await stubSupabase(page, { sessions, queue_entries: queuePublic, queue_public: queuePublic, 'rpc:community_member': true }); // whichever the page reads (secure mode reads the view)
   await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
   await page.goto('/' + (lang ? `?lang=${lang}` : ''));
   await waitForSb(page);
@@ -86,6 +92,49 @@ test.describe('@customer:farm Few spots left', () => {
   });
 });
 
+// Automatic (the user, 2026-11-18: "Automatic Few spots left. The switch turns itself on once places left drop to a number
+// staff set"): bike_slots._fewAt, counted as the rider's page counts its places (spotsLeft).
+test.describe('@customer:farm Few spots left, automatic', () => {
+  const few = (id: string) => `_sessFew(allSessions().find(x=>x.id==='${id}'))`;
+  test('on at the number staff set, off above it; a waitlisted request holds no place', async ({ page }) => {
+    // 130 places, 110 requests held (and five on the waitlist, which hold none): 20 left, the number set
+    await custBoot(page, [withSlot(farm, { _fewAt: 20 }), sat], '', [...pub(FH, '2099-11-19', 110), ...pub(FH, '2099-11-19', 5, { status: 'waitlist', id: undefined }).map((r, i) => ({ ...r, id: `wl${i}` }))]);
+    expect(await page.evaluate(`[spotsLeft('${FH}'),${few(FH)}]`)).toEqual([20, true]);
+    await expect(page.locator('#land-events .feat-card.feat-fh .feat-foot .sess-card-spots')).toHaveText('Few spots left');
+    await page.evaluate(`selectEvent('community')`);
+    await expect(page.locator('#tab-register .sess-card.fh-card .fh-card-foot .sess-card-spots')).toHaveText('Few spots left');
+    // one request taken back: 21 left, above the number, and nothing is said
+    await page.evaluate(`S.queue=S.queue.filter(e=>e.id!=='${FH}-p0');renderRegister()`);
+    expect(await page.evaluate(`[spotsLeft('${FH}'),${few(FH)}]`)).toEqual([21, false]);
+    await expect(page.locator('#tab-register .sess-card.fh-card .sess-card-spots')).toHaveCount(0);
+  });
+
+  test('a ride that counts its places: Details says it at the number, and a count of three or fewer still says itself', async ({ page }) => {
+    await custBoot(page, [withSlot(jcc, { _fewAt: 10 })], '', pub(JCC, '2099-11-17', 30));
+    expect(await page.evaluate(`[spotsLeft('${JCC}'),${few(JCC)}]`)).toEqual([10, true]);
+    await page.evaluate(`showSessInfo('${JCC}')`);
+    await expect(page.locator('#bike-info-modal .ev-info-facts')).toContainText('Few spots left');
+    await page.evaluate('closeEventInfo()');
+    await page.evaluate(`S.queue=S.queue.concat(${JSON.stringify(pub(JCC, '2099-11-17', 8).map((r) => ({ ...r, id: r.id + 'x' })))}.map(entryFromDB))`);
+    expect(await page.evaluate(`spotsLeft('${JCC}')`)).toBe(2);
+    await page.evaluate(`showSessInfo('${JCC}')`);
+    await expect(page.locator('#bike-info-modal .ev-info-facts')).toContainText('2 spots left');
+    await expect(page.locator('#bike-info-modal .ev-info-facts')).not.toContainText('Few spots left');
+  });
+
+  test('the switch still says it whatever the count; a ride staff approve that names no places is the switch\'s alone; full or not a number says nothing', async ({ page }) => {
+    await custBoot(page, [withSlot(farm, { _few: 1, _fewAt: 5 }), sat]);
+    expect(await page.evaluate(`[spotsLeft('${FH}'),${few(FH)}]`)).toEqual([130, true]);
+    const r = await page.evaluate(`(()=>{const s=allSessions().find(x=>x.id==='${SAT}');return[
+      _sessFew({...s,spots:null,capacity:null,bike_slots:'{"_fewAt":999}'}),
+      _sessFew({...s,bike_slots:'{"_fewAt":999}'}),
+      _sessFew({...s,bike_slots:'{"_fewAt":999}',status:'full'}),
+      _sessFew({...s,bike_slots:'{"_fewAt":"lots"}'}),
+      _sessFew({...s,bike_slots:'{"_fewAt":0}'})];})()`);
+    expect(r).toEqual([false, true, false, false, false]);
+  });
+});
+
 test.describe('@staff:sessions Few spots left', () => {
   async function staffBoot(page: Page, sessions: Record<string, unknown>[]) {
     await page.setViewportSize({ width: 1280, height: 900 });
@@ -142,5 +191,42 @@ test.describe('@staff:sessions Few spots left', () => {
     expect(await page.evaluate(`_nsSlots('16:30 - 20:30','').slots._few`)).toBe(1);
     await page.evaluate(`_n6sFormReset();renderSessions()`);
     await expect(page.locator('#ns-few')).not.toBeChecked();
+  });
+
+  test('the number it says itself at: the edit form opens on it, a save carries it, emptied it goes', async ({ page }) => {
+    const patches = await staffBoot(page, [withSlot(farm, { _total: 130, _fewAt: 20 }), jcc]);
+    await page.evaluate(`setStaffTab('sessions');startEditSession('${FH}')`);
+    await expect(page.locator('#es-few')).not.toBeChecked();
+    await expect(page.getByLabel('Few spots left · Automatically at · places left')).toHaveValue('20');
+    await expect(page.locator('#sess-edit-form .few-at')).toContainText('places left');
+    await page.evaluate('_saveSessionEdit()');
+    await expect.poll(() => patches.length).toBe(1);
+    expect(slotsOf(patches[0])).toMatchObject({ _time: '16:30 - 20:30', _fewAt: 20 });
+    expect('_few' in slotsOf(patches[0])).toBe(false);
+    await page.evaluate(`startEditSession('${FH}')`);
+    await page.locator('#es-fewat').fill('35');
+    await page.evaluate('_saveSessionEdit()');
+    await expect.poll(() => patches.length).toBe(2);
+    expect(slotsOf(patches[1])._fewAt).toBe(35);
+    await page.evaluate(`startEditSession('${FH}')`);
+    await page.locator('#es-fewat').fill('');
+    await page.evaluate('_saveSessionEdit()');
+    await expect.poll(() => patches.length).toBe(3);
+    expect('_fewAt' in slotsOf(patches[2])).toBe(false);
+  });
+
+  test('the new form stores the number; a clone, a template and a copied week carry it, the switch stays behind', async ({ page }) => {
+    await staffBoot(page, [withSlot(farm, { _few: 1, _fewAt: 20 }), jcc]);
+    await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;renderSessions()`);
+    await page.locator('#tab-sessions .ev-pick.ev-farm').click();
+    await expect(page.locator('#ns-fewat')).toHaveValue('');
+    expect(await page.evaluate(`'_fewAt' in _nsSlots('16:30 - 20:30','').slots`)).toBe(false);
+    await page.locator('#ns-fewat').fill('15');
+    expect(await page.evaluate(`_nsSlots('16:30 - 20:30','').slots._fewAt`)).toBe(15);
+    await page.evaluate(`_n6sFormReset();renderSessions()`);
+    await expect(page.locator('#ns-fewat')).toHaveValue('');
+    const r = await page.evaluate(`(()=>{const s=allSessions().find(x=>x.id==='${FH}'),c=_nsCopy(s,{newSessEvent:'farm'}),w=JSON.parse(_n6sCopyRow(s,7).bike_slots);
+      return[c.newSessFewAt,c.newSessFew,NS_TPL_KEYS.includes('newSessFewAt'),NS_TPL_BLANK.newSessFewAt,w._fewAt,'_few' in w];})()`);
+    expect(r).toEqual(['20', undefined, true, '', 20, false]);
   });
 });
