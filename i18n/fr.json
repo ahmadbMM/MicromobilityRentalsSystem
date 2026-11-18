@@ -9818,5 +9818,11 @@
   "qclNotSent": "L'appel n'a pas atteint les écrans. Vérifiez la connexion et appelez à nouveau.",
   "qclSound": "Son",
   "qclExit": "Quitter",
-  "qclDeskNo": "Numéro du comptoir"
+  "qclDeskNo": "Numéro du comptoir",
+  "nwxFig": "Nouveau {0}",
+  "nwxOpt": "Nouveau depuis votre dernier passage",
+  "nwxNew": "Nouveau",
+  "nwxCx": "Annulé",
+  "nwxCh": "Modifié",
+  "nwxSeen": "Vu"
 }

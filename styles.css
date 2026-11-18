@@ -6273,6 +6273,12 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .q-live-count{top:var(--staff-stic
 :is(#tab-queue,#tab-waitlist) .q-lc-active b{color:var(--green);}
 :is(#tab-queue,#tab-waitlist) .q-lc-waiting b{color:var(--orange);}
 :is(#tab-queue,#tab-waitlist) .q-lc-owing b{color:var(--red);}
+/* New since you last looked (2026-11-18): its own colour, the figure and the row's mark */
+body.view-staff{--nwx-c:var(--blue);}
+:is(#tab-queue,#tab-waitlist) .q-lc-nwx b{color:var(--nwx-c);}
+:is(#tab-queue,#tab-waitlist) .nwx-tag{display:inline-flex;align-items:center;margin-inline-start:6px;padding:1px 6px;border:1px solid var(--nwx-c);border-radius:var(--sf-r-xs);color:var(--nwx-c);font-size:var(--sf-fs-xs);font-weight:600;white-space:nowrap;vertical-align:middle;}
+:is(#tab-queue,#tab-waitlist) .nwx-tag.nwx-x{border-color:var(--red);color:var(--red);}
+:is(#tab-queue,#tab-waitlist) .result-count .nwx-seen{margin-inline-start:8px;}
 :is(#tab-queue,#tab-waitlist) .n6b-pres{display:inline-flex;align-items:center;gap:4px;margin-inline-start:6px;padding:1px 6px;border:1px solid var(--orange);color:var(--orange);font-size:var(--sf-fs-xs);font-weight:600;white-space:nowrap;vertical-align:middle;}
 .n6b-pres-dlg{display:block;margin-top:6px;padding:6px 8px;border:1px solid var(--orange);color:var(--orange);font-size:var(--sf-fs-sm);font-weight:600;}
 :is(#tab-queue,#tab-waitlist) .q-lc-btn.active{border-color:var(--green);color:var(--text);}
@@ -14949,6 +14955,7 @@ body.view-staff #tab-queue .rq-hacts .live-share select{display:none;}
   body.view-staff #tab-queue .q-lc-nums .q-lc-sep{display:none;}
   body.view-staff #tab-queue .q-lc-nums .q-lc-waiting{order:-2;}
   body.view-staff #tab-queue .q-lc-nums .q-lc-owing{order:-1;}
+  body.view-staff #tab-queue .q-lc-nums .q-lc-nwx{order:-1;}
   body.view-staff #tab-queue .q-live-count{padding-inline-end:28px;-webkit-mask-image:linear-gradient(to left,transparent,#000 24px);mask-image:linear-gradient(to left,transparent,#000 24px);}
   html[dir="rtl"] body.view-staff #tab-queue .q-live-count{-webkit-mask-image:linear-gradient(to right,transparent,#000 24px);mask-image:linear-gradient(to right,transparent,#000 24px);}
   /* the list ends a floating pair's height (58px and its 16px lift, the tab bar and the safe area are .view-main's) above

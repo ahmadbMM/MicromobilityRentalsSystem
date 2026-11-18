@@ -9818,5 +9818,11 @@
   "qclNotSent": "Hindi umabot sa mga screen ang tawag. Tingnan ang koneksyon at tumawag ulit.",
   "qclSound": "Tunog",
   "qclExit": "Lumabas",
-  "qclDeskNo": "Numero ng desk"
+  "qclDeskNo": "Numero ng desk",
+  "nwxFig": "Bago {0}",
+  "nwxOpt": "Bago mula nang huli mong tingnan",
+  "nwxNew": "Bago",
+  "nwxCx": "Kinansela",
+  "nwxCh": "Binago",
+  "nwxSeen": "Nakita na"
 }

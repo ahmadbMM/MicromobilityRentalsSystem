@@ -9818,5 +9818,11 @@
   "qclNotSent": "La llamada no llegó a las pantallas. Revisa la conexión y llama de nuevo.",
   "qclSound": "Sonido",
   "qclExit": "Salir",
-  "qclDeskNo": "Número de mostrador"
+  "qclDeskNo": "Número de mostrador",
+  "nwxFig": "Nuevo {0}",
+  "nwxOpt": "Nuevo desde tu última visita",
+  "nwxNew": "Nuevo",
+  "nwxCx": "Cancelado",
+  "nwxCh": "Cambiado",
+  "nwxSeen": "Visto"
 }

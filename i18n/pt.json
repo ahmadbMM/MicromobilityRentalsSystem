@@ -9818,5 +9818,11 @@
   "qclNotSent": "A chamada não chegou às telas. Verifique a conexão e chame de novo.",
   "qclSound": "Som",
   "qclExit": "Sair",
-  "qclDeskNo": "Número do balcão"
+  "qclDeskNo": "Número do balcão",
+  "nwxFig": "Novo {0}",
+  "nwxOpt": "Novo desde a sua última visita",
+  "nwxNew": "Novo",
+  "nwxCx": "Cancelado",
+  "nwxCh": "Alterado",
+  "nwxSeen": "Visto"
 }
