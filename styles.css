@@ -9328,6 +9328,17 @@ body:not(.view-staff) .hub-sat-box{width:22px;height:22px;display:flex;align-ite
 body:not(.view-staff) .hub-sat.on{border-color:var(--go);background:var(--go-wash);color:var(--go-2);}
 body:not(.view-staff) .hub-sat.on .hub-sat-box{border-color:var(--go);background:var(--go);}
 body:not(.view-staff) .hub-sat:disabled{opacity:.5;cursor:default;}
+/* Build-up plan (2026-11-18, member-hub.js _bupHtml): the event, its date, the Saturdays to go, one row per Saturday. */
+body:not(.view-staff) .hub-bup-w{display:block;margin-top:0;}
+body:not(.view-staff) .hub-bup-n{display:block;font-size:var(--fs-17);color:var(--go-2);margin:6px 0 4px;}
+body:not(.view-staff) .hub-bup-l{list-style:none;margin:0;padding:0;}
+body:not(.view-staff) .hub-bup-r{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;padding:4px 0;border-bottom:1px solid var(--line);}
+body:not(.view-staff) .hub-bup-r:last-child{border-bottom:0;}
+body:not(.view-staff) .hub-bup-d{font-weight:600;font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .hub-bup-r.past .hub-bup-d{font-weight:400;color:var(--muted);}
+body:not(.view-staff) .hub-bup-s{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-13);font-weight:600;color:var(--muted);}
+body:not(.view-staff) .hub-bup-r:is(.done,.held) .hub-bup-s{color:var(--go-2);}
+body:not(.view-staff) .hub-bup-r .btn-sm{flex:none;min-height:44px;}
 body:not(.view-staff) .hub-row2{display:flex;align-items:center;gap:10px;}
 body:not(.view-staff) .hub-medal{width:40px;height:40px;flex:none;}
 body:not(.view-staff) .hub-bday{display:flex;align-items:center;gap:10px;color:var(--go-2);}

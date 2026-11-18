@@ -2865,6 +2865,7 @@
   "mfRefused": "À cette date, les membres réservent en premier. Tout le monde peut réserver dès {0}.",
   "mfFor": "Réservé aux membres pendant",
   "mfUntil": "Réservé aux membres jusqu’à {0}",
+  "ssBupLbl": "Plan de préparation",
   "errSomethingWrong": "Cela n’a pas fonctionné, et nous en avons reçu les détails. Réessayez, s’il vous plaît.",
   "errQNumTaken": "Ce numéro est déjà pris par une autre réservation.",
   "errLoginFirst": "Veuillez d'abord vous connecter.",

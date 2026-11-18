@@ -2865,6 +2865,7 @@
   "mfRefused": "Sa petsang ito, mga miyembro muna ang nagbu-book. Puwedeng mag-book ang lahat mula {0}.",
   "mfFor": "Para sa mga miyembro lang nang",
   "mfUntil": "Para sa mga miyembro lang hanggang {0}",
+  "ssBupLbl": "Plano ng paghahanda",
   "errSomethingWrong": "Hindi ito gumana, at natanggap namin ang mga detalye. Pakisubukan ulit.",
   "errQNumTaken": "Ginagamit na ang numerong iyon ng ibang booking.",
   "errLoginFirst": "Mag-log in muna.",

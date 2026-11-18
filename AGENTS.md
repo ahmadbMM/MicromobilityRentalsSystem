@@ -2201,6 +2201,29 @@ It isn't worth money, and it makes membership mean something now that sessions s
 - Tests: `tests/members-first.spec.ts`. The SQL was run twice on a local Postgres with stubs (`auth.role()`, `is_staff()`,
   `_member_active`). Website: not mirrored yet (it reads `public_at` from the same rows).
 
+## Build-up plan (2026-11-18)
+The user, 2026-11-18 (the community features round): "When a member books a big event (T100, Victory Lap and the like),
+the tab counts down the Saturdays left and suggests which ones to book. It ticks each one off once they've ridden it. It
+builds on Plan my Saturdays." No database change.
+- **Stored**: `bike_slots._bup` 1 beside `_time` (no column, no migration), the same lifecycle as Few spots left: a
+  "Build-up plan" switch on both session forms (`_bupSessSwitch`, `#es-bup` / `#ns-bup`, `ssBupLbl`) on every kind but
+  `saturday`; the edit form opens on what the date has and its save keeps or drops it (`_bupSlot`; the editor rebuilds
+  `bike_slots`), a template push keeps each night's own, a copied week (`_n6sCopyRow`), a fast clone and a clone start
+  without it (`_n6sFormReset`). The Sessions agenda marks such a date (`.ssx-bup`, `_sessExtraBits` with `feat`).
+- **Riders** (`member-hub.js`, `_bupHtml`, right after the hero; Plan my Saturdays stays where it was): the member's
+  nearest place held (`waiting`/`active`, never waitlisted or cancelled) on a marked, not called off date at least 7 days
+  ahead. The card: the event's title (`_evName`, as its ticket names it), its date, "N Saturdays to go" (calendar
+  Saturdays from today, today included, to the day before), and one row per Saturday from the later of the booking's day
+  (`registered_at` in Riyadh, the member's first row on that session) and 8 weeks before, at most 8: Done with a tick (a
+  `saturday`-kind booking `done`, or `active` on a day gone), the date alone and dimmed (gone, not ridden), Booked,
+  On the waitlist, Book (`_hubBook`: the hero's checks, open, booking window open, not full, `_sgOk`), Fully booked (full,
+  or closed with `_fbk`), Cancelled (every ride that day called off), else Not open yet. The card's own words never say
+  ride or bike about the event; the list's name is "Saturday rides". Words `bup*` in `HUB_T`; Done, Book, On the
+  waitlist and Cancelled are the hub's own; Booked and Fully booked are the app's (`tkStBooked`, `sessFbk`) lent in
+  `_hubDeps.words`. No read of its own: the member's bookings and the sessions Reserve reads (`list_sessions` sends
+  every session).
+- Tests: `tests/buildup-plan.spec.ts`. Website: not mirrored yet (the `/club` members' area would need the same card).
+
 ## Blood Donation event (2026-11-03)
 - **Blood Donor badge (2026-11-05):** `blood_donor`, the drop on the red medal, earned from staff's Donated mark (`donatedAt`), so taking the mark back takes the badge; shown only once held. **Volunteer badge:** `volunteer`, the raised hand on its own blue special medal (`BDG_SPECIAL.volunteer`, `.sp-volunteer`), given by staff from Community > Badges. Catalogue rows: migration 20261105100000. Mirrored in the website's `lib/ride-record.ts`.
 - **Blood Donation Visitor badge (2026-11-06):** `blood_visitor`, the drop's outline with a heart inside on the teal medal (glyph `dropo`), earned by everyone who came, donors and visitors alike: any booking on a `blood` session that staff checked out (status done), or one marked Donated (the owner, 2026-11-06: "the blood donation visitor badge give it to donors and visitors"); Blood Donor stays with those marked Donated only. Shown only once held. Catalogue row in migration 20261106100000.

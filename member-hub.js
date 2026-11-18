@@ -43,6 +43,11 @@ const HUB_T = {
   goalOf: ['{0} of {1}, until {2}', '{0} من {1}، حتى {2}', '{0} sur {1}, jusqu’au {2}', '{0} de {1}, hasta el {2}', '{0} de {1}, até {2}', '{1} میں سے {0}، {2} تک', '{1} में से {0}, {2} तक', '{0} sa {1}, hanggang {2}', '{1} मध्ये {0}, {2} सम्म', '{1}টির মধ্যে {0}টি, {2} পর্যন্ত'],
   goalDone: ['Done', 'تم', 'Terminé', 'Hecho', 'Concluído', 'مکمل', 'पूरा', 'Tapos na', 'पूरा भयो', 'সম্পন্ন'],
   plan: ['Plan my Saturdays', 'خطتي لأيام السبت', 'Planifier mes samedis', 'Planificar mis sábados', 'Planejar os meus sábados', 'میرے ہفتے کے دنوں کی منصوبہ بندی', 'मेरे शनिवार की योजना', 'Planuhin ang mga Sabado ko', 'मेरा शनिबारको योजना', 'আমার শনিবারের পরিকল্পনা'],
+  bup: ['Build-up plan', 'خطة الاستعداد', 'Plan de préparation', 'Plan de preparación', 'Plano de preparação', 'تیاری کا منصوبہ', 'तैयारी की योजना', 'Plano ng paghahanda', 'तयारी योजना', 'প্রস্তুতির পরিকল্পনা'],
+  bupOne: ['1 Saturday to go', 'يتبقى سبت واحد', '1 samedi restant', 'Queda 1 sábado', 'Falta 1 sábado', 'ہفتے کا 1 دن باقی', '1 शनिवार बाकी', '1 Sabado na lang', '1 शनिबार बाँकी', '1টি শনিবার বাকি'],
+  bupN: ['{0} Saturdays to go', 'أيام السبت المتبقية: {0}', '{0} samedis restants', 'Quedan {0} sábados', 'Faltam {0} sábados', 'ہفتے کے {0} دن باقی', '{0} शनिवार बाकी', '{0} Sabado na lang', '{0} शनिबार बाँकी', '{0}টি শনিবার বাকি'],
+  bupSats: ['Saturday rides', 'جولات السبت', 'Sorties du samedi', 'Recorridos del sábado', 'Passeios de sábado', 'ہفتے کی رائیڈز', 'शनिवार राइड', 'Mga Saturday ride', 'शनिबार राइडहरू', 'শনিবারের রাইড'],
+  bupSoon: ['Not open yet', 'لم يُفتح الحجز بعد', 'Pas encore ouvert', 'Aún no abierto', 'Ainda não aberto', 'ابھی کھلا نہیں', 'अभी खुला नहीं', 'Hindi pa bukas', 'अझै खुलेको छैन', 'এখনো খোলেনি'],
   season: ['Season challenge', 'تحدي الموسم', 'Défi de la saison', 'Reto de temporada', 'Desafio da época', 'سیزن کا چیلنج', 'सीज़न की चुनौती', 'Hamon ng season', 'मौसमको चुनौती', 'মৌসুমের চ্যালেঞ্জ'],
   goalAll: ['Community goal', 'هدف المجتمع', 'Objectif de la communauté', 'Meta de la comunidad', 'Objetivo da comunidade', 'کمیونٹی کا ہدف', 'समुदाय का लक्ष्य', 'Layunin ng komunidad', 'समुदायको लक्ष्य', 'কমিউনিটির লক্ষ্য'],
   clubSat: ['{0} Saturday rides this month', '{0} رحلة سبت هذا الشهر', '{0} sorties du samedi ce mois-ci', '{0} salidas de sábado este mes', '{0} passeios de sábado este mês', 'اس مہینے ہفتے کی {0} سواریاں', 'इस महीने {0} शनिवार राइड', '{0} Saturday ride ngayong buwan', 'यो महिना {0} शनिबारे राइड', 'এই মাসে শনিবারের {0}টি রাইড'],
@@ -310,6 +315,7 @@ function _feedHtml(c, d, stale) {
     d.birthday ? `<div class="hub-card hub-bday">${_cuIc('gift', 20)}<strong>${esc(_hF('bday', String((c && c.name) || '').trim().split(/\s+/)[0] || ''))}</strong></div>` : '',
     hero.recap ? staff : '',
     hero.html,
+    _bupHtml(c), // the Build-up plan, right after the hero (2026-11-18)
     _intHtml(false),
     d.year ? _yrCardHtml(d.year) : '',
     _monHtml(c, d),
@@ -621,6 +627,65 @@ async function _planTick(date) {
 }
 // This file is fetched as the tab opens: the plan's first read leaves here, beside the feed's own, not a turn after it.
 _planFetch();
+// ── Build-up plan (the user, 2026-11-18) ────────────────────────────────────────────────────────────
+// "When a member books a big event (T100, Victory Lap and the like), the tab counts down the Saturdays left and suggests
+// which ones to book. It ticks each one off once they've ridden it. It builds on Plan my Saturdays." Staff mark the event
+// with the session forms' Build-up plan switch (bike_slots._bup 1; never on a Saturday ride). The member's nearest place
+// held on a marked date (waiting or checked in; never waitlisted or cancelled) a week or more ahead gets one card right
+// after the hero: the event's title as its ticket names it, its date, the Saturdays to go (from today, today too on a
+// Saturday, to the day before), then one row per Saturday from the later of the booking's day and eight weeks before the
+// event: Done with a tick (a Saturday ride finished), the date alone, dimmed (gone, not ridden), Booked, On the waitlist,
+// Book (a ride the member may book now, the hero's own checks; it opens Reserve as the hero's Book does), Fully booked,
+// Cancelled, or Not open yet. All from what the page holds (the member's own bookings, the sessions Reserve reads); no
+// read of its own. The card's words never call the event a ride: it may be a run or a race.
+function _bupDay(d, n) { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
+function _bupSats(from, to) { // the Saturdays from `from` to `to`, both included
+  const out = [];
+  for (let d = _bupDay(from, (13 - new Date(from + 'T12:00:00Z').getUTCDay()) % 7); d <= to; d = _bupDay(d, 7)) out.push(d);
+  return out;
+}
+const _bupYmd = (x) => String(x || '').slice(0, 10), _bupOk = (d) => /^\d{4}-\d\d-\d\d$/.test(d);
+function _bupHtml(c) {
+  const dep = window._hubDeps || {};
+  if (!c || !dep.slots) return '';
+  const today = todayStr(), wk = _bupDay(today, 7), me = S.loggedIn || c, Q = getQueue().filter((e) => e && e.customerId === c.id);
+  let ev = null;
+  for (const e of Q) {
+    if (e.status !== 'waiting' && e.status !== 'active') continue;
+    const s = _sessGet(e.sessionId), d = s ? _bupYmd(s.session_date || s.id) : '';
+    if (!s || !_bupOk(d) || d < wk || s.cancelled_at || _rideKind(s) === 'saturday' || !(dep.slots(s.bike_slots) || {})._bup) continue;
+    if (!ev || d < ev.d || (d === ev.d && String(s.id) < String(ev.s.id))) ev = { s, d };
+  }
+  if (!ev) return '';
+  // From the booking's day (the member's first row on that date's session), or eight weeks before, whichever is later.
+  const made = Q.filter((e) => e.sessionId === ev.s.id).map((e) => _ksaYmd(e.registeredAt)).filter(_bupOk).sort()[0] || '';
+  const last = _bupDay(ev.d, -1), from = made > _bupDay(ev.d, -56) ? made : _bupDay(ev.d, -56);
+  const togo = _bupSats(today, last).length, rows = _bupSats(from, last).slice(-8);
+  const mine = {}, sats = {};
+  for (const e of Q) { const s = _sessGet(e.sessionId); if (s && _rideKind(s) === 'saturday') { const k = _bupYmd(s.session_date || s.id); (mine[k] = mine[k] || []).push(e); }; }
+  for (const s of S.sessions || []) { if (s && _rideKind(s) === 'saturday' && s.status !== 'deleted' && !s.draft) { const k = _bupYmd(s.session_date || s.id); (sats[k] = sats[k] || []).push(s); }; }
+  const w = _hubW();
+  let fmt = null; try { fmt = new Intl.DateTimeFormat(_locale(), { day: 'numeric', month: 'short', timeZone: 'UTC' }); } catch (_) {}
+  const row = (d) => {
+    const E = mine[d] || [], L = (sats[d] || []).filter((s) => !s.cancelled_at), past = d < today;
+    let cls = '', end = '';
+    if (E.some((e) => e.status === 'done' || (past && e.status === 'active'))) { cls = 'done'; end = `<span class="hub-bup-s">${_cuIc('tick', 14)}${_hT('goalDone')}</span>`; }
+    else if (past) cls = 'past';
+    else if (E.some((e) => e.status === 'waiting' || e.status === 'active')) { cls = 'held'; end = `<span class="hub-bup-s">${esc(w.booked || '')}</span>`; }
+    else if (E.some((e) => e.status === 'waitlist')) end = `<span class="hub-bup-s">${_hT('wl')}</span>`;
+    else {
+      const ok = L.find((s) => s.status === 'open' && _bwOpen(s) && !_sessFull(s) && _sgOk(s, me));
+      if (ok) end = `<button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_hubBook', ok.id)}">${_hT('book')}</button>`;
+      else if (L.some((s) => _sgOk(s, me) && (s.status === 'full' || (s.status === 'closed' && (dep.slots(s.bike_slots) || {})._fbk)))) end = `<span class="hub-bup-s">${esc(w.full || '')}</span>`;
+      else end = `<span class="hub-bup-s">${_hT(!L.length && (sats[d] || []).length ? 'rsCancel' : 'bupSoon')}</span>`;
+    }
+    let dt = d; try { if (fmt) dt = fmt.format(new Date(d + 'T12:00:00Z')); } catch (_) {}
+    return `<li class="hub-bup-r${cls ? ' ' + cls : ''}"><span class="hub-bup-d"><bdi>${esc(dt)}</bdi></span>${end}</li>`;
+  };
+  return `<div class="hub-card hub-bup"><span class="hub-k">${_cuIc('flag', 16)} ${_hT('bup')}</span><strong class="hub-name"><bdi>${esc(_evName(ev.s))}</bdi></strong>
+    <span class="hub-meta hub-bup-w"><bdi>${esc(_hDate(ev.d))}</bdi></span><strong class="hub-bup-n">${esc(togo === 1 ? _hT('bupOne') : _hF('bupN', togo))}</strong>
+    ${rows.length ? `<ul class="hub-bup-l" aria-label="${esc(_hT('bupSats'))}">${rows.map(row).join('')}</ul>` : ''}</div>`;
+}
 function _seasonHtml(g) {
   const n = Number(g.n) || 0, tg = Number(g.target) || 1, name = _hPick(g, 'name', 'name_ar');
   const medal = g.badge && typeof _bdgMedal === 'function' ? _bdgMedal(g.badge.icon, g.badge.color, 'hub-medal') : '';
