@@ -34,6 +34,7 @@ test.describe('@build the move: one address, written everywhere from site.config
     const mw = read('functions/_middleware.js');
     expect(mw).toContain(`const SITE_ORIGIN = '${NEW}';`);
     expect(mw).toContain("const FORMER_HOSTS = ['micromobilityrentals.pages.dev'];");
+    expect(read('functions/api/push-send.js')).toContain(`const SITE_ORIGIN = '${NEW}';`); // a tap leads to the rider app from any host (bug hunt 2026-11-18)
     expect(read('service-worker.js')).toContain("const LIVE_CUSTOMER_HOST = self.location.hostname === 'experiences.micromobility.sa';");
     expect(read('robots.txt')).toContain(`Sitemap: ${NEW}/sitemap.xml`);
     expect(read('sitemap.xml')).toContain(`<loc>${NEW}/</loc>`);
@@ -44,6 +45,14 @@ test.describe('@build the move: one address, written everywhere from site.config
     expect(html.split(OLD).length - 1).toBe(1);
     for (const f of ['index.html', 'app.js', 'staff.js']) expect(read(f), f).not.toMatch(/__SITE_(?:FORMER_)?ORIGINS?__/);
     expect(read('sitemap.xml')).not.toContain('pages.dev');
+  });
+
+  // Bug hunt 2026-11-18: deploy-now's stale guard said it was CI's list and missed five of its files.
+  test('the instant deploy checks every file the build writes that CI checks', () => {
+    const ci = /git diff --exit-code -- ([^\\\n]+)/.exec(read('.github/workflows/ci.yml'))![1].trim().split(/\s+/).sort();
+    const dn = /^GENERATED="([^"]+)"$/m.exec(read('scripts/deploy-now.sh'))![1].trim().split(/\s+/).sort();
+    expect(dn).toEqual(ci);
+    for (const f of ['functions/_middleware.js', 'sitemap.xml', 'robots.txt', 'certificate.css', 'assets/certificate.html', 'functions/api/push-send.js']) expect(ci).toContain(f);
   });
 });
 

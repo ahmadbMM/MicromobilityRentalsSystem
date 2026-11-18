@@ -20,6 +20,11 @@
 
 // A staff account may send this many notifications in this many minutes (counted in staff_actions).
 const PUSH_LIMIT = 30;
+// The rider app's address: every tap leads there, whichever host made the call. It was the caller's own, so a push sent
+// from the staff panel (staff.micromobility.sa, the same Pages project) or a drain asked for there led to the staff host,
+// and a waitlist offer's ?claim= was lost (bug hunt 2026-11-18). Written by scripts/build-html.mjs from site.config.json,
+// as functions/_middleware.js's SITE_ORIGIN is: change the address there.
+const SITE_ORIGIN = 'https://experiences.micromobility.sa';
 const PUSH_WINDOW_MIN = 10;
 
 export async function onRequestPost(context) {
@@ -40,14 +45,16 @@ export async function onRequestPost(context) {
   const ANON = env.SUPABASE_ANON_KEY;
   if (!ANON) return json({ ok: false, error: 'no anon key' }, 500);
 
-  // Staff-only. A valid Supabase Auth session is not enough — it must be a session that
-  // is_staff() would accept, which is what asking for the staff row proves.
-  const who = await fetch(`${SUPA}/rest/v1/rpc/is_staff`, {
+  // Staff who may change bookings only. A valid Supabase Auth session is not enough, nor is any staff row: is_staff()
+  // also lets in the view-only Owner role and the scan-only Door role, and a push is a write to a rider (bug hunt
+  // 2026-11-18). The staff pushes are the Bookings ones (a place moved up, a freed place offered), so the test is
+  // _staff_mod('queue', true), the one the database holds those writes to.
+  const who = await fetch(`${SUPA}/rest/v1/rpc/_staff_mod`, {
     method: 'POST',
     headers: { apikey: ANON, Authorization: `Bearer ${staffToken}`, 'Content-Type': 'application/json' },
-    body: '{}',
+    body: JSON.stringify({ p_mod: 'queue', p_edit: true }),
   });
-  if (!who.ok || (await who.json()) !== true) return json({ ok: false, error: 'not staff' }, 403);
+  if (!who.ok || (await who.json().catch(() => null)) !== true) return json({ ok: false, error: 'not staff' }, 403);
 
   // Who is sending: the staff account behind the token. Every send is written to staff_actions
   // (the audit trail staff read in History > Log) with the service key, and the same rows are
@@ -71,16 +78,27 @@ export async function onRequestPost(context) {
   if (!Number.isFinite(used)) return json({ ok: false, error: 'rate check failed' }, 503); // refused rather than unmetered
   if (used >= PUSH_LIMIT) return json({ ok: false, error: 'rate limited', limit: PUSH_LIMIT, minutes: PUSH_WINDOW_MIN }, 429);
 
-  // Service-role read: push_subscriptions is not readable with the anon key.
+  // The rider's own choice first: a staff push is about their rides, and a rider who switched "My rides" off (and kept
+  // Community on, so the browser stays subscribed) is not sent one - the hold _push_outbox_gate puts on the database's
+  // own 'rides' pushes (20261114000200_push_consent). Service-role reads: neither table is readable with the anon key.
+  const prefsRes = await fetch(
+    `${SUPA}/rest/v1/push_prefs?customer_id=eq.${encodeURIComponent(customerId)}&select=rides`,
+    { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` } },
+  );
+  if (!prefsRes.ok) return json({ ok: false, error: 'lookup failed' }, 502);
+  const prefs = await prefsRes.json().catch(() => null);
+  if (!Array.isArray(prefs)) return json({ ok: false, error: 'lookup failed' }, 502);
+  if (prefs[0] && prefs[0].rides === false) return json({ ok: true, sent: 0, reason: 'rides off' });
+  // A browser that failed three times is skipped, as the gate skips it.
   const subsRes = await fetch(
-    `${SUPA}/rest/v1/push_subscriptions?customer_id=eq.${encodeURIComponent(customerId)}&select=*`,
+    `${SUPA}/rest/v1/push_subscriptions?customer_id=eq.${encodeURIComponent(customerId)}&fail_count=lt.3&select=*`,
     { headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` } },
   );
   if (!subsRes.ok) return json({ ok: false, error: 'lookup failed' }, 502);
   const subs = await subsRes.json();
   if (!Array.isArray(subs) || !subs.length) return json({ ok: true, sent: 0, reason: 'no subscriptions' });
 
-  const origin = new URL(request.url).origin;
+  const origin = SITE_ORIGIN;
   // The record first: a send that is not on record is not sent.
   const logRes = await fetch(`${SUPA}/rest/v1/staff_actions?select=id`, {
     method: 'POST',
@@ -139,7 +157,7 @@ async function drain(request, env, PUB, PRIV, SERVICE) {
   const listRes = await call(`${SUPA}/rest/v1/push_outbox?sent_at=is.null&order=id.asc&limit=${DRAIN_MAX}&select=*`, { headers: H });
   if (!listRes.ok) return json({ ok: false, error: 'lookup failed' }, 502);
   const rows = await listRes.json().catch(() => []);
-  const origin = new URL(request.url).origin;
+  const origin = SITE_ORIGIN; // never the host the drain was asked for on
   const mark = (id, patch, only) => call(`${SUPA}/rest/v1/push_outbox?id=eq.${encodeURIComponent(id)}${only ? '&sent_at=is.null' : ''}`, {
     method: 'PATCH', headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(patch),
   });
@@ -216,7 +234,9 @@ function payloadFor(m, origin) {
 // Where a notification may lead: an address on this site only, at most 500 characters - the
 // payload has to fit one 4 KB record, and a tap must never open someone else's page. The value is
 // resolved against this origin and must stay on it over https; what is sent is the path, query and
-// hash alone (the service worker resolves it against its own origin), else './'.
+// hash alone (the service worker resolves it against its own origin), else './'. A path that starts
+// with two slashes ('/.//evil.example', 'https://<site>//evil.example') is one slash again: resolved
+// as it was, it was another host's address (bug hunt 2026-11-18).
 function safeUrl(u, origin) {
   const s = String(u || '').trim();
   if (!s || s.length > 500) return './';
@@ -227,7 +247,7 @@ function safeUrl(u, origin) {
     const x = new URL(s, base.origin + '/');
     if (x.origin !== base.origin) return './';
     if (x.protocol !== base.protocol) return './';
-    return (x.pathname + x.search + x.hash) || './';
+    return (x.pathname.replace(/^\/{2,}/, '/') + x.search + x.hash) || './';
   } catch { return './'; }
 }
 

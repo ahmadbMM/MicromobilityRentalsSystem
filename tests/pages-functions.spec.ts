@@ -154,6 +154,11 @@ test.describe('the Apple Wallet pass', () => {
   const circuit = { id: 's1', event_kind: 'rental', ride_kind: null as string | null, bike_slots: JSON.stringify({ _time: '21:00 - 23:00' }), meet_url: null as string | null, needs_approval: false, hide_queue: false };
   const realFetch = globalThis.fetch;
   let sessionUrls: string[] = [];
+  // One copy of the function per test, as one isolate serves many passes: a copy per pass opened the .p12 afresh each
+  // time (about a second; the function keeps the opened signer for its isolate), and the non-bike test's two dozen passes
+  // ran into the 30 s limit on a busy machine (bug hunt 2026-11-18). Each test still starts from a fresh copy.
+  let walletPost: Fn | null = null;
+  test.beforeEach(() => { walletPost = null; });
   test.afterEach(() => { globalThis.fetch = realFetch; });
 
   async function pass(b: typeof booking, sess: Record<string, unknown> | null, pw = PW, party: { rows?: (typeof booking)[]; groupIds?: string[] } = {}) {
@@ -166,7 +171,7 @@ test.describe('the Apple Wallet pass', () => {
       if (url.includes('apple.com')) return new Response(wwdrDer);
       return new Response('', { status: 404 });
     }) as typeof fetch;
-    const post = await load('functions/api/wallet-pass.js', 'onRequestPost');
+    const post = walletPost ??= await load('functions/api/wallet-pass.js', 'onRequestPost');
     const res = await post({
       request: new Request('https://site.test/api/wallet-pass', { method: 'POST', body: JSON.stringify({ customerId: 'c1', token: 't', bookingId: b.id, ...(party.groupIds ? { groupIds: party.groupIds } : {}) }) }),
       env: { APPLE_PASS_P12_BASE64: p12b64, APPLE_PASS_P12_PASSWORD: pw, APPLE_PASS_TYPE_ID: 'pass.test', APPLE_TEAM_ID: 'TEAM', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' },
@@ -267,6 +272,39 @@ test.describe('the Apple Wallet pass', () => {
     expect(shown).not.toMatch(CYCLING);
     const P = await import('../scripts/wallet/pass-images.js' as string);
     expect(Buffer.from(r.files!['strip@2x.png']).toString('base64')).toBe(P.YOGA_IMAGES['strip@2x.png']);
+  });
+
+  // Bug hunt 2026-11-18: every kind with no bikes has art of its own, never the default strip's bicycles (the Farm House
+  // Night had none and wore them); and a session read that fails refuses the pass, never a circuit bike pass in its place.
+  test('a session with no bikes never wears the bicycles, and a failed session read issues no pass', async () => {
+    const P = await import('../scripts/wallet/pass-images.js' as string);
+    const src = readFileSync(resolve(__dirname, '../scripts/wallet/wallet-pass.src.js'), 'utf8');
+    const noBike = Object.keys(new Function(`return ${/const NO_BIKE = (\{[^}]*\});/.exec(src)![1]}`)() as Record<string, boolean>);
+    expect(noBike).toContain('farm');
+    for (const k of noBike) {
+      expect(P.RIDE_IMAGES[k], k).toBeTruthy();
+      expect(P.RIDE_IMAGES[k]['strip@2x.png'], k).not.toBe(P.PASS_IMAGES['strip@2x.png']);
+    }
+    const farm = { ...circuit, event_kind: 'community', ride_kind: 'farm', needs_approval: false, bike_slots: JSON.stringify({ _time: '16:30 - 20:30' }) };
+    const r = await pass({ ...booking, price: 0 }, farm);
+    expect(r.status).toBe(200);
+    expect(Buffer.from(r.files!['strip@2x.png']).toString('base64')).not.toBe(P.PASS_IMAGES['strip@2x.png']);
+    for (const answer of [() => new Response('', { status: 502 }), () => { throw new Error('timeout'); }, () => new Response('{"message":"x"}')]) {
+      globalThis.fetch = (async (u: string | URL | Request) => {
+        const url = String(u);
+        if (url.includes('/rpc/my_bookings')) return new Response(JSON.stringify([booking]));
+        if (url.includes('/rpc/list_sessions')) return answer();
+        if (url.includes('apple.com')) return new Response(wwdrDer);
+        return new Response('', { status: 404 });
+      }) as typeof fetch;
+      const post = await load('functions/api/wallet-pass.js', 'onRequestPost');
+      const res = await post({
+        request: new Request('https://site.test/api/wallet-pass', { method: 'POST', body: JSON.stringify({ customerId: 'c1', token: 't', bookingId: booking.id }) }),
+        env: { APPLE_PASS_P12_BASE64: p12b64, APPLE_PASS_P12_PASSWORD: PW, APPLE_PASS_TYPE_ID: 'pass.test', APPLE_TEAM_ID: 'TEAM', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' },
+      });
+      expect(res.status).toBe(503);
+      expect(await res.json()).toMatchObject({ ok: false, error: 'session unavailable' });
+    }
   });
 
   // The Saturday Social Ride's booking number (the owner, 2026-10-25): its list is out and the rider is on it,
@@ -688,6 +726,9 @@ test.describe('the Google Wallet pass', () => {
     const live = await gpass(booking, { ...circuit, bike_slots: JSON.stringify({ _time: '21:00 - 00:30' }) });
     expect(live.obj.state).toBe('ACTIVE');
     expect(live.obj.validTimeInterval).toEqual({ end: { date: '2026-09-24T00:30:00+03:00' } });
+    // the Farm House Night's clock is arrival, then dinner: the pass lasts the night, not until dinner (bug hunt 2026-11-18)
+    const farm = await gpass(booking, { ...circuit, event_kind: 'community', ride_kind: 'farm', bike_slots: JSON.stringify({ _time: '16:30 - 20:30' }) });
+    expect(farm.obj.validTimeInterval).toEqual({ end: { date: '2026-09-23T23:59:00+03:00' } });
     expect((await gpass({ ...booking, status: 'cancelled' }, circuit)).obj.state).toBe('INACTIVE');
     expect((await gpass({ ...booking, status: 'noshow' }, circuit)).obj.state).toBe('INACTIVE');
     expect((await gpass({ ...booking, status: 'done' }, circuit)).obj.state).toBe('COMPLETED');
@@ -800,14 +841,19 @@ test.describe('@staff:security the push sender', () => {
     const endpoints = ['https://fcm.googleapis.com/fcm/send/abc', 'https://web.push.apple.com/QXyz', 'https://evil.example/hook', 'http://fcm.googleapis.com/x', 'https://fcm.googleapis.com.evil.example/x', 'https://10.0.0.1/x'];
     const hits: string[] = [];
     const audit: string[] = [];
+    const subsUrls: string[] = [];
     let used = 0;
+    let mayEdit = 'true';
+    let prefs = '[]';
     globalThis.fetch = (async (u: string | URL | Request, init?: RequestInit) => {
       const url = String(u);
-      if (url.includes('/rpc/is_staff')) return new Response('true');
+      if (url.includes('/rpc/_staff_mod')) { expect(JSON.parse(String(init?.body))).toEqual({ p_mod: 'queue', p_edit: true }); return new Response(mayEdit); }
+      if (url.includes('/rpc/is_staff')) throw new Error('is_staff lets in the view-only roles');
+      if (url.includes('/rest/v1/push_prefs')) return new Response(prefs);
       if (url.includes('/auth/v1/user')) return new Response(JSON.stringify({ id: '0f8fad5b-d9cb-469f-a165-70867728950e' }));
       if (url.includes('/rest/v1/staff_actions') && init?.method === 'HEAD') return new Response(null, { status: 200, headers: { 'content-range': `*/${used}` } });
       if (url.includes('/rest/v1/staff_actions')) { audit.push(String(init?.body || '')); used++; return new Response(null, { status: 201 }); }
-      if (url.includes('/rest/v1/push_subscriptions')) return new Response(JSON.stringify(endpoints.map((endpoint) => ({ endpoint, p256dh, auth }))));
+      if (url.includes('/rest/v1/push_subscriptions')) { subsUrls.push(url); return new Response(JSON.stringify(endpoints.map((endpoint) => ({ endpoint, p256dh, auth })))); }
       hits.push(url);
       return new Response('', { status: 201 });
     }) as typeof fetch;
@@ -834,6 +880,23 @@ test.describe('@staff:security the push sender', () => {
     used = 30;
     expect(await send({ url: '/' })).toMatchObject({ ok: false, error: 'rate limited' });
     expect(hits).toEqual([]);
+    used = 0;
+    // a browser that failed three times is skipped, as the database's own pushes skip it
+    expect(subsUrls.every((x) => x.includes('fail_count=lt.3'))).toBe(true);
+    // a rider who switched "My rides" off is not sent one, and nothing is put on record (bug hunt 2026-11-18)
+    prefs = JSON.stringify([{ rides: false }]);
+    audit.length = 0;
+    expect(await send({ url: '/' })).toMatchObject({ ok: true, sent: 0, reason: 'rides off' });
+    expect(hits).toEqual([]);
+    expect(audit).toEqual([]);
+    prefs = JSON.stringify([{ rides: true }]);
+    expect((await send({ url: '/' })).sent).toBe(2);
+    // an account that may not change bookings (the view-only Owner, the Door scanner) sends nothing
+    mayEdit = 'false';
+    audit.length = 0;
+    expect(await send({ url: '/' })).toMatchObject({ ok: false, error: 'not staff' });
+    expect(hits).toEqual([]);
+    expect(audit).toEqual([]);
   });
 
   test('{drain: true} sends what the database queued, once, and drops what waited three days', async () => {
@@ -859,7 +922,7 @@ test.describe('@staff:security the push sender', () => {
         return new Response(JSON.stringify(id === '3' ? [] : [{ id }]), { status: 200 });
       }
       if (url.includes('/rest/v1/push_subscriptions')) return new Response(JSON.stringify([{ endpoint: 'https://fcm.googleapis.com/fcm/send/abc', p256dh, auth }]));
-      if (url.includes('/rpc/is_staff') || url.includes('/auth/v1/user') || url.includes('staff_actions')) throw new Error('no staff check on a drain');
+      if (url.includes('/rpc/is_staff') || url.includes('/rpc/_staff_mod') || url.includes('/auth/v1/user') || url.includes('staff_actions')) throw new Error('no staff check on a drain');
       pushed.push(url);
       return new Response('', { status: 201 });
     }) as typeof fetch;
@@ -891,6 +954,10 @@ test.describe('@staff:security the push sender', () => {
     expect(safeUrl('http://site.test/x', o)).toBe('./');
     expect(safeUrl('javascript:alert(1)', o)).toBe('./');
     expect(safeUrl('/x', 'http://site.test')).toBe('./'); // never over plain http
+    // a path that starts with two slashes is one slash: resolved, it was another host (bug hunt 2026-11-18)
+    expect(safeUrl('/.//evil.test/login', o)).toBe('/evil.test/login');
+    expect(safeUrl('https://site.test//evil.test', o)).toBe('/evil.test');
+    expect(new URL(safeUrl('/.//evil.test/login', o), o + '/').origin).toBe(o);
   });
 });
 

@@ -85,7 +85,11 @@ for (let w = -Math.floor(WEEKS / 2); w < Math.ceil(WEEKS / 2); w++) {
     out.push(`insert into public.sessions (id, day, session_date, capacity, status, created_at, bike_slots, event_kind, ride_kind, needs_approval, hide_queue, spots, paid_ride, open_to_all, title, description, price) values (${q(ev + '-ev')}, ${q(dayName(ev))}, ${q(ev)}, 30, ${q(evPast ? 'closed' : 'open')}, now()::text, '{"_time":"19:00 - 21:00"}', 'community', 'event', false, true, 30, true, true, 'Bike maintenance class', 'Two hours on brakes, gears and flats.', 40) on conflict (id) do nothing;`);
   }
 }
-// bookings: past nights done and rated, future nights waiting
+// bookings: past nights done and rated, future nights waiting. The booking window's trigger refuses a waiting row a rider
+// could not book yet (_booking_window_guard: only staff pass, and the SQL editor is no staff member), so with booking.window
+// set - by this seed's first run, or copied from production - every later run rolled back on NOT_OPEN_YET (bug hunt
+// 2026-11-18). It is off for these rows alone, inside the transaction: an error rolls the switch back with the rest.
+out.push(`alter table public.queue_entries disable trigger queue_entries_booking_window;`);
 let qn = 0;
 for (const s of sessions) {
   const n = s.kind === 'jcc' ? int(18, 40) : int(8, 22);
@@ -102,6 +106,7 @@ for (const s of sessions) {
     out.push(`insert into public.queue_entries (id, name, email, phone, size, type_preference, paid, price, assigned_bike_id, session_id, session_day, session_date, queue_num, status, registered_at, walk_in, customer_id, height, rating_bike, rating_exp, feedback, checked_in_at, checked_out_at, approval) values (${q(id)}, ${q(r.name)}, null, ${q(r.phone)}, ${q(SIZES[Math.min(4, Math.max(0, Math.floor((r.height - 150) / 10)))])}, ${q(s.kind === 'saturday' ? 'Own' : r.type)}, ${status === 'done' || (s.kind === 'jcc' && rnd() < 0.3)}, ${price}, ${q(bike ? bike.id : null)}, ${q(s.id)}, ${q(dayName(s.date))}, ${q(s.date)}, ${k}, ${q(status)}, ${q(new Date(new Date(s.date).getTime() - int(1, 6) * 86400000).toISOString())}, false, ${q(r.id)}, ${r.height}, ${rated && bike ? int(5, 10) : 'null'}, ${rated ? int(4, 10) : 'null'}, ${rated && rnd() < 0.3 ? q(pick(['Great night', 'Saddle was low', 'Loved the pace', 'More lights please'])) : 'null'}, ${status === 'done' ? q(s.date + 'T18:05:00Z') : 'null'}, ${status === 'done' ? q(s.date + 'T20:10:00Z') : 'null'}, ${q(s.kind === 'saturday' ? 'approved' : null)}) on conflict (id) do nothing;`);
   }
 }
+out.push(`alter table public.queue_entries enable trigger queue_entries_booking_window;`);
 out.push(`insert into public.site_content (key, value, updated_by) values ('site.coming_soon', 'true'::jsonb, 'seed') on conflict (key) do nothing;`);
 out.push(`insert into public.site_content (key, value, updated_by) values ('booking.window', '{"days": 14, "at": "20:00"}'::jsonb, 'seed') on conflict (key) do nothing;`);
 out.push(`insert into public.staff_options (key, items) values ('service_every', '[40]'::jsonb) on conflict (key) do nothing;`);

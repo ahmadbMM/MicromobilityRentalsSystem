@@ -15,8 +15,9 @@
 # Flags: --dirty  ship despite uncommitted changes (the guard exists because a
 #                 live site running code that is in no commit is undebuggable).
 #
-# Two guards have no flag. Untracked files inside a folder that ships are refused: dist/ copies
-# those folders whole, so a work-in-progress functions/api/x.js would go live as an endpoint.
+# Two guards have no flag. Untracked files that ship are refused: dist/ copies its folders whole and
+# its root files as they are on disk, so a work-in-progress functions/api/x.js would go live as an
+# endpoint, and a new module never added would go live from no commit.
 # And HEAD must be exactly origin/main: CI deploys origin/main, so shipping from a checkout that
 # is behind it rolls production back, and shipping unpushed commits puts code live that CI will
 # overwrite on its next run. Push or pull first.
@@ -32,11 +33,13 @@ if [ "${1:-}" != "--dirty" ] && ! git diff --quiet HEAD -- . ':!dist'; then
   exit 1
 fi
 
-# The folders dist/ copies whole (DIRS in scripts/assemble-dist.mjs). Ignored files count too,
-# except macOS's .DS_Store, which wrangler never uploads.
-SHIPPED_DIRS=$(node -e "import('./scripts/assemble-dist.mjs').then(m=>console.log(m.DIRS.join(' ')))")
+# What dist/ copies: the folders whole (DIRS in scripts/assemble-dist.mjs) and the root files
+# (FILES), each from the working tree. Ignored files count too, except macOS's .DS_Store, which
+# wrangler never uploads. A root file in FILES that was never added (a new lazy module) passed
+# every check here and went live from no commit (bug hunt 2026-11-18).
+SHIPPED=$(node -e "import('./scripts/assemble-dist.mjs').then(m=>console.log([...m.DIRS,...m.FILES].join(' ')))")
 # shellcheck disable=SC2086
-stray=$(git ls-files --others -- $SHIPPED_DIRS | grep -Ev '(^|/)\.DS_Store$' || true)
+stray=$(git ls-files --others -- $SHIPPED | grep -Ev '(^|/)\.DS_Store$' || true)
 if [ -n "$stray" ]; then
   echo "✗ files git does not track would ship — commit or remove them:" >&2
   echo "$stray" | head -10 >&2
@@ -54,10 +57,12 @@ fi
 
 npm run build:html --silent
 npm run build:wallet --silent
-# the same stale guard CI runs (the same list): what we upload must match what git holds. It read
-# index.html and service-worker.js alone, so a stale app.js, staff.js, staff part, pack, _headers
-# (the CSP) or wallet function went live from here while git held another.
-GENERATED="index.html app.js app.css lang staff-parts service-worker.js staff.js _headers functions/api/wallet-pass.js"
+# the same stale guard CI runs (the same list as ci.yml's git diff, tests/site-move.spec.ts holds
+# them to it): what we upload must match what git holds. It read index.html and service-worker.js
+# alone, so a stale app.js, staff.js, staff part, pack, _headers (the CSP) or wallet function went
+# live from here while git held another; then five files the build also writes (the middleware's
+# hosts, the sitemap, robots.txt, the certificate's two) were missing (bug hunt 2026-11-18).
+GENERATED="index.html app.js app.css lang staff-parts service-worker.js functions/_middleware.js sitemap.xml robots.txt staff.js _headers certificate.css assets/certificate.html functions/api/wallet-pass.js functions/api/push-send.js"
 # shellcheck disable=SC2086
 git diff --quiet -- $GENERATED || {
   [ "${1:-}" = "--dirty" ] || { echo "✗ the build changed generated files — commit them (or --dirty):" >&2; git diff --stat -- $GENERATED | tail -5 >&2; exit 1; }

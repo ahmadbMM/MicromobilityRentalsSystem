@@ -551,6 +551,13 @@ const mw = mwBefore
   .replace(/^const FORMER_HOSTS = \[[^\]\n]*\];$/m, `const FORMER_HOSTS = ${JSON.stringify(formerHosts).replace(/"/g, "'").replace(/,/g, ', ')};`);
 if (!mw.includes(`const SITE_ORIGIN = '${origin}';`) || !/^const FORMER_HOSTS = \[/m.test(mw)) throw new Error('build: could not stamp the site origin into functions/_middleware.js');
 if (mw !== mwBefore) await writeFile(mwUrl, mw);
+// The push sender leads every tap to the rider app's address, whichever host called it (bug hunt 2026-11-18): the same
+// stamp, so a staging copy (scripts/staging-build.mjs) leads to its own.
+const psUrl = new URL('../functions/api/push-send.js', import.meta.url);
+const psBefore = await readFile(psUrl, 'utf8');
+const ps = psBefore.replace(/^const SITE_ORIGIN = '[^']*';$/m, `const SITE_ORIGIN = '${origin}';`);
+if (!ps.includes(`const SITE_ORIGIN = '${origin}';`)) throw new Error('build: could not stamp the site origin into functions/api/push-send.js');
+if (ps !== psBefore) await writeFile(psUrl, ps);
 
 // No build/tooling banner in the shipped file — index.html is public (View Source),
 // so the "edit app.src.html, not index.html" rule lives in AGENTS.md / CLAUDE.md instead.

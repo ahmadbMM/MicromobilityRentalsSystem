@@ -92,6 +92,10 @@ export async function onRequestPost(context) {
   // that row alone instead of every session ever run - egress is metered, and a pass needs one.
   // The find() below still picks by id, so the answer is right even if the filter were ignored.
   let sess = null;
+  // A read that failed (an error, a timeout, an answer that is not a list) is not a session that is gone: without it the
+  // pass was drawn as a circuit bike ride (_rideOf(null)) for a yoga or pool booking, and a signed pass is never updated.
+  // Refused, so the rider's next tap gets the right one (bug hunt 2026-11-18).
+  let sessRead = false;
   if (b.session_id != null) {
     try {
       const sr = await fetch(`${SUPA}/rest/v1/rpc/list_sessions?id=eq.${encodeURIComponent(b.session_id)}`, {
@@ -101,9 +105,10 @@ export async function onRequestPost(context) {
       });
       if (sr.ok) {
         const all = await sr.json();
-        if (Array.isArray(all)) sess = all.find((x) => x && x.id === b.session_id) || null;
+        if (Array.isArray(all)) { sessRead = true; sess = all.find((x) => x && x.id === b.session_id) || null; }
       }
-    } catch (e) { /* the pass is still worth issuing without it */ }
+    } catch (e) { /* refused below */ }
+    if (!sessRead) return json({ ok: false, error: "session unavailable" }, 503);
   }
   // A donor's pass names their blood type, as their booking card does; a visitor's names none (blood_role, 20261105140000).
   let bloodType = "";

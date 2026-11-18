@@ -411,7 +411,8 @@ test.describe('@staff:security the sender speaks Declarative Web Push', () => {
     const got: unknown[] = [];
     globalThis.fetch = (async (u: string | URL | Request, init?: RequestInit) => {
       const url = String(u);
-      if (url.includes('/rpc/is_staff')) return new Response('true');
+      if (url.includes('/rpc/_staff_mod')) return new Response('true');
+      if (url.includes('/rest/v1/push_prefs')) return new Response('[]');
       if (url.includes('/auth/v1/user')) return new Response(JSON.stringify({ id: '0f8fad5b-d9cb-469f-a165-70867728950e' }));
       if (url.includes('/rest/v1/staff_actions') && init?.method === 'HEAD') return new Response(null, { status: 200, headers: { 'content-range': '*/0' } });
       if (url.includes('/rest/v1/staff_actions')) return new Response(null, { status: 201 });
@@ -426,6 +427,10 @@ test.describe('@staff:security the sender speaks Declarative Web Push', () => {
     await send({ title: 'جگہ خالی ہو گئی', message: 'بکنگ #4' });
     expect(got[0]).toEqual({ web_push: 8030, notification: { title: 'A spot opened up', body: 'Booking #4', navigate: 'https://experiences.micromobility.sa/', tag: 'booking-q1', lang: 'en', dir: 'ltr' } });
     expect(got[1]).toMatchObject({ notification: { lang: 'ur', dir: 'rtl' } });
+    // sent from the staff panel's own host, the tap still leads to the rider app, a waitlist offer's claim and all (bug hunt 2026-11-18)
+    await post({ request: new Request('https://staff.micromobility.sa/api/push-send', { method: 'POST',
+      body: JSON.stringify({ staffToken: 'st', customerId: 'c1', title: 'A place for you', message: 'Yours for 30 minutes', url: '/?claim=tok1', tag: 'offer-1', lang: 'en' }) }), env });
+    expect(got[2]).toMatchObject({ notification: { navigate: 'https://experiences.micromobility.sa/?claim=tok1' } });
   });
 
   test('the service worker shows both shapes, and the tap leads to navigate', async () => {

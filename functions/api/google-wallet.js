@@ -81,7 +81,7 @@ function isCommunity(sess) { return !!sess && sess.event_kind === "community" &&
 function isApproval(sess) { return isCommunity(sess) && sess.needs_approval !== false; }
 function isPublished(sess) { return isCommunity(sess) && sess.hide_queue === false; }
 // Rides that gather store "gathering - start" in _time and have no end (the app's KIND_TRAITS.gathering).
-const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true };
+const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, farm: true }; // the Farm House Night: arrival, then dinner (bug hunt 2026-11-18)
 // When the pass stops being a ticket: the ride's end on its own day (past midnight rolls into the
 // next one), or the end of the ride's day when its clock has no end. A Jeddah time, +03:00.
 function validUntil(b, sess) {
