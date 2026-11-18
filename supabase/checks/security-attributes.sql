@@ -646,6 +646,10 @@ with expected(fname, want_definer, note) as (values
   ('_circuit_badge', true, 'trigger: a circuit challenge makes and renames its own season badge in badges'),
   ('_circuit_badge_gone', true, 'trigger: a deleted circuit challenge takes its badge along unless a rider holds it'),
   ('_circuit_ts', false, 'pure: a check-in or check-out kept as text, read as a time'),
+  ('staff_customer_export', true, 'Download their data: admins only, reads every table with a customer_id and the staff notes (20261118210000)'),
+  ('staff_owner_choices', true, 'the staff an owner or a follow-up is for is picked from: reads staff and auth.users (20261118210000)'),
+  ('_account_family_stamp', true, 'trigger: who linked a family, from staff (20261118210000)'),
+  ('_account_owners_stamp', true, 'trigger: the owner must be staff that is on; names from staff and auth.users (20261118210000)'),
   ('_purge_old',                   true,  'retention: reaches every personal table; service_role only (20261009165000)')
 )
 select e.fname,
