@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-5f741aac47';
+const CACHE = 'mmcq-93d9fd6ed7';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -28,7 +28,7 @@ const STAFF_JS = './staff.js?v=7ea7d0b90c';
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
 const STAFF_PARTS = ["./staff-parts/analytics.js?v=0cc8966de4","./staff-parts/community.js?v=c3c2825cb6","./staff-parts/bikes.js?v=eb4f7a42d5","./staff-parts/cashier.js?v=c581f11c97","./staff-parts/catalog.js?v=a068f98154","./staff-parts/inventory.js?v=a56d0410bc","./staff-parts/website.js?v=19cb12148f","./staff-parts/history.js?v=96e9dd2df2","./staff-parts/wallet.js?v=4336c7103d","./staff-parts/workshop.js?v=dc4d4b506f","./staff-parts/ambassadors.js?v=8ff59be061","./staff-parts/messages.js?v=0c7b8a1be3","./staff-parts/volunteers.js?v=548c9df7c7","./staff-parts/vendors.js?v=e8ee9ce867","./staff-parts/sessions.js?v=770cc44ba4","./staff-parts/lockers.js?v=45da05e876","./staff-parts/ask.js?v=ffa99861b0","./staff-parts/store.js?v=aba51e0618","./staff-parts/sela.js?v=a7ece2ddf1","./staff-parts/vlap.js?v=9ef47c45ed","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=db6c70cce3","./staff-parts/settings.js?v=74d352d7fe","./staff-parts/fleet.js?v=6c839872d1","./staff-parts/money.js?v=5b5ad6e838","./staff-parts/desk.js?v=02c8728fac","./staff-parts/deskq.js?v=cc3cd11a1d","./staff-parts/kiosk.js?v=192ce76299","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=58829e4df1","./staff-parts/announce.js?v=fc8da5cb39","./staff-parts/peopleapps.js?v=1f30b2e2e2","./staff-parts/peoplemore.js?v=de8d4f94b1","./staff-parts/sessreport.js?v=fb8caa4b73","./staff-parts/reports.js?v=8bf1a18de7","./staff-parts/door.js?v=954a2d3ba3"];
-const APP_JS = './app.js?v=cc5ef3f968';
+const APP_JS = './app.js?v=fb001eafa7';
 const APP_CSS = './app.css?v=b6aa98a52a';
 const SHELL = [
   SHELL_KEY,

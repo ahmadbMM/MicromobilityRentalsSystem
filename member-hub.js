@@ -675,7 +675,7 @@ function _bupHtml(c) {
     else if (E.some((e) => e.status === 'waiting' || e.status === 'active')) { cls = 'held'; end = `<span class="hub-bup-s">${esc(w.booked || '')}</span>`; }
     else if (E.some((e) => e.status === 'waitlist')) end = `<span class="hub-bup-s">${_hT('wl')}</span>`;
     else {
-      const ok = L.find((s) => s.status === 'open' && _bwOpen(s) && !_sessFull(s) && _sgOk(s, me));
+      const ok = L.find((s) => s.status === 'open' && _bwOpen(s, 1) && !_sessFull(s) && _sgOk(s, me)); // a member books in a members-first window too, as the hero does
       if (ok) end = `<button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_hubBook', ok.id)}">${_hT('book')}</button>`;
       else if (L.some((s) => _sgOk(s, me) && (s.status === 'full' || (s.status === 'closed' && (dep.slots(s.bike_slots) || {})._fbk)))) end = `<span class="hub-bup-s">${esc(w.full || '')}</span>`;
       else end = `<span class="hub-bup-s">${_hT(!L.length && (sats[d] || []).length ? 'rsCancel' : 'bupSoon')}</span>`;

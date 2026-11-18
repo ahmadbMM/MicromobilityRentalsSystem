@@ -2235,7 +2235,8 @@ builds on Plan my Saturdays." No database change.
   Saturdays from today, today included, to the day before), and one row per Saturday from the later of the booking's day
   (`registered_at` in Riyadh, the member's first row on that session) and 8 weeks before, at most 8: Done with a tick (a
   `saturday`-kind booking `done`, or `active` on a day gone), the date alone and dimmed (gone, not ridden), Booked,
-  On the waitlist, Book (`_hubBook`: the hero's checks, open, booking window open, not full, `_sgOk`), Fully booked (full,
+  On the waitlist, Book (`_hubBook`: the hero's checks, open, booking window open, members-first window or not
+  (`_bwOpen(s, 1)`, Members book first), not full, `_sgOk`), Fully booked (full,
   or closed with `_fbk`), Cancelled (every ride that day called off), else Not open yet. The card's own words never say
   ride or bike about the event; the list's name is "Saturday rides". Words `bup*` in `HUB_T`; Done, Book, On the
   waitlist and Cancelled are the hub's own; Booked and Fully booked are the app's (`tkStBooked`, `sessFbk`) lent in
