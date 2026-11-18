@@ -245,6 +245,13 @@ th[aria-sort="descending"] .rp-sbtn::after{content:"\25BC"}
 .food-ico{display:block;width:11px;height:11px}
 .fwk-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#475569;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .fwk-ico{display:block;width:11px;height:11px}
+.pro-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.law-mk{background:#7d6b5d}
+.hrt-mk{background:#a61e4d}
+.snr-mk{background:#8a4b1f}
+.mkt-mk{background:#4c3fd1;width:auto;padding:0 3px}
+.pro-ico{display:block;width:11px;height:11px}
+.pro-wd{display:block;font-size:8px;font-weight:700;letter-spacing:.03em;line-height:1;text-transform:uppercase;white-space:nowrap}
 .imc-mk{display:inline-flex;align-items:center;margin-inline-start:6px;height:14px;padding:0 3px;box-sizing:border-box;background:#fff;border:1px solid #0e5592;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .imc-mk img{display:block;height:10px;width:auto}
 /* the partner report's signature column: room to sign on paper */

@@ -520,6 +520,31 @@ slate `#475569` (dark-theme name `#b6c2d2`; it was chocolate brown). `_fwkChip` 
 section `fwork`, words `fwkLabel`. The slate band rules leave out `.inf-row`, `.bdf-row` and `.food-row`: an
 influencer keeps plum, a BD booking red, a food blogger teal; both marks still show. tests/food-worker-tag.spec.ts.
 
+## The work tags: Lawyer, HR, Senior, Marketing (2026-11-18, migration 20261118180000)
+
+`tags` rows `tag_lawyer`, `tag_hr`, `tag_senior`, `tag_marketing` (slugs `lawyer`, `hr`, `senior`, `marketing`; locked,
+never auto-granted). The user's picks on the new staff tags page: Lawyer the scales of justice on taupe `#7d6b5d`, HR the
+letters HR on berry `#a61e4d`, Senior (a senior role, staff give it; not age) a necktie on chocolate `#8a4b1f`, Marketing
+the word itself (`t('mktLabel')`, uppercase by CSS, in the staff screen's language) on indigo `#4c3fd1`. Shown: the mark
+after the holder's name on bookings and printed sheets, the band and the name in the tag's colour, filters, report
+counts. NOT beside the account's name (the user left that out). One table drives all four: `PRO_TAGS` (`k` law / hrt /
+snr / mkt, `id`, `key` the label, `sf` the Bookings filter, `am` the People filter, `rk` the account report's column and
+section) with `_PRO_SVG`, `_proOn/_proCid/_proOf/_proAny/_proRow/_proChips/_proChipsG/_proTiles`, `PRO_SF` / `PRO_AM`.
+`_proChips` follows every `_fwkChip` on a booking, `_proRow` every `_fwkRow`. `_proRow` gives `.pro-row` plus the first
+held tag's own class (`.law-row` ...), which sets `--pro-c` / `--pro-cn` (dark name); one set of band rules reads them and
+leaves out `.inf-row`, `.bdf-row`, `.food-row`, `.fwk-row`. The Marketing word's 10px size is in staff-css-allow.json.
+tests/work-tags.spec.ts.
+
+## Tapping a tag shows its name and description (2026-11-18)
+
+The user: "make clicking on a tag from staff shows the name and description of it". `_tagTap(id)` adds
+`data-tag-tap` and a `data-on-click` calling `_tagInfo(id, event)` to every tag mark after a name (`_cmChip`, `_snChip`,
+`_infChip`, `_foodChip`, `_fwkChip`, `_imcChip`, `_blkChip`, the work tags) and to `_tagChip` (accounts, Members, the
+Tags page; `_tagChip(tg, ct, noTap)` leaves it off inside a pop-up). `_tagInfo` stops the event, so the row, card or
+button around the mark does not open too, and draws the tag's face, `tags.name` and `tags.description` (or `tagNoDesc`)
+in `#confirm-modal`, lifted to z-index 210 (`.tag-info-bd`) so it shows over the edit-booking dialog. With
+`#confirm-modal` already up the tap is left alone. The picker's buttons (`.am-pick`) keep their own job.
+
 ## The Petromin tag and Petromin Days (2026-10-12)
 
 The owner: "add a new petromin tag that gives its holders access only to petromin sessions through a new event

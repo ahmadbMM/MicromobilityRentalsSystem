@@ -12021,6 +12021,54 @@ body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):n
 html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.fwk-row:not(.inf-row):not(.bdf-row):not(.food-row).cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0c7a3d,inset -10px 0 0 #475569,inset -14px 0 0 var(--rs-edge,transparent);}
 body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).fwk-row:not(.inf-row):not(.food-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:#475569;}
 html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).fwk-row:not(.inf-row):not(.food-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:#b6c2d2;}
+/* The four work tags (2026-11-18, the user's picks on the new staff tags page): Lawyer, the scales of justice on taupe;
+   HR, the letters HR on berry; Senior, a necktie on chocolate; Marketing, the word itself on indigo. The mark after the
+   holder's name (.pro-mk, _proChips), on its tag chip (.tag-svg), and a band down the start edge of their row in the
+   tag's colour with the name in it (_proRow sets .pro-row and the tag's own class, which carries --pro-c and the dark
+   theme's lighter --pro-cn). An influencer, a BD- booking, a food blogger or a food worker keeps their own band. */
+.pro-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;color:#fff;border-radius:var(--sf-r-xs);vertical-align:middle;}
+.law-mk{background:#7d6b5d;}
+.hrt-mk{background:#a61e4d;}
+.snr-mk{background:#8a4b1f;}
+.mkt-mk{background:#4c3fd1;width:auto;padding:0 4px;}
+.pro-ico{display:block;width:14px;height:14px;}
+.tag-svg .pro-ico{width:16px;height:16px;}
+.pro-wd{display:block;font-size:10px;font-weight:600;letter-spacing:.03em;line-height:1;text-transform:uppercase;white-space:nowrap;}
+.law-row{--pro-c:#7d6b5d;--pro-cn:#cbbcb0;}
+.hrt-row{--pro-c:#a61e4d;--pro-cn:#f29bb8;}
+.snr-row{--pro-c:#8a4b1f;--pro-cn:#d9a273;}
+.mkt-row{--pro-c:#4c3fd1;--pro-cn:#aba4f6;}
+.queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row) td:first-child,.q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row),.ho-row.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row){box-shadow:inset 3px 0 0 var(--pro-c);}
+html[dir="rtl"] .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row) td:first-child,html[dir="rtl"] .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row),html[dir="rtl"] .ho-row.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row){box-shadow:inset -3px 0 0 var(--pro-c);}
+.q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark,.ho-row.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 var(--pro-c);}
+html[dir="rtl"] .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark,html[dir="rtl"] .ho-row.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 var(--pro-c);}
+body.view-staff .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row) td:first-child{box-shadow:inset 3px 0 0 var(--pro-c),inset 7px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row) td:first-child{box-shadow:inset -3px 0 0 var(--pro-c),inset -7px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 var(--pro-c),inset 11px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 var(--pro-c),inset -11px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark td:first-child{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 var(--pro-c),inset 10px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark td:first-child{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 var(--pro-c),inset -10px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0c7a3d,inset 10px 0 0 var(--pro-c),inset 14px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0c7a3d,inset -10px 0 0 var(--pro-c),inset -14px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-mobile-view .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row){box-shadow:inset 3px 0 0 var(--pro-c),inset 7px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row){box-shadow:inset -3px 0 0 var(--pro-c),inset -7px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 var(--pro-c),inset 11px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 var(--pro-c),inset -11px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 var(--pro-c),inset 10px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 var(--pro-c),inset -10px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0c7a3d,inset 10px 0 0 var(--pro-c),inset 14px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0c7a3d,inset -10px 0 0 var(--pro-c),inset -14px 0 0 var(--rs-edge,transparent);}
+body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).pro-row:not(.inf-row):not(.food-row):not(.fwk-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:var(--pro-c);}
+html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).pro-row:not(.inf-row):not(.food-row):not(.fwk-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:var(--pro-cn);}
+/* Tapping a tag's mark or chip opens its name and description (_tagInfo, 2026-11-18), above any dialog it sits in. */
+[data-tag-tap]{cursor:pointer;}
+.tag-info-bd{z-index:210;}
+.tag-info{max-width:400px;}
+.tag-info-h{display:flex;align-items:center;gap:10px;min-width:0;}
+.tag-info-h .tag-chip{flex:none;}
+.tag-info-dot{flex:none;width:14px;height:14px;border-radius:50%;background:var(--tc);}
+.tag-info-d p{margin:0;line-height:1.5;color:var(--text);}
+.tag-info-d .tag-info-none{color:var(--muted);}
 /* The special needs tag (2026-10-23): a figure in a wheelchair, white on orange (the owner, 2026-10-23; it was blue) - on its tag chip (.tag-svg) and after
    a holder's name wherever staff meet the booking (.sn-mk, _snChip). */
 .sn-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#e8590c;color:#fff;border-radius:var(--sf-r-xs);vertical-align:middle;}
@@ -13002,6 +13050,10 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table tbody tr.food-row:not
 body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table tbody tr.fwk-row:not(.inf-row):not(.food-row) td:first-child{padding-inline-start:14px;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table tbody tr.fwk-row:not(.inf-row):not(.food-row):is(.ptn-row-mark,.cm-row-mark) td:first-child{padding-inline-start:20px;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table tbody tr.fwk-row:not(.inf-row):not(.food-row).cm-row-mark.ptn-row-mark td:first-child{padding-inline-start:24px;}
+/* the work tags' bands (2026-11-18): the same room again */
+body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table tbody tr.pro-row:not(.inf-row):not(.food-row):not(.fwk-row) td:first-child{padding-inline-start:14px;}
+body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table tbody tr.pro-row:not(.inf-row):not(.food-row):not(.fwk-row):is(.ptn-row-mark,.cm-row-mark) td:first-child{padding-inline-start:20px;}
+body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table tbody tr.pro-row:not(.inf-row):not(.food-row):not(.fwk-row).cm-row-mark.ptn-row-mark td:first-child{padding-inline-start:24px;}
 
 /* Dark: a header cell that stays put while the rest moves needs a solid fill. --sf-head is 5% white on
    the dark desk, so the roster's sticky header showed the rows scrolling under it, Manage Record in
