@@ -221,6 +221,36 @@ test.describe('@staff:sessions members book first', () => {
     await expect(page.locator('#ns-mf')).not.toBeChecked();
   });
 
+  // bug hunt 2026-11-18, cf-rentals0-1: with a booking window (site_content booking.window) the members' hours start when
+  // it opens the date to riders, not when the session opens, or they ran out while nobody could book
+  test('with a booking window the hours count from its opening: edit, a window that ran out early, and the new form', async ({ page }) => {
+    const w = await staffBoot(page, [jcc, plain]);
+    await page.evaluate(`S._bw={days:7,at:'20:00'}`);
+    const at = (iso: unknown) => new Date(String(iso)).getTime();
+    // 21 Nov opens to riders on 14 Nov at 20:00 (Riyadh): six hours from then
+    await page.evaluate(`startEditSession('${plain.id}')`);
+    await page.locator('#es-mf').check();
+    await page.locator('#es-mf-h').selectOption('6');
+    await page.evaluate('_saveSessionEdit()');
+    await expect.poll(() => w.length).toBe(1);
+    expect(at(w[0].b.public_at)).toBe(at('2099-11-15T02:00:00+03:00'));
+    // 17 Nov opens to riders today at 20:00, but its three hours were counted from 09:00: an untouched save moves them
+    await page.evaluate(`startEditSession('${JCC}')`);
+    await expect(page.locator('#es-mf-until')).toHaveText('Members only until Today · 11 PM');
+    await page.evaluate('_saveSessionEdit()');
+    await expect.poll(() => w.length).toBe(2);
+    expect(at(w[1].b.public_at)).toBe(at('2099-11-10T23:00:00+03:00'));
+    // the new form, Open now: 24 Nov opens to riders on 17 Nov at 20:00
+    await page.waitForFunction(`!S.editSessionId`);
+    await page.evaluate(`S.showAddSession=true;S.newSessEvent='jcc';S.newSessMode='total';S.newSessTotal=6;S.newSessDate='2099-11-24';_n6sFormReset();S.n6sPub='open';S.newSessMf=true;S.newSessMfH=12;renderSessions()`);
+    await page.locator('#tab-sessions').getByRole('button', { name: 'Create session' }).click();
+    await expect.poll(() => w.filter((x) => x.m === 'POST').length).toBe(1);
+    expect(at(w.find((x) => x.m === 'POST')!.b.public_at)).toBe(at('2099-11-18T08:00:00+03:00'));
+    // a window already open on the day changes nothing: 12 hours from now
+    const fresh = JSON.stringify({ ...plain, public_at: null });
+    expect(await page.evaluate(`S._bw={days:30,at:null};_mfPlan(${fresh},true,12,'open')`)).toBe(new Date(NOW.getTime() + 12 * 36e5).toISOString());
+  });
+
   test('the list marks it while the window runs; a copied week starts without it', async ({ page }) => {
     await staffBoot(page, [jcc, plain]);
     expect(await page.evaluate(`_ssStatusBadge(_sessGet('${JCC}'))`)).toContain('Members first');

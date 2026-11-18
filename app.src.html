@@ -8604,16 +8604,18 @@ function _mfOkNew(){const e=S.newSessEvent||'jcc';return !_nsComm()||e==='snd96'
 function _esMfSess(s){return s&&_rideKind(s)==='event'&&typeof S.editSessOpenAll==='boolean'?{...s,open_to_all:S.editSessOpenAll}:s;} // an event's audience as the editor holds it
 // The public_at a save writes (null: none): a window the session has keeps its start (the hours may change); switched on
 // while it is open, or opened in this save, now + the hours; a timed opening + the hours; a draft or a closed one gets its
-// window from the server when it opens (_session_published, 20261118210800).
+// window from the server when it opens (_session_published, 20261118210800). The start is never before the booking
+// window opens the date to riders (_bwOpenMs; bug hunt 2026-11-18, cf-rentals0-1): the server holds the same line.
 function _mfPlan(s,on,h,st){
   if(!on||!MF_HOURS.includes(h)||!_mfOk(s))return null;
-  const was=s.public_at?Date.parse(s.public_at):NaN,wh=_mfH(s);
-  if(isFinite(was)&&wh)return new Date(was+(h-wh)*36e5).toISOString();
-  if(st==='open'||st==='full')return new Date(Date.now()+h*36e5).toISOString();
-  const oa=s.opens_at?Date.parse(s.opens_at):NaN;return isFinite(oa)?new Date(oa+h*36e5).toISOString():null;
+  const was=s.public_at?Date.parse(s.public_at):NaN,wh=_mfH(s),bw=_bwOpenMs(s);
+  if(isFinite(was)&&wh)return new Date(Math.max(was-wh*36e5,bw)+h*36e5).toISOString();
+  if(st==='open'||st==='full')return new Date(Math.max(Date.now(),bw)+h*36e5).toISOString();
+  const oa=s.opens_at?Date.parse(s.opens_at):NaN;return isFinite(oa)?new Date(Math.max(oa,bw)+h*36e5).toISOString():null;
 }
 function _mfSessSwitch(which,ok){
   if(!ok)return'';
+  if(S._bw===undefined)_bwLoad(); // the booking window the hours wait for (_bwOpenMs), once
   const ed=which==='edit',on=!!S[ed?'editSessMf':'newSessMf'],h=S[ed?'editSessMfH':'newSessMfH']||6,id=ed?'es-mf':'ns-mf',until=ed?_mfUntilTxt():'';
   return`<div class="form-group ss-mt18 mf-sess"><label class="vm-switch"><input type="checkbox" class="web-toggle" role="switch" id="${id}"${on?' checked':''} data-on-change="${_on("_mfSessSet",which,_P("checked"))}"><span><b>${esc(t('mfStatus'))}</b></span></label>
     <div class="mf-for" id="${id}-for"${on?'':' hidden'}><label for="${id}-h">${esc(t('mfFor'))}</label><select id="${id}-h" data-on-change="${_on("_mfSessHours",which,_P("value"))}">${MF_HOURS.map(n=>`<option value="${n}"${n===h?' selected':''}>${esc(_tn('accVolHrs',n))}</option>`).join('')}</select></div>
@@ -8623,7 +8625,7 @@ function _mfSessSet(which,v){const ed=which==='edit';S[ed?'editSessMf':'newSessM
 function _mfSessHours(which,v){const n=Number(v);S[which==='edit'?'editSessMfH':'newSessMfH']=MF_HOURS.includes(n)?n:6;if(which==='edit')_mfUntilPaint();}
 // "Members only until <day time>": the window the save would leave, while it is ahead.
 function _mfUntilTxt(){const s=_sessDisp(S.editSessionId);if(!s)return'';
-  const iso=_mfPlan(_esMfSess(s),!!S.editSessMf,S.editSessMfH||6,S.editSessStatus==='fbk'?'closed':(S.editSessStatus||s.status));
+  const iso=_mfPlan({..._esMfSess(s),session_date:S.editSessDate||s.session_date},!!S.editSessMf,S.editSessMfH||6,S.editSessStatus==='fbk'?'closed':(S.editSessStatus||s.status));
   return iso&&Date.parse(iso)>Date.now()?t('mfUntil').replace('{0}',_revealWhen({reveal_at:iso})):'';}
 function _mfUntilPaint(){const el=document.getElementById('es-mf-until');if(!el)return;const x=_mfUntilTxt();el.textContent=x;el.hidden=!x;}
 // The Sessions list's mark while the window runs on a session riders can book.
@@ -31863,6 +31865,16 @@ function _bwWinOn(s){
   return null;
 }
 function _bwOpen(s,mem){return !_bwOpensOn(s,mem);}
+// The moment the booking window opens a ride to riders (epoch ms), 0 when none holds it (no window set, a race): Members
+// book first counts its hours from the later of this and the session's opening (_mfPlan; the server's _session_published,
+// bug hunt 2026-11-18 cf-rentals0-1, 20261119000900), or the members' head start ran out while nobody could book.
+function _bwOpenMs(s){
+  if(_isRace(s))return 0;
+  const w=_bwGet();if(w.days==null)return 0;
+  const d=String((s&&(s.session_date||s.id))||'').slice(0,10);if(!/^\d{4}-\d{2}-\d{2}$/.test(d))return 0;
+  const x=new Date(d+'T12:00:00Z');x.setUTCDate(x.getUTCDate()-w.days);
+  const ms=Date.parse(x.toISOString().slice(0,10)+'T'+(w.at||'00:00')+':00+03:00');return isFinite(ms)?ms:0;
+}
 // Within a day of opening the words count down to the real window (_bwTick keeps them true while they show), else the day
 // and a 12-hour time like every other time on the page (the Reserve research, 2026-11-10, row 3; the raw "20:00" went).
 function _bwOpensText(s){const o=_bwOpensOn(s);if(!o)return'';
@@ -34771,7 +34783,7 @@ async function _saveSessionEdit(){
     const _esPub=_esFb&&(_n6sDraft(sess)||_n6sTimed(sess));
     if(_esPub){if('draft' in sess)_patch.draft=false;if('opens_at' in sess)_patch.opens_at=null;}
     // Members book first (_mfPlan), sent only when it changed and the database has the column (20261118210800).
-    if('public_at' in sess){const _mfIso=_mfPlan(_esMfSess(sess),_mfOn,_mfHrs,newStatus),_mfWas=sess.public_at?Date.parse(sess.public_at):null;
+    if('public_at' in sess){const _mfIso=_mfPlan({..._esMfSess(sess),session_date:newDate},_mfOn,_mfHrs,newStatus),_mfWas=sess.public_at?Date.parse(sess.public_at):null;
       if((_mfIso?Date.parse(_mfIso):null)!==_mfWas)_patch.public_at=_mfIso;}
     if(!!S.editSessLockers!==(sess.lockers===true))_patch.lockers=!!S.editSessLockers; // Lockers offered (2026-11-09), sent only when it changed
     // The meeting point's name and coordinate (R11) and the ride's status (R10), each sent only when it changed: a database before
@@ -35082,6 +35094,8 @@ async function _addSession(){
   let rows=_nsFillDates(date,document.getElementById('ns-repeat')?.value||S.newSessRepeat,S.newSessDays,S.n6sEvery,S.n6sUntil).map(ds=>({
     id:ds+_sessIdSuffix(_nsKind()),day:dayNames[new Date(ds+'T12:00:00').getDay()],session_date:ds,capacity:total,status:_pub==='open'?'open':'closed',
     bike_slots:JSON.stringify(slots),created_at:new Date().toISOString(),...extra,...(_rvIso?{reveal_at:_rvFor(ds)}:{})}));
+  // each date's members-only hours start no earlier than its booking window opens it to riders (_bwOpenMs, cf-rentals0-1)
+  if(extra.public_at&&slots._mfh){const _mh=slots._mfh,_m0=Date.parse(extra.public_at)-_mh*36e5;rows.forEach(r=>{r.public_at=new Date(Math.max(_m0,_bwOpenMs(r))+_mh*36e5).toISOString();});}
   if(rows.length>1&&_n6sCol('series_id')){const _sid=_n6sNewSeries();rows.forEach(r=>{r.series_id=_sid;});}
   rows=await _n6sClashGate(rows,null);if(!rows)return; // a clash: staff skipped those dates, made them anyway, or stopped (SS06)
   if(!rows.length){toast(t('n6sCopyNone'),'info');return;}
@@ -75870,14 +75884,14 @@ async function _acLoad(force){
       sb.from('squads').select('*').order('name'),sb.from('squad_members').select('customer_id,squad_id'),
       sb.from('hub_photos').select(AC_PH_COLS).neq('status','rejected').order('created_at',{ascending:false}).limit(200),sb.from('member_welcome').select('*')]);
     fail=[r,g,q,m,p,w].map(x=>x&&x.error).find(Boolean)||null;
-    if(!fail)S._ac={rounds:r.data||[],goals:g.data||[],squads:q.data||[],sqm:m.data||[],photos:p.data||[],welcome:w.data||[],posts:[],badges:[]};
+    if(!fail)S._ac={rounds:r.data||[],goals:g.data||[],squads:q.data||[],sqm:m.data||[],photos:p.data||[],welcome:w.data||[],posts:[],badges:null};
     if(!fail){ // the Saturday reports and the badges a challenge can give (2026-11-11): a database without them keeps the rest
       // and the months' club goals and Ramadan's dates (R20, R21; 20261114000100): null where the database has no such table yet
       const[po,bd,cg,rm]=await Promise.all([_acPostsRead(),
         sb.from('badges').select('id,slug,name,name_ar,retired,sort').eq('retired',false).order('sort'),
         sb.from('hub_club_goals').select('*').order('month',{ascending:false}).limit(36),sb.from('hub_ramadan').select('*').order('year')]);
       if(po&&!po.error&&Array.isArray(po.data))S._ac.posts=po.data;
-      if(bd&&!bd.error&&Array.isArray(bd.data))S._ac.badges=bd.data;
+      if(bd&&!bd.error&&Array.isArray(bd.data))S._ac.badges=bd.data; // null when the read failed: Edit is refused, not a badge dropped (cf-rentals0-2)
       S._ac.club=cg&&!cg.error&&Array.isArray(cg.data)?cg.data:null;
       S._ac.ramadan=rm&&!rm.error&&Array.isArray(rm.data)?rm.data:null;
     }
@@ -76129,7 +76143,7 @@ function _acGoalsHtml(){
     <div class="form-row"><div class="form-group"><label for="ac-g-kind">${t('acKind')}</label><select id="ac-g-kind"><option value="challenge"${sel(d.kind==='challenge')}>${t('acKindCh')}</option><option value="goal"${sel(d.kind==='goal')}>${t('acKindGo')}</option></select></div>
     <div class="form-group"><label for="ac-g-scope">${t('acCounts')}</label><select id="ac-g-scope"><option value="saturday"${sel(d.scope==='saturday')}>${t('acScopeSat')}</option><option value="community"${sel(d.scope==='community')}>${t('acScopeAll')}</option></select></div></div>
     <div class="form-row">${_acField('ac-g-target','acTarget','type="number" min="1" max="100000" step="1"',d.target==null?'':String(d.target))}${_acField('ac-g-from','acOpens','type="date"',d.from||todayStr())}${_acField('ac-g-to','acCloses','type="date"',d.to)}</div>
-    <div class="form-row"><div class="form-group"><label for="ac-g-badge">${t('acBadgeFor')}</label><select id="ac-g-badge"><option value="">${t('acBadgeNone')}</option>${(S._ac.badges||[]).map(b=>`<option value="${esc(b.id)}"${sel(d.badge_id===b.id)}>${esc((S.lang==='ar'&&b.name_ar)||b.name)}</option>`).join('')}</select></div></div>
+    <div class="form-row"><div class="form-group"><label for="ac-g-badge">${t('acBadgeFor')}</label><select id="ac-g-badge"><option value="">${t('acBadgeNone')}</option>${d.badge_id&&!(S._ac.badges||[]).some(b=>b.id===d.badge_id)?`<option value="${esc(d.badge_id)}" selected>${esc(_acBadgeName(d.badge_id))}</option>`:''}${(S._ac.badges||[]).map(b=>`<option value="${esc(b.id)}"${sel(d.badge_id===b.id)}>${esc((S.lang==='ar'&&b.name_ar)||b.name)}</option>`).join('')}</select></div></div>
     <div class="bdg-foot"><button type="button" class="btn-secondary" data-on-click="${_on('_acGoalForm',false)}">${t('cancelBtn')}</button><button type="button" class="btn-primary" data-on-click="${_on('_acGoalSave')}">${t('saveBtn')}</button></div></div>`
     :`<button type="button" class="btn-secondary cmy-mt12" data-on-click="${_on('_acGoalForm',true)}">+ ${t('acNewGoal')}</button>`)+_acTplHtml();
 }
@@ -76137,8 +76151,11 @@ function _acGoalForm(on){S._acGoalNew=!!on;renderCommunity();}
 // Edit a challenge or goal in the same form (2026-11-18, the Ramadan season: the seeded Ramadan and Eid challenges keep their
 // dates when staff move hub_ramadan, so staff move them here). The row keeps its id and its Ramadan flag (ramadan_any is not
 // on the form); a member's count follows the new dates at their next read.
+// The badge it gives stays chosen when it is retired (the form lists the badges in use and the challenge's own beside them);
+// with the badges unread the form would save it as No badge, so Edit waits for them (bug hunt 2026-11-18, cf-rentals0-2).
 function _acGoalEdit(id){
   const g=(S._ac.goals||[]).find(x=>x.id===id);if(!g)return;
+  if(!Array.isArray(S._ac.badges)){toast(t('errConnection'),'error');_acLoad(true);return;}
   S._acGoalNew={edit:id,kind:g.kind,scope:g.scope,name:g.name,name_ar:g.name_ar,target:g.target,from:String(g.starts_on||'').slice(0,10),to:String(g.ends_on||'').slice(0,10),badge_id:g.badge_id||''};renderCommunity();
   const el=document.getElementById('ac-g-en');if(el)try{el.focus({preventScroll:true});el.scrollIntoView({block:'center'});}catch(_){}
 }
@@ -76165,7 +76182,7 @@ async function _acGoalDel(id){
   const r=await sb.from('hub_goals').delete().eq('id',id);if(_writeErr(r,'delete goal'))return;
   S._ac.goals=S._ac.goals.filter(x=>x.id!==id);renderCommunity();
 }
-function _acBadgeName(id){const b=(S._ac&&S._ac.badges||[]).find(x=>x.id===id);return b?((S.lang==='ar'&&b.name_ar)||b.name):id;}
+function _acBadgeName(id){const b=(S._ac&&S._ac.badges||[]).find(x=>x.id===id)||(S.badges||[]).find(x=>x.id===id);return b?((S.lang==='ar'&&b.name_ar)||b.name):id;}
 // ── circuit challenges (new features build F25, 2026-11-13; migration 20261114082500): a named lap target for a season.
 // Riders scan its poster at the start line on every lap (the rider app at /?lap=<code>; a plain NFC tag can hold the same
 // address) and see their own count against the target. The database counts a lap only for a rider checked in on a

@@ -104,6 +104,33 @@ test.describe('@customer:members Build-up plan', () => {
     await expect(card(page).getByRole('button')).toHaveCount(0);
   });
 
+  test('a Saturday whose only rides are for the other gender is the date alone, dimmed, never Not open yet', async ({ page }) => {
+    // bug hunt 2026-11-18, cf-platform1-2: it said Not open yet until the day passed, though none would ever open to him
+    const sessions = [
+      sat('2099-12-05', { id: '2099-12-05-w', gender_only: 'female' }), sat('2099-12-12', { id: '2099-12-12-w', gender_only: 'female', status: 'full' }),
+      sat('2099-12-19', { status: 'closed' }), sat('2099-12-19', { id: '2099-12-19-w', gender_only: 'female', status: 'closed' }),
+      event({ session_date: '2099-12-25', day: 'Friday' }),
+    ];
+    const rows = [bk('e1', EV, '2099-12-25', 'waiting', { registered_at: '2099-12-01T09:00:00Z' })];
+    await member(page, { sessions, rows });
+    expect(await rowTexts(page)).toEqual(['5 Dec', '12 Dec', '19 Dec Not open yet']); // a ride for him on the 19th may still open
+    await expect(card(page).locator('.hub-bup-r.none')).toHaveCount(2);
+    await expect(card(page).locator('.hub-bup-r.none .hub-bup-s')).toHaveCount(0);
+    await expect(card(page).locator('.hub-bup-r.none .hub-bup-d').first()).toHaveCSS('font-weight', '400'); // dimmed, as a day gone
+  });
+
+  test('the same Saturdays to a woman: Book, Fully booked and Not open yet', async ({ page }) => {
+    const sessions = [
+      sat('2099-12-05', { id: '2099-12-05-w', gender_only: 'female' }), sat('2099-12-12', { id: '2099-12-12-w', gender_only: 'female', status: 'full' }),
+      sat('2099-12-19', { status: 'closed' }), sat('2099-12-19', { id: '2099-12-19-w', gender_only: 'female', status: 'closed' }),
+      event({ session_date: '2099-12-25', day: 'Friday' }),
+    ];
+    const rows = [bk('e1', EV, '2099-12-25', 'waiting', { registered_at: '2099-12-01T09:00:00Z' })];
+    await member(page, { sessions, rows, gender: 'female' });
+    expect(await rowTexts(page)).toEqual(['5 Dec Book', '12 Dec Fully booked', '19 Dec Not open yet']);
+    await expect(card(page).locator('.hub-bup-r.none')).toHaveCount(0);
+  });
+
   test('today\'s Saturday counts as one to go, and a finished one today is Done', async ({ page }) => {
     const rows = [...ROWS.filter((r) => r.id !== 'b4'), bk('b4', '2099-11-28', '2099-11-28', 'done')];
     await member(page, { at: '2099-11-28T09:00:00+03:00', rows });

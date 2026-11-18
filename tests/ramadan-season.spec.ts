@@ -149,13 +149,18 @@ test.describe('@customer:members the Ramadan season on the Community tab', () =>
 
 test.describe('@staff:community a seeded season challenge is moved in Activities', () => {
   const goal = { id: 'goal_ramadan_2027', kind: 'challenge', name: 'Ramadan Rhythm: 2 Sessions', name_ar: 'إيقاع رمضان: مشاركتان', scope: 'community', target: 2, starts_on: '2027-02-08', ends_on: '2027-03-09', badge_id: 'bd_ramadan_2027', ramadan_any: true };
-  async function staff(page: Page) {
+  async function staff(page: Page, badgesInUse?: (cors: Record<string, string>) => { status: number; body: unknown }) {
     await stubSupabase(page, { sessions: [], customers: [{ id: 'c1', name: 'Lina Haddad', email: 'l@example.com', phone: '+966551000001', created_at: '2026-01-01T00:00:00Z' }], queue_entries: [], bikes: [], staff_options: [],
       tags: [{ id: 'tag_saturday', slug: 'saturday', name: 'Community', color: 'green', locked: true }], customer_tags: [], titles: [], customer_titles: [],
       rotm_rounds: [], hub_goals: [goal], squads: [], squad_members: [], hub_photos: [], member_welcome: [], hub_posts: [],
       hub_ramadan: [{ year: 2027, starts_on: '2027-02-08', ends_on: '2027-03-09', confirmed: false }],
       badges: [{ id: 'bd_ramadan_2027', slug: 'ramadan_2027', name: 'Ramadan 2027', name_ar: 'رمضان 2027', retired: false, sort: 99 }, { id: 'bd_eid_2027', slug: 'eid_2027', name: 'Eid 2027', name_ar: 'عيد 2027', retired: false, sort: 100 }],
       'rpc:staff_rotm_tally': [], 'rpc:staff_goal_progress': [], 'rpc:staff_hub_numbers': {} });
+    // the badges a challenge may give (Activities reads those not retired), answered apart where a test says so
+    if (badgesInUse) await page.route(/\/rest\/v1\/badges\?.*retired=eq\.false/, (r) => {
+      const cors = { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, a = badgesInUse(cors);
+      return r.fulfill({ status: a.status, headers: cors, body: JSON.stringify(a.body) });
+    });
     await unlockStaff(page);
     await page.goto('/');
     await waitForSb(page);
@@ -191,6 +196,34 @@ test.describe('@staff:community a seeded season challenge is moved in Activities
     await expect(page.locator('#ac-g-en')).toHaveCount(0);
     await expect(page.locator('#tab-community [data-goal]')).toHaveCount(1);
     expect(await page.evaluate(`S._ac.goals.find(g=>g.id==='goal_ramadan_2027').ramadan_any`)).toBe(true);
+  });
+
+  // bug hunt 2026-11-18, cf-rentals0-2: the form listed only the badges in use, so a challenge whose badge was retired (or
+  // read while the badges failed to load) was saved with No badge
+  test('a retired badge stays chosen through Edit and Save', async ({ page }) => {
+    await staff(page, () => ({ status: 200, body: [{ id: 'bd_eid_2027', slug: 'eid_2027', name: 'Eid 2027', name_ar: 'عيد 2027', retired: false, sort: 100 }] }));
+    await page.evaluate(`S.badges=[{id:'bd_ramadan_2027',slug:'ramadan_2027',name:'Ramadan 2027',name_ar:'رمضان 2027',retired:true,sort:99}]`);
+    const w: Record<string, unknown>[] = [];
+    page.on('request', (r) => { if (r.method() === 'PATCH' && new URL(r.url()).pathname.endsWith('/rest/v1/hub_goals')) w.push(r.postDataJSON()); });
+    await page.locator('#tab-community [data-goal="goal_ramadan_2027"]').getByRole('button', { name: 'Edit' }).click();
+    await expect(page.locator('#ac-g-badge')).toHaveValue('bd_ramadan_2027');
+    await expect(page.locator('#ac-g-badge option:checked')).toHaveText('Ramadan 2027');
+    await expect(page.locator('#ac-g-badge option')).toHaveCount(3); // No badge, the challenge's own, the one in use
+    await page.locator('#tab-community .bdg-foot .btn-primary').click();
+    await expect.poll(() => w.length).toBe(1);
+    expect(w[0]).toMatchObject({ badge_id: 'bd_ramadan_2027' });
+  });
+
+  test('with the badges unread, Edit is refused in words and nothing is written', async ({ page }) => {
+    await staff(page, () => ({ status: 500, body: { code: '57014', message: 'canceling statement due to statement timeout' } }));
+    const w: string[] = [];
+    page.on('request', (r) => { if (r.method() !== 'GET' && new URL(r.url()).pathname.endsWith('/rest/v1/hub_goals')) w.push(r.method()); });
+    await expect(page.locator('#tab-community [data-goal="goal_ramadan_2027"]')).toBeVisible();
+    expect(await page.evaluate('S._ac.badges')).toBe(null);
+    await page.locator('#tab-community [data-goal="goal_ramadan_2027"]').getByRole('button', { name: 'Edit' }).click();
+    await expect(page.locator('.toast').filter({ hasText: 'Connection error. Check your network.' })).toBeVisible();
+    await expect(page.locator('#ac-g-en')).toHaveCount(0);
+    expect(w).toEqual([]);
   });
 });
 

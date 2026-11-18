@@ -630,8 +630,9 @@ _planFetch();
 // Saturday, to the day before), then one row per Saturday from the later of the booking's day and eight weeks before the
 // event: Done with a tick (a Saturday ride finished), the date alone, dimmed (gone, not ridden), Booked, On the waitlist,
 // Book (a ride the member may book now, the hero's own checks; it opens Reserve as the hero's Book does), Fully booked,
-// Cancelled, or Not open yet. All from what the page holds (the member's own bookings, the sessions Reserve reads); no
-// read of its own. The card's words never call the event a ride: it may be a run or a race.
+// Cancelled, the date alone, dimmed (every ride that day is for the other gender: none will open to them; bug hunt
+// 2026-11-18, cf-platform1-2), or Not open yet. All from what the page holds (the member's own bookings, the sessions
+// Reserve reads); no read of its own. The card's words never call the event a ride: it may be a run or a race.
 function _bupDay(d, n) { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
 function _bupSats(from, to) { // the Saturdays from `from` to `to`, both included
   const out = [];
@@ -672,6 +673,7 @@ function _bupHtml(c) {
       const ok = L.find((s) => s.status === 'open' && _bwOpen(s, 1) && !_sessFull(s) && _sgOk(s, me)); // a member books in a members-first window too, as the hero does
       if (ok) end = `<button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_hubBook', ok.id)}">${_hT('book')}</button>`;
       else if (L.some((s) => _sgOk(s, me) && (s.status === 'full' || (s.status === 'closed' && (dep.slots(s.bike_slots) || {})._fbk)))) end = `<span class="hub-bup-s">${esc(w.full || '')}</span>`;
+      else if (L.length && !L.some((s) => _sgOk(s, me))) cls = 'none'; // only the other gender's rides that day: nothing to wait for
       else end = `<span class="hub-bup-s">${_hT(!L.length && (sats[d] || []).length ? 'rsCancel' : 'bupSoon')}</span>`;
     }
     let dt = d; try { if (fmt) dt = fmt.format(new Date(d + 'T12:00:00Z')); } catch (_) {}
