@@ -8822,7 +8822,7 @@
   "walTitle": "পাঠানো বার্তা",
   "walRate": "আপনার রাইড রেট করুন",
   "logCatWa": "WhatsApp",
-  "sqTips": "খোঁজার টিপস: tag:vip, type:road, status:waiting, onbike, done, noshow বা waitlist, paid:yes বা no, size:m, session:কোনো তারিখ বা শিরোনাম, phone:, email:, যেকোনো শব্দের সাথে",
+  "sqTips": "খোঁজার টিপস: tag:vip, type:road, status:waiting, onbike, done, noshow, waitlist বা late, paid:yes বা no, size:m, session:কোনো তারিখ বা শিরোনাম, phone:, email:, যেকোনো শব্দের সাথে",
   "roleDoor": "প্রবেশদ্বার",
   "tmDoorNote": "একটি লক করা স্ক্রিনে টিকিট স্ক্যান করে এবং যারা টাকা দিয়েছেন বা বিনামূল্যে এসেছেন তাদের চেক-ইন করে। কোনো সেকশন নেই।",
   "zgTitle": "প্রবেশদ্বারে চেক-ইন",
@@ -9824,5 +9824,9 @@
   "nwxNew": "নতুন",
   "nwxCx": "বাতিল",
   "nwxCh": "পরিবর্তিত",
-  "nwxSeen": "দেখা হয়েছে"
+  "nwxSeen": "দেখা হয়েছে",
+  "ltrMin": "{0} মিনিট দেরি",
+  "ltrLate": "দেরি",
+  "ltrHistChip": "{0}/{1} দেরি",
+  "ltrHistTip": "নির্ধারিত সময়ের এই ব্যক্তির শেষ পাঁচটি উপস্থিতিতে দেরি"
 }

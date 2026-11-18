@@ -8822,7 +8822,7 @@
   "walTitle": "Mensagens enviadas",
   "walRate": "Avalie seu passeio",
   "logCatWa": "WhatsApp",
-  "sqTips": "Dicas de busca: tag:vip, type:road, status:waiting, onbike, done, noshow ou waitlist, paid:yes ou no, size:m, session:uma data ou um título, phone:, email:, com quaisquer palavras",
+  "sqTips": "Dicas de busca: tag:vip, type:road, status:waiting, onbike, done, noshow, waitlist ou late, paid:yes ou no, size:m, session:uma data ou um título, phone:, email:, com quaisquer palavras",
   "roleDoor": "Entrada",
   "tmDoorNote": "Lê os ingressos e faz o check-in de quem pagou ou veio de graça, em uma única tela bloqueada. Sem seções.",
   "zgTitle": "Check-in na entrada",
@@ -9824,5 +9824,9 @@
   "nwxNew": "Novo",
   "nwxCx": "Cancelado",
   "nwxCh": "Alterado",
-  "nwxSeen": "Visto"
+  "nwxSeen": "Visto",
+  "ltrMin": "Atrasado {0} min",
+  "ltrLate": "Atrasado",
+  "ltrHistChip": "{0}/{1} atrasos",
+  "ltrHistTip": "Atrasos nas últimas cinco chegadas desta pessoa com hora marcada"
 }

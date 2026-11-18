@@ -8822,7 +8822,7 @@
   "walTitle": "بھیجے گئے پیغامات",
   "walRate": "اپنی سواری کی درجہ بندی کریں",
   "logCatWa": "واٹس ایپ",
-  "sqTips": "تلاش کے نکات: tag:vip، type:road، status:waiting، onbike، done، noshow یا waitlist، paid:yes یا no، size:m، session:کوئی تاریخ یا عنوان، phone:، email:، کسی بھی الفاظ کے ساتھ",
+  "sqTips": "تلاش کے نکات: tag:vip، type:road، status:waiting، onbike، done، noshow، waitlist یا late، paid:yes یا no، size:m، session:کوئی تاریخ یا عنوان، phone:، email:، کسی بھی الفاظ کے ساتھ",
   "roleDoor": "داخلہ",
   "tmDoorNote": "ایک لاک اسکرین پر ٹکٹ اسکین کرتا ہے اور ادائیگی کرنے والوں یا مفت آنے والوں کی آمد درج کرتا ہے۔ کوئی سیکشن نہیں۔",
   "zgTitle": "داخلے پر چیک اِن",
@@ -9824,5 +9824,9 @@
   "nwxNew": "نیا",
   "nwxCx": "منسوخ",
   "nwxCh": "تبدیل",
-  "nwxSeen": "دیکھ لیا"
+  "nwxSeen": "دیکھ لیا",
+  "ltrMin": "{0} منٹ تاخیر",
+  "ltrLate": "تاخیر سے",
+  "ltrHistChip": "{0}/{1} تاخیر",
+  "ltrHistTip": "مقررہ وقت والی اس شخص کی آخری پانچ حاضریوں میں تاخیر"
 }

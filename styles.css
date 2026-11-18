@@ -14053,6 +14053,7 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-el,body.view-staff :is
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .cx-why,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-dnote,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-wnum,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .n6p-pin{display:inline;margin:0;padding:0;white-space:nowrap;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .pos-badge{display:inline;margin:0;padding:0;border:0;background:transparent;font:inherit;font-weight:600;color:var(--text);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-wnum{font-weight:600;color:var(--orange);}
+body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-ltr{display:inline;margin:0;padding:0;white-space:nowrap;font-weight:600;color:var(--orange);} /* Late arrivals (2026-11-18) */
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-dot{margin-inline:4px;color:var(--muted-l);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st1 .rq-nowv{white-space:nowrap;font-size:var(--sf-fs-xs);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-apok,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-apchip,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-apchip-rej{display:inline-flex;align-items:center;min-height:24px;padding:1px 8px;border:1px solid;border-radius:var(--sf-r-pill,var(--sf-r-pill));font-size:var(--sf-fs-xs);font-weight:600;white-space:nowrap;}

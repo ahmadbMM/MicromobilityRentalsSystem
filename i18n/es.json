@@ -8822,7 +8822,7 @@
   "walTitle": "Mensajes enviados",
   "walRate": "Valora tu salida",
   "logCatWa": "WhatsApp",
-  "sqTips": "Consejos de búsqueda: tag:vip, type:road, status:waiting, onbike, done, noshow o waitlist, paid:yes o no, size:m, session:una fecha o un título, phone:, email:, con cualquier palabra",
+  "sqTips": "Consejos de búsqueda: tag:vip, type:road, status:waiting, onbike, done, noshow, waitlist o late, paid:yes o no, size:m, session:una fecha o un título, phone:, email:, con cualquier palabra",
   "roleDoor": "Entrada",
   "tmDoorNote": "Escanea entradas y registra la llegada de quienes han pagado o vienen gratis, en una sola pantalla bloqueada. Sin secciones.",
   "zgTitle": "Registro en la entrada",
@@ -9824,5 +9824,9 @@
   "nwxNew": "Nuevo",
   "nwxCx": "Cancelado",
   "nwxCh": "Cambiado",
-  "nwxSeen": "Visto"
+  "nwxSeen": "Visto",
+  "ltrMin": "Tarde {0} min",
+  "ltrLate": "Tarde",
+  "ltrHistChip": "{0}/{1} tarde",
+  "ltrHistTip": "Llegadas tarde en las últimas cinco llegadas de esta persona con hora fijada"
 }
