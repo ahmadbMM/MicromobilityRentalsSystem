@@ -2228,8 +2228,10 @@ builds on Plan my Saturdays." No database change.
   `bike_slots`), a template push keeps each night's own, a copied week (`_n6sCopyRow`), a fast clone and a clone start
   without it (`_n6sFormReset`). The Sessions agenda marks such a date (`.ssx-bup`, `_sessExtraBits` with `feat`).
 - **Riders** (`member-hub.js`, `_bupHtml`, right after the hero; Plan my Saturdays stays where it was): the member's
-  nearest place held (`waiting`/`active`, never waitlisted or cancelled) on a marked, not called off date at least 7 days
-  ahead. The card: the event's title (`_evName`, as its ticket names it), its date, "N Saturdays to go" (calendar
+  nearest place held (`waiting`/`active`, never waitlisted or cancelled) on a marked, not called off date still to come
+  (after today), while at least one Saturday is left before it: the card stays until the last Saturday before the event
+  has passed (the first build hid it a week before, which lost the Saturday that matters most; fixed the same day), and
+  no Saturday left means no card, never a count of 0. The card: the event's title (`_evName`, as its ticket names it), its date, "N Saturdays to go" (calendar
   Saturdays from today, today included, to the day before), and one row per Saturday from the later of the booking's day
   (`registered_at` in Riyadh, the member's first row on that session) and 8 weeks before, at most 8: Done with a tick (a
   `saturday`-kind booking `done`, or `active` on a day gone), the date alone and dimmed (gone, not ridden), Booked,

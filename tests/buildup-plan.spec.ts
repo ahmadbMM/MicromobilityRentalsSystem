@@ -4,8 +4,8 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb, type Fixtures } fr
 // Build-up plan (the user, 2026-11-18: "When a member books a big event (T100, Victory Lap and the like), the tab counts
 // down the Saturdays left and suggests which ones to book. It ticks each one off once they've ridden it. It builds on Plan
 // my Saturdays."). Staff mark the event with the session forms' Build-up plan switch (bike_slots._bup 1; never on a
-// Saturday ride). On the Community tab, right after the hero, the member's nearest place held on a marked date a week or
-// more ahead gets a card: the event's title and date, the Saturdays to go, and one row per Saturday from the later of the
+// Saturday ride). On the Community tab, right after the hero, the member's nearest place held on a marked date still to
+// come gets a card, until the last Saturday before it has passed: the event's title and date, the Saturdays to go, and one row per Saturday from the later of the
 // booking's day and eight weeks before the event (Done, gone and dimmed, Booked, Book, Not open yet, ...). Everything
 // comes from what the page already holds: no read of its own. All Supabase traffic is stubbed.
 
@@ -125,7 +125,7 @@ test.describe('@customer:members Build-up plan', () => {
 
   for (const [what, o] of [
     ['a date without the Build-up plan', { sessions: SESS.map((s) => (s.id === EV ? event({ bike_slots: JSON.stringify({ _time: '16:00 - 17:00' }) }) : s)) }],
-    ['less than a week before the event', { at: '2099-12-12T09:00:00+03:00' }],
+    ['no Saturday left before the event (Sunday before a Friday event)', { at: '2099-12-13T09:00:00+03:00' }],
     ['the event started', { at: '2099-12-18T18:00:00+03:00' }],
     ['the booking cancelled', { rows: ROWS.map((r) => (r.id === 'e1' ? { ...r, status: 'cancelled' } : r)) }],
     ['the booking on the waitlist', { rows: ROWS.map((r) => (r.id === 'e1' ? { ...r, status: 'waitlist' } : r)) }],
@@ -139,7 +139,23 @@ test.describe('@customer:members Build-up plan', () => {
     });
   }
 
-  test('the card is exactly a week ahead, and the nearest marked event is the one planned for', async ({ page }) => {
+  test('a Friday event six days ahead: the card stays, with that Saturday the one to go', async ({ page }) => {
+    await member(page, { at: '2099-12-12T07:00:00+03:00' }); // Saturday 12 December; the event is Friday 18 December
+    await expect(card(page).locator('.hub-bup-n')).toHaveText('1 Saturday to go');
+    expect((await rowTexts(page)).slice(-2)).toEqual(['5 Dec', '12 Dec Not open yet']);
+  });
+
+  test('a Sunday event two days ahead: the next day\'s Saturday is on the card, bookable', async ({ page }) => {
+    const sessions = [...SESS.filter((s) => s.id !== EV), sat('2099-12-19'), event({ session_date: '2099-12-20', day: 'Sunday' })];
+    const rows = ROWS.map((r) => (r.id === 'e1' ? { ...r, session_date: '2099-12-20', session_day: 'Sunday' } : r));
+    await member(page, { at: '2099-12-18T10:00:00+03:00', sessions, rows });
+    await expect(card(page).locator('.hub-bup-n')).toHaveText('1 Saturday to go');
+    await expect(card(page).locator('.hub-bup-r').last()).toHaveText(/19 Dec\s*Book/);
+    await card(page).locator('.hub-bup-r').last().getByRole('button', { name: 'Book' }).click();
+    await expect.poll(() => page.evaluate('[S.custTab,S.selSession]')).toEqual(['register', '2099-12-19']);
+  });
+
+  test('the nearest marked event still to come is the one planned for', async ({ page }) => {
     const sessions = [...SESS, event({ id: 'rh-1', session_date: '2100-01-08', ride_kind: 'runher', title: 'Later Run Spec' })];
     const rows = [...ROWS, bk('e2', 'rh-1', '2100-01-08', 'waiting', { registered_at: '2099-10-01T09:00:00Z' })];
     await member(page, { at: '2099-12-11T00:10:00+03:00', sessions, rows });

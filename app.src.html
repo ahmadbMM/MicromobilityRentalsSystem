@@ -8630,7 +8630,7 @@ function _mfBadge(s){return _mfAt(s)&&_sessLive(s)?`<span class="badge-mf">${esc
 // Build-up plan (the user, 2026-11-18: "When a member books a big event (T100, Victory Lap and the like), the tab counts
 // down the Saturdays left and suggests which ones to book"): staff mark the event with the session forms' switch
 // (bike_slots._bup 1, beside _time; no column, no migration), on every kind but the Saturday ride itself. A member holding
-// a place on a marked date a week or more ahead sees the plan on the Community tab (member-hub.js _bupHtml). Kept as Few
+// a place on a marked date still to come sees the plan on the Community tab (member-hub.js _bupHtml). Kept as Few
 // spots left is: the edit form opens on what the date has and its save keeps or drops it, a template push keeps each
 // night's own, and a copied week, a fast clone and a clone start without it.
 function _sessBup(s){return !!(parseSlots(s&&s.bike_slots)||{})._bup;}

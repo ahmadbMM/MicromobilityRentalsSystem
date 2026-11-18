@@ -631,7 +631,7 @@ _planFetch();
 // "When a member books a big event (T100, Victory Lap and the like), the tab counts down the Saturdays left and suggests
 // which ones to book. It ticks each one off once they've ridden it. It builds on Plan my Saturdays." Staff mark the event
 // with the session forms' Build-up plan switch (bike_slots._bup 1; never on a Saturday ride). The member's nearest place
-// held on a marked date (waiting or checked in; never waitlisted or cancelled) a week or more ahead gets one card right
+// held on a marked date (waiting or checked in; never waitlisted or cancelled) that has not come yet gets one card right
 // after the hero: the event's title as its ticket names it, its date, the Saturdays to go (from today, today too on a
 // Saturday, to the day before), then one row per Saturday from the later of the booking's day and eight weeks before the
 // event: Done with a tick (a Saturday ride finished), the date alone, dimmed (gone, not ridden), Booked, On the waitlist,
@@ -648,12 +648,12 @@ const _bupYmd = (x) => String(x || '').slice(0, 10), _bupOk = (d) => /^\d{4}-\d\
 function _bupHtml(c) {
   const dep = window._hubDeps || {};
   if (!c || !dep.slots) return '';
-  const today = todayStr(), wk = _bupDay(today, 7), me = S.loggedIn || c, Q = getQueue().filter((e) => e && e.customerId === c.id);
+  const today = todayStr(), me = S.loggedIn || c, Q = getQueue().filter((e) => e && e.customerId === c.id);
   let ev = null;
   for (const e of Q) {
     if (e.status !== 'waiting' && e.status !== 'active') continue;
     const s = _sessGet(e.sessionId), d = s ? _bupYmd(s.session_date || s.id) : '';
-    if (!s || !_bupOk(d) || d < wk || s.cancelled_at || _rideKind(s) === 'saturday' || !(dep.slots(s.bike_slots) || {})._bup) continue;
+    if (!s || !_bupOk(d) || d <= today || s.cancelled_at || _rideKind(s) === 'saturday' || !(dep.slots(s.bike_slots) || {})._bup) continue;
     if (!ev || d < ev.d || (d === ev.d && String(s.id) < String(ev.s.id))) ev = { s, d };
   }
   if (!ev) return '';
@@ -661,6 +661,7 @@ function _bupHtml(c) {
   const made = Q.filter((e) => e.sessionId === ev.s.id).map((e) => _ksaYmd(e.registeredAt)).filter(_bupOk).sort()[0] || '';
   const last = _bupDay(ev.d, -1), from = made > _bupDay(ev.d, -56) ? made : _bupDay(ev.d, -56);
   const togo = _bupSats(today, last).length, rows = _bupSats(from, last).slice(-8);
+  if (!togo) return ''; // no Saturday left before the event (fixed 2026-11-18: the card stays until then, not a week before)
   const mine = {}, sats = {};
   for (const e of Q) { const s = _sessGet(e.sessionId); if (s && _rideKind(s) === 'saturday') { const k = _bupYmd(s.session_date || s.id); (mine[k] = mine[k] || []).push(e); }; }
   for (const s of S.sessions || []) { if (s && _rideKind(s) === 'saturday' && s.status !== 'deleted' && !s.draft) { const k = _bupYmd(s.session_date || s.id); (sats[k] = sats[k] || []).push(s); }; }
