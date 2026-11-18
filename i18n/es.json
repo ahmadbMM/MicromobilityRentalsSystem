@@ -8511,6 +8511,7 @@
   "payErrNotPaid": "Ese pago no se completó, así que no hay nada que reembolsar",
   "payErrNoAcc": "No hay cuenta que pueda tener monedero: reembólsalo a la tarjeta",
   "payErrState": "Ese reembolso ya se decidió en otro dispositivo",
+  "payErrCodeInUse": "Una reserva próxima usa este código de regalo o de paquete. Cancela primero esa reserva.",
   "payErrAmount": "Escribe un importe mayor que 0 y no superior a lo que queda",
   "payErrGateway": "El reembolso no se completó: {0}",
   "paySignedOut": "Vuelve a iniciar sesión para enviar un reembolso",

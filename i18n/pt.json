@@ -8511,6 +8511,7 @@
   "payErrNotPaid": "Esse pagamento não foi concluído, então não há nada a reembolsar",
   "payErrNoAcc": "Não há conta que possa ter carteira: reembolse no cartão",
   "payErrState": "Esse reembolso já foi decidido em outro aparelho",
+  "payErrCodeInUse": "Uma reserva futura usa este código de presente ou de pacote. Cancele essa reserva primeiro.",
   "payErrAmount": "Escreva um valor acima de 0 e não maior que o que falta",
   "payErrGateway": "O reembolso não foi concluído: {0}",
   "paySignedOut": "Faça login novamente para enviar um reembolso",

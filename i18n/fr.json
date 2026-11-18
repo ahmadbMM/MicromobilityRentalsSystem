@@ -8511,6 +8511,7 @@
   "payErrNotPaid": "Ce paiement n’a pas abouti, il n’y a donc rien à rembourser",
   "payErrNoAcc": "Aucun compte ne peut recevoir de portefeuille : remboursez sur la carte",
   "payErrState": "Ce remboursement a déjà été traité sur un autre appareil",
+  "payErrCodeInUse": "Une réservation à venir utilise ce code cadeau ou de forfait. Annulez d’abord cette réservation.",
   "payErrAmount": "Saisissez un montant supérieur à 0 et pas plus que ce qui reste",
   "payErrGateway": "Le remboursement n’a pas abouti : {0}",
   "paySignedOut": "Reconnectez-vous pour envoyer un remboursement",

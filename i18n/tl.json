@@ -8511,6 +8511,7 @@
   "payErrNotPaid": "Hindi natapos ang bayad na iyan, kaya walang mai-refund",
   "payErrNoAcc": "Walang account na may wallet: i-refund ito sa card",
   "payErrState": "Napagpasyahan na ang refund na iyan sa ibang device",
+  "payErrCodeInUse": "May paparating na booking na gumagamit ng gift o pack code na ito. Kanselahin muna ang booking na iyon.",
   "payErrAmount": "Maglagay ng halagang higit sa 0 at hindi lalampas sa natitira",
   "payErrGateway": "Hindi natuloy ang refund: {0}",
   "paySignedOut": "Mag-sign in muli para magpadala ng refund",
