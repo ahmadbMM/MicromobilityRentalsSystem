@@ -479,7 +479,7 @@ test.describe('@staff:store products: low stock, bulk prices, Duplicate, the edi
     await staff(page, { store_products: [prod('pa', { name_en: 'Bottle', price: 45 }), prod('pb', { name_en: 'Lamp', price: 199, compare_at: 210 }), prod('pc', { name_en: 'Gloves', price: 80 })],
       store_variants: [vari('va1', 'pa', { price: 55 })] });
     await view(page, 'products');
-    await page.locator('#tab-store button', { hasText: 'Change prices' }).click();
+    await page.locator('#tab-store button', { hasText: 'Bulk edit' }).click();
     await page.locator('#tab-store .sto-prod-pick', { hasText: 'Bottle' }).locator('input').check();
     await page.locator('#tab-store .sto-prod-pick', { hasText: 'Lamp' }).locator('input').check();
     await expect(page.locator('#sto-bulk-go')).toHaveText('Apply to 2');
@@ -488,7 +488,7 @@ test.describe('@staff:store products: low stock, bulk prices, Duplicate, the edi
     await expect.poll(() => pw.length + vw.length).toBe(3);
     await expect(page.locator('#toast-container')).toContainText('Prices changed on 2 products');
     pw.length = 0; vw.length = 0;
-    await page.locator('#tab-store button', { hasText: 'Change prices' }).click();
+    await page.locator('#tab-store button', { hasText: 'Bulk edit' }).click();
     await page.locator('#tab-store .sto-prod-pick', { hasText: 'Lamp' }).locator('input').check();
     await page.locator('#sto-bulk-v').fill('10');
     await page.locator('#sto-bulk-go').click();
@@ -878,7 +878,7 @@ test.describe('@staff:store review fixes', () => {
     await staff(page, { store_products: [prod('pa', { name_en: 'Bottle', price: 45 }), prod('pg', { name_en: 'Gift card', kind: 'gift_card', category: 'gift', slug: 'gift-card', price: 100 })], store_variants: [],
       site_content: [{ key: 'store.delivery', value: { pickup: { on: true, fee: 0 }, jeddah: { on: true, fee: 20 }, ksa: { on: false }, freeOver: 0 }, updated_at: NOW }] });
     await view(page, 'products');
-    await page.locator('#tab-store button', { hasText: 'Change prices' }).click();
+    await page.locator('#tab-store button', { hasText: 'Bulk edit' }).click();
     await expect(page.locator('#tab-store .sto-prod-pick')).toHaveCount(1);
     await page.locator('#tab-store button', { hasText: 'Select all' }).click();
     await expect(page.locator('#sto-bulk-go')).toHaveText('Apply to 1');

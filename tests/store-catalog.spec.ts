@@ -94,7 +94,7 @@ test.describe('@staff:store catalog mode (production: the catalogue alone)', () 
     expect(await railBtn(page, 'store')).not.toBe('none');
     expect(await railBtn(page, 'payments')).toBe('none');
     await expect(page.locator('#tab-store .sto-views .filter-pill.active')).toHaveText('Products');
-    expect(await pills(page)).toEqual(['Products', 'Low stock', 'Categories', 'Collections', 'Reports', 'Settings']);
+    expect(await pills(page)).toEqual(['Products', 'Low stock', 'Stock history', 'Suppliers', 'Categories', 'Collections', 'Reports', 'Settings']); // with S2's views
     for (const v of ['stock', 'categories', 'collections', 'settings', 'products']) { await view(page, v); await page.waitForTimeout(150); }
     await page.evaluate(`S.stoView='orders';setStaffTab('store')`); // an order view asked for by name still opens the products
     await expect(page.locator('#tab-store .sto-views .filter-pill.active')).toHaveText('Products');
@@ -119,7 +119,7 @@ test.describe('@staff:store catalog mode (production: the catalogue alone)', () 
     await staff(page, { ...CATALOG, site_content: [{ key: 'store.lowStock', value: 4, updated_at: NOW }] }, '/?staff', 'manager');
     await page.evaluate(`setStaffTab('store')`);
     await expect(page.locator('#tab-store .sto-views .filter-pill.active')).toHaveText('Categories');
-    expect(await pills(page)).toEqual(['Categories', 'Collections', 'Reports', 'Settings']);
+    expect(await pills(page)).toEqual(['Stock history', 'Suppliers', 'Categories', 'Collections', 'Reports', 'Settings']); // S2's views: staff read them
     await expect(page.locator('#tab-store .spc-row')).toHaveCount(4);
     await expect(page.locator('#tab-store button', { hasText: 'New category' })).toHaveCount(0);
     await expect(page.locator('#tab-store .spc-row button')).toHaveCount(0); // no order buttons, no Edit
@@ -138,7 +138,7 @@ test.describe('@staff:store full mode (staging) and the stock block\'s views', (
     await expect(page.locator('#tab-store .sto-views .filter-pill.active')).toHaveText('Orders');
     const p = await pills(page);
     for (const k of ['Orders', 'Products', 'Categories', 'Collections', 'Reports', 'Settings']) expect(p).toContain(k);
-    expect(p).not.toContain('Stock history');
+    for (const k of ['Stock history', 'Suppliers']) expect(p).toContain(k); // S2's views, merged
   });
 
   test('without staff_store_mode the older staff_store_ready answers: full', async ({ page }) => {
