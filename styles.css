@@ -14981,6 +14981,97 @@ body.view-staff.view-staff :is(#pay-rf,#sto-dlg) .confirm-box{width:min(var(--sf
 .pay-menu-popup .pay-menu-onl{color:var(--green);font-weight:600;}
 body.view-staff .pay-toggle.pay-held{border-style:dashed;}
 .ci-pay-onl{cursor:default;}
+/* ══ SPM-S1: the store's catalogue screens (2026-11-19): categories, collections, settings and reports on #tab-store, and their
+   centred pop-up (#spc-dlg) with the confirm dialog's chrome. ══ */
+#spc-dlg .chrome-dh10{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+#spc-dlg .chrome-dt{font-size:var(--sf-fs-lg);font-weight:600;overflow-wrap:anywhere;}
+#spc-dlg .chrome-xt{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:var(--sf-fs-xl);line-height:1;padding:0 4px;min-width:44px;min-height:44px;}
+#spc-dlg .chrome-dact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:12px;}
+#spc-dlg .confirm-box{max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;}
+body.view-staff.view-staff #spc-dlg .confirm-box{width:min(var(--sf-dlg-l),calc(100vw - 32px));}
+#spc-dlg .chrome-dbody{overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:12px;}
+#spc-dlg .chrome-dbody>*{flex-shrink:0;}
+#spc-dlg .sto-grid2,#spc-dlg .sto-grid3{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));}
+#spc-dlg .sto-grid3{grid-template-columns:repeat(3,minmax(0,1fr));}
+#spc-dlg :is(.sto-grid2,.sto-grid3) .form-group{margin:0;}
+#spc-dlg :is(input[type=text],input[type=number],input[type=date],select,textarea){width:100%;}
+#spc-dlg .sto-h{font-size:var(--sf-fs-sm);font-weight:600;color:var(--text);margin-top:4px;}
+#spc-dlg .sto-kl{font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);}
+:is(#spc-dlg,#tab-store) .sto-chk{display:flex;align-items:center;gap:8px;font-size:var(--sf-fs-md);cursor:pointer;}
+#spc-dlg .sto-chk input[type=checkbox]{-webkit-appearance:checkbox;appearance:auto;display:block;position:static;flex:none;width:18px;height:18px;min-height:0;margin:0;padding:0;opacity:1;}
+#spc-dlg .spc-del{margin-inline-end:auto;}
+#spc-dlg .spc-warn,#tab-store .spc-warn{padding:6px 10px;border-radius:var(--sf-r-ctl);border:1px solid var(--orange);color:var(--orange);font-size:var(--sf-fs-sm);font-weight:600;margin-top:6px;}
+#spc-dlg .spc-warn[hidden]{display:none;}
+#spc-dlg .spc-cnt,#tab-store .spc-cnt{color:var(--muted);font-size:var(--sf-fs-xs);font-weight:400;}
+#spc-dlg .spc-chks{display:flex;flex-wrap:wrap;gap:6px 16px;}
+#spc-dlg .spc-tpl{display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid var(--border);border-radius:var(--sf-r-ctl);}
+#spc-dlg .spc-tpl>button{align-self:flex-start;}
+#spc-dlg .spc-trs{display:flex;flex-direction:column;gap:6px;}
+#spc-dlg .spc-ics{flex-direction:row;flex-wrap:wrap;}
+#spc-dlg .spc-tr{display:flex;gap:6px;align-items:center;}
+#spc-dlg .spc-tr>:is(input,select){flex:1 1 0;min-width:0;}
+#spc-dlg .spc-ics .spc-tr{flex:0 1 200px;}
+#spc-dlg .spc-img{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+#spc-dlg .spc-img img{width:160px;height:110px;object-fit:cover;border-radius:var(--sf-r-ctl);background:var(--s1);display:block;}
+#spc-dlg .spc-img-acts{display:flex;gap:6px;flex-wrap:wrap;}
+#spc-dlg .spc-its{display:flex;flex-direction:column;gap:4px;}
+#spc-dlg .spc-it,#spc-dlg .spc-add{display:flex;align-items:center;gap:10px;padding:6px 4px;border:none;border-top:1px solid var(--border);background:transparent none;color:var(--text);text-align:start;font:inherit;width:100%;}
+#spc-dlg .spc-add{cursor:pointer;min-height:44px;}
+#spc-dlg .spc-add:hover{background:var(--s1);}
+#spc-dlg .spc-plus{margin-inline-start:auto;color:var(--green);font-weight:600;font-size:var(--sf-fs-sm);}
+#spc-dlg .spc-res{display:flex;flex-direction:column;max-height:260px;overflow-y:auto;}
+#spc-dlg .spc-q{max-width:none;}
+:is(#spc-dlg,#tab-store) .spc-n{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 200px;}
+:is(#spc-dlg,#tab-store) .spc-ord{display:flex;gap:4px;flex:0 0 auto;}
+:is(#spc-dlg,#tab-store) .spc-ord>button{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
+:is(#spc-dlg,#tab-store) .spc-thumb{flex:0 0 44px;width:44px;height:44px;border-radius:var(--sf-r-ctl);overflow:hidden;background:var(--s1);display:flex;align-items:center;justify-content:center;color:var(--muted);}
+:is(#spc-dlg,#tab-store) .spc-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+#tab-store .spc-list{display:flex;flex-direction:column;}
+#tab-store .spc-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 4px;border-top:1px solid var(--border);}
+#tab-store .spc-row.spc-kid{padding-inline-start:40px;}
+#tab-store .spc-meta{display:flex;flex-direction:column;gap:2px;flex:0 1 180px;font-size:var(--sf-fs-sm);}
+@media (max-width:767px){
+  #spc-dlg .sto-grid2,#spc-dlg .sto-grid3{grid-template-columns:minmax(0,1fr);}
+  #tab-store .spc-row.spc-kid{padding-inline-start:16px;}
+  #tab-store .spc-meta{flex-basis:auto;}
+}
+/* Settings: Payments > Settings' layout, on the Store */
+#tab-store .pay-set{display:flex;flex-direction:column;gap:16px;max-width:760px;}
+#tab-store .pay-set-sec{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid var(--border);}
+#tab-store .pay-set-sec h2{font-size:var(--sf-fs-lg);font-weight:600;margin:0;}
+#tab-store .pay-set-sec h3{font-size:var(--sf-fs-md);font-weight:600;margin:8px 0 0;}
+#tab-store .pay-set-row{display:flex;gap:12px;flex-wrap:wrap;}
+#tab-store .pay-set-n{flex:1 1 200px;margin:0;}
+#tab-store .pay-set-n :is(input,select,textarea){width:100%;}
+#tab-store .pay-set-acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
+#tab-store .pay-set-days{display:flex;gap:12px;flex-wrap:wrap;}
+#tab-store .pay-set-list{display:flex;flex-direction:column;gap:6px;}
+#tab-store .pay-set-tm{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+#tab-store .pay-set-tm input[type=text]{flex:1 1 160px;}
+#tab-store .pay-set-add{align-self:flex-start;}
+/* the banner's tone, as a preview */
+#tab-store .spc-bn{padding:10px 14px;border-radius:var(--sf-r-ctl);font-weight:600;font-size:var(--sf-fs-sm);text-align:center;overflow-wrap:anywhere;}
+#tab-store .spc-bn-brand{background:var(--green);color:#fff;}
+#tab-store .spc-bn-dark{background:#14181b;color:#f4f2ec;}
+#tab-store .spc-bn-sale{background:var(--red);color:#fff;}
+#tab-store .spc-bn-info{background:rgba(var(--blue-rgb),.12);color:var(--blue);border:1px solid rgba(var(--blue-rgb),.35);}
+/* Reports */
+#tab-store .spc-rep{display:flex;flex-direction:column;gap:18px;}
+#tab-store .spc-sec{display:flex;flex-direction:column;gap:8px;}
+#tab-store .spc-sh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+#tab-store .spc-sh h2{font-size:var(--sf-fs-lg);font-weight:600;margin:0;}
+#tab-store .spc-sec .stats-row{margin-bottom:0;}
+#tab-store .spc-warn-c .stat-num{color:var(--orange);}
+#tab-store .spc-range{gap:12px;flex-wrap:wrap;}
+#tab-store .spc-tbl{width:100%;border-collapse:collapse;font-size:var(--sf-fs-sm);}
+#tab-store .spc-tbl :is(th,td){padding:8px 10px;border-bottom:1px solid var(--border);text-align:start;white-space:nowrap;}
+#tab-store .spc-tbl th{font-weight:600;color:var(--muted);font-size:var(--sf-fs-xs);}
+#tab-store .spc-tbl .spc-num{text-align:end;font-variant-numeric:tabular-nums;}
+#tab-store .spc-bars{display:flex;flex-direction:column;gap:6px;}
+#tab-store .spc-bar-r{display:grid;grid-template-columns:minmax(70px,auto) minmax(0,1fr) minmax(90px,auto);gap:10px;align-items:center;font-size:var(--sf-fs-sm);}
+#tab-store .spc-bar{height:12px;border-radius:var(--sf-r-pill);background:var(--s1);overflow:hidden;}
+#tab-store .spc-bar-f{display:block;height:100%;width:var(--w,0%);background:var(--green);border-radius:var(--sf-r-pill);}
+#tab-store .spc-bar-v{display:flex;flex-direction:column;align-items:flex-end;font-weight:600;font-variant-numeric:tabular-nums;}
 /* ══ Sessions in order and in colour, and the details a row carries (2026-11-10, the user: "show the sessions with the
    chronological order starting from today ... show with a green or grey color if the session is open or closed"; and
    the five extras: places left, waitlist, meeting place, place in a series, code). Staff only. ══ */

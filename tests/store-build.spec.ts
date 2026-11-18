@@ -665,25 +665,28 @@ test.describe('@staff:store products: low stock, bulk prices, Duplicate, the edi
   });
 });
 
+// The store.* keys are Store > Settings' since 2026-11-19 (spm-s1); the legal line stays in Payments > Settings.
 test.describe('@staff:payments Settings: the delivery as charged, pickup days, slots, districts, switches, the legal identity', () => {
   test('X02: with no delivery saved the ways read as the database offers them, fees blank; a blank fee stays unset', async ({ page }) => {
     const sc = writes(page, 'site_content');
     await staff(page, { site_content: [{ key: 'pay.enabled', value: false, updated_at: NOW }] });
+    // the legal line reads the website's defaults (Payments > Settings)
     await page.evaluate(`S.payView='settings';setStaffTab('payments')`);
-    const sec = page.locator('#tab-payments');
+    const pay = page.locator('#tab-payments');
+    await expect(pay.locator('#ps-lgen')).toHaveValue('Micromobility Company Ltd.');
+    await expect(pay.locator('#ps-cr')).toHaveValue('1009107240');
+    await expect(pay.locator('#ps-vat')).toHaveValue('312555068900003');
+    await view(page, 'settings');
+    const sec = page.locator('#tab-store');
     await expect(sec.locator('#ps-pu')).toBeChecked(); // pickup is on unless it is false (X01)
     await expect(sec.locator('#ps-j')).not.toBeChecked();
     await expect(sec.locator('#ps-k')).not.toBeChecked();
     await expect(sec.locator('#ps-jfee')).toHaveValue('');
     await expect(sec.locator('#ps-kfee')).toHaveValue('');
     await expect(sec.locator('#ps-free')).toHaveValue('');
-    // the legal line reads the website's defaults
-    await expect(sec.locator('#ps-lgen')).toHaveValue('Micromobility Company Ltd.');
-    await expect(sec.locator('#ps-cr')).toHaveValue('1009107240');
-    await expect(sec.locator('#ps-vat')).toHaveValue('312555068900003');
     await sec.locator('#ps-j').check();
     await sec.locator('#ps-pudays').fill('1-2');
-    await sec.locator('#ps-save').click();
+    await sec.locator('#ss-save').click();
     await expect.poll(() => sc.length).toBeGreaterThan(0);
     const by = Object.fromEntries((sc[0].body as { key: string; value: unknown }[]).map((r) => [r.key, r.value]));
     expect(by['store.delivery']).toEqual({ pickup: { on: true, fee: 0, days: '1-2' }, jeddah: { on: true }, ksa: { on: false }, freeOver: null });
@@ -694,15 +697,15 @@ test.describe('@staff:payments Settings: the delivery as charged, pickup days, s
     const sc = writes(page, 'site_content');
     await staff(page, { site_content: [{ key: 'store.open', value: true, updated_at: NOW },
       { key: 'store.delivery', value: { pickup: { on: true, fee: 0 }, jeddah: { on: false, fee: 25 }, ksa: { on: false } }, updated_at: NOW }] });
-    await page.evaluate(`S.payView='settings';setStaffTab('payments')`);
-    const sec = page.locator('#tab-payments');
+    await view(page, 'settings');
+    const sec = page.locator('#tab-store');
     await expect(sec.locator('#ps-jfee')).toHaveValue('25');
     await sec.locator('#ps-pu').uncheck();
-    await sec.locator('#ps-save').click();
+    await sec.locator('#ss-save').click();
     await expect(page.locator('#toast-container')).toContainText('keep at least one way');
     expect(sc).toHaveLength(0);
     await sec.locator('#ps-j').check();
-    await sec.locator('#ps-save').click();
+    await sec.locator('#ss-save').click();
     await expect.poll(() => sc.length).toBeGreaterThan(0);
     const by = Object.fromEntries((sc[0].body as { key: string; value: unknown }[]).map((r) => [r.key, r.value]));
     expect(by['store.delivery']).toEqual({ pickup: { on: false, fee: 0 }, jeddah: { on: true, fee: 25 }, ksa: { on: false }, freeOver: null });
@@ -711,20 +714,19 @@ test.describe('@staff:payments Settings: the delivery as charged, pickup days, s
   test('slots, districts, the switches, low stock, complaints and the legal identity are written as the website reads them', async ({ page }) => {
     const sc = writes(page, 'site_content');
     await staff(page, { site_content: [{ key: 'biz.public', value: { vat_no: '300000000000003' }, updated_at: NOW }] });
-    await page.evaluate(`S.payView='settings';setStaffTab('payments')`);
-    const sec = page.locator('#tab-payments');
-    await expect(sec.locator('#ps-vat')).toHaveValue('300000000000003'); // Settings > Business's, when the legal line has none
+    await view(page, 'settings');
+    const sec = page.locator('#tab-store');
     await sec.locator('#ps-sl').check();
     await sec.locator('#ps-sk6').check(); // no delivery on Saturdays too
     await sec.locator('input[aria-label="Time 2, from"]').fill('17:00');
     await sec.locator('button', { hasText: 'Add a time' }).first().click(); // the slots' (the handover's and Ramadan's follow, 2026-11-18)
     await sec.locator('input[aria-label="Time 3, from"]').fill('21:00');
     await sec.locator('input[aria-label="Time 3, to"]').fill('21:00'); // a time may run past midnight since 2026-11-18 (21:00 to 01:00), never end where it starts
-    await sec.locator('#ps-save').click();
+    await sec.locator('#ss-save').click();
     await expect(page.locator('#toast-container')).toContainText('Time 3');
     await sec.locator('input[aria-label="Time 3, to"]').fill('23:00');
     await sec.locator('#ps-ds').check();
-    await sec.locator('#ps-save').click();
+    await sec.locator('#ss-save').click();
     await expect(page.locator('#toast-container')).toContainText('at least one district');
     await sec.locator('button', { hasText: 'Add a district' }).click();
     await sec.locator('input[aria-label="District 1, name in English"]').fill('Al Rawdah');
@@ -733,23 +735,32 @@ test.describe('@staff:payments Settings: the delivery as charged, pickup days, s
     await sec.locator('#ps-smsa').check();
     await sec.locator('#ps-low').fill('5');
     await sec.locator('#ps-cdays').fill('3');
-    await sec.locator('#ps-ecr').fill('7011223344');
-    await sec.locator('#ps-vat').fill('31234');
-    await sec.locator('#ps-save').click();
-    await expect(page.locator('#toast-container')).toContainText('15 digits');
-    await sec.locator('#ps-vat').fill('311111111100003');
-    await sec.locator('#ps-sbc').fill('https://eauthenticate.saudibusiness.gov.sa/certificate-details/0000000000');
-    await sec.locator('#ps-cr').fill('');
-    await sec.locator('#ps-save').click();
+    await sec.locator('#ss-save').click();
     await expect.poll(() => sc.length).toBeGreaterThan(0);
     const by = Object.fromEntries((sc[0].body as { key: string; value: unknown }[]).map((r) => [r.key, r.value]));
     expect(by['store.slots']).toEqual({ on: true, ahead: 6, lead: 1, skip: [5, 6], times: [{ id: 'am', from: '09:00', to: '13:00' }, { id: 'pm', from: '17:00', to: '21:00' }, { id: 't1', from: '21:00', to: '23:00' }] });
     expect(by['store.districts']).toEqual({ on: true, list: [{ en: 'Al Rawdah', ar: 'الروضة' }] });
-    expect(by).toMatchObject({ 'store.tabby.on': true, 'store.smsa.on': true, 'store.lowStock': 5, 'store.complaintsDays': 3,
-      'site.legal.ecr': { en: '7011223344', ar: '7011223344' }, 'site.legal.vat': { en: '311111111100003', ar: '311111111100003' },
-      'site.legal.sbc': { href: 'https://eauthenticate.saudibusiness.gov.sa/certificate-details/0000000000' }, 'site.legal.cr': { en: '', ar: '' } });
+    expect(by).toMatchObject({ 'store.tabby.on': true, 'store.smsa.on': true, 'store.lowStock': 5, 'store.complaintsDays': 3 });
     expect(by).not.toHaveProperty('store.addressLookup.on');
-    expect(by).not.toHaveProperty('site.legal.legalName');
+    await expect(page.locator('#toast-container')).toContainText('Settings saved');
+    // the legal identity: Payments > Settings
+    await page.evaluate(`S.payView='settings';setStaffTab('payments')`);
+    const pay = page.locator('#tab-payments');
+    await expect(pay.locator('#ps-vat')).toHaveValue('300000000000003'); // Settings > Business's, when the legal line has none
+    await pay.locator('#ps-ecr').fill('7011223344');
+    await pay.locator('#ps-vat').fill('31234');
+    await pay.locator('#ps-save').click();
+    await expect(page.locator('#toast-container')).toContainText('15 digits');
+    await pay.locator('#ps-vat').fill('311111111100003');
+    await pay.locator('#ps-sbc').fill('https://eauthenticate.saudibusiness.gov.sa/certificate-details/0000000000');
+    await pay.locator('#ps-cr').fill('');
+    await pay.locator('#ps-save').click();
+    await expect.poll(() => sc.length).toBeGreaterThan(1);
+    const lg = Object.fromEntries((sc[sc.length - 1].body as { key: string; value: unknown }[]).map((r) => [r.key, r.value]));
+    expect(lg).toMatchObject({ 'site.legal.ecr': { en: '7011223344', ar: '7011223344' }, 'site.legal.vat': { en: '311111111100003', ar: '311111111100003' },
+      'site.legal.sbc': { href: 'https://eauthenticate.saudibusiness.gov.sa/certificate-details/0000000000' }, 'site.legal.cr': { en: '', ar: '' } });
+    expect(lg).not.toHaveProperty('site.legal.legalName');
+    for (const k of Object.keys(lg)) expect(k).not.toMatch(/^store\./); // Payments writes no store key
   });
 });
 
@@ -871,8 +882,8 @@ test.describe('@staff:store review fixes', () => {
     await expect(page.locator('#tab-store .sto-prod-pick')).toHaveCount(1);
     await page.locator('#tab-store button', { hasText: 'Select all' }).click();
     await expect(page.locator('#sto-bulk-go')).toHaveText('Apply to 1');
-    await page.evaluate(`S.payView='settings';setStaffTab('payments')`);
-    await expect(page.locator('#tab-payments #ps-jfee')).toHaveValue('20');
-    await expect(page.locator('#tab-payments #ps-free')).toHaveValue('');
+    await view(page, 'settings');
+    await expect(page.locator('#tab-store #ps-jfee')).toHaveValue('20');
+    await expect(page.locator('#tab-store #ps-free')).toHaveValue('');
   });
 });
