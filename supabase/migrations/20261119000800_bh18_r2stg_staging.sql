@@ -8,7 +8,8 @@
 --
 -- stg0-1. pay_booking_cancel (the website's /api/pay/cancel): 20261119000500 (sql08-1) caps the refund at what is left
 --    of the payment. A payment that paid several bookings still had room after staff refunded one of them from
---    Payments (staff_pay_refund_begin leaves the booking open, its refund row carries the booking), so that booking's
+--    Payments (staff_pay_refund_begin leaves the booking open; its refund row names the booking only when the payment
+--    paid that one booking alone: a refund of a several-booking payment is held by the payment's own room), so that booking's
 --    cancel refunded its whole card_amount a second time out of the other bookings' money. The refund is now also no
 --    more than the booking's card_amount less its refunds owed, on their way or done ('due', 'pending', 'done'); nothing
 --    left, nothing refunded or recorded, as before. The answer's shape is unchanged.
@@ -128,7 +129,8 @@ begin
          (20261119000800), stg0-1: a booking staff had refunded in part was refunded in full again while its payment,
          which paid other bookings too, still had room) */
       bk_back := coalesce((select sum(r.amount) from payment_refunds r
-                            where r.booking_id = q.id and r.status in ('due', 'pending', 'done')), 0);
+                            where r.booking_id = q.id and r.payment_id is not distinct from q.payment_id
+                              and r.status in ('due', 'pending', 'done')), 0);   -- this payment's refunds only (review of 2026-11-18)
       amt := round(least(q.card_amount - bk_back, greatest(room, 0)), 2);
       if amt <= 0 then dest := null; end if;
     end if;
