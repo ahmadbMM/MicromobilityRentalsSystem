@@ -62,7 +62,7 @@ test.describe('@staff:customers customer activity', () => {
     await expect(rows(page).nth(1)).toContainText('Maya Haddad'); // the rider, when not the account holder
     await expect(rows(page).nth(2)).toContainText('Signed in');
     await expect(rows(page).nth(3)).toContainText('Edited account details');
-    await expect(rows(page).nth(3)).toContainText('city: — → Jeddah');
+    await expect(rows(page).nth(3)).toContainText(/city: \u2068—\u2069 → \u2068Jeddah\u2069/); // each value isolated, the arrow the language's (bug hunt 2026-11-18)
     await expect(rows(page).nth(4)).toContainText('Applied to the community');
     await expect(rows(page).nth(4)).toContainText('walk.person@gmail.com'); // no account: how to reach them
     // The newest page is asked for, newest first, and only the columns drawn.

@@ -203,6 +203,34 @@ test.describe('@staff:bookings Run for Her report per distance', () => {
     expect((await page.evaluate('window.__rep') as string[])[2]).toContain('Nora Haddad');
   });
 
+  test('the live preview with the contacts column on waits for them and opens nothing; a Print tapped meanwhile is its own (bug hunt 2026-11-18)', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.addInitScript(() => { try { localStorage.setItem('cq_rep_opts', JSON.stringify({ cols: { em: 1 } })); } catch { /* none */ } });
+    const customers = [{ id: 'cr1', name: 'Runner r1', phone: '0550000001', emergency_name: 'Nora Haddad', emergency_phone: '+966551234567', emergency_relation: 'sibling' }];
+    await stubSupabase(page, { sessions: [run, jcc], bikes: [], queue_entries: runners, customers });
+    // the contacts' read is held a while (after the stub: the last route wins), so the preview starts before it is in
+    await page.route(/\/rest\/v1\/customers\?.*emergency_name/, async (route) => { await new Promise((r) => setTimeout(r, 1500)); return route.fallback(); });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('getQueue().length>0');
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${RUN}';renderStaffQueue();S._repOpts=null;showPrintReportOptions()`);
+    await catchReports(page);
+    const m = page.locator('#print-opts-modal');
+    await expect(m.locator('[data-rep="cols:em"]')).toHaveAttribute('aria-pressed', 'true');
+    await page.waitForTimeout(400); // the preview is waiting on the read now
+    await m.locator('.rpt-km-row').nth(1).getByRole('button', { name: 'Print' }).click();
+    // the preview draws the sheet with the contacts beside the choices
+    await expect.poll(() => page.evaluate(`(()=>{const f=document.querySelector('#print-opts-modal .rb-frame');const d=f&&f.contentDocument;return !!(d&&/Nora Haddad/.test(d.body?d.body.textContent:''));})()`), { timeout: 10000 }).toBe(true);
+    // the staffer's Print: opened and recorded once; the preview: neither
+    await expect.poll(async () => (await page.evaluate('window.__rep') as string[]).length).toBe(1);
+    expect((await page.evaluate('window.__rep') as string[])[0]).toContain('Nora Haddad');
+    await page.waitForTimeout(600);
+    expect((await page.evaluate('window.__rep') as string[]).length).toBe(1);
+    expect(await page.evaluate(`document.querySelectorAll('#rx-modal .rx-frame').length`)).toBe(0);
+    expect(await page.evaluate(`S.fullLog.filter(x=>x.label===t('logPrintedReport')).length`)).toBe(1);
+  });
+
   test('the day sheet on race day: each runner’s distance, no bike column, a runner on the course checked in', async ({ page }) => {
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
     const RH = `${today}-rh`;

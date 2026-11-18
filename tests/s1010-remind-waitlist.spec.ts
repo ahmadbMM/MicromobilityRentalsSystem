@@ -52,6 +52,15 @@ test.describe('@staff:bookings waitlist offers', () => {
     expect(p).toContain('id=eq.e3');
     expect(p).toContain('status=eq.waitlist');
     await expect(dlg.getByText('Has the place now')).toBeVisible();
+    // the place-opened message for this ride in the rider's language, not the booth's "your turn", and the row owes it
+    // until it is sent (bug hunt 2026-11-18)
+    const wa = dlg.locator('a[data-wa-t="wl_moved"]');
+    await expect(wa).toHaveCount(1);
+    await expect(dlg.locator('a[data-wa-t="wa_turn"]')).toHaveCount(0);
+    expect(await wa.getAttribute('href')).toBe(await page.evaluate(`_ptLink(_qGet('e3'))`));
+    expect(await page.evaluate(`_ptList().includes('e3')`)).toBe(true);
+    await page.evaluate(`_wloTold('e3')`);
+    expect(await page.evaluate(`_ptList().includes('e3')`)).toBe(false);
   });
 
   test('in Automatic the next in line gets the place at once, as before', async ({ page }) => {

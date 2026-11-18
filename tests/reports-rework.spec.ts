@@ -103,6 +103,22 @@ test.describe('@staff:reports the reports rework', () => {
     expect(await page.evaluate(`document.querySelectorAll('#rx-modal .rx-frame').length`)).toBe(0); // the preview is no report opened
   });
 
+  test('the preview is drawn again after a tick and after a filter (bug hunt 2026-11-18)', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await boot(page);
+    await page.evaluate(`S.sfSession='s0';setStaffTab('queue');S._repOpts=null;showPrintReportOptions()`);
+    const prev = () => page.evaluate<string | null>(`(()=>{const f=document.querySelector('#print-opts-modal .rb-frame');const d=f&&f.contentDocument;const m=d&&d.querySelector('.rx-main');return m?[...m.querySelectorAll('th')].map(x=>x.textContent.trim()).join('|')+'#'+m.querySelectorAll('tbody tr').length:null;})()`);
+    await expect.poll(prev).not.toBeNull();
+    const first = await prev();
+    await page.locator('#print-opts-modal [data-rep="cols:phone"]').click();
+    await expect.poll(prev).not.toBe(first);
+    const ticked = String(await prev());
+    expect(ticked.length).toBeGreaterThan(String(first).length); // one more heading
+    await page.evaluate(`_repSetFilter('fStatus','noshow')`);
+    await expect.poll(prev).not.toBe(ticked);
+    expect(await page.evaluate(`document.querySelectorAll('#rx-modal .rx-frame').length`)).toBe(0);
+  });
+
   test('charts: round axis values, the latest point said, the numbers in a table; tables line quantities up', async ({ page }) => {
     await boot(page);
     const html = (await page.evaluate(`(async()=>{await _loadStaffPart('analytics');return _areaChart([{vals:[969,1938,2906,3875],label:'Collected',fill:true}],['1 Jan 2026','2 Jan 2026','3 Jan 2026','4 Jan 2026'],{unitPfx:'SAR '});})()`)) as string;

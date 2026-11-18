@@ -9854,5 +9854,7 @@
   "ltrMin": "Atrasado {0} min",
   "ltrLate": "Atrasado",
   "ltrHistChip": "{0}/{1} atrasos",
-  "ltrHistTip": "Atrasos nas últimas cinco chegadas desta pessoa com hora marcada"
+  "ltrHistTip": "Atrasos nas últimas cinco chegadas desta pessoa com hora marcada",
+  "rsSplitMoved": "Apenas {0} de {1} ciclistas passaram para a nova data. Os outros continuam na primeira data.",
+  "rbNameTaken": "Outro membro da equipe já tem uma configuração da equipe com este nome. Escolha outro nome."
 }

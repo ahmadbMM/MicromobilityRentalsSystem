@@ -9854,5 +9854,7 @@
   "ltrMin": "Tarde {0} min",
   "ltrLate": "Tarde",
   "ltrHistChip": "{0}/{1} tarde",
-  "ltrHistTip": "Llegadas tarde en las últimas cinco llegadas de esta persona con hora fijada"
+  "ltrHistTip": "Llegadas tarde en las últimas cinco llegadas de esta persona con hora fijada",
+  "rsSplitMoved": "Solo {0} de {1} ciclistas pasaron a la nueva fecha. Los demás siguen en la primera fecha.",
+  "rbNameTaken": "Otro miembro del personal ya tiene una configuración de equipo con este nombre. Elige otro nombre."
 }

@@ -9854,5 +9854,7 @@
   "ltrMin": "Huli nang {0} min",
   "ltrLate": "Huli",
   "ltrHistChip": "{0}/{1} huli",
-  "ltrHistTip": "Mga huling pagdating sa huling limang pagdalo ng taong ito na may takdang oras"
+  "ltrHistTip": "Mga huling pagdating sa huling limang pagdalo ng taong ito na may takdang oras",
+  "rsSplitMoved": "{0} lang sa {1} rider ang nalipat sa bagong petsa. Nasa unang petsa pa rin ang iba.",
+  "rbNameTaken": "May team setup na sa pangalang ito ang ibang staff. Pumili ng ibang pangalan."
 }

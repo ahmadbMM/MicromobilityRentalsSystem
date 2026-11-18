@@ -9854,5 +9854,7 @@
   "ltrMin": "En retard de {0} min",
   "ltrLate": "En retard",
   "ltrHistChip": "{0}/{1} retards",
-  "ltrHistTip": "Retards sur les cinq dernières arrivées de cette personne avec une heure fixée"
+  "ltrHistTip": "Retards sur les cinq dernières arrivées de cette personne avec une heure fixée",
+  "rsSplitMoved": "Seuls {0} des {1} cyclistes ont été déplacés à la nouvelle date. Les autres restent à la première date.",
+  "rbNameTaken": "Un autre membre de l’équipe a déjà un réglage d’équipe sous ce nom. Choisissez un autre nom."
 }

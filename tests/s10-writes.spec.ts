@@ -97,6 +97,27 @@ test('bulk return goes in one staff_bulk_return, the payment in it', async ({ pa
   expect(pats.length).toBe(0);                                                // the payment and the ride time were in the call
 });
 
+test('a rider marked paid on an incidental 0 is asked the fare and returns the single way, with it (bug hunt 2026-11-18)', async ({ page }) => {
+  // staff_bulk_return writes paid alone: a price-0 booking marked paid there read as on the house (or was refused
+  // MANAGER_REQUIRED), and the dialog never asked a price-0 rider without add-ons to pay at all
+  const rows = [row('r1', 1, 'active', { price: 0 }), row('r2', 2, 'active'), row('r3', 3, 'active', { paid: true })];
+  await desk(page, { queue_entries: rows });
+  expect(await page.evaluate(`[_brOwes(_qGet('r1')),_brAmt(_qGet('r1'))]`)).toEqual([true, 75]);
+  await page.route(/rest\/v1\/rpc\/staff_bulk_return/, (route) => {
+    if (route.request().method() !== 'POST') return route.fallback();
+    rows[1].status = 'done'; rows[2].status = 'done';
+    return json(route, [{ id: 'r2', ok: true, r: { ok: true, noop: false, bikes_freed: 0 } }, { id: 'r3', ok: true, r: { ok: true, noop: false, bikes_freed: 0 } }]);
+  });
+  const many = calls(page, /rpc\/staff_bulk_return/), one = calls(page, /rpc\/staff_return(\?|$)/), pats = calls(page, /rest\/v1\/queue_entries/, 'PATCH');
+  await page.evaluate(`_bulkReturnRun([{id:'r1',cond:'ok',notes:null,paid:true},{id:'r2',cond:'ok',notes:null,paid:true},{id:'r3',cond:'ok',notes:null,paid:false}])`);
+  await expect.poll(() => many.length).toBe(1);
+  expect((many[0].body as { p_rows: Row[] }).p_rows.map((r) => r.id)).toEqual(['r2', 'r3']);
+  await expect.poll(() => one.length).toBe(1);
+  expect((one[0].body as Row).p_booking_id).toBe('r1');
+  await expect.poll(() => pats.find((p) => /id=eq\.r1/.test(p.url))).toBeTruthy();
+  expect(pats.find((p) => /id=eq\.r1/.test(p.url))!.body).toMatchObject({ paid: true, price: 75 });
+});
+
 test('the close-out is one staff_close_out and names every rider it could not settle', async ({ page }) => {
   await desk(page, {
     queue_entries: [
