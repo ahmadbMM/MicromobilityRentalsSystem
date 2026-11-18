@@ -8771,7 +8771,6 @@ body:not(.view-staff) #tab-register .cu-prog-n{flex:none;font-variant-numeric:ta
 body:not(.view-staff) #tab-register .cu-prog-b{position:relative;display:block;height:6px;border-radius:999px;background:var(--card-3);overflow:hidden;}
 body:not(.view-staff) #tab-register .cu-prog-b i{position:absolute;inset-block:0;inset-inline-start:0;width:var(--p,34%);border-radius:999px;background:var(--go);}
 body:not(.view-staff) :is(#cu,*).cu-k10{font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
-body:not(.view-staff) .reg-foot-why{flex-basis:100%;margin:0 0 8px;font-size:var(--fs-13);color:var(--ink-2);text-align:center;}
 body:not(.view-staff) .mm-reg-foot.cu-foot{flex-wrap:wrap;}
 body:not(.view-staff) .price-preview{background:var(--card-2);border:0;border-radius:var(--r-ctl);padding:14px 16px;}
 body:not(.view-staff) .price-preview-breakdown{font-size:var(--fs-13);color:var(--ink-2);font-weight:500;}
@@ -9688,8 +9687,8 @@ body:not(.view-staff) :is(.mm-reg-foot,.mm-cart-foot){background:var(--glass-sol
     box-shadow:inset 0 -1px 0 var(--glass-edge);}
   body:not(.view-staff) #cust-bottom-nav{background:var(--glass);-webkit-backdrop-filter:var(--glass-fx);backdrop-filter:var(--glass-fx);
     box-shadow:inset 0 1px 0 var(--glass-rim),inset 0 -1px 0 var(--glass-rim-2),0 0 0 1px var(--glass-edge),var(--lq-3);}
-  body:not(.view-staff) :is(.mm-reg-foot,.mm-cart-foot){background:var(--glass);-webkit-backdrop-filter:var(--glass-fx);backdrop-filter:var(--glass-fx);
-    box-shadow:inset 0 1px 0 var(--glass-rim),0 0 0 1px var(--glass-edge),var(--lq-2);}
+  body:not(.view-staff) .mm-cart-foot{background:var(--glass);-webkit-backdrop-filter:var(--glass-fx);backdrop-filter:var(--glass-fx);
+    box-shadow:inset 0 1px 0 var(--glass-rim),0 0 0 1px var(--glass-edge),var(--lq-2);} /* the booking bar stays opaque paper: no heading shows through it (EM04-B, 2026-11-18) */
 }
 @media (prefers-reduced-transparency:reduce),(prefers-contrast:more){
   body:not(.view-staff){--glass:var(--glass-solid);--glass-fx:none;--scrim-fx:none;}
@@ -9827,8 +9826,6 @@ body:not(.view-staff) .mm-reg-foot .btn-primary[aria-busy="true"]{gap:10px;opaci
 body:not(.view-staff) .mm-reg-foot .btn-primary[aria-busy="true"]::after{content:'';flex:none;width:16px;height:16px;box-sizing:border-box;border-radius:50%;
   border:2.5px solid var(--spin-track);border-top-color:var(--paper);animation:mmSpin .7s linear infinite;}
 @media (prefers-reduced-motion:reduce){body:not(.view-staff) .mm-reg-foot .btn-primary[aria-busy="true"]::after{animation-duration:1.6s!important;animation-iteration-count:infinite!important;}}
-/* the waiver's hint sits on a solid bar, not on glass over the waiver's own words */
-body:not(.view-staff) .mm-reg-foot:has(.reg-foot-why){background:var(--glass-solid);-webkit-backdrop-filter:none;backdrop-filter:none;}
 /* d_smallbars: on a phone the floating tab bar steps aside while a booking is made; the Continue bar floats alone
    near the bottom, and the page no longer keeps room for two bars */
 @media(max-width:767px){
@@ -10259,10 +10256,11 @@ body:not(.view-staff) .pg-dlg .modal-footer{flex-wrap:wrap;}
 /* the bar stays put on a phone, and nothing focused hides under it (rows 7, 12) */
 @media(max-width:720px){
   body:not(.view-staff).view-customer:has(#tab-register.active .mm-reg-foot) .mm-reg-foot{position:fixed;inset-inline:12px;bottom:max(12px,env(safe-area-inset-bottom));margin:0;}
-  body:not(.view-staff).view-customer:has(#tab-register.active .mm-reg-foot) #view-customer .view-main{padding-bottom:calc(112px + env(safe-area-inset-bottom));}
-  html.kb-open body:not(.view-staff).view-customer #tab-register .mm-reg-foot{position:static;}
+  body:not(.view-staff).view-customer:has(#tab-register.active .mm-reg-foot) #view-customer .view-main{padding-bottom:calc(var(--reg-foot-h,92px) + 20px + env(safe-area-inset-bottom));}
+  html.kb-open body:not(.view-staff).view-customer #tab-register .mm-reg-foot{display:none;} /* hidden while the keyboard is up (EM04-B) */
 }
-html:has(body:not(.view-staff) #tab-register.active .mm-reg-foot){scroll-padding-bottom:calc(120px + env(safe-area-inset-bottom));}
+/* the bar's measured height (_regFootObs) + 20px clear under a focused field (EM04-B) */
+html:has(body:not(.view-staff) #tab-register.active .mm-reg-foot){scroll-padding-bottom:calc(var(--reg-foot-h,100px) + 20px + env(safe-area-inset-bottom));}
 /* ── MY BOOKINGS, THE RESEARCH ROUND (2026-11-10: "do everything" from reports/Rider Bookings page enhancements, the
    owner's four open decisions left out). The date on one line, today's code large, the reference half folded, the
    cancelled bookings kept, four buttons in two columns, numbers that line up. ───────────────────────────────────── */
@@ -11802,6 +11800,19 @@ body.kiosk-on{overflow:hidden;}
 .inv-badge{background:rgba(var(--blue-rgb),.14);color:rgb(var(--blue-rgb));white-space:nowrap;}
 /* A Petromin night's visitor (2026-11-17): a member's booking staff made free; purple, apart from the invitee's blue */
 .pmv-badge{background:rgba(var(--purple-rgb),.14);color:rgb(var(--purple-rgb));white-space:nowrap;}
+/* an early-bird booking (EF29, 2026-11-18): why its price is lower */
+.xpe-badge{background:rgba(var(--green-rgb),.12);color:var(--green);white-space:nowrap;}
+/* Payments > Experiences' pack pop-up (#xp-pk, 2026-11-18): the refund dialog's chrome, centred, 90svh at most, scrolling inside */
+#xp-pk .chrome-dh10{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+#xp-pk .chrome-dt{font-size:var(--sf-fs-lg);font-weight:600;overflow-wrap:anywhere;}
+#xp-pk .chrome-xt{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:var(--sf-fs-xl);line-height:1;padding:0 4px;min-width:44px;min-height:44px;}
+#xp-pk .chrome-dact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:12px;}
+#xp-pk .confirm-box{max-height:90vh;max-height:90svh;display:flex;flex-direction:column;}
+#xp-pk .chrome-dbody{overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:12px;}
+body.view-staff.view-staff #xp-pk .confirm-box{width:min(var(--sf-dlg-m),calc(100vw - 32px));}
+#xp-pk input:not([type=checkbox]),#xp-pk select{width:100%;}
+#xp-pk .sto-chk{display:flex;align-items:center;gap:8px;font-size:var(--sf-fs-md);cursor:pointer;min-height:44px;}
+#xp-pk .sto-chk input[type=checkbox]{-webkit-appearance:checkbox;appearance:auto;display:block;position:static;flex:none;width:18px;height:18px;min-height:0;margin:0;padding:0;opacity:1;}
 /* the company a guest typed at micromobility.sa/petromin, after their I- number: a long one is cut, its title says it whole */
 .inv-co{display:inline-block;max-width:14em;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;}
 #tab-settings .set-kiosk{margin-top:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
@@ -15355,6 +15366,13 @@ body.view-staff #confirm-modal .fup-err{color:var(--red);font-size:var(--sf-fs-s
 body.view-staff #confirm-modal .fup-err:empty{display:none;}
 body.view-staff #cust-modal .wal-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;}
 body.view-staff #cust-modal .wal-li{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;font-size:var(--sf-fs-sm,.8125rem);}
+/* Passkeys on the account window (N06, 2026-11-18): one row each, Remove at the end; a signed-out one quieter; a possible copy in red */
+body.view-staff #cust-modal .pk-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+body.view-staff #cust-modal .pk-li{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:var(--sf-fs-sm,.8125rem);}
+body.view-staff #cust-modal .pk-what{display:flex;flex-direction:column;min-width:0;}
+body.view-staff #cust-modal .pk-li.pk-out .pk-what{opacity:.6;}
+body.view-staff #cust-modal .pk-warn{display:inline-flex;align-items:center;gap:4px;color:var(--red);font-weight:600;}
+body.view-staff #cust-modal .pk-li .btn-sm,body.view-staff #cust-modal .pk-all{flex:none;min-height:44px;}
 body.view-staff #cust-modal .wal-what{font-weight:600;overflow-wrap:anywhere;}
 /* People round (2026-11-18): the account window's owner and family, rides with; the family picker; the last bike */
 body.view-staff #cust-modal .fup-who{background:none;border:0;padding:4px;margin:-4px;font:inherit;font-weight:600;color:var(--text);text-decoration:underline;cursor:pointer;}
@@ -15897,6 +15915,11 @@ body.view-staff .ann-box .rm-list{max-height:min(60vh,520px);overflow-y:auto;}
    or under or an incident), tonight's first-timers on the First-timers pop-up, the close-night list's rebook item. */
 #checkin-modal .lfb{margin:6px 0;padding:6px 10px;border-radius:var(--r-md,var(--sf-r-ctl));background:rgba(var(--warn-rgb),.12);color:var(--text);font-size:var(--sf-fs-sm);display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere;}
 #checkin-modal .lfb.lfb-bad{background:rgba(var(--red-rgb),.1);border:1px solid rgba(var(--red-rgb),.35);}
+/* Store order to hand over (N15, 2026-11-18): the order's number and lines, Handed over at the end */
+#checkin-modal .sxh{margin:6px 0;padding:6px 10px;border-radius:var(--r-md,var(--sf-r-ctl));background:rgba(var(--blue-rgb),.1);color:var(--text);font-size:var(--sf-fs-sm);display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere;}
+#checkin-modal .sxh-h{display:flex;align-items:center;gap:4px;}
+#checkin-modal .sxh-o{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+#checkin-modal .sxh-o .btn-sm{flex:none;min-height:44px;}
 #checkin-modal .lfb-h{display:flex;align-items:center;flex-wrap:wrap;gap:4px;}
 #checkin-modal .lfb-bad .lfb-h .art-ic{color:var(--red);}
 #checkin-modal .lfb-sc,#checkin-modal .lfb-tags{display:flex;flex-wrap:wrap;gap:4px 10px;}

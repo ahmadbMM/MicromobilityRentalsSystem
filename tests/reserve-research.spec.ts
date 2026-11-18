@@ -39,7 +39,7 @@ test.describe('@customer:reserve the research round', () => {
     await expect(page.locator('#tab-register .cu-rv-date .cu-wl-chip')).toHaveText('Waitlist');
     await expect(confirmBtn(page)).toHaveText('Join waitlist');
     await page.evaluate(at(OPEN, 3, 'S.waiverOk=true;S._waiverSess=S.selSession;'));
-    await expect(confirmBtn(page)).toHaveText('Confirm booking');
+    await expect(confirmBtn(page)).toHaveText(/^Book /); // Book and the amount (EM04-B, 2026-11-18)
     await expect(page.locator('#tab-register .cu-wl-chip')).toHaveCount(0);
   });
 

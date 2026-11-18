@@ -32,13 +32,14 @@ test.describe('@bh14 s06 booking wizard', () => {
     expect(await page.evaluate('S.regBikeTypes[0]')).toBe('Hybrid');
   });
 
-  test('a sole ride whose booking window is shut is not picked; the foot says when it opens', async ({ page }) => {
+  test('a sole ride whose booking window is shut is not picked; its card says when it opens, and no bar shows', async ({ page }) => {
     await rider(page);
     await page.evaluate(`S._bw={days:3,at:null};S.selEvent='snd96';S.selSession=null;S.regStep=1;goCustomer('register');renderRegister()`);
     expect(await page.evaluate('S.selSession')).toBe(null);
-    await expect(page.locator('#rf-why')).toBeVisible();
-    expect(await page.locator('#rf-why').textContent()).toBe(await page.evaluate(`_bwOpensText(_sessDisp('${ND.id}'))`));
-    await expect(page.locator('#tab-register .mm-reg-foot .btn-primary')).toBeDisabled();
+    const st = page.locator(`#tab-register .cu-sole-card [data-bw="${ND.id}"]`); // EM04-B (2026-11-18): the bar only with a date to choose
+    await expect(st).toBeVisible();
+    expect(await st.textContent()).toBe(await page.evaluate(`_bwOpensText(_sessDisp('${ND.id}'))`));
+    await expect(page.locator('#tab-register .mm-reg-foot')).toHaveCount(0);
   });
 
   test('a refused edit gives the Confirm back', async ({ page }) => {

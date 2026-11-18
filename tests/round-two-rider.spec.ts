@@ -142,7 +142,7 @@ test.describe('@customer:round-two the booked moment', () => {
       S.regBikeHeights=['175'];S.regBikeTypes=['Road'];ensureBikeSizes();S.waiverOk=true;S._waiverSess=S.selSession;S.regSubmitting=true;renderRegister()`);
     const b = page.locator('#tab-register .mm-reg-foot .btn-primary');
     await expect(b).toHaveAttribute('aria-busy', 'true');
-    await expect(b).toHaveText('Confirm booking');
+    await expect(b).toHaveText(/^Book .*75/); // names the amount (EM04-B, 2026-11-18)
     expect(await b.evaluate((el) => getComputedStyle(el, '::after').animationName)).toBe('mmSpin');
   });
 });

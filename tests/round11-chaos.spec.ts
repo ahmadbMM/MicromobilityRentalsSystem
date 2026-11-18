@@ -98,7 +98,7 @@ test('Arabic end-to-end: full booking flow in RTL', async ({ page }) => {
   await page.locator('[data-type-slot="0"][data-type="Hybrid"]').click();
   await page.locator('button', { hasText: 'مراجعة الحجز' }).click();        // Review booking (regNextToReview)
   await page.locator('#reg-waiver-cb').check();                             // the ride waiver, on the review
-  await page.locator('button', { hasText: 'تأكيد الحجز' }).click();          // Confirm booking (submitReg)
+  await page.locator('#tab-register .mm-reg-foot .btn-primary', { hasText: 'احجز' }).click(); // Book ⃁ 75 (submitReg; EM04-B)
   await expect(page.locator('#tab-register')).toContainText('Spec Rider');
   expect(errs, errs.join('\n')).toEqual([]);
 });
