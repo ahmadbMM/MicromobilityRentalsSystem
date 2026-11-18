@@ -198,6 +198,8 @@ with expected(fname, want_definer, note) as (values
   ('volunteer_list', true, 'Volunteers: a customer has no staff row, so only this reaches the data; token-checked (20261105120000)'),
   ('volunteer_checkin', true, 'Volunteers: a customer has no staff row, so only this reaches the data; token-checked (20261105120000)'),
   ('volunteer_donated', true, 'Volunteers: a customer has no staff row, so only this reaches the data; token-checked (20261105120000)'),
+  ('volunteer_counts', true, 'Volunteers: the head counts over every booking; a customer has no staff row, so only this reaches the data; token-checked (20261119000600)'),
+  ('_rider_moved', false, 'Petromin form: a moved party''s new number, read only from rider_lookup and rider_edit, which are definer; no client execute (20261119000600)'),
   ('staff_volunteer_save', true, 'Volunteers: writes tables with no write policy; the section is checked (20261105120000)'),
   ('staff_volunteers_bulk', true, 'Volunteers: writes tables with no write policy; the section is checked (20261105120000)'),
   ('staff_volunteer_decide', true, 'Volunteers: writes tables with no write policy; the section is checked (20261105120000)'),
