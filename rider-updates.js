@@ -44,7 +44,7 @@ function _inbNav(url) {
   const w = _inbWhere(url); if (!w || w === 'vol') return;
   const u = new URL(String(url), location.origin);
   if (w === 'claim') _wlcOpen(u.searchParams.get('claim').toLowerCase());
-  else if (w === 'members') _hubGo('link');
+  else if (w === 'members') { if (u.searchParams.get('hv') === 'suggest') S._hubView = 'suggest'; _hubGo('link'); } // a suggestion's news opens the member's suggestions (20261118210500)
   else setCustTab(w, w === 'account' ? (_parsePath(u.pathname) || {}).sub : undefined);
 }
 // The read marked every row read: the count the page holds (S._inb) goes to none, and with it the dot and the icon's badge.

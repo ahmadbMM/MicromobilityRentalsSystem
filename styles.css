@@ -9384,6 +9384,26 @@ body:not(.view-staff) .mt-rules ul{margin:6px 0 0;padding-inline-start:20px;line
 body:not(.view-staff) .mt-tick{display:flex;align-items:flex-start;gap:10px;font-weight:500;font-size:var(--fs-15);line-height:1.4;color:var(--ink);cursor:pointer;}
 body:not(.view-staff) .mt-tick input{width:22px;height:22px;flex:0 0 22px;margin:1px 0 0;padding:0;border:0;border-radius:4px;background:none;appearance:auto;-webkit-appearance:checkbox;accent-color:var(--go);}
 body:not(.view-staff) .pg-field.err .mt-tick{color:var(--red);}
+/* Suggest a ride (member-hub.js: the feed's card and its page, S._hubView 'suggest'; 2026-11-18) */
+body:not(.view-staff) .rsg-form{display:flex;flex-direction:column;gap:10px;}
+body:not(.view-staff) .rsg-picks .mt-chip{display:inline-flex;align-items:center;gap:6px;}
+body:not(.view-staff) .rsg-lbl{margin-top:6px;}
+body:not(.view-staff) .rsg-text{width:100%;box-sizing:border-box;min-height:104px;padding:10px 14px;border:1px solid var(--line-2);border-radius:8px;font:inherit;font-size:16px;color:var(--ink);background:var(--card);resize:vertical;}
+body:not(.view-staff) .rsg-text:focus{border-color:var(--go);outline:medium none;}
+body:not(.view-staff) .rsg-text[aria-invalid="true"]{border-color:var(--red);}
+body:not(.view-staff) .rsg-msg{margin:0;color:var(--red);font-size:var(--fs-15);font-weight:600;}
+body:not(.view-staff) .rsg-msg:empty{display:none;}
+body:not(.view-staff) .rsg-list{list-style:none;margin:0 0 12px;padding-top:4px;padding-bottom:4px;}
+body:not(.view-staff) .rsg-row{padding:12px 0;border-bottom:1px solid var(--line);}
+body:not(.view-staff) .rsg-row:last-child{border-bottom:0;}
+body:not(.view-staff) .rsg-row-h{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+body:not(.view-staff) .rsg-st{flex:none;padding:3px 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line);color:var(--ink-2);font-size:var(--fs-13);font-weight:600;}
+body:not(.view-staff) .rsg-st-planned{background:var(--amber-wash);border-color:transparent;color:var(--amber);}
+body:not(.view-staff) .rsg-st-done{background:var(--go-wash);border-color:transparent;color:var(--go-2);}
+body:not(.view-staff) .rsg-body{margin:8px 0 4px;font-size:var(--fs-15);line-height:1.45;color:var(--ink);white-space:pre-line;overflow-wrap:anywhere;}
+body:not(.view-staff) .rsg-reply{margin-top:10px;padding:10px 12px;border-radius:var(--r-ctl);background:var(--paper);border-inline-start:3px solid var(--go);}
+body:not(.view-staff) .rsg-reply-k{display:block;font-size:var(--fs-13);font-weight:600;color:var(--go-2);}
+body:not(.view-staff) .rsg-reply p{margin:4px 0 0;font-size:var(--fs-15);line-height:1.45;color:var(--ink);white-space:pre-line;overflow-wrap:anywhere;}
 /* Ask in the Community tab (member-hub.js card, member-ask.js page; 2026-11-13) */
 body:not(.view-staff) .ak-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);}
 body:not(.view-staff) .ak-row:last-child{border-bottom:0;padding-bottom:0;}

@@ -998,7 +998,8 @@ one interest. It can reuse the sport answer every account already has." Spec `te
   (`_interest_suggest`: cycling -> saturday, circuit, road; triathlon -> swim, runs, road; athletics -> runs; swimming ->
   swim; yoga; sports for all -> saturday); nothing is kept until Save. `_purge_old` deletes an anonymised account's row.
 - **Rider** (member-hub.js, last block): the "Your interests" card of chips (`aria-pressed`, `_intTog` flips in place) with
-  Save sits right after the hero until the first save, then near the end with the picks and Change (Cancel while open).
+  Save sits right after the hero until the first save, then at the very end of the feed (after Suggest a ride and the
+  invitation) with the picks and Change (Cancel while open).
   Coming up lists the sessions of a saved interest first (date order among themselves) with the class `int-on` (a line at
   the start edge, no word); the hero is unchanged. Its own read, never kept on the phone; PGRST202 hides the card.
 - **Ask**: audience `interests` with `ask_pages.interest_keys` (1 to 12): `_ask_sees` (rebuilt from 20261113010000) lets
@@ -1014,6 +1015,38 @@ one interest. It can reuse the sport answer every account already has." Spec `te
 - **Staff account window**: an "Interests" row of chips in the details (`_n6pIntLoad`, one read per window).
 - **Privacy Notice**: a row and a retention line (en + ar), PRIVACY_VERSION unchanged (2026-11-18), nobody asked again.
 - **Website (not built yet)**: the card on /club, the Updates entries already follow; /ask follows through SQL.
+
+## Suggest a ride (2026-11-18, migration 20261118210500)
+
+The user's pick of 2026-11-18 (item 5): "Suggest a ride: a member sends staff a route, a breakfast spot or an idea, and sees
+only their own suggestions, each marked Planned or Done. When one happens, an Updates entry tells them."
+
+- **Stored:** `ride_suggestions` (kind route/breakfast/idea/other, `body` 3-500, `status` new/planned/done/closed, `reply` up to
+  300 for the member, `status_at`, `staff_user`, `told` = the statuses already announced). Staff read it (policy "staff read",
+  `_staff_mod('community')`); nobody writes it directly. Riders: `ride_suggest(p_id, p_token, p_kind, p_body)` (active
+  members only; 3 in 24 hours and 10 still new per person, `_accts_of`; answers `{ok, row}` or `{ok: false, error}`: denied,
+  member, invalid, day, open, each said in words) and `ride_suggestions_mine(p_id, p_token)` (own rows, newest first, 50; a
+  closed one comes back as `sent`, so the member sees Sent, Planned or Done and never "closed"). Staff:
+  `staff_ride_suggestion_set(p_sid, p_status, p_reply)` (`_staff_mod('community', true)`; null keeps a field, `''` clears the reply).
+- **Updates row:** the trigger `_updates_suggestion` (before update of status) writes one `push_outbox` row when a suggestion
+  becomes planned or done, as `_updates_note` writes (key `sugplan` / `sugdone` in `push_words`, ten languages, arg = the
+  first 60 characters of the member's text; tag `hub-sug-<id>-<status>`, so Community's switch decides a push). Never twice for
+  a status (`told` + the tag), never "planned" after "done", never taken back. `customer_updates` lists it as kind `info`; its
+  address `/members?src=push&hv=suggest` opens the member's suggestions (`_readHubSrc` on a cold open, `_inbNav` in
+  rider-updates.js from the list).
+- **Rider** (`member-hub.js`, the last block above `window._hubRender`): a "Suggest a ride" card after the volunteer call,
+  before the invitation, opens `S._hubView = 'suggest'`: four kind chips, a labelled text box, Send, then "Your suggestions"
+  (kind, text, date, status chip, "From the team" reply). The page is written once and then only `#rsg-list` (`_rsgPaint`), so
+  a feed read landing never wipes what the member is typing. A refusal is said under the box (`#rsg-msg`), no toast; after
+  Send the new one is at the top. A database without the functions (PGRST202) hides the card. Its names are `_rsg*`, `S._rsg`,
+  `RSG_*`, `#rsg-*`/`.rsg-*`: `S._sg`, `S._sgOff`, `SG_KINDS` and `.sg-*` belong to the page (the share gate, the sessions' chips),
+  and member-hub.js shares the page's global scope (a second `const SG_KINDS` stopped the whole file loading).
+- **Staff** (community part, Community > Activities > Suggestions, `_acSg*`): the pill counts the new ones; filters New /
+  Planned / Done / Closed, newest first; each card has the member's name (opens `openAccountHistory`) and mobile in full, kind,
+  text, date, Planned / Done / Close and a reply box with Save (a draft survives repaints, `S._acSgDraft`). Each change goes
+  to the staff log (`logAction`).
+- **Privacy Notice:** the row after the Ask answers (en + ar), PRIVACY_VERSION unchanged (2026-11-18), nobody asked again.
+- **Spec:** `tests/ride-suggestions.spec.ts` (`@customer:members`, `@staff:community`).
 
 ## New features build (2026-11-13/14)
 

@@ -13,6 +13,8 @@
 // 2026-11-13: the Mentorship programme (its card in the feed, its own page S._hubView 'mentor', its read mentor_feed);
 // see the block above window._hubRender.
 // 2026-11-18: My interests (its card, and Coming up led by the sessions of a picked interest); the last block of this file.
+// 2026-11-18: Suggest a ride (its card in the feed, its own page S._hubView 'suggest', ride_suggestions_mine / ride_suggest);
+// its block is the last above window._hubRender.
 /* global S, sb, esc, _on, getSession, _cssv, shortDate, t, _cuIc, sessionTime, _dayWord, _evName, _evOf, _evKindName, allSessions,
    _isCommunity, _sessPastDay, _sessEnded, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
    _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard, _bookingAhead, _ptnAll,
@@ -213,6 +215,9 @@ function _hubRender() {
     else { body.innerHTML = _akShellHtml(); _akLoad(); }
     return;
   }
+  // Suggest a ride: written once, then only its list again, so a repaint keeps what the member is typing.
+  if (S._hubView === 'suggest' && S._rsgOff) S._hubView = null;
+  if (S._hubView === 'suggest' && c) { _rsgPaint(body, c); return; }
   if (!d) {
     body.innerHTML = h ? `<div class="hub-card" role="status"><strong class="hub-name">${_hT('err')}</strong><button type="button" class="btn-primary hub-wide" data-on-click="${_on('_hubRetry')}">${_hT('retry')}</button></div>` : _skelHtml(2, 'hub-skel');
     return;
@@ -248,9 +253,10 @@ function _feedHtml(c, d, stale) {
     d.club ? _clubHtml(d.club) : '',
     hero.recap ? '' : staff,
     _mtCardHtml(),
-    _intHtml(true),
     d.volunteer && dep.vol ? `<div class="hub-card hub-flat"><span class="hub-k">${_cuIc('people', 16)} ${_hT('vol')}</span><a class="btn-secondary hub-wide hub-link" href="${esc(dep.vol + '/#o/' + encodeURIComponent(d.volunteer))}" target="_blank" rel="noopener">${_hT('volBtn')}</a></div>` : '',
+    _rsgCardHtml(),
     dep.inv ? `<div class="hub-card hub-flat"><button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_hubInvite')}">${esc(dep.invLabel())}</button></div>` : '',
+    _intHtml(true),
   ].join('');
 }
 
@@ -1361,6 +1367,130 @@ async function _intSave() {
   S._intEd = null; if (S._int) S._int.at = Date.now();
   _hubRender();
   const b = document.getElementById('int-change'); if (b) try { b.focus({ preventScroll: true }); } catch (_) {}
+}
+
+// ── Suggest a ride (the user's pick of 2026-11-18: "Suggest a ride: a member sends staff a route, a breakfast spot or an
+// idea, and sees only their own suggestions, each marked Planned or Done. When one happens, an Updates entry tells them.")
+// A card near the end of the feed opens a page of its own (S._hubView 'suggest'; an Updates row about a suggestion opens it
+// too, /members?hv=suggest): what it is (four chips), the text, Send; under it the member's own suggestions, newest first,
+// each with its kind, date, Sent / Planned / Done and the team's reply. One read when the page opens (ride_suggestions_mine,
+// never kept on the phone), one write (ride_suggest); migration 20261118210500, which also writes the Updates rows. The page
+// is written once and then only its list part, so a repaint of the tab never takes away what the member is typing. A
+// database without it (PGRST202) closes the page and hides the card.
+Object.assign(HUB_T, {
+  rsgTitle: ['Suggest a ride', 'اقترح جولة', 'Suggérer une sortie', 'Sugiere una salida', 'Sugira um passeio', 'سواری کی تجویز دیں', 'राइड का सुझाव दें', 'Magmungkahi ng ride', 'राइडको सुझाव दिनुहोस्', 'একটি রাইডের পরামর্শ দিন'],
+  rsgGo: ['Make a suggestion', 'قدّم اقتراحًا', 'Faire une suggestion', 'Hacer una sugerencia', 'Fazer uma sugestão', 'تجویز دیں', 'सुझाव दें', 'Magbigay ng mungkahi', 'सुझाव दिनुहोस्', 'পরামর্শ দিন'],
+  rsgKindQ: ['What is it?', 'ما نوع اقتراحك؟', 'De quoi s’agit-il ?', '¿Qué es?', 'O que é?', 'یہ کیا ہے؟', 'यह क्या है?', 'Ano ito?', 'यो के हो?', 'এটি কী?'],
+  rsgKRoute: ['Route', 'مسار', 'Itinéraire', 'Ruta', 'Percurso', 'راستہ', 'रास्ता', 'Ruta', 'बाटो', 'রুট'],
+  rsgKBreakfast: ['Breakfast spot', 'مكان للفطور', 'Lieu pour le petit-déjeuner', 'Sitio para desayunar', 'Lugar para o café da manhã', 'ناشتے کی جگہ', 'नाश्ते की जगह', 'Lugar para sa almusal', 'बिहानको खाजाको ठाउँ', 'নাস্তার জায়গা'],
+  rsgKIdea: ['Ride idea', 'فكرة جولة', 'Idée de sortie', 'Idea de salida', 'Ideia de passeio', 'سواری کا خیال', 'राइड का आइडिया', 'Ideya para sa ride', 'राइडको विचार', 'রাইডের আইডিয়া'],
+  rsgKOther: ['Something else', 'شيء آخر', 'Autre chose', 'Otra cosa', 'Outra coisa', 'کچھ اور', 'कुछ और', 'Iba pa', 'अरू केही', 'অন্য কিছু'],
+  rsgText: ['Your suggestion', 'اقتراحك', 'Votre suggestion', 'Tu sugerencia', 'A sua sugestão', 'آپ کی تجویز', 'आपका सुझाव', 'Ang mungkahi mo', 'तपाईंको सुझाव', 'আপনার পরামর্শ'],
+  rsgSend: ['Send', 'إرسال', 'Envoyer', 'Enviar', 'Enviar', 'بھیجیں', 'भेजें', 'Ipadala', 'पठाउनुहोस्', 'পাঠান'],
+  rsgMine: ['Your suggestions', 'اقتراحاتك', 'Vos suggestions', 'Tus sugerencias', 'As suas sugestões', 'آپ کی تجاویز', 'आपके सुझाव', 'Mga mungkahi mo', 'तपाईंका सुझावहरू', 'আপনার পরামর্শগুলো'],
+  rsgSent: ['Sent', 'أُرسل', 'Envoyée', 'Enviada', 'Enviada', 'بھیج دی گئی', 'भेजा गया', 'Naipadala', 'पठाइयो', 'পাঠানো হয়েছে'],
+  rsgPlanned: ['Planned', 'ضمن الخطة', 'Prévue', 'Planificada', 'Planejada', 'منصوبے میں', 'योजना में', 'Nakaplano', 'योजनामा', 'পরিকল্পিত'],
+  rsgDone: ['Done', 'نُفّذ', 'Réalisée', 'Hecha', 'Realizada', 'ہو گئی', 'पूरा हुआ', 'Natupad', 'पूरा भयो', 'সম্পন্ন'],
+  rsgReply: ['From the team', 'من الفريق', 'De l’équipe', 'Del equipo', 'Da equipe', 'ٹیم کی طرف سے', 'टीम की ओर से', 'Mula sa team', 'टिमबाट', 'টিমের পক্ষ থেকে'],
+  rsgPickKind: ['Please pick what it is.', 'يرجى اختيار نوع الاقتراح.', 'Choisissez de quoi il s’agit.', 'Elige qué es.', 'Escolha o que é.', 'براہ کرم چنیں کہ یہ کیا ہے۔', 'कृपया चुनें कि यह क्या है।', 'Pakipili kung ano ito.', 'कृपया यो के हो छान्नुहोस्।', 'অনুগ্রহ করে বেছে নিন এটি কী।'],
+  rsgShort: ['Please write at least 3 characters.', 'يرجى كتابة 3 أحرف على الأقل.', 'Écrivez au moins 3 caractères.', 'Escribe al menos 3 caracteres.', 'Escreva pelo menos 3 caracteres.', 'کم از کم 3 حروف لکھیں۔', 'कम से कम 3 अक्षर लिखें।', 'Sumulat ng hindi bababa sa 3 character.', 'कम्तीमा 3 अक्षर लेख्नुहोस्।', 'অন্তত 3টি অক্ষর লিখুন।'],
+  rsgDay: ['You can send 3 suggestions a day. Please try again tomorrow.', 'يمكنك إرسال 3 اقتراحات في اليوم. يرجى المحاولة غدًا.', 'Vous pouvez envoyer 3 suggestions par jour. Réessayez demain.', 'Puedes enviar 3 sugerencias al día. Inténtalo mañana.', 'Pode enviar 3 sugestões por dia. Tente amanhã.', 'آپ دن میں 3 تجاویز بھیج سکتے ہیں۔ کل دوبارہ کوشش کریں۔', 'आप दिन में 3 सुझाव भेज सकते हैं। कल फिर कोशिश करें।', 'Puwede kang magpadala ng 3 mungkahi bawat araw. Subukang muli bukas.', 'तपाईं दिनमा 3 सुझाव पठाउन सक्नुहुन्छ। भोलि फेरि प्रयास गर्नुहोस्।', 'আপনি দিনে 3টি পরামর্শ পাঠাতে পারেন। আগামীকাল আবার চেষ্টা করুন।'],
+  rsgOpenMax: ['You have 10 suggestions waiting for the team. You can send more once they have looked at them.', 'لديك 10 اقتراحات بانتظار الفريق. يمكنك إرسال المزيد بعد أن يطّلع عليها.', '10 de vos suggestions attendent l’équipe. Vous pourrez en envoyer d’autres quand elle les aura lues.', 'Tienes 10 sugerencias esperando al equipo. Podrás enviar más cuando las haya visto.', 'Você tem 10 sugestões aguardando a equipe. Poderá enviar mais quando ela as tiver visto.', 'آپ کی 10 تجاویز ٹیم کے جائزے کی منتظر ہیں۔ ٹیم کے دیکھ لینے کے بعد آپ مزید بھیج سکتے ہیں۔', 'आपके 10 सुझाव टीम के देखने का इंतज़ार कर रहे हैं। टीम के देख लेने के बाद आप और भेज सकते हैं।', 'May 10 mungkahi kang hinihintay pang tingnan ng team. Makakapagpadala ka ulit kapag natingnan na nila ang mga ito.', 'तपाईंका 10 सुझाव टिमले हेर्न बाँकी छन्। टिमले हेरेपछि तपाईं थप पठाउन सक्नुहुन्छ।', 'আপনার 10টি পরামর্শ টিমের দেখার অপেক্ষায় আছে। টিম দেখে নেওয়ার পর আপনি আরও পাঠাতে পারবেন।'],
+  rsgMember: ['Suggestions are for Community members.', 'الاقتراحات متاحة لأعضاء المجتمع.', 'Les suggestions sont réservées aux membres de la communauté.', 'Las sugerencias son para los miembros de la comunidad.', 'As sugestões são para membros da comunidade.', 'تجاویز صرف کمیونٹی ممبران کے لیے ہیں۔', 'सुझाव केवल कम्युनिटी सदस्यों के लिए हैं।', 'Para sa mga miyembro ng Community ang mga mungkahi.', 'सुझाव कम्युनिटीका सदस्यहरूका लागि मात्र हुन्।', 'পরামর্শ শুধু কমিউনিটির সদস্যদের জন্য।'],
+});
+const RSG_KINDS = [['route', 'rsgKRoute', 'pin'], ['breakfast', 'rsgKBreakfast', 'cup'], ['idea', 'rsgKIdea', 'bike'], ['other', 'rsgKOther', 'chat']];
+const RSG_ERR = { day: 'rsgDay', open: 'rsgOpenMax', invalid: 'rsgShort', member: 'rsgMember' };
+// S._rsg: {forId, rows (null until read), kind, draft, err, busy, loading, fail, html}; per account, in memory only.
+function _rsgState(c) {
+  if (!c) return null;
+  if (!S._rsg || S._rsg.forId !== c.id) S._rsg = { forId: c.id, rows: null, kind: '', draft: '', err: '', busy: false, loading: false, fail: false, html: null };
+  return S._rsg;
+}
+function _rsgCardHtml() {
+  if (S._rsgOff) return '';
+  return `<div class="hub-card hub-flat rsg-card"><span class="hub-k">${_cuIc('chat', 16)} ${_hT('rsgTitle')}</span><button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_rsgOpen')}">${_hT('rsgGo')}</button></div>`;
+}
+function _rsgOpen() { S._hubView = 'suggest'; _hubRender(); _rsgFetch(); try { window.scrollTo(0, 0); } catch (_) {} }
+function _rsgClose() { S._hubView = null; _hubRender(); try { window.scrollTo(0, 0); } catch (_) {} }
+async function _rsgFetch() {
+  const c = _hCust(), g = _rsgState(c); if (!g || !sb || g.loading) return;
+  g.loading = true; g.fail = false;
+  let r; try { r = await sb.rpc('ride_suggestions_mine', _hTok(c)); } catch (e) { r = { error: e }; }
+  g.loading = false;
+  const now = _hCust(); if (!now || now.id !== c.id) return;
+  const e = r && r.error, d = r && !e && r.data;
+  if (e && (e.code === 'PGRST202' || e.code === '42883')) S._rsgOff = true;
+  else if (d && d.ok === true && Array.isArray(d.rows)) g.rows = d.rows;
+  else g.fail = true; // the rows already shown stay
+  if (S.custTab === 'members') _hubRender();
+}
+function _rsgPaint(body, c) {
+  const g = _rsgState(c), key = c.id + '|' + (S.lang || 'en');
+  if (g.rows === null && !g.loading && !g.fail) _rsgFetch();
+  let pg = document.getElementById('rsg-page');
+  if (!pg || !body.contains(pg) || pg.getAttribute('data-k') !== key) {
+    body.innerHTML = _rsgPageHtml(key);
+    pg = document.getElementById('rsg-page'); g.html = null;
+    const ta = document.getElementById('rsg-text'); if (ta) ta.value = g.draft;
+  }
+  const L = document.getElementById('rsg-list'), h = _rsgListHtml(g);
+  if (L && g.html !== h) { L.innerHTML = h; g.html = h; }
+  _rsgSync(g);
+}
+function _rsgPageHtml(key) {
+  return `<div id="rsg-page" data-k="${esc(key)}"><div class="hub-card hub-flat mt-head"><h2 class="mt-h1" id="rsg-h">${_hT('rsgTitle')}</h2><button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_rsgClose')}">${_hT('close')}</button></div>
+    <div class="hub-card rsg-form" role="group" aria-labelledby="rsg-h"><span class="mt-lbl" id="rsg-kind-l">${_hT('rsgKindQ')}</span>
+      <div class="mt-picks rsg-picks" role="group" aria-labelledby="rsg-kind-l">${RSG_KINDS.map(([k, w, ic]) => `<button type="button" class="mt-chip rsg-kind" data-k="${k}" aria-pressed="false" data-on-click="${_on('_rsgKind', k)}">${_cuIc(ic, 16)} ${_hT(w)}</button>`).join('')}</div>
+      <label class="mt-lbl rsg-lbl" for="rsg-text">${_hT('rsgText')}</label>
+      <textarea id="rsg-text" class="rsg-text" maxlength="500" rows="4" data-on-input="${_on('_rsgInput', _EL)}"></textarea>
+      <p id="rsg-msg" class="rsg-msg" role="alert"></p>
+      <button type="button" id="rsg-go" class="btn-primary hub-wide" data-on-click="${_on('_rsgSend')}">${_hT('rsgSend')}</button></div>
+    <div id="rsg-list"></div></div>`;
+}
+function _rsgListHtml(g) {
+  if (g.rows === null) return g.fail ? `<div class="hub-card" role="status"><strong class="hub-name">${_hT('err')}</strong><button type="button" class="btn-primary hub-wide" data-on-click="${_on('_rsgFetch')}">${_hT('retry')}</button></div>` : _skelHtml(1, 'hub-skel');
+  if (!g.rows.length) return '';
+  return `<h3 class="mt-h2">${_hT('rsgMine')}</h3><ul class="hub-card rsg-list">${g.rows.map(_rsgRowHtml).join('')}</ul>`;
+}
+function _rsgRowHtml(x) {
+  const k = RSG_KINDS.find((y) => y[0] === x.kind) || RSG_KINDS[3], st = x.status === 'planned' || x.status === 'done' ? x.status : 'sent';
+  return `<li class="rsg-row"><div class="rsg-row-h"><span class="hub-k">${_cuIc(k[2], 16)} ${_hT(k[1])}</span><span class="rsg-st rsg-st-${st}">${_hT(st === 'planned' ? 'rsgPlanned' : st === 'done' ? 'rsgDone' : 'rsgSent')}</span></div>
+    <p class="rsg-body" dir="auto">${esc(x.body || '')}</p><span class="hub-meta">${esc(_hDate(x.day))}</span>
+    ${x.reply ? `<div class="rsg-reply"><span class="rsg-reply-k">${_hT('rsgReply')}</span><p dir="auto">${esc(x.reply)}</p></div>` : ''}</li>`;
+}
+// The form's state onto the page as it stands: the chip picked, the message, Send while it is sending.
+function _rsgSync(g) {
+  document.querySelectorAll('#rsg-page .rsg-kind').forEach((b) => { const on = b.getAttribute('data-k') === g.kind; b.setAttribute('aria-pressed', String(on)); b.classList.toggle('on', on); });
+  const m = document.getElementById('rsg-msg'); if (m && m.textContent !== (g.err ? _hT(g.err) : '')) m.textContent = g.err ? _hT(g.err) : '';
+  const ta = document.getElementById('rsg-text'); if (ta) { if (g.err === 'rsgShort') ta.setAttribute('aria-invalid', 'true'); else ta.removeAttribute('aria-invalid'); }
+  const go = document.getElementById('rsg-go'); if (go) go.disabled = !!g.busy;
+}
+function _rsgKind(k) {
+  const g = _rsgState(_hCust()); if (!g || !RSG_KINDS.some((y) => y[0] === k)) return;
+  g.kind = g.kind === k ? '' : k;
+  if (g.err === 'rsgPickKind') g.err = '';
+  _rsgSync(g);
+}
+function _rsgInput(el) {
+  const g = _rsgState(_hCust()); if (!g || !el) return;
+  g.draft = String(el.value || '');
+  if (g.err) { g.err = ''; _rsgSync(g); }
+}
+async function _rsgSend() {
+  const c = _hCust(), g = _rsgState(c); if (!g || !sb || g.busy) return;
+  const ta = document.getElementById('rsg-text'); if (ta) g.draft = String(ta.value || '');
+  const text = g.draft.trim();
+  g.err = !g.kind ? 'rsgPickKind' : text.length < 3 ? 'rsgShort' : '';
+  if (g.err) { _rsgSync(g); const f = g.err === 'rsgPickKind' ? document.querySelector('#rsg-page .rsg-kind') : ta; if (f) try { f.focus(); } catch (_) {} return; }
+  g.busy = true; _rsgSync(g);
+  let r; try { r = await sb.rpc('ride_suggest', { ..._hTok(c), p_kind: g.kind, p_body: text }); } catch (e) { r = { error: e }; }
+  g.busy = false;
+  const now = _hCust(); if (!now || now.id !== c.id) return;
+  const res = r && !r.error && r.data;
+  if (!res || res.ok !== true || !res.row) { g.err = (res && RSG_ERR[res.error]) || 'err'; _rsgSync(g); return; }
+  g.kind = ''; g.draft = ''; g.err = ''; if (ta) ta.value = '';
+  g.rows = [res.row, ...(g.rows || []).filter((x) => x.id !== res.row.id)];
+  _hubRender();
 }
 
 window._hubRender = _hubRender;
