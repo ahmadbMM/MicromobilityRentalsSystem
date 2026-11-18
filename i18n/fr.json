@@ -9713,5 +9713,14 @@
   "stoSzWMax": "Taille {0}, tour de taille jusqu’à (cm)",
   "stoSzWMin": "Taille {0}, tour de taille dès (cm)",
   "stoSzWaistH": "Tour de taille (cm)",
-  "stoWarranty": "Garantie (mois)"
+  "stoWarranty": "Garantie (mois)",
+  "lfbTitle": "Dernière sortie",
+  "bnwMenu": "Réserver la semaine prochaine",
+  "bnwBook": "Réserver",
+  "bnwTonight": "Nouveaux venus de ce soir",
+  "bnwAgain": "A déjà réservé à nouveau",
+  "ckAutoRebook": "Nouveaux venus interrogés sur la semaine prochaine",
+  "bnwCkAll": "Tous les nouveaux venus ont réservé à nouveau",
+  "bnwCkN": "{0} pas encore réservé",
+  "bnwCkTick": "Marquer comme demandé"
 }

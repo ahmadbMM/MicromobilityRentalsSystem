@@ -9713,5 +9713,14 @@
   "stoSzWMax": "Size {0}, baywang hanggang (cm)",
   "stoSzWMin": "Size {0}, baywang mula (cm)",
   "stoSzWaistH": "Baywang (cm)",
-  "stoWarranty": "Warranty (buwan)"
+  "stoWarranty": "Warranty (buwan)",
+  "lfbTitle": "Huling ride",
+  "bnwMenu": "Mag-book sa susunod na linggo",
+  "bnwBook": "Mag-book",
+  "bnwTonight": "Mga baguhan ngayong gabi",
+  "bnwAgain": "Nag-book ulit",
+  "ckAutoRebook": "Natanong ang mga baguhan tungkol sa susunod na linggo",
+  "bnwCkAll": "Nag-book ulit ang lahat ng baguhan",
+  "bnwCkN": "{0} ang hindi pa nagbu-book",
+  "bnwCkTick": "Markahang natanong"
 }

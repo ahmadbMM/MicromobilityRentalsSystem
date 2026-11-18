@@ -15578,3 +15578,22 @@ body.view-staff .ann-miss p{margin:0 0 6px;}
 body.view-staff .ann-miss ul{margin:0 0 6px;padding:0;list-style:none;}
 body.view-staff .ann-miss li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;}
 body.view-staff .ann-box .rm-list{max-height:min(60vh,520px);overflow-y:auto;}
+/* Last feedback at check-in and Book next week (2026-11-18): the drawer's Last ride block (the note look; red with a score of 3
+   or under or an incident), tonight's first-timers on the First-timers pop-up, the close-night list's rebook item. */
+#checkin-modal .lfb{margin:6px 0;padding:6px 10px;border-radius:var(--r-md,var(--sf-r-ctl));background:rgba(var(--warn-rgb),.12);color:var(--text);font-size:var(--sf-fs-sm);display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere;}
+#checkin-modal .lfb.lfb-bad{background:rgba(var(--red-rgb),.1);border:1px solid rgba(var(--red-rgb),.35);}
+#checkin-modal .lfb-h{display:flex;align-items:center;flex-wrap:wrap;gap:4px;}
+#checkin-modal .lfb-bad .lfb-h .art-ic{color:var(--red);}
+#checkin-modal .lfb-sc,#checkin-modal .lfb-tags{display:flex;flex-wrap:wrap;gap:4px 10px;}
+#checkin-modal .lfb-sc .lfb-mid b{color:var(--orange);}
+#checkin-modal .lfb-sc .lfb-lo b{color:var(--red);}
+#checkin-modal .lfb-tags span{padding:0 6px;border:1px solid var(--border);border-radius:var(--sf-r-pill);font-size:var(--sf-fs-xs);}
+#checkin-modal .lfb-note{font-style:italic;}
+#checkin-modal .lfb-inc{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
+#checkin-modal .lfb-inc .inc-li{border-top:1px solid rgba(var(--red-rgb),.25);padding-top:4px;}
+#confirm-modal .bnw-ft-h{margin:0 0 4px;font-size:var(--sf-fs-sm);font-weight:600;}
+#confirm-modal .bnw-ft{list-style:none;margin:0 0 14px;padding:0;}
+#confirm-modal .bnw-ft-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);}
+@media (max-width:600px){#confirm-modal .bnw-ft-row{flex-direction:column;align-items:stretch;}}
+#confirm-modal .bnw-again{display:inline-flex;align-items:center;gap:4px;color:var(--green);font-size:var(--sf-fs-sm);font-weight:600;}
+:is(#confirm-modal,#desk-sheet) .bnw-go{display:inline-flex;align-items:center;gap:4px;}

@@ -4426,3 +4426,44 @@ The user picked two of the booking app's new-section ideas ("do 1 5"). Spec: `te
   token), shown to staff in Messages as "Booking app" (`SM_HELP_TOPIC` also names the website tab `rides`). The page then
   shows the reference (`M-0042`) in place of the form, no toast; what is typed survives `renderAccount` (`S._rhM.text`).
 - Customer budget 364 -> 366 for the inline pop-up (see `scripts/split-staff.mjs`).
+
+## Last feedback at check-in and Book next week (2026-11-18, no migration)
+
+The user picked items 3 and 4 of the proposed Bookings features. Spec: `tests/bk-feedback-rebook.spec.ts` (`@staff:bookings`).
+All the code is in the **desk part**; the core holds only two built-name calls (`_s10W('_lfb'+'Box', e)` in both check-in
+drawers, `_s10W('_bnw'+'Item', e)` in `_entryActions0` and the party row's and card's menus), `RS_ITEM._bnwOpen` and the walk-in form's next-week mode. `_sntLoad`
+names `_lfbBox` and `_bnwItem` so they ride in the desk part. Words: `lfb*`, `bnw*`, `ckAutoRebook`.
+- **Last ride in the check-in drawer** (`_lfbBox`, on its own line under `_hBadge` in `renderCheckinModal` and `_ciSatRender`):
+  the rider's last rated earlier ride (date; its session's name when its kind differs from tonight's), the bike and headline
+  scores out of 10 (`rating_bike`, `rating_exp`; the headline is Service on a rental since 2026-11-03, else Experience), the
+  rating tags (`rateTag*`), the reasons given for low scores (`rating_detail.why`, labelled by `_rgLabel`), the comment
+  (`feedback`), and the incidents of that ride plus the account's latest incident on an earlier booking when it is more recent
+  (`_incLi`). Drawn only when there is something to act on: a comment, a reason, a tag, a score under 10 or an incident;
+  otherwise nothing. Calm (the drawer's note look, `.lfb`) unless a score is 3 or under (`LFB_LOW`) or there is an incident
+  (`.lfb-bad`). Ratings come from the bookings the device holds (`_ahByCust`: the year, `select('*')`); incidents from the
+  account's one read `_incNeed('customer_id', cid)` (once a page; its landing repaints the roster and so the drawer). A
+  rating is the account's (a party rates once, on its first rider), so it shows only on the account's own rider (the night's
+  row in the account's name, else the account's first row there); an incident only on the rider it names (`rider_name`).
+  A booking with no account shows nothing (the first-timer and milestone marks need an account too).
+- **Book next week** (`_bnwNextOf`, `_bnwFor`, `_bnwItem`, `_bnwOpen`): the next session of the booking's kind (`_rideKind`)
+  after its night is the first one not deleted, called off (`cancelled_at`) or a draft, dated after the night and today or
+  later; it counts only when it is `open`, within 14 days of the night, and one the walk-in form takes (`!_noWalkin`, an
+  approval ride for admins only). A one-off named event (`BNW_ONE`: event, snd96, runher, vlap, arena, defe5k, blood) has no
+  next. So Saturday rides, swims and races have no tile: the desk form does not take them. The ⋯ menu tile (Booking group,
+  "Book next week · <date>") shows on waiting, on-bike and done bookings with an account whose account holds no live booking
+  on that session, for accounts that change Bookings, and on a folded party's row and card menus (for its holder, `primary`). It opens the **walk-in form** (the account window's New booking path:
+  per-type caps with Add anyway through `_qIns`, fares and free rides, `_applyDefaultPay`, the Run's age, the outbox) with
+  `S._wiBnw` = the session: the form is titled Book next week, has no Payment and no Check in, and its one button is
+  Book (n). Prefilled: the session, the account linked (`S._wiCustId`, its phone and height as `S._wiAuto`), the party's
+  riders tonight (waiting, on a bike or done; a member whose own account already holds the next session left out), each
+  with tonight's height and the type they rode (`resolvedType`); a type the next session does not offer becomes Any, as the
+  booking editor's move does. Nothing else is carried (no code, no on the house, no price). The log says "Book next week:
+  #n Name +k".
+- **First-timers** (`_n6cFtOpen`): above the existing follow-up list, "Tonight's first-timers (N)" (`_bnwFts`: the night on
+  show, else today's nights; `_n6cIsFirst`; one row per account) with "Booked again · <date>" when the account holds a later
+  live booking of any kind (`_bnwLater`), else Book next week when there is a next session.
+- **Close-night list** (`_ckAuto`, key `Rebook`, last of the automatic items): "First-timers asked about next week", only
+  when tonight has first-timers who rode (on a bike or done) and the night has a next session. Done when each holds a later
+  booking; otherwise it lists those who do not, each with Book next week (closes the sheet, opens the form), and one staff
+  tick, Mark as asked (`session_checks` item `rebook`, `_ckTick`), passes it as Leave owing does. The list's warning, Close out
+  anyway and the Settings switch are unchanged.

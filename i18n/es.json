@@ -9713,5 +9713,14 @@
   "stoSzWMax": "Talla {0}, cintura hasta (cm)",
   "stoSzWMin": "Talla {0}, cintura desde (cm)",
   "stoSzWaistH": "Cintura (cm)",
-  "stoWarranty": "Garantía (meses)"
+  "stoWarranty": "Garantía (meses)",
+  "lfbTitle": "Último paseo",
+  "bnwMenu": "Reservar la próxima semana",
+  "bnwBook": "Reservar",
+  "bnwTonight": "Primerizos de esta noche",
+  "bnwAgain": "Ya reservó de nuevo",
+  "ckAutoRebook": "Se preguntó a los primerizos por la próxima semana",
+  "bnwCkAll": "Todos los primerizos reservaron de nuevo",
+  "bnwCkN": "{0} sin reservar todavía",
+  "bnwCkTick": "Marcar como preguntado"
 }
