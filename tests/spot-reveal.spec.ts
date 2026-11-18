@@ -127,9 +127,12 @@ test.describe('@staff:sessions the announce time on the session forms', () => {
     await expect(page.locator('#es-reveal-clr')).toBeVisible();
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect.poll(() => patches.filter((p) => 'reveal_at' in p).length).toBe(1);
-    // 20:00 in Riyadh is 17:00 UTC; the meeting point and breakfast go in the same write
-    expect(patches.find((p) => 'reveal_at' in p)).toMatchObject({ reveal_at: '2099-10-23T17:00:00.000Z' });
-    expect(patches.some((p) => p.meet_url === MEET && p.breakfast_name === 'Harbour Cafe')).toBe(true);
+    // 20:00 in Riyadh is 17:00 UTC; the meeting point goes in the same write. The breakfast spot is sent only when the
+    // form changed it (bug hunt 2026-11-18, sql04-1: a date move kept the old day's venue over the new day's), so an
+    // untouched one is left out or sent as it was, never anything else.
+    const rp = patches.find((p) => 'reveal_at' in p)!;
+    expect(rp).toMatchObject({ reveal_at: '2099-10-23T17:00:00.000Z', meet_url: MEET });
+    expect([undefined, 'Harbour Cafe']).toContain(rp.breakfast_name);
   });
 
   test('any time is taken, even after the ride gathers; Show now clears it', async ({ page }) => {
