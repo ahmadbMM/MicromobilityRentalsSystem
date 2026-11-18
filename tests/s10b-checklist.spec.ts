@@ -181,36 +181,36 @@ test.describe('@staff:bookings round s10b: night checklists', () => {
     await page.getByRole('menuitem', { name: /Open the night/ }).click();
     const dlg = sheet(page);
     await expect(dlg).toContainText('Opening checklist');
-    await expect(dlg.locator('.ck-tick')).toHaveCount(5);
-    await expect(dlg.locator('.ck-prog')).toHaveText('0 of 5 done');
+    await expect(dlg.locator('.ck-tick')).toHaveCount(6);                      // with Crew set (Tonight's crew, 2026-11-18)
+    await expect(dlg.locator('.ck-prog')).toHaveText('0 of 6 done');
     await expect(dlg.locator('.ck-li').filter({ hasText: 'Bike prep done' }).getByRole('button', { name: 'Bike prep' })).toBeVisible();
     await expect(dlg.locator('.ck-li').filter({ hasText: 'Scanner phone' }).getByRole('button', { name: 'Test the scanner' })).toBeVisible();
     await dlg.getByRole('checkbox', { name: 'Helmets out' }).click();
-    await expect(dlg.locator('.ck-prog')).toHaveText('1 of 5 done');
+    await expect(dlg.locator('.ck-prog')).toHaveText('1 of 6 done');
     expect(sent[0].body).toEqual({ session_id: 's0', list: 'open', item_key: 'helmets_out' });
     await dlg.getByRole('button', { name: 'Close' }).last().click();
     // the Dashboard asks while the list is not finished
     await page.evaluate(`setStaffTab('dashboard')`);
     const card = page.locator('#tab-dashboard .dash-card').filter({ has: page.getByRole('heading', { name: 'Open the night', exact: true }) });
-    await expect(card).toContainText('1 of 5 done');
+    await expect(card).toContainText('1 of 6 done');
     // another desk ticks: it arrives on staff-ref, no read
     await page.evaluate(`S._staffAuthed = true; setupRefRealtime()`);
     await page.waitForFunction('_refLive === true', null, { timeout: 8000 });
     const omar = { id: 9, session_id: 's0', list: 'open', item_key: 'scanner', done_by_name: 'Omar', done_at: NOW.toISOString() };
     held.push(omar); // in the database, as the other desk's insert put it there
     rt.broadcast('realtime:staff-ref', 'session_checks', { op: 'INSERT', row: omar });
-    await expect(card).toContainText('2 of 5 done');
+    await expect(card).toContainText('2 of 6 done');
     await card.locator('.dash-row').click();
     await expect(dlg.getByRole('checkbox', { name: /Scanner phone/ })).toHaveAttribute('aria-checked', 'true');
     await expect(dlg.locator('.ck-li').filter({ hasText: 'Scanner phone' })).toContainText('Omar');
-    for (const n of ['Bike prep done', 'Cash float counted', 'Lockers checked']) await dlg.getByRole('checkbox', { name: n }).click();
+    for (const n of ['Bike prep done', 'Cash float counted', 'Lockers checked', 'Crew set']) await dlg.getByRole('checkbox', { name: n }).click(); // no crew on the night: a tick
     await expect(dlg.locator('.ck-prog')).toHaveText('All done');
     await dlg.getByRole('button', { name: 'Close' }).last().click();
     await expect(card).toHaveCount(0);                                       // finished: no prompt
     // a delete from another desk opens it again
     held.splice(held.indexOf(omar), 1);
     rt.broadcast('realtime:staff-ref', 'session_checks', { op: 'DELETE', row: null, old: { id: 9, session_id: 's0', list: 'open', item_key: 'scanner' } });
-    await expect(page.locator('#tab-dashboard .dash-card').filter({ hasText: 'Open the night' })).toContainText('4 of 5 done');
+    await expect(page.locator('#tab-dashboard .dash-card').filter({ hasText: 'Open the night' })).toContainText('5 of 6 done');
   });
 
   test('before the database has the table, ticks stay on this device and the list says so', async ({ page }) => {
@@ -248,7 +248,7 @@ test.describe('@staff:bookings round s10b: night checklists', () => {
     await expect(card.locator('#ck-in-close-3')).toHaveValue('Radios on charge');
     await expect(card.locator('#ck-in-open-1')).toHaveValue('Helmets out and cleaned'); // what was typed survives the redraw
     await card.locator('#ck-b-open-2-0').click();                              // remove "Cash float counted"
-    await expect(card.locator('#ck-set-ol, .ck-set-ol').first().locator('li')).toHaveCount(4);
+    await expect(card.locator('#ck-set-ol, .ck-set-ol').first().locator('li')).toHaveCount(5);
     await card.locator('#ck-must').check();
     await card.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(card.locator('#ck-set-ok')).toHaveText('Saved');
@@ -256,13 +256,13 @@ test.describe('@staff:bookings round s10b: night checklists', () => {
     const items = (ups[0] as { key: string; items: { must: boolean; open: { k: string; l?: string; lk?: string }[]; close: { k: string; l?: string; lk?: string }[] } });
     expect(items.key).toBe('night_checklists');
     expect(items.items.must).toBe(true);
-    expect(items.items.open.map((x) => x.k)).toEqual(['prep', 'helmets_out', 'scanner', 'lockers']);
+    expect(items.items.open.map((x) => x.k)).toEqual(['prep', 'helmets_out', 'scanner', 'lockers', 'crew']);
     expect(items.items.open[0]).toEqual({ k: 'prep', lk: 'ckPrep' });          // a built-in name left alone keeps its language key
     expect(items.items.open[1]).toEqual({ k: 'helmets_out', l: 'Helmets out and cleaned' });
     expect(items.items.close.map((x) => x.l || x.lk)).toEqual(['ckHelmetsBack', 'ckStored', 'ckIncident', 'Radios on charge', 'ckNote']);
     // the next close-out reads the new list
     await page.evaluate(`setStaffTab('queue');setSfSession('s0');_ckOpen('open','s0')`);
-    await expect(sheet(page).locator('.ck-tick')).toHaveCount(4);
+    await expect(sheet(page).locator('.ck-tick')).toHaveCount(5);
     await expect(sheet(page).getByRole('checkbox', { name: 'Helmets out and cleaned' })).toBeVisible();
     // a manager reads it, cannot change it
     await page.evaluate(`_dkClose();setStaffRole('manager');setStaffTab('settings');setSettingsView('business')`);

@@ -4467,3 +4467,61 @@ names `_lfbBox` and `_bnwItem` so they ride in the desk part. Words: `lfb*`, `bn
   booking; otherwise it lists those who do not, each with Book next week (closes the sheet, opens the form), and one staff
   tick, Mark as asked (`session_checks` item `rebook`, `_ckTick`), passes it as Leave owing does. The list's warning, Close out
   anyway and the Settings switch are unchanged.
+
+
+## Tonight's crew and Call for help (2026-11-18, migration 20261118230000)
+The user picked two staff-only Bookings features from a list of proposed ones. Spec: `tests/bk-crew-help.spec.ts`
+(`@staff:bookings`); `tests/s10b-checklist.spec.ts` counts six opening items now.
+- **Tonight's crew** ("Who is working tonight and in what role: desk, bikes, leader, sweeper or door. It's set in the
+  opening checklist, shows next to Notes, and fills in the part-timers' hours at close-out."). `session_crew` (id uuid,
+  session_id FK to sessions on delete cascade, staff_user_id, name, role in desk/bikes/leader/sweeper/door,
+  created_by/_name/_at; unique (session_id, staff_user_id): one role a night, a new role is an update). **One person
+  column**: a part-timer is a staff account (`part_timers.user_id` is the account's user id), so `staff_user_id` names both
+  and nobody is listed twice; no FK to staff or part_timers, the stamped name keeps a removed account's row readable. The
+  trigger `_session_crew_stamp` refuses anyone who is not an active staff account (not a volunteer) or an active
+  part-timer, stamps the name (display_name, else the part-timer's name, else the email's first part) and who added them;
+  an update changes the role alone. Staff read; `_staff_mod('queue', true)` inserts, updates, deletes; anon nothing.
+  `_session_crew_broadcast` sends every change on **staff-ref**, event `session_crew` (setupRefRealtime hands it to
+  `_crwRt` by the built name `'_cr'+'wRt'`: **a built name's first piece must not be a top-level name**, or the split's
+  word scan pulls that function into the customer half, as `'_snt'+'Rt'` did with `_snt`). `staff_crew_people()` (any
+  staff account; names only, never an email): active staff who can open Bookings (as `_staff_mod` reads it) and active
+  part-timers, each once, with `part_timer`. A session date move (insert + delete) leaves the new night without a crew.
+  - Core: the store (`_crw`, `_crwOf`, `_crwNeed`) and `_crwChip`, "Crew (N)" right after Notes in `_s10Figs`; the More
+    action "Tonight's crew" in `sh:queue`'s Session group. Desk part: `_crwLoad`, `_crwOpen` (entries), the pop-up
+    (centred desk sheet: the crew by role in the order desk, bikes, leader, sweeper, door, each with its role `<select>`
+    and Remove; Add: person, role buttons (`.inc-k`; no Bikes on a night without bikes), "Add to crew", which says
+    "Choose a person." / "Choose a role." when tapped short). The role update is guarded `.eq('role', from)`; nothing
+    matched reads the night again and says "changed on another device" (or the refusal). A 23505 (another desk added them
+    first) reads again and says so in the dialog. Log lines "Tonight's crew: <name> · <role>", "… · Desk → Leader",
+    "… · Remove · <name>". No toast, no undo (as handover notes).
+  - The opening list's built-in item `crew` ("Crew set", last in `CK_DEF.open`) ticks itself once the night has a crew row
+    (`_ckState`, like `note` on the close list) and links to the pop-up. Lists admins saved are left as they are; the
+    Settings editor offers no built-ins, so a list an admin saved keeps its own items, without Crew set.
+  - Close-out: `closeOutSession` (and the night summary's button) hand the crew's user ids to `_ptcOpen(sid, crew)`; the
+    team part lists the active part-timers among them who have no hours on the night yet, first, each with the night's
+    hours (`_ptcNightH`: the `_time` window, past midnight counts on, to the quarter hour), all editable. The desk reads
+    the crew first when it has not (`_crw().got`).
+  - Before the table: Crew says "Waiting for the database update" (error toast, no dialog), Crew set is a plain tick,
+    the hours are not pre-filled.
+- **Call for help** ("A desk button that sends 'Help needed at bikes' to the other staff devices through the bell. It
+  would use the live channel the desk already has, so no new table."). **Presence, not broadcast**: staff-desk's
+  policies (20261107100000) let staff track presence only. `_n6bPresSet` merges `S._hlpMe` into what it tracks
+  (`{help:{id, at, where, note, name}}` while calling, `{coming:<call id>}` after On my way; its dedupe key includes it);
+  `_n6bPresSync` hands the raw state to the core's `_hlpSync` by a built name, which fetches the desk part's `_hlpSeen`
+  only when someone's state holds a call or an answer (or held one at the last sync). A call ends when the caller ends
+  it, after `HLP_MS` (10 minutes; receivers drop it too, by its `at`), or when the caller's device leaves the channel.
+  - Caller (`_hlpOpen`, desk part): "Call for help" first in `sh:queue`'s Session group (a phone's Desk tools) and a
+    button on the Door screen's header (door part, `_on('_hlpOpen')`, the desk entry's stand-in). Where as five named
+    buttons (Desk, Bikes, Lockers, Door, Other), a note (60), "Call for help"; refused with "Not connected" when the
+    staff-desk channel is not joined. While open: "Calling for help at Bikes", who is on the way (names from presence),
+    End call. Log "Called for help: <where>".
+  - Everyone else (any section, the Door screen too): `#hlp-pop`, a centred alertdialog over every sheet (z-index 9040),
+    "<name> needs help at <where>", the note and time, Close / On my way (log "On my way: <name>"); one `haptic(200)` per
+    call; the newest call not closed or answered shows, a call that ends closes its pop-up, a device that joins while a
+    call is open shows it. Bell kind `help` (NT_KINDS, queue's switch, on by default; `_hlpBell` by the built name
+    `'_hlp'+'Bell'` in `_ntKindsNow`): one line per call heard today ("Sara needs help at Bikes · 20:00 · note"),
+    kept on the device (`cq_hlp_log`) for the day; a line opens the call again while it is open. The first `_hlpSeen`
+    lets the bell take its baseline before adding the call, so a call that brought the desk part in is still news.
+- Sizes (local): customer 362.1 -> 362.2 KB (+0.07: the hooks in `_n6bPresSet`, `_n6bPresSync`, setupRefRealtime and
+  `_ntKindsNow`, which are customer-half code), staff 1133.3 -> 1138.2, core 348.9 -> 349.4, the desk part 21 -> 25;
+  budgets staff 1140 -> 1146 and core 352 -> 354 (split-staff.mjs).

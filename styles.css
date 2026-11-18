@@ -12632,6 +12632,29 @@ body.view-staff #desk-sheet .ck-mk{display:inline-flex;justify-content:center;}
 body.view-staff #desk-sheet .ck-mk.ck-ok{color:var(--green);}
 body.view-staff #desk-sheet .ck-mk.ck-no{color:var(--orange);}
 body.view-staff #desk-sheet .ck-mk.ck-wait{color:var(--muted);}
+/* Tonight's crew and Call for help (2026-11-18): the crew and the caller's pop-ups in the centred desk sheet (the role and
+   where buttons are the incident sheet's .inc-k), the chip beside Notes, the other devices' call pop-up (#hlp-pop, over
+   every sheet and row menu, under the approval keypad and the toasts) and the Door screen's button. Tokens only. */
+body.view-staff #tab-queue .crw-chip{white-space:nowrap;}
+body.view-staff #desk-sheet :is(#crw-foot,#hlp-foot){display:contents;}
+body.view-staff #desk-sheet :is(.crw-body,.hlp-body,.crw-new){display:flex;flex-direction:column;gap:8px;}
+body.view-staff #desk-sheet :is(.crw-list,.hlp-list){list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+body.view-staff #desk-sheet .crw-li{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;border:1px solid var(--border);border-radius:var(--sf-r-ctl);padding:6px 10px;background:var(--s1);}
+body.view-staff #desk-sheet .crw-n{flex:1 1 140px;min-width:0;font-weight:600;overflow-wrap:anywhere;}
+body.view-staff #desk-sheet .crw-pt{color:var(--muted);font-weight:600;font-size:var(--fs-sm);}
+body.view-staff #desk-sheet :is(.crw-li select,#crw-who,#hlp-note){min-height:44px;}
+body.view-staff #desk-sheet :is(#crw-who,#hlp-note){width:100%;box-sizing:border-box;}
+body.view-staff #desk-sheet .crw-li .btn-sm{min-height:44px;}
+body.view-staff #desk-sheet .crw-new{margin-top:6px;padding-top:10px;border-top:1px solid var(--border);}
+body.view-staff #desk-sheet .hlp-on{margin:0;padding:10px 12px;border-radius:var(--sf-r-ctl);background:rgba(var(--red-rgb),.08);overflow-wrap:anywhere;}
+body.view-staff #desk-sheet .hlp-list li{font-weight:600;}
+#hlp-pop .modal-backdrop{z-index:9040;}
+#hlp-pop .hlp-box{width:min(92vw,420px);border-top:4px solid var(--red);}
+#hlp-pop .hlp-box:focus{outline:medium none;}
+#hlp-pop .hlp-t{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:var(--sf-fs-lg);font-weight:600;color:var(--red);overflow-wrap:anywhere;}
+#hlp-pop .hlp-d{margin:0 0 16px;color:var(--text);font-size:var(--sf-fs-md);overflow-wrap:anywhere;}
+#hlp-pop .chrome-dact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
+#hlp-pop .chrome-dact button{min-height:44px;}
 body.view-staff #desk-sheet .ck-l{font-weight:600;overflow-wrap:anywhere;}
 body.view-staff #desk-sheet .ck-why{color:var(--muted);font-size:var(--fs-sm);overflow-wrap:anywhere;}
 body.view-staff #desk-sheet .ck-tick{display:flex;align-items:center;gap:8px;min-height:44px;padding:0;border:0;background:none;color:var(--text);font:inherit;text-align:start;cursor:pointer;}
@@ -13418,6 +13441,7 @@ body.door-mode #scan-modal :is(.bkm-srow,.bkm-srow6,#scan-batch,#scan-express-hi
 #door-page :is(.zg-me,.zg-none,.zg-num){color:var(--muted);font-weight:500;}
 #door-page .zg-none{margin:0;}
 #door-page .zg-top .btn-sm{display:inline-flex;align-items:center;gap:6px;min-height:44px;flex:0 0 auto;}
+#door-page .zg-tools{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;} /* Call for help beside Sign out (2026-11-18) */
 #door-page :is(.zg-pick,.zg-spec){display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
 #door-page :is(.zg-pick,.zg-spec) .toggle-btn{min-height:44px;}
 #door-page .zg-figs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
