@@ -472,6 +472,7 @@ begin
   select * into _s from sessions where id = p_session_id;
   if not found then raise exception 'NO_SESSION' using errcode = 'P0001'; end if;
   perform pg_advisory_xact_lock(hashtext('promote:' || p_session_id));
+  perform pg_advisory_xact_lock(hashtext('cap:' || p_session_id));   -- and a rider's own booking for the last place (review of 2026-11-18)
   select coalesce(q.type_preference, '') into _typ from queue_entries q
    where q.id = p_booking_id and q.session_id = p_session_id and q.status = 'waitlist'
    for update;
@@ -1450,7 +1451,7 @@ begin
   new.at := now();
   -- what the count is checked against is worked out here for anyone but an admin, as at the close (bug hunt
   -- 2026-11-18, sql14-2) (20261119000700)
-  if (auth.uid() is not null and not coalesce(public.is_admin(), false)) or new.expected_cash is null then
+  if auth.uid() is not null and (not coalesce(public.is_admin(), false) or new.expected_cash is null) then   -- no account (cron, service): as before
     new.expected_cash := (select x.cash from public._till_expected(new.till_id) x);
   end if;
   return new;
