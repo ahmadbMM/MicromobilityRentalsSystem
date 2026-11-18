@@ -530,6 +530,111 @@ test.describe('the Apple Wallet pass', () => {
     expect(asked.length).toBe(n);
   });
 
+  // A store order collected at the showroom (N02, the store build of 2026-11-18): the website's order page sends the
+  // order's number and its own key; the pass is read through store_order_pass and says no price.
+  test('a store order gets a pickup pass from store_order_pass: its MMO- code, the handover, the lines on the back, no price', async () => {
+    const key = 'ab'.repeat(16);
+    const found = {
+      ok: true,
+      pass: {
+        no: 1042, status: 'ready', live: true, ready: true, name: 'Sara',
+        slot: { day: '2026-11-21', from: '16:00', to: '16:20' },
+        items: [{ name: 'DA54 MAX', variant: 'M · Black', qty: 1 }, { name: 'Varia RTL515', variant: null, qty: 2 }],
+        // the answer's own code and path are never printed: the pass makes them from the number and the key
+        code: 'MMO-1-zzzzzz', path: '/somewhere-else',
+        showroom: { en: 'Thu Al-Nurayn St, Jeddah', ar: 'شارع ذي النورين، جدة' }, updated_at: '2026-11-18T10:00:00+00:00',
+      },
+    };
+    const env = { APPLE_PASS_P12_BASE64: p12b64, APPLE_PASS_P12_PASSWORD: PW, APPLE_PASS_TYPE_ID: 'pass.test', APPLE_TEAM_ID: 'TEAM', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' };
+    const asked: Record<string, unknown>[] = [];
+    const post = await load('functions/api/wallet-pass.js', 'onRequestPost');
+    const run = async (answer: unknown, storeOrder: Record<string, unknown> = { no: 1042, key, lang: 'ar' }, e: Record<string, string> = env) => {
+      globalThis.fetch = (async (u: string | URL | Request, init?: RequestInit) => {
+        const url = String(u);
+        if (url === 'https://db.test/rest/v1/rpc/store_order_pass') { asked.push(JSON.parse(String(init?.body))); return new Response(JSON.stringify(answer)); }
+        if (url.includes('apple.com')) return new Response(wwdrDer);
+        return new Response('', { status: 404 }); // nothing else is read: no bookings, no sessions, no shop
+      }) as typeof fetch;
+      return post({ request: new Request('https://site.test/api/wallet-pass', { method: 'POST', body: JSON.stringify({ storeOrder }) }), env: e });
+    };
+    const passOf = async (res: Response) => {
+      const files = unzipSync(new Uint8Array(await res.arrayBuffer()));
+      return { files, j: JSON.parse(strFromU8(files['pass.json'])) };
+    };
+    type F = { key: string; label: string; value: string; attributedValue?: string };
+    const field = (j: { generic: Record<string, F[]> }, sect: string, k: string) => j.generic[sect].find((x) => x.key === k);
+
+    const res = await run(found);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('application/vnd.apple.pkpass');
+    expect(res.headers.get('content-disposition')).toContain('order-MM-1042.pkpass');
+    expect(asked[0]).toEqual({ p_no: 1042, p_track: key });
+    const { files, j } = await passOf(res);
+    // a plain pass with the MicroMobility mark, not a ride ticket with a ride's strip
+    expect(j.generic).toBeTruthy();
+    expect(j.eventTicket).toBeUndefined();
+    expect(files['icon.png']).toBeTruthy();
+    expect(files['strip.png']).toBeUndefined();
+    expect(j.serialNumber).toBe('store-1042');
+    expect(j.barcodes[0]).toMatchObject({ format: 'PKBarcodeFormatQR', message: 'MMO-1042-ababab', altText: 'MM-1042' });
+    expect(j.barcode.message).toBe('MMO-1042-ababab');
+    expect(field(j, 'headerFields', 'order')).toMatchObject({ label: 'ORDER', value: 'MM-1042' });
+    expect(field(j, 'primaryFields', 'pickup')).toMatchObject({ label: 'PICKUP', value: 'Sat 21 Nov' });
+    expect(field(j, 'secondaryFields', 'time')).toMatchObject({ label: 'TIME', value: '4:00 PM - 4:20 PM' });
+    expect(field(j, 'secondaryFields', 'status')!.value).toBe('Ready to collect');
+    expect(field(j, 'auxiliaryFields', 'showroom')!.value).toBe('Thu Al-Nurayn St, Jeddah');
+    // surfaces at the handover, for its twenty minutes; live, so not void
+    expect(j.relevantDate).toBe('2026-11-21T16:00:00+03:00');
+    expect(j.relevantDates).toEqual([{ startDate: '2026-11-21T16:00:00+03:00', endDate: '2026-11-21T16:20:00+03:00' }]);
+    expect(j.voided).toBeUndefined();
+    // the back: the lines, the showroom in the language asked, the order's page and its "I'm here", the code
+    expect(field(j, 'backFields', 'items')!.value).toBe('DA54 MAX · M · Black × 1\nVaria RTL515 × 2');
+    expect(field(j, 'backFields', 'showroom_b')!.value).toBe('شارع ذي النورين، جدة');
+    expect(field(j, 'backFields', 'page')).toMatchObject({ value: `https://micromobility.sa/store/order/1042?k=${key}` });
+    expect(field(j, 'backFields', 'page')!.attributedValue).toContain(`href="https://micromobility.sa/store/order/1042?k=${key}"`);
+    expect(field(j, 'backFields', 'here')!.value).toBe(`https://micromobility.sa/store/order/1042?k=${key}#arrive`);
+    expect(field(j, 'backFields', 'ref')!.value).toBe('MMO-1042-ababab');
+    const all = JSON.stringify(j);
+    expect(all).not.toMatch(/\bSAR\b|TOTAL|price|zzzzzz|somewhere-else/i);
+
+    // English asked: the English address; the staging site's links when the booking app names it
+    const en = (await passOf(await run(found, { no: 1042, key, lang: 'en' }, { ...env, STORE_SITE_ORIGIN: 'https://staging.micromobility.sa/' }))).j;
+    expect(field(en, 'backFields', 'showroom_b')!.value).toBe('Thu Al-Nurayn St, Jeddah');
+    expect(field(en, 'backFields', 'page')!.value).toBe(`https://staging.micromobility.sa/store/order/1042?k=${key}`);
+    const badOrigin = (await passOf(await run(found, { no: 1042, key }, { ...env, STORE_SITE_ORIGIN: 'javascript:alert(1)' }))).j;
+    expect(field(badOrigin, 'backFields', 'page')!.value).toBe(`https://micromobility.sa/store/order/1042?k=${key}`);
+    // no handover booked: where the order stands, no time, no date to surface on
+    const noSlot = (await passOf(await run({ ok: true, pass: { ...found.pass, slot: null, status: 'preparing', ready: false } }))).j;
+    expect(field(noSlot, 'primaryFields', 'pickup')!.value).toBe('Preparing');
+    expect(field(noSlot, 'secondaryFields', 'time')).toBeUndefined();
+    expect(noSlot.relevantDate).toBeUndefined();
+    // a Ramadan evening's slot past midnight ends the next day
+    const late = (await passOf(await run({ ok: true, pass: { ...found.pass, slot: { day: '2026-11-21', from: '23:40', to: '00:00' } } }))).j;
+    expect(late.relevantDates).toEqual([{ startDate: '2026-11-21T23:40:00+03:00', endDate: '2026-11-22T00:00:00+03:00' }]);
+    // an order no longer live is void and offers no "I'm here"
+    const gone = (await passOf(await run({ ok: true, pass: { ...found.pass, status: 'cancelled', live: false, ready: false } }))).j;
+    expect(gone.voided).toBe(true);
+    expect(field(gone, 'backFields', 'here')).toBeUndefined();
+    expect(field(gone, 'secondaryFields', 'status')!.value).toBe('Cancelled');
+
+    // the outcomes the website relays: no such order, not a pickup, the database's lock, an answer for another order
+    const miss = await run({ ok: false, error: 'not_found' });
+    expect(miss.status).toBe(404);
+    expect(await miss.json()).toEqual({ ok: false, error: 'not_found' });
+    const ship = await run({ ok: false, error: 'not_pickup' });
+    expect(ship.status).toBe(409);
+    expect(await ship.json()).toEqual({ ok: false, error: 'not_pickup' });
+    const lock = await run({ ok: false, error: 'throttled' });
+    expect(lock.status).toBe(429);
+    expect((await run({ ok: true, pass: { ...found.pass, no: 7 } })).status).toBe(404);
+    // a bad number or key is refused before anything is read; an unconfigured site says so first
+    const n = asked.length;
+    expect((await run(found, { no: 1042, key: 'xyz' })).status).toBe(400);
+    expect((await run(found, { no: -3, key })).status).toBe(400);
+    expect((await run(found, { no: 1042, key }, { SUPABASE_ANON_KEY: 'anon' })).status).toBe(501);
+    expect(asked.length).toBe(n);
+  });
+
   test('a signing failure tells the rider nothing about the certificate', async () => {
     const res = await pass(booking, circuit, 'wrong password');
     expect(res.status).toBe(500);

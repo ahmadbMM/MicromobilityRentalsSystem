@@ -53,6 +53,9 @@ export async function onRequestPost(context) {
   // A Petromin registration (the form at micromobility.sa/petromin, 2026-11-11) has no account behind it: its
   // pass is read through rider_lookup instead (petrominPass, below).
   if (body && body.petromin && typeof body.petromin === "object") return petrominPass(request, body.petromin, env, passTypeId, teamId);
+  // A store order collected at the showroom (the website's order page, 2026-11-18, N02) has its own key and no account
+  // behind it either: its pass is read through store_order_pass (storeOrderPass, below).
+  if (body && body.storeOrder && typeof body.storeOrder === "object") return storeOrderPass(request, body.storeOrder, env, passTypeId, teamId);
   const { customerId, token, bookingId } = body || {};
   if (!customerId || !token || !bookingId) return json({ ok: false, error: "missing fields" }, 400);
   const groupIds = Array.isArray(body && body.groupIds) ? body.groupIds.filter((x2) => typeof x2 === "string").slice(0, 50) : [];
@@ -511,6 +514,154 @@ async function buildPetrominPkpass(r, cfg) {
     }
   };
   return _seal(pass, { ...PASS_IMAGES, ...(dukan ? RIDE_IMAGES.dukan : RIDE_IMAGES.petromin) }, cfg.signer);
+}
+// ── A store order's pickup pass (2026-11-18, N02 of the store build "do all") ──────────────────────────────────────────
+// The website's order page sends {storeOrder: {no, key, lang}} (its /api/store/wallet-pass relays it): the order's number
+// and its own 32-hex key, which is the right to read the order exactly as the order's link is. No account, no token.
+// store_order_pass (migration 20261119300000) answers only what the pass prints, metered per caller; nothing else from the
+// body is used, and the code, the links and the serial are made here from the number and the key, not taken from the
+// answer. The pass: the order number on top; the pickup day and the 20-minute handover when one was booked, else where the
+// order stands; the showroom; the counter code MMO-<no>-<first six of the key>, which the staff scanner opens the order
+// with; on the back the lines, the showroom's address (in Arabic when asked and kept), the order's page and its "I'm here".
+// No price, no phone: a pass is shown at a counter and on a lock screen. An order that is no longer live (unpaid,
+// cancelled, refunded, collected) is voided. It surfaces at the handover's start. Apple's pass web service is not set up,
+// so a pass keeps what it said when it was added; the order page's button gives a fresh one.
+// The website the links open: STORE_SITE_ORIGIN (an https origin, e.g. the staging site), else micromobility.sa.
+const SO_MISS_MAX = 10, SO_MISS_WINDOW_MS = 10 * 60000;
+const _soMisses = new Map();
+function _soMissCount(ip, add) {
+  const now = Date.now();
+  let m = _soMisses.get(ip);
+  if (m && now - m.at > SO_MISS_WINDOW_MS) { _soMisses.delete(ip); m = null; }
+  if (add) {
+    if (!m) _soMisses.set(ip, (m = { at: now, n: 0 }));
+    m.n++;
+    if (_soMisses.size > 1000) _soMisses.delete(_soMisses.keys().next().value);
+  }
+  return m ? m.n : 0;
+}
+const SO_STATUS = { pending: "Awaiting payment", paid: "Paid", preparing: "Preparing", ready: "Ready to collect", shipped: "Shipped",
+  out: "Out for delivery", delivered: "Collected", cancelled: "Cancelled", refunded: "Refunded" };
+function _soOrigin(env) {
+  const o = String((env && env.STORE_SITE_ORIGIN) || "").trim().replace(/\/+$/, "");
+  return /^https:\/\/[a-z0-9.-]+(:\d{2,5})?$/i.test(o) ? o : "https://micromobility.sa";
+}
+async function storeOrderPass(request, q, env, passTypeId, teamId) {
+  const no = typeof q.no === "number" ? q.no : typeof q.no === "string" && /^\d{1,9}$/.test(q.no.trim()) ? Number(q.no.trim()) : NaN;
+  const key = typeof q.key === "string" ? q.key.trim().toLowerCase() : "";
+  const lang = q.lang === "ar" ? "ar" : "en";
+  if (!Number.isInteger(no) || no < 1 || no > 999999999 || !/^[0-9a-f]{32}$/.test(key)) return json({ ok: false, error: "missing fields" }, 400);
+  const SUPA = env.SUPABASE_URL || SUPA_DEFAULT;
+  const ANON = env.SUPABASE_ANON_KEY;
+  if (!ANON) return json({ ok: false, error: "no anon key" }, 500);
+  const ip = request.headers.get("cf-connecting-ip") || "?";
+  if (_soMissCount(ip) >= SO_MISS_MAX) return json({ ok: false, error: "throttled" }, 429);
+  let r;
+  try {
+    const rpc = await fetch(`${SUPA}/rest/v1/rpc/store_order_pass`, {
+      method: "POST",
+      headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_no: no, p_track: key })
+    });
+    if (!rpc.ok) return json({ ok: false, error: "lookup failed" }, 502);
+    r = await rpc.json();
+  } catch (e) {
+    return json({ ok: false, error: "lookup failed" }, 502);
+  }
+  // the database's meter is everyone's here (the caller is this function): said as a lock, never as a missing order
+  if (r && r.ok === false && r.error === "throttled") return json({ ok: false, error: "throttled" }, 429);
+  if (r && r.ok === false && r.error === "not_pickup") return json({ ok: false, error: "not_pickup" }, 409);
+  const p = r && r.ok === true && r.pass && typeof r.pass === "object" ? r.pass : null;
+  if (!p || Number(p.no) !== no) {
+    _soMissCount(ip, true);
+    return json({ ok: false, error: "not_found" }, 404);
+  }
+  try {
+    const pkpass = await buildStorePkpass(p, { no, key, lang, origin: _soOrigin(env), signer: await getSigner(env), passTypeId, teamId });
+    return new Response(pkpass, {
+      headers: {
+        "Content-Type": "application/vnd.apple.pkpass",
+        "Content-Disposition": `attachment; filename="order-MM-${no}.pkpass"`,
+        "Cache-Control": "no-store"
+      }
+    });
+  } catch (e) {
+    console.error("wallet-pass: sign failed", (e && e.stack) || e);
+    return json({ ok: false, error: "sign failed" }, 500);
+  }
+}
+async function buildStorePkpass(p, cfg) {
+  const no = cfg.no, key = cfg.key;
+  const code = `MMO-${no}-${key.slice(0, 6)}`;
+  const page = `${cfg.origin}/store/order/${no}?k=${key}`;
+  const status = SO_STATUS[String(p.status || "")] || "";
+  const live = p.live === true;
+  const ready = p.ready === true;
+  // the handover booked (store_orders.handover {day, at, to}): a Riyadh day and two clock times, else none
+  const s = p.slot && typeof p.slot === "object" ? p.slot : null;
+  const day = s && /^\d{4}-\d{2}-\d{2}$/.test(String(s.day || "")) ? String(s.day) : "";
+  const fromMin = day ? _pmMin(s.from) : null, toMin = day ? _pmMin(s.to) : null;
+  const dow = day ? WEEKDAYS[new Date(`${day}T12:00:00Z`).getUTCDay()] : "";
+  const hours = fromMin != null ? `${_hhmm(fromMin)}${toMin != null ? ` - ${_hhmm(toMin)}` : ""}` : "";
+  const startAt = fromMin != null ? `${day}T${String(s.from).padStart(5, "0")}:00+03:00` : "";
+  // a window running past midnight (21:40 - 00:00) ends on the next day
+  let endAt = "";
+  if (startAt && toMin != null) {
+    const end = new Date(Date.parse(startAt) + (((toMin - fromMin) + 1440) % 1440 || 1440) * 60000);
+    const r = new Date(end.getTime() + 3 * 3600000).toISOString();
+    endAt = `${r.slice(0, 19)}+03:00`;
+  }
+  const items = Array.isArray(p.items) ? p.items.filter((x) => x && typeof x === "object").slice(0, 6) : [];
+  const lines = items.map((x) => {
+    const qty = Number.isInteger(x.qty) && x.qty > 0 && x.qty <= 10 ? x.qty : 1;
+    const variant = _pmText(x.variant, 40);
+    return `${_pmText(x.name, 80)}${variant ? ` \xB7 ${variant}` : ""} \xD7 ${qty}`;
+  }).filter((x) => x.trim()).join("\n");
+  const sr = p.showroom && typeof p.showroom === "object" ? p.showroom : {};
+  const showEn = _pmText(sr.en, 120), showAr = _pmText(sr.ar, 120);
+  const showBack = (cfg.lang === "ar" && showAr) || showEn || showAr;
+  const name = _pmText(p.name, 40);
+  const primaryValue = day ? _shortWhen(dow, day) : ready ? "Ready" : "Preparing";
+  const pass = {
+    formatVersion: 1,
+    passTypeIdentifier: cfg.passTypeId,
+    teamIdentifier: cfg.teamId,
+    serialNumber: `store-${no}`,
+    organizationName: "MicroMobility",
+    description: `Order MM-${no} - pickup`,
+    foregroundColor: EXP.fg,
+    backgroundColor: EXP.bg,
+    labelColor: EXP.label,
+    sharingProhibited: true,
+    ...live ? {} : { voided: true },
+    ...startAt ? { relevantDate: startAt } : {},
+    ..._relevantDates(startAt, endAt),
+    barcodes: [{ format: "PKBarcodeFormatQR", message: code, messageEncoding: "iso-8859-1", altText: `MM-${no}` }],
+    barcode: { format: "PKBarcodeFormatQR", message: code, messageEncoding: "iso-8859-1", altText: `MM-${no}` },
+    generic: {
+      headerFields: [{ key: "order", label: "ORDER", value: `MM-${no}` }],
+      primaryFields: [{ key: "pickup", label: "PICKUP", value: primaryValue }],
+      secondaryFields: [
+        ...hours ? [{ key: "time", label: "TIME", value: hours }] : [],
+        ...status ? [{ key: "status", label: "STATUS", value: status }] : []
+      ],
+      auxiliaryFields: [
+        { key: "showroom", label: "SHOWROOM", value: showEn || "Jeddah" },
+        ...name ? [{ key: "name", label: "NAME", value: name }] : []
+      ],
+      backFields: [
+        ...day ? [{ key: "when", label: "Pickup", value: `${dow} ${day}${hours ? " \xB7 " + hours : ""}`.trim() }] : [],
+        ...lines ? [{ key: "items", label: "In this order", value: lines }] : [],
+        ...showBack ? [{ key: "showroom_b", label: "Showroom", value: showBack }] : [],
+        { key: "page", label: "Your order", value: page, attributedValue: `<a href="${_attr(page)}">Open your order</a>` },
+        ...live ? [{ key: "here", label: "At the showroom", value: `${page}#arrive`, attributedValue: `<a href="${_attr(page + "#arrive")}">I'm here</a>` }] : [],
+        { key: "help", label: "Good to know", value: "Show this pass at the counter when you collect your order." },
+        { key: "ref", label: "Reference", value: code }
+      ]
+    }
+  };
+  return _seal(pass, { "icon.png": PASS_IMAGES["icon.png"], "icon@2x.png": PASS_IMAGES["icon@2x.png"], "icon@3x.png": PASS_IMAGES["icon@3x.png"],
+    "logo.png": PASS_IMAGES["logo.png"], "logo@2x.png": PASS_IMAGES["logo@2x.png"], "logo@3x.png": PASS_IMAGES["logo@3x.png"] }, cfg.signer);
 }
 function _numsDisplay(nums) {
   if (!nums || !nums.length) return "";
