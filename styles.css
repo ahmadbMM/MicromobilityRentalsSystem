@@ -11802,6 +11802,17 @@ body.kiosk-on{overflow:hidden;}
 .pmv-badge{background:rgba(var(--purple-rgb),.14);color:rgb(var(--purple-rgb));white-space:nowrap;}
 /* an early-bird booking (EF29, 2026-11-18): why its price is lower */
 .xpe-badge{background:rgba(var(--green-rgb),.12);color:var(--green);white-space:nowrap;}
+/* Payments > Experiences' pack pop-up (#xp-pk, 2026-11-18): the refund dialog's chrome, centred, 90svh at most, scrolling inside */
+#xp-pk .chrome-dh10{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+#xp-pk .chrome-dt{font-size:var(--sf-fs-lg);font-weight:600;overflow-wrap:anywhere;}
+#xp-pk .chrome-xt{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:var(--sf-fs-xl);line-height:1;padding:0 4px;min-width:44px;min-height:44px;}
+#xp-pk .chrome-dact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:12px;}
+#xp-pk .confirm-box{max-height:90vh;max-height:90svh;display:flex;flex-direction:column;}
+#xp-pk .chrome-dbody{overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:12px;}
+body.view-staff.view-staff #xp-pk .confirm-box{width:min(var(--sf-dlg-m),calc(100vw - 32px));}
+#xp-pk input:not([type=checkbox]),#xp-pk select{width:100%;}
+#xp-pk .sto-chk{display:flex;align-items:center;gap:8px;font-size:var(--sf-fs-md);cursor:pointer;min-height:44px;}
+#xp-pk .sto-chk input[type=checkbox]{-webkit-appearance:checkbox;appearance:auto;display:block;position:static;flex:none;width:18px;height:18px;min-height:0;margin:0;padding:0;opacity:1;}
 /* the company a guest typed at micromobility.sa/petromin, after their I- number: a long one is cut, its title says it whole */
 .inv-co{display:inline-block;max-width:14em;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;}
 #tab-settings .set-kiosk{margin-top:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
