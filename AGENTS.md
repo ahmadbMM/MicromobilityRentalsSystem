@@ -4660,6 +4660,24 @@ the way all graphs and tables and visualizations are aligned and their design".
   amber status) on one grid per row. Every staff table lines its quantities up at the end (`_ckAlignTables`, from
   `goStaff`); a table that lays itself out says `data-noalign`.
 
+## The Saturday Social Ride report (2026-11-18, migration 20261119120000)
+
+The user: the number of people who showed up for Saturday social rides since the start (five visits count five), the date
+of the first ride, the unique riders "and more info and stats", extracted from the staff website. Spec:
+`tests/saturday-ride-report.spec.ts` (`@staff:reports`).
+- **One server call.** `staff_saturday_ride_report()` (security definer, `is_staff()` or `STAFF_ONLY`, not for anon) answers
+  `{generated_at, summary, rides, frequency, mix}` over every Saturday ride since the first: a staff device holds a rolling
+  year of bookings (`QUEUE_WINDOW_DAYS`), too little for "since the start". Only counts leave the database, no names.
+- **What it counts.** A Saturday ride: `ride_kind = 'saturday'`, not deleted, cancelled or a draft. An attendance: a booking
+  checked in (`active` or `done`), one per row. A rider: the booking's account (else its phone, then its name). The show-up
+  rate reads only rides where staff marked a no-show. Ride groups from the first ride that had one (3 Oct 2026); gender, age
+  (today, KSA) and nationality per rider, nationality as the top eight, `*` (Other) and `''` (Not given).
+- **The client** (`_srrOpen`, `_srrBody`, all in the reports part): a card `satride` in Reports > Rides and bookings for
+  the accounts that open Analytics (`_rp2Cat`), look C (`REPORT_LOOK`), drawn with `_reportShell` and opened in the viewer,
+  whose Print, PDF, Share, Excel and CSV read it like any report. Words `srr*`.
+- A live web copy of the same numbers (claude.ai artifact 7k8jg1mg3j3cESNgkkerzx) runs the same definitions as SQL on the
+  reader's own Supabase connector; change both together.
+
 ## The birthday week (2026-11-15)
 
 The user: "in birthday week of the customer make the screen throw confetti from the top to the bottom of the page
