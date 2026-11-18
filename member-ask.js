@@ -1115,8 +1115,8 @@ function _akRes(a, full, q, raw) {
       break;
     }
     case 'quiz_text': {
-      const right = _akClamp(_akInt(r.right) || 0, 0, n), acc = _akL(r.correct).filter((x) => typeof x === 'string' && x.trim());
-      body = `<p class="ak-meta">${esc(_aF('gotRight', right, n))}</p>${acc.length ? `<p class="ak-reveal"><span class="ak-right">${_akIc('check', 14)}</span><span>${_aT('correct')}</span> <b dir="auto">${esc(acc.join(' · '))}</b></p>` : ''}`;
+      const right = typeof r.right === 'number' ? _akClamp(_akInt(r.right) || 0, 0, n) : null, acc = _akL(r.correct).filter((x) => typeof x === 'string' && x.trim());
+      body = `${right === null ? '' : `<p class="ak-meta">${esc(_aF('gotRight', right, n))}</p>`}${acc.length ? `<p class="ak-reveal"><span class="ak-right">${_akIc('check', 14)}</span><span>${_aT('correct')}</span> <b dir="auto">${esc(acc.join(' · '))}</b></p>` : ''}`;
       break;
     }
     default: break; // a form: its count alone

@@ -832,10 +832,11 @@ create or replace function public.volunteer_counts(p_id text, p_token text, p_se
  security definer
  set search_path to 'public'
 as $function$
-declare _n record;
+declare _n record; w volunteer_sessions%rowtype;
 begin
-  -- volunteers2-2 (20261119000600)
-  perform _vol_gate(p_id, p_token, p_session, 'list');
+  -- volunteers2-2 (20261119000600); the session's own counts switch holds here too (review of 2026-11-18)
+  w := _vol_gate(p_id, p_token, p_session, 'list');
+  if not coalesce((w.caps ->> 'counts')::boolean, false) then return null; end if;
   select count(*) filter (where q.status in ('waiting', 'waitlist', 'active', 'done')) booked,
          count(*) filter (where q.status in ('active', 'done')) arrived,
          count(*) filter (where q.donated_at is not null) donated,
