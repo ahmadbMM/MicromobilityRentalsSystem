@@ -563,3 +563,34 @@ test('@staff:community Edit default opens the saved default, saves it back and l
   await expect(m.locator('.modal-title')).toHaveText('Account report');
   await expect(m.locator('[data-rep="cols:minutes"]')).toHaveAttribute('aria-pressed', 'false');
 });
+
+// Bug hunt 2026-11-18 (app35-1): opened from the Reports page the builder reads every account's whole riding record, as
+// Accounts does, so a rider whose rides are older than the device's window is not "never rode".
+test('opened from Reports, the builder counts every account\'s whole record from the server', async ({ page }) => {
+  await stubSupabase(page, { ...fixtures, 'rpc:staff_customer_stats': [['c4', 3, 3, 0, '2024-01-05', '2024-03-01', 0, 0, 120, 225]] });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction(`getCustomers().length===4`);
+  await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('reports');showAccountReportOptions()`);
+  await expect(page.locator('#acr-count')).toBeVisible();
+  await page.waitForFunction('S._n6pCs&&S._n6pCs.size===1');
+  expect(await page.evaluate('S.staffTab')).toBe('reports');
+  await page.evaluate(`_accSet('fRides','never')`);
+  await expect(page.locator('#acr-count')).toContainText('On this list: 2 / 4');
+  expect(await page.evaluate(`_accRows().map(r=>r.c.id)`)).toEqual(['c2', 'c3']);
+});
+
+// Bug hunt 2026-11-18 (app35-3): a team setup picked while the print default is being edited goes into the default, laid
+// over the defaults, and the device's own choices stay as they were.
+test('a saved setup picked while editing the default goes into the default, not the device\'s choices', async ({ page }) => {
+  await staff(page);
+  await page.evaluate(`S.staffOptions={...(S.staffOptions||{}),acc_report_default:[_accDefaults()]};_accOpts().cols.minutes=0;_accSave()`);
+  await page.getByRole('button', { name: 'Edit default' }).click();
+  const m = page.locator('#print-opts-modal');
+  await expect(m.locator('.modal-title')).toHaveText('Edit the default community report');
+  await page.evaluate(`S._rbSets={acc:{list:[{id:'x1',name:'Team set',scope:'team',opts:{cols:{minutes:1}},created_by:'u9'}],at:Date.now(),busy:false}};_rbApply('acc','x1')`);
+  await expect(m.locator('[data-rep="cols:minutes"]')).toHaveAttribute('aria-pressed', 'true');
+  const r = await page.evaluate(`({edit:S._accDefEdit.cols.minutes,email:S._accDefEdit.cols.email,tag:S._accDefEdit.fTag,dev:S._accOpts.cols.minutes,saved:JSON.parse(localStorage.getItem('cq_acc_rep_opts')).cols.minutes})`);
+  expect(r).toEqual({ edit: 1, email: 1, tag: 'tag_saturday', dev: 0, saved: 0 });
+});

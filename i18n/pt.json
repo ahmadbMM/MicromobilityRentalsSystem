@@ -8764,6 +8764,7 @@
   "ckAutoDrawer": "A gaveta do dinheiro está contada",
   "ckDrawerDone": "Contada",
   "ckDrawerNot": "Ainda não contada",
+  "ckNoCash": "Nenhum dinheiro recebido esta noite",
   "ckDoneSr": "Feito",
   "ckOpenSr": "Por fazer",
   "ckProgress": "{0} de {1} feitos",

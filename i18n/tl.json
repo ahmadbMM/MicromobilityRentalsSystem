@@ -8764,6 +8764,7 @@
   "ckAutoDrawer": "Nabilang na ang cash drawer",
   "ckDrawerDone": "Nabilang na",
   "ckDrawerNot": "Hindi pa nabibilang",
+  "ckNoCash": "Walang cash na tinanggap ngayong gabi",
   "ckDoneSr": "Tapos",
   "ckOpenSr": "Hindi pa tapos",
   "ckProgress": "{0} sa {1} ang tapos",

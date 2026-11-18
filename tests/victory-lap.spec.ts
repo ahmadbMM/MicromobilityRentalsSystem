@@ -473,6 +473,23 @@ test.describe('@staff:bookings Victory Lap', () => {
     expect(at('Athlete r1')).toBeLessThan(at('Athlete r5'));
     expect(at('Athlete r5')).toBeLessThan(at('Athlete r4'));
   });
+  // Bug hunt 2026-11-18 (app36-1): the Teams sheet always writes each athlete's phone and email and the Still need a partner
+  // sheet their phone, so the personal-data record names them whatever columns are ticked (a Start list has none).
+  test('a Start list in Excel records the phones and emails its Teams and partner sheets carry', async ({ page }) => {
+    const q = [row('r1', { race: 'xd', div: 'op', shirt: 'M', team: 'VL-AAAA' }), row('r3', { race: 'md', div: 'el', shirt: 'L', pair: true }), row('r5', { race: 'xd', div: 'op', shirt: 'XL', team: 'VL-AAAA' })];
+    const cust = q.map((r) => ({ id: r.customer_id, name: r.name, email: r.id + '@example.com', phone: r.phone }));
+    await stubSupabase(page, { sessions: [vl, jcc], bikes: [], queue_entries: q, customers: cust });
+    const pii: Record<string, unknown>[] = [];
+    await page.route(/\/rest\/v1\/rpc\/staff_pii_reveal/, (r) => { pii.push(r.request().postDataJSON()); return r.fulfill({ status: 200, headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' }, body: 'null' }); });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('getQueue().length>0');
+    await page.evaluate(`(async()=>{setStaffTab('queue');S.sfSession='${VL}';await _loadStaffPart('vlap');await exportVlXlsx('${VL}',_vrbDefaults('start'));})()`);
+    await expect.poll(() => pii.length).toBe(1);
+    expect(pii[0].p_fields).toEqual(expect.arrayContaining(['phone', 'email']));
+    expect(pii[0].p_via).toBe('export');
+  });
   // Doubles read as one everywhere (the owner, 2026-10-25): on the roster and in Athletes and teams the partners
   // sit together under one frame whatever their numbers; staff upload a receipt; the receipts PDF carries it.
   test('Doubles partners sit together with a Doubles team mark; staff upload a receipt; the receipts PDF prints it', async ({ page }) => {

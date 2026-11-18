@@ -8764,6 +8764,7 @@
   "ckAutoDrawer": "La caisse est comptée",
   "ckDrawerDone": "Comptée",
   "ckDrawerNot": "Pas encore comptée",
+  "ckNoCash": "Pas d’espèces encaissées ce soir",
   "ckDoneSr": "Fait",
   "ckOpenSr": "Pas fait",
   "ckProgress": "{0} sur {1} faits",

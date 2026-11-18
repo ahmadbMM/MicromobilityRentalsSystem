@@ -8764,6 +8764,7 @@
   "ckAutoDrawer": "नगदको दराज गनियो",
   "ckDrawerDone": "गनियो",
   "ckDrawerNot": "अझै गनिएको छैन",
+  "ckNoCash": "आज राति कुनै नगद लिइएन",
   "ckDoneSr": "भयो",
   "ckOpenSr": "भएको छैन",
   "ckProgress": "{1} मध्ये {0} भयो",
