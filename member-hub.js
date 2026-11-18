@@ -15,10 +15,11 @@
 // 2026-11-18: My interests (its card, and Coming up led by the sessions of a picked interest); the last block of this file.
 // 2026-11-18: Suggest a ride (its card in the feed, its own page S._hubView 'suggest', ride_suggestions_mine / ride_suggest);
 // its block is the last above window._hubRender.
+// 2026-11-18: the Ramadan season (its dates from hub_season, a card and the next session's accent; see _ssnCheck).
 /* global S, sb, esc, _on, getSession, _cssv, shortDate, t, _cuIc, sessionTime, _dayWord, _evName, _evOf, _evKindName, allSessions,
    _isCommunity, _sessPastDay, _sessEnded, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
    _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard, _bookingAhead, _ptnAll,
-   _arHold, _isApprovalRide, _commPublished, _needsBike, _typeClosed, _mfMarkHtml,
+   _arHold, _isApprovalRide, _commPublished, _needsBike, _typeClosed, _mfMarkHtml, todayStr,
    NATIONALITIES, nationalityLabel, _natFor, _selOnce, askConfirm, closeConfirm, _EL, _EV */
 const HUB_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 const HUB_T = {
@@ -68,6 +69,9 @@ const HUB_T = {
   vol: ['Volunteers needed', 'نحتاج متطوعين', 'Bénévoles recherchés', 'Se buscan voluntarios', 'Procuram-se voluntários', 'رضاکاروں کی ضرورت ہے', 'स्वयंसेवकों की ज़रूरत है', 'Kailangan ng mga volunteer', 'स्वयंसेवक चाहिएको छ', 'স্বেচ্ছাসেবক প্রয়োজন'],
   volBtn: ['Volunteer', 'تطوّع', 'Je me propose', 'Quiero ayudar', 'Quero ajudar', 'رضاکار بنیں', 'स्वयंसेवा करें', 'Mag-volunteer', 'स्वयंसेवा गर्नुहोस्', 'স্বেচ্ছাসেবক হন'],
   bday: ['Happy birthday, {0}!', 'كل عام وأنت بخير يا {0}!', 'Joyeux anniversaire, {0} !', '¡Feliz cumpleaños, {0}!', 'Feliz aniversário, {0}!', 'سالگرہ مبارک، {0}!', 'जन्मदिन मुबारक, {0}!', 'Maligayang kaarawan, {0}!', 'जन्मदिनको शुभकामना, {0}!', 'শুভ জন্মদিন, {0}!'],
+  // The Ramadan season (2026-11-18): the card that opens the tab while Ramadan runs, and on Eid al-Fitr's first three days.
+  ssnRam: ['Ramadan Kareem', 'رمضان كريم', 'Ramadan Karim', 'Ramadán Kareem', 'Ramadan Kareem', 'رمضان کریم', 'रमज़ान करीम', 'Ramadan Kareem', 'रमजान करिम', 'রমজান কারিম'],
+  ssnEid: ['Eid Mubarak', 'عيد مبارك', 'Aïd Moubarak', 'Eid Mubarak', 'Eid Mubarak', 'عید مبارک', 'ईद मुबारक', 'Eid Mubarak', 'ईद मुबारक', 'ঈদ মোবারক'],
   yrTitle: ['Your {0} with MicroMobility', 'عامك {0} مع مايكروموبيليتي', 'Votre année {0} avec MicroMobility', 'Tu {0} con MicroMobility', 'O seu {0} com a MicroMobility', 'MicroMobility کے ساتھ آپ کا {0}', 'MicroMobility के साथ आपका {0}', 'Ang {0} mo kasama ang MicroMobility', 'MicroMobility सँग तपाईंको {0}', 'MicroMobility-র সাথে আপনার {0}'],
   yrSoFar: ['Your year so far', 'عامك حتى الآن', 'Votre année jusqu’ici', 'Tu año hasta ahora', 'O seu ano até agora', 'اب تک آپ کا سال', 'अब तक आपका साल', 'Ang taon mo sa ngayon', 'अहिलेसम्मको तपाईंको वर्ष', 'এ পর্যন্ত আপনার বছর'],
   yrOpen: ['See your year', 'شاهد عامك', 'Voir votre année', 'Ver tu año', 'Ver o seu ano', 'اپنا سال دیکھیں', 'अपना साल देखें', 'Tingnan ang taon mo', 'आफ्नो वर्ष हेर्नुहोस्', 'আপনার বছর দেখুন'],
@@ -191,6 +195,67 @@ async function _hubCheer(slugs) {
   if (typeof _plsSeen === 'function') _plsSeen(c, slugs);
 }
 
+// ── The Ramadan season (2026-11-18; the user picked "Ramadan season (about 8 Feb to 8 Mar 2027): a Ramadan challenge from
+// the existing template, a season badge, an Eid ride and a Ramadan look for the tab") ─────────────────────────────────────
+// The tab reads Ramadan's dates on its own (hub_season, migration 20261118210900: the Ramadan running now or the next one,
+// as staff keep it in Community > Activities > Club goal), kept on the phone for six hours so the look paints at once. While
+// today (Riyadh's date, todayStr, as the birthday week reads it) is between its first and last day the feed opens with a
+// "Ramadan Kareem" card (a crescent and two lanterns, drawn here) and the next session's card wears night blue and gold
+// (#hub-body.hub-ssn-on); on Eid al-Fitr's first three days the card says "Eid Mubarak". Gregorian dates only, no Hijri. A
+// database without the function, a failed read or a member outside the dates: no card, no accent, nothing said. The season
+// challenges themselves are ordinary staff challenges (goal_ramadan_2027, goal_eid_2027) that hub_feed sends in their dates.
+// S._ssn: {id, at, ram: {from, to, eid} | null, off}.
+const _SSN_KEY = 'cq_hub_ssn_', _SSN_TTL = 216e5;
+function _ssnYmd(v) { const s = String(v || '').slice(0, 10); return /^\d{4}-\d\d-\d\d$/.test(s) ? s : ''; }
+function _ssnDay(d, n) { return new Date(Date.parse(d + 'T00:00:00Z') + n * 864e5).toISOString().slice(0, 10); }
+function _ssnRam(x) {
+  const from = _ssnYmd(x && (x.from || x.starts_on)), to = _ssnYmd(x && (x.to || x.ends_on)), eid = _ssnYmd(x && (x.eid || x.eid_on));
+  return from && to && eid && from <= to && to < eid ? { from, to, eid } : null;
+}
+function _ssnMine() { const c = _hCust(); return c && S._ssn && S._ssn.id === c.id ? S._ssn : null; }
+function _ssnCheck() {
+  const c = _hCust(); if (!c) return null;
+  let s = S._ssn && S._ssn.id === c.id ? S._ssn : null;
+  if (!s) {
+    let k = null; try { k = JSON.parse(localStorage.getItem(_SSN_KEY + c.id) || 'null'); } catch (_) {}
+    if (k && typeof k.at === 'number') s = S._ssn = { id: c.id, at: k.at, ram: _ssnRam(k.ram) };
+  }
+  if (!s || (!s.off && Date.now() - s.at >= _SSN_TTL)) _ssnFetch(c);
+  return s;
+}
+async function _ssnFetch(c) {
+  if (!c || !c.session_token || !sb || S._ssnBusy) return;
+  S._ssnBusy = true;
+  let r; try { r = await sb.rpc('hub_season', _hTok(c)); } catch (e) { r = { error: e }; }
+  S._ssnBusy = false;
+  const now = _hCust(); if (!now || now.id !== c.id) return; // signed out, or another account, meanwhile
+  const was = S._ssn && S._ssn.id === c.id ? S._ssn : null, before = _ssnKind(was), d = r && !r.error && r.data;
+  if (d && (d.ok === true || d.error === 'member')) {
+    S._ssn = { id: c.id, at: Date.now(), ram: d.ok === true ? _ssnRam(d.ramadan) : null };
+    try { localStorage.setItem(_SSN_KEY + c.id, JSON.stringify({ at: S._ssn.at, ram: S._ssn.ram })); } catch (_) {}
+  } else if (r && r.error && (r.error.code === 'PGRST202' || r.error.code === '42883')) {
+    S._ssn = { id: c.id, at: Date.now(), ram: null, off: true }; // a database before the migration: not asked again
+  } else {
+    S._ssn = { id: c.id, ram: was ? was.ram : null, at: Date.now() - _SSN_TTL + 12e4 }; // no answer: what shows stays, asked again in two minutes
+  }
+  if (S.custTab === 'members' && _ssnKind(S._ssn) !== before) _hubRender();
+}
+// 'ramadan' from its first day to its last, 'eid' on the three days after, else ''.
+function _ssnKind(s) {
+  const r = s && s.ram; if (!r) return '';
+  const t0 = todayStr();
+  return t0 >= r.from && t0 <= r.to ? 'ramadan' : t0 >= r.eid && t0 <= _ssnDay(r.eid, 2) ? 'eid' : '';
+}
+// A crescent with its star (BDG_GLYPH.crescent's lines) and two lanterns hanging on their cords, in the season's gold.
+function _ssnArt() {
+  const lamp = (x, y, k) => `<path class="hs-str" d="M${x + 12 * k} 0V${(y + 4.6 * k).toFixed(1)}"/><g transform="translate(${x} ${y}) scale(${k})"><path class="hs-cap" d="M8.4 4.6h7.2l-1.1 2.2H9.5z"/><path class="hs-glass" d="M8 7.4h8l1.6 4-1.6 7.2H8l-1.6-7.2z"/><path class="hs-core" d="M10.6 9.2h2.8v7.6h-2.8z"/><path class="hs-cap" d="M7.4 19h9.2l-1.2 2.8H8.6z"/></g>`;
+  return `<svg class="hub-ssn-art" viewBox="0 0 124 56" aria-hidden="true" focusable="false"><g transform="translate(2 1) scale(2.25)"><path class="hs-moon" d="M15.6 3.2A9.3 9.3 0 1 0 15.6 20.8 8.83 8.83 0 1 1 15.6 3.2Z"/><path class="hs-star" d="M18.6 7.4l.68 1.87 1.98.06-1.57 1.23.56 1.91-1.65-1.12-1.65 1.12.56-1.91-1.57-1.23 1.98-.06z"/></g>${lamp(62, 6, 1.5)}${lamp(92, 16, 1.2)}</svg>`;
+}
+function _ssnHtml(kind) {
+  if (!kind) return '';
+  return `<div class="hub-card hub-ssn hub-ssn-${kind}"><strong class="hub-ssn-t">${esc(_hT(kind === 'eid' ? 'ssnEid' : 'ssnRam'))}</strong>${_ssnArt()}</div>`;
+}
+
 // ── The page ──────────────────────────────────────────────────────────────────────────────────────
 function _hubRender() {
   const body = document.getElementById('hub-body');
@@ -200,6 +265,8 @@ function _hubRender() {
   if (!S._hub && c) { const disk = _hubDisk(c); if (disk) S._hub = { forId: c.id, at: disk.at, d: disk.d }; }
   const h = S._hub, d = h && h.d;
   _hubVisitNow();
+  const ssn = _ssnKind(_ssnCheck());
+  body.classList.toggle('hub-ssn-on', !!ssn);
   _mtFetch();
   _akListFetch();
   _intFetch();
@@ -238,6 +305,7 @@ function _feedHtml(c, d, stale) {
   // A ride the member has just finished, with nothing else booked: its recap leads the page, before the next one to book.
   const staff = _hubUpd(_staffHtml(d));
   return [
+    _ssnHtml(_ssnKind(_ssnMine())),
     stale ? `<div class="hub-card hub-stale" role="status"><span>${_hT('stale')}</span><button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_hubRetry')}">${_hT('retry')}</button></div>` : '',
     d.birthday ? `<div class="hub-card hub-bday">${_cuIc('gift', 20)}<strong>${esc(_hF('bday', String((c && c.name) || '').trim().split(/\s+/)[0] || ''))}</strong></div>` : '',
     hero.recap ? staff : '',

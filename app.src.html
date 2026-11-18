@@ -22933,6 +22933,9 @@ const BDG_GLYPH={
   // roof, loft window and braced door, under a crescent moon. The door is cut out of the barn, the brace drawn over it with
   // attributes, not .s, whose 2-unit stroke would fill the door at 30 px.
   barn:'<path fill-rule="evenodd" d="M2.2 22.4V12.2L5.4 7.8 11 4.9l5.6 2.9 3.2 4.4v10.2zM7.4 22.4v-6.6h7.2v6.6zM9.6 9.4h2.8v2.8H9.6z"/><path fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="square" d="M7.9 16.3l6.2 5.6M14.1 16.3l-6.2 5.6"/><path transform="translate(15.2 -.2) scale(.42)" d="M20.5 14.6A8.8 8.8 0 1 1 9.4 3.5a7 7 0 0 0 11.1 11.1Z"/>',
+  // Ramadan 2027 (2026-11-18, the Ramadan season: "a season badge"): the new crescent, thinner than the moon, with its star in
+  // the hollow. The Eid badge wears the lantern above; member-hub.js draws the same crescent on the tab's Ramadan card.
+  crescent:'<path d="M15.6 3.2A9.3 9.3 0 1 0 15.6 20.8 8.83 8.83 0 1 1 15.6 3.2Z"/><path class="o" d="M18.6 7.4l.68 1.87 1.98.06-1.57 1.23.56 1.91-1.65-1.12-1.65 1.12.56-1.91-1.57-1.23 1.98-.06z"/>',
 };
 const BDG_COLORS=['green','gold','blue','red','purple','orange','teal','silver'];
 // The drawn-special medallions: 'special' (Race Ready, the owner 2026-09-29) gold running into
@@ -76038,7 +76041,7 @@ function _acGoalsHtml(){
   const rows=S._ac.goals.map(g=>{
     const open=S._acGoal===g.id,pr=S._acProg&&S._acProg.id===g.id?S._acProg.rows:null;
     return`<div class="am-tag-row" data-goal="${esc(g.id)}"><strong>${esc(g.name)}</strong><span class="am-meta">${t(g.kind==='goal'?'acKindGo':'acKindCh')} · ${esc(String(g.target))} · ${esc(_acDate(g.starts_on))} – ${esc(_acDate(g.ends_on))}${g.badge_id?' · '+esc(_acBadgeName(g.badge_id)):''}</span>
-      <div class="cmy-am-tacts"><button type="button" class="btn-sm ${open?'btn-primary':'btn-secondary'}" aria-expanded="${open}" data-on-click="${_on('_acGoalOpen',g.id)}">${t('acWho')}</button>${_acSureBtn('go'+g.id,t('deleteBtn'),'_acGoalDel',g.id)}</div></div>
+      <div class="cmy-am-tacts"><button type="button" class="btn-sm ${open?'btn-primary':'btn-secondary'}" aria-expanded="${open}" data-on-click="${_on('_acGoalOpen',g.id)}">${t('acWho')}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_acGoalEdit',g.id)}">${t('editBtn')}</button>${_acSureBtn('go'+g.id,t('deleteBtn'),'_acGoalDel',g.id)}</div></div>
       ${open?`<div class="tg-holders">${!pr?`<div class="am-meta">${t('mbLoading')}</div>`:pr.length?pr.map(x=>`<div class="tg-row"><span class="tg-who"><strong>${esc(x.name||'—')}</strong><small>${esc(t('acCountOf').replace('{0}',x.n).replace('{1}',g.target))}</small></span></div>`).join(''):_emptyState(t('acNone'))}</div>`:''}`;
   }).join('')||_emptyState(t('acNone'));
   const d=S._acGoalNew&&S._acGoalNew!==true?S._acGoalNew:{},sel=(on)=>on?' selected':'';
@@ -76051,10 +76054,22 @@ function _acGoalsHtml(){
     :`<button type="button" class="btn-secondary cmy-mt12" data-on-click="${_on('_acGoalForm',true)}">+ ${t('acNewGoal')}</button>`)+_acTplHtml();
 }
 function _acGoalForm(on){S._acGoalNew=!!on;renderCommunity();}
+// Edit a challenge or goal in the same form (2026-11-18, the Ramadan season: the seeded Ramadan and Eid challenges keep their
+// dates when staff move hub_ramadan, so staff move them here). The row keeps its id and its Ramadan flag (ramadan_any is not
+// on the form); a member's count follows the new dates at their next read.
+function _acGoalEdit(id){
+  const g=(S._ac.goals||[]).find(x=>x.id===id);if(!g)return;
+  S._acGoalNew={edit:id,kind:g.kind,scope:g.scope,name:g.name,name_ar:g.name_ar,target:g.target,from:String(g.starts_on||'').slice(0,10),to:String(g.ends_on||'').slice(0,10),badge_id:g.badge_id||''};renderCommunity();
+  const el=document.getElementById('ac-g-en');if(el)try{el.focus({preventScroll:true});el.scrollIntoView({block:'center'});}catch(_){}
+}
 async function _acGoalSave(){
-  const tg=Number(_acVal('ac-g-target'));
+  const tg=Number(_acVal('ac-g-target')),ed=S._acGoalNew&&S._acGoalNew.edit;
   const row={kind:_acVal('ac-g-kind'),scope:_acVal('ac-g-scope'),name:_acVal('ac-g-en'),name_ar:_acVal('ac-g-ar'),target:tg,starts_on:_acVal('ac-g-from'),ends_on:_acVal('ac-g-to'),badge_id:_acVal('ac-g-badge')||null};
   if(!row.name||!row.name_ar||!row.starts_on||!row.ends_on||row.ends_on<row.starts_on||!Number.isInteger(tg)||tg<1||tg>100000){toast(t('acNeedAll'),'error');return;}
+  if(ed){
+    const r=await sb.from('hub_goals').update(row).eq('id',ed);if(_writeErr(r,'save goal'))return;
+    S._ac.goals=S._ac.goals.map(x=>x.id===ed?{...x,...row}:x);S._acGoalNew=false;logAction(`${t('editBtn')}: ${row.name}`);renderCommunity();return;
+  }
   row.id='goal_'+uid();
   const r=await sb.from('hub_goals').insert(row);if(_writeErr(r,'save goal'))return;
   S._ac.goals=[row,...S._ac.goals];S._acGoalNew=false;logAction(`${t('acNewGoal')}: ${row.name}`);renderCommunity();

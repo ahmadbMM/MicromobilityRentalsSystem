@@ -55,7 +55,7 @@ test.describe('@customer:members the Community tab', () => {
   test('one read, no sub-menu, the page\'s Back, nothing about anyone else, and no sideways scroll', async ({ page }) => {
     const sent = rpcSent(page);
     await member(page);
-    expect([...new Set(sent.map((x) => x.fn).filter((f) => (f.startsWith('hub_') && f !== 'hub_pulse' && f !== 'hub_plan') || f === 'member_directory'))]).toEqual(['hub_feed']); // hub_pulse is the app's own light read (tests/community-reach-app.spec.ts); hub_plan is the Saturdays card's own, asked beside the feed, never before it (tests/plan-saturdays.spec.ts)
+    expect([...new Set(sent.map((x) => x.fn).filter((f) => (f.startsWith('hub_') && f !== 'hub_pulse' && f !== 'hub_plan' && f !== 'hub_season') || f === 'member_directory'))]).toEqual(['hub_feed']); // hub_pulse is the app's own light read (tests/community-reach-app.spec.ts); hub_plan is the Saturdays card's own, asked beside the feed, never before it (tests/plan-saturdays.spec.ts); hub_season is Ramadan's dates for the tab's season look, kept on the phone for six hours (tests/ramadan-season.spec.ts)
     await expect(page.locator('#hub-nav, .hub-tab, #tab-members .mb-row, #mb-q')).toHaveCount(0);
     await expect(page.locator('#cust-back-btn')).toBeVisible(); // the Community tab keeps the page's Back (the user, 2026-11-11)
     await expect(page.locator('#hub-body')).not.toContainText(/kudos|No challenge is running/i);

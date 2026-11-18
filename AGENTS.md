@@ -1048,6 +1048,33 @@ only their own suggestions, each marked Planned or Done. When one happens, an Up
 - **Privacy Notice:** the row after the Ask answers (en + ar), PRIVACY_VERSION unchanged (2026-11-18), nobody asked again.
 - **Spec:** `tests/ride-suggestions.spec.ts` (`@customer:members`, `@staff:community`).
 
+## The Ramadan season (2026-11-18)
+
+The user picked, 2026-11-18: "Ramadan season (about 8 Feb to 8 Mar 2027): a Ramadan challenge from the existing template, a
+season badge, an Eid ride and a Ramadan look for the tab". Migration `20261118210900_ramadan_season.sql`; spec
+`tests/ramadan-season.spec.ts`.
+
+- **Seeded once** (`on conflict do nothing`): `goal_ramadan_2027`, the staff template "Ramadan Rhythm: 2 Sessions"
+  (`AC_TEMPLATES` 'ramadan': community scope, target 2, its words) dated from `hub_ramadan`'s 2027 row (projected 8 February
+  to 9 March 2027), `ramadan_any` on (any session in Ramadan counts, `_hub_goal_n`); and `goal_eid_2027`, "Eid Ride" /
+  "رحلة العيد", target 1, community sessions from Eid al-Fitr day (`hub_ramadan.ends_on` + 1) to the following Saturday (a
+  Saturday Eid runs to the next one). Each has its own held-only badge the database gives: `bd_ramadan_2027` "Ramadan 2027"
+  (glyph `crescent`, new in `BDG_GLYPH`: a thin crescent with its star, blue) and `bd_eid_2027` "Eid 2027" (the existing
+  `lantern`, gold). `created_at` is each one's first day at midnight in Riyadh, so the tab's dot (`hub_pulse`) lights when it
+  starts. No session is made: staff make the Eid ride in the session editor.
+- **They keep their dates.** If staff move `hub_ramadan` after the moon sighting, the two challenges do not follow: staff move
+  them in Community > Activities > Challenges with **Edit** on the row (`_acGoalEdit`, new: the same form, an update of the
+  same row; `ramadan_any` is not on the form and stays). `hub_feed`/`hub_pulse` show a staff challenge only between its first
+  and last day and `_hub_award` looks only at started ones, so neither appears before Ramadan (no "starts on" state).
+- **The look** (`member-hub.js`, `_ssn*`): the tab reads the dates with `hub_season(p_id, p_token)` (definer, token, members
+  only: the Ramadan running now or the next one, kept until its third Eid day; `hub_ramadan` itself is staff-only and
+  `hub_feed` was not rebuilt), kept on the phone for six hours (`cq_hub_ssn_<id>`). On Ramadan's days (Riyadh's date,
+  `todayStr`, as the birthday week) the feed opens with a "Ramadan Kareem" / "رمضان كريم" card (`.hub-ssn`, a crescent and two
+  lanterns drawn in `_ssnArt`) and `#hub-body.hub-ssn-on` re-points the next session card's night and neon tokens to night
+  blue and gold; on Eid al-Fitr's first three days the card says "Eid Mubarak" / "عيد مبارك" (same accent). Words `ssnRam`,
+  `ssnEid` in `HUB_T`. No Hijri dates anywhere (the owner declined them). A database without `hub_season`, a refusal or a
+  failed read: no card, nothing said. The rider side has one light look, so the accent has one set of tokens (`--ssn-*`).
+
 ## New features build (2026-11-13/14)
 
 Sixteen items the owner marked "Build now" on 2026-11-13, released together. Specs (`tests/`, `.spec.ts`): first-five-rides, still-coming,
