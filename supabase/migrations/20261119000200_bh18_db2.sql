@@ -120,9 +120,10 @@ begin
     /* At most three of the rider's laps arrive within the challenge's minimum time (created_at is when each one
        arrived): kept scans still go in when the signal comes back, but calls back-dated one after another (p_ago
        0, g, 2g, ...) no longer make a whole season of laps at once (bug hunt 2026-11-18, mods0-3, sql05-6). */
-    elsif (select count(*) from circuit_laps l
+    elsif coalesce(p_ago, 0) > 0 and (select count(*) from circuit_laps l
             where l.challenge_id = c.id and l.customer_id = any(v_accts)
               and l.created_at > now() - make_interval(secs => c.min_gap_s)) >= 3 then
+      -- back-dated calls only: a live scan right after the kept ones are sent is a real lap (review of 2026-11-18)
       v_why := 'gap';
     else
       select q.session_id into v_sess
@@ -638,7 +639,7 @@ $b$        -- 5 or older, as every other door takes it (bug hunt 2026-11-18, sql
   d := pg_temp._once(d,
 $a$           or v !~ '^https://([a-z0-9]+\.supabase\.co/storage/v1/object/public/photos/|lh[0-9]+\.googleusercontent\.com/)' then continue; end if;$a$,
 $b$           -- this project's own photos bucket, as customer_set_photo takes it (sql07-4)
-           or v !~ '^https://(qpffkzmsfyilicwcsszz\.supabase\.co/storage/v1/object/public/photos/|lh[0-9]+\.googleusercontent\.com/)' then continue; end if;$b$);
+           or v !~ '^https://((qpffkzmsfyilicwcsszz|jkfhiszcnuvoftvkzaye)\.supabase\.co/storage/v1/object/public/photos/|lh[0-9]+\.googleusercontent\.com/)' then continue; end if;$b$);
   execute d;
 end $do$;
 
@@ -660,7 +661,7 @@ begin
   -- (20261119000200).
   if p_photo is not null
      and not ((length(p_photo) <= 2000 and p_photo ~ '^https://[^[:space:]"''<>`\\]+$'
-               and p_photo ~ '^https://(qpffkzmsfyilicwcsszz\.supabase\.co/storage/v1/object/public/photos/|lh[0-9]+\.googleusercontent\.com/)')
+               and p_photo ~ '^https://((qpffkzmsfyilicwcsszz|jkfhiszcnuvoftvkzaye)\.supabase\.co/storage/v1/object/public/photos/|lh[0-9]+\.googleusercontent\.com/)')
               or (length(p_photo) <= 700000 and p_photo ~ '^data:image/(jpeg|png|webp|gif);base64,[A-Za-z0-9+/=]+$')) then
     return false;
   end if;
@@ -984,6 +985,7 @@ insert into supabase_migrations.schema_migrations (version, name)
 values ('20261119000200', 'bh18_db2')
 on conflict (version) do nothing;
 
+drop function if exists pg_temp._once(text, text, text);
 commit;
 
 -- Read-only check after applying (expect: 12, t, t, f, 1):

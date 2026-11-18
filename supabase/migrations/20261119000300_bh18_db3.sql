@@ -1291,6 +1291,7 @@ begin
   end if;
 end $chk$;
 
+drop function if exists pg_temp._once(text, text, text, integer);
 commit;
 
 -- check (read only): the marks, one staff_locker_cancel, the guarded tables, the policy, the ledger row.

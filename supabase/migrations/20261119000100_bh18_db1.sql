@@ -29,11 +29,9 @@
 --    still counted as a locker evening, so micromobility.sa/lockers kept selling it, and its reserved page lockers kept
 --    their money. A deleted night is closed like a cancelled one, and deleting it cancels its page lockers with their
 --    money given back ('night deleted'), as calling a night off does.
--- 7. sql03-2, _rider_reg_follow_booking: a returned booking removed (History > Remove), made a no-show or cancelled kept
---    its Petromin / Dukan registration returned, so the company bill still charged it. It is un-returned now (price
---    cleared by _rider_registration_guard), as done -> waiting already was; the month's takings already leave a removed
---    booking out (_mt_core). Undo (back to done) bills it again. Deliberate change of the 2026-10-28 rule "no-show,
---    cancel and every other move leave the registration alone", for a booking that was returned.
+-- 7. sql03-2, _rider_reg_follow_booking: NOT changed. Un-billing a returned Petromin / Dukan registration whose booking is
+--    later removed, made a no-show or cancelled would reverse the 2026-10-28 rule "no-show, cancel and every other move
+--    leave the registration alone"; that is the owner's call. The function is re-created with its 20261028140000 text.
 -- 8. sql04-2, _updates_wl_in: a booking promoted off the waitlist a second time left no new Updates entry (fixed tag,
 --    ON CONFLICT DO NOTHING). The row is now written afresh and unread, same tag.
 -- 9. sql05-5, _wl_offer_fill (patched in place) + new deferred trigger queue_entries_wl_offer_moved / _wl_offer_moved:
@@ -636,7 +634,7 @@ create trigger sessions_lockers_cancelled after update of cancelled_at, status o
   execute function public._lk_session_cancelled();
 
 -- ── 7. A returned booking removed: its Petromin / Dukan registration is no longer billed (sql03-2) ─────────────────
--- _rider_reg_follow_booking from 20261028140000_staff_review_money.sql; one branch added.
+-- _rider_reg_follow_booking from 20261028140000_staff_review_money.sql, unchanged (owner's call, see item 7).
 create or replace function public._rider_reg_follow_booking()
 returns trigger
 language plpgsql
@@ -663,12 +661,6 @@ begin
            checked_out_at = now(),
            checked_out_by = coalesce(r.checked_out_by, v_by)
      where r.matched_entry_id = new.id and r.checked_out_at is null;
-  elsif new.status in ('removed', 'noshow', 'cancelled') and old.status = 'done' then
-    -- A returned booking taken off (History > Remove, a correction) is no ride: its registration is no longer
-    -- returned, so the company is not billed for it, as the month's takings already leave a removed booking out
-    -- (_mt_core). Undoing it (back to done) returns it again (bug hunt 2026-11-18, sql03-2).
-    update rider_registrations r set checked_out_at = null, checked_out_by = null
-     where r.matched_entry_id = new.id and r.checked_out_at is not null;
   elsif new.status in ('waiting', 'waitlist') and old.status = 'done' then
     update rider_registrations r set checked_out_at = null, checked_out_by = null
      where r.matched_entry_id = new.id and r.checked_out_at is not null;
