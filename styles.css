@@ -14333,14 +14333,13 @@ body.view-staff #tab-community .ppl-find .search-input{padding-inline-start:12px
 .bdr-pick-t b{font-size:14px;font-weight:700;}
 .bdr-pick-t small{font-size:12.5px;line-height:1.4;color:var(--muted);}
 .bdr-was{margin:-6px 0 14px;font-size:13px;line-height:1.45;color:var(--muted);}
-.bdr-hint{margin:2px 0 10px;font-size:12.5px;line-height:1.45;color:var(--muted);}
 .bdr-file{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;}
 .bdr-thumb{width:44px;height:44px;object-fit:cover;border-radius:4px;flex:none;}
 .bdr-doc{display:flex;align-items:center;justify-content:center;width:44px;height:44px;flex:none;color:var(--green);}
 .bdr-fname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;}
 body:not(.view-staff) .mr-bdr-hint,body:not(.view-staff) .badge-pop-reqst{font-size:var(--fs-13);color:var(--ink-2);}
 body:not(.view-staff) :is(.bdr-pick,.bdr-file){border-color:var(--line);border-radius:var(--r-ctl);background:var(--card-2);}
-body:not(.view-staff) :is(.bdr-pick-t small,.bdr-was,.bdr-hint){color:var(--ink-2);}
+body:not(.view-staff) :is(.bdr-pick-t small,.bdr-was){color:var(--ink-2);}
 body:not(.view-staff) .bdr-doc{color:var(--go);}
 /* The Badge requests section (#tab-badgereq, 2026-11-08; the requests headed People > Badges until then). */
 #tab-badgereq .bdr-st-count{margin:12px 0 4px;}

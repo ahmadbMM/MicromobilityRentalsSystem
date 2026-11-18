@@ -276,6 +276,20 @@ test.describe('@staff:payments payments, refunds owed, settings', () => {
     expect(seen.find((c) => c.name === 'staff_pay_refund_decline')!.body).toEqual({ p_refund: 'rd2', p_reason: 'Locker was used' });
   });
 
+  test('the figures are the whole range\'s from staff_payment_figures when the list holds only the newest payments (bug hunt 2026-11-18, app17-3)', async ({ page }) => {
+    const seen = rpcCalls(page);
+    await staff(page, { 'rpc:staff_store_ready': true, 'rpc:staff_payments': pays, payment_refunds: [], store_orders: [],
+      'rpc:staff_payment_figures': { ok: true, by: { paid: { n: 600, amount: 30000, back: 0 }, partly_refunded: { n: 1, amount: 200, back: 50 }, failed: { n: 3, amount: 600, back: 0 } } } });
+    await page.evaluate(`setStaffTab('payments')`);
+    const sec = page.locator('#tab-payments');
+    await expect(sec.locator('.pay-row')).toHaveCount(2);
+    const num = sec.locator('.pay-figs .stat-num');
+    await expect(num.nth(0)).toHaveText('601'); // paid and partly refunded, failed aside
+    await expect(num.nth(1)).toContainText('30,200');
+    await expect(num.nth(2)).toContainText('50');
+    expect(seen.find((c) => c.name === 'staff_payment_figures')!.body).toHaveProperty('p_from');
+  });
+
   test('Settings writes the pay.* and store.* keys as the Website editor does', async ({ page }) => {
     const sc = writes(page, 'site_content');
     await staff(page, { 'rpc:staff_store_ready': true, site_content: [

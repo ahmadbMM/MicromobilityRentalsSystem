@@ -78,6 +78,9 @@ test.describe('@staff:lockers a booking\'s locker in its add-ons', () => {
     await q.getByRole('button', { name: 'Unassign' }).click();
     await expect.poll(() => sent(seen, 'staff_locker_edit')).toBeTruthy();
     expect(sent(seen, 'staff_locker_edit')).toMatchObject({ p_rental: 'R1', p_day: null, p_period: null, p_code: '', p_name: null, p_customer: null });
+    // the function's eight arguments: without p_op and p_approval PostgREST found none and every Unassign failed (bug hunt 2026-11-18, app16-1)
+    expect(sent(seen, 'staff_locker_edit')).toHaveProperty('p_op');
+    expect(sent(seen, 'staff_locker_edit')).toHaveProperty('p_approval');
     await expect(page.locator('.toast').filter({ hasText: 'Locker 1 unassigned' })).toHaveCount(1); // a quiet toast: said, not shown
   });
 

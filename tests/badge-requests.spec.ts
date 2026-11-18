@@ -53,7 +53,7 @@ test.describe('@customer:account badge requests', () => {
     await rider(page);
     const sent = calls(page, /\/rpc\/customer_badge_request$/);
     const host = page.locator('#mr-badges-host');
-    await expect(host.locator('.mr-bdr-hint')).toContainText('Ask our team for it, with a proof if you have one.');
+    await expect(host.locator('.mr-bdr-hint')).toHaveCount(0); // no hint line under the button, only the requests waiting (bug hunt 2026-11-18, css06-3)
     await host.getByRole('button', { name: 'Request a badge' }).click();
     await expect(dlg(page)).toHaveAttribute('aria-labelledby', 'bdr-title');
     // Every badge not held, earned by riding (First Lap is, by the one ride) or given by staff, every level not reached,

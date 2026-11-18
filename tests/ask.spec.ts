@@ -794,6 +794,21 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     await expect(sec(page).locator('.ask-pg')).toHaveCount(4);
   });
 
+  test('an option added to a saved question never takes the id of one deleted, and a deleted option takes its Right mark with it (bug hunt 2026-11-18, app18-1)', async ({ page }) => {
+    await staff(page);
+    await openPage(page, 1, 'setup');
+    await sec(page).locator('.ask-q').nth(1).locator('.ask-q-ed').click(); // Which day suits you? (a1, a2, a3), saved
+    await expect(page.getByRole('textbox', { name: 'Option 3, English' })).toHaveValue('Saturday');
+    await page.evaluate(`_askQ().v.config.correct=['a3']`);
+    await pop(page).getByRole('button', { name: 'Remove 3' }).click();
+    expect(await page.evaluate(`_askQ().v.config.correct`)).toEqual([]);
+    await pop(page).getByRole('button', { name: 'Add option' }).click();
+    const ids = (await page.evaluate(`_askQ().v.config.options.map(o=>o.id)`)) as string[];
+    expect(ids.slice(0, 2)).toEqual(['a1', 'a2']);
+    expect(ids[2]).not.toBe('a3'); // the answers that named a3 would count for the new option
+    expect(ids[2]).toMatch(/^a[a-z0-9]{1,11}$/); // what the database takes
+  });
+
   test('the window is entered in Saudi time and must close after it opens; Delete page asks first', async ({ page }) => {
     await staff(page);
     const sent = writes(page, /\/rest\/v1\/(ask_pages|ask_questions)$/);

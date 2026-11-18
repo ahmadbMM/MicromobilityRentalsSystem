@@ -841,6 +841,16 @@ test.describe('@staff:store review fixes', () => {
     await expect(page.locator('#sto-rt-amt')).toHaveValue('180'); // 200 of 300 in goods, 30 off: 200 x 270 / 300
   });
 
+  test('a return on an order the list does not hold reads the order first: the refund still starts at the lines less their discount share (bug hunt 2026-11-18, app17-2)', async ({ page }) => {
+    const rt = { id: 'rt1', order_id: 'o4', order_no: 1004, name: 'Huda Buyer', phone: '966501112233', kind: 'return', items: [{ item_id: 11, name: 'Trail helmet', variant: 'M', qty: 1, unit_price: 200 }],
+      reason: 'damaged', note: null, status: 'open', amount: null, staff_note: null, created_at: NOW, decided_at: null, decided_by: null };
+    await staff(page, { 'rpc:staff_store_orders': [], 'rpc:staff_store_returns': [rt], store_orders: [{ total: 270, discount: 30 }],
+      store_order_items: [{ qty: 1, unit_price: 200, gift_card: false }, { qty: 1, unit_price: 100, gift_card: false }] });
+    await view(page, 'returns');
+    await page.locator('#tab-store .sto-row', { hasText: 'MM-1004' }).click();
+    await expect(page.locator('#sto-rt-amt')).toHaveValue('180'); // not the 200 the line costs at full price
+  });
+
   test('bulk prices leave gift cards alone; a free-delivery threshold of 0 reads as none', async ({ page }) => {
     await staff(page, { store_products: [prod('pa', { name_en: 'Bottle', price: 45 }), prod('pg', { name_en: 'Gift card', kind: 'gift_card', category: 'gift', slug: 'gift-card', price: 100 })], store_variants: [],
       site_content: [{ key: 'store.delivery', value: { pickup: { on: true, fee: 0 }, jeddah: { on: true, fee: 20 }, ksa: { on: false }, freeOver: 0 }, updated_at: NOW }] });
