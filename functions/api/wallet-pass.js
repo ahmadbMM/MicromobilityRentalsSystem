@@ -1786,25 +1786,23 @@ async function storeOrderPass(request, q, env, passTypeId, teamId) {
   const SUPA = env.SUPABASE_URL || SUPA_DEFAULT;
   const ANON = env.SUPABASE_ANON_KEY;
   if (!ANON) return json({ ok: false, error: "no anon key" }, 500);
-  const ip = request.headers.get("cf-connecting-ip") || "?";
-  if (_soMissCount(ip) >= SO_MISS_MAX) return json({ ok: false, error: "throttled" }, 429);
+  const ip = (request.headers.get("cf-connecting-ip") || "").trim();
+  const seen = ip || "?";
+  const head = { apikey: ANON, Authorization: `Bearer ${ANON}`, "Content-Type": "application/json" };
+  if (/^[0-9A-Fa-f:.]{2,45}$/.test(ip)) head["x-mm-visitor-ip"] = ip;
   let r;
   try {
-    const rpc = await fetch(`${SUPA}/rest/v1/rpc/store_order_pass`, {
-      method: "POST",
-      headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ p_no: no, p_track: key })
-    });
+    const rpc = await fetch(`${SUPA}/rest/v1/rpc/store_order_pass`, { method: "POST", headers: head, body: JSON.stringify({ p_no: no, p_track: key }) });
     if (!rpc.ok) return json({ ok: false, error: "lookup failed" }, 502);
     r = await rpc.json();
   } catch (e) {
     return json({ ok: false, error: "lookup failed" }, 502);
   }
-  if (r && r.ok === false && r.error === "throttled") return json({ ok: false, error: "throttled" }, 429);
   if (r && r.ok === false && r.error === "not_pickup") return json({ ok: false, error: "not_pickup" }, 409);
   const p = r && r.ok === true && r.pass && typeof r.pass === "object" ? r.pass : null;
   if (!p || Number(p.no) !== no) {
-    _soMissCount(ip, true);
+    const n = _soMissCount(seen, true);
+    if (r && r.ok === false && r.error === "throttled" || n > SO_MISS_MAX) return json({ ok: false, error: "throttled" }, 429);
     return json({ ok: false, error: "not_found" }, 404);
   }
   try {

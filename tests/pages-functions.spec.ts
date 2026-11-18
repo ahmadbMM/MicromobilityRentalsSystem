@@ -635,6 +635,55 @@ test.describe('the Apple Wallet pass', () => {
     expect(asked.length).toBe(n);
   });
 
+  // The security review of 2026-11-18 (L3): the website relays every shopper's pass from its one address, so only misses
+  // are metered (here and in the database), and the database's meter is the visitor's: this function names its caller's
+  // CF-Connecting-IP as x-mm-visitor-ip. Junk keys never lock out an order's own key.
+  test('a store order pass names the visitor to the database, and junk keys never lock out the right one', async () => {
+    const key = 'cd'.repeat(16), junk = 'ee'.repeat(16);
+    const env = { APPLE_PASS_P12_BASE64: p12b64, APPLE_PASS_P12_PASSWORD: PW, APPLE_PASS_TYPE_ID: 'pass.test', APPLE_TEAM_ID: 'TEAM', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' };
+    const found = { ok: true, pass: { no: 1043, status: 'preparing', live: true, ready: false, name: 'Omar', slot: null,
+      items: [{ name: 'DA54 MAX', variant: 'M · Black', qty: 1 }], showroom: { en: 'Thu Al-Nurayn St, Jeddah' }, updated_at: '2026-11-18T10:00:00+00:00' } };
+    const heads: Headers[] = [];
+    const post = await load('functions/api/wallet-pass.js', 'onRequestPost');
+    globalThis.fetch = (async (u: string | URL | Request, init?: RequestInit) => {
+      const url = String(u);
+      if (url === 'https://db.test/rest/v1/rpc/store_order_pass') {
+        heads.push(new Headers(init?.headers));
+        return new Response(JSON.stringify(JSON.parse(String(init?.body)).p_track === key ? found : { ok: false, error: 'not_found' }));
+      }
+      if (url.includes('apple.com')) return new Response(wwdrDer);
+      return new Response('', { status: 404 });
+    }) as typeof fetch;
+    const ask = (k: string, ip?: string) => post({ request: new Request('https://site.test/api/wallet-pass', {
+      method: 'POST', headers: ip ? { 'cf-connecting-ip': ip } : {}, body: JSON.stringify({ storeOrder: { no: 1043, key: k } }) }), env });
+    // ten misses from one address answer 404, the eleventh is a lock
+    for (let i = 0; i < 10; i++) expect((await ask(junk, '203.0.113.9')).status).toBe(404);
+    expect((await ask(junk, '203.0.113.9')).status).toBe(429);
+    // the right key from that same address still gets its pass, and the database was told whose it is
+    const ok = await ask(key, '203.0.113.9');
+    expect(ok.status).toBe(200);
+    expect(ok.headers.get('content-type')).toBe('application/vnd.apple.pkpass');
+    expect(heads.at(-1)!.get('x-mm-visitor-ip')).toBe('203.0.113.9');
+    expect(heads.at(-1)!.get('apikey')).toBe('anon');
+    // the database's own lock on this visitor is said as a lock, and a right key is still served
+    globalThis.fetch = (async (u: string | URL | Request, init?: RequestInit) => {
+      const url = String(u);
+      if (url === 'https://db.test/rest/v1/rpc/store_order_pass') {
+        heads.push(new Headers(init?.headers));
+        return new Response(JSON.stringify(JSON.parse(String(init?.body)).p_track === key ? found : { ok: false, error: 'throttled' }));
+      }
+      if (url.includes('apple.com')) return new Response(wwdrDer);
+      return new Response('', { status: 404 });
+    }) as typeof fetch;
+    expect((await ask(junk, '198.51.100.20')).status).toBe(429);
+    expect((await ask(key, '198.51.100.20')).status).toBe(200);
+    // no address (a local run) or one that is not an address: nothing named
+    expect((await ask(key)).status).toBe(200);
+    expect(heads.at(-1)!.get('x-mm-visitor-ip')).toBeNull();
+    expect((await ask(key, 'not an address')).status).toBe(200);
+    expect(heads.at(-1)!.get('x-mm-visitor-ip')).toBeNull();
+  });
+
   test('a signing failure tells the rider nothing about the certificate', async () => {
     const res = await pass(booking, circuit, 'wrong password');
     expect(res.status).toBe(500);

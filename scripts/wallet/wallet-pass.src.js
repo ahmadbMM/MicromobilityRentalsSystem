@@ -518,8 +518,7 @@ async function buildPetrominPkpass(r, cfg) {
 // ── A store order's pickup pass (2026-11-18, N02 of the store build "do all") ──────────────────────────────────────────
 // The website's order page sends {storeOrder: {no, key, lang}} (its /api/store/wallet-pass relays it): the order's number
 // and its own 32-hex key, which is the right to read the order exactly as the order's link is. No account, no token.
-// store_order_pass (migration 20261119300000) answers only what the pass prints, metered per caller; nothing else from the
-// body is used, and the code, the links and the serial are made here from the number and the key, not taken from the
+// store_order_pass (migration 20261119300000) answers only what the pass prints; nothing else from the body is used, and the code, the links and the serial are made here from the number and the key, not taken from the
 // answer. The pass: the order number on top; the pickup day and the 20-minute handover when one was booked, else where the
 // order stands; the showroom; the counter code MMO-<no>-<first six of the key>, which the staff scanner opens the order
 // with; on the back the lines, the showroom's address (in Arabic when asked and kept), the order's page and its "I'm here".
@@ -527,6 +526,10 @@ async function buildPetrominPkpass(r, cfg) {
 // cancelled, refunded, collected) is voided. It surfaces at the handover's start. Apple's pass web service is not set up,
 // so a pass keeps what it said when it was added; the order page's button gives a fresh one.
 // The website the links open: STORE_SITE_ORIGIN (an https origin, e.g. the staging site), else micromobility.sa.
+// Only misses are metered, here (10 per address per isolate) and in the database (per visitor: this function names its
+// caller's CF-Connecting-IP as x-mm-visitor-ip, which store_order_pass keys its meter on), and a right number and key
+// is answered whatever either meter says (the security review of 2026-11-18, L3): the website relays every shopper's
+// pass from its one address, so a lock on a few junk keys had stopped every shopper's pass.
 const SO_MISS_MAX = 10, SO_MISS_WINDOW_MS = 10 * 60000;
 const _soMisses = new Map();
 function _soMissCount(ip, add) {
@@ -554,26 +557,24 @@ async function storeOrderPass(request, q, env, passTypeId, teamId) {
   const SUPA = env.SUPABASE_URL || SUPA_DEFAULT;
   const ANON = env.SUPABASE_ANON_KEY;
   if (!ANON) return json({ ok: false, error: "no anon key" }, 500);
-  const ip = request.headers.get("cf-connecting-ip") || "?";
-  if (_soMissCount(ip) >= SO_MISS_MAX) return json({ ok: false, error: "throttled" }, 429);
+  const ip = (request.headers.get("cf-connecting-ip") || "").trim();
+  const seen = ip || "?";
+  const head = { apikey: ANON, Authorization: `Bearer ${ANON}`, "Content-Type": "application/json" };
+  if (/^[0-9A-Fa-f:.]{2,45}$/.test(ip)) head["x-mm-visitor-ip"] = ip;
   let r;
   try {
-    const rpc = await fetch(`${SUPA}/rest/v1/rpc/store_order_pass`, {
-      method: "POST",
-      headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ p_no: no, p_track: key })
-    });
+    const rpc = await fetch(`${SUPA}/rest/v1/rpc/store_order_pass`, { method: "POST", headers: head, body: JSON.stringify({ p_no: no, p_track: key }) });
     if (!rpc.ok) return json({ ok: false, error: "lookup failed" }, 502);
     r = await rpc.json();
   } catch (e) {
     return json({ ok: false, error: "lookup failed" }, 502);
   }
-  // the database's meter is everyone's here (the caller is this function): said as a lock, never as a missing order
-  if (r && r.ok === false && r.error === "throttled") return json({ ok: false, error: "throttled" }, 429);
   if (r && r.ok === false && r.error === "not_pickup") return json({ ok: false, error: "not_pickup" }, 409);
   const p = r && r.ok === true && r.pass && typeof r.pass === "object" ? r.pass : null;
   if (!p || Number(p.no) !== no) {
-    _soMissCount(ip, true);
+    // a miss: the database's lock for this visitor, or this address's misses here, said as a lock, never as a missing order
+    const n = _soMissCount(seen, true);
+    if ((r && r.ok === false && r.error === "throttled") || n > SO_MISS_MAX) return json({ ok: false, error: "throttled" }, 429);
     return json({ ok: false, error: "not_found" }, 404);
   }
   try {
