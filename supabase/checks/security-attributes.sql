@@ -100,7 +100,7 @@ with expected(fname, want_definer, note) as (values
   ('staff_cancel_held', true, 'the Cancel session list: each cancelled booking''s wallet part from the whole ledger (20261119000700)'),
   ('staff_give_spot', true, 'Give the place: counts the places under the ride''s promotion lock (20261119000700)'),
   ('staff_payment_figures', true, 'the Payments page: figures over every payment of the range (20261119000700)'),
-  ('staff_saturday_ride_report', true, 'the Saturday Social Ride report: counts over every Saturday ride since the first, staff only (20261119120000)'),
+  ('staff_saturday_ride_report', true, 'the Saturday Social Ride report: counts over every Saturday ride since the first, staff only (20261119130500)'),
   ('till_close', true, 'closes a till with the expected cash and card worked out on the server (20261119000700)'),
   ('_till_expected', true, 'a till''s expected cash and card from the bookings, sales, wallet moves and deposits; cashier check inside (20261119000700)'),
   ('_wl_cap_guard', true, 'trigger: the waitlist cap staff set, counted past the caller''s RLS; no client execute (20261119000700)'),

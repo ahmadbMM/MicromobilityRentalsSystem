@@ -4660,7 +4660,7 @@ the way all graphs and tables and visualizations are aligned and their design".
   amber status) on one grid per row. Every staff table lines its quantities up at the end (`_ckAlignTables`, from
   `goStaff`); a table that lays itself out says `data-noalign`.
 
-## The Saturday Social Ride report (2026-11-18, migration 20261119120000)
+## The Saturday Social Ride report (2026-11-18, migration 20261119130500)
 
 The user: the number of people who showed up for Saturday social rides since the start (five visits count five), the date
 of the first ride, the unique riders "and more info and stats", extracted from the staff website. Spec:

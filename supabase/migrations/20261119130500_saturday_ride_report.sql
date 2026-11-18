@@ -1,5 +1,5 @@
 -- ============================================================================
--- 20261119120000_saturday_ride_report
+-- 20261119130500_saturday_ride_report
 --
 -- The Saturday Social Ride report (the user, 2026-11-18: "make me a report ... that shows the number of people who
 -- showed up for saturday social rides since the website started, if someone attended 5 times he's considered as 5
@@ -24,6 +24,9 @@
 -- Answer: {generated_at, summary{...}, rides[...], frequency[...], mix[...]} (see the select below for the fields).
 -- New function only; no table or row is changed.
 -- Rollback: drop function public.staff_saturday_ride_report();
+-- Renumbered 2026-11-18: first applied (staging, then production) as 20261119120000, which the testimonials migration
+-- had already taken in its handed-over script; both ledgers' rows were moved to this number by hand, so a re-run only
+-- replaces the function and adds nothing.
 -- ============================================================================
 
 begin;
@@ -186,12 +189,12 @@ begin
 end $chk$;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261119120000', 'saturday_ride_report')
+values ('20261119130500', 'saturday_ride_report')
 on conflict (version) do nothing;
 
 commit;
 
 -- check: select p.prosecdef, has_function_privilege('anon', p.oid, 'execute') as anon_can,
 --          has_function_privilege('authenticated', p.oid, 'execute') as auth_can,
---          (select count(*) from supabase_migrations.schema_migrations where version = '20261119120000') as ledger
+--          (select count(*) from supabase_migrations.schema_migrations where version = '20261119130500') as ledger
 --        from pg_proc p where p.oid = 'public.staff_saturday_ride_report()'::regprocedure;

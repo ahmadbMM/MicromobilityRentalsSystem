@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 import { tapReports, lastReport, viewerFrame } from './helpers/reports';
 
-// The Saturday Social Ride report (2026-11-18, migration 20261119120000): the attendances since the first Saturday ride
+// The Saturday Social Ride report (2026-11-18, migration 20261119130500): the attendances since the first Saturday ride
 // (five visits count five), the unique riders, the first ride's date and more, from one staff-only server call, opened from
 // its card in Reports > Rides and bookings and extracted through the viewer (Print, PDF, Excel, CSV).
 
