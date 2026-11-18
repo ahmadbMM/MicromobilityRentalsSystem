@@ -166,6 +166,31 @@ test.describe('@staff:bookings s1010 kiosk: self-service walk-ins', () => {
     expect(rpc.some((c) => c.name === 'customer_signup')).toBe(false);
   });
 
+  test('sent from New account to Find, an account that lacks a contact gives just that and goes on (bug hunt 2026-11-18)', async ({ page }) => {
+    // the details step used to draw the new account's boxes again, and every Continue said the number was taken
+    const { rpc } = await boot(page, { customers: [{ ...customers[0], emergency_phone: null }] });
+    await enterKiosk(page);
+    await kiosk(page).getByRole('button', { name: "I'm new here" }).click();
+    await kiosk(page).locator('#ko-first').fill('Sara');
+    await kiosk(page).locator('#ko-last').fill('Haddad');
+    await kiosk(page).locator('#ko-phone').fill('0500000123');
+    await kiosk(page).getByRole('button', { name: 'Continue' }).click();
+    await kiosk(page).getByRole('button', { name: 'I have an account' }).click();
+    await kiosk(page).locator('#ko-phone').fill('500000123');
+    await kiosk(page).getByRole('button', { name: 'Find', exact: true }).click();
+    await kiosk(page).locator('.ko-hit').click();
+    await kiosk(page).locator('#ko-last4').fill('0123'); // no contact and no birth year: the phone's last four
+    await kiosk(page).getByRole('button', { name: 'Confirm', exact: true }).click();
+    await expect(kiosk(page).locator('#ko-emName')).toBeVisible();
+    await expect(kiosk(page).locator('#ko-first')).toHaveCount(0);
+    await kiosk(page).locator('#ko-emName').fill('Huda Haddad');
+    await kiosk(page).locator('#ko-emPhone').fill('500000778');
+    await kiosk(page).locator('#ko-emRel').selectOption('sibling');
+    await kiosk(page).getByRole('button', { name: 'Continue' }).click();
+    await expect(kiosk(page).getByRole('heading', { name: "Tonight's rides" })).toBeVisible();
+    expect(rpc.some((c) => c.name === 'customer_signup')).toBe(false);
+  });
+
   test('no ride taking walk-ins tonight says so; the language switcher redraws the screen; leaving asks the PIN', async ({ page }) => {
     await boot(page, { sessions: [sessions[1]] });
     await enterKiosk(page);

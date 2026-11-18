@@ -276,6 +276,22 @@ test('the walk-in type goes with its rider, and picking an account keeps the typ
   expect(await page.evaluate('S._wiType')).toBe('Hybrid');
 });
 
+test('a name retyped after a pick lets go of the phone and height the pick filled, not of what staff typed (bug hunt 2026-11-18)', async ({ page }) => {
+  // kept, "Use as typed - no account" still found the picked account by its number and booked the walk-up on it
+  await boot(page, { sessions: [sess(LIVE)], queue_entries: [],
+    customers: [{ id: 'c1', name: 'Ahmed Saleh', phone: '+966500000001', height: 175, created_at: '2026-01-01T00:00:00Z' }] });
+  await page.waitForFunction('(S.customers||[]).length>0');
+  await page.evaluate(`S.sfSession=${JSON.stringify(LIVE)};showWalkinModal();_wiPickCust('c1')`);
+  await expect(page.locator('#wi-phone')).toHaveValue('+966500000001');
+  await expect(page.locator('#wi-height')).toHaveValue('175');
+  await page.fill('#wi-height', '160'); // typed by staff: stays
+  await page.fill('#wi-name', 'Sara');
+  await page.evaluate('_wiUseTyped()');
+  await expect(page.locator('#wi-phone')).toHaveValue('');
+  await expect(page.locator('#wi-height')).toHaveValue('160');
+  expect(await page.evaluate('S._wiCustId')).toBeNull();
+});
+
 test('a Saturday ride takes no group: Add group does not offer it, and a stale pick books nothing', async ({ page }) => {
   // The owner, 2026-10-07: "remove the add group button from saturday and run for her".
   const COMM = '2099-03-07';

@@ -183,8 +183,9 @@ test.describe('@staff:sessions Featured', () => {
   const slotsOf = (p: Record<string, unknown>) => JSON.parse(String(p.bike_slots)) as Record<string, unknown>;
 
   test('the edit form: on for a yoga date, off for a Saturday ride, none on a circuit night; the save writes only a change', async ({ page }) => {
-    // the yoga date as the session form makes it: a plain count of places beside its times
-    const patches = await staffBoot(page, [withSlot(yoga, { _total: 15 }), sat, jcc]);
+    // the yoga date as the session form makes it (_nsSeats): its places in spots, no bike count beside its times. It is edited
+    // by places too (bug hunt 2026-11-18): opened as a bike session with no bikes, every Save was refused with "add bikes".
+    const patches = await staffBoot(page, [yoga, sat, jcc]);
     await page.evaluate(`setStaffTab('sessions');startEditSession('${JCC}')`);
     await expect(page.locator('#sess-edit-form')).toBeVisible();
     await expect(page.locator('#es-feat')).toHaveCount(0);
@@ -202,7 +203,9 @@ test.describe('@staff:sessions Featured', () => {
     await page.locator('#es-feat').uncheck();
     await page.evaluate('_saveSessionEdit()');
     await expect.poll(() => patches.length).toBe(2);
-    expect(slotsOf(patches[1])).toMatchObject({ _time: '16:00 - 17:30', _total: 15, _feat: 0 });
+    expect(slotsOf(patches[1])).toMatchObject({ _time: '16:00 - 17:30', _feat: 0 });
+    expect(patches[1]).toMatchObject({ spots: 15, capacity: 15 });
+    expect('_total' in slotsOf(patches[1])).toBe(false);
     // a Saturday ride: off as made, 1 once switched on
     await page.evaluate(`startEditSession('${SAT}')`);
     await expect(page.locator('#es-feat')).not.toBeChecked();

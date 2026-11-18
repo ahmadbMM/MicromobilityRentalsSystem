@@ -29,7 +29,7 @@ async function boot(page: Page, extra: Record<string, unknown> = {}) {
   await page.setViewportSize({ width: 1280, height: 1000 });
   await stubSupabase(page, {
     sessions: [], queue_entries: [], bikes: [], customers: [], tags, customer_tags: [], community_applications: apps,
-    staff_options: [{ key: 'community.app_rules', items: rules }],
+    staff_options: [{ key: 'community.app_rules', items: rules, updated_at: '2026-09-25T08:00:00Z' }],
     'rpc:staff_community_approve': { ok: true, customer_id: 'cx', existing: true },
     'rpc:staff_community_decide': { ok: true },
     ...extra,
@@ -123,8 +123,11 @@ test('admins customize: default tags and rules, the messages in every language, 
   await set.locator('.ap-rule-new select').nth(3).selectOption('tag_sela');
   await set.getByRole('button', { name: 'Add rule' }).click();
   await expect.poll(() => writes.filter((w) => /staff_options/.test(w.url)).length).toBe(1);
-  const saved = (writes.find((w) => /staff_options/.test(w.url))!.body as { key: string; items: { rules: unknown[] } });
-  expect(saved.key).toBe('community.app_rules');
+  // written over the row as it was read (bug hunt 2026-11-18): an update on its key and its updated_at, not a blind upsert
+  const w0 = writes.find((w) => /staff_options/.test(w.url))!;
+  const saved = w0.body as { items: { rules: unknown[] } };
+  expect(w0.url).toContain('key=eq.community.app_rules');
+  expect(w0.url).toContain('updated_at=eq.');
   expect(saved.items.rules).toHaveLength(3);
   // the messages: the applications' templates, in every language
   await set.getByRole('button', { name: 'Messages', exact: true }).click();

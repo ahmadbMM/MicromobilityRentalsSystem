@@ -52,6 +52,21 @@ test('community: Hide moves the card to Hidden, Unhide brings it back; the Appli
   await expect(page.locator('[data-ca-filter="pending"]')).toHaveText('Pending (1)');
 });
 
+test('Undo of a Hide run after the list reloaded unhides the card on show (bug hunt 2026-11-18)', async ({ page }) => {
+  const writes: { url: string; body: Record<string, unknown> }[] = [];
+  await open(page, 'applications', writes);
+  await page.locator('.ca-row[data-app-id="a1"] .ap-hide').click();
+  await expect(page.locator('[data-ca-filter="hidden"]')).toHaveText('Hidden (2)');
+  await expect.poll(() => writes.length).toBe(1);
+  // the minute's reload: the same rows as new objects, the one kept by the Hide no longer on the list
+  await page.evaluate(`S._caApps=S._caApps.map(a=>({...a}));renderCommunity()`);
+  await page.evaluate('S.undoStack[S.undoStack.length-1].fn()');
+  await expect.poll(() => writes.length).toBe(2);
+  expect(writes[1].body).toEqual({ hidden_at: null, hidden_by: null });
+  await expect(page.locator('[data-ca-filter="hidden"]')).toHaveText('Hidden (1)');
+  await expect(page.locator('[data-ca-filter="pending"]')).toHaveText('Pending (1)');
+});
+
 test('learn to ride: Hide and Unhide the same way', async ({ page }) => {
   const writes: { url: string; body: Record<string, unknown> }[] = [];
   await open(page, 'learning', writes);

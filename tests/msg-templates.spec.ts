@@ -53,6 +53,10 @@ test('with no text of its own a message is the built-in one', async ({ page }) =
   expect(txt).toContain('Saturday Community Ride');
   expect(txt).toContain('Meet up time: *5:45AM*');
   expect(txt).not.toContain('Meet Up Location'); // as before: no meeting point, no lines for it
+  // in Arabic too (bug hunt 2026-11-18): the heading stayed with nothing under it
+  const ar = await page.evaluate(`_rmText(getQueue()[0],'ride','ar')`) as string;
+  expect(ar).toContain('الحجز:');
+  expect(ar).not.toContain('موقع التجمّع');
 });
 
 test('the rider messages come in English and Arabic, an admin\'s Arabic text first', async ({ page }) => {

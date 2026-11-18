@@ -34327,7 +34327,9 @@ const SESS_EDIT_COLS=['day','session_date','capacity','status','bike_slots','add
 // (seats, no fleet). An event opened as a bike session read "add bikes" on every save.
 // Victory Lap as well (bug hunt 2026-10-28): it is seated like an event, and opened as a bike session it
 // showed the fleet picker and every Save was refused with "add bikes". The Arena Heros race the same (2026-10-28).
-function _editSeats(s){const k=_rideKind(s);return _isApprovalRide(s)||k==='event'||_isRace(s)||_isRun(s)||_isBlood(s);}
+// Hatha Yoga too (bug hunt 2026-11-18): the seats form makes it with no approval and no bikes, so it opened as a bike
+// session with none and every Save was refused with "add bikes".
+function _editSeats(s){const k=_rideKind(s);return _isApprovalRide(s)||k==='event'||k==='yoga'||_isRace(s)||_isRun(s)||_isBlood(s);}
 function _sessEditCols(row){const o={};SESS_EDIT_COLS.forEach(k=>{if(row&&k in row)o[k]=row[k];});return o;}
 // A ride's stock name, in any language this page has loaded. Such a title is not a name staff
 // gave the ride: it is the label of whoever saved it, and stored it made a Saturday ride read
@@ -34594,6 +34596,11 @@ async function _saveSessionEdit(){
     // event for each. Offered add-ons go always, so removals stick. What is said about a change is said once it has landed.
     const _patch={day:newDay,session_date:newDate,capacity:total,status:newStatus,bike_slots:JSON.stringify(slots),addons:JSON.stringify(S.editSessAddons||[])},_after=[];
     if(newStatus!=='closed'&&sess.cancelled_at)_patch.cancelled_at=null; // a night called off (Cancel night) and opened again here
+    // Full, no waitlist on a draft or a night waiting on its timer is shown as full at once (bug hunt 2026-11-18), as Full publishes
+    // it (_session_published clears both for open and full only): kept, riders never saw it full, the form came back Closed, and
+    // the timer later opened the night to bookings and its waitlist. Undo puts both back.
+    const _esPub=_esFb&&(_n6sDraft(sess)||_n6sTimed(sess));
+    if(_esPub){if('draft' in sess)_patch.draft=false;if('opens_at' in sess)_patch.opens_at=null;}
     if(!!S.editSessLockers!==(sess.lockers===true))_patch.lockers=!!S.editSessLockers; // Lockers offered (2026-11-09), sent only when it changed
     // The meeting point's name and coordinate (R11) and the ride's status (R10), each sent only when it changed: a database before
     // 20261114000100 refuses the unknown column and _sessPatch writes the rest field by field.
@@ -34695,7 +34702,7 @@ async function _saveSessionEdit(){
       const currentId=newId!==oldId?newId:oldId;
       // What the edit wrote goes back from the snapshot, every column of it; the rest of the row
       // is taken as it is NOW, so a list published or a place taken since the edit stands.
-      const _back=_sessEditCols(_snap);
+      const _back=_sessEditCols(_snap);if(_esPub){if('draft' in _snap)_back.draft=_snap.draft;if('opens_at' in _snap)_back.opens_at=_snap.opens_at;}
       if(newId!==oldId&&_onServer){
         // Back on its own id, or refused if that date has been re-used since. Then what the edit wrote, as for any edit.
         const _um=await sb.rpc('staff_move_session',{p_from:currentId,p_to_id:oldId,p_date:String(prevDate).slice(0,10),p_exact:true});
@@ -35619,11 +35626,33 @@ async function _saveGroupEdit(){
     }
     const took=moving&&m.status==='waitlist';
     if(took)await _addonStockQ(entryAddons(m),-1); // waitlist -> confirmed: the row finally reserves its add-on stock (same rule as promote/reschedule)
-    done.push({m,took});
+    done.push({m,took,patch});
   }
+  // Each member gets back only what the edit changed, over the row as the edit left it (bug hunt 2026-11-18, as the single
+  // booking's Undo): run later (Logs, topbar), the whole old rows put a party checked in since back to waiting with the bikes
+  // still out, and a moved party whose old number another booking had taken came back split. A member not as the edit left
+  // it writes nothing for anyone; an old number taken meanwhile is taken again fresh, as the move itself does.
+  const left=done.map(({m,patch})=>{const p=prev.find(x=>x.id===m.id)||{};
+    return{m,fwd:patch,st:patch.status||m.status,sid:patch.session_id||m.sessionId,paid:!!m.paid,back:Object.fromEntries([...new Set([...Object.keys(patch),'status'])].filter(k=>k in p).map(k=>[k,p[k]]))};});
   pushUndo(`${t('undoEditBooking')} ${gname||primary.groupName||primary.name}`,async()=>{
-    if(_writeErr(await Promise.all(prev.map(p=>sb.from('queue_entries').update(p).eq('id',p.id))),'undo edit')){await loadDataLight();renderStaffQueue();return false;}
-    for(const p of prev)if(moving&&p.status==='waitlist')await _addonStockQ(entryAddons(members.find(m=>m.id===p.id)||{}),1); // back to waitlist = release what the move consumed
+    const fr=await sb.from('queue_entries').select('id,status,session_id,paid').in('id',left.map(x=>x.m.id));
+    if(!fr||fr.error){toast(t('errConnection'),'error');return false;}
+    const now=new Map((fr.data||[]).map(x=>[x.id,x]));
+    if(left.some(x=>{const r=now.get(x.m.id);return !r||r.status!==x.st||r.session_id!==x.sid||!!r.paid!==x.paid;})){toast(t('errChangedElsewhere'),'warning');await loadDataLight();renderStaffQueue();return false;}
+    const undone=[];
+    for(const x of left){
+      const go=()=>sb.from('queue_entries').update(x.back).eq('id',x.m.id).eq('status',x.st).eq('session_id',x.sid).eq('paid',x.paid).select('id');
+      let ur=await go();
+      if(moving&&ur&&ur.error&&(String(ur.error.code||ur.error.message).includes('23505')||/duplicate|unique/i.test(ur.error.message||''))){await loadDataLight();x.back.queue_num=nextQNum(x.back.session_id);ur=await go();}
+      const bad=_writeErr(ur,'undo edit');
+      if(bad||!(ur.data||[]).length){
+        if(!bad)toast(t('errChangedElsewhere'),'warning');
+        if(undone.length)await Promise.all(undone.map(u=>sb.from('queue_entries').update(u.fwd).eq('id',u.m.id))).catch(()=>{}); // fire-and-forget: the party stays together as edited; the reload below shows what stands
+        await loadDataLight();renderStaffQueue();return false;
+      }
+      undone.push(x);
+    }
+    for(const x of left)if(moving&&x.back.status==='waitlist')await _addonStockQ(entryAddons(x.m),1); // back to waitlist = release what the move consumed
     await loadDataLight();renderStaffQueue();
   });
   closeGroupEditModal();
@@ -37092,15 +37121,27 @@ async function _caApplyRules(){
 // device, so two quick taps both land too.
 let _caCfgQ=Promise.resolve();
 function _caCfgWrite(change){const p=_caCfgQ.then(()=>_caCfgPut(change));_caCfgQ=p.catch(()=>{});return p;}
+// Written over the row as it was read (bug hunt 2026-11-18, as _bdMarkDo): the plain upsert let a second admin's write, made from
+// the same read, replace the first one's rule or tag. A row that moved on meanwhile is read again and the change applied to it.
 async function _caCfgPut(change){
   if(!isAdmin())return false;
-  let r;try{r=await sb.from('staff_options').select('items').eq('key',CA_RULES_KEY).maybeSingle();}catch(e){r={error:e};}
-  if(_writeErr(r,'options')){renderCommunity();return false;}
-  const fresh=r.data?r.data.items:null;
-  if(r.data)S.staffOptions={...(S.staffOptions||{}),[CA_RULES_KEY]:fresh};
-  const ok=await _optWrite(CA_RULES_KEY,change(_caCfg(fresh)));
-  if(ok){logAction(t('apRulesSaved'));toast(t('apRulesSaved'),'success');}
-  renderCommunity();return ok;
+  let next=null;
+  for(let tries=0;tries<3&&next===null;tries++){
+    let r;try{r=await sb.from('staff_options').select('items,updated_at').eq('key',CA_RULES_KEY).maybeSingle();}catch(e){r={error:e};}
+    if(_writeErr(r,'options')){renderCommunity();return false;}
+    const fresh=r.data?r.data.items:null;
+    if(r.data)S.staffOptions={...(S.staffOptions||{}),[CA_RULES_KEY]:fresh};
+    const n=change(_caCfg(fresh)),at=new Date().toISOString();
+    let w;try{w=r.data?await sb.from('staff_options').update({items:n,updated_at:at}).eq('key',CA_RULES_KEY).eq('updated_at',r.data.updated_at).select('key')
+      :await sb.from('staff_options').insert({key:CA_RULES_KEY,items:n,updated_at:at}).select('key');}catch(e){w={error:e};}
+    if(w.error&&!r.data&&String(w.error.code)==='23505')continue; // another admin made the row first: read theirs
+    if(_writeErr(w,'options')){renderCommunity();return false;}
+    if(Array.isArray(w.data)&&w.data.length)next=n; // no row answered: it moved on since the read
+  }
+  if(next===null){toast(t('errConnection'),'error');renderCommunity();return false;} // moved on every time: said, never dropped quietly
+  S.staffOptions={...(S.staffOptions||{}),[CA_RULES_KEY]:next};
+  logAction(t('apRulesSaved'));toast(t('apRulesSaved'),'success');
+  renderCommunity();return true;
 }
 // The tap's meaning (on or off, as this screen showed it) goes onto the fresh row: a tag another admin set meanwhile is not flipped back.
 function _caDefTagToggle(tid){const on=!_caCfg().defaultTags.includes(tid);_caCfgWrite(c=>({...c,defaultTags:on?(c.defaultTags.includes(tid)?c.defaultTags:[...c.defaultTags,tid]):c.defaultTags.filter(x=>x!==tid)}));}
@@ -37458,7 +37499,9 @@ async function _apHide(k,id,on){
   if(S[k==='la'?'_laNoHide':'_caNoHide']){toast(t('auNoDb'),'warning');return;}
   if(!(await _apHidePut(k,a,on)))return;
   const msg=t(on?'apHiddenToast':'apUnhiddenToast').replace('{0}',k==='la'?_laWho(a):a.name||'');
-  pushUndo(msg,async()=>{if(!(await _apHidePut(k,a,!on)))return false;});
+  // The row as the list holds it when Undo runs (bug hunt 2026-11-18, as _laUndoTo): a reload meanwhile replaced the one kept
+  // above, and the undo wrote the database but left the card as it was.
+  pushUndo(msg,async()=>{const cur=(k==='la'?_laFind:_caFind)(id)||a;if(!!cur.hidden_at===!on)return;if(!(await _apHidePut(k,cur,!on)))return false;});
   toast(msg,'success');
 }
 function _appIn(k,a,tests){
@@ -38378,8 +38421,10 @@ function _laRow(a){
   const learners=_laLearners(a);
   const acct=a.customer_id?_laAcctOf(a):(a.status==='pending'?_caAcct(a):null);
   const acctLink=acct?`<button type="button" class="ca-link" data-on-click="${_on("showEditCustomerModal",acct.id)}">${esc(acct.name||acct.email||acct.id)}</button>`:'';
+  // A sign-up not yet scheduled has no existing_account (customer_learn_apply leaves it null; bug hunt 2026-11-18): its account is
+  // named plainly (caHasAccount below), never "New account made" for an account the rider may have had for months.
   const note=_laGone(a)?`<div class="ca-acct">${t('laAcctGone')}</div>`
-    :a.customer_id?`<div class="ca-acct">${a.existing_account?t('laUsedExisting'):t('caMadeNew')}${acctLink?' · '+acctLink:''}</div>`
+    :a.customer_id&&a.existing_account!=null?`<div class="ca-acct">${a.existing_account?t('laUsedExisting'):t('caMadeNew')}${acctLink?' · '+acctLink:''}</div>`
     :acct?`<div class="ca-acct">${t('caHasAccount').replace('{0}',acctLink)}</div>`:'';
   const lesson=a.lesson_at&&(a.status==='scheduled'||a.status==='done')
     ?`<div class="la-lesson">${esc(t('laLesson').replace('{0}',fmtStamp(a.lesson_at)+(a.lesson_place?' · '+a.lesson_place:'')))}</div>`:'';
@@ -39008,6 +39053,10 @@ ${RM_E.phone} *+966 56 666 8818*
 كلٌّ منا مسؤول ليس عن سلامته فقط، بل عن سلامة من يركب بجانبه وخلفه أيضاً. وقد يؤدي تكرار السلوك المتهوّر أو العدائي أو غير الآمن إلى مطالبة الراكب بمغادرة الجولة أو عدم المشاركة في الجولات الجماعية القادمة.
 
 لنواصل الاستمتاع بجولات قوية وتنافسية، ولكن بانضباط وتواصل واحترام وحسن تقدير. لا نتيجة ولا انطلاقة سريعة ولا مقطع ولا رقم شخصي يستحق أن يتسبّب في حادث. اركبوا بأمان واعتنوا ببعضكم. ${RM_E.biker1}${RM_E.biker2}`;
+// No meeting point: its heading goes too (bug hunt 2026-11-18). _tplFill drops only the line with the empty link, and the heading
+// on the line above ("موقع التجمّع:", or an admin's own) stayed with nothing under it. The heading is a line ending in a colon
+// just above a line that is only {meet_link}.
+function _rmNoLoc(src,loc){return loc?src:String(src).replace(/[^\n]*:[ \t]*\n([ \t]*\{meet_link\}[ \t]*(?:\n|$))/g,'$1');}
 // The ride details: "3rd of October", "5:45AM" (in Arabic: "3 أكتوبر", "5:45 ص"). A line whose value the session lacks is left out.
 function _rmRideText(sess,lang){
   const ds=String((sess&&(sess.session_date||sess.id))||''),dm=/^(\d{4})-(\d{2})-(\d{2})$/.exec(ds);
@@ -39022,9 +39071,9 @@ function _rmRideText(sess,lang){
     if(dm){try{dayAr=new Intl.DateTimeFormat('ar-SA-u-nu-latn-ca-gregory',{day:'numeric',month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(+dm[1],+dm[2]-1,+dm[3],12)));}catch(_){}}
     const tmAr=x=>{const m=/^(\d{1,2}):(\d{2})$/.exec(x);if(!m)return x;const h=+m[1];return`${h%12||12}:${m[2]} ${h<12?'ص':'م'}`;};
     const v={beg_km:String(_rgKm(sess,'beg')),int_km:String(_rgKm(sess,'int')),date:dayAr,meet_time:meet?tmAr(meet):'',start_time:start?tmAr(start):'',meet_link:loc||'',booking_link:CA_SITE+'/',breakfast:_hasBreakfast(sess)?'*الإفطار بعد الجولة*':''};
-    return _tplUse('rm_ride','ar',v)??_tplFill(RM_RIDE_AR,v);
+    return _tplFill(_rmNoLoc(_tplOver('rm_ride','ar')??RM_RIDE_AR,loc),v);
   }
-  const own=_tplUse('rm_ride',lang||'en',{beg_km:String(_rgKm(sess,'beg')),int_km:String(_rgKm(sess,'int')),date:day,meet_time:meet?tm(meet):'',start_time:start?tm(start):'',meet_link:loc||'',booking_link:CA_SITE+'/',breakfast:_hasBreakfast(sess)?'*Breakfast after the ride*':''});
+  const _ownT=_tplOver('rm_ride',lang||'en')??_tplOver('rm_ride','en'),own=_ownT==null?null:_tplFill(_rmNoLoc(_ownT,loc),{beg_km:String(_rgKm(sess,'beg')),int_km:String(_rgKm(sess,'int')),date:day,meet_time:meet?tm(meet):'',start_time:start?tm(start):'',meet_link:loc||'',booking_link:CA_SITE+'/',breakfast:_hasBreakfast(sess)?'*Breakfast after the ride*':''});
   if(own!=null)return own;
   const L=[`MicroMobility’s Saturday Community Ride ${RM_E.bike} *${day}*`,''];
   if(meet)L.push(`Meet up time: *${tm(meet)}*`);
@@ -39077,7 +39126,7 @@ function _rmRender(){
       <textarea id="rm-msg-text" class="ca-msg" readonly dir="${lang==='ar'?'rtl':'ltr'}" aria-label="${esc(t(kind[1]))}">${esc(txt)}</textarea>
       <div class="ca-actions">
         <button type="button" class="btn-primary rm-copy" data-on-click="${_on("_rmCopy")}">${t('caCopyBtn')}</button>
-        <a class="btn-secondary rm-wa" data-wa-t="${esc(m.k)}" data-wa-b="${esc(e.id)}" href="${esc(wa)}" target="_blank" rel="noopener noreferrer">${t('caWaBtn')}</a>
+        <a class="btn-secondary rm-wa" data-wa-t="${esc(RM_TPL_ID[m.k]||m.k)}" data-wa-b="${esc(e.id)}" href="${esc(wa)}" target="_blank" rel="noopener noreferrer">${t('caWaBtn')}</a>
         <button type="button" class="btn-secondary rm-back" data-on-click="${_on("_rmPick",'')}">${t('regBackBtn')}</button>
       </div>`;
   }
@@ -39409,7 +39458,9 @@ function _annPlace(s,L){
   const nm=(L==='ar'&&s.meet_name_ar)||s.meet_name;if(nm)return String(nm);
   const loc=String(s.location||'').trim();
   if(loc==='JCC'||(!loc&&_annCirc(s)))return ANN_NAME[L].jcc;
-  return loc&&_own(VENUE_KEY,loc)?t(VENUE_KEY[loc]):loc;
+  // The venue in the message's language, not the desk's (bug hunt 2026-11-18, as _waRiderMsg): t() reads the desk's.
+  const Lp=LANG[L==='ar'?'ar':'en']||LANG.en;
+  return loc&&_own(VENUE_KEY,loc)?(Lp[VENUE_KEY[loc]]||LANG.en[VENUE_KEY[loc]]||loc):loc;
 }
 function _annLink(s){
   const u=_safeUrl(s.meet_url);if(u)return u;
@@ -40490,7 +40541,10 @@ function _custPool(q,n){
   return hits.slice(0,n||8);
 }
 function _wiCustMatches(q){return _custPool(q,8);}
-function _wiNameInput(v){S._wiCustId=null;if(S._wiAuto&&S._wiAuto.type&&S._wiType===S._wiAuto.type)_wiSetType('');_sugHold('wi-suggest');_debRender('wi',()=>_wiRenderSuggest(v));}
+// A retyped name, or the name used as typed, lets go of the picked account and what it filled in (bug hunt 2026-11-18): its phone
+// stayed in the box, and the booking found that account by the number and was made on it. A box staff typed into keeps it.
+function _wiUnpick(){const A=S._wiAuto||{};if(A.type&&S._wiType===A.type)_wiSetType('');[['wi-phone','phone'],['wi-height','height']].forEach(([i,k])=>{const el=document.getElementById(i);if(el&&A[k]&&el.value===A[k])el.value='';});S._wiAuto={};}
+function _wiNameInput(v){S._wiCustId=null;_wiUnpick();_sugHold('wi-suggest');_debRender('wi',()=>_wiRenderSuggest(v));}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__wiRenderSuggest_1(event,el){event.preventDefault()}
 function _on__wiRenderSuggest_2(event,el){event.preventDefault()}
@@ -40528,7 +40582,7 @@ function _wiPickCust(id){
   else _wiStockHint(); // the height just filled changes the size on the rack
   document.getElementById('wi-phone')?.focus();
 }
-function _wiUseTyped(){S._wiCustId=null;_wiHideSuggest();document.getElementById('wi-phone')?.focus();}
+function _wiUseTyped(){S._wiCustId=null;_wiUnpick();_wiHideSuggest();document.getElementById('wi-phone')?.focus();}
 function _wiNameKey(e){
   if(e.key==='Enter'){e.preventDefault();_debFlush('wi');const acc=document.querySelector('#wi-suggest .mw-sug:not(.wi-sug-new)');const first=document.querySelector('#wi-suggest .mw-sug');(acc&&document.querySelectorAll('#wi-suggest .mw-sug:not(.wi-sug-new)').length===1?acc:first)?.click();}
   else if(e.key==='Escape'){e.stopPropagation();_wiHideSuggest();}
@@ -40642,7 +40696,7 @@ function saveWalkin(){return _busyRun('walkin',_saveWalkin);}
 // as steps), where it used to be the walk-in form, then a search for the row, then the modal.
 function saveWalkinCheckin(){return _busyRun('walkin',()=>_saveWalkin(true));} // the ask rides with this run: a second tap while it saves no longer clears a shared flag (bug hunt 2026-11-11)
 // One rider, one dialog (round s10, item 9): added and checked in with the payment picked in the form.
-function saveWalkinOne(){S._wiOne=true;return _busyRun('walkin',()=>_saveWalkin(true)).finally(()=>{S._wiOne=false;});}
+function saveWalkinOne(){return _busyRun('walkin',()=>_saveWalkin(true,true));} // the one dialog rides with this run too (bug hunt 2026-11-18): a second tap's finally cleared the shared flag mid-save
 // The check-in the drawer's Confirm makes (_confirmCheckinRun: the type's fare, on the house through its door, the desk
 // outbox, the log and Undo), run without drawing the drawer. What still needs asking (a deposit, a group, a refusal) opens
 // the drawer on this rider with the question, as the two-step way does.
@@ -40653,7 +40707,7 @@ async function _wiCiOne(id,pay){
   const m=document.getElementById('checkin-modal');
   if(S._ciId===id&&!(m&&m.innerHTML))renderCheckinModal();
 }
-async function _saveWalkin(thenCi){
+async function _saveWalkin(thenCi,one){
   _wiSync();
   const name=_titleCaseName(_nameClean(document.getElementById('wi-name')?.value||'')); // the box also searches by phone, so it is not filtered as typed
   if(!name){const i=document.getElementById('wi-name');if(i){_fieldErr(i,t('errFieldRequired'));i.focus();}return;}
@@ -40691,7 +40745,7 @@ async function _saveWalkin(thenCi){
     entries=await _wiInsertRiders(sessId,riders,phone,S._wiCustId,()=>saveWalkin(),S._wiRg); // modal is still up, so a retry re-reads the same form
     if(!entries){S._wiTried=_wiAttempted;return;}
   }
-  const _pay=S._wiPay,_one=S._wiOne&&entries.length===1,_bn=S._wiBnw;
+  const _pay=S._wiPay,_one=one===true&&entries.length===1,_bn=S._wiBnw;
   closeWalkinModal();
   const _thenCi=thenCi===true&&entries[0]&&entries[0].id;
   logAction(`${t(_bn?'bnwMenu':'addWalkinBtn')}: #${entries[0].queueNum} ${name}${entries.length>1?` +${entries.length-1}`:''}`);
@@ -40998,6 +41052,7 @@ function _koConfirm(){
     K.err=t('kioskLast4Wrong');_koRender();return;
   }
   _koHit(c.id);
+  K.isNew=false;K.dup=false; // an account found and confirmed leaves New account behind (bug hunt 2026-11-18): its details step drew the new account's boxes again and every Continue said the number was taken
   K.acct={id:c.id,name:c.name||'',email:c.email||'',phone:c.phone||'',height:c.height||null,type:c.type_preference||'',nationality:c.nationality||'',birth:c.birth_date||''};
   K.D.height=K.acct.height?String(K.acct.height):'';K.D.type=K.acct.type;
   K.busy=true;K.err='';_koRender();
@@ -41425,6 +41480,14 @@ async function _saveBookingEdit(){
   // off its ride and back by Undo came back without its group (2026-10-07).
   if('ride_group' in patch)prev.ride_group=e.rideGroup||null;
   if('run_km' in patch)prev.run_km=e.runKm||null;
+  // A type full on the ride is asked about before anything is written (bug hunt 2026-11-18), as the walk-in asks (_wiInsertRiders):
+  // asked at the first added rider, after the booking's own edit had landed, Pick another type closed the form and the riders typed
+  // in were gone. The answer rides with the inserts below (cap): asked once, not again per rider.
+  const _soloAppr=x=>_isApprovalRide(x)&&!_isFarm(x),cap={};
+  if(_nr.length&&_nrS&&!_soloAppr(_nrS)&&!_soloAppr(_sessDisp(e.sessionId))&&!_noGroupAdd(_nrS)){
+    const _aw=_sessFull(_nrS)||spotsLeft(toSessionId)<_nr.filter(r=>!r.wl).length+(toSessionId!==e.sessionId?1:0);
+    if(!await _capPre(_nr.map(r=>({session_id:toSessionId,type_preference:_noCarbon(_nrS)&&r.type==='Road Carbon'?'Any':r.type,status:(r.wl||_aw)?'waitlist':'waiting'})),cap))return;
+  }
   const moving=toSessionId!==e.sessionId;let offBike=null,offAt=null,offBy=null;
   if(moving){
     const newSess=_sessDisp(toSessionId);if(!newSess)return;
@@ -41455,7 +41518,6 @@ async function _saveBookingEdit(){
   // Saturday rule: one rider per customer. Community bookings never take added riders —
   // the modal hides the rows, and this guards any stale/scripted path (incl. moving into one).
   // The Farm House Night is the exception: a family on one booking, as its members book it (2026-11-13).
-  const _soloAppr=x=>_isApprovalRide(x)&&!_isFarm(x);
   if(newRiders.length&&(_soloAppr(_sessDisp(toSessionId))||_soloAppr(_sessDisp(e.sessionId)))){
     toast(t('commSoloOnly'),'warning');newRiders=[];S._beNewRiders=[];
   }
@@ -41493,7 +41555,7 @@ async function _saveBookingEdit(){
     const _seated=newRiders.filter(r=>!r.wl).length;
     const autoWl=_sessFull(sessT)||spotsLeft(toSessionId)<_seated+(moving?1:0);
     let qn=nextQNum(toSessionId)+(moving?1:0); // when moving, the edited entry already took the next number
-    let _wln=nextWlNum(toSessionId);const cap={}; // a type full on the ride: asked once for the riders added (2026-11-11)
+    let _wln=nextWlNum(toSessionId); // a type full on the ride: asked once for the riders added (2026-11-11), before the edit was written (cap, above)
     for(const r of newRiders){
       const rStatus=(r.wl||autoWl)?'waitlist':'waiting';
       const ent=_applyDefaultPay({id:uid(),name:r.name,email:e.email||'',phone,size:r.height?heightToSize(r.height,r.type):'',height:r.height,waitlistNum:rStatus==='waitlist'?_wln++:null,
@@ -41559,9 +41621,13 @@ async function _saveBookingEdit(){
     if(parkedRows.length)await Promise.all(parkedRows.map(x=>sb.from('desk_waitlist').delete().eq('id',x))).catch(()=>{}); // ...and off the Staff List with them (fire-and-forget: the undo's clean-up)
     await loadDataLight();renderStaffQueue();
   });
+  // Riders it could not add are not dropped (bug hunt 2026-11-18): what landed stays, with its Undo, and the form opens again on
+  // the booking with those riders in it, the refusal said above (Pick another type: the form again, as _qIns promises).
+  const _beLeft=inserted.length<newRiders.length?newRiders.slice(inserted.length).map(r=>(S._beNewRiders||[])[r.i]).filter(Boolean):[];
   closeBookingEditModal();
   logAction(`${t('editBookingTitle')}: #${prev.queue_num} ${prev.name}${moving?` → ${shortDate(patch.session_date)}`:''}${inserted.length?` · +${inserted.length} ${t('beRidersAdded')}`:''}`);
   await loadDataLight();
+  if(_beLeft.length){renderStaffQueue();showBookingEditModal(id);if(S._beId===id){S._beNewRiders=_beLeft;showBookingEditModal(id);}return;}
   toast(t('toastBookingUpdated'));
   S._flashId=id;S._flashColor='green';setTimeout(()=>{S._flashId=null;},800);
   renderStaffQueue();
@@ -41931,9 +41997,12 @@ function _wkSessions(sun){const sat=_ssPlus(sun,6);return(S.sessions||[]).filter
 const WK_CHEV='<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 // One session's card, as the row drew it (2026-11-10: four short lines); in the week its day is the column's heading, so the
 // card's time line starts with the time.
+// The bookings a registration on the night's form holds (matched_entry_id): the Bookings roster leaves them out, handled on the
+// company tiles, so the counts beside it leave them out too (bug hunt 2026-11-18): the tile said 14 waiting over a list of 6.
+function _pmBookedIds(){return new Set((S.riders||[]).map(r=>r.matched_entry_id).filter(Boolean));}
 function _sessChipHtml(s){
-    const q=(_qBySession().get(s.id)||[]).slice();
-    const sWait=q.filter(e=>e.status==='waiting').length;
+    const q=(_qBySession().get(s.id)||[]).slice(),_pmB=_pmBookedIds();
+    const sWait=q.filter(e=>e.status==='waiting'&&!_pmB.has(e.id)).length;
     const sActive=q.filter(e=>e.status==='active').length;
     const sDone=q.filter(e=>e.status==='done').length;
     const cap=_isApprovalRide(s)?(s.spots||s.capacity||12):Math.max(0,(s.capacity||12)-_n6rOutN(s)); // bikes out of service hold no place, as in spotsLeft and the picker (bug hunt 2026-11-11)
@@ -42037,10 +42106,11 @@ function _sessStripHtml(){
     .sort(_sessOrder);
   const _pmSid=_pmStripNight(openSess);
   const grid=`<div class="wk-grid sess-bar-desktop">${w.days.map(x=>`<div class="wk-day${x.d===td?' wk-today':''}${x.d<td?' wk-past':''}" role="group" aria-label="${esc(_wkDl(x))}">${_wkDh(x,td)}${x.list.length?x.list.map(_sessChipHtml).join(''):`<div class="wk-none">${esc(t('wkNone'))}</div>`}</div>`).join('')}</div>`;
+  const _pmBk=_pmBookedIds(); // the waiting counts below, as the roster counts
   const dropdownOpts=`<option value="all"${S.queueView!=='petromin'&&S.sfSession==='all'?' selected':''}>${t('allSessions')}</option>`+
     openSess.map(s=>{
       const q=(_qBySession().get(s.id)||[]).slice();
-      const sWait=q.filter(e=>e.status==='waiting').length;
+      const sWait=q.filter(e=>e.status==='waiting'&&!_pmBk.has(e.id)).length;
       const label=`${esc(_sessLabel(s))} — ${sWait} ${t('waitingStat').toLowerCase()}`;
       return`<option value="${esc(s.id)}"${S.queueView!=='petromin'&&S.sfSession===s.id?' selected':''}>${label}</option>`+(_rideKind(s)==='petromin'?_pmOptHtml(s.id):'');
     }).join('')+(_pmSid&&!openSess.some(s=>s.id===_pmSid)?_pmOptHtml(_pmSid):'')
@@ -42052,6 +42122,7 @@ function _sessStripHtml(){
     // Past and closed nights too (2026-10-03): on a phone this is the roster's only ride picker (the
     // filter bar's own Session select is hidden there), so a past night must still be reachable.
     +(()=>{const _open=new Set(openSess.map(s=>s.id));const past=allSessions().filter(s=>s.status!=='deleted'&&!_open.has(s.id)&&!(_fd&&_isApprovalRide(s))).sort(_sessOrder).slice(0,60);
+      {const c=S.sfSession!=='all'&&!_open.has(S.sfSession)&&!past.some(s=>s.id===S.sfSession)?_sessGet(S.sfSession):null;if(c&&c.status!=='deleted'&&!(_fd&&_isApprovalRide(c)))past.push(c);} // the night on show, older than these 60 (bug hunt 2026-11-18): left out, the picker read All sessions and picking All did nothing
       return past.length?`<optgroup label="${esc(t('statusClosed'))}">${past.map(s=>`<option value="${esc(s.id)}"${S.queueView!=='petromin'&&S.sfSession===s.id?' selected':''}>${esc(_sessLabel(s))}</option>`).join('')}</optgroup>`:'';})();
 
   return`<div id="sess-strip" class="wk-strip" role="region" aria-label="${esc(t('wkLabel'))}">${_wkHeadHtml(w)}${grid}
@@ -42421,7 +42492,7 @@ function renderStaffQueue(_resultsOnly){
   // their booking stays off this roster (asked for 2026-09-22). Knowing which they are needs the
   // registrations, so a night that has them loads them here too.
   if(!S.ridersLoaded&&_pmNights().length)_pmEnsureRiders(); // at most once a minute, and no repaint after a failed load (2026-10-05)
-  const _pmBooked=new Set((S.riders||[]).map(r=>r.matched_entry_id).filter(Boolean));
+  const _pmBooked=_pmBookedIds();
   const base=(S.sfSession!=='all'
     ?queue.filter(e=>e.sessionId===S.sfSession&&e.status!=='removed'&&e.status!=='cancelled')
     :queue.filter(e=>e.status!=='removed'&&e.status!=='cancelled'))
@@ -42640,7 +42711,7 @@ function renderStaffQueue(_resultsOnly){
   const livePosMap={};
   // Places in line, for the sessions on screen only: through the per-session index, not a sort of
   // every waiting row on every night.
-  const allWaiting=[];{const _qbs=_qBySession();new Set(filtered.map(e=>e.sessionId)).forEach(sid=>(_qbs.get(sid)||[]).forEach(e=>{if(e.status==='waiting')allWaiting.push(e);}));}
+  const allWaiting=[];{const _qbs=_qBySession();new Set(filtered.map(e=>e.sessionId)).forEach(sid=>(_qbs.get(sid)||[]).forEach(e=>{if(e.status==='waiting'&&!_pmBooked.has(e.id))allWaiting.push(e);}));} // a registrant's booking is off this roster, and out of its places
   allWaiting.sort((a,b)=>a.sessionId.localeCompare(b.sessionId)||a.queueNum-b.queueNum);
   const sessPosCounter={};
   const seenBookings=new Set();

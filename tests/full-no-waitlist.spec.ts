@@ -215,6 +215,20 @@ test.describe('@staff:full-no-waitlist the Sessions controls', () => {
     expect(slotsOf(l[1])._fbk).toBeUndefined();
   });
 
+  test('on a night waiting on its timer it shows the night full at once, and Undo puts the timer back (bug hunt 2026-11-18)', async ({ page }) => {
+    // kept, the timer later opened the night to bookings and its waitlist, and riders never saw it full meanwhile
+    const opens = '2099-03-05T17:00:00.000Z';
+    await staff(page, [ride({ status: 'closed', draft: false, opens_at: opens })]);
+    const l = patches(page);
+    await page.evaluate(`startEditSession('${D1}-s');S.editSessStatus='fbk';_saveSessionEdit()`);
+    await expect.poll(() => l.length).toBeGreaterThan(0);
+    expect(l[0]).toMatchObject({ status: 'closed', draft: false, opens_at: null });
+    expect(slotsOf(l[0])._fbk).toBe(1);
+    await page.evaluate('S.undoStack[S.undoStack.length-1].fn()');
+    await expect.poll(() => l.length).toBeGreaterThan(1);
+    expect(l[1]).toMatchObject({ status: 'closed', draft: false, opens_at: opens });
+  });
+
   test('a copied week starts closed and unseen, never full', async ({ page }) => {
     const fb = ride({ status: 'closed', bike_slots: '{"_time":"05:30 - 06:00","_fbk":1}' });
     await staff(page, [fb]);

@@ -51,6 +51,7 @@ test('a Saturday booking opens its three messages, ride details read off the ses
   expect(txt).toContain(MEET);
   expect(txt).toContain('https://experiences.micromobility.sa/');
   const wa = await box.locator('a.rm-wa').getAttribute('href');
+  await expect(box.locator('a.rm-wa')).toHaveAttribute('data-wa-t', 'rm_ride'); // the template's id: the shared log names it (bug hunt 2026-11-18)
   expect(wa).toMatch(/^https:\/\/wa\.me\/966550000009\?text=/);
   expect(decodeURIComponent(wa!.split('text=')[1])).toBe(txt);
 

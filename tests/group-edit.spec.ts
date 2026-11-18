@@ -52,3 +52,50 @@ test('group edit modal updates group info and every member', async ({ page }) =>
   expect(patches.e2.name).toBe('Ali');
   expect(patches.e1.name).toBe('Tamer Group 1'); // untouched fields stay as they were
 });
+
+// Undo writes back only what the edit changed, and only over rows still as the edit left them (bug hunt 2026-11-18, as
+// the single booking's Undo): run later from the Log, the whole old rows put a party checked in since back to waiting
+// with the bikes still out.
+test('group edit undo puts back only the changed fields, and nothing once a member was checked in since', async ({ page }) => {
+  const sessions = [{ id: 's0', day: 'Friday', session_date: '2099-02-10', capacity: 12, status: 'open', created_at: 1 }];
+  const row = (id: string, qn: number, name: string): Record<string, unknown> => ({
+    id, session_id: 's0', session_day: 'Friday', session_date: '2099-02-10', queue_num: qn, name,
+    phone: '0512345678', customer_id: null, type_preference: 'Road', status: 'waiting', paid: false,
+    price: 30, registered_at: '2099-01-01T10:00:00Z', group_id: 'g1', group_name: 'Tamer Group',
+  });
+  const queue_entries = [row('e1', 1, 'Tamer Group 1'), row('e2', 2, 'Tamer Group 2')];
+  await stubSupabase(page, { sessions, queue_entries });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.evaluate(`showGroupEditModal('e1')`);
+  const modal = page.locator('#group-edit-modal');
+  await expect(modal.locator('#ge-gname')).toHaveValue('Tamer Group');
+  await page.waitForFunction(() => { const m = document.getElementById('group-edit-modal'); return !!m && m.contains(document.activeElement); });
+  await modal.locator('#ge-gname').fill('Falcons');
+  const patches: { url: string; body: Record<string, unknown> }[] = [];
+  page.on('request', (r) => {
+    if (r.method() === 'PATCH' && r.url().includes('/rest/v1/queue_entries')) patches.push({ url: decodeURIComponent(r.url()), body: r.postDataJSON() });
+  });
+  await modal.getByRole('button', { name: /Save/ }).click();
+  await expect(modal).toBeHidden();
+  await expect.poll(() => patches.length).toBe(2);
+  await page.evaluate(`S.undoStack[S.undoStack.length-1].fn()`);
+  await expect.poll(() => patches.length).toBe(4);
+  for (const p of patches.slice(2)) {
+    expect(p.url).toContain('status=eq.waiting');
+    expect(p.url).toContain('session_id=eq.s0');
+    expect(p.body.group_name).toBe('Tamer Group');
+    for (const k of ['queue_num', 'session_id', 'session_date', 'price']) expect(k in p.body).toBe(false);
+  }
+  // again, with one member checked in since: nothing is written for anyone
+  await page.evaluate(`showGroupEditModal('e1')`);
+  await page.waitForFunction(() => { const m = document.getElementById('group-edit-modal'); return !!m && m.contains(document.activeElement); });
+  await modal.locator('#ge-gname').fill('Hawks');
+  await modal.getByRole('button', { name: /Save/ }).click();
+  await expect(modal).toBeHidden();
+  await expect.poll(() => patches.length).toBe(6);
+  queue_entries[0].status = 'active';
+  expect(await page.evaluate(`S.undoStack[S.undoStack.length-1].fn()`)).toBe(false);
+  expect(patches.length).toBe(6);
+});

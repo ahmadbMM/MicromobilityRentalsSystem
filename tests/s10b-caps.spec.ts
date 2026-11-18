@@ -181,6 +181,33 @@ test.describe('@staff:walk-in a bike type whose places are all taken', () => {
     expect(sent[1].cap).toBe('ok');
   });
 
+  test('a rider added in the booking editor is asked about before the booking is written (bug hunt 2026-11-18)', async ({ page }) => {
+    // asked at the insert, after the booking's own edit had landed, Pick another type closed the form and the rider was gone
+    await desk(page);
+    const sent = inserts(page);
+    const edits: string[] = [];
+    page.on('request', (r: Request) => { if (r.method() === 'PATCH' && /\/rest\/v1\/queue_entries/.test(r.url())) edits.push(r.url()); });
+    await page.evaluate(`showBookingEditModal('h1');_beAddRider()`);
+    const m = page.locator('#booking-edit-modal');
+    await m.locator('#be-nr-name-0').fill('Family One');
+    await m.locator('#be-nr-type-0').selectOption('Road');
+    await page.evaluate('saveBookingEdit();0');
+    const box = page.locator('#confirm-modal .confirm-box');
+    await expect(box).toContainText('Road is full (2 of 2). Add anyway?');
+    await box.getByRole('button', { name: 'Pick another type' }).click();
+    await expect(box).toHaveCount(0);
+    await expect(m.locator('#be-nr-name-0')).toHaveValue('Family One');
+    expect(edits).toEqual([]);
+    expect(sent.length).toBe(0);
+    // asked again on Save, Add anyway: the booking, then the rider with the override, and no second question
+    await page.evaluate('saveBookingEdit();0');
+    await box.getByRole('button', { name: 'Add anyway' }).click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(edits.length).toBe(1);
+    expect(sent[0].cap).toBe('ok');
+    expect((sent[0].body as Record<string, unknown>).type_preference).toBe('Road');
+  });
+
   test('a ride that counts no type adds with no question and no override', async ({ page }) => {
     await desk(page);
     const sent = inserts(page);

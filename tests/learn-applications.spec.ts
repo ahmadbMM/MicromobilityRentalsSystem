@@ -235,6 +235,14 @@ test.describe('@staff:community learn to ride', () => {
 
   // How they heard of us (the owner, 2026-09-28: asked by this form and the community one, no longer
   // by the booking app's sign-up), in the staff member's language; nothing when there is no answer.
+  test('a sign-up made from the rider\'s own account, not yet scheduled, names it and never says New account made (bug hunt 2026-11-18)', async ({ page }) => {
+    // customer_learn_apply sets customer_id and leaves existing_account null until the first staff_learn_schedule
+    await learnTab(page, { learn_applications: learners.map((l) => (l.id === 'l2' ? { ...l, customer_id: 'c1' } : l)) });
+    const s = row(page, 'l2');
+    await expect(s.locator('.ca-acct')).toContainText('Already has an account: Huda Al Saleh');
+    await expect(s.locator('.ca-acct')).not.toContainText('New account made');
+  });
+
   test('the card shows how the applicant heard of us', async ({ page }) => {
     await learnTab(page, { learn_applications: learners.map((l) => (l.id === 'l1' ? { ...l, heard_from: 'friend' } : l)) });
     await expect(row(page, 'l1')).toContainText('How did you hear about us?');
