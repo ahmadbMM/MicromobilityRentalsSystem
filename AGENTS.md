@@ -4660,7 +4660,7 @@ the way all graphs and tables and visualizations are aligned and their design".
   amber status) on one grid per row. Every staff table lines its quantities up at the end (`_ckAlignTables`, from
   `goStaff`); a table that lays itself out says `data-noalign`.
 
-## The Saturday Social Ride report (2026-11-18, migration 20261119130500)
+## The Saturday Social Ride report (2026-11-18, migrations 20261119130500 and 20261119141500)
 
 The user: the number of people who showed up for Saturday social rides since the start (five visits count five), the date
 of the first ride, the unique riders "and more info and stats", extracted from the staff website. Spec:
@@ -4668,10 +4668,15 @@ of the first ride, the unique riders "and more info and stats", extracted from t
 - **One server call.** `staff_saturday_ride_report()` (security definer, `is_staff()` or `STAFF_ONLY`, not for anon) answers
   `{generated_at, summary, rides, frequency, mix}` over every Saturday ride since the first: a staff device holds a rolling
   year of bookings (`QUEUE_WINDOW_DAYS`), too little for "since the start". Only counts leave the database, no names.
-- **What it counts.** A Saturday ride: `ride_kind = 'saturday'`, not deleted, cancelled or a draft. An attendance: a booking
-  checked in (`active` or `done`), one per row. A rider: the booking's account (else its phone, then its name). The show-up
-  rate reads only rides where staff marked a no-show. Ride groups from the first ride that had one (3 Oct 2026); gender, age
-  (today, KSA) and nationality per rider, nationality as the top eight, `*` (Other) and `''` (Not given).
+- **What it counts** (20261119141500, the user: "include all bookings of all time even non checked in bookings"). A
+  Saturday ride: `ride_kind = 'saturday'`, not deleted, cancelled or a draft. A counted booking: on a ride already held
+  (today or earlier, KSA), given a place - checked in (`active`, `done`), marked `noshow` or left `waiting` - one per row;
+  not counted: cancelled, removed, waitlist, and requests never approved (unless staff checked them in). `attendances` /
+  `attended` keep their names and carry that count; `checked_in` and `not_checked_in` sit beside them. A rider: the
+  booking's account (else its phone, then its name). The show-up rate is checked in / (checked in + no-shows) on rides
+  where staff marked a no-show. Ride groups from the first ride that had one (3 Oct 2026); gender, age (today, KSA) and
+  nationality per rider, nationality as the top eight, `*` (Other) and `''` (Not given). Before 5 Sep 2026 no rider was
+  checked in at the ride: those rides' check-ins all carry 03:00 KSA on the day, written afterwards in bulk.
 - **The client** (`_srrOpen`, `_srrBody`, all in the reports part): a card `satride` in Reports > Rides and bookings for
   the accounts that open Analytics (`_rp2Cat`), look C (`REPORT_LOOK`), drawn with `_reportShell` and opened in the viewer,
   whose Print, PDF, Share, Excel and CSV read it like any report. Words `srr*`.
