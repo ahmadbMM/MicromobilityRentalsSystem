@@ -67,11 +67,10 @@ test.describe('@staff:sessions the Sessions section, second round', () => {
     await page.locator('#tab-sessions .sess-detail-actions .sh-more').click(); // a tile in the detail's More (staff round s10)
     await page.getByRole('menuitem', { name: 'Announce' }).click();
     const dlg = page.getByRole('dialog', { name: /Announce/ });
-    // the link above the words, not after them (the booking link opens every prepared message; bug hunt 2026-11-18)
-    await expect(dlg.locator('#n6r-ann-en')).toHaveValue(/\?ev=jcc&session=2099-03-03\n\nNight ride is open for booking/);
-    await expect(dlg.locator('#n6r-ann-en')).not.toHaveValue(/Book here/);
+    // the words, then the link: it is the only link, so the first (the user, 2026-11-18: the booking link is the first link, not the top line)
+    await expect(dlg.locator('#n6r-ann-en')).toHaveValue(/^Night ride is open for booking: [^\n]*Book here: \S+\?ev=jcc&session=2099-03-03$/);
     // the Arabic text names the Arabic title
-    await expect(dlg.locator('#n6r-ann-ar')).toHaveValue(/\?ev=jcc&session=2099-03-03\n\nالحجز مفتوح الآن في ركوب ليلي/);
+    await expect(dlg.locator('#n6r-ann-ar')).toHaveValue(/^الحجز مفتوح الآن في ركوب ليلي[^\n]*احجز من هنا: \S+\?ev=jcc&session=2099-03-03$/);
     await expect(dlg.locator('#n6r-ann-link')).toHaveValue(/\?ev=jcc&session=2099-03-03$/);
   });
 

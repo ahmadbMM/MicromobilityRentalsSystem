@@ -59,11 +59,11 @@ test('a Saturday booking opens its three messages, ride details read off the ses
   await box.locator('.rm-back').click();
   await box.locator('.rm-opt[data-rm="etiq"]').click();
   const et = await box.locator('#rm-msg-text').inputValue();
-  expect(et.startsWith('https://experiences.micromobility.sa/\n\nMicroMobility’s Public Road Cycling Etiquette')).toBe(true);
+  expect(et.startsWith('MicroMobility’s Public Road Cycling Etiquette')).toBe(true); // no link, none on top (2026-11-18)
   expect(et).toContain('\u{1F4DE} *+966 56 666 8818*');
   await box.locator('.rm-back').click();
   await box.locator('.rm-opt[data-rm="privacy"]').click();
-  expect(await box.locator('#rm-msg-text').inputValue()).toMatch(/^https:\/\/experiences\.micromobility\.sa\/\n\n\u{1F512} \*A Friendly Privacy Reminder\*/u);
+  expect(await box.locator('#rm-msg-text').inputValue()).toMatch(/^\u{1F512} \*A Friendly Privacy Reminder\*/u);
   await box.locator('.ca-x').click();
   await expect(page.locator('#confirm-modal .ca-msg-box')).toHaveCount(0);
 });

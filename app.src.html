@@ -33718,8 +33718,9 @@ function _n6rDetailHtml(s){
 // ── SS11 Announce: the words to send, in English and Arabic, with the link that opens the session for booking ──
 const N6R_EV=['jcc','community','snd96','workshop','event','runher','petromin','vlap','arena','blood'];
 // Push to the riders who agreed to ride news is left out: the push sender reaches one rider a call (30 in 10 minutes).
-// The link first (the user, 2026-11-14, _bkFirst; bug hunt 2026-11-18: it came last).
-const N6R_ANN={en:'{5}\n\n{0} is open for booking: {1}, {2}{3}. {4} places left.',ar:'{5}\n\nالحجز مفتوح الآن في {0}: {1}، {2}{3}. الأماكن المتبقية: {4}.'};
+// Its link is the message's only one, so it is the first link (_bkFirst) where it stands, at the end (the user, 2026-11-18:
+// the booking app's link is the first LINK, not the top line).
+const N6R_ANN={en:'{0} is open for booking: {1}, {2}{3}. {4} places left. Book here: {5}',ar:'الحجز مفتوح الآن في {0}: {1}، {2}{3}. الأماكن المتبقية: {4}. احجز من هنا: {5}'};
 function _n6rBookLink(s){const ev=_nsKindOf(s),o=_isStaffHost()?'__SITE_ORIGIN__':location.origin;return o+'/'+(N6R_EV.includes(ev)?'?ev='+ev+'&session='+encodeURIComponent(s.id):'');}
 function _n6rAnnText(s,lang){
   const L=LANG[lang]||LANG.en,tt=k=>(L&&L[k])||LANG.en[k]||'';
@@ -39583,14 +39584,25 @@ function _tplFill(src,vars){
 // The message as the admins wrote it, filled in, or null when they have not (the caller builds it). A language
 // they have not written takes their English (2026-10-09), but Arabic, which every message has built in.
 function _tplUse(id,lang,vars){const o=_tplOver(id,lang)??(lang!=='ar'?_tplOver(id,'en'):null);return o==null?null:_tplFill(o,vars||{});}
-// The booking app's link opens every prepared message (the user, 2026-11-14: "change all message templates to have the
-// link for the booking app always first even this one"). WhatsApp previews a message's first link, so the card a rider
-// sees is the booking app's. A text that already opens with it, bare or under a one-line label such as the Saturday
-// ride's "Booking:", is left as it is; an admin's own text without it gets it on top, as the built-in ones do.
+// The booking app's link is the FIRST LINK of a prepared message, not its top line (the user, 2026-11-18: "i only want
+// that the first link in every message to be the booking app website link"; 2026-11-14 had put it on top of every one).
+// WhatsApp previews a message's first link, so the card a rider sees is the booking app's. A message with no link stays
+// as written; one whose first link is already the booking app's (any page of it, or a fill-in that becomes one) stays
+// too; otherwise the link goes on its own line just above the first other link, above that link's label when it sits
+// under one ("Location:"), as the Saturday ride's "Booking:" sits just above its meeting point.
+const BK_FILLS=new Set(['booking_link','cancel_link','claim_link','link','site']); // fill-ins that are booking app pages
+// A booking app address: CA_SITE, or this page's own away from the staff host, as _n6rBookLink writes a session's link.
+function _bkOwn(u){
+  const o=((/^https?:\/\/[^/?#]+/i.exec(u)||[''])[0]).toLowerCase();if(!o)return false;if(o===CA_SITE.toLowerCase())return true;
+  try{return !_isStaffHost()&&o===location.origin.toLowerCase();}catch(e){return false;}
+}
 function _bkFirst(txt){
-  const s=String(txt==null?'':txt).replace(/^\s+/,'');if(!s.trim())return s;
-  const ln=s.split('\n',2),lk=l=>{l=String(l||'').trim();return l==='{booking_link}'||l===CA_SITE||l.startsWith(CA_SITE+'/');};
-  return lk(ln[0])||(/:\s*$/.test(ln[0])&&lk(ln[1]))?s:CA_SITE+'/\n\n'+s;
+  const s=String(txt==null?'':txt),m=/https?:\/\/[^\s<>"*]+|\{([a-z_]*link|site)\}/i.exec(s);if(!m)return s;
+  if(m[1]!=null?BK_FILLS.has(m[1].toLowerCase()):_bkOwn(m[0]))return s;
+  const L=s.split('\n');let i=s.slice(0,m.index).split('\n').length-1;
+  if(i>0&&L[i].trim().replace(/^\*+|\*+$/g,'')===m[0]&&/[:：]\s*\**\s*$/.test(L[i-1]))i--; // the link under its label: above the label
+  L.splice(i,0,...(i>0&&L[i-1].trim()?['']:[]),CA_SITE+'/','');
+  return L.join('\n');
 }
 // A one-tap WhatsApp to a rider is in English and Arabic, as the built-in text is written, whatever the desk's own
 // language (bug hunt 2026-10-28): t() in a Hindi or French desk sent the rider Hindi or French plus Arabic, and the
@@ -39604,7 +39616,7 @@ const LM_LINE_DEF={en:'Thank you for riding with us. Here is to many more rides 
   ur:'ہمارے ساتھ رائیڈ کرنے کا شکریہ۔ آگے بھی بہت سی رائیڈز ایک ساتھ ہوں۔',hi:'हमारे साथ राइड करने के लिए धन्यवाद। आगे भी कई और राइड्स साथ में हों।',tl:'Salamat sa pag-ride kasama namin. Nawa ay marami pa tayong ride na magkasama.',
   ne:'हामीसँग राइड गर्नुभएकोमा धन्यवाद। अझै धेरै राइडहरू सँगै गरौं।',bn:'আমাদের সঙ্গে রাইড করার জন্য ধন্যবাদ। সামনে আরও অনেক রাইড একসঙ্গে হোক।'};
 // The built-in text with its fill-ins showing, which the editor starts from.
-// A message opens with the booking app's link (_bkFirst); lm_anniv is a line on a card, never sent, so it stays bare, and the
+// A message's first link is the booking app's (_bkFirst); lm_anniv is a line on a card, never sent, so it stays bare, and the
 // Saturday ride's details carry it just above the meeting point (the user, 2026-11-14: "put the bookings website link just
 // above the location directly"), still before the map's link, so WhatsApp's preview stays the booking app's.
 // An announcement's built-in text is the announce part's (fetched with the editor, _tplOpen), and keeps its booking link where
@@ -75238,7 +75250,7 @@ async function _n6qSegInvite(){
   // An invitation to a session they have not booked is marketing: news, which goes only to riders who agreed to hear it
   // (ride_news, PDPL), with the way to stop it (2026-11-10: sent as an update about their ride, it reached everyone).
   g.kind='news';g.texts={};
-  langs.forEach(l=>{g.texts[l]=_bkFirst(_n6qInvText(s,l));}); // the booking app's link first (app49-1), as every prepared message
+  langs.forEach(l=>{g.texts[l]=_bkFirst(_n6qInvText(s,l));}); // the booking app's link is its first link (app49-1), as every prepared message's
   g.tab='msg';_segPaint();
 }
 
@@ -75875,7 +75887,7 @@ async function _mtsOfSave(){
 // university and field only, as the members' page shows it.
 function _mtsCopy(){
   const P=((S._mts&&S._mts.p)||[]).filter(p=>p.status==='open'&&p.num).sort((a,b)=>a.num-b.num);
-  const L=['__SITE_ORIGIN__/members','',`*${t('mtsWaHead')}*`,'']; // the booking app's link first (app50-3), as every prepared message
+  const L=[`*${t('mtsWaHead')}*`,'']; // the members' page at the end is its first link (_bkFirst; the user, 2026-11-18: not on top)
   P.forEach(p=>{L.push(`*${t('mtsProfileN').replace('{0}',p.num)}*`,p.university,p.field,'');});
   L.push(t('mtsWaFoot').replace('{0}','__SITE_ORIGIN__/members'));
   const txt=_bkFirst(L.join('\n')),b=document.getElementById('mts-copy');

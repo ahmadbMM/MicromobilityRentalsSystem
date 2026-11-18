@@ -30,21 +30,35 @@ test('the fill-ins are filled, and a line whose fill-in is empty is left out', a
   expect(txt).toBe('Ride on *3rd of October*\nMeet at 5:45AM\nBook: https://experiences.micromobility.sa/');
 });
 
-// The user, 2026-11-14: "change all message templates to have the link for the booking app always first". WhatsApp
-// previews a message's first link, so every prepared message opens with the booking app's (not lm_anniv, a card line never sent).
-test('every message template opens with the booking app\'s link, in every language', async ({ page }) => {
+// The user, 2026-11-18: "i only want that the first link in every message to be the booking app website link" (2026-11-14
+// had put it on top of every one). WhatsApp previews a message's first link, so in every prepared message with a link the
+// first is the booking app's, and none is put on top (not lm_anniv, a card line never sent).
+test('the booking app\'s link is the first link of every message template, never put on top, in every language', async ({ page }) => {
   await boot(page);
   await page.waitForFunction(`typeof globalThis['_remDef'+'ault']==='function'`);
   // The WhatsApp announcements (wk_, ann_; 2026-11-16) keep it just above the place, as the Saturday ride does: tests/week-announce.spec.ts
   const bad = await page.evaluate(`(()=>{const out=[];for(const[,list]of TPL)for(const[id]of list)if(id!=='lm_anniv'&&!/^(wk|ann)_/.test(id))for(const g of _tplLangs()){
     const v=_tplDefault(id,g);if(!v.trim()){out.push(id+'/'+g+' empty');continue;}
-    const ok=id==='rm_ride'?v.includes(g==='ar'?'الحجز:\\n{booking_link}\\n\\nموقع التجمّع:\\n{meet_link}':'Booking:\\n{booking_link}\\n\\nMeet Up Location:\\n{meet_link}'):v.startsWith('https://experiences.micromobility.sa/\\n\\n');
-    if(!ok)out.push(id+'/'+g+': '+v.slice(0,40));}return out;})()`);
+    if(v.startsWith('https://experiences.micromobility.sa/'))out.push(id+'/'+g+' on top');
+    const m=/https?:\\/\\/[^\\s*]+|\\{([a-z_]*link|site)\\}/.exec(v);
+    if(m&&!(m[1]!=null?['booking_link','cancel_link','claim_link','link','site'].includes(m[1]):m[0].startsWith('https://experiences.micromobility.sa')))out.push(id+'/'+g+' first link '+m[0]);
+    if(id==='rm_ride'&&!v.includes(g==='ar'?'الحجز:\\n{booking_link}\\n\\nموقع التجمّع:\\n{meet_link}':'Booking:\\n{booking_link}\\n\\nMeet Up Location:\\n{meet_link}'))out.push(id+'/'+g+': '+v.slice(0,40));}return out;})()`);
   expect(bad).toEqual([]);
-  // once is enough: a text that already opens with it, bare or under a label, is left as it is
-  expect(await page.evaluate(`_bkFirst(_bkFirst('Hi'))`)).toBe('https://experiences.micromobility.sa/\n\nHi');
-  expect(await page.evaluate(`_bkFirst('Booking:\\nhttps://experiences.micromobility.sa/\\n\\nRide')`)).toBe('Booking:\nhttps://experiences.micromobility.sa/\n\nRide');
-  expect(await page.evaluate(`_bkFirst('')`)).toBe('');
+  const bk = (s: string) => page.evaluate(`_bkFirst(${JSON.stringify(s)})`);
+  // no link: as written
+  expect(await bk('Hi Sara,\n\nSee you on the road!')).toBe('Hi Sara,\n\nSee you on the road!');
+  expect(await bk('')).toBe('');
+  // the first link is already the booking app's (any page of it, or a fill-in that becomes one): as written
+  expect(await bk('Booking:\nhttps://experiences.micromobility.sa/\n\nLocation:\nhttps://maps.app.goo.gl/x')).toBe('Booking:\nhttps://experiences.micromobility.sa/\n\nLocation:\nhttps://maps.app.goo.gl/x');
+  expect(await bk('Can\'t come? Cancel here:\nhttps://experiences.micromobility.sa/my-rides?lang=en')).toBe('Can\'t come? Cancel here:\nhttps://experiences.micromobility.sa/my-rides?lang=en');
+  expect(await bk('Hi {first_name},\n\n{ride}\n\n{cancel_link}')).toBe('Hi {first_name},\n\n{ride}\n\n{cancel_link}');
+  // another link first: the booking app's goes just above it, above its label when it sits under one, and once only
+  const grp = 'Hi Sara,\nYou are invited.\nJoin the group:\nhttps://chat.whatsapp.com/abc\n\nThe team';
+  const want = 'Hi Sara,\nYou are invited.\n\nhttps://experiences.micromobility.sa/\n\nJoin the group:\nhttps://chat.whatsapp.com/abc\n\nThe team';
+  expect(await bk(grp)).toBe(want);
+  expect(await bk(want)).toBe(want);
+  expect(await bk('Hi\n\nMap: https://maps.app.goo.gl/x')).toBe('Hi\n\nhttps://experiences.micromobility.sa/\n\nMap: https://maps.app.goo.gl/x');
+  expect(await bk('{ride}\n\n{group_link}')).toBe('{ride}\n\nhttps://experiences.micromobility.sa/\n\n{group_link}');
 });
 
 test('with no text of its own a message is the built-in one', async ({ page }) => {
@@ -73,7 +87,7 @@ test('the rider messages come in English and Arabic, an admin\'s Arabic text fir
   await box.locator('.rm-opt[data-rm="privacy"]').click();
   await expect(box.locator('#rm-msg-text')).toHaveValue(/A Friendly Privacy Reminder/);
   await box.locator('[data-rm-lang="ar"]').click();
-  await expect(box.locator('#rm-msg-text')).toHaveValue('https://experiences.micromobility.sa/\n\nتذكير بالخصوصية يا {first_name}'); // a word it does not know stays as written; the booking app's link on top
+  await expect(box.locator('#rm-msg-text')).toHaveValue('تذكير بالخصوصية يا {first_name}'); // a word it does not know stays as written; no link, none added (2026-11-18)
   await expect(box.locator('#rm-msg-text')).toHaveAttribute('dir', 'rtl');
 });
 
