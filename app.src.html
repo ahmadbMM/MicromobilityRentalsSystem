@@ -63,8 +63,12 @@
        address once, whose hand-over page brings back whatever that browser still keeps there, or
        nothing, and returns to the same page. cq_moved_in marks it done before it goes, so it never
        loops and a later sign-out is never undone. Not for automation or crawlers, nor a ?signin=
-       link (it signs its own account in), nor a visit that has just come from the old address. -->
-  <script>(function(F){function take(){var h=location.hash;if(h.indexOf('#mm-move=')!==0)return;var raw='',back='';h.slice(1).split('&').forEach(function(p){if(p.indexOf('mm-move=')===0)raw=p.slice(8);else if(p.indexOf('mm-hash=')===0)back=decodeURIComponent(p.slice(8));});history.replaceState(history.state,'',location.pathname+location.search+(back?'#'+back:''));var from='';try{from=new URL(document.referrer).origin;}catch(e){}if(F.indexOf(from)<0)return;var d=JSON.parse(decodeURIComponent(escape(atob(raw.split('-').join('+').split('_').join('/'))))),had=localStorage.getItem('cq_session')!==null||sessionStorage.getItem('cq_session')!==null;Object.keys(d).forEach(function(k){var st=k.slice(0,2)==='l:'?localStorage:k.slice(0,2)==='s:'?sessionStorage:null,key=k.slice(2),v=d[k];if(!st||typeof v!=='string'||!/^(cq_|mm_|sb-)/.test(key)||(key==='cq_session'&&had))return;if(st.getItem(key)===null)st.setItem(key,v);});}try{take();}catch(e){}try{var L=localStorage,M='cq_moved_in';if(location.origin!=='__SITE_ORIGIN__'||!F.length||L.getItem(M)!==null)return;L.setItem(M,'1');if(L.getItem(M)===null||L.getItem('cq_session')!==null||sessionStorage.getItem('cq_session')!==null||navigator.webdriver||/bot|crawl|spider|slurp|lighthouse|headless/i.test(navigator.userAgent)||/[?&]signin=/.test(location.search))return;var from='';try{from=new URL(document.referrer).origin;}catch(e){}if(F.indexOf(from)>=0)return;location.replace(F[0]+location.pathname+location.search+location.hash);}catch(e){}})(__SITE_FORMER_ORIGINS__);</script>
+       link (it signs its own account in), nor a visit that has just come from the old address.
+       That trip carries a nonce stored here (?mm-n=, bug hunt 2026-11-18): a browser that sends no
+       referrer had its hand-over refused, with what it carried already gone from the old address,
+       which now keeps it a week; the trip brings it back, and only a payload that comes back with
+       this browser's own nonce is taken without the referrer (the kept copy, marked b:, only so). -->
+  <script>(function(F){function take(){var h=location.hash,q=location.search,mv=h.indexOf('#mm-move=')===0,n=(/[?&]mm-n=([0-9a-f]{16,64})(?:&|$)/.exec(q)||[])[1]||'',want='';if(!mv&&!n)return;if(n){try{want=localStorage.getItem('cq_move_n')||'';localStorage.removeItem('cq_move_n');}catch(e){}q=q.replace(/([?&])mm-n=[0-9a-f]{16,64}(&|$)/,function(x,a,b){return b?a:'';});}var raw='',back=mv?'':h.slice(1);if(mv)h.slice(1).split('&').forEach(function(p){if(p.indexOf('mm-move=')===0)raw=p.slice(8);else if(p.indexOf('mm-hash=')===0)back=decodeURIComponent(p.slice(8));});history.replaceState(history.state,'',location.pathname+q+(back?'#'+back:''));if(!mv)return;var ok=n!==''&&n===want,from='';try{from=new URL(document.referrer).origin;}catch(e){}var d=JSON.parse(decodeURIComponent(escape(atob(raw.split('-').join('+').split('_').join('/'))))),had=localStorage.getItem('cq_session')!==null||sessionStorage.getItem('cq_session')!==null;if(!ok&&(F.indexOf(from)<0||d['b:']))return;Object.keys(d).forEach(function(k){var st=k.slice(0,2)==='l:'?localStorage:k.slice(0,2)==='s:'?sessionStorage:null,key=k.slice(2),v=d[k];if(!st||typeof v!=='string'||!/^(cq_|mm_|sb-)/.test(key)||(key==='cq_session'&&had))return;if(st.getItem(key)===null)st.setItem(key,v);});}try{take();}catch(e){}try{var L=localStorage,M='cq_moved_in';if(location.origin!=='__SITE_ORIGIN__'||!F.length||L.getItem(M)!==null)return;L.setItem(M,'1');if(L.getItem(M)===null||L.getItem('cq_session')!==null||sessionStorage.getItem('cq_session')!==null||navigator.webdriver||/bot|crawl|spider|slurp|lighthouse|headless/i.test(navigator.userAgent)||/[?&]signin=/.test(location.search))return;var from='';try{from=new URL(document.referrer).origin;}catch(e){}if(F.indexOf(from)>=0)return;var n='';try{var a=crypto.getRandomValues(new Uint8Array(12));for(var i=0;i<a.length;i++)n+=(a[i]<16?'0':'')+a[i].toString(16);L.setItem('cq_move_n',n);if(L.getItem('cq_move_n')!==n)n='';}catch(e){n='';}location.replace(F[0]+location.pathname+location.search+(n?(location.search?'&':'?')+'mm-n='+n:'')+location.hash);}catch(e){}})(__SITE_FORMER_ORIGINS__);</script>
   <!-- Each language address names ITSELF as canonical. One static href="/" told search engines
        that /?lang=ar and every other alternate below was a copy of the English root, so they
        dropped those addresses and the hreflang set with them. It is written here, from ?lang
@@ -3057,7 +3061,10 @@ function _socNorm(raw){
   // networks keep their short list, so a vm.tiktok.com/<code> short link does not pass for a handle.
   v=v.replace(/^(?:https?:\/\/)?(?:(?:www\.|m\.|mobile\.)?(?:instagram\.com|x\.com|twitter\.com|tiktok\.com)|(?:[a-z]{2,3}\.|www\.|m\.|mobile\.)?linkedin\.com)\/(?:in\/)?/i,'');
   v=v.replace(/[?#].*$/,'').replace(/^[@\/\s]+|[\/\s]+$/g,'');
-  return v.slice(0,100);
+  // Whole, never cut (bug hunt 2026-11-18): a LinkedIn link of a non-Latin name is percent-encoded, six characters a
+  // letter, and cutting it to 100 kept a broken slug that each rule (3 to 100) then passed, saved with no word, a 404 on
+  // the staff cards. Too long now meets the field's own error.
+  return v;
 }
 function _socUrl(net,h){const n=SOCIAL_NETS.find(x=>x[0]===net);if(!n)return'#';let v=String(h||'');try{v=decodeURIComponent(v);}catch(e){}return n[2]+encodeURIComponent(v);}
 // Reads the four inputs `${prefix}-soc-<net>`; {val} is the clean object or null when all
@@ -6474,7 +6481,8 @@ function _bestFreeBike(e){
   // A premium tier has no fleet type of its own: Road Carbon is ridden on a Road bike, a carbon
   // frame first. Matching the tier's name against bike types found nothing, every time.
   const base=PREMIUM_TIERS[ty]||ty,carbon=ty==='Road Carbon';
-  const held=new Set();getQueue().forEach(x=>{if(x.id!==e.id&&['waiting','waitlist','active'].includes(x.status))getAssignedBikeIds(x).forEach(b=>held.add(b));});
+  // A waiting or waitlisted booking holds its bike for its own night only (_rsvSameDay, as the picker; bug hunt 2026-11-18).
+  const held=new Set();getQueue().forEach(x=>{if(x.id!==e.id&&(x.status==='active'||(x.status==='waiting'||x.status==='waitlist')&&_rsvSameDay(x,e)))getAssignedBikeIds(x).forEach(b=>held.add(b));});
   const free=(S.bikes||[]).filter(b=>b.status==='available'&&!held.has(b.id)&&(!base||base==='Any'||b.type===base));
   // Nothing of the rider's size: another free bike of theirs, never across the Kids line (bug hunt 2026-11-11): an adult's Any
   // booking was handed whatever came first in the fleet, a Kids bike among them, and a child's an adult bike.
@@ -10261,8 +10269,10 @@ async function _bldAddSaveGo(then){
   if(_nameErr3(first,'',last)||[...first].length<2||[...last].length<2)return say('errEnterName','bed-first');
   if(!_nameCharsOk(first,last))return say('errNameChars','bed-first');
   if(!_namePartsOk(first,last))return say('errNameShort','bed-first');
-  const phone=c0&&v('bed-phone')===String(c0.phone||'')?v('bed-phone'):_normPhone(_asciiDigits(v('bed-phone')),'+966');
-  if(!/^\+?[0-9]{8,15}$/.test(phone))return say('errBloodDetails','bed-phone');
+  // The account's number left as it is passes in the shape accounts hold (spaces, dashes, 6 digits up), as the donor
+  // step takes it; only a number typed here must be the sign-up shape (bug hunt 2026-11-18).
+  const samePh=!!c0&&v('bed-phone')===String(c0.phone||''),phone=samePh?v('bed-phone'):_normPhone(_asciiDigits(v('bed-phone')),'+966');
+  if(!(samePh?/^\+?[\d\s-]{6,20}$/:/^\+?[0-9]{8,15}$/).test(phone))return say('errBloodDetails','bed-phone');
   const email=v('bed-email').toLowerCase();
   if((email||!vis)&&!/^[^\s@<>"'()]+@[^\s@<>"'()]+\.[^\s@<>"'()]+$/.test(email))return say('errValidEmail','bed-email');
   const gen=v('bed-gender'),dob=v('bed-dob'),nat=v('bed-nat'),bt=vis?'':v('bed-bt');
@@ -10276,8 +10286,8 @@ async function _bldAddSaveGo(then){
   if(c0&&_bldAddOn(D.sid,c0.id))return say('bldAddAlready');
   const phOf=x=>_koLast9(x);
   const taken=String(phone)!==String((c0&&c0.phone)||'')&&(S.customers||[]).some(x=>!x.merged_into&&(!c0||x.id!==c0.id)&&x.phone&&phOf(x.phone)===phOf(phone));
-  if(taken&&!c0)return say('bldAddPhoneTaken','bed-phone');
-  if(taken&&!(await _cfPhShareOk(phone)))return;
+  // Staff may put one number on several accounts (a family): a new account takes it as a picked one does (bug hunt 2026-11-18).
+  if(taken&&!(await _cfPhShareOk(phone)))return say(c0?'errPhoneExists':'bldAddPhoneTaken','bed-phone');
   if(email&&email!==String((c0&&c0.email)||'').toLowerCase()){
     if(await _bldEmailTaken(email,c0&&c0.id))return say('errEmailExists','bed-email');
   }
@@ -10339,8 +10349,8 @@ async function _bldEditSaveGo(){
   if(name!==name0&&!_nameCharsOk(first,last)){toast(t('errNameChars'),'error');return;}
   if(name!==name0&&!_namePartsOk(first,last)){toast(t('errNameShort'),'error');return;}
   if(_nameErr3(first,'',last)){toast(t('errEnterName'),'error');g('bed-first')?.focus();return;}
-  const ph0=String((c&&c.phone)||e.phone||''),phone=v('bed-phone')===ph0?ph0:_normPhone(v('bed-phone'),'+966');
-  if(!/^\+?[0-9]{8,15}$/.test(phone)){toast(t('errBloodDetails'),'error');g('bed-phone')?.focus();return;}
+  const ph0=String((c&&c.phone)||e.phone||''),samePh=v('bed-phone')===ph0,phone=samePh?ph0:_normPhone(v('bed-phone'),'+966');
+  if(!(samePh?/^\+?[\d\s-]{6,20}$/:/^\+?[0-9]{8,15}$/).test(phone)){toast(t('errBloodDetails'),'error');g('bed-phone')?.focus();return;} // the number left as it is: as accounts hold it (bug hunt 2026-11-18)
   const em0=String((c&&c.email)||e.email||''),email=v('bed-email')===em0?em0:v('bed-email').toLowerCase();
   if((email||!vis)&&email!==em0&&!/^[^\s@<>"'()]+@[^\s@<>"'()]+\.[^\s@<>"'()]+$/.test(email)){toast(t('errValidEmail'),'error');g('bed-email')?.focus();return;}
   const acct={};
@@ -10692,13 +10702,16 @@ function _n6vSince(){return _ksaYmd(Date.now()-365*864e5);}
 function _n6vGet(q){return Promise.resolve(q).catch(e=>({error:e}));}
 async function _vmRead(W){
   const get=_n6vGet;
-  let hq=sb.from('volunteer_hours').select(VM_H_COLS);if(!W.hoursAll)hq=hq.gte('worked_on',_n6vSince());
-  const[a,b,c,d,e,f,g,h,i]=await Promise.all([get(sb.from('volunteers').select('*')),get(sb.from('volunteer_sessions').select('*')),_vmShQ(c=>sb.from('volunteer_shifts').select(c)),
-    get(hq.order('worked_on',{ascending:false}).order('id',{ascending:false}).limit(W.hoursAll?20000:5000)),get(sb.from('volunteer_settings').select('data').maybeSingle()),
-    get(sb.from('customers').select('id,volunteer_hours').gt('volunteer_hours',0).limit(5000)),
-    get(sb.from('promo_codes').select(VM_PC_COLS).not('volunteer_session_id','is',null).order('created_at',{ascending:false}).limit(3000)),
-    _vmVcQ(c=>sb.from('volunteer_certs').select(c).order('issued_at',{ascending:false}).limit(3000)),
-    get(sb.from('volunteer_ratings').select(VM_RT_COLS).order('updated_at',{ascending:false}).limit(5000))]); // staff's ratings (20261115230000)
+  // Every row, a page at a time (bug hunt 2026-11-18): one request stops at PostgREST's 1,000 rows whatever .limit says, so
+  // past that the shifts (read in no order) dropped any part of a night's team, and the hours, totals, rewards and ratings
+  // all but the newest thousand. Each read ends its sort on a unique column (_pagedAll).
+  const hq=()=>{let q=sb.from('volunteer_hours').select(VM_H_COLS);if(!W.hoursAll)q=q.gte('worked_on',_n6vSince());return q.order('worked_on',{ascending:false}).order('id',{ascending:false});};
+  const[a,b,c,d,e,f,g,h,i]=await Promise.all([get(_pagedAll(()=>sb.from('volunteers').select('*').order('customer_id'),'customer_id')),get(_pagedAll(()=>sb.from('volunteer_sessions').select('*').order('session_id'),'session_id')),_vmShQ(c=>_pagedAll(()=>sb.from('volunteer_shifts').select(c).order('id'),'id')),
+    get(_pagedAll(hq)),get(sb.from('volunteer_settings').select('data').maybeSingle()),
+    get(_pagedAll(()=>sb.from('customers').select('id,volunteer_hours').gt('volunteer_hours',0).order('id'),'id')),
+    get(_pagedAll(()=>sb.from('promo_codes').select(VM_PC_COLS).not('volunteer_session_id','is',null).order('created_at',{ascending:false}).order('id',{ascending:false}))),
+    _vmVcQ(c=>_pagedAll(()=>sb.from('volunteer_certs').select(c).order('issued_at',{ascending:false}).order('id',{ascending:false}))),
+    get(_pagedAll(()=>sb.from('volunteer_ratings').select(VM_RT_COLS).order('updated_at',{ascending:false}).order('id',{ascending:false})))]); // staff's ratings (20261115230000)
   W.busy=false;
   const bad=[a,b,c,d,e].find(r=>r.error);
   if(bad){if(_vmMissing(bad.error))W.missing=true;else W.err=true;}
@@ -10749,8 +10762,8 @@ async function _n6vRwRead(sid){
 // After a write: only what it changed is read again, never the five tables (VL02).
 async function _n6vAfter(fn,a){
   const W=_vm();a=a||{};
-  if(fn==='staff_volunteer_save'||fn==='staff_volunteers_bulk'){const r=await _n6vGet(sb.from('volunteers').select('*'));if(!r.error){W.rows=r.data||[];W.rev++;}}
-  else if(fn==='staff_volunteer_session_save'||fn==='staff_volunteer_roles_save'){const r=await _n6vGet(sb.from('volunteer_sessions').select('*'));if(!r.error){W.sess=r.data||[];W.rev++;}}
+  if(fn==='staff_volunteer_save'||fn==='staff_volunteers_bulk'){const r=await _n6vGet(_pagedAll(()=>sb.from('volunteers').select('*').order('customer_id'),'customer_id'));if(!r.error){W.rows=r.data||[];W.rev++;}} // paged, as _vmRead
+  else if(fn==='staff_volunteer_session_save'||fn==='staff_volunteer_roles_save'){const r=await _n6vGet(_pagedAll(()=>sb.from('volunteer_sessions').select('*').order('session_id'),'session_id'));if(!r.error){W.sess=r.data||[];W.rev++;}}
   else if(fn==='staff_volunteer_award'){await _n6vSessRead(a.p_session,true);await _n6vRwRead(a.p_session);}
   else if(a.p_session&&/^staff_volunteer_(decide|shift_save|shift_times|end)$/.test(fn))await _n6vSessRead(a.p_session,false);
   else if(fn==='staff_volunteer_hours_add'||fn==='staff_volunteer_hours_void'){
@@ -11034,8 +11047,9 @@ function _vmAcct(id){closeConfirm();openAccountHistory(id);}
 function _vmAddOpen(){_vmDlg(t('zvAdd'),`<input id="vm-add-q" class="vm-in" type="text" autocomplete="off" aria-label="${esc(t('zvAddSearch'))}" placeholder="${esc(t('zvAddSearch'))}" data-on-input="${_on("_vmAddSearch",_P("value"))}"><div id="vm-add-res" class="vm-res"></div>`);setTimeout(()=>document.getElementById('vm-add-q')?.focus(),40);}
 function _vmFindCusts(q){
   q=String(q||'').trim().toLowerCase();if(q.length<2)return[];
-  const d=q.replace(/\D/g,'');
-  return(S.customers||[]).filter(c=>!c.merged_into&&(String(c.name||'').toLowerCase().includes(q)||String(c.email||'').toLowerCase().includes(q)||(d.length>=4&&String(c.phone||'').replace(/\D/g,'').includes(d)))).slice(0,20);
+  // A number as it is written (05..., Arabic-Indic digits) finds the account the way the main search does (_phoneHit; bug hunt 2026-11-18).
+  const d=_asciiDigits(q).replace(/\D/g,'');
+  return(S.customers||[]).filter(c=>!c.merged_into&&(String(c.name||'').toLowerCase().includes(q)||String(c.email||'').toLowerCase().includes(q)||(d.length>=4&&_phoneHit(c.phone,q)))).slice(0,20);
 }
 function _vmAddSearch(q){
   const h=document.getElementById('vm-add-res');if(!h)return;const W=_vm(),rows=_vmFindCusts(q);
@@ -11573,9 +11587,13 @@ async function _n6vUndoGo(sid,cid,kind,cancel){
     // what was left on the session, usually nothing.
     const W=_vm();if(W.tot&&tot!=null)W.tot.set(String(cid),Math.max(0,tot));else await _n6vTotRead([String(cid)]);
     W.hours=(W.hours||[]).slice();W.rev++;await _n6vRwRead(sid);}
-  await _n6vUndoDo(sid,cid,kind);
+  await _n6vUndoDo(sid,cid,kind,cancel);
 }
-async function _n6vUndoDo(sid,cid,kind){const x=_vdOne(sid,cid);if(x&&await _vdTimes(sid,cid,kind==='in'?null:x.clock_in,null,'zdUndone')){closeConfirm();renderVolunteers();}}
+async function _n6vUndoDo(sid,cid,kind,back){const x=_vdOne(sid,cid);if(x&&await _vdTimes(sid,cid,kind==='in'?null:x.clock_in,null,'zdUndone')){
+  // Check-in undone and its hours cancelled (bug hunt 2026-11-18): the award had made the shift 'done', which with no
+  // clock-in still read as Finished, offered the fixed hours again and counted as came. It is back on the team, not here yet.
+  if(back&&kind==='in'&&x.status==='done'&&!_n6vLiveAward(sid,cid).length){if(!await _vmRpc('staff_volunteer_shift_save',{p_session:sid,p_customer:cid,p_status:'accepted'},null,true))return;x.status='accepted';}
+  closeConfirm();renderVolunteers();}}
 // The certificate's dates, as the portal writes them: "5 November 2026", and the day it is issued.
 function _n6vCertDay(ymd,lang){if(!ymd)return'';try{return new Date(`${String(ymd).slice(0,10)}T12:00:00+03:00`).toLocaleDateString(`${lang}-u-ca-gregory-nu-latn`,{timeZone:'Asia/Riyadh',day:'numeric',month:'long',year:'numeric'});}catch(_){return String(ymd);}}
 // Badges reached with an award (VL14): said by name.
@@ -11612,7 +11630,7 @@ function _vdSid(){
   D.sid=ids.find(id=>day(id)===today)||ids.find(id=>day(id)>today)||ids[ids.length-1]||'';
   return D.sid;
 }
-function _vdGo(id){if(!id)return;const D=_vd();D.sid=id;D.sel=null;D.role='';renderVolunteers();if(S.view==='staff'&&S.staffTab==='volunteers')_pushNav();} // the address names the session (/volunteers?session=)
+function _vdGo(id){if(!id)return;const D=_vd();D.sid=id;D.sel=null;D.role='';D.conf='';D.wait='';renderVolunteers();if(S.view==='staff'&&S.staffTab==='volunteers')_pushNav();} // the address names the session (/volunteers?session=)
 function _vdOpenSess(sid){_vdGo(sid);_vmView('shift');}
 // in: on duty; out: finished; wait: on the team, not here yet; asked: interested; off: not coming.
 function _vdState(x){
@@ -11729,7 +11747,7 @@ function _vdToolsHtml(sid,w,all){
   return`<div class="filter-row vx-bar" id="vd-bar">
     <div class="${_srchCls('vd',D.q)}" data-srch="vd">${_artIcon('search',13)}<input id="vd-q" class="search-input" aria-label="${esc(t('zvSearch'))}" placeholder="${esc(t('zvSearch'))}" value="${esc(D.q)}" data-on-input="${_on("_vdSearch",_P("value"))}">${_srchBtn()}</div>
     <button type="button" class="btn-sm btn-muted" aria-pressed="false" data-on-click="${_on("_vdSelMode")}">${esc(t('amSelBtn'))}</button>
-    ${_svBar('volunteers')}${_fPanel('vd',main,adv,[..._fS(D,'role'),..._fS(D,'hrs brief',1)])}</div>`;
+    ${_svBar('volunteers')}${_fPanel('vd',main,adv,[..._fS(D,'role conf'),..._fS(D,'hrs brief wait',1)])}</div>`;
 }
 function _vdListHtml(sid){
   _n6wDqApply();
@@ -12030,8 +12048,10 @@ async function _vdBulk(kind){
     for(const x of wait){if(await _n6wTimesQueue(sid,x.customer_id,x.in,x.out,null,true))queued++;else bad++;}
   }else for(const id of ids){
     const x=_vdOne(sid,id);
-    if(kind==='no_show'&&x&&!x.clock_in)await call('staff_volunteer_shift_save',{p_session:sid,p_customer:id,p_status:'no_show'});
-    else if(kind==='remove'&&x&&!x.clock_in&&!_vdGiven(sid,id))await call('staff_volunteer_shift_save',{p_session:sid,p_customer:id,p_status:null});
+    // No show only for who is on the team and not here (the row menu's 'wait'): never an interested, declined, withdrawn or
+    // finished one. Whoever a bulk action passes over is counted with the failures, not called Saved (bug hunt 2026-11-18).
+    if(kind==='no_show'){if(x&&_vdState(x)==='wait')await call('staff_volunteer_shift_save',{p_session:sid,p_customer:id,p_status:'no_show'});else bad++;}
+    else if(kind==='remove'){if(x&&!x.clock_in&&!_vdGiven(sid,id))await call('staff_volunteer_shift_save',{p_session:sid,p_customer:id,p_status:null});else bad++;}
   }
   D.sel=new Set();await _vmLoad(true);renderVolunteers();
   if(bad)toast(t('zvSomeFailed').replace('{0}',String(bad)),'error');
@@ -12129,12 +12149,16 @@ function _vbR2(n){return Math.round((+n||0)*100)/100;}
 async function _vbLoad(sids,quiet){
   const has=new Set((sids||[]).filter(Boolean)),ids0=[...has];if(!ids0.length)return null;
   const mine=(r,k)=>r.error?[]:(r.data||[]).filter(x=>x&&has.has(x[k]));
-  const[a,b,c,d,f,g]=await Promise.all([_vmShQ(q=>sb.from('volunteer_shifts').select(q).in('session_id',ids0)),
-    _n6vGet(sb.from('volunteer_hours').select(VM_H_COLS).in('session_id',ids0)),
-    _n6vGet(sb.from('promo_codes').select(VM_PC_COLS).in('volunteer_session_id',ids0)),
-    _vmVcQ(q=>sb.from('volunteer_certs').select(q).in('session_id',ids0)),
-    _n6vGet(sb.from('volunteer_feedback').select('shift_id,session_id,customer_id,rating,again,comment').in('session_id',ids0)),
-    _n6vGet(sb.from('volunteer_ratings').select(VM_RT_COLS).in('session_id',ids0))]);
+  // Every row of the opportunities picked (bug hunt 2026-11-18): one request stops at PostgREST's 1,000 rows, and a report
+  // over many opportunities came out short with no word. 100 opportunities a request, each read a page at a time by a
+  // unique column; a page refused refuses the whole read.
+  const each=async(mk,key)=>{const out=[];for(let i=0;i<ids0.length;i+=100){const part=ids0.slice(i,i+100),r=await _pagedAll(()=>mk(part).order(key),key);if(r.error)return r;out.push(...(r.data||[]));}return{data:out,error:null};};
+  const[a,b,c,d,f,g]=await Promise.all([_vmShQ(q=>each(p=>sb.from('volunteer_shifts').select(q).in('session_id',p),'id')),
+    _n6vGet(each(p=>sb.from('volunteer_hours').select(VM_H_COLS).in('session_id',p),'id')),
+    _n6vGet(each(p=>sb.from('promo_codes').select(VM_PC_COLS).in('volunteer_session_id',p),'id')),
+    _vmVcQ(q=>each(p=>sb.from('volunteer_certs').select(q).in('session_id',p),'id')),
+    _n6vGet(each(p=>sb.from('volunteer_feedback').select('shift_id,session_id,customer_id,rating,again,comment').in('session_id',p),'shift_id')),
+    _n6vGet(each(p=>sb.from('volunteer_ratings').select(VM_RT_COLS).in('session_id',p),'id'))]);
   if(a.error||b.error){if(!quiet)toast(t('errConnection'),'error');return null;}
   const sh=mine(a,'session_id'),hrs=mine(b,'session_id').filter(h=>!h.voided_at),codes=mine(c,'volunteer_session_id').filter(p=>p.active!==false);
   const certs=mine(d,'session_id').filter(q=>q.kind==='session'&&!q.revoked_at),fb=mine(f,'session_id'),rts=mine(g,'session_id');
@@ -12508,13 +12532,17 @@ function _vmRwRows(){
 function _vmRwHtml(seg){
   const W=_vm(),f=W.hf,rows=_vmRwRows(),codes=W.codes||[],certs=W.certs||[];
   const sel=(k,lbl,opts)=>_fField(esc(lbl),`<select class="filter-select" aria-label="${esc(lbl)}" data-on-change="${_on("_vmHF",k,_P("value"))}">${opts.map(([v,l])=>`<option value="${esc(v)}"${String(f[k]||'')===v?' selected':''}>${esc(l)}</option>`).join('')}</select>`);
-  const main=sel('kind',t('zrKind'),[['',t('zpAny')],['code',t('codeKindVl')],['cert',t('zvCert')]])+sel('st',t('zvFStatus'),[['',t('zpAny')],['live',t('zrLive')],['used',t('zrUsed')],['expired',t('zrExpired')],['off',t('zrTakenBack')],['auto',t('zrAuto')]]);
+  // The period (shared with the Hours list) is shown, counted and cleared here too: it filtered this list unseen (bug hunt 2026-11-18).
+  const per=(k,l)=>`<option value="${k}"${(f.per||'')===k?' selected':''}>${esc(l)}</option>`;
+  const main=_fField(esc(t('zvPeriod')),`<select class="filter-select" id="vmr-per" aria-label="${esc(t('zvPeriod'))}" data-on-change="${_on("_n6vPer",_P("value"))}">${per('',t('zvPerAll'))}${per('month',t('zvPerMonth'))}${per('last',t('zvPerLast'))}${per('quarter',t('zvPerQuarter'))}${per('year',t('zvPerYear'))}${per('custom',t('zvPerCustom'))}</select>`)
+    +`<label class="vm-inl">${esc(t('zvFrom'))}<input type="date" value="${esc(f.from)}" data-on-change="${_on("_vmHF","from",_P("value"))}"></label><label class="vm-inl">${esc(t('zvTo'))}<input type="date" value="${esc(f.to)}" data-on-change="${_on("_vmHF","to",_P("value"))}"></label>`
+    +sel('kind',t('zrKind'),[['',t('zpAny')],['code',t('codeKindVl')],['cert',t('zvCert')]])+sel('st',t('zvFStatus'),[['',t('zpAny')],['live',t('zrLive')],['used',t('zrUsed')],['expired',t('zrExpired')],['off',t('zrTakenBack')],['auto',t('zrAuto')]]);
   const head=`<div class="vx-row vx-th" aria-hidden="true"><span>${esc(t('zdColWho'))}</span><span>${esc(t('zrKind'))}</span><span>${esc(t('zsOpp'))}</span><span>${esc(t('zrGivenOn'))}</span><span>${esc(t('zvFStatus'))}</span><span></span></div>`;
   return`<div class="filter-row vx-hacts">${seg}</div>
   ${_vxFigs([[null,codes.length,t('zrFigCodes')],[null,codes.filter(c=>+c.uses>0).length,t('zrUsed')],[null,certs.filter(c=>!c.revoked_at).length,t('zrFigCerts')],[null,certs.filter(c=>c.issued_by==='auto'&&!c.revoked_at).length,t('zrAuto')]],'','')}
   <div class="vx-card vx-list-card"><div class="filter-row vx-bar">
     <div class="${_srchCls('vmr',f.q)}" data-srch="vmr">${_artIcon('search',13)}<input class="search-input" id="vmr-q" aria-label="${esc(t('zvSearch'))}" placeholder="${esc(t('zvSearch'))}" value="${esc(f.q)}" data-on-change="${_on("_vmHF","q",_P("value"))}">${_srchBtn()}</div>
-    ${_fPanel('vmr',main,'',_fS(f,'kind st'))}</div>
+    ${_fPanel('vmr',main,'',[{key:'per',kind:'radio',isOn:()=>!!(f.per||f.from||f.to),clear:()=>{f.per=f.from=f.to='';}},..._fS(f,'kind st')])}</div>
   <div class="vm-led" id="vmr-list">${rows.length?`<div class="vx-tbl vr-tbl">${head}${rows.slice(0,400).map(_vmRwRow).join('')}</div>`:_emptyState(t('zrNone'))}</div></div>`;
 }
 function _vmRwRow(r){
@@ -15275,7 +15303,7 @@ function _fixItemHtml(k,g,c){
   if(k==='type_preference')body=`<select id="fx-type" class="${(v.type_preference&&v.type_preference!=='Any')?'':'ph'}" aria-labelledby="fx-l-type_preference" data-on-change="${_on("_fixPick",_EL,"type_preference")}"${dis}><option value="">${esc(t('emPick'))}</option>${CUST_TYPES.filter(x=>x!=='Any').map(x=>`<option value="${x}"${v.type_preference===x?' selected':''}>${esc(typeLabel(x))}</option>`).join('')}</select>`;
   else if(k==='profession'||k==='workplace')body=`<input id="fx-${k}" type="text" maxlength="${k==='profession'?80:120}" autocomplete="${k==='profession'?'organization-title':'organization'}" value="${esc(v[k]||'')}" aria-labelledby="fx-l-${k}" data-on-input="${_on("_fixClearErr",k)}"${off}>`;
   else if(k==='heard_from')body=`<select id="fx-heard" class="${v.heard_from?'':'ph'}" aria-labelledby="fx-l-heard_from" data-on-change="${_on("_fixPick",_EL,"heard_from")}"${dis}><option value="">${esc(t('emPick'))}</option>${HEARD_OPTS.map(x=>`<option value="${x}"${v.heard_from===x?' selected':''}>${esc(heardLabel(x))}</option>`).join('')}</select>`;
-  else if(FIX_SOC.includes(k))body=`<div class="fx-soc"><span class="fx-soc-at" aria-hidden="true">@</span><input id="fx-soc-${k}" type="text" autocapitalize="none" autocomplete="off" spellcheck="false" maxlength="100" value="${esc(v[k]||'')}" aria-labelledby="fx-l-${k}" data-on-input="${_on("_fixClearErr",k)}"${off}></div>`;
+  else if(FIX_SOC.includes(k))body=`<div class="fx-soc"><span class="fx-soc-at" aria-hidden="true">@</span><input id="fx-soc-${k}" type="text" autocapitalize="none" autocomplete="off" spellcheck="false" maxlength="400" value="${esc(v[k]||'')}" aria-labelledby="fx-l-${k}" data-on-input="${_on("_fixClearErr",k)}"${off}></div>`;
   // WhatsApp: Yes (the mobile) or No, and then the number, with the mobile's country codes. An account
   // without a mobile is asked for the number alone.
   else if(k==='whatsapp'){const w=v.wa||{},ph=c.phone||'',same=ph?w.same:false;
@@ -15965,7 +15993,7 @@ function _afxItemHtml(k,g){
     body=(mob?`<div class="fx-q">${t('waAsk').replace('{0}',`<bdi dir="ltr">${esc(mob)}</bdi>`)}</div>
       <div class="fx-seg" role="group" ${lb}>${[['yes','waYes'],['no','waNo']].map(([x,l])=>`<button type="button" class="fx-opt${same===x?' on':''}" aria-pressed="${same===x?'true':'false'}" data-on-click="${_on("_afxWaPick",x)}"${dis}>${esc(t(l))}</button>`).join('')}</div>`:'')
       +(same==='no'?`<div class="phone-row fx-wa-row"><select class="phone-cc" id="afx-wa-cc" aria-label="${esc(t('a11yDialCode'))}" data-on-change="${_on("_afxClr","whatsapp")}"${dis}>${_ccOpts(w.cc||'+966')}</select><input class="phone-num" id="afx-wa-phone" type="tel" inputmode="tel" autocomplete="off" value="${esc(w.num||'')}" placeholder="5x xxx xxxx" aria-labelledby="afx-l-${k}" data-on-input="${_on("_on_afxWa",_EV,_EL)}"${dis}></div>`:'');}
-  else if(k==='instagram'||k==='linkedin')body=`<input id="afx-${k}" type="text" maxlength="100" autocapitalize="none" autocomplete="off" spellcheck="false" dir="ltr" value="${esc(v[k]||'')}" placeholder="${k==='instagram'?'@username':'linkedin.com/in/…'}" aria-labelledby="afx-l-${k}" data-on-input="${_on("_afxClr",k)}"${dis}><div class="fx-hint">${t('afxHandleHint')}</div>`;
+  else if(k==='instagram'||k==='linkedin')body=`<input id="afx-${k}" type="text" maxlength="400" autocapitalize="none" autocomplete="off" spellcheck="false" dir="ltr" value="${esc(v[k]||'')}" placeholder="${k==='instagram'?'@username':'linkedin.com/in/…'}" aria-labelledby="afx-l-${k}" data-on-input="${_on("_afxClr",k)}"${dis}><div class="fx-hint">${t('afxHandleHint')}</div>`;
   return `<div class="fx-item pg-field${err?' err':''}" data-afx="${k}">
     <div class="fx-top"><span class="fx-flag" aria-hidden="true">${_artIcon('flag',12)}</span><span class="fx-lbl" id="afx-l-${k}">${esc(t(CA_FIX_LBL[k]))}</span></div>
     ${_afxWasHtml(k,(g.was||{})[k])}${body}
@@ -20815,6 +20843,8 @@ function _bookRefused(err,sess){
   // Staff switched micromobility.sa/saturday on while this rider was on the form (SATURDAY_LINK, 20261108120000).
   if(/SATURDAY_LINK/.test(m+' '+String((err&&(err.details||err.detail))||''))){S._satLink=true;S._satLinkAt=Date.now();_satLinkModal();return;}
   if(/STALE_SESSION/.test(m)){doLogout(true);toast(t('errSessionStale'),'warning');return;}
+  // The waitlist staff capped (bike_slots._wl) filled while this rider was on the form (WAITLIST_FULL, bug hunt 2026-11-18).
+  if(/WAITLIST_FULL/.test(m+' '+String((err&&(err.details||err.detail))||''))){toast(t('errWaitlistFull'),'error');loadDataLight().then(()=>{if(S.view==='customer')renderRegister();}).catch(()=>{});return;}
   if(/SESSION_CLOSED/.test(m)){toast(t('errSessionClosed'),'error');loadDataLight().then(()=>{if(S.view==='customer')renderRegister();}).catch(()=>{});return;}
   // A type staff closed while this rider was on the form (TYPE_CLOSED, _type_closed_guard): the sessions are read again
   // and the riders step, with that type greyed and no longer picked, asks for another.
@@ -61593,7 +61623,7 @@ function _bestBikes(r,e,n,ty0){
   ty0=ty0||_riderType(r,e);
   if(ty0==='Own'||ty0==='None')return[]; // their own bike, or no bike at all
   const ty=PREMIUM_TIERS[ty0]||ty0,carbon=ty0==='Road Carbon';
-  const held=new Set();getQueue().forEach(x=>{if(x.id!==e.id&&(x.status==='waiting'||x.status==='waitlist'))getAssignedBikeIds(x).forEach(b=>held.add(b));});
+  const held=new Set();getQueue().forEach(x=>{if(x.id!==e.id&&(x.status==='waiting'||x.status==='waitlist')&&_rsvSameDay(x,e))getAssignedBikeIds(x).forEach(b=>held.add(b));}); // its own night only (bug hunt 2026-11-18)
   // How far a bike is from the size that suits the rider, on that bike's own chart (an Any
   // booking weighs a Road and a Hybrid by their own bands). A Kids fit is a Kids bike or nothing.
   const gap=b=>{const z=Number(r.height)>0?bikeFit(r.height,b.type):(e.size||'');

@@ -174,19 +174,29 @@ function moved(context, url, path) {
 // return carries #access_token=...). A fragment that is itself a hand-over is dropped: only this
 // page writes one, from this device's own storage. Kept to what the app stores (cq_*, mm_*, and
 // supabase-js's sb-*), per value and in all, so the address stays short enough for every browser.
+// What it takes off is kept a week under mmho:<key> (bug hunt 2026-11-18): a browser that sends no
+// referrer at all had the hand-over refused on SITE_ORIGIN, and the sign-in and waiting bookings were
+// then on neither address. They go over again only to the app's own trip here (?mm-n=, the nonce it
+// stored there), marked 'b:' so the app takes them from that trip alone, never from a crafted link.
 const HAND_OVER_JS = `(function(){
 var TO=${JSON.stringify(SITE_ORIGIN)},KEEP=/^(cq_|mm_|sb-)/,SKIP=/^(cq_snapshot|cq_staff|cq_role|cq_team|cq_access|cq_op_|cq_kiosk|cq_booth|cq_desk_|cq_sales_|cq_ct_|cq_ho$|cq_weather|cq_errors|cq_full_log)/,FIRST=/^(cq_session|sb-|cq_lang|mm_lang|cq_book_outbox|cq_ref|cq_device_id)/;
+var BK='mmho:',now=Date.now(),ask=/[?&]mm-n=[0-9a-f]{16,64}(?:&|$)/.test(location.search),back=false;
 var hash=location.hash.replace(/^#/,'');if(/^mm-move=/.test(hash))hash='';
 var path=location.pathname==='/index.html'?'/':location.pathname,dest=TO+path+location.search,list=[],data={},size=0,taken=[];
-function read(st,tag){try{for(var i=0;i<st.length;i++){var k=st.key(i),v=st.getItem(k);if(k&&v!=null&&KEEP.test(k)&&!SKIP.test(k)&&v.length<=16384)list.push([tag,k,v,st]);}}catch(e){}}
-read(window.localStorage,'l');read(window.sessionStorage,'s');
+function keys(st){var ks=[];try{for(var i=0;i<st.length;i++)ks.push(st.key(i));}catch(e){}return ks;}
+function read(st,tag,bk){try{keys(st).forEach(function(k){var b=!!k&&k.indexOf(BK)===0,n=b?k.slice(BK.length):k,v;if(!k||b!==bk)return;v=st.getItem(k);if(v!=null&&KEEP.test(n)&&!SKIP.test(n)&&v.length<=16384)list.push([tag,n,v,st,b]);});}catch(e){}}
+try{var at=+localStorage.getItem('mmho@')||0;if(at&&now-at>6048e5){[localStorage,sessionStorage].forEach(function(st){keys(st).forEach(function(k){if(k&&k.indexOf(BK)===0)st.removeItem(k);});});localStorage.removeItem('mmho@');}}catch(e){}
+read(window.localStorage,'l',false);read(window.sessionStorage,'s',false);
+if(ask){var live={},m0=list.length;for(var x=0;x<m0;x++)live[list[x][0]+':'+list[x][1]]=1;read(window.localStorage,'l',true);read(window.sessionStorage,'s',true);list=list.filter(function(e,i){return i<m0||!live[e[0]+':'+e[1]];});}
 list.sort(function(a,b){return (FIRST.test(b[1])?1:0)-(FIRST.test(a[1])?1:0);});
-for(var i=0;i<list.length;i++){var e=list[i];if(size+e[1].length+e[2].length>24000)continue;data[e[0]+':'+e[1]]=e[2];size+=e[1].length+e[2].length;taken.push(e);}
+for(var i=0;i<list.length;i++){var e=list[i];if(size+e[1].length+e[2].length>24000)continue;data[e[0]+':'+e[1]]=e[2];size+=e[1].length+e[2].length;taken.push(e);if(e[4])back=true;}
 var frag=hash;
 if(taken.length){try{
+if(back)data['b:']='1';
 var b=btoa(unescape(encodeURIComponent(JSON.stringify(data)))).split('+').join('-').split('/').join('_').replace(/=+$/,'');
 frag='mm-move='+b+(hash?'&mm-hash='+encodeURIComponent(hash):'');
-for(var j=0;j<taken.length;j++)try{taken[j][3].removeItem(taken[j][1]);}catch(e){}
+var kept=false;for(var j=0;j<taken.length;j++)if(!taken[j][4])try{taken[j][3].setItem(BK+taken[j][1],taken[j][2]);taken[j][3].removeItem(taken[j][1]);kept=true;}catch(e){}
+if(kept)try{localStorage.setItem('mmho@',String(now));}catch(e){}
 }catch(e){frag=hash;}}
 var gone=false;function go(){if(gone)return;gone=true;location.replace(dest+(frag?'#'+frag:''));}
 setTimeout(go,700);
@@ -215,7 +225,8 @@ function handOverPage(to) {
     headers: {
       'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex',
       // The app on SITE_ORIGIN takes a hand-over only from a page whose origin the browser names as
-      // a former address: no third party can plant a sign-in on a rider's phone with a crafted link.
+      // a former address, or on its own trip here with the nonce it stored (mm-n): no third party can
+      // plant a sign-in on a rider's phone with a crafted link.
       'referrer-policy': 'origin', 'link': `<${to}>; rel="canonical"`, 'x-content-type-options': 'nosniff',
       'content-security-policy': `default-src 'none'; script-src 'nonce-${nonce}'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`,
     },

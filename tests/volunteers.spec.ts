@@ -351,6 +351,44 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     expect(await page.evaluate(`_vm().tot&&_vm().tot.get('c1')`)).toBe(10);
   });
 
+  test('undoing a check-in and cancelling its hours puts them back on the team, not here yet (bug hunt 2026-11-18)', async ({ page }) => {
+    const voids = rpcs(page, 'staff_volunteer_hours_void');
+    const times = rpcs(page, 'staff_volunteer_shift_times');
+    const saves = rpcs(page, 'staff_volunteer_shift_save');
+    // Given the session's hours while on duty (fixed hours, Give all): the award made the shift 'done'.
+    const sh = shifts.map((x) => (x.customer_id === 'c1' ? { ...x, status: 'done', clock_in: '2099-11-05T14:00:00+00:00', clock_out: null } : x));
+    const award = [{ id: 11, customer_id: 'c1', session_id: SID, hours: 3, worked_on: '2026-11-05', source: 'session', added_by: 'Admin One' }];
+    await staff(page, { volunteer_shifts: sh, volunteer_hours: award, 'rpc:staff_volunteer_hours_void': { ok: true, total: 0 }, 'rpc:staff_volunteer_shift_times': { ok: true }, 'rpc:staff_volunteer_shift_save': { ok: true } });
+    await menu(page, row(page, 'c1'), 'Undo check-in');
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Undo and cancel the hours' }).click();
+    await expect.poll(() => saves.length).toBe(1);
+    expect(voids[0]).toEqual({ p_id: 11 });
+    expect(times[0]).toMatchObject({ p_customer: 'c1', p_in: null, p_out: null });
+    expect(saves[0]).toEqual({ p_session: SID, p_customer: 'c1', p_status: 'accepted' });
+    // Not Finished: on the team, not here yet, so End the shift can mark them and the hours are not offered again.
+    expect(await page.evaluate(`_vdState(_vdOne('${SID}','c1'))`)).toBe('wait');
+  });
+
+  test('every shift is read, past the 1,000 rows one request stops at (bug hunt 2026-11-18)', async ({ page }) => {
+    const many = [...Array.from({ length: 1049 }, (_, i) => ({ id: 100 + i, session_id: SID, customer_id: `x${i}`, status: 'declined', created_at: '2026-11-01T10:00:00Z' })),
+      { id: 2000, session_id: SID, customer_id: 'c1', status: 'accepted', role: 'Check-in', clock_in: null, clock_out: null, created_at: '2026-11-04T10:00:00Z' }];
+    await stubSupabase(page, fx());
+    // As PostgREST: at most 1,000 rows a request, after the id given, whatever the request asks for.
+    await page.route('**/rest/v1/volunteer_shifts*', async (route) => {
+      if (route.request().method() !== 'GET') return route.fallback();
+      const u = new URL(route.request().url());
+      const gt = Number(String(u.searchParams.get('id') || '').replace(/^gt\./, '')) || 0;
+      const lim = Math.min(Number(u.searchParams.get('limit')) || 1000, 1000);
+      return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(many.filter((r) => r.id > gt).slice(0, lim)) });
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await goStaffTab(page, 'volunteers');
+    await expect(row(page, 'c1')).toBeVisible();
+    expect(await page.evaluate('_vm().shifts.length')).toBe(1050);
+  });
+
   test('add several: a number written with spaces is one number, Arabic digits count, and a mobile two accounts share is left to Add a volunteer', async ({ page }) => {
     const saves = rpcs(page, 'staff_volunteer_save');
     const twins = [{ id: 'c4', name: 'Lina Fares', phone: '+966500000004', created_at: '2026-01-04' }, { id: 'c5', name: 'Hadi Fares', phone: '+966500000004', created_at: '2026-01-05' }];

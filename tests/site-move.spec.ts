@@ -155,7 +155,9 @@ test.describe('@build the move: the middleware on the old address', () => {
 // Cloudflare calls it), the new one by the test server. An intercepted request's allHeaders() never
 // settles, so the Sec-Fetch-* headers are the ones a browser sends for what Playwright says it is: a
 // top-level navigation, or a fetch from the page. (The real worker below meets the real headers.)
-async function serveOld(page: Page, onRequest: Fn) {
+// noReferrer: the hand-over page as a browser that sends no referrer at all meets it (Firefox's
+// sendRefererHeader=0, a referrer-stripping extension): the new address sees no former origin.
+async function serveOld(page: Page, onRequest: Fn, noReferrer = false) {
   await page.route(`${OLD}/**`, async (route) => {
     const req = route.request();
     const headers = new Headers(req.isNavigationRequest() && req.frame() === page.mainFrame() ? NAV
@@ -166,7 +168,12 @@ async function serveOld(page: Page, onRequest: Fn) {
     });
     const out: Record<string, string> = {};
     res.headers.forEach((v, k) => { out[k] = v; });
-    await route.fulfill({ status: res.status, headers: out, body: Buffer.from(await res.arrayBuffer()) });
+    let body = Buffer.from(await res.arrayBuffer());
+    if (noReferrer && out['referrer-policy']) {
+      out['referrer-policy'] = 'no-referrer';
+      body = Buffer.from(body.toString('utf8').replace('<meta name="referrer" content="origin">', '<meta name="referrer" content="no-referrer">'));
+    }
+    await route.fulfill({ status: res.status, headers: out, body });
   });
 }
 async function serveNew(page: Page, baseURL: string) {
@@ -307,7 +314,8 @@ test.describe('@customer:move a rider who comes to the new address straight', ()
 
     await page.goto(`${NEW}/my-bookings?x=1#keep=1`);
     await expect.poll(() => trips.length).toBe(1);
-    expect(trips[0]).toBe(`${OLD}/my-bookings?x=1`); // a request never carries its fragment: the page below shows it came back
+    // A request never carries its fragment (the page below shows it came back); the trip carries the nonce the page stored.
+    expect(trips[0]).toMatch(new RegExp(`^${OLD.replace(/\./g, '\\.')}/my-bookings\\?x=1&mm-n=[0-9a-f]{24}$`));
     await page.waitForURL(`${NEW}/**`);
     await waitForSb(page);
     // @ts-expect-error a probe for the spec
@@ -325,6 +333,41 @@ test.describe('@customer:move a rider who comes to the new address straight', ()
     await page.goto(`${NEW}/`);
     await waitForSb(page);
     expect(trips).toEqual([]);
+    expect(await page.evaluate(() => localStorage.getItem('cq_session'))).toBeNull();
+    await page.unrouteAll({ behavior: 'ignoreErrors' }); // the signed-in app still fetching as the page closes
+  });
+
+  test('a browser that sends no referrer is refused the hand-over, then its own trip brings it back; a crafted link never again', async ({ page, baseURL }) => {
+    const onRequest = await middleware();
+    await stubSupabase(page, fixtures);
+    await serveOld(page, onRequest, true);
+    await serveNew(page, baseURL!);
+    await asPerson(page);
+    await page.goto(`${OLD}/api/seed`);
+    await page.evaluate((r) => { localStorage.setItem('cq_session', JSON.stringify(r)); localStorage.setItem('cq_book_outbox', '[{"id":"o1"}]'); }, RIDER);
+    const trips = tripsToOld(page);
+
+    await page.goto(`${OLD}/my-bookings`);
+    // Refused for want of a referrer (what it carried is off the old address by then), the page makes its one trip
+    // there with its nonce, and the copy kept there comes back with it.
+    await page.waitForURL((u) => u.origin === NEW && trips.length === 2 && !u.search.includes('mm-n') && !u.hash.includes('mm-move'));
+    expect(trips[1]).toMatch(/[?&]mm-n=[0-9a-f]{24}$/);
+    await waitForSb(page);
+    // @ts-expect-error a probe for the spec
+    expect(await page.evaluate(() => window.__rs[0])).toBe('/my-bookings');
+    expect(page.url()).not.toMatch(/mm-n|mm-move/);
+    // @ts-expect-error a probe for the spec
+    expect(await page.evaluate(() => window.__set)).toEqual(expect.arrayContaining([['l', 'cq_session', JSON.stringify(RIDER)], ['l', 'cq_book_outbox', '[{"id":"o1"}]']]));
+    expect(await page.evaluate(() => ({
+      // @ts-expect-error app globals
+      signedIn: getSession()?.id, nonce: localStorage.getItem('cq_move_n'),
+    }))).toEqual({ signedIn: 'c1', nonce: null });
+
+    // Signed out here; a crafted link with a nonce of its own brings the kept copy over, and it is not taken.
+    await page.evaluate(() => localStorage.removeItem('cq_session'));
+    await page.goto(`${OLD}/reserve?mm-n=0123456789abcdef01234567`);
+    await page.waitForURL(`${NEW}/reserve`);
+    await waitForSb(page);
     expect(await page.evaluate(() => localStorage.getItem('cq_session'))).toBeNull();
     await page.unrouteAll({ behavior: 'ignoreErrors' }); // the signed-in app still fetching as the page closes
   });
