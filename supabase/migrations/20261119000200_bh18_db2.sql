@@ -562,9 +562,8 @@ declare d text;
 begin
   d := pg_get_functiondef('public.customer_community_apply(text,text,jsonb)'::regprocedure);
   if position('(20261119000200)' in d) > 0 then return; end if;
-  d := pg_temp._once(d,
-$a$   -- another account's application stays its own, whatever number or email it shares (20261005210200)
-   where x.status = 'pending' and (x.customer_id = p_id or (x.customer_id is null and (lower(x.email) = v_email or x.phone = v_phone)))
+  d := pg_temp._once(d,   -- the live text has no comment line above it since 20261110235400 (checked on both databases 2026-11-18)
+$a$   where x.status = 'pending' and (x.customer_id = p_id or (x.customer_id is null and (lower(x.email) = v_email or x.phone = v_phone)))
    order by (x.customer_id = p_id) desc nulls last, (lower(x.email) = v_email) desc, x.created_at limit 1;$a$,
 $b$   -- another account's application stays its own, whatever number or email it shares (20261005210200); one with
    -- no account is linked by its email only, never by a number staff may have put on several accounts (bug hunt
