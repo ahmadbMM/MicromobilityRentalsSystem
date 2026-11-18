@@ -9779,5 +9779,15 @@
   "bmvPickOther": "Elegir otra sesión",
   "bmvNotMoved": "{0} sin mover:",
   "bmvLog": "Movido",
-  "bmvUndo": "Deshacer el movimiento"
+  "bmvUndo": "Deshacer el movimiento",
+  "qclCall": "Llamar al mostrador",
+  "qclNext": "Llamar al siguiente",
+  "qclScreen": "Pantalla de llamadas",
+  "qclCalled": "Llamado {0}",
+  "qclDesk": "Mostrador {0}",
+  "qclNone": "Nadie espera ser llamado",
+  "qclNotSent": "La llamada no llegó a las pantallas. Revisa la conexión y llama de nuevo.",
+  "qclSound": "Sonido",
+  "qclExit": "Salir",
+  "qclDeskNo": "Número de mostrador"
 }

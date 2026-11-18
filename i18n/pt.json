@@ -9779,5 +9779,15 @@
   "bmvPickOther": "Escolher outra sessão",
   "bmvNotMoved": "{0} não movidos:",
   "bmvLog": "Movido",
-  "bmvUndo": "Desfazer a mudança"
+  "bmvUndo": "Desfazer a mudança",
+  "qclCall": "Chamar ao balcão",
+  "qclNext": "Chamar o próximo",
+  "qclScreen": "Tela de chamadas",
+  "qclCalled": "Chamado {0}",
+  "qclDesk": "Balcão {0}",
+  "qclNone": "Ninguém aguarda ser chamado",
+  "qclNotSent": "A chamada não chegou às telas. Verifique a conexão e chame de novo.",
+  "qclSound": "Som",
+  "qclExit": "Sair",
+  "qclDeskNo": "Número do balcão"
 }

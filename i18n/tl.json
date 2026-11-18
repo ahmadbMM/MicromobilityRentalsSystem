@@ -9779,5 +9779,15 @@
   "bmvPickOther": "Pumili ng ibang sesyon",
   "bmvNotMoved": "Hindi nailipat ang {0}:",
   "bmvLog": "Inilipat",
-  "bmvUndo": "I-undo ang paglipat"
+  "bmvUndo": "I-undo ang paglipat",
+  "qclCall": "Tawagin sa desk",
+  "qclNext": "Tawagin ang susunod",
+  "qclScreen": "Screen ng pagtawag",
+  "qclCalled": "Tinawag {0}",
+  "qclDesk": "Desk {0}",
+  "qclNone": "Walang naghihintay na tawagin",
+  "qclNotSent": "Hindi umabot sa mga screen ang tawag. Tingnan ang koneksyon at tumawag ulit.",
+  "qclSound": "Tunog",
+  "qclExit": "Lumabas",
+  "qclDeskNo": "Numero ng desk"
 }

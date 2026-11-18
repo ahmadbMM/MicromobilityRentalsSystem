@@ -9779,5 +9779,15 @@
   "bmvPickOther": "Choisir une autre session",
   "bmvNotMoved": "{0} non déplacés :",
   "bmvLog": "Déplacé",
-  "bmvUndo": "Annuler le déplacement"
+  "bmvUndo": "Annuler le déplacement",
+  "qclCall": "Appeler au comptoir",
+  "qclNext": "Appeler le suivant",
+  "qclScreen": "Écran d'appel",
+  "qclCalled": "Appelé {0}",
+  "qclDesk": "Comptoir {0}",
+  "qclNone": "Personne n'attend d'être appelé",
+  "qclNotSent": "L'appel n'a pas atteint les écrans. Vérifiez la connexion et appelez à nouveau.",
+  "qclSound": "Son",
+  "qclExit": "Quitter",
+  "qclDeskNo": "Numéro du comptoir"
 }

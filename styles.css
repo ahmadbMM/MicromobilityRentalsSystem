@@ -13437,6 +13437,31 @@ body.vol-mode #topbar-right{visibility:hidden;}
 body.door-mode.view-staff #door-page{display:block;}
 body.door-mode #view-staff{display:none!important;}
 body.door-mode #topbar-right{visibility:hidden;}
+/* The calling screen (2026-11-18): /bookings/screen over the hidden panel, booking numbers only, read from 10 m away;
+   the colours are the theme's tokens, so the light and dark themes both hold. */
+#qcl-page{display:none;}
+body.qcl-mode.view-staff #qcl-page{display:block;}
+body.qcl-mode #view-staff,body.qcl-mode #topbar{display:none!important;}
+#qcl-page .qcl-wrap{box-sizing:border-box;min-height:100vh;min-height:100dvh;padding:clamp(16px,2.5vw,40px);display:grid;grid-template-rows:auto auto 1fr;gap:clamp(14px,2.5vw,36px);background:var(--bg);color:var(--text);}
+#qcl-page .qcl-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+#qcl-page .qcl-title{margin:0;font-size:clamp(1.25rem,3vw,2.75rem);font-weight:600;line-height:1.15;}
+#qcl-page .qcl-when{margin-top:4px;color:var(--muted);font-size:clamp(.875rem,2vw,1.75rem);font-weight:600;}
+#qcl-page .qcl-ctl{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;}
+#qcl-page .qcl-snd[aria-pressed="false"]{opacity:.65;text-decoration:line-through;}
+#qcl-page .qcl-h{margin:0 0 clamp(8px,1.5vw,20px);display:flex;flex-wrap:wrap;align-items:baseline;gap:.15em 1em;font-size:clamp(1.25rem,3.2vw,3rem);font-weight:600;line-height:1.2;color:var(--text);}
+#qcl-page .qcl-desks{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,clamp(220px,30vw,520px)),1fr));gap:clamp(10px,2vw,28px);}
+#qcl-page .qcl-desk{display:grid;justify-items:center;align-content:center;gap:.3em;container-type:inline-size;padding:clamp(14px,2vw,32px);border:3px solid var(--border);border-radius:var(--sf-r-card);background:var(--s1);text-align:center;}
+#qcl-page .qcl-desk.qcl-new{border-color:var(--green);box-shadow:0 0 0 3px var(--green);}
+#qcl-page .qcl-num{font-size:clamp(4rem,13vw,16rem);font-size:clamp(3rem,30cqi,16rem);font-weight:600;line-height:1;white-space:nowrap;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--text);}
+#qcl-page .qcl-num.qcl-long{font-size:clamp(2.5rem,9vw,12rem);font-size:clamp(2.5rem,19cqi,12rem);} /* PM-004, I-012: the card's width sets the size, so a long number stays on one line */
+#qcl-page .qcl-dk{display:flex;flex-wrap:wrap;justify-content:center;gap:.15em .8em;font-size:clamp(1.25rem,3vw,3rem);font-weight:600;color:var(--text);}
+#qcl-page .qcl-none{font-size:clamp(4rem,13vw,16rem);line-height:1;color:var(--muted);border-style:dashed;}
+#qcl-page .qcl-list{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:clamp(8px,1.5vw,20px);}
+#qcl-page .qcl-list li{padding:.1em .45em;border:2px solid var(--border);border-radius:var(--sf-r-ctl);background:var(--s1);font-size:clamp(1.75rem,5vw,5rem);font-weight:600;font-variant-numeric:tabular-nums;}
+@media (prefers-reduced-motion:no-preference){#qcl-page .qcl-new{animation:qcl-in .9s ease-in-out 2;}}
+@keyframes qcl-in{0%,100%{transform:scale(1);}45%{transform:scale(1.04);}}
+:is(#tab-queue,#tab-waitlist) .qcl-pill{display:inline-flex;align-items:center;gap:4px;margin-inline-start:6px;padding:1px 6px;border:1px solid var(--blue);color:var(--blue);font-size:var(--sf-fs-xs);font-weight:600;white-space:nowrap;vertical-align:middle;}
+.set-desk-no select{max-width:8em;}
 body.door-mode #scan-modal :is(.bkm-srow,.bkm-srow6,#scan-batch,#scan-express-hint,#scan-tally,#scan-details,#scan-except){display:none;}
 #door-page .zg-wrap{box-sizing:border-box;max-width:560px;margin:0 auto;padding:16px 16px 48px;display:grid;gap:12px;}
 #door-page .zg-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}

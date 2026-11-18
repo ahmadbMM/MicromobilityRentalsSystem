@@ -3362,6 +3362,29 @@ within 14 days, gets 14 more days.
   (`_ciPaint`). No table, no reads. Before the migration the join is refused and retried slowly. Specs set `S._n6bPres`.
 - `tests/n6-bookings-review.spec.ts`.
 
+## The calling screen (2026-11-18, migration 20261118220500)
+The user's pick of the staff Bookings features: "Now-calling screen. A big-screen mode on a staff device, like Ask's big
+screen. It shows booking numbers only ('Desk 1: #23'), so the crowd waits without asking."
+- **A call** is a broadcast `qcl` `{sid, id, num, desk, at}` on the private topic `staff-desk`, sent over the presence
+  channel (`_n6bPresCh`, now with `broadcast:{ack:true}`). 20261107100000 let staff write only presence there; the
+  migration adds the policy "staff call on staff-desk" (INSERT, extension broadcast, is_staff()). No table: each device
+  keeps the night's calls in memory (`S._qclL`, the latest per booking in `S._qcl`); a refused or unanswered send says
+  `qclNotSent` (the call stays on this desk). `num` is what the rider knows (`_qclNum`: I-001, a registration's PM-/PL-/D-,
+  else #n).
+- **Who can be called** (`_qclOk`): waiting (to be reserved and reserved included), a number, approved where the ride
+  approves (an approval ride only once its list is out), the night not over. Call to the desk on the booking's menu
+  (`_qclCall`, RS_ITEM 'bk'); Call next in the header's Session group (`_qclNext`: the lowest number no desk has called on
+  this device's memory; nobody left says `qclNone` as info). A called waiting row shows `.qcl-pill` "Called 21:04" in
+  its status cell (`_qclPill`). Desk number: Settings > This device (`cq_desk_no`, 1-9, default 1).
+- **The screen** is `/bookings/screen?s=<sid>` (`SUB_PATHS.queue.screen`, `S.queueView='screen'`): Calling screen opens it
+  with `window.open` (a blocked window opens it in this tab). `renderStaffQueue` hands it to `_qclScreen`; `body.qcl-mode`
+  hides `#view-staff` and `#topbar`; `_qclOff` puts the panel back (any other queue view, `setStaffTab` to another
+  section, Exit). It keeps the screen awake whatever the desk's switch says (`_wakeWant`), starts empty, shows each desk's
+  latest number large (the newest marked `.qcl-new`) and the eight before under Called, headings in English and Arabic
+  together (constants in `_qclBi`, not keys), numbers only, a WebAudio chime (`cq_qcl_snd`) and Exit.
+- Code: the core keeps the pill, the menu entry, the header buttons, the address and the channel hook; the rest is in the
+  desk part (`_qclCall`, `_qclNext`, `_qclOpen`, `_qclScreen`, `_qclRx` are entries). `tests/calling-screen.spec.ts`.
+
 ## Referrals (2026-11-08, migration 20261108160000)
 
 The owner: "referring a friend that completes a paid ride gets a free ride".
