@@ -341,3 +341,105 @@ test.describe('@staff:sessions test rides (EF23)', () => {
     expect(posts[0]).toMatchObject({ id: d9 + '-tr', event_kind: 'community', ride_kind: 'testride', open_to_all: true, paid_ride: false, needs_approval: false, title: null });
   });
 });
+
+// ── B10 follow-up: the passkeys' staff side (N06; B7, migration 20261119300100, switch account.passkeys OFF) ─────────────
+test.describe('@staff:people passkeys on the account window, the switch, the activity words (N06)', () => {
+  const cust = { id: 'cust-pk', name: 'Lina Key', phone: '+966500000077', email: 'lina@example.test', created_at: '2026-01-01T00:00:00Z' };
+  const items = [
+    { id: '11111111-1111-4111-8111-111111111111', label: 'icloud', created_at: '2026-11-01T10:00:00Z', last_used_at: '2026-11-17T10:00:00Z', backed_up: true, counter_flag_at: null, live: true },
+    { id: '22222222-2222-4222-8222-222222222222', label: 'android', created_at: '2026-11-05T10:00:00Z', last_used_at: null, backed_up: false, counter_flag_at: '2026-11-16T10:00:00Z', live: false },
+  ];
+  const win = (page: Page) => page.locator('#cust-modal');
+
+  test('the account window lists the passkeys with their marks; Remove one and Remove all, each asked first', async ({ page }) => {
+    const seen = rpcCalls(page);
+    await staff(page, { customers: [cust], 'rpc:staff_store_ready': true, 'rpc:staff_passkeys': { on: false, items }, 'rpc:staff_passkey_remove': { removed: 1 } });
+    await expect.poll(() => page.evaluate('S._storeReady')).toBe(true);
+    await page.evaluate(`openAccountHistory('cust-pk')`);
+    const sec = win(page).locator('.pk-ah');
+    await expect(sec).toContainText('Passkeys');
+    await expect(sec.locator('.pk-li')).toHaveCount(2);
+    const one = sec.locator('.pk-li').nth(0), two = sec.locator('.pk-li').nth(1);
+    await expect(one).toContainText('iCloud Keychain');
+    await expect(one).toContainText('Synced');
+    await expect(one).toContainText('Last used');
+    await expect(two).toContainText('Android phone');
+    await expect(two.locator('.pk-warn')).toContainText('Possible copy'); // counter_flag_at
+    await expect(two).toContainText('Signed out');                        // live false
+    expect(seen.find((c) => c.name === 'staff_passkeys')!.body).toEqual({ p_customer: 'cust-pk' });
+    // Remove one: asked in a centred pop-up, then the one passkey
+    await one.getByRole('button', { name: 'Remove', exact: true }).click();
+    const dlg = page.locator('#confirm-modal [role="dialog"], .modal-backdrop [role="dialog"]').filter({ hasText: 'Remove the passkey iCloud Keychain?' });
+    await expect(dlg).toBeVisible();
+    await dlg.getByRole('button', { name: 'Remove', exact: true }).click();
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_passkey_remove').length).toBe(1);
+    expect(seen.find((c) => c.name === 'staff_passkey_remove')!.body).toEqual({ p_customer: 'cust-pk', p_passkey: items[0].id });
+    await expect(page.locator('#toast-container')).toContainText('Passkeys removed: 1');
+    // Remove all: every passkey of the account (p_passkey null)
+    await sec.locator('.pk-all').click();
+    const all = page.locator('[role="dialog"]').filter({ hasText: 'Remove all 2 passkeys of Lina Key?' });
+    await expect(all).toBeVisible();
+    await all.getByRole('button', { name: 'Remove all' }).click();
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_passkey_remove').length).toBe(2);
+    expect(seen.filter((c) => c.name === 'staff_passkey_remove')[1].body).toEqual({ p_customer: 'cust-pk', p_passkey: null });
+  });
+
+  test('a refused removal is said; without the store (production) nothing is asked; a database without passkeys is not asked again', async ({ page }) => {
+    await staff(page, { customers: [cust], 'rpc:staff_store_ready': true, 'rpc:staff_passkeys': { on: true, items: [items[0]] },
+      'rpc:staff_passkey_remove': { __rpcError: { status: 403, code: '42501', message: 'STAFF_ONLY' } } });
+    await expect.poll(() => page.evaluate('S._storeReady')).toBe(true);
+    await page.evaluate(`openAccountHistory('cust-pk')`);
+    await win(page).locator('.pk-li').getByRole('button', { name: 'Remove', exact: true }).click();
+    await page.locator('[role="dialog"]').filter({ hasText: 'Remove the passkey' }).getByRole('button', { name: 'Remove', exact: true }).click();
+    await expect(page.locator('#toast-container .toast.error')).toBeVisible();
+    await expect(win(page).locator('.pk-li')).toHaveCount(1);
+    // production: no staff_store_ready, so no staff_passkeys either
+    const p2 = await page.context().newPage();
+    const seen2 = rpcCalls(p2);
+    await staff(p2, { customers: [cust], 'rpc:staff_passkeys': { on: true, items } });
+    await expect.poll(() => p2.evaluate('S._storeReady')).toBe(false);
+    await p2.evaluate(`openAccountHistory('cust-pk')`);
+    await expect(p2.locator('#cust-modal')).toContainText('Lina Key');
+    await expect(p2.locator('#cust-modal .pk-ah')).toHaveCount(0);
+    expect(seen2.filter((c) => c.name === 'staff_passkeys')).toHaveLength(0);
+    // the store but not the passkeys (404): no section, and the next window does not ask again
+    const p3 = await page.context().newPage();
+    const seen3 = rpcCalls(p3);
+    await staff(p3, { customers: [cust, { ...cust, id: 'cust-pk2', name: 'Omar Key' }], 'rpc:staff_store_ready': true,
+      'rpc:staff_passkeys': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.staff_passkeys in the schema cache' } } });
+    await expect.poll(() => p3.evaluate('S._storeReady')).toBe(true);
+    await p3.evaluate(`openAccountHistory('cust-pk')`);
+    await expect.poll(() => p3.evaluate('!!(S._pkO&&S._pkO.gone)')).toBe(true);
+    await p3.evaluate(`closeCustomerProfile();openAccountHistory('cust-pk2')`);
+    await expect(p3.locator('#cust-modal')).toContainText('Omar Key');
+    await expect(p3.locator('#cust-modal .pk-ah')).toHaveCount(0);
+    expect(seen3.filter((c) => c.name === 'staff_passkeys')).toHaveLength(1);
+  });
+
+  test('the Website section switches passkey sign-in (account.passkeys) where the database has it; the activity says passkeys', async ({ page }) => {
+    const sc = writes(page, 'site_content');
+    await staff(page, { 'rpc:staff_store_ready': true, 'rpc:staff_passkeys': { on: false, items: [] }, site_content: [{ key: 'account.passkeys', value: { on: false }, updated_at: NOW }] });
+    await expect.poll(() => page.evaluate('S._storeReady')).toBe(true);
+    await page.evaluate(`setStaffTab('website')`);
+    const sw = page.locator('#web-pk-switch');
+    await expect(sw).toBeVisible();
+    await expect(sw).not.toBeChecked();
+    await sw.check();
+    await expect.poll(() => sc.length).toBeGreaterThan(0);
+    expect(sc[0].body).toEqual([expect.objectContaining({ key: 'account.passkeys', value: { on: true } })]);
+    await expect(page.locator('#toast-container')).toContainText('Passkey sign-in turned on');
+    // the customer activity's words (the database writes the lines: B7's _passkey_log)
+    await page.evaluate(`typeof _cactDetail==='function'||_n6pAhLoad()`);
+    await page.waitForFunction(`typeof _cactDetail==='function'`);
+    expect(await page.evaluate(`[_cactLabel({action:'passkey_add'}),_cactDetail({action:'passkey_add',detail:{label:'google'}}),_cactLabel({action:'passkey_remove'}),
+      _cactDetail({action:'passkey_remove',detail:{by:'staff',n:2}}),_cactDetail({action:'signin',detail:{passkey:true}}),_CACT_CAT.passkey_add]`))
+      .toEqual(['Added a passkey', 'Google Password Manager', 'Removed a passkey', 'by staff ×2', 'with a passkey', 'auth']);
+    // production: no card at all
+    const p2 = await page.context().newPage();
+    await staff(p2, { 'rpc:staff_passkeys': { on: true, items: [] }, site_content: [] });
+    await expect.poll(() => p2.evaluate('S._storeReady')).toBe(false);
+    await p2.evaluate(`setStaffTab('website')`);
+    await expect(p2.locator('#tab-website .page-title')).toBeVisible();
+    await expect(p2.locator('#web-pk-switch')).toHaveCount(0);
+  });
+});

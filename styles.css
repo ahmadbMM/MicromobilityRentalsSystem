@@ -15333,6 +15333,13 @@ body.view-staff #confirm-modal .fup-err{color:var(--red);font-size:var(--sf-fs-s
 body.view-staff #confirm-modal .fup-err:empty{display:none;}
 body.view-staff #cust-modal .wal-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;}
 body.view-staff #cust-modal .wal-li{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;font-size:var(--sf-fs-sm,.8125rem);}
+/* Passkeys on the account window (N06, 2026-11-18): one row each, Remove at the end; a signed-out one quieter; a possible copy in red */
+body.view-staff #cust-modal .pk-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+body.view-staff #cust-modal .pk-li{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:var(--sf-fs-sm,.8125rem);}
+body.view-staff #cust-modal .pk-what{display:flex;flex-direction:column;min-width:0;}
+body.view-staff #cust-modal .pk-li.pk-out .pk-what{opacity:.6;}
+body.view-staff #cust-modal .pk-warn{display:inline-flex;align-items:center;gap:4px;color:var(--red);font-weight:600;}
+body.view-staff #cust-modal .pk-li .btn-sm,body.view-staff #cust-modal .pk-all{flex:none;min-height:44px;}
 body.view-staff #cust-modal .wal-what{font-weight:600;overflow-wrap:anywhere;}
 /* People round (2026-11-18): the account window's owner and family, rides with; the family picker; the last bike */
 body.view-staff #cust-modal .fup-who{background:none;border:0;padding:4px;margin:-4px;font:inherit;font-weight:600;color:var(--text);text-decoration:underline;cursor:pointer;}
