@@ -3385,6 +3385,71 @@ screen. It shows booking numbers only ('Desk 1: #23'), so the crowd waits withou
 - Code: the core keeps the pill, the menu entry, the header buttons, the address and the channel hook; the rest is in the
   desk part (`_qclCall`, `_qclNext`, `_qclOpen`, `_qclScreen`, `_qclRx` are entries). `tests/calling-screen.spec.ts`.
 
+## Move N: the ticked riders to another session (2026-11-18, no migration)
+Item 2 of the staff Bookings round ("do 2 4 6 7 9 10"). Spec: `tests/bulk-move.spec.ts`.
+- The selection row's **Move {0}** (`#bulk-move`, `_bmvOk`): the ticked riders still in line (waiting in any form,
+  waitlisted; never on a bike, done, no-show, cancelled, removed, nor a Blood Donation booking); Bookings editors only.
+- `_bmvOpen` (desk part entry) opens a centred `_dkSheet`: the session picker (`_bmvTo`: live, not over, not called off,
+  not a draft, not an approval ride or Blood Donation, not their own), the target's places left and each moving type's
+  (`_bmvFigs`), "Move their whole party" (on, `_partyOf` on that night), "Move N riders" / participants (`_bmvGoLbl`).
+- Each row moves exactly as Edit Booking's session change: that code is three shared functions, `_bkRideCols`,
+  `_bkMoveCols`, `_bkMoveWrite` (guarded on the status, 23505 renumbered after a fresh read, PAID_MOVE). **Both the single
+  and the bulk move now let go of a bike reserved for the old night.** One write per rider through `_saveLane` (never a
+  Promise.all, no server function); numbers counted up from this desk's copy so two riders never share one.
+- A full session or type asks first (Move anyway / Pick another session). Offline refuses (`_offlineStop`). Moved rows
+  leave at once; a refused one comes back ticked, named in the sheet with why (the sheet stays open only then). One Log
+  line per rider (kind 'move') and one topbar Undo (`pushUndo`, `_bmvUndo`, guarded). Words: prefix `bmv`.
+
+## New since you last looked (2026-11-18, no migration)
+Item 7 of the staff Bookings round. Spec: `tests/new-since.spec.ts`.
+- Per device and night: `cq_nwx` {session: when} is the last look, written when the night is left (another night or
+  section, page hidden or closed; newest 60 kept); `cq_nwx_ty` {session: {booking: type}} what the night held then
+  (newest 12), so a type change or a booking moved onto the night can be told (updated_at cannot: a check-in moves it).
+  A visit counts from the PREVIOUS look; a night never opened on the device shows no figure.
+- New = registered_at after the look; Cancelled = cancelled_at after it; Changed = another bike type, or on the night now
+  and not then. This device's own writes after the look are left out (`_writeErr` landed rows, inserts, the outbox).
+- "New N" chip beside Owing (`--nwx-c`); tapping sets the status filter `nwx` (cancelled rows show in it), rows marked
+  New / Cancelled / Changed (`_nwxTag`); Seen in the result line resets the look. No bar, no toast.
+- The figure, mark and filter are in the core; the look, count and Seen in the desk part (`_nwxBoot`, called through
+  `_nwxW`). Also fixed: the Bookings Filters panel was handed a stray '' in place of its spec, so its button never counted
+  a filter nor offered Clear.
+
+## Late arrivals (2026-11-18, no migration)
+Item 9 of the staff Bookings round. Spec: `tests/late-arrivals.spec.ts`.
+- The time to turn up (`_ltrAt`): a gathering ride's gathering time, else the start for `LTR_KINDS` (workshop, event,
+  yoga, Defe 5K); never circuit, Petromin or other open-window nights, the pool, blood or the Arena race.
+- Late (`_ltrMin`): checked_in_at more than `LTR_GRACE_MIN` = 10 whole minutes after it, Riyadh time, same day; on a
+  bike or back only. "Late {0} min" sits in the status cell's second line before `.rq-by` (no new line).
+- `lateFlag` beside `noShowFlag` wherever that shows: per account (else phone) over the last five check-ins on sessions
+  with a time to turn up, from the second late one, "{0}/{1} late".
+- "Late" in the Filters panel's status list and `status:late` / `حالة:متأخر` in the search operators. Core only. Prefix `ltr`.
+
+## Few spots left, automatic (2026-11-18, no migration)
+Item 4 of the staff Bookings round; extends "Few spots left (2026-11-15)" above. Spec: `tests/few-spots.spec.ts`.
+- `bike_slots._fewAt` (whole number 1-999; empty = off), set as "Automatically at N places left" under the switch on both
+  session forms. `_sessFew(s)`: live, not full, and the switch OR places left (`spotsLeft`, the count behind "N spots
+  left") at or under `_fewAt`. An approval ride with no spots/capacity of its own follows the switch alone. Waitlisted
+  requests hold no place. A count of three or fewer, Waitlist, Fully booked, not open yet and the rider's own mark still win.
+- The editor rebuilds bike_slots from scratch, so `_fewAt` is carried through `_saveSessionEdit`, `_nsSlots`, `_nsCopy`,
+  templates (`NS_TPL_KEYS`, `NS_TPL_BLANK`) and Copy week. Words `fwaAt` / `fwaUnit`.
+- **Website mirror** (mm-platform apps/web/src/lib/rides.ts): `fewAt` read from `bike_slots._fewAt`, and few is on once
+  the places left reach it; keep the two in step.
+
+## Lost and found (2026-11-18, migration 20261118221000)
+Item 10 of the staff Bookings round. Spec: `tests/lost-found.spec.ts`.
+- Table `found_items` (one row per thing found at a session: what, place, note, photo as a small data: URL, booking or
+  account, state kept / collected / disposed, keep_until). Trigger `_found_items_fill` (SECURITY DEFINER) copies the
+  owner and name from the booking (always the item's own night) or the account, defaults keep_until to the night + 14
+  days, refuses more than a year away, stamps who/when (`_lk_who`). Staff read; `_staff_mod('queue', true)` writes
+  (Lockers editors too); admins delete; no anon. `_found_items_broadcast` sends each change on `staff-ref` (event
+  `found_items`, photo left out, `has_photo` instead). No foreign keys: a session moves by insert and delete.
+- Bookings header Session tools: "Lost and found" (`_lnfOpen`, desk part entry): this session's items, then every item
+  still kept (others' and the lockers' items), Add found item (What required, Where, Note, Photo through `_photoSmall`,
+  Belongs to, Keep until). Mark collected / donated (painted at once, written guarded on kept), WhatsApp the owner (en+ar),
+  Edit. A booking's menu: "Record found item" after Record incident, the booking filled in.
+- Lockers > Items lists found items beside the lockers' items; `_lkItemOpen` became a Lockers entry. Before the table
+  exists, both say "Waiting for the database update". Prefix `lnf`.
+
 ## Referrals (2026-11-08, migration 20261108160000)
 
 The owner: "referring a friend that completes a paid ride gets a free ride".
