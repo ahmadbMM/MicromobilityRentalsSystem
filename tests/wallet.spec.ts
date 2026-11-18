@@ -244,6 +244,18 @@ test.describe('@staff:customers wallet', () => {
     expect(till).toEqual({ ride: { cash: 80, card: 50 }, shop: { cash: 0, card: 70 } });
   });
 
+  test('the till: a ride takes its wallet moves whatever the hour; the shop a refund on the day its receipt was sold (bug hunt 2026-11-18, app46-3)', async ({ page }) => {
+    await staff(page);
+    const r = await page.evaluate(`(()=>{const day=n=>_ksaYmd(Date.now()+n*864e5),at=n=>new Date(Date.now()+n*864e5).toISOString();
+      S.cashSales=[{id:'l1',receipt_id:'r1',session_id:null,name:'Gel',qty:1,price:20,pay:'refunded',created_at:at(-1)}];
+      S._cwMoves=[
+        {kind:'topup',amount:100,method:'cash',session_id:'s1',created_at:at(2)},
+        {kind:'refund',amount:20,method:'cash',card_part:0,session_id:null,receipt_id:'r1',created_at:at(0)},
+        {kind:'topup',amount:30,method:'card',session_id:null,created_at:at(0)}];
+      return{ride:_cwTill({day:day(1)},new Set(['s1'])),today:_cwTill({day:day(0),shop:true}),yesterday:_cwTill({day:day(-1),shop:true})}})()`);
+    expect(r).toEqual({ ride: { cash: 100, card: 0 }, today: { cash: 0, card: 30 }, yesterday: { cash: 20, card: 0 } });
+  });
+
   test('a database without the wallet: no button, no tab, no pay line, nothing refused', async ({ page }) => {
     await stubSupabase(page, { sessions, customers, tags: [], customer_tags: [], queue_entries: [bk('q1', 1)], bikes: [], staff_options: [], 'rpc:staff_wallet_balances': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function in the schema cache' } } });
     await unlockStaff(page);

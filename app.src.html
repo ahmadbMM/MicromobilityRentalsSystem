@@ -10717,6 +10717,7 @@ async function _vmRead(W){
   if(bad){if(_vmMissing(bad.error))W.missing=true;else W.err=true;}
   else{
     W.missing=false;W.rows=a.data||[];W.sess=b.data||[];W.shifts=c.data||[];W.hours=d.data||[];W.cfg=(e.data&&e.data.data)||{};W.tot=f.error?null:new Map((f.data||[]).map(r=>[String(r.id),+r.volunteer_hours||0]));
+    if(W.tot){S._amVolH=W.tot;S._amVolAt=Date.now();} // the Accounts filter's figures too, kept up as these are (app48-2)
     S._n6vCust=null; // the hours just replaced drop the older rows a person's own read brought (_vmOpen): read again on their next open
     if(!g.error)W.codes=(g.data||[]).filter(r=>r&&r.volunteer_session_id); // a database before the rework keeps none
     if(!h.error)W.certs=h.data||[];
@@ -10738,7 +10739,7 @@ function _n6vMerge(k,rows,scope){
 async function _n6vTotRead(ids){
   const W=_vm();ids=[...new Set(ids.filter(Boolean))];if(!ids.length||!W.tot)return;
   const r=await _n6vGet(sb.from('customers').select('id,volunteer_hours').in('id',ids));
-  if(!r.error)(r.data||[]).forEach(x=>{if(ids.includes(String(x.id))){W.tot.set(String(x.id),+x.volunteer_hours||0);W.rev++;}});
+  if(!r.error)(r.data||[]).forEach(x=>{if(ids.includes(String(x.id))){W.tot.set(String(x.id),+x.volunteer_hours||0);if(S._amVolH&&S._amVolH!==W.tot)S._amVolH.set(String(x.id),+x.volunteer_hours||0);W.rev++;}});
 }
 // One session's team (and hours) read again, after a write that changed it.
 async function _n6vSessRead(sid,hrs){
@@ -49336,8 +49337,8 @@ function openRemindSheet(sid,kind){
   _tplLoad().then(()=>{if(S._rem&&S._rem.sid===sid)_remPaint();});
   _remPaint();
 }
-function _remClose(){S._rem=null;closeConfirm();const r=S._remRet;S._remRet=null;if(r&&document.contains(r))try{r.focus({preventScroll:true});}catch(_){}}
-function _on_rem_bd(event,el){if(event.target===el)_remClose();}
+function _remClose(){if(S._rem&&S._rem.run)_remRunEnd();S._rem=null;closeConfirm();const r=S._remRet;S._remRet=null;if(r&&document.contains(r))try{r.focus({preventScroll:true});}catch(_){}}
+function _on_rem_bd(event,el){const R=S._rem&&S._rem.run;if(event.target===el&&!(R&&R.i<R.list.length))_remClose();} // not mid-run (app48-4)
 function _remSet(k,v){const g=S._rem;if(!g||g.run)return;g[k]=v;_remPaint();}
 function _remLangSet(id,v){const g=S._rem;if(!g)return;g.lang[id]=v;_remPaint();}
 function _remTplId(){return S._rem&&S._rem.kind==='2h'?'remind_2h':S._rem&&S._rem.kind==='late'?'remind_late':'remind_24h';}
@@ -68799,6 +68800,10 @@ async function _salesRefundWallet(key,rows,reason){
   if(_roNow()){_roRefusal();return false;}
   if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return false;}
   if(_isOffline()){toast(t('cwErrOffline'),'error');return false;}
+  // Its lines still waiting in the outbox are sent first (bug hunt 2026-11-18, app46-1): never queued, a wallet refund sent
+  // ahead of them refunded only the lines the server held, and the rest landed later as live sales, their stock never back.
+  const ids=rows.map(x=>x.id);
+  if(_outboxHoldsReceipt(key,ids)){try{await _outboxFlush();}catch(_){}if(_outboxHoldsReceipt(key,ids)){toast(t('syncLeft').replace('{0}',_outboxCount()),'error');return false;}}
   const opId=_opId(),amt=Math.round(rows.reduce((s2,x)=>s2+(x.pay==='refunded'?0:_lineCharge(x)),0)*100)/100;
   const r=await _gatedRpc(t('cwRefundTo'),a=>_rpcOp('staff_wallet_refund_receipt',{p_receipt_id:key,p_reason:reason?String(reason).slice(0,300):null,...a,p_op_id:opId},true),{kind:'refund',amount:amt});
   if(r===null)return false;
@@ -69985,12 +69990,16 @@ function _tillTake(c){
   return{cash:r2(rs.cash+coCash+pu.cash+w.cash),card:r2(rs.card+coCard+pu.card+w.card),unk:rs.unknown,dep:_tillDep(c,sessIds),walCash:w.cash,walCard:w.card};
 }
 // What wallets moved through this drawer on its day (2026-11-02): money added or taken out at this ride (at no ride:
-// the shop's drawer), by card or cash; and a refund into a wallet made the same day, whose money was taken
-// tonight and is still in the drawer although its booking or receipt no longer counts.
+// the shop's drawer), by card or cash; and a refund into a wallet, whose money was taken in this drawer and is still
+// in it although its booking or receipt no longer counts. A ride's till takes its rides' moves whatever the hour, as
+// it takes their rentals and purchases (bug hunt 2026-11-18, app46-3: one made after midnight was in no till); the
+// shop's takes its day's, a refund on the day its receipt was sold (the move's receipt_id, once staff_wallet_moves
+// gives it; until then the day it was made).
 function _cwTill(c,ids){
-  let cash=0,card=0;
+  let cash=0,card=0;const rcDay=new Map();
+  if(c.shop)(S.cashSales||[]).forEach(x=>{const k=x.receipt_id||x.id;if(!rcDay.has(k))rcDay.set(k,_ksaDay(x.created_at));});
   (S._cwMoves||[]).forEach(m=>{
-    if(_ksaDay(m.created_at)!==c.day||!(c.shop?!m.session_id:ids&&ids.has(m.session_id)))return;
+    if(c.shop?(m.session_id||((m.kind==='refund'&&m.receipt_id&&rcDay.get(m.receipt_id))||_ksaDay(m.created_at))!==c.day):!(ids&&ids.has(m.session_id)))return;
     const a=Number(m.amount)||0;
     if(m.kind==='refund'){if(!m.method)return;const k=Number(m.card_part)||0;card+=k;cash+=a-k;}
     else if(m.method==='card')card+=a;else if(m.method==='cash')cash+=a;
@@ -70190,8 +70199,10 @@ async function _tillCountGo(){
   const T=S._till;if(!T||!T.row||T.busy)return;
   const cash=_tillNum('mny-till-cash',true);if(cash==null)return;
   const note=(document.getElementById('mny-till-notes')||{}).value||'';
-  const _tk=_tillNet(T),exp=Math.round(((Number(T.row.float)||0)+_tk.cash+(_tk.dep||0))*100)/100;
   T.busy=true;
+  try{await _cwLoad(true);}catch(_){} // another desk's wallet money is in this drawer too, as at the close (bug hunt 2026-11-18, app47-3)
+  if(S._till!==T||!T.row){T.busy=false;return;}
+  const _tk=_tillNet(T),exp=Math.round(((Number(T.row.float)||0)+_tk.cash+(_tk.dep||0))*100)/100;
   const r=await sb.from('till_counts').insert({till_id:T.row.id,counted_cash:cash,expected_cash:exp,counted_by_name:(_opName()||'').slice(0,60)||null,note:String(note).slice(0,300)}).select('id,at,counted_by_name,counted_cash,expected_cash,note');
   T.busy=false;
   if(_writeErr(r,'till count')){_tillDraw();return;}
@@ -70230,11 +70241,14 @@ async function _tillCloseGo(){
 function _tillH(){return S._tillH||(S._tillH={from:fmtDate(new Date(Date.now()-29*864e5)),to:todayStr(),rows:null,busy:false,err:null,key:''});}
 async function _tillHistLoad(){
   const H=_rangeFix(_tillH(),29),key=H.from+'~'+H.to;H.key=key;H.busy=true;_tillHistDraw(true); // a cleared date box takes the default, not day=gte. (app40-10)
-  let r;try{r=await sb.from('till_sessions').select('*').gte('day',H.from).lte('day',H.to).order('day',{ascending:false}).order('opened_at',{ascending:false}).limit(500);}catch(e){r={error:e};}
+  // Pages of 1000 (bug hunt 2026-11-18, app47-4): one read stopped at 500 tills without a word, and the over/short per
+  // person and per night came out short. Cut, the page says so.
+  let r;try{r=await _pagedCap(()=>sb.from('till_sessions').select('*').gte('day',H.from).lte('day',H.to),'id',false,10);}catch(e){r={error:e};}
   await _staffPeopleLoad();
   if(H.key!==key)return;
   H.busy=false;
-  if(r.error){H.err=_absent(r.error)?t('auNoDb'):_errMessage(r.error);H.rows=[];}else{H.err=null;H.rows=r.data||[];}
+  if(r.error){H.err=_absent(r.error)?t('auNoDb'):_errMessage(r.error);H.rows=[];H.cut=false;}
+  else{H.err=null;H.cut=!!r.cut;H.rows=(r.data||[]).sort((a,b)=>String(b.day).localeCompare(String(a.day))||String(b.opened_at||'').localeCompare(String(a.opened_at||'')));}
   _tillHistDraw(true);
 }
 function _tillCtxName(row){if(!row.session_id)return t('tillShopCtx');const s=_sessDisp(row.session_id);return s?`${dayLabel(s.day)} ${shortDate(s.session_date||s.id)}`:shortDate(row.day);}
@@ -70251,7 +70265,7 @@ function _tillHistDraw(noLoad){
     <div class="mny-filters">${_rngFields('_tillH','_tillHistLoad')}
       ${_editOk('cashier')?`<button type="button" class="btn-primary" data-on-click="${_on("recordDrawerCount")}">${t('tillTitle')}</button>`:''}</div>
     ${H.busy?`<div class="mny-empty">${t('loadingLabel')}</div>`:''}
-    ${H.err?`<div class="mny-empty">${esc(H.err)}</div>`:''}
+    ${H.err?`<div class="mny-empty">${esc(H.err)}</div>`:''}${H.cut&&!H.busy?`<div class="mny-note">${t('bh28ReadCut')}</div>`:''}
     ${rows.length?`<div class="mny-tw"><table class="mny-t"><thead><tr><th>${t('colDate')}</th><th>${t('tillCtx')}</th><th>${t('tillOpenedByCol')}</th><th>${t('tillFloat')}</th><th>${t('drawerExpected')}</th><th>${t('drawerCounted')}</th><th>${t('tillVariance')}</th><th>${t('tillCardTerm')}</th><th>${t('tillClosedBy')}</th><th></th></tr></thead><tbody>
       ${rows.map(r=>`<tr><td>${esc(shortDate(r.day))}</td><td>${esc(_tillCtxName(r))}</td><td><bdi>${esc(r.opened_by_name||_personName(r.opened_by)||'—')}</bdi></td><td>${_money(r.float)}</td>
         <td>${r.expected_cash!=null?_money(r.expected_cash):'—'}</td><td>${r.counted_cash!=null?_money(r.counted_cash):'—'}</td><td>${r.closed_at&&r.counted_cash!=null?_tillVar(v(r)):`<span class="mny-mut">${t('tillStatusOpen')}</span>`}</td>
@@ -71060,7 +71074,7 @@ function _invRecvOpen(id){
   _wsDlg(t('rcvTitle').replace('{0}',it.name),esc(t('rcvSub').replace('{0}',Number(it.qty)||0)),`
     <div class="form-row ws-dlg-row">
       <div class="form-group"><label for="rcv-q">${t('rcvQty')}</label><input id="rcv-q" type="number" min="1" max="100000" step="1" inputmode="numeric"></div>
-      <div class="form-group"><label for="rcv-c">${t('rcvCost')}</label><input id="rcv-c" type="number" min="0" max="100000" step="0.01" inputmode="decimal" value="${esc(it.cost!=null?it.cost:'')}"></div>
+      <div class="form-group"><label for="rcv-c">${t('rcvCost')}</label><input id="rcv-c" type="number" min="0" max="100000" step="0.01" inputmode="decimal" value="${esc(it.cost!=null&&_can('costs')?it.cost:'')}"></div>
     </div>
     ${X.ok?`<div class="form-row ws-dlg-row">
       <div class="form-group"><label for="rcv-s">${t('invSupplier')}</label><input id="rcv-s" type="text" maxlength="120" list="rcv-s-list" value="${esc(x.supplier||'')}"><datalist id="rcv-s-list">${sups.map(s=>`<option value="${esc(s)}"></option>`).join('')}</datalist></div>
@@ -71193,7 +71207,9 @@ async function _invCsvPicked(el){
   if(ci.name<0){toast(t('invImportHead'),'error');return;}
   const key=(n,b)=>String(n||'').trim().toLowerCase()+'\u0001'+String(b||'').trim().toLowerCase();
   const have=new Map((S.inventory||[]).map(i=>[key(i.name,i.brand),i]));const seen=new Set();
-  const num=v=>{v=String(v==null?'':v).trim();if(v==='')return null;const n=_flxNum(v);return isFinite(n)?n:NaN;};
+  // A decimal comma, as a comma-decimal Excel writes it (7,5 or 4,25), is a decimal point, not a thousands mark (bug hunt
+  // 2026-11-18, app47-2: 7,5 came in as 75); 1,000 still reads as a thousand.
+  const num=v=>{v=String(v==null?'':v).trim();if(v==='')return null;const a=_asciiDigits(v);if(/^-?\d+,\d{1,2}$/.test(a))v=a.replace(',','.');const n=_flxNum(v);return isFinite(n)?n:NaN;};
   const plan=rows.slice(1).map((r,i)=>{
     const g=k=>ci[k]<0?'':String(r[ci[k]]??'').trim(),errs=[];
     const name=g('name');if(!name)errs.push('invImportErrName');
@@ -72091,12 +72107,14 @@ function _amBadgeN(c){if(!_bdgOk())return 0;const o=new Set();_bdgHeld(c.id).for
 // having any hours until the page was reloaded. Until an answer comes the filter holds nobody back (2026-11-10). The
 // Blood Donation night's Bookings asks for them too (_bqData) and is drawn again when they come.
 function _amVolOf(id){return(S._amVolH&&S._amVolH.get(String(id)))||0;}
+// Read again once five minutes old (bug hunt 2026-11-18, app48-2: read once, hours added or cancelled in Volunteers never
+// reached the filter); the Volunteers part's read hands its own over (_vmRead). Pages of 1000 (app48-3).
 function _amVolLoad(){
-  if(S._amVolH||S._amVolBusy||!sb||Date.now()-(S._amVolErrAt||0)<3e4)return;S._amVolBusy=true;
+  if((S._amVolH&&Date.now()-(S._amVolAt||0)<3e5)||S._amVolBusy||!sb||Date.now()-(S._amVolErrAt||0)<3e4)return;S._amVolBusy=true;
   const fail=e=>{S._amVolBusy=false;if(!S._amVolErrAt)_writeErr({error:e||{message:'failed'}},'volunteer hours');S._amVolErrAt=Date.now();};
-  Promise.resolve(sb.from('customers').select('id,volunteer_hours').gt('volunteer_hours',0).limit(5000)).then(({data,error})=>{
+  Promise.resolve(_pagedAll(()=>sb.from('customers').select('id,volunteer_hours').gt('volunteer_hours',0).order('id'),'id')).then(({data,error})=>{
     if(error){fail(error);return;}
-    S._amVolBusy=false;S._amVolErrAt=0;S._amVolH=new Map((data||[]).map(r=>[String(r.id),+r.volunteer_hours||0]));
+    S._amVolBusy=false;S._amVolErrAt=0;S._amVolAt=Date.now();S._amVolH=new Map((data||[]).map(r=>[String(r.id),+r.volunteer_hours||0]));
     if(S.amVolH||/^volH/.test(S.amSort||'')){const w=document.getElementById('am-cust-rows');if(w)w.innerHTML=_amCustRows();}
     if(S.view==='staff'&&S.staffTab==='queue'&&S._bq&&/amVolH|bq:avolH/.test(_bqKeys().join()+','+String(S.sfSort||'')))try{renderStaffQueue();}catch(_){}
   },fail);
@@ -72281,7 +72299,7 @@ function _bqPanel(){
     +_bqAmDefs().map(([k,lbl,opts])=>{const on=_selOnce(a[k]||'');return _fField(esc(lbl),`<select class="filter-select" aria-label="${esc(lbl)}" data-on-change="${_on('_bqAm',k,_P('value'))}"><option value="">${esc(t('filterAll'))}</option>${opts.map(([v,l])=>`<option value="${esc(v)}"${on(v)?' selected':''}>${esc(l)}</option>`).join('')}</select>`);}).join('');
 }
 function _amOnN(){return AM_FKEYS.filter(k=>S[k]&&k!=='amMember').length;} // the scope switch shows Member
-function _amReset(){AM_FKEYS.forEach(k=>{S[k]='';});S.amShow=AM_PAGE;renderCommunity();}
+function _amReset(){const m=S.amMember;AM_FKEYS.forEach(k=>{S[k]='';});S.amMember=m;S.amShow=AM_PAGE;renderCommunity();} // the scope stays (app48-1): Members is not a filter
 // The sorts: [value, label, the value sorted on (null = none, goes last), 1 ascending | -1 descending,
 // how the row shows that value while it is the sort (none: the row shows nothing more)].
 function _amSorts(){
@@ -72586,9 +72604,9 @@ function openSegmentActions(ids){
   if(!S._caApps&&!S._caBusy&&isAdmin()&&typeof _caLoad==='function')_caLoad().then(()=>{if(S._seg&&S._seg.tab==='msg'&&!S._seg.run)_segPaint();},()=>{}); // the riders' languages
   _segPaint();
 }
-function _segClose(){S._seg=null;closeConfirm();}
+function _segClose(){if(S._seg&&S._seg.run)_segMsgEnd();S._seg=null;closeConfirm();} // a run closed part way is logged (app48-4)
 function _segSet(k,v){const g=S._seg;if(!g||g.busy)return;_segTextSync();g[k]=v;g.sure=null;if(k==='kind')g.texts={};_segPaint();}
-function _on_seg_bd(event,el){if(event.target===el&&!(S._seg&&S._seg.busy))_segClose();}
+function _on_seg_bd(event,el){const g=S._seg;if(event.target===el&&!(g&&(g.busy||(g.run&&g.run.i<g.run.list.length))))_segClose();} // not mid-run (app48-4)
 function _on_seg_note(event,el){if(S._seg)S._seg.note=el.value;}
 function _on_seg_text(event,el){const g=S._seg;if(g)g.texts[_segEdLang()]=el.value;}
 function _segTextSync(){const g=S._seg,ta=document.getElementById('seg-text');if(g&&ta&&!g.run)g.texts[_segEdLang()]=ta.value;}
@@ -73540,7 +73558,15 @@ async function _bdrLoad(force){
   S._bdrBusy=true;S._bdrAt=Date.now();
   const was=JSON.stringify(S._bdrRows||null);
   const q=c=>sb.from('badge_requests').select(c).order('created_at',{ascending:false}).limit(1000);
-  let r,hid=true;try{r=await q(BDR_COLS+BDR_HID);if(r&&r.error&&/hidden_/.test(String(r.error.message||''))){hid=false;r=await q(BDR_COLS);}}catch(e){r={error:e};}
+  let r,hid=true;try{r=await q(BDR_COLS+BDR_HID);if(r&&r.error&&/hidden_/.test(String(r.error.message||''))){hid=false;r=await q(BDR_COLS);}
+    // and the waiting ones older than those, in pages (bug hunt 2026-11-18, app49-3): past 1000 rows they left the Waiting
+    // list and the rail's number without a word.
+    if(r&&!r.error&&Array.isArray(r.data)&&r.data.length>=1000){
+      const last=r.data[r.data.length-1].created_at,seen=new Set(r.data.map(x=>String(x.id)));
+      const o=await _pagedAll(()=>sb.from('badge_requests').select(hid?BDR_COLS+BDR_HID:BDR_COLS).eq('status','pending').lte('created_at',last).order('created_at',{ascending:false}).order('id'));
+      r=o.error?o:{data:r.data.concat((o.data||[]).filter(x=>!seen.has(String(x.id)))),error:null};
+    }
+  }catch(e){r={error:e};}
   S._bdrBusy=false;
   if(r&&!r.error&&Array.isArray(r.data)){S._bdrRows=r.data;S._bdrErr=false;S._bdrNoHide=!hid;}
   else if(r&&r.error&&_bdgMissing(r.error))S._bdrGone=true; // a database from before them: the section says so
@@ -74474,7 +74500,7 @@ async function _n6qSegInvite(){
   // An invitation to a session they have not booked is marketing: news, which goes only to riders who agreed to hear it
   // (ride_news, PDPL), with the way to stop it (2026-11-10: sent as an update about their ride, it reached everyone).
   g.kind='news';g.texts={};
-  langs.forEach(l=>{g.texts[l]=_n6qInvText(s,l);});
+  langs.forEach(l=>{g.texts[l]=_bkFirst(_n6qInvText(s,l));}); // the booking app's link first (app49-1), as every prepared message
   g.tab='msg';_segPaint();
 }
 
@@ -74923,7 +74949,10 @@ function _mtsEdit(id){
   const p=id?((S._mts&&S._mts.p)||[]).find(x=>x.id===id):null;
   S._mtsEd={id:p?p.id:'',cid:p?p.customer_id:''};
   const yr=new Date().getFullYear(),cy=p?p.class_year:yr;
-  const years=[yr-2,yr-1,yr,yr+1,yr+2,yr+3].map(y=>`<option value="${y}"${y===cy?' selected':''}>${y}</option>`).join('');
+  // The stored year is offered too, outside this year's window (bug hunt 2026-11-18, app50-4): the first option showed,
+  // and any save wrote it over the class year.
+  const ys=[yr-2,yr-1,yr,yr+1,yr+2,yr+3];if(p&&Number.isInteger(Number(cy))&&!ys.includes(Number(cy)))ys.push(Number(cy));ys.sort((a,b)=>a-b);
+  const years=ys.map(y=>`<option value="${y}"${y===Number(cy)?' selected':''}>${y}</option>`).join('');
   const r=p&&NATIONALITIES.find(x=>x[0]===p.country),once=_selOnce(r?r[1]:'');
   const codeOf=Object.fromEntries(NATIONALITIES.map(([k,n])=>[n,k]));
   const nm=_natFor(S.lang||'en'),ctry=`<option value=""></option>${nm.list.map(n=>`<option value="${esc(codeOf[n]||'')}"${once(n)?' selected':''}>${esc(nm.lab[n]||n)}</option>`).join('')}`;
@@ -75108,10 +75137,10 @@ async function _mtsOfSave(){
 // university and field only, as the members' page shows it.
 function _mtsCopy(){
   const P=((S._mts&&S._mts.p)||[]).filter(p=>p.status==='open'&&p.num).sort((a,b)=>a.num-b.num);
-  const L=[`*${t('mtsWaHead')}*`,''];
+  const L=['__SITE_ORIGIN__/members','',`*${t('mtsWaHead')}*`,'']; // the booking app's link first (app50-3), as every prepared message
   P.forEach(p=>{L.push(`*${t('mtsProfileN').replace('{0}',p.num)}*`,p.university,p.field,'');});
   L.push(t('mtsWaFoot').replace('{0}','__SITE_ORIGIN__/members'));
-  const txt=L.join('\n'),b=document.getElementById('mts-copy');
+  const txt=_bkFirst(L.join('\n')),b=document.getElementById('mts-copy');
   const done=()=>{if(b){b.textContent=t('mtsCopied');setTimeout(()=>{if(b.isConnected)b.textContent=t('mtsCopy');},2000);}};
   try{navigator.clipboard.writeText(txt).then(done,()=>toast(t('errConnection'),'error'));}catch(e){toast(t('errConnection'),'error');}
 }
@@ -75667,7 +75696,7 @@ function _acVoteHtml(){
       <div class="cmy-am-tacts"><button type="button" class="btn-sm ${open?'btn-primary':'btn-secondary'}" aria-expanded="${open}" data-on-click="${_on('_acRoundOpen',r.id)}">${t('acVotes')}</button>${_acSureBtn('rd'+r.id,t('deleteBtn'),'_acRoundDel',r.id)}</div></div>
       ${open?`<div class="tg-holders">${!tl?`<div class="am-meta">${t('mbLoading')}</div>`:tl.length?tl.map(x=>`<div class="tg-row"><span class="tg-who"><strong>${esc(x.name||'—')}</strong><small>${esc(t('acVotesN').replace('{0}',x.votes))}</small></span>${r.winner_id?'':_acSureBtn('cr'+x.customer_id,t('acCrown'),'_acCrown',r.id,x.customer_id,x.name||'')}</div>`).join(''):_emptyState(t('acNoVotes'))}</div>`:''}`;
   }).join('')||_emptyState(t('acNone'));
-  const titles=(S.titles||[]).filter(x=>!x.retired&&!x.auto_rides);
+  const titles=(S.titles||[]).filter(x=>!x.retired&&!x.auto_rides&&!x.path_step); // a path step is never a prize (app50-2): giving one takes the step held away
   return rows+(S._acRoundNew?`<div class="inline-form bdg-form"><div class="form-row">${_acField('ac-r-en','acLabelEn','type="text" maxlength="40"')}${_acField('ac-r-ar','acLabelAr','type="text" maxlength="40" dir="rtl"')}</div>
     <div class="form-row">${_acField('ac-r-open','acOpens','type="date"',todayStr())}${_acField('ac-r-close','acCloses','type="date"')}</div>
     <div class="form-group"><label for="ac-r-title">${t('acTitleGive')}</label><select id="ac-r-title"><option value="">${t('acNoTitle')}</option>${titles.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')}</select></div>
@@ -75699,7 +75728,9 @@ async function _acCrown(id,cid,name){
   const x=S._ac.rounds.find(y=>y.id===id);if(!x)return;
   const r=await sb.from('rotm_rounds').update({winner_id:cid,winner_name:name}).eq('id',id);if(_writeErr(r,'set winner'))return;
   x.winner_id=cid;x.winner_name=name;
-  if(x.title_id){
+  // A round saved with a path step as its prize gives none (bug hunt 2026-11-18, app50-2): a time-limited step deleted the
+  // winner's own, a higher one too (_title_path_one), and left them a plain rider when it ran out.
+  if(x.title_id&&!(S.titles||[]).some(y=>y.id===x.title_id&&y.path_step)){
     const[y,m]=String(x.closes_on).split('-').map(Number),end=new Date(Date.UTC(y,m+1,0)).toISOString().slice(0,10);
     // The title held already for ever, or to a later day, stays as it is: the upsert wrote the round's end over it
     // and cut it short. One that ends sooner, or has ended, runs to the round's end.

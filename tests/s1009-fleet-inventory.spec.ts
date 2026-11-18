@@ -72,6 +72,14 @@ test.describe('@staff:inventory stock movements', () => {
     await expect.poll(() => page.evaluate("S.inventory.find(i=>i.id==='gel').cost")).toBe(6.55);
   });
 
+  test('Receive: an account that may not see costs gets an empty unit cost box (bug hunt 2026-11-18, app47-1)', async ({ page }) => {
+    await open(page, { 'rpc:staff_inventory_extras': EXTRAS });
+    await page.evaluate("setStaffRole('frontdesk');S._myCaps={can_see_costs:false};_invRecvOpen('gel')");
+    await expect(page.locator('#confirm-modal .ws-dlg #rcv-c')).toHaveValue('');
+    await page.evaluate("closeConfirm();S._myCaps={can_see_costs:true};_invRecvOpen('gel')");
+    await expect(page.locator('#confirm-modal .ws-dlg #rcv-c')).toHaveValue('6');
+  });
+
   test('Receive on an older database: the count as a movement and the cost as a weighted average', async ({ page }) => {
     const calls = await open(page);
     await page.evaluate("_invRecvOpen('gel')");

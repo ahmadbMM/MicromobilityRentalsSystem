@@ -137,6 +137,26 @@ test.describe('@staff:sales voids, refunds and stock', () => {
     expect(inv).toEqual([]);
   });
 
+  test('a refund to the wallet waits for the receipt\'s lines still in the outbox, then goes (bug hunt 2026-11-18, app46-1)', async ({ page }) => {
+    await boot(page, { 'rpc:staff_wallet_refund_receipt': { ok: true, receipt_id: 'r1', count: 2, items: [], wallet: 21, balance: 21 } });
+    const calls: string[] = [];
+    page.on('request', (r) => { if (r.url().includes('/rpc/staff_wallet_refund_receipt')) calls.push(r.url()); });
+    await page.route(/\/rest\/v1\/cashier_sales/, (r) => (r.request().method() === 'GET' ? r.fallback() : r.abort('internetdisconnected')));
+    const held = await page.evaluate(`(async()=>{setStaffRole('admin');
+      S.cashSales=[{id:'w1',receipt_id:'r1',session_id:null,customer_id:'c1',name:'Gel',item_id:'gel',category:'EnergyGels',qty:1,price:12,pay:'paid',created_at:new Date().toISOString()}];
+      _salesApply([{id:'w2',receipt_id:'r1',session_id:null,customer_id:'c1',name:'Bar',item_id:'bar',category:'ProteinBars',qty:1,price:9,pay:'paid'}],[]);
+      await _outboxFlush();S._netDown=false; // a dropped send flags the connection; this is the line held while the device reads online
+      const v=await _salesRefundWallet('r1',S.cashSales.filter(x=>x.receipt_id==='r1'),'mistake');
+      return{v,pays:S.cashSales.map(x=>x.pay),left:_outboxCount()};})()`);
+    expect(held).toEqual({ v: false, pays: ['paid', 'paid'], left: 1 });
+    expect(calls).toEqual([]);
+    await expect(page.locator('#toast-container')).toContainText('Changes still waiting to sync: 1');
+    await page.unroute(/\/rest\/v1\/cashier_sales/);
+    const sent = await page.evaluate(`(async()=>{S._netDown=false;const v=await _salesRefundWallet('r1',S.cashSales.filter(x=>x.receipt_id==='r1'),'mistake');return{ok:!!v,left:_outboxCount(),pays:S.cashSales.map(x=>x.pay)};})()`);
+    expect(sent).toEqual({ ok: true, left: 0, pays: ['refunded', 'refunded'] });
+    expect(calls).toHaveLength(1);
+  });
+
   test('a stock movement the network drops waits in the outbox and is applied when it returns', async ({ page }) => {
     await boot(page);
     const inv: string[] = [];

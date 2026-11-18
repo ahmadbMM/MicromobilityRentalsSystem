@@ -1117,7 +1117,11 @@ function _mtCountryOpts(code) {
 function _mtAskOpen() {
   const d = _mtData(), a = (d && d.ask && d.ask.status === 'pending' && d.ask) || {};
   const y = new Date().getFullYear(), yr = Number(a.class_year) || y;
-  const years = [y - 1, y, y + 1, y + 2, y + 3].map((v) => `<option value="${v}"${v === yr ? ' selected' : ''}>${v}</option>`).join('');
+  // The year a waiting request holds is offered too, outside this year's window (bug hunt 2026-11-18, app50-4): the first
+  // option showed, and sending it again wrote that over the class year.
+  const ys = [y - 1, y, y + 1, y + 2, y + 3];
+  if (!ys.includes(yr)) { ys.push(yr); ys.sort((p, q) => p - q); }
+  const years = ys.map((v) => `<option value="${v}"${v === yr ? ' selected' : ''}>${v}</option>`).join('');
   const pref = a.gender_pref || 'any';
   const prefs = [['any', 'mtPrefAny'], ['female', 'mtPrefF'], ['male', 'mtPrefM']].map(([v, k]) => `<option value="${v}"${v === pref ? ' selected' : ''}>${esc(_hT(k))}</option>`).join('');
   const inp = (key, v, max, ac) => `<input type="text" id="mt-${key}" maxlength="${max}" value="${esc(v || '')}"${ac ? ` autocomplete="${ac}"` : ''} data-on-input="${_on('_mtClr', _EL)}">`;
