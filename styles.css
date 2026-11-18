@@ -5623,6 +5623,8 @@ body.fix-open{overflow:hidden;}
    Under the account's own pages (z-index) in case both are up. */
 #rate-modal .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
 #rate-modal .rg-box:focus,#rate-modal .rg-box:focus-visible{outline:none;}
+/* The one-time ask about an old comment (#tst-ask, testimonials 2026-11-18): the rating's own backdrop */
+#tst-ask .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
 .rg-kicker{color:var(--go-2);}
 .rg-kicker .fx-flag{color:var(--go);}
 .rg-meta{margin-top:6px;font-weight:600;font-size:13px;color:var(--ink-2);}
@@ -10019,6 +10021,63 @@ body:not(.view-staff) .rh-sent:focus{outline:none;}
 body:not(.view-staff) .rh-ref{color:var(--ink);}
 body:not(.view-staff) .rh-talk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;}
 body:not(.view-staff) .rh-talk>a{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;min-height:48px;text-decoration:none;}
+
+/* ── Testimonials (2026-11-18, rider-testimonial.js): Account > Write a testimonial, the step after a 9 or 10 in the
+   rating's pop-up and the one-time ask about an old comment. What it is about as pills, five drawn stars, the name as
+   real radios with the line it shows under them; the rider's own below, each with its state ── */
+body:not(.view-staff) .tst-f{margin:0 0 16px;}
+body:not(.view-staff) .tst-lbl{display:block;margin:0 0 8px;padding:0;font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) .tst-opt{font-weight:400;color:var(--ink-3);}
+body:not(.view-staff) .tst-pills{display:flex;flex-wrap:wrap;gap:8px;}
+body:not(.view-staff) .tst-pill{min-height:44px;padding:8px 14px;border:1px solid var(--line-3);border-radius:999px;background:var(--card);color:var(--ink);font-size:var(--fs-13);font-weight:500;line-height:1.25;cursor:pointer;}
+body:not(.view-staff) .tst-pill.on{border-color:var(--go);background:var(--go-wash);color:var(--go-2);font-weight:600;}
+body:not(.view-staff) :is(.tst-pill,.tst-sb):focus-visible{outline:2px solid var(--go);outline-offset:2px;}
+body:not(.view-staff) .tst-starpick{display:flex;gap:4px;}
+body:not(.view-staff) .tst-sb{display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:var(--r-chip);background:transparent none;color:var(--amber-2);cursor:pointer;}
+body:not(.view-staff) .tst-star{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linejoin:round;}
+body:not(.view-staff) .tst-star.on{fill:currentColor;}
+body:not(.view-staff) .tst-stars{display:inline-flex;gap:2px;color:var(--amber-2);}
+body:not(.view-staff) .tst-ta{display:block;width:100%;min-height:120px;padding:10px 14px;border:1px solid var(--line-3);border-radius:var(--r-ctl);background:var(--card);color:var(--ink);font-family:inherit;font-size:16px;font-weight:400;line-height:1.45;resize:vertical;}
+body:not(.view-staff) .tst-count{margin-top:6px;font-size:var(--fs-12);color:var(--ink-3);text-align:end;font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .tst-count.low{color:var(--amber);}
+body:not(.view-staff) .tst-names{min-width:0;margin:0 0 16px;padding:0;border:0;}
+body:not(.view-staff) .tst-nm{display:flex;align-items:center;gap:10px;min-height:44px;margin:0 0 6px;padding:8px 12px;border:1px solid var(--line-3);border-radius:var(--r-ctl);background:var(--card);color:var(--ink);cursor:pointer;}
+body:not(.view-staff) .tst-nm.on{border-color:var(--go);background:var(--go-wash);font-weight:600;}
+body:not(.view-staff) .tst-nm input{-webkit-appearance:radio;appearance:radio;flex:none;width:18px;height:18px;min-height:0;margin:0;accent-color:var(--go);} /* inputs are appearance:none site-wide: the native dot, in the action green */
+body:not(.view-staff) .tst-shows{display:grid;gap:2px;margin-top:4px;padding:6px 12px;border-inline-start:3px solid var(--line-2);font-size:var(--fs-13);color:var(--ink-2);}
+body:not(.view-staff) .tst-shows-n{font-weight:600;color:var(--ink);}
+body:not(.view-staff) .tst-ph{display:flex;align-items:center;gap:12px;margin:0 0 8px;}
+body:not(.view-staff) .tst-thumb{width:72px;height:72px;object-fit:cover;border-radius:var(--r-chip);}
+body:not(.view-staff) .tst-pick{display:inline-flex;align-items:center;gap:8px;min-height:44px;cursor:pointer;}
+body:not(.view-staff) .tst-err{margin:0 0 12px;font-size:var(--fs-13);font-weight:600;color:var(--red);}
+body:not(.view-staff) :is(.tst-send,.tst-again){width:100%;min-height:48px;}
+body:not(.view-staff) .tst-sent{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-weight:600;color:var(--go);}
+body:not(.view-staff) .tst-sent:focus{outline:medium none;}
+body:not(.view-staff) .tst-note{margin:0;color:var(--ink-2);}
+body:not(.view-staff) .tst-retry{margin-top:10px;min-height:44px;}
+body:not(.view-staff) .tst-mine{margin-top:20px;}
+body:not(.view-staff) .tst-h{margin:0 0 10px;font-size:var(--fs-17);font-weight:700;color:var(--ink);}
+body:not(.view-staff) .tst-list{display:grid;gap:10px;margin:0;padding:0;list-style:none;}
+body:not(.view-staff) .tst-item{padding:14px 16px;border-radius:var(--r-card);background:var(--card);box-shadow:var(--pl-1);}
+body:not(.view-staff) .tst-item-h{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+body:not(.view-staff) .tst-st{padding:2px 10px;border-radius:999px;background:var(--card-2);font-size:var(--fs-12);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) .tst-st-pub{background:var(--go-wash);color:var(--go-2);}
+body:not(.view-staff) .tst-st-wait{background:var(--amber-wash);color:var(--amber);}
+body:not(.view-staff) .tst-body{margin:10px 0 6px;color:var(--ink);line-height:1.5;white-space:pre-line;overflow-wrap:anywhere;}
+body:not(.view-staff) .tst-item-m{font-size:var(--fs-12);color:var(--ink-3);}
+body:not(.view-staff) .tst-del{margin-top:10px;min-height:44px;}
+body:not(.view-staff) .tst-quote{margin:14px 0;padding:12px 14px;border-inline-start:3px solid var(--go);border-radius:var(--r-chip);background:var(--card-2);color:var(--ink);line-height:1.5;white-space:pre-line;overflow-wrap:anywhere;}
+body:not(.view-staff) :is(#rate-modal .tst-rate,#tst-ask .tst-ask){margin-block:auto;}
+body:not(.view-staff) :is(#rate-modal .tst-rate,#tst-ask .tst-ask) .pg-title{margin-bottom:14px;}
+body:not(.view-staff) :is(.tst-rate,.tst-ask):focus{outline:medium none;}
+/* the consent tick: the sign-up's tick row (_tickHtml), drawn here in the system's colours */
+body:not(.view-staff) .tst-consent .cu-tick-row{display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:8px 0;cursor:pointer;user-select:none;}
+body:not(.view-staff) .tst-consent .cu-tick-row:focus-visible{outline:2px solid var(--go);outline-offset:2px;border-radius:var(--r-chip);}
+body:not(.view-staff) .tst-consent .cu-tick-box{display:flex;align-items:center;justify-content:center;flex:none;width:22px;height:22px;margin-top:1px;border:2px solid var(--line-3);border-radius:6px;background:var(--card);}
+body:not(.view-staff) .tst-consent .cu-tick-on{border-color:var(--go);background:var(--go);}
+body:not(.view-staff) .tst-consent .cu-tick-on path{stroke:var(--card);}
+body:not(.view-staff) .tst-consent .cu-tick-lbl{font-size:var(--fs-15);font-weight:500;line-height:1.45;color:var(--ink);}
+body:not(.view-staff) .tst-consent .cu-req{color:var(--red);}
 
 /* ── Reason dialogs: one list of real radios, nothing picked, the answers stacked ── */
 body:not(.view-staff) #cancel-reason-modal .cr-opts{margin:16px 0 12px;border-radius:var(--r-card);background:var(--card);box-shadow:var(--pl-1);overflow:hidden;}
@@ -14427,6 +14486,54 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
 #tab-badgereq .bdr-row{padding:12px 0;border-top:1px solid var(--border);}
 #tab-badgereq .bdr-row.done>.bdg-item>:is(.bdg-m,.bdg-txt){opacity:.7;}
 #tab-badgereq .bdr-who{padding:0;border:0;background:none;color:var(--text);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+/* ── Testimonials (staff, 2026-11-18): the summary, the switch and the page's link on top, then the list; Add testimonial ── */
+#tab-testimonials .tsm-top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin:0 0 14px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--sf-r-card,12px);}
+#tab-testimonials .tsm-sum{display:grid;gap:4px;min-width:0;}
+#tab-testimonials .tsm-avg{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:var(--sf-fs-md);color:var(--text);}
+#tab-testimonials .tsm-avg b{font-size:var(--sf-fs-xl);font-weight:600;font-variant-numeric:tabular-nums;}
+#tab-testimonials .tsm-sw{display:grid;gap:4px;}
+#tab-testimonials .tsm-sw-l{display:inline-flex;align-items:center;gap:8px;cursor:pointer;}
+#tab-testimonials .tsm-top-acts{display:flex;flex-wrap:wrap;gap:8px;margin-inline-start:auto;}
+#tab-testimonials .tsm-open{display:inline-flex;align-items:center;text-decoration:none;}
+#tab-testimonials .tsm-count{margin:12px 0 4px;}
+#tab-testimonials .tsm-none{margin:14px 0;}
+#tab-testimonials .tsm-list-in{display:flex;flex-direction:column;}
+#tab-testimonials .tsm-row{display:grid;gap:8px;padding:12px 0;border-top:1px solid var(--border);}
+#tab-testimonials .tsm-h{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;}
+#tab-testimonials .tsm-stars{display:inline-flex;gap:1px;color:var(--orange);}
+#tab-testimonials .tsm-star{fill:currentColor;opacity:.25;}
+#tab-testimonials .tsm-star.on{opacity:1;}
+#tab-testimonials .tsm-nostar{font-size:var(--sf-fs-sm);color:var(--muted);}
+#tab-testimonials .tsm-chip{display:inline-flex;align-items:center;padding:2px 8px;border:1px solid var(--border);border-radius:999px;font-size:var(--sf-fs-xs);font-weight:500;color:var(--muted);}
+#tab-testimonials .tsm-c-pending{border-color:currentColor;color:var(--orange);}
+#tab-testimonials .tsm-c-published{border-color:currentColor;color:var(--green);}
+#tab-testimonials .tsm-c-rejected{border-color:currentColor;color:var(--red);}
+#tab-testimonials .tsm-c-feat{font-weight:600;color:var(--text);}
+#tab-testimonials .tsm-body{margin:0;font-size:var(--sf-fs-md);line-height:1.5;color:var(--text);white-space:pre-line;overflow-wrap:anywhere;}
+#tab-testimonials .tsm-meta{display:grid;gap:2px;font-size:var(--sf-fs-sm);color:var(--muted);}
+#tab-testimonials .tsm-who{padding:0;border:0;background:transparent none;color:var(--text);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+#tab-testimonials .tsm-ph{display:flex;align-items:flex-end;flex-wrap:wrap;gap:8px;}
+#tab-testimonials .tsm-img{max-width:min(100%,320px);max-height:320px;object-fit:contain;border-radius:var(--sf-r-ctl,8px);}
+#tab-testimonials .tsm-note{max-width:420px;margin:0;}
+#tab-testimonials .tsm-acts{display:flex;flex-wrap:wrap;gap:6px;}
+#tab-testimonials .tsm-mv{display:inline-flex;align-items:center;justify-content:center;min-width:36px;}
+.tsm-add{width:min(94vw,520px);max-height:calc(100dvh - 48px);overflow-y:auto;}
+.tsm-add :is(input[type=text],textarea,select){width:100%;}
+.tsm-add .form-group{margin-bottom:14px;}
+.tsm-add .tsm-a-modes{min-width:0;margin:0 0 14px;padding:0;border:0;}
+.tsm-add .tsm-a-modes legend{margin-bottom:6px;padding:0;font-size:var(--sf-fs-xs);font-weight:600;}
+.tsm-add .tsm-mode{display:flex;align-items:center;gap:8px;min-height:32px;cursor:pointer;}
+/* inputs are appearance:none site-wide and the staff skin draws no radio or box of its own: ask for the native ones */
+.tsm-add .tsm-mode input{-webkit-appearance:radio;appearance:radio;flex:none;width:16px;height:16px;min-height:0;margin:0;accent-color:var(--green);}
+.tsm-add .tsm-a-pub input{-webkit-appearance:checkbox;appearance:checkbox;flex:none;width:16px;height:16px;min-height:0;margin:0;accent-color:var(--green);}
+.tsm-add .tsm-a-res{display:grid;gap:4px;margin-top:6px;}
+.tsm-add .tsm-a-hit{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--sf-r-ctl,8px);background:transparent none;color:var(--text);font:inherit;text-align:start;cursor:pointer;}
+.tsm-add .tsm-a-who{display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+.tsm-add .tsm-a-n{margin-top:4px;text-align:end;}
+.tsm-add .tsm-a-two{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.tsm-add .tsm-a-file{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.tsm-add .tsm-a-thumb{width:64px;height:64px;object-fit:cover;border-radius:var(--sf-r-ctl,8px);}
+.tsm-add .tsm-a-pub{display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer;}
 #tab-badgereq .bdr-who{padding-block:5px;margin-block:-5px;} /* 24x24 hit area (WCAG 2.5.8, staff round s10): padding grows it, the negative margin gives the room back, so nothing moves */
 #tab-badgereq .bdr-cmt{margin-top:2px;font-size:var(--sf-fs-sm);line-height:1.45;color:var(--text);white-space:pre-line;overflow-wrap:anywhere;}
 #tab-badgereq .bdr-desc{line-height:1.45;overflow-wrap:anywhere;}

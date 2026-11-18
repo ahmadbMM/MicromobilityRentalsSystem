@@ -80,7 +80,7 @@ test.describe('accessibility gate (any violation fails the build)', () => {
   // (staff round s10, item 43), and every list holds about twenty rows (officeFixtures), so the gate reads real tables.
   const STAFF_TABS = ['queue', 'dashboard', 'cashier', 'inventory', 'workshop', 'customers', 'community', 'ambassadors',
     'vendors', 'website', 'catalog', 'messages', 'analytics', 'history', 'team', 'settings',
-    'waitlist', 'sessions', 'lockers', 'badgereq', 'volunteers', 'store', 'payments', 'ask'] as const; // Ask: 2026-11-13 (its page views are audited in tests/ask.spec.ts)
+    'waitlist', 'sessions', 'lockers', 'badgereq', 'volunteers', 'store', 'payments', 'ask', 'testimonials'] as const; // Ask: 2026-11-13 (its page views are audited in tests/ask.spec.ts); Testimonials: 2026-11-18
   for (const lang of ['en', 'ar'] as const) {
     for (const tab of STAFF_TABS) {
       test(`staff: ${tab} (${lang})`, async ({ page }) => {
@@ -286,5 +286,13 @@ function officeFixtures() {
   return { ...base, customers, queue_entries, bikes, workshop_jobs, workshop_job_events: [], site_messages, badges, customer_badges: [], badge_requests,
     community_applications, learn_applications: [], volunteers, desk_waitlist, lockers, locker_rentals,
     'rpc:staff_store_ready': true, 'rpc:staff_store_orders': [], store_orders: [], payment_refunds: [],
-    'rpc:staff_ask_pages': ask_pages, 'rpc:staff_ask_pending': 12 };
+    'rpc:staff_ask_pages': ask_pages, 'rpc:staff_ask_pending': 12,
+    // Testimonials (2026-11-18): every state, some with photos, staff-added ones without an account
+    'rpc:staff_testimonials': { on: false, counts: { pending: 8, published: 6, rejected: 3, hidden: 3, featured: 2 }, asks: { yes: 3, no: 4 },
+      items: ids.map((i) => ({ id: i, customer_id: i % 5 ? `c${i}` : null, entry_id: i % 4 ? null : `q${i}`, source: ['web', 'app', 'rating', 'old_comment', 'staff'][i % 5], about: ['saturday', 'session', 'learn', 'event', 'workshop', 'other'][i % 6],
+        stars: i % 5 ? 1 + (i % 5) : null, body: `What ${nm(i)} said about the ride, in their own words.`, lang: 'en', name_mode: ['full', 'short', 'anon'][i % 3], display_name: i % 3 === 2 ? null : nm(i),
+        photo: i % 3 === 0, consent_at: at(i), consent_note: i % 5 ? null : 'WhatsApp', status: i < 8 ? 'pending' : i < 14 ? 'published' : i < 17 ? 'rejected' : 'hidden', featured: i === 9 || i === 10,
+        sort_order: i >= 8 && i < 14 ? i - 7 : null, staff_note: null, reviewed_by: i < 8 ? null : 'Spec Staff', reviewed_at: i < 8 ? null : at(i), published_at: i >= 8 && i < 14 ? at(i) : null,
+        created_by: i % 5 ? null : 'Spec Staff', created_at: at(i), customer_name: i % 5 ? nm(i) : null, customer_phone: i % 5 ? '0500000000' : null, since: i % 5 ? { year: 2025, rides: i } : null,
+        ride_title: i % 4 ? null : 'Circuit night', ride_date: i % 4 ? null : DAY })) } };
 }

@@ -378,6 +378,7 @@ window.mmLoading=(function(){
     <button class="tab-btn"        data-stab="community" data-on-click='["setStaffTab","community"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">People</span></button>
     <button class="tab-btn"        data-stab="badgereq"  data-on-click='["setStaffTab","badgereq"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Badge requests</span></button>
     <button class="tab-btn"        data-stab="ask"       data-on-click='["setStaffTab","ask"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ask</span></button>
+    <button class="tab-btn"        data-stab="testimonials" data-on-click='["setStaffTab","testimonials"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Testimonials</span></button>
     <span class="snav-group" data-group="snavPartners" role="heading" aria-level="2">Partners &amp; web</span>
     <button class="tab-btn"        data-stab="vendors"       data-on-click='["setStaffTab","vendors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Vendors</span></button>
     <button class="tab-btn"        data-stab="ambassadors" data-on-click='["setStaffTab","ambassadors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ambassadors</span></button>
@@ -407,6 +408,7 @@ window.mmLoading=(function(){
     <div id="tab-community"  class="tab-panel"></div>
     <div id="tab-badgereq"  class="tab-panel"></div>
     <div id="tab-ask"       class="tab-panel"></div>
+    <div id="tab-testimonials" class="tab-panel"></div>
     <div id="tab-analytics"  class="tab-panel"></div>
     <div id="tab-history"   class="tab-panel"></div>
     <div id="tab-reports"   class="tab-panel"></div>
@@ -483,6 +485,7 @@ window.mmLoading=(function(){
 <div id="return-modal" data-host></div>
 <div id="confirm-modal"    data-host></div>
 <div id="rate-modal"       data-host></div>
+<div id="tst-ask"          data-host></div>
 <div id="waiver-gate"      data-host></div>
 <div id="share-gate"       data-host></div>
 <div id="club-gate"        data-host></div>
@@ -1395,6 +1398,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   tabAsk:'Ask',tabAskWait:'{0} waiting for approval',askRbTitle:'Answers report',askRbLay:'Each row is',askRbLayA:'An answer',askRbLayP:'A person',askRbSetAnswers:'Answer list',askRbSetPeople:'People and their answers',askRbSetQuiz:'Quiz scores',askRbSetReview:'Approvals',askRbBand:'Age group',askRbAcct:'Account ID',askRbQNo:'Question no.',askRbKind:'Question type',askRbQCols:'Each question in its own column',askRbForm:'Each form field in its own column',askRbRight:'Right or wrong',askRbRightN:'{0} of {1}',askRbVotes:'Votes',askRbLang:'Language',askRbRevBy:'Reviewed by',askRbRevAt:'Reviewed at',askRbAid:'Answer no.',askRbSecQs:'Each question\'s results',askRbSecCross:'Each question, group by group',askRbSecList:'The list',askRbSplit:'Split results by',askRbAllRounds:'All rounds',askRbStKept:'Approved and waiting',askRbNotMember:'Not members',askRbFlagNo:'Not flagged',askRbQaNo:'Not answered yet',askRbVotesYes:'With votes',askRbVotesNo:'No votes',askRbPick:'Picked',askRbAvgPlace:'Average place',askRbMedian:'Median',askRbInArea:'In the right area',askRbAvgPts:'Average points',askRbRightPct:'Right answers',askRbSortQ:'Question order',askRbSortNew:'Newest first',askRbSortOld:'Oldest first',askRbSortAns:'Answer, A to Z',askRbSortPts:'Most points',askRbSortFast:'Quickest',askRbSortVotes:'Most votes',askRbSortN:'Most answers',askNew:'New question',askEmpty:'No questions yet.',askNoMatch:'Nothing matches the filter.',askNoDb:'Ask is not set up on the database yet.',askStDraft:'Draft',askStOpen:'Open',askStSoon:'Opens {0}',askStClosed:'Closed',askFSoon:'Not open yet',askClosesAt:'Closes {0}',askNoEnd:'No end',askAnswers:'Answers',askPeople:'People',askWaiting:'Waiting for approval',askCopy:'Copy',askCopied:'Link copied',askBack:'All questions',askTabSetup:'Setup',askTabResults:'Results',askGPage:'Page',askTitleEn:'Title (English)',askTitleAr:'Title (Arabic)',askIntroEn:'Introduction (English)',askIntroAr:'Introduction (Arabic)',askSlug:'Link name',askSlugTaken:'This link name is taken',askSlugBad:'Use 3 to 40 lower-case letters, digits and dashes.',askNeedTitle:'Write a title in English or Arabic.',askAud:'Who sees it',askAudLink:'Anyone with the link',askAudAcc:'Signed-in accounts',askAudTags:'Accounts with a tag',askAudPick:'Pick at least one tag.',askTags:'Tags',askGWhen:'When it is open',askOpens:'Opens',askNow:'Now',askAt:'Date and time',askCloses:'Closes',askIn1d:'1 day',askIn3d:'3 days',askIn1w:'1 week',askSaudi:'Saudi time',askWhenBad:'Pick a date and time.',askCloseBad:'It must close after it opens.',askAfter:'After it closes',askAfterShow:'Show results',askAfterHide:'Hide',askGMore:'More',askListed:'Shown in the list on micromobility.sa/ask',askNotes:'Staff notes',askStart:'Start',askEnd:'End',askEndAsk:'End this page?',askUnsaved:'Unsaved changes',askSaved:'Saved',askStarted:'Started',askDelPage:'Delete page',askDelAsk:'Delete this page and all its answers?',askQs:'Questions',askAddQ:'Add question',askEditQ:'Edit question',askNeedQ:'Add a question first.',askUp:'Move up',askDown:'Move down',askQDelAsk:'Delete this question and its {0} answers?',askTaking:'Taking answers',askType:'Type',askKcloud:'Word cloud',askKopen:'Open answers',askKqa:'Questions from people',askKchoice:'Multiple choice',askKscales:'Scales',askKranking:'Ranking',askKpoints:'100 points',askKnumber:'Number',askKinfo:'Text slide',askQTitleEn:'Question (English)',askQTitleAr:'Question (Arabic)',askHelpEn:'Help text (English)',askHelpAr:'Help text (Arabic)',askMaxLen:'Longest answer, in characters',askPerPerson:'Answers per person',askVotes:'People can upvote answers',askOptions:'Options',askStatements:'Statements',askOptEn:'Option {0}, English',askOptAr:'Option {0}, Arabic',askEn:'English',askAr:'Arabic',askAddOpt:'Add option',askMaxPicks:'Choices per person',askChange:'People can change their answer',askMin:'Lowest',askMax:'Highest',askLoEn:'Low end label (English)',askLoAr:'Low end label (Arabic)',askHiEn:'High end label (English)',askHiAr:'High end label (Arabic)',askTotal:'Points to share',askNumMin:'Smallest number',askNumMax:'Largest number',askStep:'Step',askUnitEn:'Unit (English)',askUnitAr:'Unit (Arabic)',askModerated:'Approve answers before they show',askResWho:'Who sees the results',askResLive:'At once',askResAnswered:'After answering',askResClosed:'After it closes',askResStaff:'Staff only',askNeedOpts:'Add at least {0} options.',askOptEmpty:'Fill in every option, or remove it.',askNumOrder:'The largest number must be above the smallest.',askCfgBad:'These settings do not fit this type of question.',askAWait:'Waiting',askAOk:'Approved',askANo:'Not approved',askApprove:'Approve',askReject:'Reject',askToWait:'Back to waiting',askEditText:'Edit text',askMarkAnswered:'Mark answered',askNotAnswered:'Not answered',askAnswered:'Answered',askApproveN:'Approve {0} selected',askRejectN:'Reject {0} selected',askApproveAll:'Approve all waiting',askApproveAllAsk:'Approve all {0} waiting answers?',askDelAAsk:'Delete this answer?',askNoAnswers:'No answers yet.',askNoneHere:'Nothing here.',askFlagged:'Flagged',askQuestion:'Question',askAnswer:'Answer',askTime:'Time',askQr:'QR code of the link',askScreen:'Open big screen',askPreview:'Preview',askReset:'Reset results',askResetAsk:'Reset the results?',askResetBody:'A new round starts with no answers. Older answers are kept.',askRound:'Round {0}',askAvg:'Average',askPlace:'Average place {0}',askVotesN:'Votes {0}',askWho:'Who answered what',
   askNoRight:'This account can look at Ask but not change it.',askNoOpen:'This account cannot open Ask.',askKindLocked:'This question has answers, so its type cannot change.',askPicAdmin:'Only an admin can upload pictures.',askRoundPick:'Round',askRoundNow:'Round {0} (now)',askTabStats:'Stats',askNotTags:'Not for accounts with',askGender:'Gender',askGenAll:'Everyone',askMinAge:'Youngest age',askMaxAge:'Oldest age',askAgeNote:'An age rule leaves out every account with no birth date. Most accounts have none.',askAgeBad:'Ages are whole years from 1 to 120, and the youngest cannot be above the oldest.',askGLook:'Look',askTheme:'Theme',askThlight:'Light',askThdark:'Dark',askThgreen:'Green',askThsand:'Sand',askPalette:'Chart colours',askPlbrand:'Brand',askPlforest:'Forest',askPlocean:'Ocean',askPlsunset:'Sunset',askPlberry:'Berry',askPlmono:'Mono',askPalPage:'As the page',askCover:'Cover picture',askPic:'Picture',askPicUp:'Upload picture',askPicNew:'Replace picture',askThanksEn:'Line after an answer (English)',askThanksAr:'Line after an answer (Arabic)',askLayout:'Questions shown',askLayStack:'All on one page',askLaySteps:'One at a time',askScr:'The big screen shows',askScrQr:'QR code',askScrCount:'How many answered',askRotate:'The big screen moves to the next question',askSecs:'Every {0} seconds',askOff:'Not by itself',askGWords:'Blocked words',askBwAdd:'Add words, with commas between them',askBwAddBtn:'Add',askBwFull:'A page takes 200 blocked words at most.',askChart:'Chart',askVzcloud:'Word cloud',askVzbubbles:'Bubbles',askVzbars:'Bars',askVztiles:'Tiles',askVzlist:'Ranked list',askVzcards:'Cards',askVzwall:'Sticky notes',askVzspotlight:'Spotlight',askVzstream:'Stream',askVzcolumns:'Columns',askVzdonut:'Donut',askVzpie:'Pie',askVzdots:'Dots',askVztracks:'Tracks',askVzradar:'Radar',askVzstacked:'Stacked bars',askVzheat:'Heat map',askVzpodium:'Podium',askVzladder:'Ladder',askVzhistogram:'Histogram',askVzgauge:'Gauge',askVzstrip:'Strip',askSort:'Order',askSogiven:'As written',askSocount:'Largest first',askValues:'Numbers on the chart',askVaboth:'Count and percent',askVacount:'Count',askVapercent:'Percent',askVanone:'None',askLimit:'How many it shows',askCase:'Letters',askCatyped:'As typed',askCaupper:'CAPITALS',askCalower:'small letters',askAngle:'Words',askAnflat:'All level',askAnmixed:'Some on their side',askSize:'Text size',askSzm:'Medium',askSzs:'Small',askSzl:'Large',askTotalOn:'Show how many answered',askOlder:'Show older answers',askNotGiven:'Not given',askOther:'Other',askTable:'Table',askSegPick:'Choose a question',askSegBy:'Group by',askSegNone:'No answer',askByAge:'Age',askByMember:'Community',askMembers:'Members',askByLang:'Language of the answers',askByNat:'Nationality',askByDay:'Answers by day',askByHour:'Answers by hour, Saudi time',askByQ:'Answers by question',askDay:'Day',askHour:'Hour',askFirst:'First answer',askLast:'Last answer',askReach:'Reach',askReachOf:'{0} of {1} accounts',askTop:'Answered most',askSeg:'One question, group by group',
   askDup:'Duplicate',askDupSave:'Save the page before duplicating it.',askGPace:'Pace',askPaceSelf:'Everyone at their own pace',askPaceLive:'We show one question at a time',askReact:'Reaction buttons under each question',askKgrid:'Two-axis grid',askKpin:'Pin on a picture',askKform:'Short form',askKquiz:'Quiz, pick the answer',askKquiz_text:'Quiz, type the answer',askVzscatter:'Scatter',askItems:'Items',askXEn:'Horizontal axis (English)',askXAr:'Horizontal axis (Arabic)',askYEn:'Vertical axis (English)',askYAr:'Vertical axis (Arabic)',askGridMax:'Highest value',askGridAxes:'Name both axes.',askFields:'Fields',askFieldEn:'Field {0}, English',askFieldAr:'Field {0}, Arabic',askFieldType:'Field {0}, what it takes',askFttext:'Text',askFtnumber:'Number',askFtchoice:'One of a list',askRequired:'Required',askFieldOptEn:'Field {0}, option {1}, English',askFieldOptAr:'Field {0}, option {1}, Arabic',askAddField:'Add field',askNeedField:'Add at least one field.',askFieldEmpty:'Give every field a label, or remove it.',askFieldOpts:'A list field needs at least 2 options, each filled in.',askSeconds:'Seconds to answer',askSpeed:'More points for a faster answer',askAccept:'Accepted answers, one a line',askNeedAccept:'Write at least one accepted answer.',askAcceptMany:'10 accepted answers at most.',askRight:'Right answer',askRightNum:'Right answer (optional)',askRightOpt:'Option {0} is right',askRightMark:'Right',askWrong:'Wrong',askNeedRight:'Mark the right answer.',askRightRange:'The right answer must be between the smallest and the largest number.',askPinRight:'Right area (optional): tap the picture',askPinAdd:'Mark a right area',askPinNone:'Remove the right area',askPinX:'Across',askPinY:'Down',askPinR:'Size',askPinNeedsPic:'A pin question needs its picture.',askPts:'{0} points',askSecN:'{0} s',askRightOf:'Right: {0} of {1}',askAccepted:'Accepted:',askSeeAnswers:'See the answers',askRevealed:'Answer revealed',askReveal:'Reveal the answer',askHide:'Hide the answer',askBoard:'Board',askPlaceCol:'Place',askPoints:'Points',askSecCol:'Seconds',askLive:'On screen now',askNoneShown:'Nothing shown yet',askOnScreen:'On screen',askShown:'Shown',askNotShown:'Not shown yet',askShowNow:'Show now',askPrev:'Previous',askNext:'Next',askOpenQ:'Open for answers',askCloseQ:'Close answers',askTimeUp:'Time is up',askHideA:'Hide',askHideOf:'Hide: {0}',
+  tstRow:"Write a testimonial",qtTitle:"Testimonials",qtWaitN:"{0} waiting for review",qtNoDb:"Testimonials are not set up on the database yet.",qtSearch:"Search name, phone, words or note",qtFWait:"Waiting",qtFPub:"Published",qtFNot:"Not published",qtStWait:"Waiting",qtStPub:"Published",qtStRej:"Rejected",qtStHid:"Hidden",qtFeatured:"Featured",qtNotFeat:"Not featured",qtAbout:"About",qtAbSat:"Saturday community ride",qtAbSess:"Session or rental",qtAbLearn:"Learn to ride",qtAbEvent:"Event",qtAbShop:"Workshop or store",qtAbOther:"Something else",qtSource:"Source",qtSrcWeb:"Website",qtSrcApp:"Booking app",qtSrcRating:"After a rating",qtSrcOld:"Old comment",qtSrcStaff:"Added by staff",qtStarsL:"Stars",qtStarsOf:"{0} of 5 stars",qtNoStars:"No stars",qtPhoto:"Photo",qtWithPh:"With a photo",qtNoPh:"No photo",qtAccount:"Account",qtNoAcct:"No account",qtShowsAs:"Shows as",qtAnon:"Anonymous",qtAnonShows:"A MicroMobility rider (anonymous)",qtSince0:"Rider since {0}",qtSince1:"Rider since {0} · 1 ride",qtSinceN:"Rider since {0} · {1} rides",qtSent:"Sent {0}",qtBy:"by {0}",qtAgreed:"Agreed {0}",qtReviewed:"Reviewed by {0}, {1}",qtNoteIs:"Note",qtPhotoOf:"Photo sent with the testimonial of {0}",qtShowPh:"Show photo",qtHidePh:"Hide photo",qtPhGone:"This testimonial has no photo any more.",qtPublish:"Publish",qtReject:"Reject",qtRejectSure:"Reject now",qtRejNote:"Note for the team",qtHide:"Hide",qtBack:"Back to waiting",qtFeature:"Feature",qtUnfeature:"Unfeature",qtUp:"Move up",qtDown:"Move down",qtDropPh:"Remove photo",qtDropPhSure:"Tap again to remove the photo",qtDel:"Delete",qtDelSure:"Tap again to delete",qtFeatLimit:"12 are featured already. Unfeature one first.",qtNoChange:"Another device changed it first.",qtAvg:"average from {0} published",qtAvgNoStars:"{0} published, none with stars",qtAvgNone:"Nothing published yet",qtAsks:"Old comments: {0} said yes, {1} said no",qtOnLbl:"Riders see testimonials",qtOnNow:"On",qtOffNow:"Off: only the direct links work",qtOnAdmin:"Only an admin can change this.",qtOnQ:"Show testimonials to riders?",qtOnBody:"This turns on, together: the Testimonials link in the micromobility.sa menu and its sitemap, the page in search engines, the home page strip of featured ones, Write a testimonial on the booking app's Account, the ask after a rating of 9 or 10 on both, and the one-time ask about an old comment.",qtOnBtn:"Show them",qtOffQ:"Stop showing testimonials to riders?",qtOffBody:"This turns all of that off. The direct links keep working.",qtOffBtn:"Stop showing them",qtOnLog:"Testimonials shown to riders",qtOffLog:"Testimonials no longer shown to riders",qtOpenPage:"Open the page",qtAdd:"Add testimonial",qtAddT:"Add a testimonial",qtAAcct:"Their account",qtAAcctPh:"Search name, phone or email",qtAClear:"Clear",qtAName:"Name",qtAMode:"How the name shows",qtMFull:"Full name",qtMShort:"First name and last initial",qtMAnon:"Anonymous",qtAWords:"Their words",qtAPick:"Pick one",qtAWhere:"Where they agreed",qtAWherePh:"For example: WhatsApp, 12 November",qtAPub:"Publish now",qtEBody:"Write between 20 and 800 characters.",qtEAbout:"Pick what it is about.",qtEWhere:"Say where they agreed (3 characters at least).",qtEName:"Type the name, pick an account or choose Anonymous.",qtEStars:"Stars go from 1 to 5.",qtEPhoto:"This photo cannot be used. Try another one.",qtECust:"That account no longer exists.",qtDonePub:"Testimonial published: {0}",qtDoneRej:"Testimonial rejected: {0}",qtDoneHid:"Testimonial hidden: {0}",qtDoneBack:"Testimonial back to waiting: {0}",qtDoneFeat:"Testimonial featured: {0}",qtDoneUnfeat:"Testimonial no longer featured: {0}",qtDonePh:"Testimonial photo removed: {0}",qtDoneDel:"Testimonial deleted: {0}",qtDoneMove:"Testimonials' order changed: {0}",qtDoneAdd:"Testimonial added, waiting for review: {0}",qtDoneAddPub:"Testimonial added and published: {0}",qtShown:"Showing {0} of {1}",qtNoneWait:"Nothing is waiting for review.",qtNoneHere:"None here.",qtNoMatch:"Nothing matches the filter.",
 },
 ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'ممتلئة',settingsLanguage:'اللغة',proteinWord:'{0} بروتين',
   s13BikeChanged:'تم تغيير هذه الدراجة للتو على جهاز آخر. تم تحديث القائمة — راجعها وحاول مرة أخرى.',ticketQrLabel:'رمز QR للحجز',mrCxByYou:'أُلغي بطلبك',mrCxByUs:'أُلغي من قِبَلنا',liveMapBtn:'الخريطة الحية',leaveWlBtn:'مغادرة قائمة الانتظار',mapsApple:'خرائط Apple',mapsGoogle:'خرائط Google',offlineActTitle:'أنت غير متصل. اتصل بالإنترنت لتعديل هذا الحجز.',errLoginPhoneCc:'لا يوجد حساب بهذا الرقم كرقم سعودي. إذا كان رقمك من دولة أخرى فاكتبه مع رمز الدولة، مثل ‎+20 1012345678.',selectBookingAria:'تحديد الحجز',modifyChangedMsg:'تغيّر هذا الحجز أثناء تعديلك له. راجع التفاصيل ثم احفظ مرة أخرى.',wlAimedClosedMsg:'هذه الجولة لا تستقبل الحضور المباشر. اختر جولة أخرى من القائمة أعلاه لتسليمه دراجة.',bdNotEarned:'لم تُكتسب بعد',promoCustAmbiguous:'يوجد أكثر من عميل بهذا الاسم. اختر من القائمة العميل صاحب رقم الجوال الصحيح.',naDelBodyFinal:'يُؤرشف الحساب ولا يُمحى: تبقى {0} حجوزات سابقة ومدفوعاته ومحفظته وأوسمته وسجله باسم الراكب. يُسجَّل خروج الراكب ولا يمكنه تسجيل الدخول بعد ذلك، ويصبح البريد الإلكتروني ورقم الجوال متاحين لحساب جديد. يمكن للمسؤول استعادته من العملاء > المؤرشفة.',geMoveOnBike:'أحد أفراد هذه المجموعة على دراجة بالفعل، لذا تبقى المجموعة في هذه الجلسة.',errChangedElsewhere:'تم تعديل هذا الحجز للتو من جهاز آخر. تم تحديث القائمة — راجعها وحاول مجددًا.',errBikeNumberMax:'رقم الدراجة من 4 أرقام كحد أقصى (1–9999)، وإلا فلن يمكن مسح ملصقها وبطاقتها.',ridersEditOnBike:'أحد أفراد هذه المجموعة على دراجة بالفعل، لذا لا يمكن نقل المجموعة إلى ليلة أخرى.',
@@ -2087,6 +2091,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   tabAsk:'اسأل',tabAskWait:'{0} بانتظار الموافقة',askRbTitle:'تقرير الإجابات',askRbLay:'كل صف هو',askRbLayA:'إجابة',askRbLayP:'شخص',askRbSetAnswers:'قائمة الإجابات',askRbSetPeople:'الأشخاص وإجاباتهم',askRbSetQuiz:'نتائج المسابقة',askRbSetReview:'الموافقات',askRbBand:'الفئة العمرية',askRbAcct:'رقم الحساب',askRbQNo:'رقم السؤال',askRbKind:'نوع السؤال',askRbQCols:'كل سؤال في عمود',askRbForm:'كل حقل من النموذج في عمود',askRbRight:'صحيح أم خطأ',askRbRightN:'{0} من {1}',askRbVotes:'الأصوات',askRbLang:'اللغة',askRbRevBy:'راجعها',askRbRevAt:'وقت المراجعة',askRbAid:'رقم الإجابة',askRbSecQs:'نتائج كل سؤال',askRbSecCross:'كل سؤال حسب المجموعة',askRbSecList:'القائمة',askRbSplit:'تقسيم النتائج حسب',askRbAllRounds:'كل الجولات',askRbStKept:'الموافق عليها وبالانتظار',askRbNotMember:'غير الأعضاء',askRbFlagNo:'غير مُعلَّمة',askRbQaNo:'لم تتم الإجابة بعد',askRbVotesYes:'لها أصوات',askRbVotesNo:'بلا أصوات',askRbPick:'اختار',askRbAvgPlace:'متوسط الترتيب',askRbMedian:'الوسيط',askRbInArea:'داخل المنطقة الصحيحة',askRbAvgPts:'متوسط النقاط',askRbRightPct:'الإجابات الصحيحة',askRbSortQ:'ترتيب الأسئلة',askRbSortNew:'الأحدث أولاً',askRbSortOld:'الأقدم أولاً',askRbSortAns:'الإجابة، من أ إلى ي',askRbSortPts:'الأكثر نقاطًا',askRbSortFast:'الأسرع',askRbSortVotes:'الأكثر أصواتًا',askRbSortN:'الأكثر إجابات',askNew:'سؤال جديد',askEmpty:'لا توجد أسئلة بعد.',askNoMatch:'لا شيء يطابق الفلتر.',askNoDb:'قسم «اسأل» غير مُعدّ في قاعدة البيانات بعد.',askStDraft:'مسودة',askStOpen:'مفتوحة',askStSoon:'تفتح {0}',askStClosed:'مغلقة',askFSoon:'لم تفتح بعد',askClosesAt:'تغلق {0}',askNoEnd:'بلا نهاية',askAnswers:'الإجابات',askPeople:'الأشخاص',askWaiting:'بانتظار الموافقة',askCopy:'نسخ',askCopied:'تم نسخ الرابط',askBack:'كل الأسئلة',askTabSetup:'الإعداد',askTabResults:'النتائج',askGPage:'الصفحة',askTitleEn:'العنوان (بالإنجليزية)',askTitleAr:'العنوان (بالعربية)',askIntroEn:'المقدمة (بالإنجليزية)',askIntroAr:'المقدمة (بالعربية)',askSlug:'اسم الرابط',askSlugTaken:'اسم الرابط هذا مستخدم',askSlugBad:'استخدم من 3 إلى 40 حرفًا إنجليزيًا صغيرًا وأرقامًا وشرطات.',askNeedTitle:'اكتب عنوانًا بالإنجليزية أو بالعربية.',askAud:'من يراها',askAudLink:'كل من لديه الرابط',askAudAcc:'الحسابات المسجَّل دخولها',askAudTags:'الحسابات التي تحمل وسمًا',askAudPick:'اختر وسمًا واحدًا على الأقل.',askTags:'الوسوم',askGWhen:'متى تكون مفتوحة',askOpens:'الفتح',askNow:'الآن',askAt:'تاريخ ووقت',askCloses:'الإغلاق',askIn1d:'يوم واحد',askIn3d:'3 أيام',askIn1w:'أسبوع واحد',askSaudi:'بتوقيت السعودية',askWhenBad:'اختر تاريخًا ووقتًا.',askCloseBad:'يجب أن تغلق بعد أن تفتح.',askAfter:'بعد الإغلاق',askAfterShow:'عرض النتائج',askAfterHide:'إخفاء',askGMore:'المزيد',askListed:'تظهر في القائمة على micromobility.sa/ask',askNotes:'ملاحظات الموظفين',askStart:'بدء',askEnd:'إنهاء',askEndAsk:'إنهاء هذه الصفحة؟',askUnsaved:'تغييرات غير محفوظة',askSaved:'تم الحفظ',askStarted:'بدأت',askDelPage:'حذف الصفحة',askDelAsk:'حذف هذه الصفحة وكل إجاباتها؟',askQs:'الأسئلة',askAddQ:'إضافة سؤال',askEditQ:'تعديل السؤال',askNeedQ:'أضف سؤالًا أولًا.',askUp:'تحريك لأعلى',askDown:'تحريك لأسفل',askQDelAsk:'حذف هذا السؤال وإجاباته ({0})؟',askTaking:'يستقبل الإجابات',askType:'النوع',askKcloud:'سحابة كلمات',askKopen:'إجابات مفتوحة',askKqa:'أسئلة من الحضور',askKchoice:'اختيار من متعدد',askKscales:'مقاييس',askKranking:'ترتيب',askKpoints:'100 نقطة',askKnumber:'رقم',askKinfo:'شريحة نصية',askQTitleEn:'السؤال (بالإنجليزية)',askQTitleAr:'السؤال (بالعربية)',askHelpEn:'نص المساعدة (بالإنجليزية)',askHelpAr:'نص المساعدة (بالعربية)',askMaxLen:'أطول إجابة، بعدد الأحرف',askPerPerson:'عدد الإجابات لكل شخص',askVotes:'يمكن التصويت للإجابات',askOptions:'الخيارات',askStatements:'العبارات',askOptEn:'الخيار {0}، بالإنجليزية',askOptAr:'الخيار {0}، بالعربية',askEn:'الإنجليزية',askAr:'العربية',askAddOpt:'إضافة خيار',askMaxPicks:'عدد الاختيارات لكل شخص',askChange:'يمكن تغيير الإجابة',askMin:'الأدنى',askMax:'الأعلى',askLoEn:'تسمية الطرف الأدنى (بالإنجليزية)',askLoAr:'تسمية الطرف الأدنى (بالعربية)',askHiEn:'تسمية الطرف الأعلى (بالإنجليزية)',askHiAr:'تسمية الطرف الأعلى (بالعربية)',askTotal:'النقاط المراد توزيعها',askNumMin:'أصغر رقم',askNumMax:'أكبر رقم',askStep:'الخطوة',askUnitEn:'الوحدة (بالإنجليزية)',askUnitAr:'الوحدة (بالعربية)',askModerated:'الموافقة على الإجابات قبل ظهورها',askResWho:'من يرى النتائج',askResLive:'فورًا',askResAnswered:'بعد الإجابة',askResClosed:'بعد الإغلاق',askResStaff:'الموظفون فقط',askNeedOpts:'أضف {0} خيارات على الأقل.',askOptEmpty:'املأ كل خيار أو احذفه.',askNumOrder:'يجب أن يكون أكبر رقم أعلى من أصغر رقم.',askCfgBad:'هذه الإعدادات لا تناسب هذا النوع من الأسئلة.',askAWait:'بالانتظار',askAOk:'موافق عليها',askANo:'غير موافق عليها',askApprove:'موافقة',askReject:'رفض',askToWait:'إعادة للانتظار',askEditText:'تعديل النص',askMarkAnswered:'تحديد كمُجاب عنه',askNotAnswered:'لم يُجَب عنه',askAnswered:'تمت الإجابة',askApproveN:'الموافقة على {0} محددة',askRejectN:'رفض {0} محددة',askApproveAll:'الموافقة على كل المنتظرة',askApproveAllAsk:'الموافقة على كل الإجابات المنتظرة ({0})؟',askDelAAsk:'حذف هذه الإجابة؟',askNoAnswers:'لا توجد إجابات بعد.',askNoneHere:'لا شيء هنا.',askFlagged:'مُعلَّمة',askQuestion:'السؤال',askAnswer:'الإجابة',askTime:'الوقت',askQr:'رمز QR للرابط',askScreen:'فتح الشاشة الكبيرة',askPreview:'معاينة',askReset:'تصفير النتائج',askResetAsk:'تصفير النتائج؟',askResetBody:'تبدأ جولة جديدة بلا إجابات. الإجابات السابقة تبقى محفوظة.',askRound:'الجولة {0}',askAvg:'المتوسط',askPlace:'متوسط الترتيب {0}',askVotesN:'الأصوات {0}',askWho:'من أجاب بماذا',
   askNoRight:'هذا الحساب يمكنه عرض هذا القسم دون تعديله.',askNoOpen:'هذا الحساب لا يمكنه فتح هذا القسم.',askKindLocked:'لهذا السؤال إجابات، لذا لا يمكن تغيير نوعه.',askPicAdmin:'رفع الصور للمدير فقط.',askRoundPick:'الجولة',askRoundNow:'الجولة {0} (الحالية)',askTabStats:'الإحصاءات',askNotTags:'ليست للحسابات التي تحمل',askGender:'الجنس',askGenAll:'الجميع',askMinAge:'أصغر عمر',askMaxAge:'أكبر عمر',askAgeNote:'شرط العمر يستثني كل حساب بلا تاريخ ميلاد، ومعظم الحسابات بلا تاريخ ميلاد.',askAgeBad:'العمر بالسنوات الكاملة من 1 إلى 120، ولا يزيد الأصغر على الأكبر.',askGLook:'المظهر',askTheme:'السمة',askThlight:'فاتح',askThdark:'داكن',askThgreen:'أخضر',askThsand:'رملي',askPalette:'ألوان الرسوم',askPlbrand:'العلامة',askPlforest:'الغابة',askPlocean:'المحيط',askPlsunset:'الغروب',askPlberry:'التوت',askPlmono:'أحادي',askPalPage:'كالصفحة',askCover:'صورة الغلاف',askPic:'الصورة',askPicUp:'رفع صورة',askPicNew:'تغيير الصورة',askThanksEn:'سطر بعد الإجابة (بالإنجليزية)',askThanksAr:'سطر بعد الإجابة (بالعربية)',askLayout:'عرض الأسئلة',askLayStack:'كلها في صفحة واحدة',askLaySteps:'سؤال تلو الآخر',askScr:'تعرض الشاشة الكبيرة',askScrQr:'رمز QR',askScrCount:'عدد المجيبين',askRotate:'تنتقل الشاشة الكبيرة إلى السؤال التالي',askSecs:'كل {0} ثانية',askOff:'ليس تلقائياً',askGWords:'الكلمات المحظورة',askBwAdd:'أضف كلمات تفصل بينها فواصل',askBwAddBtn:'إضافة',askBwFull:'الحد الأقصى للصفحة 200 كلمة محظورة.',askChart:'الرسم',askVzcloud:'سحابة كلمات',askVzbubbles:'فقاعات',askVzbars:'أشرطة',askVztiles:'مربعات',askVzlist:'قائمة مرتبة',askVzcards:'بطاقات',askVzwall:'ملاحظات لاصقة',askVzspotlight:'إبراز',askVzstream:'تدفق',askVzcolumns:'أعمدة',askVzdonut:'حلقة',askVzpie:'دائرة',askVzdots:'نقاط',askVztracks:'مسارات',askVzradar:'رادار',askVzstacked:'أشرطة مكدسة',askVzheat:'خريطة حرارية',askVzpodium:'منصة تتويج',askVzladder:'سلّم',askVzhistogram:'مدرّج تكراري',askVzgauge:'عدّاد',askVzstrip:'شريط',askSort:'الترتيب',askSogiven:'كما كُتبت',askSocount:'الأكبر أولاً',askValues:'الأرقام على الرسم',askVaboth:'العدد والنسبة',askVacount:'العدد',askVapercent:'النسبة',askVanone:'بلا أرقام',askLimit:'كم يعرض',askCase:'الأحرف',askCatyped:'كما كُتبت',askCaupper:'أحرف كبيرة',askCalower:'أحرف صغيرة',askAngle:'الكلمات',askAnflat:'كلها أفقية',askAnmixed:'بعضها عمودي',askSize:'حجم النص',askSzm:'متوسط',askSzs:'صغير',askSzl:'كبير',askTotalOn:'إظهار عدد المجيبين',askOlder:'عرض إجابات أقدم',askNotGiven:'غير محدد',askOther:'أخرى',askTable:'جدول',askSegPick:'اختر سؤالاً',askSegBy:'التقسيم حسب',askSegNone:'بلا إجابة',askByAge:'العمر',askByMember:'المجتمع',askMembers:'الأعضاء',askByLang:'لغة الإجابات',askByNat:'الجنسية',askByDay:'الإجابات حسب اليوم',askByHour:'الإجابات حسب الساعة، بتوقيت السعودية',askByQ:'الإجابات حسب السؤال',askDay:'اليوم',askHour:'الساعة',askFirst:'أول إجابة',askLast:'آخر إجابة',askReach:'الوصول',askReachOf:'{0} من {1} حساب',askTop:'الأكثر إجابة',askSeg:'سؤال واحد، مجموعة بمجموعة',
   askDup:'نسخ الصفحة',askDupSave:'احفظ الصفحة قبل نسخها.',askGPace:'الإيقاع',askPaceSelf:'كلٌّ بإيقاعه',askPaceLive:'نعرض سؤالاً واحداً في كل مرة',askReact:'أزرار التفاعل تحت كل سؤال',askKgrid:'شبكة بمحورين',askKpin:'دبوس على صورة',askKform:'نموذج قصير',askKquiz:'مسابقة: اختر الإجابة',askKquiz_text:'مسابقة: اكتب الإجابة',askVzscatter:'نقاط على محورين',askItems:'العناصر',askXEn:'المحور الأفقي (بالإنجليزية)',askXAr:'المحور الأفقي (بالعربية)',askYEn:'المحور الرأسي (بالإنجليزية)',askYAr:'المحور الرأسي (بالعربية)',askGridMax:'أعلى قيمة',askGridAxes:'سمِّ المحورين.',askFields:'الحقول',askFieldEn:'الحقل {0}، بالإنجليزية',askFieldAr:'الحقل {0}، بالعربية',askFieldType:'الحقل {0}، نوع الإجابة',askFttext:'نص',askFtnumber:'رقم',askFtchoice:'واحد من قائمة',askRequired:'مطلوب',askFieldOptEn:'الحقل {0}، الخيار {1}، بالإنجليزية',askFieldOptAr:'الحقل {0}، الخيار {1}، بالعربية',askAddField:'إضافة حقل',askNeedField:'أضف حقلاً واحداً على الأقل.',askFieldEmpty:'اكتب اسماً لكل حقل أو احذفه.',askFieldOpts:'حقل القائمة يحتاج إلى خيارين على الأقل، وكل خيار مكتوب.',askSeconds:'ثوانٍ للإجابة',askSpeed:'نقاط أكثر للإجابة الأسرع',askAccept:'الإجابات المقبولة، واحدة في كل سطر',askNeedAccept:'اكتب إجابة مقبولة واحدة على الأقل.',askAcceptMany:'10 إجابات مقبولة على الأكثر.',askRight:'الإجابة الصحيحة',askRightNum:'الإجابة الصحيحة (اختياري)',askRightOpt:'الخيار {0} صحيح',askRightMark:'صحيح',askWrong:'خطأ',askNeedRight:'حدِّد الإجابة الصحيحة.',askRightRange:'يجب أن تكون الإجابة الصحيحة بين أصغر رقم وأكبر رقم.',askPinRight:'المنطقة الصحيحة (اختياري): اضغط على الصورة',askPinAdd:'حدِّد منطقة صحيحة',askPinNone:'إزالة المنطقة الصحيحة',askPinX:'أفقياً',askPinY:'رأسياً',askPinR:'الحجم',askPinNeedsPic:'سؤال الدبوس يحتاج إلى صورته.',askPts:'{0} نقطة',askSecN:'{0} ث',askRightOf:'الصحيحة: {0} من {1}',askAccepted:'المقبولة:',askSeeAnswers:'عرض الإجابات',askRevealed:'الإجابة مكشوفة',askReveal:'كشف الإجابة',askHide:'إخفاء الإجابة',askBoard:'لوحة النتائج',askPlaceCol:'المركز',askPoints:'النقاط',askSecCol:'الثواني',askLive:'على الشاشة الآن',askNoneShown:'لم يُعرض شيء بعد',askOnScreen:'على الشاشة',askShown:'عُرض',askNotShown:'لم يُعرض بعد',askShowNow:'اعرض الآن',askPrev:'السابق',askNext:'التالي',askOpenQ:'فتح الإجابات',askCloseQ:'إغلاق الإجابات',askTimeUp:'انتهى الوقت',askHideA:'إخفاء',askHideOf:'إخفاء: {0}',
+  tstRow:"اكتب شهادة",qtTitle:"الشهادات",qtWaitN:"{0} بانتظار المراجعة",qtNoDb:"الشهادات غير مُعدّة في قاعدة البيانات بعد.",qtSearch:"ابحث بالاسم أو الجوال أو الكلمات أو الملاحظة",qtFWait:"بانتظار المراجعة",qtFPub:"منشورة",qtFNot:"غير منشورة",qtStWait:"بانتظار المراجعة",qtStPub:"منشورة",qtStRej:"مرفوضة",qtStHid:"مخفية",qtFeatured:"مميّزة",qtNotFeat:"غير مميّزة",qtAbout:"الموضوع",qtAbSat:"جولة السبت المجتمعية",qtAbSess:"جلسة أو استئجار",qtAbLearn:"تعلّم ركوب الدراجة",qtAbEvent:"فعالية",qtAbShop:"الورشة أو المتجر",qtAbOther:"شيء آخر",qtSource:"المصدر",qtSrcWeb:"الموقع الإلكتروني",qtSrcApp:"تطبيق الحجز",qtSrcRating:"بعد تقييم",qtSrcOld:"تعليق سابق",qtSrcStaff:"أضافها الموظفون",qtStarsL:"النجوم",qtStarsOf:"{0} من 5 نجوم",qtNoStars:"بلا نجوم",qtPhoto:"الصورة",qtWithPh:"بصورة",qtNoPh:"بلا صورة",qtAccount:"الحساب",qtNoAcct:"دون حساب",qtShowsAs:"يظهر باسم",qtAnon:"دون اسم",qtAnonShows:"أحد راكبي MicroMobility (دون اسم)",qtSince0:"راكب منذ {0}",qtSince1:"راكب منذ {0} · جولة واحدة",qtSinceN:"راكب منذ {0} · الجولات: {1}",qtSent:"أُرسلت {0}",qtBy:"بواسطة {0}",qtAgreed:"الموافقة {0}",qtReviewed:"راجعها {0}، {1}",qtNoteIs:"ملاحظة",qtPhotoOf:"الصورة المرسلة مع شهادة {0}",qtShowPh:"اعرض الصورة",qtHidePh:"أخفِ الصورة",qtPhGone:"لم تعد لهذه الشهادة صورة.",qtPublish:"انشر",qtReject:"ارفض",qtRejectSure:"ارفض الآن",qtRejNote:"ملاحظة للفريق",qtHide:"أخفِ",qtBack:"أعد إلى الانتظار",qtFeature:"ميّز",qtUnfeature:"ألغِ التمييز",qtUp:"انقل للأعلى",qtDown:"انقل للأسفل",qtDropPh:"احذف الصورة",qtDropPhSure:"اضغط مرة أخرى لحذف الصورة",qtDel:"احذف",qtDelSure:"اضغط مرة أخرى للحذف",qtFeatLimit:"توجد 12 شهادة مميّزة بالفعل. ألغِ تمييز إحداها أولاً.",qtNoChange:"غيّرها جهاز آخر قبلك.",qtAvg:"متوسط {0} شهادة منشورة",qtAvgNoStars:"{0} منشورة، دون نجوم",qtAvgNone:"لا شيء منشور بعد",qtAsks:"التعليقات السابقة: {0} وافقوا، و{1} رفضوا",qtOnLbl:"يرى الراكبون الشهادات",qtOnNow:"مفعّل",qtOffNow:"متوقف: الروابط المباشرة فقط تعمل",qtOnAdmin:"يستطيع المسؤول وحده تغييره.",qtOnQ:"هل تعرض الشهادات على الراكبين؟",qtOnBody:"يفعّل هذا معاً: رابط «الشهادات» في قائمة micromobility.sa وخريطة الموقع، وظهور الصفحة في محركات البحث، وشريط الشهادات المميّزة في الصفحة الرئيسية، و«اكتب شهادة» في «الحساب» بتطبيق الحجز، والسؤال بعد تقييم 9 أو 10 في كليهما، والسؤال لمرة واحدة عن تعليق سابق.",qtOnBtn:"اعرضها",qtOffQ:"هل توقف عرض الشهادات على الراكبين؟",qtOffBody:"يوقف هذا كل ما سبق، وتبقى الروابط المباشرة تعمل.",qtOffBtn:"أوقف العرض",qtOnLog:"أصبحت الشهادات معروضة على الراكبين",qtOffLog:"لم تعد الشهادات معروضة على الراكبين",qtOpenPage:"افتح الصفحة",qtAdd:"أضف شهادة",qtAddT:"إضافة شهادة",qtAAcct:"حسابه",qtAAcctPh:"ابحث بالاسم أو الجوال أو البريد",qtAClear:"مسح",qtAName:"الاسم",qtAMode:"كيف يظهر الاسم",qtMFull:"الاسم الكامل",qtMShort:"الاسم الأول والحرف الأول من اسم العائلة",qtMAnon:"دون اسم",qtAWords:"كلماته",qtAPick:"اختر",qtAWhere:"أين وافق",qtAWherePh:"مثلاً: واتساب، 12 نوفمبر",qtAPub:"انشرها الآن",qtEBody:"اكتب بين 20 و800 حرف.",qtEAbout:"اختر موضوعها.",qtEWhere:"اذكر أين وافق (3 أحرف على الأقل).",qtEName:"اكتب الاسم أو اختر حساباً أو «دون اسم».",qtEStars:"النجوم من 1 إلى 5.",qtEPhoto:"لا يمكن استخدام هذه الصورة. جرّب صورة أخرى.",qtECust:"لم يعد هذا الحساب موجوداً.",qtDonePub:"نُشرت الشهادة: {0}",qtDoneRej:"رُفضت الشهادة: {0}",qtDoneHid:"أُخفيت الشهادة: {0}",qtDoneBack:"أُعيدت الشهادة إلى الانتظار: {0}",qtDoneFeat:"مُيّزت الشهادة: {0}",qtDoneUnfeat:"أُلغي تمييز الشهادة: {0}",qtDonePh:"حُذفت صورة الشهادة: {0}",qtDoneDel:"حُذفت الشهادة: {0}",qtDoneMove:"تغيّر ترتيب الشهادات: {0}",qtDoneAdd:"أُضيفت الشهادة بانتظار المراجعة: {0}",qtDoneAddPub:"أُضيفت الشهادة ونُشرت: {0}",qtShown:"عرض {0} من {1}",qtNoneWait:"لا شيء بانتظار المراجعة.",qtNoneHere:"لا شيء هنا.",qtNoMatch:"لا شيء يطابق الفلتر.",
 }};
 // The staff screens' strings are not in LANG on a customer's phone (2026-10-01): the build moves
 // every key only staff code names into staff.js (English) and lang/staff-<code>.json (the rest,
@@ -2354,7 +2359,7 @@ function isAdmin(){return S.staffRole==='admin';}
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
 // Inside Riders the summary report stays admin-only (renderRiders).
 const DESK_TABS=['queue','waitlist','lockers','cashier','workshop']; // Lockers (2026-11-09): the desk gives them // the Waitlist (2026-11-09): a section of its own, opened by whoever opens Bookings // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
-const ROLE_TABS={volunteer:[],door:[],manager:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','waitlist','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','store','inventory'],owner:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
+const ROLE_TABS={volunteer:[],door:[],manager:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','waitlist','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','store','inventory'],owner:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
 function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]||DESK_TABS).filter(_stoSecOk);}
 // The Store and Payments (2026-11-10) are sections only where the database has them (staff_store_ready, _stoProbe): not on
 // the rail, not among the Team page's sections, not in "every section" anywhere else.
@@ -2365,7 +2370,7 @@ function _deskTabOk(tab){return tab==='settings'||tab==='reports'&&S.staffRole!=
 // call into (a return's fleet check, a void's reason, the night summary). Every other part comes the first time something asks for it (its stand-in fetches it).
 // Before the role is known nothing is held back. People's rarely opened views (peopleapps, peoplemore: staff round s10,
 // item 47) come only when one is opened; a session's report (sessreport) with the desk's parts.
-const STAFF_PART_TABS={reports:[],peopleapps:[],peoplemore:[],sessreport:['queue'],sessions:['sessions'],lockers:['lockers'],store:['store','payments'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],ask:['ask'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist'],announce:['queue','settings'],door:[]}; // door: fetched by its stand-in when a Door account signs in
+const STAFF_PART_TABS={reports:[],peopleapps:[],peoplemore:[],sessreport:['queue'],sessions:['sessions'],lockers:['lockers'],store:['store','payments'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],ask:['ask'],testimonials:['testimonials'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist'],announce:['queue','settings'],door:[]}; // door: fetched by its stand-in when a Door account signs in
 function _staffPartWanted(n){const tabs=STAFF_PART_TABS[n];if(!tabs||!S.staffRole)return true;return tabs.some(_deskTabOk);}
 // A staff account's own preferences (2026-10-09): staff.prefs through staff_my_prefs, with this
 // device's copy (cq_prefs, kept per account) read at once so a reload starts as the person left it.
@@ -3240,7 +3245,7 @@ let _sbWritesOut=0;
 // wait in the request lane like any read (2026-10-27: the rider's page reads checked against their
 // migrations - customer_my_badges to petromin_member at the end - and the consents, the deletion request
 // and the last-seen stamp left out, which write).
-const _READ_RPC=new Set(['staff_owner_choices','staff_customer_export','staff_archived_list','staff_archived_account','staff_customer_stats','hub_overview','hub_photos_list','hub_photo_img','staff_rotm_tally','staff_goal_progress','customer_my_titles','member_directory','staff_title_auto_holders','staff_sync','staff_people','list_sessions','my_bookings','customer_profile','customer_exists','customer_token_ok','customer_pwd_state','customer_fix_fields','community_member','promo_lookup','staff_resolve_bike','staff_phone_accounts','staff_email_for_phone','staff_inventory_costs','staff_inventory_extras','staff_ambassador_stats','staff_team_list','staff_team_more','staff_purge_preview','staff_operator_list','staff_sign_in_methods','staff_last_seen','staff_sign_in_lock','staff_undo_code_state','staff_audit_search','staff_invite_check','customer_my_badges','customer_emergency','customer_about','badge_catalog','badge_seasons','badge_weeks','customer_blood_type','customer_whatsapp','customer_purchases','ambassador_mine','petromin_member','customer_sport']);
+const _READ_RPC=new Set(['staff_owner_choices','staff_customer_export','staff_archived_list','staff_archived_account','staff_customer_stats','hub_overview','hub_photos_list','hub_photo_img','staff_rotm_tally','staff_goal_progress','customer_my_titles','member_directory','staff_title_auto_holders','staff_sync','staff_people','list_sessions','my_bookings','customer_profile','customer_exists','customer_token_ok','customer_pwd_state','customer_fix_fields','community_member','promo_lookup','staff_resolve_bike','staff_phone_accounts','staff_email_for_phone','staff_inventory_costs','staff_inventory_extras','staff_ambassador_stats','staff_team_list','staff_team_more','staff_purge_preview','staff_operator_list','staff_sign_in_methods','staff_last_seen','staff_sign_in_lock','staff_undo_code_state','staff_audit_search','staff_invite_check','customer_my_badges','customer_emergency','customer_about','badge_catalog','badge_seasons','badge_weeks','customer_blood_type','customer_whatsapp','customer_purchases','ambassador_mine','petromin_member','customer_sport','testimonial_mine','staff_testimonials','staff_testimonial_photo']);
 function _fetchT(input,init){
   const m=String((init&&init.method)||(input&&input.method)||'GET').toUpperCase();
   const _rpc=m==='POST'&&/\/rest\/v1\/rpc\/([^/?#]+)/.exec(String((input&&input.url)||input));
@@ -5058,7 +5063,9 @@ const PRIVACY_VERSION='2026-11-18';
 // 2026-11-18: a mentee's profile shows members only their university and field of study, the rest staff only; the same day, the
 // interests a member picks in the Community tab, seen by the member and our staff, to show them those sessions first and
 // send them updates about them, kept until changed or the account is deleted; the same day, Suggest a ride: the suggestions
-// a Community member sends, staff's status and reply, kept until the account is deleted) moves
+// a Community member sends, staff's status and reply, kept until the account is deleted; the same day, testimonials: the words,
+// stars, the name as the rider chooses it, an optional photo and the rider-since line, published with the rider's consent, kept
+// until the rider deletes it or staff remove it, a photo deleted once staff decide not to publish) moves
 // PRIVACY_VERSION, the date shown, but not this one;
 // an account that confirmed this version or any later one is not asked again.
 const PRIVACY_ASK_FROM='2026-10-02';
@@ -5090,6 +5097,7 @@ en:[
     ['Whether you compete in a sport, as a professional or an amateur, and the sports federations you compete under','Community members: required, asked once on your account. Everyone else: optional, in Account. Seen only by you and our staff; you can change it in Account at any time.','So our team knows the athletes in our community and can plan rides and events with them.'],
     ['Your answers on micromobility.sa/ask: the ideas, votes, ratings and questions you send','Optional: only when you choose to answer. Kept with your account. Other people may see an answer, never who sent it; our staff can see who sent each one.','Planning rides and events around what our community asks for, and keeping what is shown suitable for everyone'],
     ['Suggest a ride (Community members only): each suggestion you send (a route, a breakfast spot, a ride idea or something else, in your own words), when you sent it, and our team’s status and reply','Always optional: only if you send one. Seen by you and our staff; other members never see it. Kept until your account is deleted.','Planning rides and sessions around what our members suggest, and telling you in your Updates list when yours is planned or happens'],
+    ['Testimonials: the words you write about our rides and services, your star rating, what it is about, your name as you choose to show it (your full name, your first name and last initial, or none), a photo if you add one, and, beside a name, the year you started riding with us and how many rides you have done','Always optional: only if you write one and tick that MicroMobility may publish it. Seen by our staff; once our staff publish it, by anyone on micromobility.sa. You can delete yours at any time in Account.','Publishing what riders say about us on our website, with your consent. A photo is deleted as soon as our team decides not to publish it.'],
     ['The mentorship programme (Community members only): if you register as a mentee, your university, field of study, city, country, starting year, the help you want, your goal and the mentor gender you prefer; if you register as a mentor, where and what you studied, your work, the places you know, how you can help and what you tell us','Optional: only if you register. A mentee’s university and field of study are shown to Community members without their name; their city, country, starting year, the help wanted, their goal and the mentor gender they prefer are seen by our staff only. What a mentor tells us is seen by our staff only; a short line about their experience, without their name, is shown to the one student our staff propose them to. Once you both accept, we share your first name and WhatsApp number with that one person. You can step back at any time; we then stop sharing them.','Matching students starting university with Community members who can help them, and following up on each match'],
     ['A blood donation event’s registration: your name, mobile number, birth date and nationality, whether you come as a donor or a visitor, which club or community you are from, your email address and blood type if you come as a donor, your gender if you come as a visitor, and whether you donated','Asked only when you register for a blood donation event. Seen by you, our staff and that event’s partners and third parties once you agree to share them. We never ask for or keep your ID or Iqama number.','Registering you for the event, and giving confirmed donors and checked-in visitors any reward the event offers'],
     ['Volunteering: the opportunities you register for, your message and preferred role, whether you are accepted, your role, when you start and finish, your volunteering hours, that you accepted the volunteer agreement, what you do on the volunteer portal, notes our team keeps, and our team’s rating of how each event you work went, with their comments','Only if you register to volunteer, or our team adds volunteering hours to your account. Seen by you and our staff, except our team’s notes, ratings and comments, which only our staff see.','Running volunteering at our events, your record of hours and your certificate, and choosing volunteers for later events'],
@@ -5128,6 +5136,7 @@ en:[
     '<strong>To share an athlete’s details with WeSportify, Mile and Gymnation for the Arena Heros Hybrid Race:</strong> your consent, which we ask for before you can take part in the race.',
     '<strong>To share a donor’s details with the partners and third parties of a blood donation event:</strong> your consent, which we ask for before you can register.',
     '<strong>To share a mentor’s or a mentee’s first name and WhatsApp number with their match:</strong> your consent, which we ask for when you register and which you withdraw by stepping back.',
+    '<strong>To publish your testimonial on our website:</strong> your consent, the box you tick when you send it, which you withdraw by deleting it.',
   ]},
   {p:'<strong>We use your data only for the purposes above.</strong> If we ever want to use it for something else, we will ask you first, unless the law allows otherwise.'},
   {h:'If you don’t give us your data'},
@@ -5175,6 +5184,7 @@ en:[
     '<strong>Your Updates list:</strong> each message is deleted after 90 days.',
     '<strong>The Saturdays you plan to come:</strong> deleted when the month ends.',
     '<strong>Your interests:</strong> kept until you change them or your account is deleted.',
+    '<strong>Testimonials:</strong> kept until you delete yours or our staff remove it; a photo is deleted as soon as our team decides not to publish it.',
   ]},
   {p:'To destroy data, we either delete it permanently from our database or remove everything that identifies you, so it can only be used in anonymous totals. Deleted data leaves our backups within 7 days.'},
   {h:'Your rights'},
@@ -5221,6 +5231,7 @@ ar:[
     ['هل تنافس في رياضة ما بشكل احترافي أو كهاوٍ، والاتحادات الرياضية التي تنافس تحت مظلتها','أعضاء المجتمع: مطلوب، ويُسأل مرة واحدة في حسابك. وللجميع غيرهم: اختياري، من الحساب. لا يراه إلا أنت وموظفونا، ويمكنك تغييره من الحساب في أي وقت.','ليعرف فريقنا الرياضيين في مجتمعنا ويخطط معهم للجولات والفعاليات.'],
     ['إجاباتك في micromobility.sa/ask: الأفكار والتصويتات والتقييمات والأسئلة التي ترسلها','اختياري: فقط عندما تختار أن تجيب. تُحفظ مع حسابك. قد يرى الآخرون الإجابة، لكنهم لا يرون من أرسلها أبداً؛ أما موظفونا فيرون من أرسل كل إجابة.','لتخطيط الجولات والفعاليات وفق ما يطلبه مجتمعنا، ولإبقاء ما يُعرض مناسباً للجميع'],
     ['اقترح جولة (لأعضاء المجتمع فقط): كل اقتراح ترسله (مسار، أو مكان للفطور، أو فكرة جولة، أو شيء آخر، بكلماتك)، ووقت إرساله، وحالته وردّ فريقنا عليه','اختياري دائماً: فقط إن أرسلت اقتراحاً. لا يراه إلا أنت وموظفونا، ولا يراه الأعضاء الآخرون أبداً. يُحفظ حتى حذف حسابك.','لتخطيط الجولات والفعاليات وفق ما يقترحه أعضاؤنا، ولإبلاغك في قائمة التحديثات عندما نخطط لاقتراحك أو ننفّذه'],
+    ['الشهادات: الكلمات التي تكتبها عن جولاتنا وخدماتنا، وتقييمك بالنجوم، وموضوعها، واسمك كما تختار أن يظهر (اسمك الكامل، أو اسمك الأول والحرف الأول من اسم العائلة، أو دون اسم)، وصورة إن أضفتها، وإلى جانب الاسم السنة التي بدأت فيها الركوب معنا وعدد جولاتك','اختياري دائماً: فقط إن كتبت شهادة ووافقت على أن تنشرها MicroMobility. يراها موظفونا، وبعد أن ينشرها موظفونا يراها أي زائر لموقع micromobility.sa. يمكنك حذف شهادتك في أي وقت من «الحساب».','لنشر ما يقوله الراكبون عنا على موقعنا الإلكتروني، بموافقتك. تُحذف الصورة فور أن يقرر فريقنا عدم نشر الشهادة.'],
     ['برنامج الإرشاد (لأعضاء المجتمع فقط): إن سجّلت كمسترشد: جامعتك وتخصصك ومدينتك ودولتك وسنة بدئك والمساعدة التي تريدها وهدفك وجنس المرشد الذي تفضّله؛ وإن سجّلت كمرشد: أين درست وماذا درست وعملك والأماكن التي تعرفها وكيف يمكنك المساعدة وما تخبرنا به','اختياري: فقط إذا سجّلت. تُعرض جامعة المسترشد وتخصصه لأعضاء المجتمع دون اسمه، ولا يرى مدينته ودولته وسنة بدئه والمساعدة التي يريدها وهدفه وجنس المرشد الذي يفضّله إلا موظفونا. وما يخبرنا به المرشد لا يراه إلا موظفونا، ويُعرض سطر قصير عن خبرته، دون اسمه، على الطالب الوحيد الذي يقترحه عليه موظفونا. وبعد قبولكما كليكما، نشارك اسمك الأول ورقم واتساب الخاص بك مع ذلك الشخص وحده. ويمكنك الانسحاب في أي وقت، وعندها نتوقف عن مشاركتهما.','مطابقة الطلاب الذين يبدؤون دراستهم الجامعية مع أعضاء المجتمع القادرين على مساعدتهم، ومتابعة كل مطابقة'],
     ['التسجيل في فعالية للتبرع بالدم: اسمك ورقم جوالك وتاريخ ميلادك وجنسيتك، وما إذا كنت ستحضر كمتبرع أم كزائر، والنادي أو المجتمع الذي تنتمي إليه، وبريدك الإلكتروني وفصيلة دمك إن حضرت كمتبرع، وجنسك إن حضرت كزائر، وما إذا كنت قد تبرعت','تُطلب فقط عند التسجيل في فعالية للتبرع بالدم. يطّلع عليها أنت وموظفونا والشركاء والأطراف الثالثة لتلك الفعالية بعد موافقتك على مشاركتها. لا نطلب رقم هويتك أو إقامتك ولا نحتفظ به.','تسجيلك في الفعالية، ومنح المتبرعين المؤكَّدين والزوار الذين سجّلوا حضورهم أي مكافأة تقدمها الفعالية'],
     ['التطوع: الفرص التي تسجل فيها، ورسالتك ودورك المفضل، وقبولك من عدمه، ودورك، ووقت بدئك وانتهائك، وساعات تطوعك، وموافقتك على إقرار المتطوع، وما تقوم به في بوابة المتطوعين، وملاحظات يحتفظ بها فريقنا، وتقييم فريقنا لأدائك في كل فعالية تعمل فيها مع تعليقاتهم','فقط إذا سجلت للتطوع، أو أضاف فريقنا ساعات تطوع إلى حسابك. يراها أنت وموظفونا، باستثناء ملاحظات فريقنا وتقييماته وتعليقاته، فلا يراها إلا موظفونا.','إدارة التطوع في فعالياتنا، وسجل ساعاتك وشهادتك، واختيار المتطوعين للفعاليات القادمة'],
@@ -5259,6 +5270,7 @@ ar:[
     '<strong>لمشاركة بيانات الرياضي مع WeSportify وMile وGymnation لسباق أرينا هيروز الهجين:</strong> موافقتك، ونطلبها منك قبل أن تتمكن من المشاركة في السباق.',
     '<strong>لمشاركة بيانات المتبرع مع الشركاء والأطراف الثالثة لفعالية تبرع بالدم:</strong> موافقتك، ونطلبها منك قبل أن تتمكن من التسجيل.',
     '<strong>لمشاركة الاسم الأول ورقم واتساب للمرشد أو المسترشد مع من تتم مطابقته معه:</strong> موافقتك، ونطلبها عند تسجيلك، وتسحبها بالانسحاب.',
+    '<strong>لنشر شهادتك على موقعنا الإلكتروني:</strong> موافقتك، أي المربع الذي تضع عليه علامة عند إرسالها، وتسحبها بحذف الشهادة.',
   ]},
   {p:'<strong>لا نستخدم بياناتك إلا للأغراض المذكورة أعلاه.</strong> وإذا أردنا استخدامها لغرض آخر، فسنطلب موافقتك أولًا، ما لم يُجز النظام غير ذلك.'},
   {h:'إذا لم تزوّدنا ببياناتك'},
@@ -5306,6 +5318,7 @@ ar:[
     '<strong>قائمة التحديثات:</strong> تُحذف كل رسالة بعد 90 يومًا.',
     '<strong>أيام السبت التي تنوي الحضور فيها:</strong> تُحذف بانتهاء الشهر.',
     '<strong>اهتماماتك:</strong> نحتفظ بها حتى تغيّرها أو يُحذف حسابك.',
+    '<strong>الشهادات:</strong> نحتفظ بها حتى تحذف شهادتك أو يزيلها موظفونا؛ وتُحذف الصورة فور أن يقرر فريقنا عدم نشر الشهادة.',
   ]},
   {p:'لإتلاف البيانات، إما أن نحذفها نهائيًا من قاعدة بياناتنا، أو نزيل كل ما يحدد هويتك بحيث لا تُستخدم إلا في إحصاءات مجهولة الهوية. وتُزال البيانات المحذوفة من نسخنا الاحتياطية خلال 7 أيام.'},
   {h:'حقوقك'},
@@ -5497,16 +5510,19 @@ function _bizAddrHref(){
 // A rider's page (and a staff page before its own settings arrive): the public copy and the fares,
 // from this device's last copy at once, then from the server.
 function _bizPubBoot(){
-  try{const c=JSON.parse(localStorage.getItem('cq_biz_pub')||'null');if(c&&typeof c==='object'){if(!_BIZ_FULL&&c.b&&typeof c.b==='object')_BIZ=c.b;if(Array.isArray(c.p))_PRICE_ROWS=c.p;_bizApplyPub();_bizFootPaint();}}catch(_){}
+  try{const c=JSON.parse(localStorage.getItem('cq_biz_pub')||'null');if(c&&typeof c==='object'){if(!_BIZ_FULL&&c.b&&typeof c.b==='object')_BIZ=c.b;if(Array.isArray(c.p))_PRICE_ROWS=c.p;if(typeof c.t==='boolean')S._tstOn=c.t;_bizApplyPub();_bizFootPaint();}}catch(_){}
   if(!sb)return;
-  Promise.all([Promise.resolve(sb.from('site_content').select('key,value').eq('key','biz.public').maybeSingle()).catch(e=>({error:e})),
+  // The testimonials switch (site_content TST_KEY, 2026-11-18) rides in the same read: no request of its own on any page.
+  Promise.all([Promise.resolve(sb.from('site_content').select('key,value').in('key',['biz.public',TST_KEY])).catch(e=>({error:e})),
     Promise.resolve(sb.from('ride_prices').select('*')).catch(e=>({error:e}))]).then(([a,p])=>{
-    const b=a&&!a.error&&a.data&&a.data.key==='biz.public'&&a.data.value&&typeof a.data.value==='object'&&!Array.isArray(a.data.value)?a.data.value:null;
+    const sc=a&&!a.error&&Array.isArray(a.data)?a.data:null,row=k=>(sc||[]).find(x=>x&&x.key===k),bz=row('biz.public');
+    const b=bz&&bz.value&&typeof bz.value==='object'&&!Array.isArray(bz.value)?bz.value:null;
     const rows=p&&!p.error&&Array.isArray(p.data)?p.data:null;
-    if(!_BIZ_FULL&&(b||(a&&!a.error)))_BIZ=b;
+    if(!_BIZ_FULL&&(b||sc))_BIZ=b;
     if(rows)_PRICE_ROWS=rows;
+    if(sc){const tw=row(TST_KEY);_tstOnSet(!!tw&&tw.value===true);}
     _bizApplyPub();_bizFootPaint();
-    try{localStorage.setItem('cq_biz_pub',JSON.stringify({b:_BIZ_FULL?_bizPubOf(_BIZ):_BIZ,p:_PRICE_ROWS}));}catch(_){}
+    try{localStorage.setItem('cq_biz_pub',JSON.stringify({b:_BIZ_FULL?_bizPubOf(_BIZ):_BIZ,p:_PRICE_ROWS,t:S._tstOn===true}));}catch(_){}
   },()=>{});
 }
 // The keys a rider's page reads (staff_set_biz mirrors the same list into biz.public).
@@ -7941,6 +7957,7 @@ function showView(v){
     if(S._cg){S._cg=null;renderClubGate();}
     if(S._xg){S._xg=null;renderRaceGate();}
     if(S._vt){S._vt=null;renderVtGate();}
+    if(S._tma){S._tma=null;_tstAskHost(null);} // the one-time ask about an old comment (testimonials)
   }
   if(v!=='customer'&&S._sg&&!S._sg.gate){S._sg=null;renderShareGate();} // the booking's ask stays with the booking
   document.getElementById('view-landing').classList.toggle('active',v==='landing');
@@ -7972,12 +7989,12 @@ let _navRestoring=false;
 // them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
-const STAFF_PATHS={reports:'reports',volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',store:'store',payments:'payments',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ask:'ask',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
+const STAFF_PATHS={reports:'reports',volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',store:'store',payments:'payments',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ask:'ask',testimonials:'testimonials',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',members:'members'};
 // The account page's three parts (the owner, 2026-11-09): Account at /account, then /account/stats and /account/badges.
 const ACC_VIEWS=['account','stats','badges'];
 // The Account part is a menu whose rows open small pages (the user, 2026-11-10), each at /account/<page>.
-const ACC_PAGES=['personal','contact','residence','emergency','riding','sport','about','wallet','invite','ambassador','volunteer','purchases','company','notifications','updates','help','delete'];
+const ACC_PAGES=['personal','contact','residence','emergency','riding','sport','about','wallet','invite','ambassador','volunteer','purchases','company','notifications','updates','help','testimonial','delete'];
 // A signed-out visitor's two pages: Sign in at /, Create account at /signup (the owner, 2026-09-28),
 // so a link can open the sign-up itself. Signed in, /signup is just /.
 const SIGNUP_PATH='signup';
@@ -15974,7 +15991,7 @@ function _wlcClose(){try{sessionStorage.removeItem(WLC_KEY);}catch(e){}S._wlc=nu
 function _wlcClock(){const g=S._wlc,ms=Math.max(0,Date.parse(g.d.expires_at)-Date.now()-(g.skew||0)),s=Math.floor(ms/1e3);return ms?Math.floor(s/60)+':'+String(s%60).padStart(2,'0'):'';}
 function _wlcTick(){const g=S._wlc,c=g&&g.st==='ask'&&_wlcClock(),el=document.getElementById('wlc-clock');if(!c){if(g&&g.st==='ask'){g.st='late';renderClaim();}else clearInterval(S._wlcT);return;}if(el)el.textContent=c;}
 // The page behind the forced pop-ups stays still while any of them is up: one closing must not free it under another.
-function _fixOpenSync(){document.body.classList.toggle('fix-open',!!(S._fix||S._afx||S._wlc||S._rg||S._wg||S._sg||S._cg||S._xg||S._vt));}
+function _fixOpenSync(){document.body.classList.toggle('fix-open',!!(S._fix||S._afx||S._wlc||S._rg||S._wg||S._sg||S._cg||S._xg||S._vt||S._tma));}
 function renderClaim(){
   const g=S._wlc,m=document.getElementById('wl-claim');if(!m)return;
   clearInterval(S._wlcT);
@@ -16521,6 +16538,7 @@ function setStaffTab(tab,o){
   else if(tab==='community')renderCommunity();
   else if(tab==='badgereq')renderBadgeRequests();
   else if(tab==='ask')renderAsk();
+  else if(tab==='testimonials')renderTestimonials();
   else if(tab==='reports')renderReports(); // every report in one place (the reports rework, 2026-11-13)
   else if(tab==='lockers')renderLockers();
   else if(tab==='store')renderStore();
@@ -16871,12 +16889,13 @@ function _meetLL(s){
 }
 function _meetNm(s){return String((s&&((S.lang==='ar'&&s.meet_name_ar)||s.meet_name))||'').trim();}
 
-const _SNAV_ICON={reports:'print',store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',ask:'ask',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={reports:'print',store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',ask:'ask',testimonials:'quote',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   if(!_ART.bag)_ART.bag='<path opacity=".35" d="M4 8h16l-1.1 12.2A2 2 0 0 1 16.9 22H7.1a2 2 0 0 1-2-1.8z"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9h-2V6.5a2 2 0 0 0-4 0V9z"/>'; // the Store's mark (2026-11-10), kept here for the same reason
   if(!_ART.calendar)_ART.calendar='<rect opacity=".35" x="3" y="5" width="18" height="16" rx="2"/><path d="M5 5h14a2 2 0 0 1 2 2v2.5H3V7a2 2 0 0 1 2-2ZM7 2.5h2v5H7zm8 0h2v5h-2zM7 13h3v3H7zm7 0h3v3h-3z"/>'; // the Sessions section's mark (2026-11-06), kept here: in _ART it rode on every customer's page
   if(!_ART.ask)_ART.ask='<path opacity=".35" d="M4 3.5h16a2 2 0 0 1 2 2V15a2 2 0 0 1-2 2h-9.2L5.6 21v-4H4a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z"/><path d="M9.6 8.3a2.4 2.4 0 1 1 3.9 1.9c-.9.7-1.5 1.2-1.5 2.3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="14.7" r="1.15"/>'; // Ask's mark (2026-11-13): a question in a speech bubble, kept here like the two above
+  if(!_ART.quote)_ART.quote='<path opacity=".35" d="M4 3.5h16a2 2 0 0 1 2 2V15a2 2 0 0 1-2 2h-9.2L5.6 21v-4H4a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z"/><path d="M7 13.4c0-2.6 1-4.4 3.2-5.4l.6 1.1c-1.1.6-1.6 1.3-1.7 2.2H10.6V13.4Zm6 0c0-2.6 1-4.4 3.2-5.4l.6 1.1c-1.1.6-1.6 1.3-1.7 2.2H16.6V13.4Z"/>'; // Testimonials' mark (2026-11-18): quotation marks in a speech bubble
   document.querySelectorAll('#staff-tab-nav .tab-btn').forEach(b=>{
     const ic=b.querySelector('.snav-ico');
     if(ic&&!ic.firstChild)ic.innerHTML=_artIcon(_SNAV_ICON[b.dataset.stab]||'grid',17);
@@ -16978,6 +16997,8 @@ function renderStaffTabs(){
   if(!S._bdrAt&&S._staffAuthed&&_deskTabOk('badgereq'))_bdrLoad(); // the rail's count, from the first paint on (then _secPolls)
   document.getElementById('tab-ask')       .classList.toggle('active',S.staffTab==='ask');
   _askRailSync();if(!S._askCAt&&S._staffAuthed&&_deskTabOk('ask'))_askCount(); // Ask's name, and the answers waiting for approval (then _secPolls)
+  document.getElementById('tab-testimonials').classList.toggle('active',S.staffTab==='testimonials');
+  _tsmRailSync();if(!S._tsmCAt&&S._staffAuthed&&_deskTabOk('testimonials'))_tsmCount(); // Testimonials' name, and those waiting for review (then _secPolls)
   document.getElementById('tab-history')   .classList.toggle('active',S.staffTab==='history');
   document.getElementById('tab-analytics') .classList.toggle('active',S.staffTab==='analytics');
   document.getElementById('tab-website')   .classList.toggle('active',S.staffTab==='website');
@@ -18786,7 +18807,7 @@ const _N6T_REC='cq_gs_recent',_N6T_KIND_TAB={booking:'queue',acct:'community',bi
 // Every command says its keyboard shortcut (when this device has them on) and answers to its name in English and Arabic
 // whatever the language on screen (s10, item 29).
 const GS_AKA={dashboard:'لوحة القيادة',queue:'الحجوزات',waitlist:'قائمة الانتظار',sessions:'الجلسات',lockers:'الخزائن',cashier:'المبيعات till',store:'المتجر',payments:'المدفوعات',
-  inventory:'المخزون',workshop:'الورشة',community:'الأشخاص accounts',badgereq:'طلبات الأوسمة',ask:'اسأل',ambassadors:'السفراء',volunteers:'المتطوعون',vendors:'الموردون',website:'الموقع',
+  inventory:'المخزون',workshop:'الورشة',community:'الأشخاص accounts',badgereq:'طلبات الأوسمة',ask:'اسأل',testimonials:'الشهادات',ambassadors:'السفراء',volunteers:'المتطوعون',vendors:'الموردون',website:'الموقع',
   catalog:'كتالوج الدراجات',messages:'الرسائل',analytics:'التحليلات',history:'السجل',team:'الفريق',settings:'الإعدادات',next:'تسجيل دخول التالي',walkin:'زيارة مباشرة',scan:'مسح التذكرة',newsess:'جلسة جديدة',closeout:'إنهاء الليلة'};
 function _gsAka(k,lk){return(GS_AKA[k]||'')+' '+((LANG.en||{})[lk]||'');}
 // Ctrl K opens every sub-view too ("People › Applications", "Analytics › Ratings"): one per SUB_PATHS entry named here
@@ -20872,7 +20893,7 @@ function _deferWhileTyping(tab){
   return true;
 }
 function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for something the staffer did
-  _dqInit();_stoTabLabelSync();_askRailSync(); // the Store's, Payments' and Ask's names, in the language on screen
+  _dqInit();_stoTabLabelSync();_askRailSync();_tsmRailSync(); // the Store's, Payments', Ask's and Testimonials' names, in the language on screen
   if(S.staffRole==='door'){_doorShow();return;}
   const tab=S.staffTab;
   if(bg&&['cashier','inventory','community','customers','bikes'].includes(tab)&&_deferWhileTyping(tab)){try{_ahRefresh();}catch(_){}try{_ntSync();}catch(_){}return;}
@@ -20884,6 +20905,7 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
   else if(tab==='inventory')renderInventory();
   else if(tab==='community')renderCommunity();
   else if(tab==='badgereq'){if(!bg)renderBadgeRequests();} // its own loader: the desk's data has nothing for it
+  else if(tab==='testimonials'){if(!bg)renderTestimonials();} // its own loader
   else if(tab==='ask'){if(!bg||!(S._askS&&S._askS.cur))renderAsk();} // its own loader; the list follows the tags' names, a page on screen (a draft in hand) is left alone
   else if(tab==='lockers')renderLockers(); // names and booking numbers come from the desk's rows
   else if(tab==='store'){if(!bg)renderStore();} // its own loader: the desk's data has nothing for it
@@ -21936,6 +21958,85 @@ function _rhPageOpen(){
   s.onerror=()=>{S._rhLoading=false;s.remove();toast(t('errConnection'),'error');};
   document.head.appendChild(s);
 }
+// ── Testimonials (the user, 2026-11-18: "Create a testimonials page but don't make it visible, People write their
+// testimonials on our services & community rides. Then we publish them in a testimonials page"; migration 20261119120000) ──
+// Riders write one on Account > Write a testimonial (/account/testimonial), after a rating of 9 or 10 (the same pop-up's
+// next step) and, once, about an old comment they left with a 9 or 10. Staff publish them (section Testimonials) on
+// micromobility.sa/testimonials. ONE switch, site_content 'testimonials.on' (admins write it; anything but true is off),
+// turns on what riders meet unasked: the Account row, the step after a rating and the old comment's ask. The page works
+// by its link whatever the switch says. The switch rides in the boot's biz.public read (_bizPubBoot), so it costs no
+// request of its own. The page, the step and the ask, with their words in ten languages, are rider-testimonial.js,
+// fetched when first needed (TST_V); what it takes from the page is named in _tstDeps, so the split keeps it here.
+const TST_KEY='testimonials.on';
+const TST_V=''; // build stamps a hash of rider-testimonial.js
+const TST_PHOTO_MAX=600000; // the database's limit on a photo's data: URL, in bytes (_tm_photo_ok)
+function _tstOnSet(v){
+  const was=S._tstOn;S._tstOn=v===true;if(was===S._tstOn)return;
+  try{_accRowsPaint();}catch(_){}
+  if(S._tstOn)setTimeout(_tstAskCheck,0);
+}
+function _tstLoad(){
+  window._tstDeps={ic:_cuIc,tick:_tickHtml,tickSet:_tickSet,date:_tstDay,skel:skeletonList,toast,offline:_offlineStop,onSet:_tstOnSet,paintRate:renderRateModal,
+    rateDone:_tstRateDone,askHost:_tstAskHost,askDone:_tstAskDone,askFree:_tstAskFree,askKey:TST_ASK_KEY,absent:_rpcAbsent,max:TST_PHOTO_MAX};
+  if(window._tstPage)return Promise.resolve(true);
+  if(S._tstLoading)return S._tstLoading;
+  return(S._tstLoading=new Promise(res=>{
+    const s=document.createElement('script');s.src='/rider-testimonial.js?v='+TST_V;
+    s.onload=()=>{S._tstLoading=null;res(!!window._tstPage);};
+    s.onerror=()=>{S._tstLoading=null;s.remove();res(false);};
+    document.head.appendChild(s);
+  }));
+}
+function _tstPageOpen(){_tstLoad().then(ok=>{if(ok)window._tstPage();else toast(t('errConnection'),'error');});}
+// A day as the rider reads it: a date (YYYY-MM-DD) or a time stamp.
+function _tstDay(v){const s=String(v||'');if(!s)return'';try{return shortDate(/^\d{4}-\d\d-\d\d$/.test(s)?s:fmtDate(new Date(s)));}catch(_){return s.slice(0,10);}}
+// What a booking was, as the database's _tm_about reads it: a Saturday community ride, a workshop, a session (rentals,
+// JCC), else an event; 'other' when the session is not here.
+function _tstAboutOf(s){if(!s)return'other';const k=s.ride_kind;return k==='saturday'?'saturday':k==='workshop'?'workshop':!s.event_kind||s.event_kind==='jcc'?'session':'event';}
+// After a rating of 9 or 10 (the main score: the overall on a Saturday, the service on any other ride), with the switch on:
+// the step that offers to share it, prefilled from the rating (rider-testimonial.js _tstRateNew answers null when it
+// should not show: the switch off on the server, that booking shared already, three waiting). Never longer than a few
+// seconds: the rating has saved, and without an answer the pop-up goes on as before.
+async function _tstRateFor(e,exp,note){
+  const c=S.loggedIn;if(!c||!c.session_token||!e||!(exp>=9)||S._tstOn!==true)return null;
+  const wait=(x,ms)=>Promise.race([x,new Promise(r=>setTimeout(()=>r(null),ms))]);
+  if(!(await wait(_tstLoad(),4000))||!window._tstRateNew)return null;
+  return wait(window._tstRateNew({entry:e.id,exp,note:note||'',about:_tstAboutOf(_sessDisp(e.sessionId))}),5000);
+}
+// The step is done (sent or Not now): the rating's last screen when it has one, else the pop-up closes and the next ride
+// waiting for its rating, if any, opens.
+function _tstRateDone(){
+  const g=S._rg;if(!g||!g.tm)return;
+  const fin=g.tmFin;g.tm=null;g.tmFin=null;
+  if(fin){g.fin=fin;if(fin.k==='badge')_plsSeen(S.loggedIn,fin.slugs);renderRateModal();return;}
+  S._rg=null;renderRateModal();setTimeout(_plsCheer,0);setTimeout(_forceRatingPrompt,0);
+}
+// The one-time ask about an old comment (a done ride rated 9 or 10 before this feature, 40+ characters written): asked
+// when nothing else is open (_forceRatingPrompt calls this last), with the switch on. testimonial_mine says whether one
+// is due; this device asks it at most once a day, and once a week when there was none; an answer ends it for good.
+const TST_ASK_KEY='cq_tst_ask_';
+function _tstAskFree(){return!S._rg&&!S._pg&&!S._fix&&!S._afx&&!S._xg&&!S._cg&&!S._wg&&!S._sg&&!S._vt&&!S._wlc&&!S._tma&&!document.getElementById('pwd-gate')&&!document.getElementById('rn-ask');}
+function _tstAskCheck(){
+  const c=S.loggedIn;
+  if(!c||!c.session_token||S._tstOn!==true||!sb||S.view==='staff'||_isStaffHost()||!S.dataLoaded||S._tstAskBusy||!_tstAskFree()||_pendingRatingId())return;
+  let m=null;try{m=JSON.parse(localStorage.getItem(TST_ASK_KEY+c.id)||'null');}catch(_){}
+  if(m&&(m.done||Date.now()-(+m.at||0)<(m.none?7*864e5:864e5)))return;
+  const was=(S._tstAskAt||{})[c.id];if(was&&Date.now()-was<864e5)return; // storage refused: once a day a page
+  (S._tstAskAt=S._tstAskAt||{})[c.id]=Date.now();
+  S._tstAskBusy=true; // the read, the marks and the pop-up are rider-testimonial.js's (_tstAskRun)
+  _tstLoad().then(ok=>ok&&window._tstAskRun?window._tstAskRun(c):0).then(()=>{S._tstAskBusy=false;},()=>{S._tstAskBusy=false;});
+}
+// The ask's host: its markup, or null to close it.
+function _tstAskHost(html){
+  const m=document.getElementById('tst-ask');
+  if(m){if(html){m.style.display='block';m.innerHTML=html;}else{m.style.display='none';m.innerHTML='';}}
+  _fixOpenSync();
+}
+// Answered (yes or no, or answered already elsewhere): never asked again on this device; then whatever waits.
+function _tstAskDone(id){
+  try{localStorage.setItem(TST_ASK_KEY+id,JSON.stringify({at:Date.now(),done:1}));}catch(_){}
+  S._tma=null;_tstAskHost(null);setTimeout(_forceRatingPrompt,0);
+}
 function renderBookingTicket(entries,opts){
   opts=opts||{};
   if(!entries||!entries.length)return'';
@@ -22515,7 +22616,7 @@ function _pendingRatingId(){
 // Called whenever My Bookings draws, on any customer tab, and as each of the account's own pages
 // closes: those (the profile page, a correction request, the forced password) go first.
 function _forceRatingPrompt(){
-  if(S.view==='staff'||!S.loggedIn||S._rg||S._pg||S._fix||S._afx||S._xg||S._cg||_isStaffHost())return;
+  if(S.view==='staff'||!S.loggedIn||S._rg||S._pg||S._fix||S._afx||S._xg||S._cg||S._tma||_isStaffHost())return; // the one-time ask about an old comment (S._tma) is answered first
   if(document.getElementById('pwd-gate'))return;
   if(S._sg&&!S._sg.gate)return; // a runner answering the booking's own ask is not interrupted
   if(S._wg||_forceWaiverPrompt())return; // a desk-added booking's waiver comes first (2026-10-04)
@@ -22523,6 +22624,7 @@ function _forceRatingPrompt(){
   if(_forceClubPrompt())return; // then a Blood Donation registrant's club or community (2026-11-05)
   if(_forceRaceRegPrompt())return; // then a Defe runner's "Have you registered for the race?" (2026-10-18)
   const id=_pendingRatingId();if(id)openRateModal(id,true);
+  else _tstAskCheck(); // nothing else waiting: the one-time ask about an old comment (testimonials, 2026-11-18), when it is due
 }
 function openRateModal(id,forced){
   const e=_qGet(id);if(!e)return;
@@ -22534,6 +22636,7 @@ function openRateModal(id,forced){
   renderRateModal();
 }
 function closeRateModal(){
+  if(S._rg&&S._rg.tm){if(!S._rg.tm.busy&&window._tstRateSkip)window._tstRateSkip();return;} // the testimonial step: Escape is Not now
   if(S._rg&&S._rg.fin){_rgFinDone();return;} // the last screen, after the rating: Escape is Done
   if(S._rg&&S._rg.forced&&S.loggedIn&&S.view!=='staff')return; // forced: only a rating (or Log out) closes it
   S._rg=null;renderRateModal();
@@ -22572,6 +22675,11 @@ function renderRateModal(){
   _syncBldTheme();
   const g=S._rg,m=document.getElementById('rate-modal');if(!m)return;
   if(!g){m.style.display='none';m.innerHTML='';_fixOpenSync();return;} // every forced pop-up counted, the claim page too
+  if(g.tm&&window._tstRateHtml){ // after a 9 or 10, the step that offers to share it as a testimonial (rider-testimonial.js), in the same pop-up
+    document.body.classList.add('fix-open');m.style.display='block';m.innerHTML=window._tstRateHtml(g.tm);
+    if(!g.tmShown){g.tmShown=true;const b=m.querySelector('.tst-rate');if(b)try{b.focus({preventScroll:true});}catch(_){}}
+    return;
+  }
   if(g.fin){ // the last screen (R5): the same pop-up, centred
     document.body.classList.add('fix-open');m.style.display='block';m.innerHTML=_rgFinHtml(g.fin);
     if(!g.finShown){g.finShown=true;const b=m.querySelector('.rg-fin');if(b)try{b.focus({preventScroll:true});}catch(_){}}
@@ -22623,8 +22731,11 @@ async function submitRating(){
   const e=_qGet(g.id);if(e){e.ratingBike=bike;e.ratingExp=exp;e.feedback=note;e.ratingDetail=detail;e.ratedAt=new Date().toISOString();}
   const thx=t(_rgRun(e)?'rateRunThanks':_ncEntry(e)?'rateSessThanks':'rateThanks');
   // The last ride rated: a member may have a last screen to see (R5). The thank-you is still said, as before.
-  let fin=null;try{fin=await _rgFinFor(e);}catch(_){}
+  // A 9 or 10 with testimonials on (2026-11-18): first the step that offers to share it (_tstRateFor), then that screen.
+  let fin=null,tm=null;
+  try{[fin,tm]=await Promise.all([Promise.resolve(_rgFinFor(e)).catch(()=>null),exp>=9&&S._tstOn===true?Promise.resolve(_tstRateFor(e,exp,note)).catch(()=>null):null]);}catch(_){}
   if(S._rg!==g)return;
+  if(tm){g.saving=false;g.tm=tm;g.tmFin=fin;renderRateModal();toast(thx);renderMyRides();return;}
   if(fin){g.saving=false;g.fin=fin;if(fin.k==='badge')_plsSeen(S.loggedIn,fin.slugs);renderRateModal();toast(thx);renderMyRides();return;}
   S._rg=null;renderRateModal();toast(thx);renderMyRides(); // which opens the next unrated ride, if there is one
   setTimeout(_plsCheer,0);
@@ -27023,6 +27134,367 @@ function _askRailSync(){
   const n=S._askN|0,k=S.lang+'|'+n;if(l.dataset.k===k)return;l.dataset.k=k;
   l.innerHTML=esc(t('tabAsk'))+(n?` <span class="tab-badge" title="${esc(t('tabAskWait').replace('{0}',n))}">${n}</span>`:'');
 }
+// ── Testimonials: the rail's number (2026-11-18, migration 20261119120000) ──────────────────────────────────────────
+// The testimonials waiting for review, read with the waiting ones only (staff_testimonials('pending'): its counts and
+// those few rows) at most every five minutes, on any section (_secPolls); the section's own read sets it too.
+async function _tsmCount(force){
+  if(!sb||S._tsmCB||S._tsmGone||(!force&&S._tsmCAt&&Date.now()-S._tsmCAt<3e5))return;
+  S._tsmCB=true;S._tsmCAt=Date.now();
+  let r;try{r=await sb.rpc('staff_testimonials',{p_status:'pending'});}catch(e){r={error:e};}
+  S._tsmCB=false;
+  if(r&&!r.error&&r.data&&r.data.counts){const n=Math.floor(Number(r.data.counts.pending));S._tsmN=n>0?n:0;}
+  else if(r&&r.error&&_rpcAbsent(r.error))S._tsmGone=true; // a database from before them: no number, and the section says so
+  _tsmRailSync();
+}
+// The rail's name and the testimonials waiting, in the language on screen (the label loop in render() leaves it alone).
+function _tsmRailSync(){
+  const l=document.querySelector('#staff-tab-nav .tab-btn[data-stab="testimonials"] .snav-lbl');if(!l)return;
+  const n=S._tsmN|0,k=S.lang+'|'+n;if(l.dataset.k===k)return;l.dataset.k=k;
+  l.innerHTML=esc(t('qtTitle'))+(n?` <span class="tab-badge" title="${esc(t('qtWaitN').replace('{0}',n))}">${n}</span>`:'');
+}
+// ── Testimonials, the staff section (the user, 2026-11-18; migration 20261119120000) ─────────────────────────────────
+// /testimonials, under People on the rail (the part staff-parts/testimonials.js). People's right in the database
+// (_staff_mod('community')), so the section is derived from People (_modIds, _MOD_PARENT) and staff_set_access never
+// hears of it. Staff approve or hide, never change the words: Publish, Reject (a second tap, a note for the team), Hide,
+// Back to waiting, Feature (twelve at most: the website's home page strip), Remove photo, Delete, and the published ones'
+// order (staff_testimonial_order). Add testimonial writes one staff took down by hand (praise on WhatsApp, Instagram or
+// Google) with where the person agreed. On top: the published average and count, the answers to the one-time ask about
+// an old comment, the launch switch (admins; the others see which way it is) and a link to the public page.
+// Every testimonial is read with staff_testimonials (the newest 1,000, without the photos); a photo is read when opened.
+const TSM_AB={saturday:'qtAbSat',session:'qtAbSess',learn:'qtAbLearn',event:'qtAbEvent',workshop:'qtAbShop',other:'qtAbOther'};
+const TSM_SRC={web:'qtSrcWeb',app:'qtSrcApp',rating:'qtSrcRating',old_comment:'qtSrcOld',staff:'qtSrcStaff'};
+const TSM_ST={pending:'qtStWait',published:'qtStPub',rejected:'qtStRej',hidden:'qtStHid'};
+const TSM_PUBLIC='https://micromobility.sa/testimonials';
+function _tsmV(){return S._tsmV||(S._tsmV={f:'pending',q:'',about:'',src:'',stars:'',ph:'',feat:'',sort:'new',n:40});}
+async function _tsmLoad(force){
+  if(!sb||S._tsmBusy||(!force&&S._tsmAt&&Date.now()-S._tsmAt<6e4))return;
+  S._tsmBusy=true;S._tsmAt=Date.now();
+  let r;try{r=await sb.rpc('staff_testimonials',{p_status:null});}catch(e){r={error:e};}
+  S._tsmBusy=false;
+  const was=S._tsmSig;
+  if(r&&!r.error&&r.data&&Array.isArray(r.data.items)){S._tsm=r.data;S._tsmErr=false;S._tsmGone=false;S._tsmN=Math.max(0,Math.floor(Number((r.data.counts||{}).pending))||0);S._tsmCAt=Date.now();}
+  else if(r&&r.error&&_rpcAbsent(r.error))S._tsmGone=true;
+  else S._tsmErr=true;
+  S._tsmSig=JSON.stringify([S._tsm||null,!!S._tsmErr,!!S._tsmGone]);
+  _tsmRailSync();
+  if(S.view==='staff'&&S.staffTab==='testimonials'&&(force||S._tsmSig!==was))renderTestimonials();
+}
+function _tsmGet(id){return((S._tsm&&S._tsm.items)||[]).find(x=>String(x.id)===String(id))||null;}
+function _tsmPaint(){if(S.view==='staff'&&S.staffTab==='testimonials')renderTestimonials();}
+function _tsmSet(k,v){const W=_tsmV();W[k]=String(v||'');W.n=40;S._tsmSure=null;renderTestimonials();}
+function _tsmQ(v){const W=_tsmV();W.q=String(v||'');W.n=40;const h=document.getElementById('tsm-list');if(h)h.innerHTML=_tsmListHtml();else renderTestimonials();}
+function _tsmMore(){_tsmV().n+=40;renderTestimonials();}
+// a second tap: the first arms the button (Reject, Remove photo, Delete), any other choice disarms it
+function _tsmArm(k){if(S._tsmSure===k)return true;S._tsmSure=k;return false;}
+// Stars, drawn (never a glyph): filled up to n of five; staff may add one with none.
+function _tsmStars(n){
+  n=Math.max(0,Math.min(5,Number(n)||0));
+  if(!n)return`<span class="tsm-nostar">${esc(t('qtNoStars'))}</span>`;
+  const one=on=>`<svg aria-hidden="true" class="tsm-star${on?' on':''}" width="15" height="15" viewBox="0 0 24 24"><path d="M12 3.6l2.55 5.2 5.75.84-4.16 4.05.98 5.72L12 16.7l-5.12 2.7.98-5.72L3.7 9.64l5.75-.84z"/></svg>`;
+  return`<span class="tsm-stars" role="img" aria-label="${esc(t('qtStarsOf').replace('{0}',n))}">${[1,2,3,4,5].map(i=>one(i<=n)).join('')}</span>`;
+}
+function _tsmSince(s){
+  if(!s||!s.year)return'';const n=Number(s.rides)||0;
+  return t(n===1?'qtSince1':n>1?'qtSinceN':'qtSince0').replace('{0}',String(s.year)).replace('{1}',String(n));
+}
+// The status pill a row sits under: Not published holds the rejected and the hidden.
+function _tsmPill(x){return x.status==='rejected'||x.status==='hidden'?'not':x.status;}
+// The published ones in the website's order: their place, then the newest published first.
+function _tsmPubOrder(){
+  return((S._tsm&&S._tsm.items)||[]).filter(x=>x.status==='published').slice().sort((a,b)=>(a.sort_order==null)-(b.sort_order==null)||(a.sort_order||0)-(b.sort_order||0)||String(b.published_at||'').localeCompare(String(a.published_at||''))||(Number(b.id)||0)-(Number(a.id)||0));
+}
+function _tsmHay(x){return[x.customer_name,x.customer_phone,x.display_name,x.body,x.staff_note,x.consent_note,x.reviewed_by,x.created_by,x.ride_title].filter(Boolean).join(' ').toLowerCase();}
+function _tsmShown(){
+  const W=_tsmV(),ws=W.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const L=(W.f==='published'?_tsmPubOrder():((S._tsm&&S._tsm.items)||[])).filter(x=>(W.f==='all'||_tsmPill(x)===W.f)
+    &&(!W.about||x.about===W.about)&&(!W.src||x.source===W.src)&&(!W.stars||(W.stars==='none'?x.stars==null:String(x.stars)===W.stars))
+    &&(!W.ph||(W.ph==='yes')===!!x.photo)&&(!W.feat||(W.feat==='yes')===!!x.featured)
+    &&(!ws.length||(h=>ws.every(w=>h.includes(w)))(_tsmHay(x))));
+  return W.sort==='old'?L.slice().reverse():L; // they come newest first (Published: in the website's order)
+}
+// On top: the published average and how many, the old comments' answers, the switch and the public page.
+function _tsmTopHtml(D){
+  const pub=(D.items||[]).filter(x=>x.status==='published'),rated=pub.filter(x=>Number(x.stars)>0),n=Number((D.counts||{}).published)||pub.length;
+  const avg=rated.length?(Math.round(rated.reduce((s,x)=>s+Number(x.stars),0)/rated.length*10)/10).toFixed(1):'';
+  const asks=D.asks||{},on=D.on===true,adm=isAdmin()&&!_roNow();
+  return`<div class="tsm-top">
+    <div class="tsm-sum"><div class="tsm-avg">${n?(avg?`<b dir="ltr">${esc(avg)}</b>${_tsmStars(Math.round(Number(avg)))}<span>${esc(t('qtAvg').replace('{0}',n))}</span>`:`<span>${esc(t('qtAvgNoStars').replace('{0}',n))}</span>`):`<span>${esc(t('qtAvgNone'))}</span>`}</div>
+      <div class="am-meta tsm-asks">${esc(t('qtAsks').replace('{0}',Number(asks.yes)||0).replace('{1}',Number(asks.no)||0))}</div></div>
+    <div class="tsm-sw${on?' on':''}"><label class="tsm-sw-l"><input type="checkbox" class="web-toggle" role="switch" id="tsm-on"${on?' checked':''} ${adm?`data-on-change="${_on('_tsmOnSet',_P('checked'))}"`:'disabled'}><b>${esc(t('qtOnLbl'))}</b></label>
+      <span class="am-meta">${esc(t(on?'qtOnNow':'qtOffNow'))}${adm?'':' · '+esc(t('qtOnAdmin'))}</span></div>
+    <div class="tsm-top-acts"><a class="btn-sm btn-secondary tsm-open" href="${TSM_PUBLIC}" target="_blank" rel="noopener noreferrer">${esc(t('qtOpenPage'))}</a>${_editOk('testimonials')?`<button type="button" class="btn-sm btn-primary tsm-add-btn" data-on-click="${_on('_tsmAddOpen')}">${esc(t('qtAdd'))}</button>`:''}</div>
+  </div>`;
+}
+function _tsmListHtml(){
+  const W=_tsmV(),L=_tsmShown(),filt=!!(W.q.trim()||W.about||W.src||W.stars||W.ph||W.feat);
+  if(!L.length)return`<div class="am-meta tsm-none">${esc(t(filt?'qtNoMatch':W.f==='pending'?'qtNoneWait':'qtNoneHere'))}</div>`;
+  const P=W.f==='published'&&!filt&&W.sort!=='old'?_tsmPubOrder():null; // moving up and down: the website's whole order on screen
+  return`<div class="am-meta tsm-count">${esc(t('qtShown').replace('{0}',Math.min(W.n,L.length)).replace('{1}',L.length))}</div>
+    <div class="tsm-list-in">${L.slice(0,W.n).map(x=>_tsmRow(x,P)).join('')}</div>
+    ${L.length>W.n?`<button type="button" class="btn-secondary btn-sm tsm-more" data-on-click="${_on('_tsmMore')}">${esc(t('amShowMore').replace('{0}',Math.min(40,L.length-W.n)))}</button>`:''}`;
+}
+function _tsmRow(x,P){
+  const id=x.id,sid=esc(String(id)),ro=!_editOk('testimonials'),sure=S._tsmSure,st=x.status,ph=(S._tsmPh||{})[id];
+  const b=(cls,fn,label,arg,on)=>`<button type="button" class="btn-sm ${cls}" data-on-click="${_on(fn,id,arg)}"${on===false?' disabled':''}>${esc(label)}</button>`;
+  const who=x.customer_id?`<button type="button" class="tsm-who" data-on-click="${_on('openAccountHistory',x.customer_id)}">${esc(x.customer_name||'—')}</button>${x.customer_phone?` · <bdi dir="ltr">${esc(x.customer_phone)}</bdi>`:''}`:esc(t('qtNoAcct'));
+  const shows=x.name_mode==='anon'?esc(t('qtAnonShows')):`<b><bdi>${esc(x.display_name||'')}</bdi></b>${x.since&&_tsmSince(x.since)?' · '+esc(_tsmSince(x.since)):''}`;
+  const ride=x.ride_title||x.ride_date?' · '+esc([x.ride_title,x.ride_date?shortDate(String(x.ride_date).slice(0,10)):''].filter(Boolean).join(' · ')):'';
+  const pos=P?P.findIndex(y=>String(y.id)===String(id)):-1;
+  let acts='';
+  if(!ro){
+    const rej=sure==='rej|'+id,del=sure==='del|'+id,dph=sure==='ph|'+id;
+    if(st!=='published')acts+=b('btn-primary','_tsmAct',t('qtPublish'),'publish');
+    if(st==='published')acts+=b('btn-secondary','_tsmAct',t(x.featured?'qtUnfeature':'qtFeature'),x.featured?'unfeature':'feature');
+    if(pos>=0)acts+=`<button type="button" class="btn-sm btn-secondary tsm-mv" aria-label="${esc(t('qtUp'))}" title="${esc(t('qtUp'))}" data-on-click="${_on('_tsmMove',id,-1)}"${pos>0?'':' disabled'}>${_tsmChev(1)}</button><button type="button" class="btn-sm btn-secondary tsm-mv" aria-label="${esc(t('qtDown'))}" title="${esc(t('qtDown'))}" data-on-click="${_on('_tsmMove',id,1)}"${pos<P.length-1?'':' disabled'}>${_tsmChev(0)}</button>`;
+    if(st==='pending')acts+=b(rej?'btn-red':'btn-secondary','_tsmAct',t(rej?'qtRejectSure':'qtReject'),'reject');
+    if(st==='pending'||st==='published')acts+=b('btn-secondary','_tsmAct',t('qtHide'),'hide');
+    if(st!=='pending')acts+=b('btn-secondary','_tsmAct',t('qtBack'),'pending');
+    if(x.photo)acts+=b(dph?'btn-red':'btn-secondary','_tsmAct',t(dph?'qtDropPhSure':'qtDropPh'),'drop_photo');
+    acts+=b(del?'btn-red':'btn-secondary','_tsmDel',t(del?'qtDelSure':'qtDel'));
+  }
+  const rejNote=!ro&&sure==='rej|'+id?`<div class="form-group tsm-note"><label for="tsm-note-${sid}">${esc(t('qtRejNote'))} <span class="label-hint">(${esc(t('optionalLabel'))})</span></label><input id="tsm-note-${sid}" type="text" maxlength="500" value="${esc((S._tsmNote||{})[id]||'')}" data-on-input="${_on('_tsmNoteIn',id,_EL)}"></div>`:'';
+  return`<div class="tsm-row tsm-${esc(st)}" data-tid="${sid}">
+    <div class="tsm-h">${_tsmStars(x.stars)}<span class="tsm-chip tsm-c-${esc(st)}">${esc(t(TSM_ST[st]||'qtStWait'))}</span>${x.featured?`<span class="tsm-chip tsm-c-feat">${esc(t('qtFeatured'))}</span>`:''}<span class="tsm-chip">${esc(t(TSM_AB[x.about]||'qtAbOther'))}</span>${pos>=0?`<span class="am-meta tsm-pos" dir="ltr">#${pos+1}</span>`:''}</div>
+    <p class="tsm-body" dir="auto">${esc(x.body||'')}</p>
+    <div class="tsm-meta">
+      <span>${esc(t('qtAccount'))}: ${who}</span>
+      <span>${esc(t('qtShowsAs'))}: ${shows}</span>
+      <span>${esc(t(TSM_SRC[x.source]||'qtSrcWeb'))}${ride} · ${esc(t('qtSent').replace('{0}',fmtStamp(x.created_at)))}${x.created_by?' · '+esc(t('qtBy').replace('{0}',x.created_by)):''}</span>
+      <span>${esc(t('qtAgreed').replace('{0}',fmtStamp(x.consent_at)))}${x.consent_note?` · <bdi>${esc(x.consent_note)}</bdi>`:''}</span>
+      ${x.reviewed_at?`<span>${esc(t('qtReviewed').replace('{0}',x.reviewed_by||'—').replace('{1}',fmtStamp(x.reviewed_at)))}</span>`:''}
+      ${x.staff_note?`<span>${esc(t('qtNoteIs'))}: <bdi>${esc(x.staff_note)}</bdi></span>`:''}
+    </div>
+    ${x.photo?`<div class="tsm-ph">${ph&&ph!=='busy'?`<img class="tsm-img" src="${esc(ph)}" alt="${esc(t('qtPhotoOf').replace('{0}',x.display_name||t('qtAnon')))}">`:''}<button type="button" class="btn-sm btn-secondary tsm-ph-btn" data-on-click="${_on('_tsmPhoto',id)}"${ph==='busy'?' disabled aria-busy="true"':''}>${esc(t(ph&&ph!=='busy'?'qtHidePh':'qtShowPh'))}</button></div>`:''}
+    ${rejNote}
+    ${acts?`<div class="tsm-acts">${acts}</div>`:''}
+  </div>`;
+}
+// Up and down, drawn here (staff code: the rider's page never carries them).
+function _tsmChev(up){return`<svg aria-hidden="true" class="art-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${up?'M6 15l6-6 6 6':'M6 9l6 6 6-6'}"/></svg>`;}
+function _tsmNoteIn(id,el){(S._tsmNote=S._tsmNote||{})[id]=el.value;}
+function renderTestimonials(){
+  const el=document.getElementById('tab-testimonials');if(!el)return;
+  _tsmLoad();
+  const D=S._tsm,W=_tsmV();
+  const a=document.activeElement,fid=a&&a.id&&el.contains(a)&&/^(tsm-q|tsm-note-\d+)$/.test(a.id)?a.id:'',pos=fid?a.selectionStart:null; // a search or a note in use
+  let body;
+  if(S._tsmGone)body=_emptyState(t('qtNoDb'));
+  else if(!D)body=S._tsmErr?_loadErr(t('errConnection'),_on('_tsmLoad',true)):skeletonList();
+  else{
+    const c=D.counts||{},n=k=>k==='all'?(Number(c.pending)||0)+(Number(c.published)||0)+(Number(c.rejected)||0)+(Number(c.hidden)||0):k==='not'?(Number(c.rejected)||0)+(Number(c.hidden)||0):Number(c[k])||0;
+    const pill=(k,l)=>`<button type="button" class="filter-pill${W.f===k?' active':''}" aria-pressed="${W.f===k}" data-on-click="${_on('_tsmSet','f',k)}">${esc(l)} (${n(k)})</button>`;
+    const opt=(v,l,on)=>`<option value="${esc(v)}"${on?' selected':''}>${esc(l)}</option>`;
+    const sel=(k,label,opts,cls)=>_fField(esc(label),`<select${cls?` class="${cls}"`:''} aria-label="${esc(label)}" data-on-change="${_on('_tsmSet',k,_P('value'))}">${opts}</select>`);
+    const main=sel('about',t('qtAbout'),opt('',t('filterAll'),!W.about)+Object.keys(TSM_AB).map(k=>opt(k,t(TSM_AB[k]),W.about===k)).join(''))
+      +sel('src',t('qtSource'),opt('',t('filterAll'),!W.src)+Object.keys(TSM_SRC).map(k=>opt(k,t(TSM_SRC[k]),W.src===k)).join(''))
+      +sel('stars',t('qtStarsL'),opt('',t('filterAll'),!W.stars)+[5,4,3,2,1].map(k=>opt(String(k),t('qtStarsOf').replace('{0}',k),W.stars===String(k))).join('')+opt('none',t('qtNoStars'),W.stars==='none'))
+      +sel('sort',t('sortBy'),opt('new',t('caSortNew'),W.sort!=='old')+opt('old',t('caSortOld'),W.sort==='old'),'tsm-sort');
+    const adv=sel('ph',t('qtPhoto'),opt('',t('filterAll'),!W.ph)+opt('yes',t('qtWithPh'),W.ph==='yes')+opt('no',t('qtNoPh'),W.ph==='no'))
+      +sel('feat',t('qtFeatured'),opt('',t('filterAll'),!W.feat)+opt('yes',t('qtFeatured'),W.feat==='yes')+opt('no',t('qtNotFeat'),W.feat==='no'));
+    body=`${_tsmTopHtml(D)}<div class="filter-bar">${listToolbar({key:'tsm',q:{v:W.q,fn:_on('_tsmQ',_P('value')),ph:t('qtSearch')},
+        pills:pill('pending',t('qtFWait'))+pill('published',t('qtFPub'))+pill('not',t('qtFNot'))+pill('all',t('filterAll')),
+        f:[main,adv,[..._fS(_tsmV,'about src stars'),..._fS(_tsmV,'ph feat',true)],renderTestimonials]})}</div>
+      <div id="tsm-list">${_tsmListHtml()}</div>`;
+  }
+  el.innerHTML=`<h1 class="page-title">${esc(t('qtTitle'))}</h1><div class="form-section ws-mt0">${body}</div>`;
+  const f=fid&&document.getElementById(fid);if(f){try{f.focus({preventScroll:true});if(pos!=null)f.setSelectionRange(pos,pos);}catch(_){}}
+}
+// The switch (admins): a question naming what it turns on or off, then site_content testimonials.on, logged with an Undo.
+function _tsmOnSet(on){
+  on=!!on;renderTestimonials(); // the switch shows what is saved until the question is answered
+  if(!isAdmin()||!S._tsm||_roNow())return;
+  confirmDialog({title:t(on?'qtOnQ':'qtOffQ'),body:esc(t(on?'qtOnBody':'qtOffBody')),confirmLabel:t(on?'qtOnBtn':'qtOffBtn'),confirmClass:on?'btn-primary':'btn-red',onConfirm:()=>_tsmOnGo(on)});
+}
+async function _tsmOnPut(on){
+  if(await _wr(sb.from('site_content').upsert({key:TST_KEY,value:!!on,updated_by:_opName()||null}),'testimonials switch')){_tsmPaint();return false;}
+  if(S._tsm)S._tsm={...S._tsm,on:!!on};
+  _tstOnSet(!!on); // this device's own copy (its Account row, were it a rider's)
+  if(S.web&&!S.web.busy)S.web.loaded=false; // the Website editor reads site_content again when next opened
+  _tsmPaint();
+  return true;
+}
+async function _tsmOnGo(on){
+  const prev=!!(S._tsm&&S._tsm.on);if(prev===on)return;
+  if(!(await _tsmOnPut(on)))return;
+  const msg=t(on?'qtOnLog':'qtOffLog');
+  pushUndo(msg,()=>_tsmOnPut(prev),{k:'settings',e:'site_content',id:TST_KEY});
+  toast(msg,'success');
+}
+// One action on one testimonial (staff_testimonial_set). Painted from the answer: the list is read again after.
+const TSM_DONE={publish:'qtDonePub',reject:'qtDoneRej',hide:'qtDoneHid',pending:'qtDoneBack',feature:'qtDoneFeat',unfeature:'qtDoneUnfeat',drop_photo:'qtDonePh'};
+const TSM_BACK={pending:'pending',published:'publish',rejected:'reject',hidden:'hide'};
+function _tsmWho(x){return x?(x.name_mode==='anon'?t('qtAnon'):x.display_name)||x.customer_name||'':'';}
+async function _tsmAct(id,act){
+  const x=_tsmGet(id);if(!x||S._tsmWr)return;
+  if(act==='reject'&&!_tsmArm('rej|'+id)){_tsmPaint();const n=document.getElementById('tsm-note-'+id);if(n)try{n.focus({preventScroll:true});}catch(_){}return;}
+  if(act==='drop_photo'&&!_tsmArm('ph|'+id)){_tsmPaint();return;}
+  S._tsmSure=null;S._tsmWr=true;
+  const note=act==='reject'?String((S._tsmNote||{})[id]||'').trim().slice(0,500)||null:null,prev=x.status,feat=!!x.featured;
+  let r;try{r=await sb.rpc('staff_testimonial_set',{p_ids:[Number(x.id)],p_action:act,p_note:note});}catch(e){r={error:e};}
+  S._tsmWr=false;
+  if(r&&r.error){
+    if(/FEATURE_LIMIT/.test(String(r.error.message||'')))toast(t('qtFeatLimit'),'error');
+    else _writeErr(r,'testimonial '+act);
+    _tsmPaint();return;
+  }
+  if(!(Number(r.data)>0)){toast(t('qtNoChange'),'info');_tsmLoad(true);return;}
+  if(S._tsmNote)delete S._tsmNote[id];
+  const msg=t(TSM_DONE[act]).replace('{0}',_tsmWho(x));
+  if(act==='drop_photo'){logAction(msg,{k:'testimonial',e:'testimonials',id:String(x.id)});if(S._tsmPh)delete S._tsmPh[id];}
+  else{
+    const undo=act==='feature'||act==='unfeature'?(feat?'feature':'unfeature'):TSM_BACK[prev];
+    pushUndo(msg,async()=>{let u;try{u=await sb.rpc('staff_testimonial_set',{p_ids:[Number(x.id)],p_action:undo,p_note:null});}catch(e){u={error:e};}if(u&&u.error){_writeErr(u,'testimonial undo');return false;}_tsmLoad(true);},{k:'testimonial',e:'testimonials',id:String(x.id)});
+  }
+  toast(msg,'success');
+  await _tsmLoad(true);
+}
+async function _tsmDel(id){
+  const x=_tsmGet(id);if(!x||S._tsmWr)return;
+  if(!_tsmArm('del|'+id)){_tsmPaint();return;}
+  S._tsmSure=null;S._tsmWr=true;
+  let r;try{r=await sb.rpc('staff_testimonial_delete',{p_tid:Number(x.id)});}catch(e){r={error:e};}
+  S._tsmWr=false;
+  if(r&&r.error){_writeErr(r,'testimonial delete');_tsmPaint();return;}
+  const msg=t('qtDoneDel').replace('{0}',_tsmWho(x));
+  logAction(msg,{k:'testimonial',e:'testimonials',id:String(x.id)});
+  if(S._tsm){const c={...(S._tsm.counts||{})};if(c[x.status]>0)c[x.status]--;S._tsm={...S._tsm,counts:c,items:S._tsm.items.filter(y=>String(y.id)!==String(id))};}
+  toast(msg,'success');_tsmPaint();_tsmLoad(true);
+}
+// Up or down among the published (the website's order): the whole order goes, each one's place from 1.
+async function _tsmMove(id,dir){
+  const P=_tsmPubOrder(),i=P.findIndex(x=>String(x.id)===String(id)),j=i+(Number(dir)<0?-1:1);
+  if(i<0||j<0||j>=P.length||S._tsmWr)return;
+  const ids=P.map(x=>Number(x.id));[ids[i],ids[j]]=[ids[j],ids[i]];
+  const was=P.map(x=>[x.id,x.sort_order]);
+  ids.forEach((v,k)=>{const y=_tsmGet(v);if(y)y.sort_order=k+1;});
+  S._tsmWr=true;_tsmPaint();
+  const btn=document.querySelector(`#tab-testimonials .tsm-row[data-tid="${CSS.escape(String(id))}"] .tsm-mv${Number(dir)<0?'':'+.tsm-mv'}`);if(btn&&!btn.disabled)try{btn.focus({preventScroll:true});}catch(_){}
+  let r;try{r=await sb.rpc('staff_testimonial_order',{p_ids:ids});}catch(e){r={error:e};}
+  S._tsmWr=false;
+  if(r&&r.error){was.forEach(([v,o])=>{const y=_tsmGet(v);if(y)y.sort_order=o;});_writeErr(r,'testimonial order');_tsmPaint();return;}
+  logAction(t('qtDoneMove').replace('{0}',_tsmWho(_tsmGet(id))),{k:'testimonial',e:'testimonials',id:String(id)});
+}
+// A photo, read when staff open it; Hide forgets it.
+async function _tsmPhoto(id){
+  const P=S._tsmPh=S._tsmPh||{};
+  if(P[id]==='busy')return;
+  if(P[id]){delete P[id];_tsmPaint();return;}
+  P[id]='busy';_tsmPaint();
+  let r;try{r=await sb.rpc('staff_testimonial_photo',{p_tid:Number(id)});}catch(e){r={error:e};}
+  if(r&&!r.error&&typeof r.data==='string'&&/^data:image\/(jpeg|png|webp);base64,/.test(r.data))P[id]=r.data;
+  else{delete P[id];if(r&&r.error)_writeErr(r,'testimonial photo');else toast(t('qtPhGone'),'info');}
+  _tsmPaint();
+}
+// ── Add testimonial: one staff took down by hand ──────────────────────────────────────────────────────────────────
+// An account (optional: its name, as the mode says, comes from it) or a typed name; how the name shows; the words; stars
+// (optional); what it is about; where they agreed (required); a photo (optional); Publish now.
+function _tsmAddOpen(){
+  if(!_editOk('testimonials')){_roRefusal();return;}
+  S._tsmAdd={cid:'',q:'',name:'',mode:'short',body:'',stars:'',about:'',where:'',photo:'',pub:false,busy:false,err:''};
+  _tsmAddPaint(true);
+}
+function _tsmAddClose(){if(S._tsmAdd&&S._tsmAdd.busy)return;S._tsmAdd=null;closeConfirm();const b=document.querySelector('#tab-testimonials .tsm-add-btn');if(b)try{b.focus({preventScroll:true});}catch(_){}}
+function _on_tsmAdd_1(event,el){if(event.target===el)_tsmAddClose();}
+function _tsmShort(n){n=String(n||'').replace(/\s+/g,' ').trim();if(!n)return'';const w=n.split(' ');return(w.length<2?n:w[0]+' '+w[w.length-1].charAt(0)+'.').slice(0,80);}
+// How the name will show, as the database will write it.
+function _tsmAddShows(d){
+  if(d.mode==='anon')return t('qtAnonShows');
+  const c=d.cid&&_custById(d.cid),n=c?String(c.name||''):d.name;
+  return(d.mode==='short'?_tsmShort(n):String(n||'').replace(/\s+/g,' ').trim().slice(0,80))||'—';
+}
+function _tsmAddPaint(open){
+  const d=S._tsmAdd,m=document.getElementById('confirm-modal');if(!d||!m)return;
+  if(!open&&!m.querySelector('.tsm-add')){S._tsmAdd=null;return;}
+  const off=d.busy?' disabled':'',c=d.cid&&_custById(d.cid);
+  const opt=(v,l,on)=>`<option value="${esc(v)}"${on?' selected':''}>${esc(l)}</option>`;
+  const mode=k=>`<label class="tsm-mode"><input type="radio" name="tsm-a-mode" value="${k}"${d.mode===k?' checked':''}${off} data-on-change="${_on('_tsmAddMode',k)}"><span>${esc(t(k==='full'?'qtMFull':k==='short'?'qtMShort':'qtMAnon'))}</span></label>`;
+  m.style.display='block';
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on_tsmAdd_1',_EV,_EL)}">
+    <div class="confirm-box tsm-add" role="dialog" aria-modal="true" aria-labelledby="tsm-add-t">
+      <div class="cmy-rej-head"><div id="tsm-add-t" class="chrome-dt">${esc(t('qtAddT'))}</div>
+        <button type="button" data-on-click="${_on('_tsmAddClose')}" aria-label="${esc(t('closeBtn'))}" class="chrome-x x-close"${off}>&times;</button></div>
+      <div class="form-group"><label for="tsm-a-q">${esc(t('qtAAcct'))} <span class="label-hint">(${esc(t('optionalLabel'))})</span></label>
+        ${c?`<div class="tsm-a-who"><b><bdi>${esc(c.name||'')}</bdi></b><bdi dir="ltr" class="am-meta">${esc(c.phone||c.email||'')}</bdi><button type="button" class="btn-sm btn-secondary"${off} data-on-click="${_on('_tsmAddPick','')}">${esc(t('qtAClear'))}</button></div>`
+          :`<input id="tsm-a-q" type="text" enterkeyhint="search" maxlength="80" autocomplete="off" placeholder="${esc(t('qtAAcctPh'))}" value="${esc(d.q)}"${off} data-on-input="${_on('_tsmAddFind',_EL)}"><div id="tsm-a-res" class="tsm-a-res">${_tsmAddHits(d.q)}</div>`}</div>
+      ${c?'':`<div class="form-group"><label for="tsm-a-name">${esc(t('qtAName'))}</label><input id="tsm-a-name" type="text" maxlength="80" value="${esc(d.name)}"${off} data-on-input="${_on('_tsmAddSet','name',_EL)}"></div>`}
+      <fieldset class="form-group tsm-a-modes"><legend>${esc(t('qtAMode'))}</legend>${mode('full')}${mode('short')}${mode('anon')}
+        <div class="am-meta tsm-a-shows" id="tsm-a-shows">${esc(t('qtShowsAs'))}: <bdi>${esc(_tsmAddShows(d))}</bdi></div></fieldset>
+      <div class="form-group"><label for="tsm-a-body">${esc(t('qtAWords'))}</label><textarea id="tsm-a-body" rows="5" maxlength="800"${off} data-on-input="${_on('_tsmAddSet','body',_EL)}">${esc(d.body)}</textarea>
+        <div class="am-meta tsm-a-n" id="tsm-a-n" dir="ltr">${String(d.body).trim().length} / 800</div></div>
+      <div class="form-row tsm-a-two">
+        <div class="form-group"><label for="tsm-a-about">${esc(t('qtAbout'))}</label><select id="tsm-a-about"${off} data-on-change="${_on('_tsmAddSet','about',_EL)}">${opt('',t('qtAPick'),!d.about)}${Object.keys(TSM_AB).map(k=>opt(k,t(TSM_AB[k]),d.about===k)).join('')}</select></div>
+        <div class="form-group"><label for="tsm-a-stars">${esc(t('qtStarsL'))} <span class="label-hint">(${esc(t('optionalLabel'))})</span></label><select id="tsm-a-stars"${off} data-on-change="${_on('_tsmAddSet','stars',_EL)}">${opt('',t('qtNoStars'),!d.stars)}${[5,4,3,2,1].map(k=>opt(String(k),t('qtStarsOf').replace('{0}',k),d.stars===String(k))).join('')}</select></div>
+      </div>
+      <div class="form-group"><label for="tsm-a-where">${esc(t('qtAWhere'))}</label><input id="tsm-a-where" type="text" maxlength="300" placeholder="${esc(t('qtAWherePh'))}" value="${esc(d.where)}"${off} data-on-input="${_on('_tsmAddSet','where',_EL)}"></div>
+      <div class="form-group tsm-a-ph"><label for="tsm-a-file">${esc(t('qtPhoto'))} <span class="label-hint">(${esc(t('optionalLabel'))})</span></label>
+        ${d.photo?`<div class="tsm-a-file"><img class="tsm-a-thumb" src="${esc(d.photo)}" alt=""><button type="button" class="btn-sm btn-secondary"${off} data-on-click="${_on('_tsmAddPhotoDrop')}">${esc(t('qtDropPh'))}</button></div>`:''}
+        <input type="file" id="tsm-a-file" accept="image/*"${off} data-on-change="${_on('_tsmAddPhoto',_EL)}"></div>
+      <label class="tsm-a-pub"><input type="checkbox" id="tsm-a-pub"${d.pub?' checked':''}${off} data-on-change="${_on('_tsmAddSet','pub',_EL)}"><span>${esc(t('qtAPub'))}</span></label>
+      ${d.err?`<div class="pg-net" role="alert">${esc(d.err)}</div>`:''}
+      <div class="cmy-rej-act">
+        <button type="button" class="btn-secondary"${off} data-on-click="${_on('_tsmAddClose')}">${esc(t('cancelBtn'))}</button>
+        <button type="button" class="btn-primary" id="tsm-a-go"${off} data-on-click="${_on('_tsmAddSave')}">${esc(d.busy?t('pgSaving'):t('saveBtn'))}</button>
+      </div></div></div>`;
+}
+function _tsmAddSet(k,el){
+  const d=S._tsmAdd;if(!d||d.busy||!el)return;
+  d[k]=k==='pub'?!!el.checked:String(el.value||'');
+  if(k==='body'){const n=document.getElementById('tsm-a-n');if(n)n.textContent=d.body.trim().length+' / 800';}
+  if(k==='name'){const s=document.getElementById('tsm-a-shows');if(s)s.innerHTML=`${esc(t('qtShowsAs'))}: <bdi>${esc(_tsmAddShows(d))}</bdi>`;}
+  if(d.err){d.err='';const e=document.querySelector('#confirm-modal .tsm-add .pg-net');if(e)e.remove();}
+}
+function _tsmAddMode(k){const d=S._tsmAdd;if(!d||d.busy)return;d.mode=k;const s=document.getElementById('tsm-a-shows');if(s)s.innerHTML=`${esc(t('qtShowsAs'))}: <bdi>${esc(_tsmAddShows(d))}</bdi>`;}
+function _tsmAddHits(q){
+  q=String(q||'').trim();if(q.length<2)return'';
+  const hits=_custLiveRows(S.customers||[]).filter(c=>_dkXAcctHit(c,q)).slice(0,8);
+  return hits.map(c=>`<button type="button" class="tsm-a-hit" data-on-click="${_on('_tsmAddPick',c.id)}"><b><bdi>${esc(c.name||'')}</bdi></b><span class="am-meta" dir="ltr">${esc(c.phone||c.email||'')}</span></button>`).join('')||`<div class="am-meta">${esc(t('gsNone'))}</div>`;
+}
+function _tsmAddFind(el){const d=S._tsmAdd;if(!d||!el)return;d.q=String(el.value||'');const b=document.getElementById('tsm-a-res');if(b)b.innerHTML=_tsmAddHits(d.q);}
+function _tsmAddPick(cid){const d=S._tsmAdd;if(!d||d.busy)return;d.cid=cid||'';if(!cid)d.q='';d.err='';_tsmAddPaint();const f=document.getElementById(cid?'tsm-a-body':'tsm-a-q');if(f)try{f.focus({preventScroll:true});}catch(_){}}
+async function _tsmAddPhoto(el){
+  const d=S._tsmAdd,f=el&&el.files&&el.files[0];if(!d||!f||d.busy)return;
+  const u=/^image\//.test(f.type||'')?await _tsmFit(f):'';
+  if(S._tsmAdd!==d)return;
+  if(!u){d.err=t('qtEPhoto');_tsmAddPaint();return;}
+  d.photo=u;d.err='';_tsmAddPaint();
+}
+// A photo made small enough for the database (600,000 bytes as a data: URL), as the rider's page makes it
+// (rider-testimonial.js _tstFitImg): the long side 1200 px, a JPEG from 0.82 down, smaller again when that is not enough.
+async function _tsmFit(f){
+  try{
+    let im;try{im=await createImageBitmap(f);}catch(_){im=await new Promise((ok,no)=>{const u=URL.createObjectURL(f),x=new Image();x.onload=()=>{URL.revokeObjectURL(u);ok(x);};x.onerror=()=>{URL.revokeObjectURL(u);no(new Error('image'));};x.src=u;});}
+    const W=im.width||im.naturalWidth,H=im.height||im.naturalHeight;
+    for(let side=1200;side>=400;side=Math.round(side*.75)){
+      const k=Math.min(1,side/Math.max(W,H,1)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(W*k));c.height=Math.max(1,Math.round(H*k));
+      const cx=c.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,c.width,c.height);cx.drawImage(im,0,0,c.width,c.height);
+      for(let q=.82;q>=.4;q-=.1){const u=c.toDataURL('image/jpeg',q);if(u.length<=TST_PHOTO_MAX&&/^data:image\/jpeg;base64,/.test(u))return u;}
+    }
+  }catch(_){}
+  return'';
+}
+function _tsmAddPhotoDrop(){const d=S._tsmAdd;if(!d||d.busy)return;d.photo='';_tsmAddPaint();}
+const TSM_ADD_ERR={BODY:'qtEBody',STARS:'qtEStars',ABOUT:'qtEAbout',NAME:'qtEName',CONSENT:'qtEWhere',PHOTO:'qtEPhoto',CUSTOMER:'qtECust'};
+async function _tsmAddSave(){
+  const d=S._tsmAdd;if(!d||d.busy)return;
+  const body=d.body.trim(),where=d.where.trim(),name=d.name.replace(/\s+/g,' ').trim();
+  const say=k=>{d.err=t(k);_tsmAddPaint();};
+  if(body.length<20||body.length>800)return say('qtEBody');
+  if(!d.about)return say('qtEAbout');
+  if(d.mode!=='anon'&&!d.cid&&!name)return say('qtEName');
+  if(where.length<3)return say('qtEWhere');
+  d.busy=true;d.err='';_tsmAddPaint();
+  let r;try{r=await sb.rpc('staff_testimonial_add',{p_customer:d.cid||null,p_name:d.cid?null:(name||null),p_name_mode:d.mode,p_body:body,p_stars:d.stars?Number(d.stars):null,
+    p_about:d.about,p_consent_note:where,p_photo:d.photo||null,p_publish:!!d.pub});}catch(e){r={error:e};}
+  if(S._tsmAdd!==d)return;
+  d.busy=false;
+  if(r&&r.error){const k=TSM_ADD_ERR[String(r.error.message||'').trim()];if(k)return say(k);_writeErr(r,'testimonial add');_tsmAddPaint();return;}
+  S._tsmAdd=null;closeConfirm();
+  const msg=t(d.pub?'qtDoneAddPub':'qtDoneAdd').replace('{0}',_tsmAddShows(d));
+  logAction(msg,{k:'testimonial',e:'testimonials',id:String(r&&r.data!=null?r.data:'')});
+  toast(msg,'success');
+  if(!d.pub&&_tsmV().f!=='pending'){_tsmV().f='pending';}else if(d.pub&&_tsmV().f==='pending')_tsmV().f='published';
+  await _tsmLoad(true);
+}
 // The page open in Ask is named in the address (/ask?ask=12.answers), so a reload, or a link sent to a colleague, comes
 // back to it. The router keeps a query it does not know (_navSearch), so the desk writes this one itself and takes it
 // away once the page or the section is left (setStaffTab calls this after the address moved; the part after each paint).
@@ -30049,7 +30521,7 @@ function renderAccount(){
         ${row('personal','person')}${row('contact','phone')}${row('residence','pin')}${row('emergency','people')}${row('riding','bike')}${row('sport','run')}${row('about','info')}
       </div></div>
       <div class="acc-grp" id="acc-g-activity"><h2 class="acc-grp-h">${t('accGrpActivity')}</h2><div class="acc-list">
-        ${row('ambassador','flag')}${row('volunteer','clock')}${row('purchases','doc')}${row('company','briefcase')}
+        ${row('ambassador','flag')}${row('volunteer','clock')}${row('purchases','doc')}${row('company','briefcase')}${row('testimonial','star') /* Write a testimonial (2026-11-18): only while the switch is on (_accRowsPaint); the page opens by its link whatever it says */}
         <button type="button" class="acc-row" id="acc-r-learn" data-on-click="${_on("_llOpen")}" hidden><span class="acc-row-ic">${_cuIc('bike',20)}</span><span class="acc-row-t">${t('llRow')}</span><span class="acc-row-v" id="acc-v-learn"></span>${_cuIc('go',16,1)}</button>
       </div></div>
       <div class="acc-grp"><h2 class="acc-grp-h">${t('accGrpSettings')}</h2><div class="acc-list">
@@ -30157,6 +30629,7 @@ function renderAccount(){
 `)}
     ${page('updates','<div id="inb-body" class="inb-body"></div>',1)}
     ${page('help','<div id="rh-help" class="rh-help"></div>',1)}
+    ${page('testimonial','<div id="tst-page" class="tst-page"></div>',1)}
     ${page('delete',`
     ${(()=>{
       // Delete my account: a request staff act on within 30 days, withdrawable until then.
@@ -30185,6 +30658,7 @@ function renderAccount(){
   _accRowsPaint();
   _cochLoad(cust);if(pg==='company')_cochOpen(); // the Company challenge row and its page (F26)
   if(pg==='help')_rhPageOpen();
+  if(pg==='testimonial')_tstPageOpen(); // the testimonial page's own file (rider-testimonial.js)
   _inbShow();
 }
 // The account page's parts (the owner, 2026-11-09: "divide the customer my account page into 3 separate pages account
@@ -30211,7 +30685,7 @@ function _accPage(){return ACC_PAGES.includes(S.accPage)?S.accPage:null;}
 function _accSub(){const v=_accView();return v!=='account'?v:(_accPage()||'');}
 function _accSubSet(sub){S.accView=ACC_VIEWS.includes(sub)?sub:'account';S.accPage=S.accView==='account'&&ACC_PAGES.includes(sub)?sub:null;}
 const _ACC_PG_T={personal:'accPgPersonal',contact:'accPgContact',residence:'accPgResidence',emergency:'accPgEmergency',riding:'accPgRiding',sport:'spTitle',about:'accPgAbout',
-  wallet:'cwTitle',invite:'refTitle',ambassador:'ambMineTitle',volunteer:'accVolTitle',purchases:'custPurchTitle',company:'cochTitle',notifications:'pushTitle',updates:'updTitle',help:'accPgHelp',delete:'delTitle'};
+  wallet:'cwTitle',invite:'refTitle',ambassador:'ambMineTitle',volunteer:'accVolTitle',purchases:'custPurchTitle',company:'cochTitle',notifications:'pushTitle',updates:'updTitle',help:'accPgHelp',testimonial:'tstRow',delete:'delTitle'};
 function _accPgTitle(k){return t(_ACC_PG_T[k]||'accountTitle');}
 // The profile columns each page writes (_saveAccount); every other column keeps the value on file.
 const ACC_PG_KEYS={personal:['name','birth_date','nationality','gender'],contact:['email','phone'],residence:['country','city'],riding:['height','type_preference'],about:['socials','profession','workplace','heard_from']};
@@ -30227,6 +30701,7 @@ function _accShow(){
   h.classList.toggle('acc-in-pg',!!pg);
   if(pg==='company')_cochOpen();
   if(pg==='help')_rhPageOpen();
+  if(pg==='testimonial')_tstPageOpen(); // the testimonial page's own file (rider-testimonial.js)
   _inbShow();
 }
 // Back and Forward landed on an account address (the tab is already open).
@@ -30349,7 +30824,8 @@ function _accRowsPaint(){
   const cf=document.getElementById('acc-cal-btn');if(cf)cf.hidden=!_calfOn(c); // the calendar address (F27): once the database has it
   put('delete',c.deletion_requested_at?esc(t('accDelPending')):'',{show:!!c.session_token&&S._delUnavailable!==c.id&&c.deletion_requested_at!==undefined,add:!!c.deletion_requested_at});
   const g=document.getElementById('acc-g-activity');
-  if(g)g.hidden=!['ambassador','volunteer','purchases','learn','company'].some(k=>{const r=document.getElementById('acc-r-'+k);return r&&!r.hidden;});
+  put('testimonial','',{show:S._tstOn===true&&!!c.session_token}); // Write a testimonial: while riders are shown testimonials (site_content testimonials.on)
+  if(g)g.hidden=!['ambassador','volunteer','purchases','learn','company','testimonial'].some(k=>{const r=document.getElementById('acc-r-'+k);return r&&!r.hidden;});
 }
 // The profile columns customer_profile answers with, laid over a signed-in copy; and the ones
 // customer_about answers with (the account page reads both): profession, workplace, how they heard
@@ -45747,17 +46223,17 @@ async function _pinApprove(what,opt){
 // only some of those (staff.modules_edit); null is everything its role allows. The role itself
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
-function _staffSections(){return['queue','waitlist','sessions','lockers','dashboard','cashier','store','payments','inventory','workshop','community','badgereq','ask','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'].filter(_stoSecOk);}
-const SECTION_KEY={reports:'tabReports',dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',store:'tabStore',payments:'tabPayments',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ask:'tabAsk',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+function _staffSections(){return['queue','waitlist','sessions','lockers','dashboard','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'].filter(_stoSecOk);}
+const SECTION_KEY={reports:'tabReports',dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',store:'tabStore',payments:'tabPayments',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ask:'tabAsk',testimonials:'qtTitle',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
 // Customers and Community are one section, People, since 2026-11-06 (id 'community'): a list naming either names it.
-function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('queue')&&!l.includes('waitlist'))l.push('waitlist');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');if(l.includes('community')&&!l.includes('ask'))l.push('ask');if(l.includes('cashier')){if(!l.includes('store'))l.push('store');if(!l.includes('payments'))l.push('payments');}return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08) and Ask (2026-11-13: it comes with People); one naming Bookings names the Waitlist (a view of it until 2026-11-09)
+function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('queue')&&!l.includes('waitlist'))l.push('waitlist');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');if(l.includes('community')&&!l.includes('ask'))l.push('ask');if(l.includes('community')&&!l.includes('testimonials'))l.push('testimonials');if(l.includes('cashier')){if(!l.includes('store'))l.push('store');if(!l.includes('payments'))l.push('payments');}return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08) and Ask (2026-11-13: it comes with People); one naming Bookings names the Waitlist (a view of it until 2026-11-09)
 // What _modIds adds back to a list that names the section's parent (Sessions, Lockers and the Waitlist with Bookings, Badge
 // requests with People). The database's staff_set_access knows only its own list of sections (none of these four on
 // 2026-11-09), so the Team page sends them only without their parent, where the database's refusal says so; with it they
 // would cost nothing to drop, since they come back on every read.
-const _MOD_PARENT={sessions:'queue',lockers:'queue',waitlist:'queue',badgereq:'community',ask:'community',store:'cashier',payments:'cashier'}; // the Store and Payments (2026-11-10) come with Sales
+const _MOD_PARENT={sessions:'queue',lockers:'queue',waitlist:'queue',badgereq:'community',ask:'community',testimonials:'community',store:'cashier',payments:'cashier'}; // the Store and Payments (2026-11-10) come with Sales
 function _modSend(a){return Array.isArray(a)?a.filter(x=>!(_own(_MOD_PARENT,x)&&a.includes(_MOD_PARENT[x]))):a;}
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
 // Settings is every account's own page (_deskTabOk opens it to all) and is never one of the
@@ -79825,7 +80301,7 @@ function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
   if(st==='fnb')st='vendors'; // the section's id until 2026-10-03
-  return['queue','waitlist','sessions','lockers','cashier','store','payments','inventory','customers','community','badgereq','ask','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
+  return['queue','waitlist','sessions','lockers','cashier','store','payments','inventory','customers','community','badgereq','ask','testimonials','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
 }
 // The tab iOS opens for a bike tag (2026-10-09, D15): when a staff tab is already open on this device, the
 // bike goes to it over the 'mm-staff' channel and this tab only says so - nothing is loaded. No answer
@@ -80314,6 +80790,7 @@ function _secPolls(full){
   if(_deskTabOk('store')||_deskTabOk('payments'))_stoCounts(); // orders to prepare and refunds owed, on the rail (2026-11-10)
   if(_deskTabOk('community')){const f=globalThis['_apps'+'Probe'];if(typeof f==='function')f();} // the applications waiting, counted (s10, item 33): staff-half code, by name
   if(_deskTabOk('ask'))_askCount(); // Ask's answers waiting for approval, on the rail (2026-11-13)
+  if(_deskTabOk('testimonials'))_tsmCount(); // the testimonials waiting for review, on the rail (2026-11-18)
 }
 // ── The online store and its payments (2026-11-10, migration 20261110150000) ─────────────────────
 // The website takes the money (Moyasar); the staff page fulfils orders, edits the products and decides refunds.

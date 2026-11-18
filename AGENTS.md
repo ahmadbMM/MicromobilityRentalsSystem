@@ -4873,3 +4873,47 @@ The user picked two staff-only Bookings features from a list of proposed ones. S
 - Sizes (local): customer 362.1 -> 362.2 KB (+0.07: the hooks in `_n6bPresSet`, `_n6bPresSync`, setupRefRealtime and
   `_ntKindsNow`, which are customer-half code), staff 1133.3 -> 1138.2, core 348.9 -> 349.4, the desk part 21 -> 25;
   budgets staff 1140 -> 1146 and core 352 -> 354 (split-staff.mjs).
+
+## Testimonials (2026-11-18, migration 20261119120000)
+The user: "Create a testimonials page but don't make it visible, People write their testimonials on our services & community
+rides. Then we publish them in a testimonials page." The website (mm-platform) shows them at micromobility.sa/testimonials.
+- **One switch**, site_content `testimonials.on` (`TST_KEY`; anything but `true` is off; admins write it). The booking app
+  reads it in the boot's business-settings read (`_bizPubBoot`: `.in('key',['biz.public',TST_KEY])`, cached in `cq_biz_pub`
+  as `t`), so it costs no request of its own: `S._tstOn`, `_tstOnSet`. On, it shows the Account row, the step after a
+  high rating and the one-time ask; off, none of them. The page itself works by its address whatever it says.
+- **The rider's page**: Account > Write a testimonial, `/account/testimonial` (`ACC_PAGES` 'testimonial', row in the
+  Activity group, shown by `_accRowsPaint` only while on). Signed out, the address is parked like any account page. Its
+  code and words (ten languages) are `rider-testimonial.js`, fetched when first needed (`_tstLoad`, stamped `TST_V`;
+  what it takes from the page is `window._tstDeps`): about pills, five drawn stars, 20-800 characters with a counter, an
+  optional photo made small on the phone (`_tstFitImg`: 1200 px, JPEG, under 600,000 bytes), the names exactly as
+  `testimonial_mine` gives them (`names.full`/`short`, each once) or Anonymous, the "Rider since" line beside a name, the
+  required tick (`_tickHtml`), Send (`testimonial_send`, source `app`); under it the rider's own with Waiting for review /
+  Published / Not published (rejected and hidden alike) and Delete on a second tap. Every refusal code has its words
+  (`TST_ERR`). The file's function names must not repeat the page's (`_tstRateFor` is the page's; the file's is `_tstRateNew`).
+- **After a rating of 9 or 10** (the main score: overall on a Saturday, service otherwise), switch on: `submitRating`
+  asks `_tstRateFor` beside `_rgFinFor`; when it answers, the same `#rate-modal` draws the step (`S._rg.tm`,
+  `window._tstRateHtml`): about from the booking as the database's `_tm_about` reads it (`_tstAboutOf`), stars = score
+  halved and rounded, the words from the comment; Send (source `rating`, `p_entry` = the booking) or Not now / Escape,
+  then the rating's own last screen as before (`_tstRateDone`). No step for a booking already shared or with three waiting.
+- **The old comment's ask**: `_forceRatingPrompt` calls `_tstAskCheck` when nothing else waits; it asks only with the switch
+  on, data loaded, no forced pop-up open (`_tstAskFree`), at most once a day per device and account (once a week after
+  "none due"; `cq_tst_ask_<id>`), and the file's `_tstAskRun` reads `testimonial_mine.ask`. The pop-up (`#tst-ask`,
+  `S._tma`, counted by `_fixOpenSync` and holding `_forceRatingPrompt` back) has Publish it / No thanks
+  (`testimonial_old_answer`) and no close; an answer ends it for good on the device too.
+- **Staff**: section Testimonials (`testimonials`, `/testimonials`, under People on the rail after Ask, the part
+  `staff-parts/testimonials.js`, `renderTestimonials`); derived from People in `_modIds` and `_MOD_PARENT` (the database
+  checks `_staff_mod('community')`; staff_set_access never hears of it). The rail's number: `_tsmCount`
+  (`staff_testimonials('pending')`, a `STAFF_ENTRY`, every five minutes through `_secPolls`). Waiting / Published / Not
+  published / All, search, Filters (about, source, stars; Advanced: photo, featured; order), rows with the account, how the
+  name shows, source, ride, consent, review, the photo read only when opened (`staff_testimonial_photo`); Publish, Reject
+  (second tap, note), Hide, Back to waiting, Feature (FEATURE_LIMIT said at 12), Move up/down among the published
+  (`staff_testimonial_order`, the whole order), Remove photo and Delete (second taps), each logged (status changes with an
+  Undo). Add testimonial (`staff_testimonial_add`): an account or a typed name, the name mode, words, stars (optional),
+  about, where they agreed (required), photo, Publish now. On top: the published average and count, the old comments'
+  yes/no, the switch (admins; a question naming what turns on, then the site_content write with `pushUndo`) and a link to
+  the public page. `staff_testimonials`, `staff_testimonial_photo` and `testimonial_mine` are in `_READ_RPC`.
+- **Trap: staff keys starting with `t`.** The analytics and store parts build keys from the prefix `'t'+…`, so
+  `partLangKeys` sees two parts "naming" every key that starts with t and keeps it in the desk core. The section's keys
+  are `qt*` for that reason (the rider's row title is `tstRow`, customer-side).
+- Privacy Notice: a testimonials row, a consent line and a retention line (en and ar); `PRIVACY_VERSION` stays 2026-11-18
+  and `PRIVACY_ASK_FROM` is unchanged (no re-ask). Tests: `tests/testimonials.spec.ts`.
