@@ -12619,6 +12619,22 @@ body.view-staff #desk-sheet #bmv-figs:empty{display:none;}
 body.view-staff #desk-sheet .bmv-party{display:flex;align-items:center;gap:8px;font-size:var(--sf-fs-sm);font-weight:600;cursor:pointer;min-height:44px;}
 body.view-staff #desk-sheet .bmv-party input{width:18px;height:18px;margin:0;accent-color:var(--green);}
 body.view-staff #cust-modal .inc-list{margin-bottom:10px;}
+/* Lost and found (2026-11-18, found_items): the centred desk sheet's lists and form, reusing the incidents' rows */
+body.view-staff #desk-sheet .lnf-h{display:flex;align-items:center;gap:6px;margin:0;font-size:var(--sf-fs-sm);font-weight:600;}
+body.view-staff #desk-sheet .lnf-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+body.view-staff #desk-sheet .lnf-what{overflow-wrap:anywhere;}
+body.view-staff #desk-sheet .lnf-st{margin-inline-start:auto;font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);}
+body.view-staff #desk-sheet .lnf-st-kept{color:var(--green);}
+body.view-staff #desk-sheet .lnf-late .lnf-st-kept{color:var(--orange);}
+body.view-staff #desk-sheet .lnf-row .sc-meta{margin-top:2px;color:var(--muted);font-size:var(--sf-fs-sm);}
+body.view-staff #desk-sheet .lnf-row .sc-meta span+span::before{content:"·";margin-inline-end:6px;}
+body.view-staff #desk-sheet .lnf-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+body.view-staff #desk-sheet .lnf-acts:empty{display:none;}
+body.view-staff #desk-sheet .lnf-acts .lnf-wa{display:inline-flex;align-items:center;gap:4px;text-decoration:none;}
+body.view-staff #desk-sheet .lnf-form input:not([type=file]){width:100%;box-sizing:border-box;}
+body.view-staff #desk-sheet .lnf-who-p{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+body.view-staff #desk-sheet .lnf-sts{display:flex;flex-wrap:wrap;gap:6px;}
+body.view-staff #tab-lockers .lk-fi-row .lk-res-code{color:var(--muted);}
 body.view-staff .rmt-chip.rmt-inc{color:var(--orange);display:inline-flex;align-items:center;gap:4px;}
 body.view-staff #tab-dashboard .snt-dash-b{white-space:normal;overflow-wrap:anywhere;}
 /* Night checklists (staff round s10, second batch, D10): the opening and close-night lists in the centred desk sheet,
