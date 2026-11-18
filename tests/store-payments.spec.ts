@@ -320,7 +320,7 @@ test.describe('@staff:payments payments, refunds owed, settings', () => {
     expect(seen.filter((c) => c.name === 'staff_payments').map((c) => 'p_offset' in (c.body as Record<string, unknown>))).toEqual([true, false]);
   });
 
-  test('Settings writes the pay.* and store.* keys as the Website editor does', async ({ page }) => {
+  test('Settings writes the pay.* keys (Payments) and the store.* keys (Store > Settings since 2026-11-19) as the Website editor does', async ({ page }) => {
     const sc = writes(page, 'site_content');
     await staff(page, { 'rpc:staff_store_ready': true, site_content: [
       { key: 'pay.enabled', value: false, updated_at: NOW }, { key: 'pay.holdMinutes', value: 15, updated_at: NOW },
@@ -337,16 +337,24 @@ test.describe('@staff:payments payments, refunds owed, settings', () => {
     await expect(page.locator('#toast-container')).toContainText('from 5 to 60');
     expect(sc).toHaveLength(0);
     await sec.locator('#ps-hold').fill('20');
-    await sec.locator('#ps-jfee').fill('35');
-    await sec.locator('#ps-lic').fill('DL-778899');
+    await expect(sec.locator('#ps-jfee')).toHaveCount(0);
     await sec.locator('#ps-save').click();
     await expect.poll(() => sc.length).toBeGreaterThan(0);
-    const rows = sc[0].body as { key: string; value: unknown }[];
-    const by = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+    const by = Object.fromEntries((sc[0].body as { key: string; value: unknown }[]).map((r) => [r.key, r.value]));
     expect(by['pay.enabled']).toBe(true);
     expect(by['pay.holdMinutes']).toBe(20);
-    expect(by['store.discountLicence']).toBe('DL-778899');
-    expect((by['store.delivery'] as { jeddah: { fee: number } }).jeddah.fee).toBe(35);
+    expect(Object.keys(by).filter((k) => k.startsWith('store.'))).toEqual([]);
+    await expect(page.locator('#toast-container')).toContainText('Settings saved');
+    await page.evaluate(`S.stoView='settings';setStaffTab('store')`);
+    await expect.poll(() => new URL(page.url()).pathname).toBe('/store/settings');
+    const st = page.locator('#tab-store');
+    await st.locator('#ps-jfee').fill('35');
+    await st.locator('#ps-lic').fill('DL-778899');
+    await st.locator('#ss-save').click();
+    await expect.poll(() => sc.length).toBeGreaterThan(1);
+    const sb2 = Object.fromEntries((sc[sc.length - 1].body as { key: string; value: unknown }[]).map((r) => [r.key, r.value]));
+    expect(sb2['store.discountLicence']).toBe('DL-778899');
+    expect((sb2['store.delivery'] as { jeddah: { fee: number } }).jeddah.fee).toBe(35);
   });
 });
 

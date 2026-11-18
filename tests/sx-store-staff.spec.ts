@@ -322,12 +322,12 @@ test.describe('@staff:store I\'m here and the warranty claims queue (N14 N31)', 
   });
 });
 
-test.describe('@staff:payments Settings: the 2026-11-18 keys', () => {
+test.describe('@staff:store Settings: the 2026-11-18 keys (Store > Settings since 2026-11-19)', () => {
   test('handover hours past midnight, Ramadan, the order-by date, the switches and numbers are written as the website reads them', async ({ page }) => {
     const sc = writes(page, 'site_content');
     await staff(page, { site_content: [{ key: 'store.checkup', value: { on: true, weeks: 12 }, updated_at: NOW }] });
-    await page.evaluate(`S.payView='settings';setStaffTab('payments')`);
-    const sec = page.locator('#tab-payments');
+    await page.evaluate(`S.stoView='settings';setStaffTab('store')`);
+    const sec = page.locator('#tab-store');
     await sec.locator('#ps-co').check();
     await sec.locator('#ps-ho').check();
     await sec.locator('#ps-hoc').fill('2');
@@ -336,7 +336,7 @@ test.describe('@staff:payments Settings: the 2026-11-18 keys', () => {
     await ho.locator('input[aria-label="Time 2, from"]').fill('21:00');
     await ho.locator('input[aria-label="Time 2, to"]').fill('01:00'); // past midnight
     await sec.locator('#ps-rm').check();
-    await sec.locator('#ps-save').click();
+    await sec.locator('#ss-save').click();
     await expect(page.locator('#toast-container')).toContainText('Ramadan');
     expect(sc).toHaveLength(0);
     await sec.locator('#ps-rmf').fill('2027-02-08');
@@ -348,14 +348,14 @@ test.describe('@staff:payments Settings: the 2026-11-18 keys', () => {
     await sec.locator('#ps-obe').fill('Eid');
     await sec.locator('#ps-obd').fill('2027-03-10');
     await sec.locator('#ps-obp').fill('2027-03-12'); // after the occasion
-    await sec.locator('#ps-save').click();
+    await sec.locator('#ss-save').click();
     await expect(page.locator('#toast-container')).toContainText('Order-by date');
     await sec.locator('#ps-obp').fill('2027-03-07');
     await sec.locator('#ps-ckw').fill('8');
     await sec.locator('#ps-sc').uncheck();
     await sec.locator('#ps-push').check();
     await sec.locator('#ps-qd').fill('10');
-    await sec.locator('#ps-save').click();
+    await sec.locator('#ss-save').click();
     await expect.poll(() => sc.length).toBeGreaterThan(0);
     const by = Object.fromEntries((sc[0].body as { key: string; value: unknown }[]).map((r) => [r.key, r.value]));
     expect(by).toMatchObject({

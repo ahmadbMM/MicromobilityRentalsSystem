@@ -3900,7 +3900,8 @@ the staff page fulfils, edits and refunds. Both sections live in the staff part 
   `SUPABASE_URL` is the staging project's; the build reads that line and names the origin in the policy's `connect-src`
   and `frame-src`. Declining a refund owed is `staff_pay_refund_decline`. A locker paid online and cancelled before its
   key is given owes one too (reason `locker <rental>`).
-- **Payments > Settings** edits the `pay.*` and `store.*` keys of `site_content` (incl. `store.discountLicence`: was
+- **Payments > Settings** edits the `pay.*` keys and the legal line (`site.legal.*`); the `store.*` keys moved to Store >
+  Settings on 2026-11-19 (next section). It used to edit the `store.*` keys too (incl. `store.discountLicence`: was
   prices show only while it is set) through the Website editor's `_webRestore` / `_webLoad` (website part entries), so
   `site_content_history` keeps each change; an Undo puts the old values back.
 - **The desk.** `pay_method 'online'` reads "Paid online" (`_payPillTxt`, every pay pill, the check-in drawer, the
@@ -3913,6 +3914,45 @@ the staff page fulfils, edits and refunds. Both sections live in the staff part 
   variable `STAFF_STAGING == 'on'`), deploying to the Pages project `micromobility-staff-staging`; see STAGING.md
   section 2. A copy whose `STAFF_ORIGIN` is its own address sends nothing on to it (`LIVE_HOSTS` in the app, the guard in
   the middleware).
+
+## The store's catalogue in the live staff app (2026-11-19, migrations 20261119400000 and 20261119400100)
+
+The user: "how can we add products to the store? ... allow customizability as much as possible for the staff", "i want to be
+able to add to the store from the current staff website" and "i dont want the store to become live". Production holds the
+catalogue alone (products, variants, categories, collections, suppliers, costs, stock moves, the `store.*` settings);
+staging holds the whole store. `tests/store-catalog.spec.ts`.
+- **The mode.** `_stoProbe` (core) asks `staff_store_mode()` first: `'full'` where the orders are, `'catalog'` where only the
+  catalogue is; a database without it is asked `staff_store_ready()` as before (true: full). `S._storeMode` is the answer
+  and `S._storeReady` is true only in full mode, so every read of an order or payment table (the rail's counts, "I'm
+  here", the session handover box, the passkeys, the dashboard's store rows, a scanned pickup pass) keeps asking
+  `S._storeReady` and never runs on production. `_stoSecOk`: the Store is a section in both modes, Payments in full only.
+- **The views** (`STO_VIEWS`, `STO_VL`, the store part's `_spcView` / `_spcShown` / `_spcHead` / `_spcBodies`): catalog mode
+  offers `STO_CATALOG` only (products, low stock, stock history, suppliers, categories, collections, reports, settings) and
+  opens on the products (a non-admin, who has no products view, on the categories). Addresses: `/store/categories`,
+  `/store/collections`, `/store/settings`, `/store/reports`, `/store/stock-history`, `/store/suppliers`. The stock history
+  and suppliers views and the Import / Export / Receive delivery / New supplier buttons are drawn by the stock block's
+  functions, called by name through `globalThis` (`_stoMovesHtml`, `_stoMovesLoad`, `_stoSupHtml`, `_stoSupLoad`,
+  `_stoImportOpen`, `_stoExportOpen`, `_stoReceiveOpen`, `_stoSupOpen`): a build without them leaves them out.
+- **Categories** (`store_categories`, admins write under RLS): two levels, names, address, blurb, photo (uploaded by
+  `_catUploadImage` under `store/cat/<slug>/`, stored as its `/media/...` path), shown or hidden, SEO with counters, the
+  filters its page offers and a template a new product starts from (spec labels, key-spec and box icons, warranty, ships
+  across the Kingdom). Order: up and down, saved by `staff_store_sort('categories', slugs)`. A rename warns that links to
+  the old address break (products follow by `on update cascade`). Delete: `staff_store_category_delete(slug, move_to)`.
+  `_stoCats()` / `_stoCatLabel(slug)` ("Bikes › Road") / `_stoCategoriesLoad(force)` replace the fixed `STO_CATS`
+  everywhere (the six stay as the fallback while the table is read, absent or empty). `_stoCatsLoad` is another thing:
+  the /bikes models the product editor links to (`catalog_models`).
+- **Collections** (`store_collections`, `store_collection_items`): manual (a product list searched, added and ordered,
+  `staff_store_sort('collection:<slug>', ids)`), newest, on sale, best sellers; a section of the store page, a schedule,
+  shown or hidden, SEO. `_stoColls()` gives each with its products' ids in order (`items`).
+- **Store > Settings** edits every `store.*` key the website and the database read, with Payments > Settings' checks and
+  value shapes (`_spcSetNext`), plus the new `store.heading`, `store.banner` (a preview of its tone), `store.seo`,
+  `store.sort`, `store.showStock`, `store.newBadge`, `store.minOrder` and `store.maxPerOrder` (CONTRACT section 10: blank
+  is null, an empty object is no key). `store.open` only in full mode; catalog mode never writes it (the hourly copy to
+  staging skips it). Admins save; everyone else with the Store reads.
+- **Reports**: `staff_store_report(from, to)` over 7 / 30 / 90 days, this month or a custom range: products by state,
+  stock and its value at price and at cost, the margin, by category, the stock moves (by reason, `sync` = copied from
+  live by the hourly job), and in full mode the sales by
+  product, category and day; each table a CSV through `_downloadCsv` (with its BOM).
 
 ## Booking card: a booking's ticket as its rider sees it (2026-11-10)
 
