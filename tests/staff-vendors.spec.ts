@@ -404,9 +404,10 @@ test.describe('@staff:vendors Vendors riders’ breakfast ratings', () => {
     await expect(b.locator('.vendor-rg-n')).toHaveText('Riders who rated the breakfast: 2');
     const avg = (k: string) => b.locator(`.vendor-rg-avg[data-k="${k}"] b`);
     await expect(avg('breakfast')).toHaveText('8.0/10');
-    await expect(avg('bf_restaurant')).toHaveText('8.0/10');
-    await expect(avg('bf_food')).toHaveText('7.5/10');
-    await expect(avg('bf_service')).toHaveText('10.0/10');
+    await expect(avg('bf_food')).toHaveText('7.5/10'); // both riders scored the food: an average
+    // A part only one of them was asked (the shorter Saturday rating, 2026-11-18): how many were low, never an average.
+    await expect(avg('bf_restaurant')).toHaveText('1 at 8 or under');
+    await expect(b.locator('.vendor-rg-avg[data-k="bf_service"]')).toHaveCount(0); // a 10: nothing low to say
     await expect(b.locator('.vendor-rg-avg[data-k="bf_atmosphere"]')).toHaveCount(0);
     // Breakfast reasons only, in question order, each ticked; the ride's and overall's are not offered.
     const why = b.locator('.vendor-rg-why');
@@ -432,7 +433,7 @@ test.describe('@staff:vendors Vendors riders’ breakfast ratings', () => {
 
   test('a shared date shows what the vendor sees, keeps the shared ticks, and Stop sharing asks first', async ({ page }) => {
     const calls = await openDay(page, {
-      vendor_shared_ratings: [{ booking_id: 20, venue_id: 1, day: rd, riders: 2, averages: { breakfast: 8, bf_food: 7.5 }, comments: [{ k: 'bf_food', text: 'Eggs were cold' }], shared_by: 'Huda Admin', shared_at: '2099-05-10T08:00:00Z' }],
+      vendor_shared_ratings: [{ booking_id: 20, venue_id: 1, day: rd, riders: 2, averages: { breakfast: 8, bf_food: 7.5 }, lows: { bf_restaurant: 1 }, comments: [{ k: 'bf_food', text: 'Eggs were cold' }], shared_by: 'Huda Admin', shared_at: '2099-05-10T08:00:00Z' }],
     });
     const b = rgBlock(page);
     await expect(b.locator('.vendor-rg-at')).toContainText('by Huda Admin');
@@ -440,6 +441,7 @@ test.describe('@staff:vendors Vendors riders’ breakfast ratings', () => {
     await expect(sees).toContainText('What Bean Box sees');
     await expect(sees.locator('.vendor-rg-n')).toHaveText('Riders who rated the breakfast: 2');
     await expect(sees.locator('.vendor-rg-avg[data-k="bf_food"] b')).toHaveText('7.5/10');
+    await expect(sees.locator('.vendor-rg-avg[data-k="bf_restaurant"] b')).toHaveText('1 at 8 or under'); // lows (20261119170000)
     await expect(sees.locator('.vendor-rg-said')).toHaveCount(1);
     await expect(sees.locator('.vendor-rg-said')).toContainText('Eggs were cold');
     // The reasons left out last time stay unticked.

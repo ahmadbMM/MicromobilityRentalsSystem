@@ -22435,8 +22435,8 @@ function _bdgRode(e){return _rideCompleted(e)||(_isOwnBike(e)&&(e.status==='done
 // site a page asks them to rate it, and stays up until they do: no close, no backdrop, no Escape,
 // moving about the site keeps it (showView), Log out is the only other way off. What it asks depends
 // on the ride: a circuit or Petromin ride (and any other kind) scores service and the bike (the owner,
-// 2026-11-03: the experience question went); a Saturday social ride scores the ride (check-in and collection, staff, bike, route),
-// the breakfast (restaurant, atmosphere, food, service) and the whole experience. Every score is 1-10
+// 2026-11-03: the experience question went); a Saturday social ride scores the ride, the bike, the breakfast and
+// the whole experience, and a ride or a breakfast scored low opens its parts (RG_IF_LOW). Every score is 1-10
 // and required, and one of 8 or under opens a box under it asking why, which is required too. The
 // comment at the end is optional. The answers land in queue_entries.rating_detail
 // ({form, s:{key:score}, why:{key:text}, skip_bf}); rating_bike keeps the bike and rating_exp the ride's
@@ -22454,19 +22454,40 @@ function _rgLow(g){return g&&g.form==='social'?RG_LOW:Math.min(RG_LOW,RG_LOW_SHO
 // asked (_rgTree) and stays listed for the ratings that carry it: Analytics and the reports read these lists.
 const RG_FORMS={rental:[['service'],['bike'],['experience']],
   social:[['ride',['ride_checkin','ride_staff','ride_bike','ride_route']],['breakfast',['bf_restaurant','bf_atmosphere','bf_food','bf_service']],['overall']]};
+// The Saturday ride's parts, asked only when their group scores low (the owner, 2026-11-18: "shorten the rating of the
+// saturday social ride as it is too long"): a ride of RG_LOW or under opens its check-in, staff and route, such a breakfast
+// its four. On the 692 ratings before, 79% gave every part its group's score, so a happy rider now answers four questions,
+// not eleven. The bike is still asked of every rider on one of ours, on its own (the bike health and the bell read it).
+const RG_IF_LOW=new Set(['ride_checkin','ride_staff','ride_route','bf_restaurant','bf_atmosphere','bf_food','bf_service']);
+// Whether a question's average over these answers ({key: score} each) means what it says: a part asked only after a low
+// group score is averaged only where every answer that scored its group scored it too. Averaged over the unhappy alone it
+// would read as everyone's (a restaurant shown "Food 6.5" for a 9.7 morning); the reports show its lows instead.
+function _rgAvgOk(list,k){
+  if(!RG_IF_LOW.has(k))return true;
+  const p=(RG_FORMS.social.find(([,sub])=>(sub||[]).includes(k))||[])[0];
+  return list.every(s=>!s||s[p]==null||s[k]!=null);
+}
 // The breakfast's own label names the venue when the ride had one (bf: _bfName of its session).
 function _rgLabel(k,bf){if(k==='breakfast'&&bf)return t('infoBreakfastAt').replace('{0}',bf);return t(k==='bike'||k==='ride_bike'?'rateBikeLabel':k==='experience'?'rateExpLabel':k==='bf_service'?'rgQ_service':'rgQ_'+k);}
 function _rgForm(e){const s=_sessDisp(e.sessionId);return _rideKind(s)==='saturday'?'social':'rental';}
 // Run for Her is a run, not a ride (the owner, 2026-10-17): it asks the rental's questions without the bike,
 // and its page and button say run. The session id ('<date>-rh') answers when the session itself is not loaded.
 function _rgRun(e){return !!e&&(_isRun(_sessDisp(e.sessionId))||/^\d{4}-\d\d-\d\d-(rh|df)(-|$)/.test(String(e.sessionId||'')));}
-// The questions this ride asks: no bike question for a rider on their own bike or an activity with
-// none, no breakfast once the rider says they did not stay for it.
+// The questions this ride asks, as [question, parts] in page order: no bike question for a rider on their own bike or an
+// activity with none, no breakfast once the rider says they did not stay for it. A part asked of everyone (the Saturday
+// bike) is a question of its own; a part asked only after a low score (RG_IF_LOW) sits under its group once it is low.
 function _rgTree(g){
   const e=_qGet(g.id);
   const own=!!e&&getQueue().filter(x=>x.sessionId===e.sessionId&&x.customerId===e.customerId&&x.status==='done').every(_isOwnBike);
   const noBike=own||_ncEntry(e); // a bike-free session never asks about a bike, its row loaded or not (2026-10-18)
-  return RG_FORMS[g.form].filter(([k])=>k!=='experience'&&!(k==='bike'&&noBike)&&!(k==='breakfast'&&g.skipBf)).map(([k,sub])=>[k,(sub||[]).filter(x=>!(x==='ride_bike'&&noBike))]);
+  const lo=_rgLow(g),out=[];
+  RG_FORMS[g.form].forEach(([k,sub])=>{
+    if(k==='experience'||(k==='bike'&&noBike)||(k==='breakfast'&&g.skipBf))return;
+    const v=g.s[k],low=v>=1&&v<=lo;
+    out.push([k,(sub||[]).filter(x=>RG_IF_LOW.has(x)&&low)]);
+    (sub||[]).filter(x=>!RG_IF_LOW.has(x)&&!(x==='ride_bike'&&noBike)).forEach(x=>out.push([x,[]]));
+  });
+  return out;
 }
 function _rgKeys(g){return _rgTree(g).flatMap(([k,sub])=>[k,...sub]);}
 // A ride from RATE_FROM on is rated only once the full form is in: a quick score with tags (the old
@@ -22519,11 +22540,13 @@ function closeRateModal(){
 }
 function setRate(k,v){
   const g=S._rg;if(!g)return;
+  const was=_rgKeys(g).join();
   g.s[k]=v;if(v>_rgLow(g)||g.err[k]===t('rgPickErr'))delete g.err[k];
-  // Only this question is drawn again: the page keeps its scroll and the other answers' boxes.
+  // Only this question is drawn again: the page keeps its scroll and the other answers' boxes. A ride or a
+  // breakfast whose parts open or close with this score draws the page (which keeps its scroll too).
   const el=document.getElementById('rgq-'+k);
-  if(!el)return renderRateModal();
-  el.outerHTML=_rgQ(k,g);
+  if(!el||_rgKeys(g).join()!==was)renderRateModal();
+  else el.outerHTML=_rgQ(k,g);
   const b=document.querySelector(`#rgq-${k} .rg-b[data-v="${v}"]`);if(b)try{b.focus({preventScroll:true});}catch(_){}
 }
 function _rgWhy(event,el){
@@ -22537,7 +22560,7 @@ function _rgSubmit(event){event.preventDefault();submitRating();}
 function _rgQ(k,g){
   const v=g.s[k]||0,err=g.err[k];
   const scale=Array.from({length:10},(_,i)=>i+1).map(n=>`<button type="button" class="rg-b${v===n?' on':''}" data-v="${n}" aria-label="${n}" aria-pressed="${v===n?'true':'false'}" data-on-click="${_on("setRate",k,n)}">${n}</button>`).join('');
-  return `<div class="rg-q${k.includes('_')?' rg-sub':''}${err?' err':''}" id="rgq-${k}">
+  return `<div class="rg-q${RG_IF_LOW.has(k)?' rg-sub':''}${err?' err':''}" id="rgq-${k}">
     <div class="rg-lbl" id="rgl-${k}">${esc(_rgLabel(k,g.bf))}</div>${k==='breakfast'?`<div class="rg-bfn">${t('rgBfShareNote')}</div>`:''}
     <div class="rg-scale" role="group" aria-labelledby="rgl-${k}">${scale}</div>
     ${g.form==='social'?'':`<div class="rg-ends" aria-hidden="true"><span>${t('rgEndLo')}</span><span>${t('rgEndHi')}</span></div>`}
@@ -22566,7 +22589,7 @@ function renderRateModal(){
     ${g.form==='social'?`<div class="fx-kicker rg-kicker"><span class="fx-flag" aria-hidden="true">${_cuIc('star',12)}</span>${t('rateRideBtn')}</div>`:''}
     <h2 id="rate-title" class="pg-title">${t(_rgRun(e)?'rateRunTitle':_ncEntry(e)?'rateSessTitle':'rateTitle')}</h2>
     <div class="rg-meta">${meta}</div>
-    <div class="rg-list">${RG_FORMS[g.form].map(([k])=>{
+    <div class="rg-list">${RG_FORMS[g.form].flatMap(([k,sub])=>[k,...(sub||[]).filter(x=>!RG_IF_LOW.has(x))]).map(k=>{
       // The breakfast's own "did not stay" sits in its box; ticked, the box keeps only its name and that.
       const q=tree.find(x=>x[0]===k),skip=k==='breakfast'?`<button type="button" class="rg-skip${g.skipBf?' on':''}" aria-pressed="${g.skipBf?'true':'false'}" data-on-click="${_on("_rgSkipBf")}">${t('rgSkipBf')}</button>`:'';
       if(!q)return skip?`<div class="rg-grp"><div class="rg-lbl">${esc(_rgLabel(k,g.bf))}</div>${skip}</div>`:'';
@@ -54621,7 +54644,8 @@ function printBreakfastReport(){
     if(sc(d.s.breakfast)==null)return;
     rated.push({s:Object.fromEntries(keys.map(k=>[k,sc(d.s[k])])),why:Object.fromEntries(keys.map(k=>[k,String(d.why&&d.why[k]||'').trim()]))});
   });
-  const stat=k=>{const v=rated.map(r=>r.s[k]).filter(x=>x!=null);return v.length?{n:v.length,avg:v.reduce((a,x)=>a+x,0)/v.length,lo:Math.min(...v),hi:Math.max(...v)}:null;};
+  // A part asked only after a low breakfast (2026-11-18) has no average here: only its lowest, highest and count (_rgAvgOk).
+  const stat=k=>{const v=rated.map(r=>r.s[k]).filter(x=>x!=null);return v.length?{n:v.length,avg:_rgAvgOk(rated.map(r=>r.s),k)?v.reduce((a,x)=>a+x,0)/v.length:null,lo:Math.min(...v),hi:Math.max(...v)}:null;};
   const cell=v=>v==null?'<td class="rp-tc rp-grey">&mdash;</td>':`<td class="rp-tc rp-b8 ${_bfScoreCls(v)}"><bdi>${v}</bdi></td>`;
   const all=rated.slice().sort((a,b)=>keys.reduce((r,k)=>r||((b.s[k]||0)-(a.s[k]||0)),0));
   const why=rated.flatMap(r=>keys.filter(k=>r.why[k]).map(k=>({k,v:r.s[k],text:r.why[k]})))
@@ -54637,7 +54661,7 @@ function printBreakfastReport(){
     <h2>${t('bfRepPerQ')}</h2>
     <table>
       <thead><tr><th>${t('bfRepColQ')}</th><th class="rp-tc">${t('bfRepColAvg')}</th><th class="rp-tc">${t('bfRepColLow')}</th><th class="rp-tc">${t('bfRepColHigh')}</th><th class="rp-tc">${t('bfRepRatings')}</th></tr></thead>
-      <tbody>${keys.map(k=>{const st=stat(k);return`<tr><td class="${k==='breakfast'?'rp-b7':'rp-bf-sub'}">${esc(_rgLabel(k))}</td>${st?`<td class="rp-tc rp-b8 ${_bfScoreCls(st.avg)}"><bdi>${st.avg.toFixed(1)}</bdi></td>${cell(st.lo)}${cell(st.hi)}<td class="rp-tc">${st.n}</td>`:'<td class="rp-tc rp-grey">&mdash;</td><td></td><td></td><td class="rp-tc">0</td>'}</tr>`;}).join('')}</tbody>
+      <tbody>${keys.map(k=>{const st=stat(k);return`<tr><td class="${k==='breakfast'?'rp-b7':'rp-bf-sub'}">${esc(_rgLabel(k))}</td>${st?`${st.avg==null?'<td class="rp-tc rp-grey">&mdash;</td>':`<td class="rp-tc rp-b8 ${_bfScoreCls(st.avg)}"><bdi>${st.avg.toFixed(1)}</bdi></td>`}${cell(st.lo)}${cell(st.hi)}<td class="rp-tc">${st.n}</td>`:'<td class="rp-tc rp-grey">&mdash;</td><td></td><td></td><td class="rp-tc">0</td>'}</tr>`;}).join('')}</tbody>
     </table>
     <h2>${t('bfRepAll')}<span class="rp-h2n">${rated.length}</span></h2>
     <table>
@@ -65223,7 +65247,16 @@ function _vendorRgWhy(b,rows){
   return out.sort((a,c)=>VENDOR_BF.indexOf(a.k)-VENDOR_BF.indexOf(c.k)||a.text.localeCompare(c.text));
 }
 function _vendorRgTick(id,key,on){const W=_vendor();(W.rgx[id]=W.rgx[id]||{})[key]=!!on;}
-function _vendorRgAvgs(av){return`<div class="vendor-rg-avgs">${VENDOR_BF.filter(k=>av[k]!=null).map(k=>`<div class="vendor-rg-avg${k==='breakfast'?'':' sub'}" data-k="${k}"><span>${esc(_rgLabel(k))}</span><b>${esc(Number(av[k]).toFixed(1)+t('anOutOf10'))}</b></div>`).join('')}</div>`;}
+// av: each question's average; lw: for a part with none (asked only after a low breakfast, _rgAvgOk), how many were low.
+function _vendorRgAvgs(av,lw){lw=lw||{};return`<div class="vendor-rg-avgs">${VENDOR_BF.filter(k=>av[k]!=null||lw[k]>0).map(k=>`<div class="vendor-rg-avg${k==='breakfast'?'':' sub'}" data-k="${k}"><span>${esc(_rgLabel(k))}</span><b>${esc(av[k]!=null?Number(av[k]).toFixed(1)+t('anOutOf10'):t('anLowN').replace('{0}',lw[k]))}</b></div>`).join('')}</div>`;}
+// What staff_vendor_share_ratings will send (20261119170000): each average every rider answered, and the low count of any
+// part that only riders with a low breakfast were asked.
+function _vendorRgCalc(rows){
+  const av={},lw={},ss=rows.map(e=>e.ratingDetail.s);
+  VENDOR_BF.forEach(k=>{const n=ss.map(s=>s[k]).filter(x=>/^\d+$/.test(String(x))).map(Number);if(!n.length)return;
+    if(_rgAvgOk(ss,k))av[k]=n.reduce((a,x)=>a+x,0)/n.length;else lw[k]=n.filter(x=>x<=RG_LOW).length;});
+  return{av,lw};
+}
 function _vendorRgBlock(b,dated){
   const W=_vendor(),today=todayStr();
   if(b.status!=='confirmed'||b.day>today)return'';
@@ -65233,15 +65266,15 @@ function _vendorRgBlock(b,dated){
   if(rows==null)body=`<div class="ca-none vendor-rg-none">${t('vndRgNotHere')}</div>`;
   else if(!rows.length)body=`<div class="ca-none vendor-rg-none">${t('vndRgNone')}</div>`;
   else{
-    const av={};VENDOR_BF.forEach(k=>{const n=rows.map(e=>e.ratingDetail.s[k]).filter(x=>/^\d+$/.test(String(x)));if(n.length)av[k]=n.reduce((a,x)=>a+Number(x),0)/n.length;});
+    const {av,lw}=_vendorRgCalc(rows);
     const why=_vendorRgWhy(b,rows);
-    body=`<div class="vendor-rg-n">${esc(t('vndRgCount').replace('{0}',rows.length))}</div>${_vendorRgAvgs(av)}
+    body=`<div class="vendor-rg-n">${esc(t('vndRgCount').replace('{0}',rows.length))}</div>${_vendorRgAvgs(av,lw)}
       ${why.length?`<div class="vendor-lbl">${t('vndRgWhy')}</div><div class="vendor-rg-whys">${why.map(c=>`<label class="vendor-chk vendor-rg-why" data-k="${c.k}"><input type="checkbox" data-vendor-rg-e="${esc(c.e)}"${c.on?' checked':''} data-on-change="${_on('_vendorRgTick',b.id,c.key,_P('checked'))}"><span><b>${esc(_rgLabel(c.k))} · ${esc(c.v+t('anOutOf10'))}</b><span class="vendor-note" dir="auto">${esc(c.text)}</span></span></label>`).join('')}</div>`:''}
       ${W.srMissing||sr?'':`<div class="ca-msg-sub vendor-rg-explain">${t('vndRgExplain')}</div><div class="ca-actions">${btn('vendor-rg-share','vndRgShare','_vendorRgShare',1)}</div>`}`;
   }
   const shared=sr?`<div class="vendor-rg-shared"><div class="vendor-rg-at">${esc(t('vndRgShared').replace('{0}',fmtStamp(sr.shared_at)).replace('{1}',sr.shared_by||'-'))}</div>
       <div class="vendor-lbl">${esc(t('vndRgSees').replace('{0}',nm))}</div>
-      <div class="vendor-rg-n">${esc(t('vndRgCount').replace('{0}',Number(sr.riders)||0))}</div>${_vendorRgAvgs(sr.averages||{})}
+      <div class="vendor-rg-n">${esc(t('vndRgCount').replace('{0}',Number(sr.riders)||0))}</div>${_vendorRgAvgs(sr.averages||{},sr.lows)}
       ${(sr.comments||[]).map(c=>`<div class="vendor-rg-said" data-k="${esc(c.k)}"><b>${esc(_rgLabel(c.k))}</b><span class="vendor-note" dir="auto">${esc(c.text)}</span></div>`).join('')}
       <div class="ca-actions">${rows&&rows.length?btn('vendor-rg-again','vndRgAgain','_vendorRgShare',1):''}${btn('vendor-rg-stop','vndRgStop','_vendorRgStop')}</div></div>`:'';
   return`<div class="vendor-rg" data-vendor-rg="${esc(b.id)}">${dated?`<div class="vendor-rg-day">${esc(_vendorLong(b.day))}</div>`:''}${body}${shared}</div>`;
@@ -76605,17 +76638,18 @@ function _anRgDetail(e){
   const keys=RG_FORMS[d.form].flatMap(([k,sub])=>[k,...(sub||[])]).filter(k=>d.s[k]);
   return`<div class="an-rg">${keys.map(k=>`<div class="an-rg-row${k.includes('_')?' an-rg-sub':''}"><span>${esc(_rgLabel(k,bf))}</span><b class="${d.s[k]<=RG_LOW?'an-c-red':'an-c-green'}">${d.s[k]}${t('anOutOf10')}</b></div>${d.why&&d.why[k]?`<div class="an-rg-why">${esc(d.why[k])}</div>`:''}`).join('')}${d.skip_bf?`<div class="an-rg-why">${t('rgSkipBf')}</div>`:''}</div>`;
 }
-// Each question's average across the detailed ratings, one block per form, and how many were 8 or under.
+// Each question's average across the detailed ratings, one block per form, and how many were 8 or under. A Saturday
+// part asked only after a low score (_rgAvgOk) shows how many answered it and how many were low, with no average.
 function _anRgCatCard(rated,color){
-  const acc={};
-  rated.forEach(e=>{const d=e.ratingDetail;if(!d||!d.s||!RG_FORMS[d.form])return;const f=acc[d.form]||(acc[d.form]={});
+  const acc={},ss={};
+  rated.forEach(e=>{const d=e.ratingDetail;if(!d||!d.s||!RG_FORMS[d.form])return;const f=acc[d.form]||(acc[d.form]={});(ss[d.form]=ss[d.form]||[]).push(d.s);
     Object.keys(d.s).forEach(k=>{const v=d.s[k];if(!(v>=1&&v<=10))return;const r=f[k]||(f[k]={sum:0,n:0,low:0});r.sum+=v;r.n++;if(v<=RG_LOW)r.low++;});});
   const forms=Object.keys(RG_FORMS).filter(f=>acc[f]);if(!forms.length)return'';
   return`<div class="chart-card an-rgcat-card an-mt14"><div class="chart-card-title">${t('anCatTitle')}</div><div class="chart-card-sub">${t('anCatSub')}</div>
-    ${forms.map(f=>RG_FORMS[f].flatMap(([k,sub])=>[k,...(sub||[])]).filter(k=>acc[f][k]).map(k=>{const r=acc[f][k],avg=r.sum/r.n;
+    ${forms.map(f=>RG_FORMS[f].flatMap(([k,sub])=>[k,...(sub||[])]).filter(k=>acc[f][k]).map(k=>{const r=acc[f][k],avg=_rgAvgOk(ss[f],k)?r.sum/r.n:null;
       return`<div class="analytics-bar-row${k.includes('_')?' an-rg-sub':''}" data-k="${k}"><div class="analytics-bar-label an-lbl-flex">${esc(_rgLabel(k))}<span class="an-chip">${r.n}</span>${r.low?`<span class="an-low">${esc(t('anLowN').replace('{0}',r.low))}</span>`:''}</div>
-        <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':Math.round(avg*10)+'%','--an-bg':color(avg)})}"></div></div>
-        <div class="analytics-bar-value">${avg.toFixed(1)}${t('anOutOf10')}</div></div>`;}).join('')).join('<div class="an-rg-gap"></div>')}</div>`;
+        <div class="analytics-bar-track">${avg==null?'':`<div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':Math.round(avg*10)+'%','--an-bg':color(avg)})}"></div>`}</div>
+        <div class="analytics-bar-value">${avg==null?'&mdash;':avg.toFixed(1)+t('anOutOf10')}</div></div>`;}).join('')).join('<div class="an-rg-gap"></div>')}</div>`;
 }
 // ── Ratings as pictures to share (the owner, 2026-10-05: "add a share button on customers rating that shares
 // a clear high quality of the rating and allow multiple ratings selection and to share them via whatsapp or
@@ -77199,7 +77233,7 @@ function _rrAvgTd(v){return v==null?'<td class="rp-tc rp-grey">&mdash;</td>':`<t
 function _rrStat(rows,k){
   let n=0,sum=0,lo=10,hi=1,low=0;
   rows.forEach(r=>{const v=r.q[k];if(v==null)return;n++;sum+=v;if(v<lo)lo=v;if(v>hi)hi=v;if(v<=RG_LOW)low++;});
-  return n?{n,avg:sum/n,lo,hi,low}:null;
+  return n?{n,avg:_rgAvgOk(rows.map(r=>r.q),k)?sum/n:null,lo,hi,low}:null; // a part asked after a low score alone: no average
 }
 function _rrAvgOf(rows,f){let s=0,n=0;rows.forEach(r=>{const v=f(r);if(v!=null){s+=v;n++;}});return n?s/n:null;}
 function _rrTiles(list){return`<div class="totals">${list.map(([n,l,c])=>`<div class="total-item${c||''}"><span class="total-num">${n}</span><span class="total-lbl">${esc(l)}</span></div>`).join('')}</div>`;}
@@ -77344,7 +77378,7 @@ function _rrBfReportHtml(){
       const m=new Map();[...rows,...skip].forEach(r=>{const k=r.day+'|'+(many?_rrVKey(r.venue):'');let x=m.get(k);if(!x)m.set(k,x={day:r.day,venue:r.venue,rs:[],skip:0});if(r.skipBf)x.skip++;else x.rs.push(r);});
       const list=[...m.values()].sort((a,b)=>b.day.localeCompare(a.day)||a.venue.localeCompare(b.venue));
       parts.push(`<h2>${t('rrSecByDay')}<span class="rp-h2n">${list.length}</span></h2><table><thead><tr><th>${t('colDate')}</th>${many?`<th>${t('rrFVenue')}</th>`:''}<th class="rp-tc">${t('bfRepRatings')}</th><th class="rp-tc">${t('rrColSkipped')}</th>${keys.map(k=>`<th class="rp-tc">${esc(_rgLabel(k))}</th>`).join('')}</tr></thead>
-        <tbody>${list.map(x=>`<tr><td>${esc(shortDate(x.day))}</td>${many?`<td>${esc(x.venue)||'&mdash;'}</td>`:''}<td class="rp-tc">${x.rs.length}</td><td class="rp-tc">${x.skip}</td>${keys.map(k=>_rrAvgTd(_rrAvgOf(x.rs,r=>r.q[k]))).join('')}</tr>`).join('')}</tbody></table>`);
+        <tbody>${list.map(x=>`<tr><td>${esc(shortDate(x.day))}</td>${many?`<td>${esc(x.venue)||'&mdash;'}</td>`:''}<td class="rp-tc">${x.rs.length}</td><td class="rp-tc">${x.skip}</td>${keys.map(k=>_rrAvgTd(_rgAvgOk(x.rs.map(r=>r.q),k)?_rrAvgOf(x.rs,r=>r.q[k]):null)).join('')}</tr>`).join('')}</tbody></table>`);
     }
     if(sec.byVenue&&many)parts.push(_rrFig(t('rrSecVenue'),_rrGroupAvg(rows,r=>_rrVKey(r.venue),r=>r.venue,bf),ch('byVenue'),true,t('rrFVenue')));
     if(sec.all)parts.push(`<h2>${t('bfRepAll')}<span class="rp-h2n">${rows.length}</span></h2><table><thead><tr><th class="rp-seq">#</th><th>${t('colDate')}</th>${many?`<th>${t('rrFVenue')}</th>`:''}${keys.map(k=>`<th class="rp-tc">${esc(_rgLabel(k))}</th>`).join('')}</tr></thead>

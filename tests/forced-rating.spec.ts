@@ -4,8 +4,8 @@ import { stubSupabase, loginCustomer, waitForSb, rateGateOn } from './helpers/su
 // After a ride is checked out or its bike returned (status done), the next time the rider opens the
 // site a rating page takes the screen and cannot be skipped, like a correction request (the owner,
 // 2026-10-03): no Cancel, no backdrop, no Escape, moving about keeps it, Log out is the only way off.
-// A circuit / Petromin ride asks service and bike (2026-11-03); a Saturday social ride asks the ride
-// (check-in, staff, bike, route), the breakfast (restaurant, atmosphere, food, service) and overall.
+// A circuit / Petromin ride asks service and bike (2026-11-03); a Saturday social ride asks the ride, the
+// bike, the breakfast and overall, and a ride or breakfast of 8 or under opens its parts (2026-11-18).
 // Every score is required, and one of 8 or under needs a reason.
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
 const open = (page: Page) => page.evaluate(`!!S._rg&&document.getElementById('rate-modal').style.display==='block'`);
@@ -66,29 +66,63 @@ test('a circuit ride: an unskippable page asks service and bike, and why for 6 o
   await expect.poll(() => open(page)).toBe(false);
 });
 
-test('a Saturday social ride asks the ride and the breakfast with their parts, and overall', async ({ page }) => {
+test('a Saturday social ride asks four questions, and a low ride or breakfast opens its parts', async ({ page }) => {
   const s = sess(today, { day: 'Saturday', event_kind: 'community', ride_kind: 'saturday' });
   const calls = await boot(page, [s], [row('q1', today, { session_day: 'Saturday', type_preference: 'Own', paid: false, price: 0 })]);
   expect(await open(page)).toBe(true);
-  // an own bike: no bike question under the ride
-  expect(await qs(page)).toEqual(['ride', 'ride_checkin', 'ride_staff', 'ride_route', 'breakfast', 'bf_restaurant', 'bf_atmosphere', 'bf_food', 'bf_service', 'overall']);
+  // an own bike: no bike question; the parts wait for a low score (the owner, 2026-11-18: the page was too long)
+  expect(await qs(page)).toEqual(['ride', 'breakfast', 'overall']);
   const m = page.locator('#rate-modal');
   // The breakfast's answers may go to the restaurant (Vendors, 2026-10-03): one quiet line says so, under its heading.
   await expect(m.locator('#rgq-breakfast .rg-bfn')).toHaveText('Your breakfast answers may be shared with the restaurant, without your name.');
   await expect(m.locator('.rg-bfn')).toHaveCount(1);
+  // a low breakfast opens its four parts, a high one closes them again
+  await m.locator('#rgq-breakfast .rg-b[data-v="7"]').click();
+  expect(await qs(page)).toEqual(['ride', 'breakfast', 'bf_restaurant', 'bf_atmosphere', 'bf_food', 'bf_service', 'overall']);
+  await expect(m.locator('#rgq-bf_food')).toHaveClass(/rg-sub/);
+  await expect(m.locator('#rgq-breakfast .rg-why')).toHaveCount(1);
+  await m.locator('#rgq-breakfast .rg-b[data-v="9"]').click();
+  expect(await qs(page)).toEqual(['ride', 'breakfast', 'overall']);
   await m.locator('.rg-skip').click(); // did not stay for breakfast
+  expect(await qs(page)).toEqual(['ride', 'overall']);
+  // an 8 on the ride (8 counts as low) opens check-in, staff and route, and asks why
+  await m.locator('#rgq-ride .rg-b[data-v="8"]').click();
   expect(await qs(page)).toEqual(['ride', 'ride_checkin', 'ride_staff', 'ride_route', 'overall']);
-  for (const k of ['ride', 'ride_checkin', 'ride_route', 'overall']) await m.locator(`#rgq-${k} .rg-b[data-v="10"]`).click();
-  await m.locator('#rgq-ride_staff .rg-b[data-v="8"]').click(); // 8 counts as low
+  await expect(m.locator('#rgq-ride .rg-b[data-v="8"]')).toBeFocused(); // the page drew again, the tap keeps its place
+  await m.locator('.pg-btn').click();
+  await expect(m.locator('.rg-q.err')).toHaveCount(5); // the ride's reason, its three parts, overall
+  expect(calls.length).toBe(0);
+  await m.locator('#rgw-ride').fill('Slow start');
+  for (const k of ['ride_checkin', 'ride_route', 'overall']) await m.locator(`#rgq-${k} .rg-b[data-v="10"]`).click();
+  await m.locator('#rgq-ride_staff .rg-b[data-v="8"]').click();
   await m.locator('#rgw-ride_staff').fill('Hard to find at the start');
   await m.locator('.pg-btn').click();
   await expect.poll(() => calls.length).toBe(1);
-  expect(calls[0].p_patch).toMatchObject({ rating_bike: null, rating_exp: 10, feedback: null,
-    rating_detail: { form: 'social', skip_bf: true, why: { ride_staff: 'Hard to find at the start' },
-      s: { ride: 10, ride_checkin: 10, ride_staff: 8, ride_route: 10, overall: 10 } } });
+  expect(calls[0].p_patch).toEqual({ rating_bike: null, rating_exp: 10, feedback: null,
+    rating_detail: { form: 'social', skip_bf: true, why: { ride: 'Slow start', ride_staff: 'Hard to find at the start' },
+      s: { ride: 8, ride_checkin: 10, ride_staff: 8, ride_route: 10, overall: 10 } } });
   await expect(m.locator('.rg-fin .rg-fin-n')).toHaveText('1 of 5'); // a first ride: the path, then Done (F1)
   await m.locator('.rg-fin .gate-out').click();
   await expect.poll(() => open(page)).toBe(false);
+});
+
+test('a happy Saturday rider on one of our bikes answers four questions and nothing else is sent', async ({ page }) => {
+  const s = sess(today, { day: 'Saturday', event_kind: 'community', ride_kind: 'saturday' });
+  const calls = await boot(page, [s], [row('q1', today, { session_day: 'Saturday', paid: false, price: 0 })]);
+  expect(await open(page)).toBe(true);
+  expect(await qs(page)).toEqual(['ride', 'ride_bike', 'breakfast', 'overall']);
+  const m = page.locator('#rate-modal');
+  await expect(m.locator('#rgq-ride_bike')).not.toHaveClass(/rg-sub/); // the bike is a question of its own now
+  await expect(m.locator('#rgq-ride_bike .rg-lbl')).toHaveText('Bike');
+  // a low ride's parts, opened and then closed by a better score, are not sent
+  await m.locator('#rgq-ride .rg-b[data-v="5"]').click();
+  await m.locator('#rgq-ride_route .rg-b[data-v="4"]').click();
+  for (const k of ['ride', 'ride_bike', 'breakfast', 'overall']) await m.locator(`#rgq-${k} .rg-b[data-v="10"]`).click();
+  expect(await qs(page)).toEqual(['ride', 'ride_bike', 'breakfast', 'overall']);
+  await m.locator('.pg-btn').click();
+  await expect.poll(() => calls.length).toBe(1);
+  expect(calls[0].p_patch).toEqual({ rating_bike: 10, rating_exp: 10, feedback: null,
+    rating_detail: { form: 'social', why: {}, s: { ride: 10, ride_bike: 10, breakfast: 10, overall: 10 } } });
 });
 
 test('it opens by itself the moment the site opens signed in, on whatever page that is', async ({ page }) => {
