@@ -227,9 +227,10 @@ test.describe('@staff:store categories', () => {
     expect(calls(seen, 'staff_store_sort')[0].body).toEqual({ p_kind: 'categories', p_keys: ['accessories', 'bikes', 'road', 'gift'] });
   });
 
-  test('delete moves its products first; one with sub-categories, and the gift cards, cannot go', async ({ page }) => {
+  test('delete moves its products first; one with sub-categories, the gift cards and the bikes cannot go', async ({ page }) => {
     const seen = rpcCalls(page);
-    await staff(page, { ...CATALOG, 'rpc:staff_store_category_delete': 2 });
+    await staff(page, { ...CATALOG, store_categories: [...cats, cat('kit', { sort: 30, name_en: 'Kit' }), cat('kitbags', { parent: 'kit', sort: 35, name_en: 'Kit bags' })],
+      'rpc:staff_store_category_delete': 2 });
     await view(page, 'categories');
     await page.locator('#tab-store .spc-row', { hasText: 'Gift cards' }).locator('button', { hasText: 'Edit' }).click();
     const d = page.locator('#spc-dlg [role="dialog"]');
@@ -237,6 +238,10 @@ test.describe('@staff:store categories', () => {
     await expect(d.locator('button', { hasText: 'Delete category' })).toHaveCount(0);
     await d.locator('button', { hasText: 'Cancel' }).click();
     await page.locator('#tab-store .spc-row', { hasText: 'Bikes' }).first().locator('button', { hasText: 'Edit' }).click();
+    await expect(d.locator('#spc-slug')).toBeDisabled(); // the bikes too (fix round 2026-11-19)
+    await expect(d.locator('button', { hasText: 'Delete category' })).toHaveCount(0);
+    await d.locator('button', { hasText: 'Cancel' }).click();
+    await page.locator('#tab-store .spc-row', { hasText: 'Kit' }).first().locator('button', { hasText: 'Edit' }).click();
     await d.locator('button', { hasText: 'Delete category' }).click();
     await expect(d.locator('.sto-err')).toContainText('sub-categories first');
     await expect(d.locator('#spc-del-go')).toHaveCount(0);
@@ -253,6 +258,33 @@ test.describe('@staff:store categories', () => {
     await expect.poll(() => calls(seen, 'staff_store_category_delete').length).toBe(1);
     expect(calls(seen, 'staff_store_category_delete')[0].body).toEqual({ p_slug: 'accessories', p_move_to: 'bikes' });
     await expect(page.locator('#toast-container')).toContainText('2 products moved');
+  });
+
+  test('the bikes: no other address, no parent, never deleted; its names, photo, order and the rest stay editable; a refusal is said', async ({ page }) => {
+    const cw = writes(page, 'store_categories');
+    await staff(page, { ...CATALOG, store_categories: [cat('bikes', { sort: 10, name_ar: 'دراجات' }), cat('accessories', { sort: 20 }), cat('gift', { sort: 60, name_en: 'Gift cards' })] });
+    await view(page, 'categories');
+    await page.locator('#tab-store .spc-row', { hasText: 'Bikes' }).locator('button', { hasText: 'Edit' }).click();
+    const d = page.locator('#spc-dlg [role="dialog"]');
+    await expect(d.locator('#spc-slug')).toBeDisabled();
+    await expect(d.locator('#spc-parent')).toHaveCount(0); // no parent picker even with no sub-categories
+    await expect(d.locator('button', { hasText: 'Delete category' })).toHaveCount(0);
+    expect(await page.evaluate(`(()=>{_spcCatDelAsk();return S._spcD.mode;})()`)).toBe(''); // not by a call either
+    await d.locator('#spc-name_en').fill('Bicycles');
+    await d.locator('#spc-visible').uncheck();
+    await d.locator('#spc-save').click();
+    await expect.poll(() => cw.length).toBe(1);
+    expect(cw[0].method).toBe('PATCH');
+    expect(cw[0].url).toContain('slug=eq.bikes');
+    expect(cw[0].body).toMatchObject({ slug: 'bikes', parent: null, name_en: 'Bicycles', visible: false });
+    // the database's own refusal (STORE_CAT_BIKES) is said in the pop-up
+    await page.route(/\/rest\/v1\/store_categories/, (r) => r.request().method() === 'PATCH'
+      ? r.fulfill({ status: 400, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: 'P0001', message: 'STORE_CAT_BIKES' }) })
+      : r.fallback());
+    await page.locator('#tab-store .spc-row', { hasText: 'Bikes' }).locator('button', { hasText: 'Edit' }).click();
+    await d.locator('#spc-name_en').fill('Bikes');
+    await d.locator('#spc-save').click();
+    await expect(d.locator('.sto-err')).toHaveText('The bikes category cannot be deleted, moved or given another address');
   });
 
   test('a refusal of the database is said in the pop-up', async ({ page }) => {
@@ -327,6 +359,39 @@ test.describe('@staff:store collections', () => {
 });
 
 test.describe('@staff:store Store > Settings', () => {
+  test('a first save on a database with no store.* keys writes only the key changed, never the form\'s defaults (fix round 2026-11-19)', async ({ page }) => {
+    const sc = writes(page, 'site_content');
+    await staff(page, { ...CATALOG, site_content: [] });
+    await view(page, 'settings');
+    const sec = page.locator('#tab-store');
+    await expect(sec.locator('#ps-pu')).toBeChecked(); // the delivery as the database reads an absent key
+    await sec.locator('#ss-sort').selectOption('newest');
+    await sec.locator('#ss-save').click();
+    await expect.poll(() => sc.length).toBeGreaterThan(0);
+    const by = Object.fromEntries((sc[0].body as { key: string; value: unknown }[]).map((r) => [r.key, r.value]));
+    expect(by).toEqual({ 'store.sort': 'newest' });
+  });
+
+  test('full mode: store.open, the order minutes and the delivery are written only when changed', async ({ page }) => {
+    const sc = writes(page, 'site_content');
+    await staff(page, { ...FULL, site_content: [] });
+    await view(page, 'settings');
+    const sec = page.locator('#tab-store');
+    await expect(sec.locator('#ps-open')).not.toBeChecked();
+    await sec.locator('#ps-lic').fill('DL-1');
+    await sec.locator('#ss-save').click();
+    await expect.poll(() => sc.length).toBeGreaterThan(0);
+    let by = Object.fromEntries((sc[0].body as { key: string; value: unknown }[]).map((r) => [r.key, r.value]));
+    expect(by).toEqual({ 'store.discountLicence': 'DL-1' });
+    await expect(page.locator('#toast-container')).toContainText('Settings saved');
+    await sec.locator('#ps-j').check();
+    await sec.locator('#ss-save').click();
+    await expect.poll(() => sc.length).toBeGreaterThan(1);
+    by = Object.fromEntries((sc[sc.length - 1].body as { key: string; value: unknown }[]).map((r) => [r.key, r.value]));
+    expect(Object.keys(by)).toEqual(['store.delivery']);
+    expect(by['store.delivery']).toEqual({ pickup: { on: true, fee: 0 }, jeddah: { on: true }, ksa: { on: false }, freeOver: null });
+  });
+
   test('the catalogue build\'s keys are written in the shapes the website reads; a bad link is refused first', async ({ page }) => {
     const sc = writes(page, 'site_content');
     await staff(page, { ...FULL, site_content: [{ key: 'store.open', value: true, updated_at: NOW }, { key: 'store.delivery', value: { pickup: { on: true, fee: 0 }, jeddah: { on: false }, ksa: { on: false }, freeOver: null }, updated_at: NOW }] });

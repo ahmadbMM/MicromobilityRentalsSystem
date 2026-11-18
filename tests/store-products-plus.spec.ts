@@ -42,22 +42,25 @@ function writes(page: Page, table: string) {
   return seen;
 }
 const json = (route: Route, body: unknown, status = 200) => route.fulfill({ status, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(body) });
+// The categories (with a sub-category and a template) S1's screens keep: the database's rows (the product editor reads them
+// again as it opens, fix round 2026-11-19), and S1's own state (S._spc) as its loaders leave it, so S1's real picker, labels
+// and save check read them
+const CATS = [{ slug: 'bikes', parent: null, name_en: 'Bikes', sort: 10, visible: true, template: { specs: [{ en: 'Frame', ar: 'الإطار' }], keys: ['weight', 'gears'], box: ['pedals'], warranty_months: 36, ship_ksa: false } },
+  { slug: 'road', parent: 'bikes', name_en: 'Road', sort: 11, visible: true, template: {} }, { slug: 'accessories', parent: null, name_en: 'Accessories', sort: 20, visible: true, template: {} },
+  { slug: 'gift', parent: null, name_en: 'Gift cards', sort: 60, visible: true, template: {} }];
 async function staff(page: Page, fx: Fixtures = {}) {
   const ops = [{ name: 'Spec Staff', has_pin: false }];
   await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [], customers, staff_options: [], 'rpc:staff_operator_list': ops, 'rpc:staff_store_ready': true,
-    store_suppliers: [SUP], store_product_private: [], store_variant_costs: [], store_collection_items: [], ...fx });
+    store_categories: CATS, store_suppliers: [SUP], store_product_private: [], store_variant_costs: [], store_collection_items: [], ...fx });
   await unlockStaff(page);
   await page.goto('/?staff');
   await waitForSb(page);
   await page.evaluate(`S._opPins=${JSON.stringify(ops)};S._opPinsAt=Date.now();S.staffRole='admin';renderStaffTabs();`);
 }
 const view = (page: Page, v: string) => page.evaluate(`S.stoView='${v}';setStaffTab('store')`);
-// The categories (with a sub-category and a template) and collections S1's screens keep, put straight into S1's own
-// state (S._spc) as its loaders leave it, so S1's real picker, labels and save check read them
+// The categories above and the collections S1's screens keep, put straight into S1's own state (S._spc)
 const S1 = `(()=>{const Q=_spc();
-  Q.cats=[{slug:'bikes',parent:null,name_en:'Bikes',sort:10,visible:true,template:{specs:[{en:'Frame',ar:'الإطار'}],keys:['weight','gears'],box:['pedals'],warranty_months:36,ship_ksa:false}},
-    {slug:'road',parent:'bikes',name_en:'Road',sort:11,visible:true,template:{}},{slug:'accessories',parent:null,name_en:'Accessories',sort:20,visible:true,template:{}},
-    {slug:'gift',parent:null,name_en:'Gift cards',sort:60,visible:true,template:{}}];
+  Q.cats=${JSON.stringify(CATS)};
   Q.cAt=Date.now();Q.cGone=false;Q.cErr=false;
   Q.colls=[{slug:'summer',name_en:'Summer picks',kind:'manual',items:[]},{slug:'fresh',name_en:'Just in',kind:'new',items:[]}];
   Q.lAt=Date.now();Q.lGone=false;Q.lErr=false;})()`;
@@ -212,7 +215,7 @@ test.describe('@staff:store the product editor\'s new fields (SPM-S2)', () => {
     const old = { ...prod('pa', { name_en: 'Bottle' }) } as Record<string, unknown>;
     for (const k of ['preview', 'publish_at', 'unpublish_at', 'badge', 'badge_en', 'badge_ar', 'badge_until', 'seo_title_en', 'seo_title_ar', 'seo_desc_en', 'seo_desc_ar', 'max_per_order', 'preorder', 'ships_on', 'weight_g', 'dims_cm', 'tags', 'low_stock_at']) delete old[k];
     await staff(page, { store_products: [old], store_variants: [{ id: 'va1', product_id: 'pa', sku: 'BT-1', size: null, color_en: null, color_ar: null, color_hex: null, price: null, stock: 3, active: true, sort: 0 }] });
-    for (const tb of ['store_suppliers', 'store_product_private', 'store_variant_costs', 'store_collection_items']) {
+    for (const tb of ['store_suppliers', 'store_product_private', 'store_variant_costs', 'store_collection_items', 'store_categories']) {
       await page.route(new RegExp(`/rest/v1/${tb}`), (route) => json(route, { code: 'PGRST205', message: `Could not find the table 'public.${tb}' in the schema cache` }, 404));
     }
     await view(page, 'products');
@@ -652,5 +655,173 @@ test.describe('@staff:store the database\'s final words (SPM-S2 follow-up)', () 
     await expect(page.locator('#tab-store .sto-prod')).toHaveCount(1);
     await expect(page.locator('#tab-store .filter-bar button', { hasText: 'Receive delivery' })).toHaveCount(0);
     await expect(page.locator('#tab-store .sps-prow button', { hasText: 'Adjust or count' })).toHaveCount(1); // a row's own stays
+  });
+});
+
+// The review's fix round (2026-11-19): the editor reads the staff-only rows and the categories again as it opens and writes
+// only the staff-only fields the admin changed; a category the list does not hold is read again and never swapped; bulk
+// Pre-order with no date keeps the dates; a search or filter unticks the rows it hides; stock_count and kept stock in CSV.
+function gets(page: Page, table: string) {
+  const seen: string[] = [];
+  page.on('request', (r) => { if (r.method() === 'GET' && r.url().includes(`/rest/v1/${table}`)) seen.push(r.url()); });
+  return seen;
+}
+test.describe('@staff:store the review\'s fix round (SPM)', () => {
+  test('the editor reads the staff-only rows again as it opens: a stale copy is replaced, and only the field changed is written', async ({ page }) => {
+    const privW = writes(page, 'store_product_private'), costW = writes(page, 'store_variant_costs'), pr = gets(page, 'store_product_private'), cg = gets(page, 'store_categories');
+    await staff(page, { store_products: [prod('pa', { name_en: 'Lamp' })], store_variants: [vari('va1', 'pa', { sku: 'LP-1' })],
+      store_product_private: [{ product_id: 'pa', supplier_id: 7, supplier_sku: 'A-9', cost: 40, staff_note: null }], store_variant_costs: [{ variant_id: 'va1', cost: 38 }] });
+    await view(page, 'products');
+    await expect(page.locator('#tab-store .sto-prod', { hasText: 'Lamp' })).toBeVisible();
+    await expect.poll(() => page.evaluate('!!(_spsX().priv&&!_spsX().busy)')).toBe(true);
+    // the copy this device read earlier, since changed by another admin (the cost was 10, no supplier, no variant cost)
+    await page.evaluate(`(()=>{const X=_spsX();X.priv=new Map([['pa',{product_id:'pa',supplier_id:null,supplier_sku:null,cost:10,staff_note:null}]]);X.vcost=new Map();X.at=Date.now();})()`);
+    const n0 = pr.length, c0 = cg.length;
+    await page.locator('#tab-store .sto-prod', { hasText: 'Lamp' }).click();
+    await sec(page, 'Staff only');
+    const p = pe(page);
+    await expect(p.locator('#sps-pe-cost')).toHaveValue('40'); // the read made as it opened
+    await expect(p.locator('#sps-pe-supplier_id')).toHaveValue('7');
+    await expect(p.locator('#sps-pe-supplier_sku')).toHaveValue('A-9');
+    await expect(p.locator('input[aria-label="Variant 1, cost price"]')).toHaveValue('38');
+    expect(pr.length).toBeGreaterThan(n0);
+    expect(cg.length).toBeGreaterThan(c0); // the categories too
+    await p.locator('#sps-pe-staff_note').fill('Fragile');
+    await p.locator('button', { hasText: /^Save$/ }).click();
+    await expect.poll(() => privW.length).toBe(1);
+    expect(privW[0].body).toEqual({ product_id: 'pa', staff_note: 'Fragile' }); // never the cost or the supplier it did not change
+    expect(costW).toHaveLength(0);
+  });
+
+  test('a read that comes back short never clears a cost or a supplier; a field changed in the editor keeps the change when a fresh read arrives', async ({ page }) => {
+    const privW = writes(page, 'store_product_private');
+    let rows: unknown[] = [];
+    await staff(page, { store_products: [prod('pa', { name_en: 'Lamp' })], store_variants: [] });
+    await page.route(/\/rest\/v1\/store_product_private/, (r) => r.request().method() === 'GET' ? json(r, rows) : r.fallback());
+    await view(page, 'products');
+    await page.locator('#tab-store .sto-prod', { hasText: 'Lamp' }).click();
+    await sec(page, 'Staff only');
+    const p = pe(page);
+    await expect(p.locator('#sps-pe-cost')).toHaveValue(''); // the row did not come back (a capped or failed read)
+    await p.locator('#sps-pe-cost').fill('55');
+    // the row arrives on a later read: the field changed here keeps 55, the others take what was read
+    rows = [{ product_id: 'pa', supplier_id: 7, supplier_sku: 'A-9', cost: 40, staff_note: 'Keep dry' }];
+    await page.evaluate('_spsLoad(true)');
+    await expect(p.locator('#sps-pe-supplier_sku')).toHaveValue('A-9');
+    await expect(p.locator('#sps-pe-cost')).toHaveValue('55');
+    await expect(p.locator('#sps-pe-staff_note')).toHaveValue('Keep dry');
+    await p.locator('button', { hasText: /^Save$/ }).click();
+    await expect.poll(() => privW.length).toBe(1);
+    expect(privW[0].body).toEqual({ product_id: 'pa', cost: 55 });
+  });
+
+  test('a category the list does not hold is read again at the save; still unknown it is said and nothing is written, never swapped for another', async ({ page }) => {
+    const pw = writes(page, 'store_products'), cg = gets(page, 'store_categories');
+    let list: unknown[] = CATS;
+    await staff(page, { store_products: [prod('pa', { name_en: 'Lamp', category: 'lights' })], store_variants: [] });
+    await page.route(/\/rest\/v1\/store_categories/, (r) => r.request().method() === 'GET' ? json(r, list) : r.fallback());
+    await view(page, 'products');
+    await page.locator('#tab-store .sto-prod', { hasText: 'Lamp' }).click();
+    const p = pe(page);
+    await expect(p.locator('#sto-pe-category')).toHaveValue('lights');
+    await expect.poll(() => page.evaluate('!_spc().cBusy&&Array.isArray(_spc().cats)')).toBe(true);
+    const c0 = cg.length;
+    await p.locator('button', { hasText: /^Save$/ }).click();
+    await expect(p.locator('.sto-err')).toHaveText('Choose a category');
+    expect(cg.length).toBeGreaterThan(c0); // read again before saying so
+    expect(pw).toHaveLength(0);
+    // another admin made it meanwhile: the save reads again and goes ahead with the category chosen
+    list = [...CATS, { slug: 'lights', parent: null, name_en: 'Lights', sort: 30, visible: true, template: {} }];
+    await p.locator('button', { hasText: /^Save$/ }).click();
+    await expect.poll(() => pw.length).toBe(1);
+    expect(pw[0].body).toMatchObject({ category: 'lights' });
+  });
+
+  test('bulk Pre-order: yes with no date sends no date (each product keeps its own); a date given is sent; no is sent alone', async ({ page }) => {
+    const seen = rpcCalls(page);
+    await staff(page, { store_products: [prod('pa', { name_en: 'Bottle', preorder: true, ships_on: '2027-01-10' }), prod('pb', { name_en: 'Lamp' })], store_variants: [], 'rpc:staff_store_bulk': 2 });
+    await view(page, 'products');
+    const bulk = async (on: 'yes' | 'no', date?: string) => {
+      await page.locator('#tab-store button', { hasText: 'Bulk edit' }).click();
+      await page.locator('#tab-store button', { hasText: 'Select all' }).click();
+      await page.locator('#sto-bulk-m').selectOption('preorder');
+      await page.locator('#sps-bk-on').selectOption(on);
+      if (date) await page.locator('#sps-bk-date').fill(date);
+      await page.locator('#sto-bulk-go').click();
+    };
+    const sent = () => seen.filter((c) => c.name === 'staff_store_bulk');
+    await bulk('yes');
+    await expect.poll(() => sent().length).toBe(1);
+    expect(sent()[0].body).toEqual({ p_ids: ['pa', 'pb'], p_action: 'preorder', p_value: { on: true } });
+    await bulk('yes', '2027-02-01');
+    await expect.poll(() => sent().length).toBe(2);
+    expect(sent()[1].body.p_value).toEqual({ on: true, ships_on: '2027-02-01' });
+    await bulk('no');
+    await expect.poll(() => sent().length).toBe(3);
+    expect(sent()[2].body.p_value).toEqual({ on: false });
+  });
+
+  test('a search or a filter that hides ticked rows unticks them: Apply reaches only rows the list shows', async ({ page }) => {
+    const seen = rpcCalls(page);
+    await staff(page, { store_products: [prod('pa', { name_en: 'Bottle' }), prod('pb', { name_en: 'Lamp', published: false }), prod('pc', { name_en: 'Gloves' })],
+      store_variants: [], 'rpc:staff_store_bulk': 1 });
+    await view(page, 'products');
+    await page.locator('#tab-store button', { hasText: 'Bulk edit' }).click();
+    await page.locator('#tab-store button', { hasText: 'Select all' }).click();
+    await expect(page.locator('#sto-bulk-go')).toHaveText('Apply to 3');
+    await page.locator('#sps-q').fill('o'); // Bottle, Gloves
+    await expect(page.locator('#sto-bulk-go')).toHaveText('Apply to 2');
+    await page.locator('#sps-q').fill('');
+    await expect(page.locator('#tab-store .sto-prod-pick')).toHaveCount(3);
+    await expect(page.locator('#sto-bulk-go')).toHaveText('Apply to 2'); // Lamp stays unticked
+    await page.locator('#tab-store .f-show').click();
+    await page.locator('#sps-f-st').selectOption('live');
+    await expect(page.locator('#sto-bulk-go')).toHaveText('Apply to 2');
+    await page.locator('#tab-store .sto-prod-pick', { hasText: 'Gloves' }).locator('input').uncheck();
+    await page.locator('#sps-f-st').selectOption('draft');
+    await expect(page.locator('#sto-bulk-go')).toHaveText('Apply to 0');
+    await page.locator('#tab-store .f-clr').click();
+    await page.locator('#tab-store .sto-prod-pick', { hasText: 'Lamp' }).locator('input').check();
+    await page.locator('#sps-q').fill('lamp');
+    await page.locator('#sto-bulk-m').selectOption('publish');
+    await page.locator('#sto-bulk-go').click();
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_store_bulk').length).toBe(1);
+    expect(seen.find((c) => c.name === 'staff_store_bulk')!.body).toEqual({ p_ids: ['pb'], p_action: 'publish', p_value: null });
+  });
+
+  test('CSV: stock_count is read and in the blank template, not in an export; the stock left as it is is said after the dry run', async ({ page }) => {
+    const sent: Record<string, unknown>[] = [];
+    await staff(page, { store_products: [prod('pa', { name_en: 'Bottle', slug: 'bottle' })], store_variants: [vari('va1', 'pa', { sku: 'BT-1', stock: 3 })] });
+    await page.route(/\/rest\/v1\/rpc\/staff_store_import/, async (route) => {
+      const b = route.request().postDataJSON() as Record<string, unknown>; sent.push(b);
+      const rows = b.p_rows as Record<string, string>[];
+      return json(route, { ok: true, dry: !!b.p_dry, products: { created: 0, updated: 1 }, variants: { created: 0, updated: rows.length }, suppliers: { created: 0 },
+        stock_kept: rows.filter((r) => 'stock' in r && !('stock_count' in r)).length, errors: [] });
+    });
+    await view(page, 'products');
+    await viaSeam(page, '_stoExportOpen()');
+    const [tpl] = await Promise.all([page.waitForEvent('download'), dlg(page).locator('button', { hasText: 'Blank template' }).click()]);
+    const head = readFileSync((await tpl.path())!).toString('utf8').slice(1).trim();
+    expect(head).toContain(',variant_price,stock,stock_count,variant_active,variant_cost');
+    await viaSeam(page, '_stoExportOpen()');
+    const [all] = await Promise.all([page.waitForEvent('download'), dlg(page).locator('button', { hasText: 'All products (1)' }).click()]);
+    const exp = readFileSync((await all.path())!).toString('utf8').slice(1).split('\n')[0];
+    expect(exp).toContain(',variant_price,stock,variant_active,variant_cost');
+    expect(exp).not.toContain('stock_count');
+    await viaSeam(page, '_stoImportOpen()');
+    const file = (rows: string) => ({ name: 'stock.csv', mimeType: 'text/csv', buffer: Buffer.from(rows, 'utf8') });
+    let ch = page.waitForEvent('filechooser');
+    await dlg(page).locator('button', { hasText: 'Choose a CSV file' }).click();
+    await (await ch).setFiles(file('slug,sku,stock\nbottle,BT-1,9\nbottle,BT-2,4\n'));
+    await expect.poll(() => sent.length).toBe(1);
+    await expect(dlg(page).locator('#sps-imp-kept')).toHaveText('Stock left as it is for 2 sizes: use a stock_count column to set counts');
+    ch = page.waitForEvent('filechooser');
+    await dlg(page).locator('button', { hasText: 'Choose another file' }).click();
+    await (await ch).setFiles(file('slug,sku,Stock Count\nbottle,BT-1,4\n'));
+    await expect.poll(() => sent.length).toBe(2);
+    await expect(dlg(page)).toContainText('Ready to import');
+    expect(sent[1]).toEqual({ p_dry: true, p_rows: [{ slug: 'bottle', sku: 'BT-1', stock_count: '4' }] });
+    await expect(dlg(page).locator('#sps-imp-kept')).toHaveCount(0);
+    await expect(dlg(page)).not.toContainText('Columns left out');
   });
 });

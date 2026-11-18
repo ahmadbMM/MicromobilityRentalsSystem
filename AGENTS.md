@@ -3938,9 +3938,22 @@ staging holds the whole store. `tests/store-catalog.spec.ts`.
   filters its page offers and a template a new product starts from (spec labels, key-spec and box icons, warranty, ships
   across the Kingdom). Order: up and down, saved by `staff_store_sort('categories', slugs)`. A rename warns that links to
   the old address break (products follow by `on update cascade`). Delete: `staff_store_category_delete(slug, move_to)`.
+  `gift` and `bikes` are fixed (`SPC_FIXED`; the database's `STORE_CAT_GIFT` / `STORE_CAT_BIKES`): never deleted, never
+  another address or a parent (the store's bike rules ask `_store_cat_root(category) = 'bikes'` by name); their names,
+  photo, order and the rest change as any other's.
   `_stoCats()` / `_stoCatLabel(slug)` ("Bikes › Road") / `_stoCategoriesLoad(force)` replace the fixed `STO_CATS`
   everywhere (the six stay as the fallback while the table is read, absent or empty). `_stoCatsLoad` is another thing:
   the /bikes models the product editor links to (`catalog_models`).
+- **The product editor (fix round, 2026-11-19).** As it opens it reads the staff-only rows (`_spsLoad(true)`: suppliers,
+  `store_product_private`, `store_variant_costs`, collection items, each whole through `_pagedAll`) and the categories
+  (`_stoCategoriesLoad(true)`) again; a field not changed in it takes what arrives (`_spsPeFill`), and the save writes only
+  the staff-only fields changed against the value each was filled with, so a short or stale read never clears a cost or
+  a supplier. A category the list does not hold is read again at the save; still unknown, "Choose a category" is said
+  and nothing is written (never swapped for a default). Bulk edit unticks rows a search or filter hides (`_spsSelFit`).
+- **CSV import's stock.** `stock` is only a NEW variant's first stock: an existing variant keeps its stock (an older
+  export put back would undo every sale since), and the answer's `stock_kept` counts the sizes whose cell differed,
+  said after the dry run. `stock_count` (in the blank template, not in an export) sets an existing variant's stock as a
+  count (reason `count`, note `CSV`). Bulk Pre-order on with no date keeps each product's `ships_on`.
 - **Collections** (`store_collections`, `store_collection_items`): manual (a product list searched, added and ordered,
   `staff_store_sort('collection:<slug>', ids)`), newest, on sale, best sellers; a section of the store page, a schedule,
   shown or hidden, SEO. `_stoColls()` gives each with its products' ids in order (`items`).
