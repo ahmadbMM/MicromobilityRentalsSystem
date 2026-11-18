@@ -60,6 +60,10 @@ const S1 = `window._stoCats=()=>[{slug:'bikes',parent:null,name_en:'Bikes',sort:
 const pe = (page: Page) => page.locator('#sto-pe [role="dialog"]');
 const dlg = (page: Page) => page.locator('#sps-dlg [role="dialog"]');
 const sec = async (page: Page, l: string) => pe(page).locator('.sto-pe-sh', { hasText: l }).click();
+// Export, Import, Receive delivery, New supplier: opened through the seam S1's Store head calls (this build's own in-list
+// buttons step aside once S1's views are there); Stock history and Suppliers are S1's views, or this build's pop-ups before
+const viaSeam = (page: Page, fn: string) => page.evaluate(fn);
+const s1In = (page: Page) => page.evaluate<boolean>(`STO_VIEWS.includes('moves')`);
 
 test.describe('@staff:store the product editor\'s new fields (SPM-S2)', () => {
   test('a new product: visibility, badge, search engines, ordering, tags, collections, staff-only cost and supplier, a variant\'s barcode and cost', async ({ page }) => {
@@ -168,7 +172,8 @@ test.describe('@staff:store the product editor\'s new fields (SPM-S2)', () => {
 
   test('a new product takes its category\'s template (a sub-category its parent\'s); Apply template adds only what is missing', async ({ page }) => {
     const pw = writes(page, 'store_products');
-    await staff(page, { store_products: [prod('pa', { name_en: 'Old Bike', category: 'bikes', specs: [{ en: ['Frame', 'Steel'], ar: ['الإطار', 'فولاذ'] }] })], store_variants: [] });
+    await staff(page, { store_products: [prod('pa', { name_en: 'Old Bike', category: 'bikes', specs: [{ en: ['Frame', 'Steel'], ar: ['الإطار', 'فولاذ'] }] })], store_variants: [],
+      catalog_models: [{ id: 'cm1', brand: 'Alvas', name: 'Road One' }] });
     await page.evaluate(S1);
     await view(page, 'products');
     await page.locator('#tab-store button', { hasText: 'New product' }).click();
@@ -178,15 +183,18 @@ test.describe('@staff:store the product editor\'s new fields (SPM-S2)', () => {
     await expect(p.locator('.sto-spec input').first()).toHaveValue('Frame');
     await expect(p.locator('#sto-pe-warranty')).toHaveValue('36');
     await expect(p.locator('#sto-pe-ship_ksa')).not.toBeChecked();
+    await expect(p.locator('#sto-pe-catalog_model')).toBeVisible(); // a sub-category of bikes names its /bikes model too
     await p.locator('#sto-pe-category').selectOption('accessories'); // its empty rows go with the other template
     await expect(p.locator('.sto-spec')).toHaveCount(0);
+    await expect(p.locator('#sto-pe-catalog_model')).toHaveCount(0);
     await p.locator('#sto-pe-category').selectOption('road');
     await p.locator('.sto-spec input').nth(1).fill('6061 aluminium');
+    await p.locator('#sto-pe-catalog_model').selectOption('cm1');
     await p.locator('#sto-pe-name_en').fill('Road One');
     await p.locator('#sto-pe-price').fill('2400');
     await p.locator('button', { hasText: /^Save$/ }).click();
     await expect.poll(() => pw.length).toBe(1);
-    expect(pw[0].body).toMatchObject({ category: 'road', warranty_months: 36, ship_ksa: false, specs: [{ en: ['Frame', '6061 aluminium'], ar: ['الإطار', '6061 aluminium'] }],
+    expect(pw[0].body).toMatchObject({ category: 'road', catalog_model: 'cm1', warranty_months: 36, ship_ksa: false, specs: [{ en: ['Frame', '6061 aluminium'], ar: ['الإطار', '6061 aluminium'] }],
       key_specs: [], box: [] }); // icons with no words are not saved
     // a saved bike: Apply template keeps its own Frame and adds the key specs and the box
     await page.locator('#tab-store .sto-prod', { hasText: 'Old Bike' }).click();
@@ -369,7 +377,7 @@ test.describe('@staff:store CSV export and import (SPM-S2)', () => {
       store_variants: [vari('va1', 'pa', { sku: 'BT-S', size: 'S', stock: 3 }), vari('va2', 'pa', { sku: 'BT-L', size: 'L', stock: 0, active: false })],
       store_product_private: [{ product_id: 'pa', supplier_id: 7, supplier_sku: 'AC-1', cost: 12.5, staff_note: null }], store_variant_costs: [{ variant_id: 'va2', cost: 14 }] });
     await view(page, 'products');
-    await page.locator('#tab-store button', { hasText: 'Export CSV' }).click();
+    await viaSeam(page, '_stoExportOpen()');
     const [dl] = await Promise.all([page.waitForEvent('download'), dlg(page).locator('button', { hasText: 'All products (2)' }).click()]);
     const txt = readFileSync((await dl.path())!).toString('utf8');
     expect(txt.charCodeAt(0)).toBe(0xfeff);
@@ -379,7 +387,7 @@ test.describe('@staff:store CSV export and import (SPM-S2)', () => {
     expect(txt).toContain(',12.5,Acme Cycles,AC-1,BT-S,,S,,,,,3,yes,');
     expect(txt).toContain(',BT-L,,L,,,,,0,no,14');
     expect(txt).toContain('\nlamp,Lamp,');
-    await page.locator('#tab-store button', { hasText: 'Export CSV' }).click();
+    await viaSeam(page, '_stoExportOpen()');
     const [dl2] = await Promise.all([page.waitForEvent('download'), dlg(page).locator('button', { hasText: 'Blank template' }).click()]);
     expect(dl2.suggestedFilename()).toBe('store-products-template.csv');
     expect(readFileSync((await dl2.path())!).toString('utf8').trim().split('\n')).toHaveLength(1);
@@ -397,7 +405,7 @@ test.describe('@staff:store CSV export and import (SPM-S2)', () => {
       return json(route, { ok: true, dry: !!b.p_dry, products: { created: 1, updated: 1 }, variants: { created: 2, updated: 0 }, suppliers: { created: 1 }, errors: [] });
     });
     await view(page, 'products');
-    await page.locator('#tab-store button', { hasText: 'Export CSV' }).click();
+    await viaSeam(page, '_stoExportOpen()');
     await dlg(page).locator('button', { hasText: 'Import CSV' }).click();
     const file = (rows: string) => ({ name: 'stock.csv', mimeType: 'text/csv', buffer: Buffer.from('﻿' + rows, 'utf8') });
     const csv1 = 'SLUG;Name EN;name_ar;Category;Price;Colour_EN;stock;Notes\r\nbottle;Bottle;قارورة;nope;"45";Blue;"3"\r\nnew-cap;"Cap; ""cool""\nline";;apparel;abc;;5;x\r\n';
@@ -470,7 +478,7 @@ test.describe('@staff:store stock: adjust, count, receive, history; suppliers (S
       store_variants: [vari('va1', 'pa', { sku: 'BT-1', barcode: '6281111111111', stock: 1 }), vari('vb1', 'pb', { sku: 'HM-M', size: 'M', stock: 0 })],
       site_content: [{ key: 'store.lowStock', value: 2, updated_at: NOW }], 'rpc:staff_store_receive': { moves: 2, units: 13 } });
     await view(page, 'stock');
-    await page.locator('#tab-store button', { hasText: 'Receive delivery' }).click();
+    await viaSeam(page, '_stoReceiveOpen()');
     const d = dlg(page);
     await page.locator('#sps-rcv-q').fill('6281111111111');
     await page.locator('#sps-rcv-q').press('Enter'); // a scanner gun
@@ -502,8 +510,9 @@ test.describe('@staff:store stock: adjust, count, receive, history; suppliers (S
     await page.route(/\/rest\/v1\/store_suppliers/, (route) => route.request().method() === 'POST'
       ? json(route, [{ ...SUP, id: 9, name: 'Bolt Parts', contact: null, phone: null, email: null, website: null }], 201) : route.fallback());
     await view(page, 'products');
-    await page.locator('#tab-store button', { hasText: 'Stock history' }).click(); // S1 makes it a view; until then a pop-up
-    const d = dlg(page);
+    const inView = await s1In(page); // S1's view, or this build's pop-up before it
+    await page.evaluate(`_spsGo('moves')`);
+    const d = inView ? page.locator('#tab-store') : dlg(page);
     await expect(d.locator('.sps-mvr')).toHaveCount(2);
     await expect(d.locator('.sps-mvr').first()).toContainText('Delivery received');
     await expect(d.locator('.sps-mvr').first()).toContainText('INV-1');
@@ -515,13 +524,13 @@ test.describe('@staff:store stock: adjust, count, receive, history; suppliers (S
     const csv = readFileSync((await dl.path())!).toString('utf8');
     expect(csv).toContain('Date,Time,Product,Change,Stock after,Reason,Note,Reference,Supplier,Unit cost,By');
     expect(csv).toContain('Bottle,10,10,Delivery received,,INV-1,Acme Cycles,11,Spec Staff');
-    await d.locator('.chrome-dact button', { hasText: 'Close' }).click();
+    if (!inView) await d.locator('.chrome-dact button', { hasText: 'Close' }).click();
     // suppliers
-    await page.locator('#tab-store button', { hasText: 'Suppliers' }).click();
+    await page.evaluate(`_spsGo('suppliers')`);
     await expect(d.locator('.sto-row')).toHaveCount(1);
     await expect(d.locator('.sto-row')).toContainText('Acme Cycles');
     await expect(d.locator('.sto-row')).toContainText('1 products');
-    await d.locator('button', { hasText: 'New supplier' }).click();
+    await viaSeam(page, `_stoSupOpen('')`);
     const f = page.locator('#sps-sup [role="dialog"]');
     await f.locator('button', { hasText: /^Save$/ }).click();
     await expect(f.locator('.sto-err')).toContainText('Write the supplier\'s name');
@@ -558,5 +567,86 @@ test.describe('@staff:store stock: adjust, count, receive, history; suppliers (S
     await page.locator('#sps-sup-name').fill('Crank Co');
     await page.locator('#sps-sup [role="dialog"] button', { hasText: /^Save$/ }).click();
     await expect(pe(page).locator('#sps-pe-supplier_id')).toHaveValue('12');
+  });
+});
+
+test.describe('@staff:store the database\'s final words (SPM-S2 follow-up)', () => {
+  test('the hourly copy\'s moves read Copied from live, also in the reason filter; a refused receive line and import row codes in words', async ({ page }) => {
+    const seen = rpcCalls(page);
+    await staff(page, { store_products: [prod('pa', { name_en: 'Bottle', slug: 'bottle' })], store_variants: [vari('va1', 'pa', { sku: 'BT-1', stock: 1 })],
+      'rpc:staff_store_stock_moves': [{ id: 5, at: NOW, variant_id: 'va1', product_id: 'pa', label: 'Bottle', delta: 4, stock_after: 5, reason: 'sync', note: null, supplier: null, unit_cost: null, ref: null, by_name: null }],
+      'rpc:staff_store_receive': { __rpcError: { status: 400, code: 'P0001', message: 'STORE_RECEIVE: 1' } },
+      'rpc:staff_store_import': { ok: false, dry: true, products: { created: 0, updated: 1 }, variants: { created: 0, updated: 0 }, suppliers: { created: 0 },
+        errors: [{ row: 1, col: 'stock', code: 'STORE_INT' }, { row: 2, col: null, code: 'STORE_ROW' }, { row: 1, col: 'sku', code: 'STORE_SKU' }, { row: 2, col: 'compare_at', code: 'store_products_check' }] } });
+    await view(page, 'products');
+    await page.locator('#tab-store .sps-prow', { hasText: 'Bottle' }).locator('.rq-more').click();
+    await page.locator('.row-sheet .pay-menu-opt', { hasText: 'Stock history' }).click();
+    await expect(dlg(page).locator('.sps-mvr')).toContainText('Copied from live');
+    await dlg(page).locator('.f-show').click();
+    await expect(page.locator('#sps-mv-rsnd option', { hasText: 'Copied from live' })).toHaveAttribute('value', 'sync');
+    await page.locator('#sps-mv-rsnd').selectOption('sync');
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_store_stock_moves').pop()!.body.p_reason).toBe('sync');
+    await dlg(page).locator('.chrome-dact button', { hasText: 'Close' }).click();
+    // receive: the line the database names
+    await viaSeam(page, '_stoReceiveOpen()');
+    await page.locator('#sps-rcv-q').fill('BT-1');
+    await page.locator('#sps-rcv-q').press('Enter');
+    await dlg(page).locator('.chrome-dact button', { hasText: 'Receive' }).click();
+    await expect(dlg(page).locator('.sto-err')).toContainText('Line 1 of the delivery was not accepted');
+    await dlg(page).locator('.chrome-dact button', { hasText: 'Cancel' }).click();
+    // import: the row codes
+    await viaSeam(page, '_stoExportOpen()');
+    await dlg(page).locator('button', { hasText: 'Import CSV' }).click();
+    const ch = page.waitForEvent('filechooser');
+    await dlg(page).locator('button', { hasText: 'Choose a CSV file' }).click();
+    await (await ch).setFiles({ name: 'p.csv', mimeType: 'text/csv', buffer: Buffer.from('slug,stock,sku\nbottle,x,BT-9\nbottle,1,\n', 'utf8') });
+    const li = dlg(page).locator('.sps-ie li');
+    await expect(li).toHaveCount(4);
+    await expect(li.nth(0)).toContainText('Write a whole number');
+    await expect(li.nth(1)).toContainText('This line could not be read');
+    await expect(li.nth(2)).toContainText('SKU: letters, digits');
+    await expect(li.nth(3)).toContainText('The was price must be higher than the price');
+  });
+
+  test('preview and collection are refused as a slug before saving; a custom badge in Arabic alone saves', async ({ page }) => {
+    const pw = writes(page, 'store_products');
+    await staff(page, { store_products: [prod('pa', { name_en: 'Bottle' })], store_variants: [] });
+    await view(page, 'products');
+    await page.locator('#tab-store button', { hasText: 'New product' }).click();
+    const p = pe(page);
+    await p.locator('#sto-pe-name_en').fill('Preview');
+    await expect(p.locator('#sto-pe-slug')).toHaveValue('preview');
+    await p.locator('#sto-pe-price').fill('20');
+    await p.locator('button', { hasText: /^Save$/ }).click();
+    await expect(p.locator('.sto-err')).toContainText('one of the store’s own pages');
+    await p.locator('#sto-pe-slug').fill('collection');
+    await p.locator('button', { hasText: /^Save$/ }).click();
+    await expect(p.locator('.sto-err')).toContainText('one of the store’s own pages');
+    expect(pw).toHaveLength(0);
+    await p.locator('#sto-pe-slug').fill('preview-light');
+    await sec(page, 'Badge');
+    await p.locator('#sps-pe-badge').selectOption('custom');
+    await p.locator('button', { hasText: /^Save$/ }).click();
+    await expect(p.locator('.sto-err')).toContainText('Write the badge words, in English or Arabic');
+    await p.locator('#sps-pe-badge_ar').fill('جديد هنا');
+    await p.locator('button', { hasText: /^Save$/ }).click();
+    await expect.poll(() => pw.length).toBe(1);
+    expect(pw[0].body).toMatchObject({ slug: 'preview-light', badge: 'custom', badge_en: null, badge_ar: 'جديد هنا' });
+  });
+
+  test('once the Store head carries Import, Export, Receive delivery and the views, the in-list buttons step aside', async ({ page }) => {
+    await staff(page, { store_products: [prod('pa', { name_en: 'Bottle' })], store_variants: [vari('va1', 'pa', { stock: 1 })],
+      site_content: [{ key: 'store.lowStock', value: 2, updated_at: NOW }] });
+    await view(page, 'products');
+    const head = page.locator('#tab-store .sps-bar');
+    if (!(await s1In(page))) {
+      for (const l of ['Export CSV', 'Stock history', 'Suppliers']) await expect(head.locator('button', { hasText: l })).toHaveCount(1);
+      await page.evaluate(`STO_VL.moves=STO_VL.moves||'spsHistory';STO_VL.suppliers=STO_VL.suppliers||'spsSuppliers';STO_VIEWS.push('moves','suppliers');renderStore()`);
+    }
+    for (const l of ['Export CSV', 'Stock history', 'Suppliers']) await expect(head.locator('button', { hasText: l })).toHaveCount(0);
+    await view(page, 'stock');
+    await expect(page.locator('#tab-store .sto-prod')).toHaveCount(1);
+    await expect(page.locator('#tab-store .filter-bar button', { hasText: 'Receive delivery' })).toHaveCount(0);
+    await expect(page.locator('#tab-store .sps-prow button', { hasText: 'Adjust or count' })).toHaveCount(1); // a row's own stays
   });
 });

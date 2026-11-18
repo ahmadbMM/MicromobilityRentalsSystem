@@ -14963,10 +14963,10 @@ body.view-staff.view-staff :is(#pay-rf,#sto-dlg) .confirm-box{width:min(var(--sf
 :is(#tab-store,#sps-dlg) .sps-prow>:not(.sto-prod){flex:0 0 auto;}
 #tab-store .sps-mv{display:flex;flex-direction:column;gap:2px;}
 #tab-store .sps-mv>button{min-height:30px;padding:2px 8px;}
-.sto-pill.sps-p-prev{border-color:var(--blue);color:var(--blue);}
+.sto-pill.sps-p-prev{border-color:var(--green);border-style:dashed;color:var(--green);background:var(--acsoft);} /* staging only: the accent, dashed (the staff theme folds blue into ink) */
 .sto-pill.sps-p-sched,.sto-pill.sps-p-pre{border-color:var(--orange);color:var(--orange);}
 .sto-pill.sps-p-out{border-color:var(--red);color:var(--red);}
-.sto-pill.sps-p-badge{border-color:var(--purple);color:var(--purple);}
+.sto-pill.sps-p-badge{border-color:var(--muted);color:var(--text);}
 #tab-store .sto-pills-r{flex-wrap:wrap;}
 #sto-pe .sps-vis{display:flex;flex-direction:column;gap:8px;}
 #sto-pe .sps-dt,:is(#tab-store,#sps-dlg) .sps-dt{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
