@@ -39,6 +39,8 @@ for (const lang of ['en', 'ar']) test(`the rider screens fit a 320px phone (${la
   await page.evaluate(`S.selEvent='jcc';S.selSession=null;S.regStep=1;setCustTab('register')`); await fits(page, 'rides');
   await page.evaluate(`S.selSession='${T}';S.regStep=2;S.regBikeHeights=['175'];renderRegister()`); await fits(page, 'riders');
   await page.evaluate(`setCustTab('myrides')`); await page.waitForTimeout(300); await fits(page, 'my bookings');
+  // a ticket's actions keep their words inside their buttons (bug hunt 2026-11-18: Reschedule ran out into Edit and Cancel)
+  expect(await page.locator('#tab-myrides .cu-tk-actions > *').evaluateAll((l) => l.filter((b) => b.scrollWidth > b.clientWidth + 1).map((b) => (b.textContent || '').trim())), 'ticket actions').toEqual([]);
   await page.locator('#tab-myrides .cu-tk-actions .btn-red').first().click(); await page.waitForTimeout(300); await fits(page, 'cancel');
   await page.evaluate(`closeCancelReasonModal();setCustTab('account')`); await page.waitForTimeout(300); await fits(page, 'account');
 });

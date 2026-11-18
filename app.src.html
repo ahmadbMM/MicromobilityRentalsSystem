@@ -33840,22 +33840,26 @@ function renderSessions(){
 
   const _live=sessions.filter(s=>s.status!=='deleted'),_today=todayStr();
   let sessList=_live.filter(s=>_ssInRange(s,S.sessRange||'all',_today)&&_ssMatch(s,S.sessQ));
-  if(S.sessStatusFilter==='draft')sessList=sessList.filter(s=>_n6sDraft(s)||_n6sTimed(s)); // made, not opened yet (SS10)
-  else if(S.sessStatusFilter!=='all') sessList=sessList.filter(s=>s.status===S.sessStatusFilter);
+  // The simple phone view hides the Filters panel (styles.css SIMPLE PHONE VIEW): its filters are not applied there, or one
+  // left on in the full view (or brought back from the account's preferences) hid sessions with nothing on screen to say so
+  // or clear it (bug hunt 2026-11-18). The date pills and the search are on screen, so they still apply; S keeps the rest.
+  const _sq=_simpleOn();
+  if(!_sq&&S.sessStatusFilter==='draft')sessList=sessList.filter(s=>_n6sDraft(s)||_n6sTimed(s)); // made, not opened yet (SS10)
+  else if(!_sq&&S.sessStatusFilter!=='all') sessList=sessList.filter(s=>s.status===S.sessStatusFilter);
   const _kinds=[...new Set(_live.map(_rideKind))].filter(k=>SS_KIND_KEY[k]);
   if(S.sessKind&&S.sessKind!=='all'&&!_kinds.includes(S.sessKind))S.sessKind='all'; // a kind no session has any more is no filter
-  if(S.sessKind&&S.sessKind!=='all')sessList=sessList.filter(s=>_rideKind(s)===S.sessKind);
-  sessList=sessList.filter(s=>_ssFillOk(s,S.sessFill));
-  if(S.sessDow&&S.sessDow!=='all')sessList=sessList.filter(s=>'d'+_ssDow(s)===String(S.sessDow));
+  if(!_sq&&S.sessKind&&S.sessKind!=='all')sessList=sessList.filter(s=>_rideKind(s)===S.sessKind);
+  if(!_sq)sessList=sessList.filter(s=>_ssFillOk(s,S.sessFill));
+  if(!_sq&&S.sessDow&&S.sessDow!=='all')sessList=sessList.filter(s=>'d'+_ssDow(s)===String(S.sessDow));
   const _anyGen=_live.some(s=>_sessGender(s));
-  if(S.sessGen&&S.sessGen!=='all')sessList=sessList.filter(s=>(_sessGender(s)||'mixed')===S.sessGen);
-  if(S.sessFlag==='co')sessList=sessList.filter(s=>_coCount(s.id)>0);
-  else if(S.sessFlag==='types')sessList=sessList.filter(s=>s.status!=='closed'&&_typesClosed(s).length>0);
+  if(!_sq&&S.sessGen&&S.sessGen!=='all')sessList=sessList.filter(s=>(_sessGender(s)||'mixed')===S.sessGen);
+  if(!_sq&&S.sessFlag==='co')sessList=sessList.filter(s=>_coCount(s.id)>0);
+  else if(!_sq&&S.sessFlag==='types')sessList=sessList.filter(s=>s.status!=='closed'&&_typesClosed(s).length>0);
   const _sessLocs=[...new Set(sessions.filter(s=>s.status!=='deleted').map(s=>String(s.location||'').trim()).filter(Boolean))].sort();
   // A place no live session names any more is no filter (2026-10-07): its select had gone, and the list
   // stayed empty with nothing on screen to clear it.
   if(S.sessLocFilter&&S.sessLocFilter!=='all'&&!_sessLocs.includes(S.sessLocFilter))S.sessLocFilter='all';
-  if(S.sessLocFilter&&S.sessLocFilter!=='all') sessList=sessList.filter(s=>String(s.location||'').trim()===S.sessLocFilter);
+  if(!_sq&&S.sessLocFilter&&S.sessLocFilter!=='all') sessList=sessList.filter(s=>String(s.location||'').trim()===S.sessLocFilter);
   const _sd=S.sessSortDir;
   const _bySession=_qBySession();
   // Day sorts Sunday first, and Capacity and Bookings sort on the numbers the list shows (_ssS: places offered, places taken) (SS05)
@@ -42608,21 +42612,26 @@ function renderStaffQueue(_resultsOnly){
   })();
   const _dupMark=e=>_dupPhones.has(e.sessionId+'|'+e.phone)
     ?`<span title="${t('dupPhoneTip')}" class="rq-dup"> ${_artIcon('warn',12)}</span>`:'';
-  if(_qc.money){
+  // The simple phone view hides the Filters panel (#fm-q, styles.css SIMPLE PHONE VIEW), so the filters only that panel
+  // sets are not applied there: one left on in the full view, or brought back from the account's preferences (ST_KEYS),
+  // hid riders with nothing on screen to say so or clear it (bug hunt 2026-11-18). S keeps them for the full view. The
+  // status (the figures bar) and the run / race splits are on screen there, so they still apply.
+  const _sq=_simpleOn();
+  if(_qc.money&&!_sq){
     if(S.sfPay==='paid')  filtered=filtered.filter(e=>e.paid);
     if(S.sfPay==='pending')filtered=filtered.filter(e=>!e.paid);
   }
-  if(_qc.bike){
+  if(_qc.bike&&!_sq){
     if(S.sfSize!=='all')  filtered=filtered.filter(e=>_entryFits(e).includes(S.sfSize));
     if(S.sfBike==='own')   filtered=filtered.filter(e=>_isOwnBike(e));
     if(S.sfBike==='rental')filtered=filtered.filter(e=>!_isOwnBike(e));
     if(_qTypes.includes(S.sfBike))filtered=filtered.filter(e=>(e.typePreference||'Any')===S.sfBike);
   }
-  if(_memv&&S.sfMember&&S.sfMember!=='all')filtered=filtered.filter(e=>_isSatMember(e)===(S.sfMember==='yes'));
+  if(!_sq&&_memv&&S.sfMember&&S.sfMember!=='all')filtered=filtered.filter(e=>_isSatMember(e)===(S.sfMember==='yes'));
   // Partner places (Defe, 2026-10-17): a partner's riders alone, or the members' places alone.
-  if(_ptnv&&S.sfPtn&&S.sfPtn!=='all')filtered=filtered.filter(e=>S.sfPtn==='members'?!e.partner:e.partner===S.sfPtn);
+  if(!_sq&&_ptnv&&S.sfPtn&&S.sfPtn!=='all')filtered=filtered.filter(e=>S.sfPtn==='members'?!e.partner:e.partner===S.sfPtn);
   // The rider-side filters (_qxCols, 2026-10-23).
-  const _qf=k=>(S[k]||'all')!=='all';
+  const _qf=k=>!_sq&&(S[k]||'all')!=='all';
   if(_qx.code&&_qf('sfCode'))filtered=filtered.filter(e=>S.sfCode==='none'?!!e.partner&&!e.partnerCodeUsed:String(e.partnerCodeUsed||'').toLowerCase()===S.sfCode);
   if(_qx.rc&&_qf('sfRc'))filtered=filtered.filter(e=>S.sfRc==='none'?!e.rideCode:e.rideCode===S.sfRc);
   if(_qx.shirt&&_qf('sfShirt'))filtered=filtered.filter(e=>{const z=_qShirt(e);return S.sfShirt==='need'?!!z&&z!=='has':S.sfShirt==='none'?!!e.partner&&!z:z===S.sfShirt;});
@@ -42636,7 +42645,7 @@ function renderStaffQueue(_resultsOnly){
   if(_qx.fwk&&_qf('sfFwk'))filtered=filtered.filter(e=>_fwkOf(e)===(S.sfFwk==='yes'));
   _qx.pro.forEach(p=>{if(_qf(p.sf))filtered=filtered.filter(e=>_proOf(p,e)===(S[p.sf]==='yes'));}); // the work tags (2026-11-18)
   if(_bldQ()&&_qf('sfRole'))filtered=filtered.filter(e=>_bldVis(e)===(S.sfRole==='visitor'));
-  if(_bq)filtered=_bq.filter(filtered);
+  if(_bq&&!_sq)filtered=_bq.filter(filtered);
   // Run for Her's runners by distance (the owner, 2026-10-05: "allow the staff in the bookings page to
   // separate them"): the filter, and the split under the filter bar that sets it.
   if(!['all','3','5','none'].includes(S.sfKm||'all'))S.sfKm='all';
@@ -43244,7 +43253,7 @@ function renderQRow(e){
   _qPosText=new Map();
   const _phoneQ=_qPhone(),_rowOf=_phoneQ?(()=>''):renderGroupRow,_cardOf=_phoneQ?renderGroupCard:(()=>'');
   const _tb=(key,html)=>_qLeaf(key,html,'tbody'),_cd=(key,html)=>_qLeaf(key,html);
-  const _qfN=[S.sfStatus!=='all',S.sfPay&&S.sfPay!=='all',S.sfBike&&S.sfBike!=='all',S.sfSize&&S.sfSize!=='all',_memv&&S.sfMember&&S.sfMember!=='all',_ptnv&&S.sfPtn&&S.sfPtn!=='all',_qc.km&&S.sfKm&&S.sfKm!=='all',_qc.vl&&S.sfVl&&S.sfVl!=='all',_qx.code&&_qf('sfCode'),_qx.rc&&_qf('sfRc'),_qx.shirt&&_qf('sfShirt'),_qc.grp&&_qf('sfGrp'),_qx.who&&_qf('sfGen'),_qx.who&&_qf('sfAge'),_qx.who&&_qf('sfNat'),_qx.sn&&_qf('sfSn'),_qx.inf&&_qf('sfInf'),_qx.food&&_qf('sfFood'),_qx.fwk&&_qf('sfFwk'),..._qx.pro.map(p=>_qf(p.sf)),_bldQ()&&_qf('sfRole')].filter(Boolean).length+(_bq?_bq.n():0); // the filters on (the Filter button's count)
+  const _qfN=[S.sfStatus!=='all',!_sq&&S.sfPay&&S.sfPay!=='all',!_sq&&S.sfBike&&S.sfBike!=='all',!_sq&&S.sfSize&&S.sfSize!=='all',!_sq&&_memv&&S.sfMember&&S.sfMember!=='all',!_sq&&_ptnv&&S.sfPtn&&S.sfPtn!=='all',_qc.km&&S.sfKm&&S.sfKm!=='all',_qc.vl&&S.sfVl&&S.sfVl!=='all',_qx.code&&_qf('sfCode'),_qx.rc&&_qf('sfRc'),_qx.shirt&&_qf('sfShirt'),_qc.grp&&_qf('sfGrp'),_qx.who&&_qf('sfGen'),_qx.who&&_qf('sfAge'),_qx.who&&_qf('sfNat'),_qx.sn&&_qf('sfSn'),_qx.inf&&_qf('sfInf'),_qx.food&&_qf('sfFood'),_qx.fwk&&_qf('sfFwk'),..._qx.pro.map(p=>_qf(p.sf)),_bldQ()&&_qf('sfRole')].filter(Boolean).length+(_bq&&!_sq?_bq.n():0); // the filters on (the Filter button's count)
   const _missHtml=!filtered.length&&S.sfSearch.trim()?_dkXMiss(S.sfSearch.trim(),base,_qfN,e=>(_fd&&_apprSessIds.has(e.sessionId))||_pmBooked.has(e.id)):'';
   const _emptyHtml=`<div class="rq-p8">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}${_missHtml}</div>`;
   const _emptyPiece=()=>_phoneQ?_cd('empty',_emptyHtml):_tb('empty',`<tr><td colspan="20">${_emptyHtml}</td></tr>`);
@@ -44258,7 +44267,7 @@ function _ptnPanelHtml(sid){
       ${shirts}
       ${ed?`<div class="ptn-form">
         <label for="${id}-places">${t('ptnPlaces')}<input type="number" id="${id}-places" min="0" max="1000" value="${esc(String(p.places??0))}"></label>
-        <label class="ptn-sw" for="${id}-need"><input type="checkbox" role="switch" id="${id}-need"${p.code_needed?' checked':''}><span>${t('ptnCodeNeeded')}</span></label>
+        <label class="ptn-sw" for="${id}-need"><input type="checkbox" class="web-toggle" role="switch" id="${id}-need"${p.code_needed?' checked':''}><span>${t('ptnCodeNeeded')}</span></label>
         ${codes?'':`<label for="${id}-code">${t('ptnCode')}<input type="text" id="${id}-code" maxlength="40" autocomplete="off" spellcheck="false" value="${esc(p.code||'')}"></label>
         <label for="${id}-limit">${t('ptnCodeLimit')}<input type="number" id="${id}-limit" min="0" max="1000" placeholder="${esc(t('ptnAllPlaces'))}" value="${p.code_limit==null?'':esc(String(p.code_limit))}"></label>`}
         <button type="button" class="btn-sm btn-green ptn-save" data-on-click="${_on('_ptnSave',sid,k)}">${t('saveBtn')}</button>
@@ -44517,7 +44526,7 @@ function _satcPanelHtml(sid){
   return`<section class="ptn-panel satc-panel${f?' folded':''}" aria-label="${esc(t('satcTitle'))}">
     <div class="ptn-title"><button type="button" class="satc-fold" aria-expanded="${!f}" aria-controls="satc-body" title="${esc(t(f?'foldShow':'attnHide'))}" data-on-click="${_on('_satcFold',_EL)}"><span class="satc-arr"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>${esc(t('satcTitle'))}</button><span class="ptn-reps"><button type="button" class="btn-sm btn-secondary satc-copy" data-on-click="${_on('_satcCopy')}">${t('ssCopyLink')}</button>${ed?`<button type="button" class="btn-sm btn-secondary satc-edit" aria-haspopup="dialog" data-on-click="${_on('_satcOpen',sid)}">${t('satcEdit')}</button>`:''}</span></div>
     <div id="satc-body" class="satc-body"${f?' hidden':''}>
-    <div class="ptn-row">${ed?`<label class="satc-sw" for="satc-link"><input type="checkbox" role="switch" id="satc-link"${c.link?' checked':''} data-on-change="${_on('_satcLinkSet',_P('checked'))}"><span>${t('satcSwitch')}</span></label>`:`<strong>${esc(t('satcSwitch'))}: ${t(c.link?'amCodeOn':'amCodeOff')}</strong>`}<span class="ptn-sub">${esc(t(c.link?'satcLinkOn':'satcLinkOff'))}</span></div>
+    <div class="ptn-row">${ed?`<label class="satc-sw" for="satc-link"><input type="checkbox" class="web-toggle" role="switch" id="satc-link"${c.link?' checked':''} data-on-change="${_on('_satcLinkSet',_P('checked'))}"><span>${t('satcSwitch')}</span></label>`:`<strong>${esc(t('satcSwitch'))}: ${t(c.link?'amCodeOn':'amCodeOff')}</strong>`}<span class="ptn-sub">${esc(t(c.link?'satcLinkOn':'satcLinkOff'))}</span></div>
     ${rows?`<ul class="satc-list">${rows}</ul>`:`<div class="ptn-sub">${esc(t(codes.length?'satcNoneOn':'ptnNoCodes'))}</div>`}
     </div>
     ${c.err?`<div class="ptn-sub" role="alert">${t('errConnection')}</div>`:''}
@@ -44614,7 +44623,7 @@ function _satcPaint(){
         <div class="satc-who"><b><bdi>${esc(x.code)}</bdi></b></div>
         <label for="satc-ln-${i}">${t('ptnCodeNameLbl')}<input type="text" id="satc-ln-${i}" maxlength="60" autocomplete="off" placeholder="${esc(t('ptnCodeNamePh'))}" value="${esc(x.name)}" data-on-input="${_on('_satcL',i,'name',_P('value'))}"></label>
         <label for="satc-lp-${i}">${t('satcPlacesEach')}<input type="number" id="satc-lp-${i}" min="0" max="1000" inputmode="numeric" placeholder="${esc(t('ptnNoLimit'))}" value="${esc(x.places)}" data-on-input="${_on('_satcL',i,'places',_P('value'))}"></label>
-        <label class="satc-sw" for="satc-la-${i}"><input type="checkbox" role="switch" id="satc-la-${i}"${x.active?' checked':''} data-on-change="${_on('_satcL',i,'active',_P('checked'))}"><span>${t('satcOnAll')}</span></label>
+        <label class="satc-sw" for="satc-la-${i}"><input type="checkbox" class="web-toggle" role="switch" id="satc-la-${i}"${x.active?' checked':''} data-on-change="${_on('_satcL',i,'active',_P('checked'))}"><span>${t('satcOnAll')}</span></label>
         <button type="button" class="btn-sm satc-del"${used(x.code)?` disabled title="${esc(t('ptnCodeHasBookings'))}"`:''} data-on-click="${_on('_satcDel',i)}"${dis}>${t('ptnCodeRemove')}</button>
       </div>`).join('');
     adds=d.newAll.map((x,i)=>_satcNewRow('a',i,x)).join('');
@@ -51459,8 +51468,8 @@ function _rpLive(doc){
       if(pnote){pnote.textContent=q?t('rpFiltered').replace('{0}',st.q.trim()).replace('{1}',String(shown)).replace('{2}',String(all)):'';pnote.hidden=!q;}
     };
     ths.forEach((th,i)=>{
-      const b=doc.createElement('button');b.type='button';b.className='rp-sbtn';b.title=t('rpSortHint');
-      while(th.firstChild)b.appendChild(th.firstChild);th.appendChild(b);
+      const b=doc.createElement('button'),w=doc.createElement('span');b.type='button';b.className='rp-sbtn';b.title=t('rpSortHint');
+      while(th.firstChild)w.appendChild(th.firstChild);b.appendChild(w);th.appendChild(b); // one item in the button's row: a heading's Arabic stays under its English (report.css)
       b.addEventListener('click',()=>{if(st.col!==i){st.col=i;st.dir=1;}else st.dir=st.dir===1?-1:st.dir===-1?0:1;draw();});
     });
     let cnt=null,pnote=null;
@@ -55778,7 +55787,7 @@ function _bmvPaint(){
   const opts=allSessions().filter(s=>_bmvTo(s,from)).map(s=>`<option value="${esc(s.id)}"${s.id===b.to?' selected':''}>${esc(_sessLabel(s))}</option>`).join('');
   _dkSheet(t('bmvTitle'),`<div><label class="snt-lbl" for="bmv-sess-spk">${esc(t('bmvTo'))}</label>${_spk(`<select id="bmv-sess" aria-label="${esc(t('bmvTo'))}" data-on-change="${_on('_bmvPick',_P('value'))}"><option value=""${b.to?'':' selected'} disabled>${esc(t('bmvPick'))}</option>${opts}</select>`)}</div>
     <div id="bmv-figs">${_bmvFigs(all)}</div>
-    ${mates.length?`<label class="bmv-party"><input type="checkbox" id="bmv-party" role="switch"${b.party?' checked':''} data-on-change="${_on('_bmvParty',_EL)}">${esc(t('bmvParty'))} (+${mates.length})</label>`:''}
+    ${mates.length?`<label class="bmv-party"><input type="checkbox" class="web-toggle" id="bmv-party" role="switch"${b.party?' checked':''} data-on-change="${_on('_bmvParty',_EL)}">${esc(t('bmvParty'))} (+${mates.length})</label>`:''}
     <div id="bmv-err" class="inc-err" role="alert">${esc(b.err)}</div>`,
     `<button type="button" class="btn-secondary" data-on-click="${_on('_dkClose')}">${t('cancelBtn')}</button><button type="button" class="btn-primary" id="bmv-go" data-on-click="${_on('_bmvGo')}">${esc(_bmvGoLbl(all))}</button>`);
 }

@@ -83,6 +83,8 @@ test.describe('@staff:bookings bulk move', () => {
     const dlg = await openMove(page, ['w1']);
     await expect(dlg).toHaveAttribute('aria-labelledby', 'dk-sheet-t');
     await expect(dlg.locator('#bmv-party')).toBeChecked();
+    // a drawn switch (track and knob), not a bare checkbox that appearance:none left invisible (bug hunt 2026-11-18)
+    expect(await dlg.locator('#bmv-party').evaluate((el) => { const c = getComputedStyle(el); return [c.width, /gradient/.test(c.backgroundImage)]; })).toEqual(['38px', true]);
     await expect(dlg.locator('#bmv-go')).toHaveText('Move 2 riders');
     await dlg.locator('#bmv-party').uncheck();
     await expect(dlg.locator('#bmv-go')).toHaveText('Move 1 rider');

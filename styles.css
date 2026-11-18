@@ -1149,7 +1149,6 @@
     /* ── My Bookings and its cards (renderMyRides, renderBookingTicket), drawn into #tab-myrides: without
        inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
     #tab-myrides .cu-act110{flex:1;min-width:110px;}
-    #tab-myrides .cu-act88{flex:1;min-width:88px;}
     #tab-myrides .cu-bg-green{background:var(--green);}
     #tab-myrides .cu-bg-orange{background:var(--orange);}
     #tab-myrides .cu-c-green{color:var(--green);}
@@ -1176,7 +1175,7 @@
     #tab-myrides .cu-pay-due{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;color:var(--orange);white-space:nowrap;}
     #tab-myrides .cu-pay-ok{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;color:var(--green-h);white-space:nowrap;}
     #tab-myrides .cu-span-all{grid-column:1/-1;}
-    #tab-myrides .cu-tk-actions{display:flex;gap:8px;padding:14px 18px 16px;flex-wrap:wrap;}
+    #tab-myrides .cu-tk-actions{padding:14px 18px 16px;}
     #tab-myrides .cu-tk-ad{display:flex;align-items:center;gap:8px;margin-top:6px;}
     #tab-myrides .cu-tk-ad-name{flex:1;min-width:0;font-size:13px;font-weight:700;}
     #tab-myrides .cu-tk-addons{padding:9px 0;border-top:1px dashed var(--border);}
@@ -2951,7 +2950,7 @@
     #tab-sessions .ss-tcap legend{padding:0;margin-bottom:6px;font-size:var(--staff-fs-sm);font-weight:600;color:var(--muted);}
     #tab-sessions .ss-tcap-row{display:flex;flex-wrap:wrap;gap:8px 12px;}
     #tab-sessions .ss-tcap-f{display:flex;flex-direction:column;gap:4px;width:96px;}
-    #tab-sessions .ss-tcap-over{margin:6px 0 0;font-size:var(--staff-fs-sm);font-weight:600;color:var(--warn);}
+    #tab-sessions .ss-tcap-over{margin:6px 0 0;font-size:var(--staff-fs-sm);font-weight:600;color:var(--orange);}
     #tab-sessions .ss-tcap-over:empty{display:none;}
     #tab-sessions .ss-datewarn{font-size:var(--sf-fs-xs);color:var(--muted-l);margin-top:5px;font-weight:600;}
     #tab-sessions .ss-times{display:flex;align-items:center;gap:8px;margin-top:4px;}
@@ -9087,11 +9086,12 @@ body:not(.view-staff) :is(input:not([type="checkbox"]):not([type="radio"]):not([
 :where(body:not(.view-staff)) :where(.btn-primary,.btn-secondary,.btn-sm,.btn-wallet,.toggle-btn,.cancel-reason-opt){display:inline-flex;align-items:center;justify-content:center;}
 body:not(.view-staff) :is(.btn-primary,.btn-secondary,.btn-sm,.btn-wallet,.toggle-btn,.type-info-btn){min-height:48px;box-sizing:border-box;line-height:1.2;}
 body:not(.view-staff) :is(.btn-primary,.btn-secondary,.btn-sm,.btn-wallet){padding-block:0;}
-/* A booking card's actions (Edit, Reschedule, Cancel; Rate, Book again) share their row in equal widths and
-   step onto a second row when the phone is too narrow for their words, never squeezing them. A popup's two
-   answers (Keep booking / Cancel booking) take half the row each. */
-body:not(.view-staff) .cu-tk-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px;}
-body:not(.view-staff) .cu-tk-actions>*{width:100%;min-width:0;white-space:nowrap;}
+/* A booking card's actions (Edit, Reschedule, Cancel; Rate, Book again) share their row, each as wide as its words
+   at least, and step onto a second row when the phone is too narrow for their words, never squeezing them (bug hunt
+   2026-11-18: equal grid cells with unwrapped words ran "Reschedule" into Edit and Cancel in Hindi, Urdu and Tagalog).
+   A button that is wider than the whole row on its own takes two lines inside itself. */
+body:not(.view-staff) .cu-tk-actions{display:flex;flex-wrap:wrap;gap:8px;}
+body:not(.view-staff) .cu-tk-actions>*{flex:1 1 auto;width:auto;min-width:0;}
 /* ── My Account's emergency card (2026-10-07): the optional second contact sits under the first, past a hairline.
    Each contact's line keeps its words at the start and its buttons at the end; where the row is too narrow for
    both, the buttons step under the words. An empty error line under a saved contact takes no room. Scoped by
@@ -9155,7 +9155,7 @@ body:not(.view-staff) .rides-zero .btn-primary{width:100%;max-width:360px;}
    button under them, and the booking's own changes (edit, reschedule, cancel; rate, book again on a
    past ride) as one quiet row of text buttons under a rule, all in one size and weight. ──────────── */
 body:not(.view-staff) .cu-tk-btns :is(.cu-tk-cal,.cu-tk-dir){font-size:var(--fs-15);font-weight:600;gap:8px;padding-inline:8px;white-space:normal;line-height:1.2;text-align:center;overflow-wrap:anywhere;min-width:0;}
-body:not(.view-staff) .cu-tk-actions{grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:4px;margin-top:2px;border-top:1px solid var(--line);}
+body:not(.view-staff) .cu-tk-actions{gap:4px;margin-top:2px;border-top:1px solid var(--line);}
 body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .cu-tk-actions{border-top-color:var(--night-line);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card .cu-tk-actions :is(.btn-sm,.btn-secondary,.btn-green,.btn-green-solid,.btn-red){
   background:transparent;border-color:transparent;font-size:var(--fs-15);font-weight:600;gap:6px;}
@@ -10182,6 +10182,8 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .cu-tk-btns :is(.cu-tk-cal
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .cu-tk-btns .cu-tk-share{grid-column:3;grid-row:1;width:48px;padding:0;}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .cu-tk-btns .cu-tk-share:only-child{grid-column:1/-1;width:auto;}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .cu-tk-btns>.cu-tk-dir:first-child{grid-column:1/3;}
+/* no Directions (a held meeting point not set yet): Calendar takes both halves, no hole beside it */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .cu-tk-btns>.cu-tk-cal:first-child:not(:has(+ .cu-tk-dir)){grid-column:1/3;}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .cu-tk-btns .cu-tk-live{grid-column:1/-1;}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .cu-tk-btns :is(.cu-tk-live,.cu-tk-share) svg{flex:none;width:18px;height:18px;}
 /* a narrow phone (320-374px): the two labels may take two lines and lose their marks, rather than run into each other */
@@ -11665,7 +11667,7 @@ body.kiosk-on{overflow:hidden;}
 #kiosk .ko-sess{font-size:var(--sf-fs-lg);margin:0 0 12px;color:var(--muted);}
 #kiosk .ko-waiver{max-height:40vh;overflow-y:auto;white-space:pre-line;padding:14px 16px;border:1px solid var(--sf-line2);border-radius:var(--sf-r-pop,var(--sf-r-pop));background:var(--sf-head);font-size:var(--sf-fs-lg);line-height:1.55;}
 #kiosk .ko-agree{display:flex;align-items:flex-start;gap:12px;margin:16px 0 4px;font-size:var(--sf-fs-lg);font-weight:600;cursor:pointer;}
-#kiosk .ko-agree input{width:28px;height:28px;flex:0 0 28px;margin:0;accent-color:var(--green);}
+#kiosk .ko-agree input{-webkit-appearance:checkbox;appearance:checkbox;width:28px;height:28px;min-height:0;flex:0 0 28px;margin:0;accent-color:var(--green);} /* the native box: inputs are appearance:none site-wide (the dark theme draws its own) */
 #kiosk .ko-done{text-align:center;padding-top:6vh;color:var(--sf-green-ink);}
 #kiosk .ko-done .ko-h1,#kiosk .ko-done .ko-sub{color:var(--text);}
 #kiosk .ko-desk{font-size:var(--sf-fs-xl);font-weight:600;margin:18px 0 6px;color:var(--text);}
@@ -12186,13 +12188,13 @@ html[data-theme="dark"] body:not(.view-staff) .code-k-sat,html[data-staff-theme=
 /* ...but the white themed tickets (Saturday and every ordinary ride, Run for Her, events, Petromin, the pool, Victory Lap,
    Defe 5K, blood) keep the base inks: the pale ones are for dark screens and the dark tickets (the live night, JCC,
    Arena), and every rider page carries data-theme="dark", so the line above reached the white tickets too. */
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-rw{--code-k:#0a7a4b;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-rf{--code-k:#0f766e;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-rb{--code-k:#a16207;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-bd{--code-k:#c8102e;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-vl{--code-k:#1f7ae0;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-promo{--code-k:#8c3b6e;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-sat{--code-k:#1d4ed8;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-rw{--code-k:#0a7a4b;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-rf{--code-k:#0f766e;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-rb{--code-k:#a16207;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-bd{--code-k:#c8102e;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-vl{--code-k:#1f7ae0;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-promo{--code-k:#8c3b6e;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-sat{--code-k:#1d4ed8;}
 .code-full{display:inline-grid;grid-template-columns:auto minmax(0,1fr);column-gap:5px;align-items:center;padding:3px 8px;}
 .code-full .code-ic{grid-row:1;grid-column:1;}
 .code-full .code-c{grid-row:1;grid-column:2;font-weight:700;}
@@ -12623,7 +12625,6 @@ body.view-staff #desk-sheet .inc-err{color:var(--red);font-size:var(--sf-fs-sm);
 body.view-staff #desk-sheet .inc-err:empty{display:none;}
 body.view-staff #desk-sheet #bmv-figs:empty{display:none;}
 body.view-staff #desk-sheet .bmv-party{display:flex;align-items:center;gap:8px;font-size:var(--sf-fs-sm);font-weight:600;cursor:pointer;min-height:44px;}
-body.view-staff #desk-sheet .bmv-party input{width:18px;height:18px;margin:0;accent-color:var(--green);}
 body.view-staff #cust-modal .inc-list{margin-bottom:10px;}
 /* Lost and found (2026-11-18, found_items): the centred desk sheet's lists and form, reusing the incidents' rows */
 body.view-staff #desk-sheet .lnf-h{display:flex;align-items:center;gap:6px;margin:0;font-size:var(--sf-fs-sm);font-weight:600;}
@@ -14970,6 +14971,9 @@ body.view-staff #tab-queue .rq-hacts .live-share select{display:none;}
   body.view-staff #cust-modal>.modal-backdrop{inset-inline-start:auto;top:var(--topbar-h,56px);width:min(540px,40vw);padding:0;align-items:stretch;justify-content:stretch;background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;animation:none;}
   body.view-staff #cust-modal .ah-box{width:100%;max-width:none;height:100%;max-height:none;margin:0;border-radius:0;border-inline-start:1px solid var(--sf-line,var(--border));box-shadow:var(--sf-sh-3,0 8px 24px rgba(0,0,0,.18));overflow-y:auto;}
   body.view-staff.ah-side #view-staff.active>.view-main{padding-inline-end:calc(min(540px,40vw) + 24px);}
+  /* a dialog opened beside the panel (Return, Edit price, a bike...) is drawn over it: these come before #cust-modal in the
+     page, so at the same z-index the panel covered their end and its buttons (bug hunt 2026-11-18) */
+  body.view-staff.ah-side :is(#bike-modal,#edit-price-modal,#optlist-modal,#receipt-modal,#return-pay-modal,#return-modal)>.modal-backdrop{z-index:201;}
 }
 /* STAFF ROUND S10 LISTS (2026-11-10): the closed Filters button's Clear, one toolbar row for an office list (its
    selection in the same row, never a bar at the foot), a row's tick, Team's e-mail under the name, People's second row */

@@ -106,6 +106,8 @@ test.describe('@staff:bookings s1010 kiosk: self-service walk-ins', () => {
     // the waiver: Agree stays off until ticked
     const join = kiosk(page).getByRole('button', { name: 'Agree and join' });
     await expect(join).toBeDisabled();
+    // the box to tick is drawn (inputs are appearance:none site-wide; the light theme had nothing to tap, bug hunt 2026-11-18)
+    expect(await kiosk(page).locator('.ko-agree input').evaluate((el) => getComputedStyle(el).appearance)).toBe('checkbox');
     await kiosk(page).locator('.ko-agree input').check();
     await join.click();
     await expect(kiosk(page).getByRole('heading', { name: 'You are on the list' })).toBeVisible();

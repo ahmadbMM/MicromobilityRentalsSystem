@@ -97,7 +97,7 @@ html, body { margin: 0; padding: 0; background: var(--mm-offwhite); }
    the skills add lines to the body, which then closes up a little (:has, below) so the footer keeps
    its place. Labels are the footer's: 12px, tracked capitals in English, plain in Arabic. */
 .fact-label, .cohost-label, .check-label { font-size: 12px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; }
-:is(.fact-label, .cohost-label, .check-label).ar, .ar :is(.fact-label, .cohost-label), .check-label .ar { letter-spacing: 0; text-transform: none; }
+:is(.fact-label, .cohost-label, .check-label).ar, .ar :is(.fact-label, .cohost-label), :is(.fact-label, .check-label) .ar { letter-spacing: 0; text-transform: none; }
 
 /* The partner who co-issues it: one line a language, each with its own label, right-aligned under the
    title and clear of the name below (which may run the full 979px). */

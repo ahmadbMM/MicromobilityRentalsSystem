@@ -138,6 +138,8 @@ test.describe('@staff:bookings Saturday ride codes', () => {
     await expect(items.nth(2)).toContainText('Guests');
     await expect(items.nth(2)).toContainText('ONLYHERE · 0 of 3 booked');
     await expect(panel.locator('#satc-link')).not.toBeChecked();
+    // a drawn switch (track and knob), not a bare checkbox that appearance:none left invisible (bug hunt 2026-11-18)
+    expect(await panel.locator('#satc-link').evaluate((el) => { const c = getComputedStyle(el); return [c.width, /gradient/.test(c.backgroundImage)]; })).toEqual(['38px', true]);
     await expect(panel).toContainText('Riders can still book Saturday rides in the app too.');
     // each booking that came with a code wears its name (a code without a name, the code itself)
     await expect(page.locator('#q-results .satc-chip').filter({ hasText: 'IMC staff' }).first()).toBeVisible();

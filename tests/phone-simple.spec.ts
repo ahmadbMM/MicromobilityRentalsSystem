@@ -126,6 +126,28 @@ test.describe('@staff:settings simple phone view', () => {
     await expect(page.locator('#tab-sessions .n6r-box')).toHaveCount(0);
   });
 
+  test('a filter only the hidden Filters panel sets does not apply on the simple phone; the full view keeps it', async ({ page }) => {
+    test.skip(test.info().project.name !== 'mobile', 'a phone');
+    await open(page, { simple: true });
+    // left on in the full view, or brought back from the account's preferences: nothing here shows it or clears it (bug hunt 2026-11-18)
+    await page.evaluate(`S.sfBike='Road';S.sfPay='paid';renderStaffQueue()`);
+    for (const id of ['w1', 'w2', 'a1']) await expect(card(page, id), id).toBeVisible();
+    // the figures bar is on screen, so its filter still applies
+    await page.locator('#q-live-count .q-lc-active').click();
+    await expect(card(page, 'w1')).toHaveCount(0);
+    await expect(card(page, 'a1')).toBeVisible();
+    await page.evaluate(`setSfStatus('all')`);
+    // Sessions: a status filter from the full view leaves the open session in the cards
+    await page.evaluate(`S.sessStatusFilter='closed';S.sessKind='all';setStaffTab('sessions')`);
+    await expect(page.locator('#tab-sessions .sess-lc')).toHaveCount(1);
+    // back to the full view: the filters are still set, and apply there
+    await page.evaluate(`setStaffTab('queue');_setSimple(false)`);
+    expect(await page.evaluate(`[S.sfBike,S.sfPay,S.sessStatusFilter]`)).toEqual(['Road', 'paid', 'closed']);
+    await expect(page.locator('#q-results [data-id="w1"]')).toHaveCount(0);
+    await page.evaluate(`setStaffTab('sessions')`);
+    await expect(page.locator('#tab-sessions .sess-lc')).toHaveCount(0);
+  });
+
   test('a desk-sized screen keeps the full look with the switch on', async ({ page }) => {
     test.skip(test.info().project.name === 'mobile', 'a laptop');
     await open(page, { width: 1280, simple: true });
