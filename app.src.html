@@ -21991,8 +21991,8 @@ function _tstPageOpen(){_tstLoad().then(ok=>{if(ok)window._tstPage();else toast(
 // A day as the rider reads it: a date (YYYY-MM-DD) or a time stamp.
 function _tstDay(v){const s=String(v||'');if(!s)return'';try{return shortDate(/^\d{4}-\d\d-\d\d$/.test(s)?s:fmtDate(new Date(s)));}catch(_){return s.slice(0,10);}}
 // What a booking was, as the database's _tm_about reads it: a Saturday community ride, a workshop, a session (rentals,
-// JCC), else an event; 'other' when the session is not here.
-function _tstAboutOf(s){if(!s)return'other';const k=s.ride_kind;return k==='saturday'?'saturday':k==='workshop'?'workshop':!s.event_kind||s.event_kind==='jcc'?'session':'event';}
+// JCC), else an event; 'other' when the session is not here. A community session with no ride kind is a Saturday.
+function _tstAboutOf(s){if(!s)return'other';const k=s.ride_kind||(s.event_kind==='community'?'saturday':'');return k==='saturday'?'saturday':k==='workshop'?'workshop':!s.event_kind||s.event_kind==='jcc'?'session':'event';}
 // After a rating of 9 or 10 (the main score: the overall on a Saturday, the service on any other ride), with the switch on:
 // the step that offers to share it, prefilled from the rating (rider-testimonial.js _tstRateNew answers null when it
 // should not show: the switch off on the server, that booking shared already, three waiting). Never longer than a few

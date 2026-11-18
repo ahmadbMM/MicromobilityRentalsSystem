@@ -18,7 +18,8 @@
 --   * staff only approve or hide: publish, reject, hide, back to waiting, feature (12 at most, the home page strip),
 --     order, drop the photo. They never change the words. The rider deletes theirs whenever they like.
 --   * old comments: riders whose ride comment (queue_entries.feedback, 40+ characters) came with a score of 9 or 10,
---     rated before this feature, are asked ONCE (testimonial_asks) whether it may be published.
+--     rated before the switch was last turned on (so never offered the step after their rating), are asked ONCE
+--     (testimonial_asks) whether it may be published.
 --   * the public page shows the average stars of the published ones and how many.
 --
 --  1. testimonials       one row per testimonial; staff-only, read and written through the functions below.
@@ -150,7 +151,8 @@ as $function$
     from customers c where c.id = p_cust
 $function$;
 
--- What a booking was: a Saturday community ride, a session (rentals, JCC), a workshop, else an event.
+-- What a booking was: a Saturday community ride, a session (rentals, JCC), a workshop, else an event. A community
+-- session with no ride kind is a Saturday, as the apps read it.
 create or replace function public._tm_about(p_entry text)
  returns text
  language sql
@@ -158,7 +160,7 @@ create or replace function public._tm_about(p_entry text)
  set search_path to 'public'
 as $function$
   select coalesce((
-    select case when s.ride_kind = 'saturday' then 'saturday'
+    select case when coalesce(s.ride_kind, case when s.event_kind = 'community' then 'saturday' end) = 'saturday' then 'saturday'
                 when s.ride_kind = 'workshop' then 'workshop'
                 when s.event_kind is null or s.event_kind = 'jcc' then 'session'
                 else 'event' end
@@ -181,8 +183,10 @@ as $function$
     'rides', (select count(*) from queue_entries e where e.customer_id = p_cust and e.status = 'done')) end
 $function$;
 
--- The old comment a rider is asked about once: a done ride rated 9 or 10 before this feature, with 40+ characters
--- written, that is not a testimonial already. The best score first, then the longest, then the newest.
+-- The old comment a rider is asked about once: a done ride rated 9 or 10 before the switch was turned on (its row's
+-- updated_at, the server's clock, stamped by _site_content_stamp; a rating since then was offered the step after the
+-- rating instead), with 40+ characters written, that is not a testimonial already. The best score first, then the
+-- longest, then the newest.
 create or replace function public._tm_old_pick(p_cust text)
  returns jsonb
  language sql
@@ -194,7 +198,8 @@ as $function$
     from queue_entries e left join sessions s on s.id = e.session_id
    where e.customer_id = p_cust and e.status = 'done' and e.rating_exp >= 9
      and char_length(_ask_text(e.feedback)) >= 40
-     and (e.rated_at is null or e.rated_at < timestamptz '2026-11-19 00:00:00+03')
+     and (e.rated_at is null or e.rated_at < coalesce((select c.updated_at from site_content c
+                                                        where c.key = 'testimonials.on' and c.value = 'true'::jsonb), now()))
      and not exists (select 1 from testimonials t where t.entry_id = e.id and t.status <> 'rejected')
    order by e.rating_exp desc, char_length(e.feedback) desc, e.session_date desc nulls last, e.id desc
    limit 1
