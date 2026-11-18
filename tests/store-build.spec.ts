@@ -95,6 +95,18 @@ test.describe('@staff:store the order sheet: out for delivery, the SMSA label, a
     await expect(sh.locator('button', { hasText: 'Out for delivery' })).toHaveCount(0);
   });
 
+  test('a slot that kept its own hours shows them, not the hours the time has in the settings now', async ({ page }) => {
+    const o = order('o9', 1009, 'paid', { fulfil: 'jeddah', address: { city: 'Jeddah', district: 'Al Rawdah', street: 'Prince Sultan Rd' },
+      slot: { day: '2026-11-17', time: 'am', from: '10:00', to: '14:00' } });
+    await staff(page, { 'rpc:staff_store_orders': [o],
+      site_content: [{ key: 'store.slots', value: { on: true, ahead: 6, lead: 1, skip: [5], times: [{ id: 'am', from: '09:00', to: '13:00' }] }, updated_at: NOW }] });
+    await page.evaluate(`setStaffTab('store')`);
+    await page.locator('#tab-store .sto-row', { hasText: 'MM-1009' }).click();
+    const sh = page.locator('#sto-modal [role="dialog"]');
+    await expect(sh).toContainText('10:00–14:00');
+    await expect(sh).not.toContainText('09:00–13:00');
+  });
+
   test('Create SMSA label posts the order with the staff token, saves the PDF and marks it shipped', async ({ page }) => {
     const o = order('o3', 1003, 'paid', { fulfil: 'ksa', address: { city: 'Riyadh', district: 'Olaya', street: 'King Fahd Rd', building: '7' } });
     await staff(page, { 'rpc:staff_store_orders': [o], site_content: [{ key: 'store.smsa.on', value: true, updated_at: NOW }] });

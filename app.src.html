@@ -26523,9 +26523,10 @@ async function _stoKeysLoad(force){
 function _stoKey(k){const K=_sto().keys;return K?K[k]:undefined;}
 function _stoLic(){const v=_stoKey('store.discountLicence');return typeof v==='string'&&v.trim()?v.trim():'';}
 function _stoLowAt(){const v=_stoKey('store.lowStock');return Number.isInteger(v)&&v>=1&&v<=50?v:3;}
-// A day and a time of the Jeddah slots (F78): "Tue 17 Nov · 09:00–13:00", the time by its id in store.slots.
+// A day and a time of the Jeddah slots (F78): "Tue 17 Nov · 09:00–13:00". The hours the order kept when it was booked
+// (store_checkout since 20261119000800, bug hunt 2026-11-18 stg11-2), else the time by its id in store.slots today.
 function _stoSlotTxt(sl){
-  const Z=_stoKey('store.slots'),tm=Z&&Array.isArray(Z.times)?Z.times.find(x=>x&&x.id===sl.time):null;
+  const hm=/^\d\d:\d\d$/,Z=_stoKey('store.slots'),tm=hm.test(sl.from)&&hm.test(sl.to)?sl:Z&&Array.isArray(Z.times)?Z.times.find(x=>x&&x.id===sl.time):null;
   let d=String(sl.day||'');try{d=new Date(d+'T12:00:00+03:00').toLocaleDateString(_locale(),{weekday:'short',day:'numeric',month:'short',timeZone:KSA_TZ});}catch(_){}
   return d+' · '+(tm?tm.from+'–'+tm.to:String(sl.time||''));
 }
