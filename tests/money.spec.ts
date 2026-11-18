@@ -31,7 +31,7 @@ test.describe('booking flow', () => {
     // Step 3 — the review: the waiver, one tap on behalf of the whole booking (Confirm is off without it),
     // then confirm; the stub echoes the insert back as success
     await page.locator('#reg-waiver-cb').check();
-    await page.locator('button', { hasText: 'Confirm booking' }).click();
+    await page.locator('#tab-register .mm-reg-foot .btn-primary', { hasText: 'Book' }).click(); // "Book ⃁ 75" since EM04-B (2026-11-18)
 
     const panel = page.locator('#tab-register');
     await expect(panel).toContainText('Spec Rider');
