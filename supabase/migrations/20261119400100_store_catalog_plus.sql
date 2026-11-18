@@ -22,7 +22,8 @@
 --     policies of store_products and store_variants show live and preview products (staff see all). Buyable = live.
 --  3. Categories made by staff (store_categories, two levels, a template and filters each), seeded with the six the
 --     staff app shows today; store_products.category becomes a foreign key to them (the fixed check goes);
---     staff_store_category_delete moves a category's products and deletes it. 'gift' stays (STORE_CAT_GIFT).
+--     staff_store_category_delete moves a category's products and deletes it. 'gift' stays (STORE_CAT_GIFT), and so
+--     does 'bikes' (STORE_CAT_BIKES: the store's bike rules ask for it by name; its names, photo and order may change).
 --     _store_cat_root(slug) gives a category's top-level one, so a sub-category of bikes is bikes everywhere code asks.
 --  4. Collections (store_collections, store_collection_items) and store_bestsellers (anyone; '[]' without orders).
 --  5. More product fields (badge, SEO, max per order, pre-order with a ships-on date, weight, dimensions, tags,
@@ -244,18 +245,28 @@ alter table public.store_categories add constraint store_categories_filters_chec
 create index if not exists store_categories_parent on public.store_categories (parent) where parent is not null;
 
 -- Two levels only; 'gift' (gift cards) has no parent and no children and is never deleted or given another slug.
+-- 'bikes' is never deleted, given another slug or a parent (STORE_CAT_BIKES): the store's bike rules (handover, still
+-- learning, the Bike owner badge, the bike credit, the /bikes model) ask _store_cat_root(category) = 'bikes' by name.
+-- Its sub-categories, names, photo, order and the rest may change.
 create or replace function public._store_cat_guard() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
   if tg_op = 'DELETE' then
     if old.slug = 'gift' then raise exception 'STORE_CAT_GIFT' using errcode = 'P0001'; end if;
+    if old.slug = 'bikes' then raise exception 'STORE_CAT_BIKES' using errcode = 'P0001'; end if;
     return old;
   end if;
   if tg_op = 'UPDATE' and old.slug = 'gift' and new.slug is distinct from 'gift' then
     raise exception 'STORE_CAT_GIFT' using errcode = 'P0001';
   end if;
+  if tg_op = 'UPDATE' and old.slug = 'bikes' and new.slug is distinct from 'bikes' then
+    raise exception 'STORE_CAT_BIKES' using errcode = 'P0001';
+  end if;
   if (new.slug = 'gift' and new.parent is not null) or new.parent = 'gift' then
     raise exception 'STORE_CAT_GIFT' using errcode = 'P0001';
+  end if;
+  if new.slug = 'bikes' and new.parent is not null then
+    raise exception 'STORE_CAT_BIKES' using errcode = 'P0001';
   end if;
   if new.parent is not null then
     if exists (select 1 from store_categories c where c.slug = new.parent and c.parent is not null) then
@@ -316,6 +327,7 @@ alter table public.store_products add constraint store_products_category_fkey
 create index if not exists store_products_category on public.store_products (category);
 
 -- Delete a category (admins): its products move to p_move_to first (required when it has any). Answers how many moved.
+-- 'gift' (STORE_CAT_GIFT) and 'bikes' (STORE_CAT_BIKES) are never deleted; products may move into 'bikes'.
 create or replace function public.staff_store_category_delete(p_slug text, p_move_to text default null) returns int
 language plpgsql security definer set search_path = public as $$
 declare c store_categories%rowtype; n int;
@@ -323,6 +335,7 @@ begin
   if not is_staff() then raise exception 'STAFF_ONLY' using errcode = '42501'; end if;
   if not is_admin() then raise exception 'ADMIN_ONLY' using errcode = '42501'; end if;
   if p_slug = 'gift' then raise exception 'STORE_CAT_GIFT' using errcode = 'P0001'; end if;
+  if p_slug = 'bikes' then raise exception 'STORE_CAT_BIKES' using errcode = 'P0001'; end if;
   select * into c from store_categories where slug = p_slug for update;
   if c.slug is null then raise exception 'STORE_CAT' using errcode = 'P0001'; end if;
   if exists (select 1 from store_categories x where x.parent = c.slug) then raise exception 'STORE_CAT_CHILDREN' using errcode = 'P0001'; end if;
@@ -776,11 +789,15 @@ grant execute on function public.staff_store_duplicate(uuid, text, text) to auth
 -- CSV import (admins). p_rows: one object per VARIANT line (1-2000), keys as the CSV's columns, values strings or numbers.
 -- A product is found by slug (made when new: slug, name_en, category and price needed); the first non-empty value of a
 -- product field across its lines wins; an empty value changes nothing. A variant is found by sku, else by (product, size,
--- color_en); a line with no variant field touches no variant. stock sets the count (reason 'import'). Suppliers are
--- found by name (any case) and made when new. Images are never imported. p_dry (the default) writes nothing; a real run
--- writes everything or nothing. Answers {ok, dry, products:{created, updated}, variants:{created, updated},
--- suppliers:{created}, errors:[{row, col, code}]} (row: 1-based in p_rows; code: the constraint or a STORE_* name; the
--- counts say what the run did or would do).
+-- color_en); a line with no variant field touches no variant. stock is a NEW variant's first stock (reason 'import'):
+-- an existing variant keeps its stock whatever the cell says (an older export put back would undo every sale since),
+-- and stock_kept counts the existing variants whose stock cell differed from their stock and was left. stock_count
+-- (0-100000) sets an existing variant's stock as a count (reason 'count', note 'CSV'; one that finds what was there is
+-- still written, as staff_store_stock_count does), and a new variant's first stock. Suppliers are found by name (any
+-- case) and made when new. Images are never imported. p_dry (the default) writes nothing; a real run writes everything
+-- or nothing. Answers {ok, dry, products:{created, updated}, variants:{created, updated}, suppliers:{created},
+-- stock_kept, errors:[{row, col, code}]} (row: 1-based in p_rows; code: the constraint or a STORE_* name; the counts say
+-- what the run did or would do).
 create or replace function public.staff_store_import(p_rows jsonb, p_dry boolean default true) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare
@@ -788,10 +805,10 @@ declare
                         'tagline_ar', 'description_en', 'description_ar', 'tags', 'badge', 'badge_en', 'badge_ar', 'max_per_order',
                         'preorder', 'ships_on', 'weight_g', 'ship_ksa', 'warranty_months', 'condition', 'seo_title_en',
                         'seo_title_ar', 'seo_desc_en', 'seo_desc_ar', 'cost', 'supplier', 'supplier_sku'];
-  vkeys text[] := array['sku', 'barcode', 'size', 'color_en', 'color_ar', 'color_hex', 'variant_price', 'stock', 'variant_active',
-                        'variant_cost'];
+  vkeys text[] := array['sku', 'barcode', 'size', 'color_en', 'color_ar', 'color_hex', 'variant_price', 'stock', 'stock_count',
+                        'variant_active', 'variant_cost'];
   nums text[] := array['price', 'compare_at', 'cost', 'variant_price', 'variant_cost'];
-  ints text[] := array['max_per_order', 'weight_g', 'warranty_months', 'stock'];
+  ints text[] := array['max_per_order', 'weight_g', 'warranty_months', 'stock', 'stock_count'];
   bools text[] := array['published', 'preview', 'preorder', 'ship_ksa', 'variant_active'];
   dry boolean := coalesce(p_dry, true);
   total int; i int; r jsonb; k text; s text; sl text;
@@ -800,6 +817,7 @@ declare
   pc int := 0; pu int := 0; vc int := 0; vu int := 0; sc int := 0;
   f jsonb; pj jsonb; prv jsonb; vj jsonb; vcost numeric; bad boolean; pid uuid; isnew boolean; cols text; sets text;
   vid uuid; vprod uuid; sup bigint; rown int; cn text; msg text; col text; frow int; ln int;
+  vstock int; vcount int; was int; newv uuid[] := '{}'; keptv uuid[] := '{}'; who text; lbl text;
 begin
   if not is_staff() then raise exception 'STAFF_ONLY' using errcode = '42501'; end if;
   if not is_admin() then raise exception 'ADMIN_ONLY' using errcode = '42501'; end if;
@@ -846,6 +864,8 @@ begin
         e := null;
         if k = any(nums) then
           if s !~ '^-?[0-9]{1,9}([.][0-9]+)?$' then e := jsonb_build_object('row', rown, 'col', k, 'code', 'STORE_NUMBER');
+          elsif k = 'cost' and round(s::numeric, 2) not between 0 and 100000 then
+            e := jsonb_build_object('row', rown, 'col', k, 'code', 'store_product_private_check');
           elsif k = 'cost' then prv := prv || jsonb_build_object('cost', round(s::numeric, 2));
           else pj := pj || jsonb_build_object(k, round(s::numeric, 2)); end if;
         elsif k = any(ints) then
@@ -874,7 +894,8 @@ begin
           if length(s) > 80 then e := jsonb_build_object('row', rown, 'col', k, 'code', 'store_suppliers_text_check');
           else prv := prv || jsonb_build_object('supplier', s); end if;
         elsif k = 'supplier_sku' then
-          prv := prv || jsonb_build_object('supplier_sku', s);
+          if length(s) > 60 then e := jsonb_build_object('row', rown, 'col', k, 'code', 'store_product_private_check');
+          else prv := prv || jsonb_build_object('supplier_sku', s); end if;
         else
           pj := pj || jsonb_build_object(k, s);
         end if;
@@ -924,7 +945,10 @@ begin
         col := case when coalesce(cn, '') <> '' then
                  regexp_replace(regexp_replace(cn, '^store_(products|product_private|suppliers)_', ''), '_(check|key|fkey)$', '')
                else nullif(btrim(split_part(msg, ':', 2)), '') end;
-        col := case cn when 'store_products_check' then 'compare_at' when 'store_product_private_check' then 'cost'
+        col := case cn when 'store_products_check' then 'compare_at'
+                       when 'store_product_private_check' then   -- the column whose value it refused (staff_note is never imported)
+                         case when length(coalesce(prv ->> 'supplier_sku', '')) > 60 then 'supplier_sku'
+                              when (prv ->> 'cost')::numeric not between 0 and 100000 then 'cost' else 'staff_note' end
                        when 'store_suppliers_text_check' then 'supplier' when 'store_suppliers_name_key' then 'supplier'
                        when 'store_products_pkey' then 'slug' else col end;
         errs := errs || jsonb_build_array(jsonb_build_object(
@@ -936,7 +960,7 @@ begin
       -- its lines' variants
       for ln in select (x #>> '{}')::int from jsonb_array_elements(prow #> array[sl, 'rows']) x loop
         r := p_rows -> (ln - 1);
-        vj := '{}'::jsonb; vcost := null; bad := false;
+        vj := '{}'::jsonb; vcost := null; vstock := null; vcount := null; bad := false;
         foreach k in array vkeys loop
           s := btrim(coalesce(case when jsonb_typeof(r -> k) in ('string', 'number', 'boolean') then r ->> k end, ''));
           continue when s = '';
@@ -947,7 +971,9 @@ begin
             else vj := vj || jsonb_build_object('price', round(s::numeric, 2)); end if;
           elsif k = any(ints) then
             if s !~ '^-?[0-9]{1,9}$' then e := jsonb_build_object('row', ln, 'col', k, 'code', 'STORE_INT');
-            else vj := vj || jsonb_build_object('stock', s::int); end if;
+            elsif k = 'stock_count' and s::int not between 0 and 100000 then e := jsonb_build_object('row', ln, 'col', k, 'code', 'STORE_STOCK');
+            elsif k = 'stock_count' then vcount := s::int;
+            else vstock := s::int; end if;
           elsif k = any(bools) then
             if lower(s) in ('yes', 'true', '1') then vj := vj || jsonb_build_object('active', true);
             elsif lower(s) in ('no', 'false', '0') then vj := vj || jsonb_build_object('active', false);
@@ -957,7 +983,7 @@ begin
           end if;
           if e is not null then errs := errs || jsonb_build_array(e); bad := true; end if;
         end loop;
-        continue when bad or (vj = '{}'::jsonb and vcost is null);
+        continue when bad or (vj = '{}'::jsonb and vcost is null and vstock is null and vcount is null);
         begin
           vid := null; vprod := null;
           if vj ? 'sku' then
@@ -970,15 +996,40 @@ begin
              order by x.sort, x.created_at, x.id limit 1;
           end if;
           if vid is null then
+            -- a new variant: its first stock is the count, else the stock cell (reason 'import')
             vid := gen_random_uuid();
             vj := vj || jsonb_build_object('id', vid, 'product_id', pid);
+            if coalesce(vcount, vstock) is not null then vj := vj || jsonb_build_object('stock', coalesce(vcount, vstock)); end if;
             select string_agg(quote_ident(x), ', ') into cols from jsonb_object_keys(vj) x;
             execute format('insert into store_variants (%s) select %s from jsonb_populate_record(null::store_variants, $1)', cols, cols) using vj;
+            newv := newv || vid;
             vc := vc + 1;
           else
             if vj <> '{}'::jsonb then
               select string_agg(format('%I = q.%I', x, x), ', ') into sets from jsonb_object_keys(vj) x;
               execute format('update store_variants t set %s from jsonb_populate_record(null::store_variants, $1) q where t.id = $2', sets) using vj, vid;
+            end if;
+            if vid = any(newv) then
+              -- made by an earlier line of this file: still its first stock
+              if coalesce(vcount, vstock) is not null then update store_variants set stock = coalesce(vcount, vstock) where id = vid; end if;
+            elsif vcount is not null then
+              -- a count: reason 'count', noted CSV; a count that finds what was there is still a move (delta 0)
+              select x.stock into was from store_variants x where x.id = vid for update;
+              perform set_config('mm.stock_reason', 'count', true);
+              perform set_config('mm.stock_note', 'CSV', true);
+              update store_variants set stock = vcount where id = vid;
+              perform set_config('mm.stock_reason', 'import', true);
+              perform set_config('mm.stock_note', '', true);
+              if was = vcount then
+                select left(coalesce(nullif(btrim(st.display_name), ''), 'Staff'), 60) into who from staff st where st.user_id = auth.uid();
+                select left(concat_ws(' ' || chr(183) || ' ', p.name_en, nullif(x.size, ''), nullif(x.color_en, '')), 200) into lbl
+                  from store_variants x join store_products p on p.id = x.product_id where x.id = vid;
+                insert into store_stock_moves (variant_id, product_id, label, delta, stock_after, reason, note, by_name)
+                values (vid, pid, lbl, 0, vcount, 'count', 'CSV', who);
+              end if;
+            elsif vstock is not null and not vid = any(keptv)
+                  and vstock is distinct from (select x.stock from store_variants x where x.id = vid) then
+              keptv := keptv || vid;   -- an existing variant's stock cell is left: its stock stays as it is
             end if;
             vu := vu + 1;
           end if;
@@ -998,6 +1049,7 @@ begin
       end loop;
     end loop;
     perform set_config('mm.stock_reason', '', true);
+    perform set_config('mm.stock_note', '', true);
     -- a dry run, or any error: nothing is kept
     if dry or jsonb_array_length(errs) > 0 then raise exception 'STORE_IMPORT_UNDO' using errcode = 'P0001'; end if;
   exception when raise_exception then
@@ -1008,6 +1060,7 @@ begin
                             'products', jsonb_build_object('created', pc, 'updated', pu),
                             'variants', jsonb_build_object('created', vc, 'updated', vu),
                             'suppliers', jsonb_build_object('created', sc),
+                            'stock_kept', cardinality(keptv),
                             'errors', (select coalesce(jsonb_agg(x order by n), '[]'::jsonb)
                                          from jsonb_array_elements(errs) with ordinality t(x, n) where n <= 1000));
 end $$;
@@ -1017,7 +1070,8 @@ grant execute on function public.staff_store_import(jsonb, boolean) to authentic
 -- One change to many products (admins, 1-500 ids); answers how many products (or collection rows) it changed.
 -- STORE_BULK for an action it does not know or a value that is not one; the licence guard and the table's checks still
 -- apply (one refusal undoes the whole call). price_pct / price_add change the product's price and every variant's own
--- price (2 decimals); a former price that is no longer above the new price is cleared.
+-- price (2 decimals); a former price that is no longer above the new price is cleared. preorder {on, ships_on}: a date
+-- given is set; on without one keeps each product's date, off without one clears it.
 create or replace function public.staff_store_bulk(p_ids uuid[], p_action text, p_value jsonb default null) returns int
 language plpgsql security definer set search_path = public as $$
 declare ids uuid[]; n int := 0; num numeric; t text[]; s text; d date; i int; ts1 timestamptz; ts2 timestamptz; sup bigint; b text;
@@ -1131,7 +1185,11 @@ begin
       exception when others then raise exception 'STORE_BULK' using errcode = 'P0001';
       end;
     end if;
-    update store_products set preorder = (v ->> 'on')::boolean, ships_on = d where id = any(ids); get diagnostics n = row_count;
+    -- on without a date keeps each product's ships_on; off without a date clears it (as the editor does)
+    update store_products set preorder = (v ->> 'on')::boolean,
+                              ships_on = case when d is not null then d when (v ->> 'on')::boolean then ships_on end
+     where id = any(ids);
+    get diagnostics n = row_count;
   elsif p_action = 'ship_ksa' then
     if jsonb_typeof(v) is distinct from 'boolean' then raise exception 'STORE_BULK' using errcode = 'P0001'; end if;
     update store_products set ship_ksa = (v #>> '{}')::boolean where id = any(ids); get diagnostics n = row_count;
