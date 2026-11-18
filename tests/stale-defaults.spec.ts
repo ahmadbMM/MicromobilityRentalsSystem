@@ -49,6 +49,21 @@ test('the staff queue opens on tonight\'s ride, even with a ride\'s mark on its 
   expect(await page.evaluate('S.sfSession')).toBe(`${today}-pw`);        // tonight's, even with a ride's mark on its id
 });
 
+// Bug hunt 2026-11-18: at 00:20 a night ride running to 01:00 is still the current one, closed for booking or not; the
+// next day's open session takes over once it has ended.
+test('after midnight the queue stays on last night\'s ride while it is still running', async ({ page }) => {
+  const late = { id: '2099-05-05', day: 'Tuesday', session_date: '2099-05-05', status: 'closed', capacity: 10, created_at: 1, bike_slots: '{"_time":"21:00 - 01:00"}' };
+  const morrow = { id: '2099-05-06', day: 'Wednesday', session_date: '2099-05-06', status: 'open', capacity: 10, created_at: 2, bike_slots: '{"_time":"21:00 - 23:00"}' };
+  await page.clock.setFixedTime(new Date('2099-05-06T00:20:00+03:00'));
+  await stubSupabase(page, { sessions: [late, morrow], queue_entries: [], bikes: [] });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  expect(await page.evaluate('_currentSessId()')).toBe('2099-05-05');
+  await page.clock.setFixedTime(new Date('2099-05-06T01:05:00+03:00'));
+  expect(await page.evaluate('_currentSessId()')).toBe('2099-05-06');
+});
+
 test('signing out drops the promo code and the add-ons picked on the account', async ({ page }) => {
   await stubSupabase(page, { queue_entries: [] });
   await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });

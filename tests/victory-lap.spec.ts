@@ -213,6 +213,40 @@ test.describe('@customer:vlap Victory Lap', () => {
     expect(paid).toContain('Receipt confirmed. Your ticket is paid.');
   });
 
+  // Bug hunt 2026-11-18: a place booked with a code (or re-priced by staff) costs less than the session's price, and the
+  // transfer asks for what the booking costs.
+  test('buying a ticket asks for the booking’s own price, not the session’s', async ({ page }) => {
+    const old = row('m8', { race: 'ws', div: 'so', shirt: 'M' }, { customer_id: 'c1', name: 'Sara Haddad', price: 75 });
+    await custBoot(page, { 'rpc:customer_vl_ticket': true, queue_entries: [old], 'rpc:my_bookings': [old] });
+    await page.evaluate(`_vtAsk('m8',true)`);
+    const g = page.locator('#vl-ticket-gate');
+    await g.locator('.vt-yn .toggle-btn').nth(1).click();
+    const amount = g.locator('.vt-bank .vt-row').first();
+    await expect(amount).toContainText('75');
+    await expect(amount).not.toContainText('150');
+  });
+
+  test('a team-code check refused for too many tries says to wait, not to check the connection', async ({ page }) => {
+    await custBoot(page, { 'rpc:vl_team_peek': { __rpcError: { status: 400, code: 'P0001', message: 'THROTTLED' } } });
+    await toStep2(page);
+    await page.locator('#vl-race-wrap .vl-race', { hasText: 'Mixed Doubles' }).click();
+    await page.locator('#vl-team-wrap .toggle-btn', { hasText: 'Join with a code' }).click();
+    await page.fill('#vl-code', 'vl 4k7q');
+    await page.locator('#vl-team-wrap .btn-secondary').click();
+    await expect(page.locator('.vl-peek-bad')).toHaveText('Too many tries from this network. Wait a few minutes and try again.');
+  });
+
+  // Bug hunt 2026-11-18: a gender tapped on the Arena step and left there is not the one Victory Lap uses once the
+  // account has its own (the step shows no toggle then, and the server checks the account's).
+  test('a gender left over from another race step does not change the races offered', async ({ page }) => {
+    await custBoot(page);
+    await toStep2(page);
+    await page.evaluate(`_runD().gender='male';renderRegister()`);
+    await expect(page.locator('#vl-g-wrap')).toHaveCount(0);
+    expect(await page.evaluate('_vlGenderNow()')).toBe('female');
+    await expect(page.locator('#vl-race-wrap .vl-race', { hasText: 'Women' }).first()).toBeVisible();
+  });
+
   test('a database without the ticket question lets the athlete through: the pop-up steps aside', async ({ page }) => {
     const old = row('m5', { race: 'ws', div: 'so', shirt: 'M' }, { customer_id: 'c1', name: 'Sara Haddad' });
     await custBoot(page, { queue_entries: [old], 'rpc:my_bookings': [old],

@@ -125,6 +125,29 @@ test('handing a rider a bike books a real queue entry and clears them off', asyn
   await expect.poll(() => patches.some((b) => /"status":"done"/.test(b))).toBe(true);
 });
 
+// Bug hunt 2026-11-18: with tonight's ride closed, a walk-up handed a bike from the whole list landed on tomorrow's
+// ride or on a past night left open, unseen. Staff are told instead, and aim the list at a ride.
+test('tonight\'s ride closed: a walk-up is booked onto no other night, and staff are told', async ({ page }) => {
+  const ksaDay = (n = 0) => new Date(Date.now() + 3 * 3600e3 + n * 864e5).toISOString().slice(0, 10);
+  const [td, lastWeek, tomorrow] = [ksaDay(0), ksaDay(-7), ksaDay(1)];
+  await openWaitlist(page, {
+    sessions: [
+      { id: td, day: 'Friday', session_date: td, capacity: 12, status: 'closed', created_at: 1 },
+      { id: lastWeek, day: 'Friday', session_date: lastWeek, capacity: 12, status: 'open', created_at: 2 },
+      { id: tomorrow, day: 'Saturday', session_date: tomorrow, capacity: 12, status: 'open', created_at: 3 },
+    ],
+    desk_waitlist: [walkup('w1', 'Walk Up')],
+  });
+  const inserts: string[] = [];
+  page.on('request', (r) => {
+    if (r.method() === 'POST' && r.url().includes('/rest/v1/queue_entries')) inserts.push(r.postData() || '');
+  });
+  await page.evaluate(`window.showCheckinModal=()=>{};giveDeskBike('w1')`);
+  await expect(page.locator('#toast-container')).toContainText('This ride isn\'t taking walk-ups');
+  await page.waitForTimeout(300);
+  expect(inserts).toHaveLength(0);
+});
+
 test("a waitlisted booking's position is still editable, since promotion follows it", async ({ page }) => {
   await openWaitlist(page, {
     // reordering needs somebody to reorder against: three waitlisted riders, W1..W3

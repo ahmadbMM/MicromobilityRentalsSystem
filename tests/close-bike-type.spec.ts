@@ -149,6 +149,18 @@ test.describe('@customer:reserve a booking already made on a closed type', () =>
     expect(await page.evaluate(`_regTypeShut(_sessDisp('${SHUT}'),'Road',1)`)).toBe(true);
   });
 
+  // Bug hunt 2026-11-18: a type staff hid from this rider since the booking was made is kept on an edit, as a closed one is.
+  test('a type hidden from the rider is kept on an edit of the row that holds it', async ({ page }) => {
+    await rider(page, { queue_entries: [row('q1', 1, 'Spec Rider', 'Hybrid', OPEN)] });
+    await page.evaluate(`S.loggedIn={...(S.loggedIn||getSession()),hidden_types:'Hybrid'}`);
+    await page.evaluate(atRiders(OPEN));
+    await expect.poll(() => page.evaluate('S.modifyEntryId')).toBe('q1');
+    await expect(pill(page, 'Hybrid')).toHaveAttribute('aria-checked', 'true');
+    await page.evaluate('validateRegInputs()');
+    expect(await page.evaluate('S.regBikeTypes[0]')).toBe('Hybrid');
+    expect(await page.evaluate(`_regTyBarred('Hybrid',_sessDisp('${OPEN}'))`)).toBe(true); // still barred for a new booking
+  });
+
   test('another type the booking does not hold stays closed on the edit', async ({ page }) => {
     await rider(page, { queue_entries: [row('q1', 1, 'Spec Rider', 'Hybrid')] });
     await page.evaluate(atRiders(SHUT));

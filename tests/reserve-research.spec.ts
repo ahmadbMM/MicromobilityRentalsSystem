@@ -121,6 +121,9 @@ test.describe('@customer:reserve the research round', () => {
     await expect(page.locator('#tab-register .bk-ok-t')).toHaveText('Not sent yet');
     await expect(page.locator('#tab-register .bk-ok-q')).toHaveCount(0);
     await expect(page.locator('#tab-register .ticket-card .cu-qr-box, #tab-register .ticket-card canvas')).toHaveCount(0);
+    // the card under it neither: no guessed number, no Wallet buttons for a booking the server does not have yet (bug hunt 2026-11-18)
+    await expect(page.locator('#tab-register .ticket-card .ticket-num')).toHaveCount(0);
+    await expect(page.locator('#tab-register .ticket-card .btn-wallet')).toHaveCount(0);
   });
 
   test('session rows and bike pills are radio groups; Details is an "i" named for its date (rows 11, 17)', async ({ page }) => {

@@ -12641,7 +12641,7 @@ function _vaHtml(){
     :`<div class="filter-row vx-bar" id="va-bar">
       <div class="${_srchCls('va',af.q)}" data-srch="va">${_artIcon('search',13)}<input id="va-q" class="search-input" aria-label="${esc(t('zvSearch'))}" placeholder="${esc(t('zvSearch'))}" value="${esc(af.q||'')}" data-on-input="${_on("_vaSearch",_P("value"))}">${_srchBtn()}</div>
       <button type="button" class="btn-sm btn-muted" aria-pressed="false" data-on-click="${_on("_vaSelMode")}">${esc(t('amSelBtn'))}</button>
-      ${_fPanel('va',main,'',_fS(()=>_vm().af,'day shirt'))}</div>`;
+      ${_fPanel('va',main,'',_fS(()=>_vm().af,'day shirt wait'))}</div>`;
   return`<div class="vx-card vx-list-card">${tools}<div class="va-list" id="va-list">${_vaRows()}</div></div>`;
 }
 function _vaF(k,v){const W=_vm();(W.af||(W.af={q:''}))[k]=String(v||'');renderVolunteers();}
@@ -13156,7 +13156,9 @@ function _n6wCertSessRows(id){
   return rows.map(([sid,v])=>`<div class="vm-res-row"><span>${esc(_vmSessLabel(sid))}<span class="am-meta"> · ${esc(_vmH(v.h))} ${esc(t('zvHoursUnit'))}</span></span><button type="button" class="btn-sm btn-primary" data-on-click="${_on("_n6wCertMakeSess",id,sid)}">${esc(t('zwCertMake'))}</button></div>`).join('')
     ||`<div class="am-meta">${esc(t('zvNoSessions'))}</div>`;
 }
-async function _n6wCertMakeSess(id,sid){
+// One certificate per tap: a second tap while the first is on the wire made a second live certificate (bug hunt 2026-11-18).
+function _n6wCertMakeSess(id,sid){return _busyRun('n6wCertS:'+id+':'+sid,()=>_n6wCertMakeSessGo(id,sid));}
+async function _n6wCertMakeSessGo(id,sid){
   const sess=_vmSess(sid);
   const r=await _n6wCall('staff_volunteer_cert_issue_session',{p_customer:id,p_session:sid,p_initiative:sess?_evName(sess):null,p_gender:_n6wCertGender()});
   if(r.error){if(_n6wAbsent(r.error)){toast(t('zwNeedsDb'),'info');return;}_n6wSay('staff_volunteer_cert_issue_session',r.error);return;}
@@ -13195,7 +13197,8 @@ async function _n6wCertListNoAccount(){
 function _n6wCertRows(L,id){
   return L.map(c=>`<div class="vm-res-row${c.revoked_at?' vm-off':''}"><span><b dir="ltr">${esc(c.serial)}</b> · ${c.kind&&c.kind!=='period'?esc(c.initiative||_vmSessLabel(c.session_id)):`${esc(shortDate(c.period_from))} – ${esc(shortDate(c.period_to))}`}${c.name&&!id?` · <bdi>${esc(c.name)}</bdi>`:''} · ${esc(_vmH(c.hours))} ${esc(t('zvHoursUnit'))}<span class="am-meta"> · ${esc(_bdgDay(c.issued_at))}${c.issued_by?' · '+esc(c.issued_by):''}${c.revoked_at?' · '+esc(t('zwRevoked')):''}</span></span>${c.revoked_at?'':`<span class="vd-res-acts"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_n6wCertPrintRow",id,c.id)}">${esc(t('repPrintNow'))}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_n6wCertRevoke",id,c.id)}">${esc(t('zwRevoke'))}</button></span>`}</div>`).join('')||`<div class="am-meta">${esc(t('zwCertNone'))}</div>`;
 }
-async function _n6wCertMake(id){
+function _n6wCertMake(id){return _busyRun('n6wCert:'+id,()=>_n6wCertMakeGo(id));}
+async function _n6wCertMakeGo(id){
   const to=document.getElementById('n6w-ct')?.value||'';
   const f=_n6wCertDayOnly()?to:(document.getElementById('n6w-cf')?.value||'');
   if(!f||!to||to<f){toast(t('zwCertBadDates'),'error');return;}
@@ -13249,7 +13252,8 @@ function _n6wCertCustomWords(){
     if(i&&(!i.value.trim()||known(k).includes(i.value.trim())))i.value=w[k];
   }
 }
-async function _n6wCertCustomMake(id){
+function _n6wCertCustomMake(id){return _busyRun('n6wCertX:'+(id||''),()=>_n6wCertCustomMakeGo(id));}
+async function _n6wCertCustomMakeGo(id){
   const g=x=>document.getElementById(x)?.value.trim()||'';
   const name=g('n6w-xn'),forWhat=g('n6w-xi');
   if(!name||!forWhat){toast(t('zwCertOwnNeeds'),'error');return;}
@@ -13803,7 +13807,7 @@ function _arHeadHtml(){
 // the emergency contact; plus the gender the races are split by). S.regVl holds the choices for the
 // session picked; the account's own details share Run for Her's draft (_runD) and fields.
 function _vlD(){const sid=S.selSession;if(!S.regVl||S.regVl.sid!==sid)S.regVl={sid,race:null,div:null,shirt:null,t5k:null,mode:'new',code:'',peek:null};return S.regVl;}
-function _vlGenderNow(){const r=S._runAcc&&S._runAcc.v,D=_runD(),ok=x=>x==='male'||x==='female';return ok(D.gender)?D.gender:ok(r&&r.gender)?r.gender:'';} // a pick on the step first: the Arena race lets it change
+function _vlGenderNow(){const r=S._runAcc&&S._runAcc.v,D=_runD(),ok=x=>x==='male'||x==='female',a=ok(r&&r.gender)?r.gender:'';if(a&&!_isArena(_sessGet(S.selSession)))return a;return ok(D.gender)?D.gender:a;} // a pick on the step first: the Arena race lets it change; Victory Lap shows no toggle once the account has a gender, so a pick left over from the Arena step is not used there (the server checks the account's, bug hunt 2026-11-18)
 function _vlJoining(V){return !!(V&&V.mode==='join'&&_vlIsDbl(V.race)&&V.peek&&V.peek.ok);}
 function _vlSetGender(g){_runD().gender=g;const V=_vlD();if(V.race&&VL_RACE_G[V.race]&&VL_RACE_G[V.race]!==g){V.race=null;V.peek=null;}else if(V.peek&&V.peek.ok&&V.peek.need&&V.peek.need!==g)V.peek={code:V.peek.code,err:'need',need:V.peek.need};renderRegister();} // a team code checked before the gender was picked (Mixed Doubles) is refused as _vlPeek does
 function _vlSetRace(r){const V=_vlD();if(V.race===r)return;V.race=r;V.peek=null;if(!_vlIsDbl(r))V.mode='new';renderRegister();}
@@ -13824,7 +13828,7 @@ async function _vlPeek(){
   let r;try{r=await sb.rpc('vl_team_peek',{p_id:c.id,p_token:c.session_token,p_session_id:V.sid,p_code:code});}catch(e){r={error:e};}
   if(S.regVl!==V||!V.peek||V.peek.code!==code)return;
   const row=r&&!r.error&&Array.isArray(r.data)?r.data[0]:null,g=_vlGenderNow();
-  if(!r||r.error)V.peek={code,err:'net'};
+  if(!r||r.error)V.peek={code,err:/THROTTLED/.test(String((r&&r.error&&r.error.message)||''))?'busy':'net'}; // too many checks from this network: wait, not a connection to fix
   else if(!row)V.peek={code,err:'none'};
   else if(row.is_full)V.peek={code,err:'full'};
   else if(row.need&&g&&row.need!==g)V.peek={code,err:'need',need:row.need};
@@ -13835,7 +13839,7 @@ function _vlPeekHtml(V){
   const p=V.peek;if(!p)return'';
   if(p.busy)return`<div class="vl-peek" role="status">${t('loadingLabel')}…</div>`;
   if(p.ok)return`<div class="vl-peek vl-peek-ok" role="status">${_cuIc('tick',16)}<span><strong dir="ltr">${esc(p.code)}</strong> · ${esc(_vlRaceTxt(p.race))} · ${esc(_vlDivTxt(p.div))}${p.partner?`<br>${esc(t('vlWithPartner').replace('{0}',p.partner))}`:''}</span></div>`;
-  const msg=p.err==='none'?t('vlErrNoTeam'):p.err==='full'?t('vlErrTeamFull'):p.err==='need'?t(p.need==='female'?'vlNeedWoman':'vlNeedMan'):t('errConnection');
+  const msg=p.err==='none'?t('vlErrNoTeam'):p.err==='full'?t('vlErrTeamFull'):p.err==='need'?t(p.need==='female'?'vlNeedWoman':'vlNeedMan'):p.err==='busy'?t('errTooManyTries'):t('errConnection');
   return`<div class="vl-peek vl-peek-bad" role="alert">${esc(msg)}</div>`;
 }
 function _vlPanelHtml(sess){
@@ -14148,9 +14152,10 @@ function _vtClose(){S._vt=null;renderVtGate();_defeRegPaint();}
 function _vtStep(st){const g=S._vt;if(!g||g.busy)return;g.step=st;g.err='';g.net=false;renderVtGate();}
 function _vtIbanFmt(v){return v.replace(/(.{4})/g,'$1 ').trim();}
 async function _vtCopy(v){try{await navigator.clipboard.writeText(v);toast(t('vtCopied'));}catch(_){toast(v,'info');}}
-// The bank details as rows, each value copyable; the amount is the session's price.
-function _vtBankHtml(s){
-  const ar=S.lang==='ar'||S.lang==='ur',price=s&&s.price!=null?Number(s.price):150,B=_isArena(s)?AR_BANK:VL_BANK;
+// The bank details as rows, each value copyable; the amount is the booking's own price (after a promo code or a staff
+// re-price), else the session's.
+function _vtBankHtml(s,e){
+  const ar=S.lang==='ar'||S.lang==='ur',ep=e&&e.price!=null&&e.price!==''?Number(e.price):NaN,price=isFinite(ep)?ep:s&&s.price!=null?Number(s.price):150,B=_isArena(s)?AR_BANK:VL_BANK;
   const row=(k,v,cp,ltr)=>`<div class="vt-row"><span class="vt-k">${esc(t(k))}</span><span class="vt-v"${ltr?' dir="ltr"':''}>${esc(v)}</span>${cp?`<button type="button" class="btn-sm btn-secondary vt-cp" aria-label="${esc(t('vtCopy')+' '+t(k))}" data-on-click="${_on("_vtCopy",cp)}">${t('vtCopy')}</button>`:''}</div>`;
   return`<div class="vt-bank">
     ${row('vtAmount',_sar(price).replace(/[⁦⁩]/g,''),'',true)}
@@ -14182,7 +14187,7 @@ function renderVtGate(){
     const q0=_qGet(g.id),paid=_vtPaid(q0),sent=_vtSent(q0),ar=_isArena(s);
     body=`<h2 id="vt-title" class="pg-title">${esc(t(ar?'arBuyTitle':'vtBuyTitle'))}</h2>
       <p id="vt-sub" class="pg-sub">${esc(t(ar?'arBuySub':'vtBuySub'))}</p>
-      ${_vtBankHtml(s)}
+      ${_vtBankHtml(s,q0||(S.lastTickets||[]).find(x=>x&&x.id===g.id))}
       <div class="vt-rc">
         <div class="vt-rc-l">${esc(t('vtRcptLabel'))}</div>
         ${(paid||sent)&&!g.img?`<div class="vt-done" role="status">${_cuIc(paid?'tick':'clock',16)}<span>${esc(t(paid?'vtPaidNote':'vtSentNote'))}</span></div>`:''}
@@ -14440,7 +14445,7 @@ function _infoFacts(s,next){
 let _infoFrom=null;
 function showEventInfo(ev){if(!_infoShowEv(ev))return;S._info={ev};_infoFrom=document.activeElement;_infoLoad();_infoPaint();}
 function showSessInfo(id){const s=_sessGet(id);if(!_infoShowSess(s))return;S._info={sid:id};_infoFrom=document.activeElement;_infoLoad();_infoPaint();}
-function _infoNextOf(ev){return allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&_evMatch(s,ev)).sort((a,b)=>String(a.session_date||a.id).localeCompare(String(b.session_date||b.id)))[0]||null;}
+function _infoNextOf(ev){return allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&!_sessEnded(s)&&_evMatch(s,ev)).sort(_sessOrder)[0]||null;} // not one over earlier today (the Reserve list drops it); same-day ones by start time
 const INFO_EV_TITLE={jcc:'landJccCardTitle',community:'landCommTitle',runher:'evRunHerName',vlap:'evVlapName',arena:'evArenaName',event:'landEventsCardTitle',snd96:'landSnd96CardTitle',petromin:'landPmDaysTitle'};
 function _infoPaint(){
   const I=S._info,m=document.getElementById('bike-info-modal');if(!I||!m)return;
@@ -16367,8 +16372,11 @@ function _autoSelectSession(){
 function _currentSessId(){
   const fd=!isAdmin(),today=todayStr(),day=s=>String(s.session_date||s.id).slice(0,10);
   const ss=allSessions().filter(s=>s.status!=='deleted'&&!(fd&&_isApprovalRide(s)));
-  const s=ss.filter(x=>_sessLive(x)&&day(x)===today).sort((a,b)=>_sessEnded(a)-_sessEnded(b)||_sessOrder(a,b))[0]
-    ||ss.filter(x=>day(x)<=today).sort((a,b)=>day(b).localeCompare(day(a))||String(b.id).localeCompare(String(a.id)))[0]
+  // Last night's ride still running past midnight (its end before its start, as _session_window reads it) comes first,
+  // open for booking or not: its riders are still bringing bikes back (bug hunt 2026-11-18).
+  const s=ss.filter(x=>day(x)<today&&!_sessEnded(x)).sort(_sessOrder)[0]
+    ||ss.filter(x=>_sessLive(x)&&day(x)===today).sort((a,b)=>_sessEnded(a)-_sessEnded(b)||_sessOrder(a,b))[0]
+    ||ss.filter(x=>day(x)<=today).sort((a,b)=>day(b).localeCompare(day(a))||_soStart(b).localeCompare(_soStart(a))||String(b.id).localeCompare(String(a.id)))[0]
     ||ss.filter(_sessLive).sort(_sessOrder)[0];
   return s?s.id:'all';
 }
@@ -17069,9 +17077,10 @@ function _mwRowSess(w){
 // belongs to no session at all and would otherwise vanish from every filtered view while its
 // rider is still standing at the desk.
 function _mwSessMatch(w){
+  const sid=_mwRowSess(w);
+  if(sid&&!isAdmin()&&_apprSessIds.has(sid))return false; // Front Desk never sees the Saturday side, as on the roster (2026-10-05): not even a booking an admin parked
   const sel=S._mwSess||'all';
   if(sel==='all')return true;
-  const sid=_mwRowSess(w);
   return sid===null||sid===sel;
 }
 
@@ -17923,7 +17932,13 @@ async function mwSetType(rowId,ty){
     if(!_freeSessIds.has(bk.sessionId)&&!bk.paid&&(bk.price??DEFAULT_PRICE)===priceForEntryType(bk,bk.typePreference||'Any')){
       patch.price=priceForEntryType(bk,ty);
     }
-    if(_writeErr(await sb.from('queue_entries').update(patch).eq('id',bk.id),'bike type'))return;
+    // The new fare only while the booking is still unpaid on the server: one paid on another device since this copy
+    // was read keeps the price it was paid at, and only its type changes (bug hunt 2026-11-18).
+    if(patch.price!==undefined){
+      const r=await sb.from('queue_entries').update(patch).eq('id',bk.id).eq('paid',false).select('id');
+      if(_writeErr(r,'bike type'))return;
+      if(!(r&&r.data&&r.data.length)){delete patch.price;if(_writeErr(await sb.from('queue_entries').update(patch).eq('id',bk.id),'bike type'))return;}
+    }else if(_writeErr(await sb.from('queue_entries').update(patch).eq('id',bk.id),'bike type'))return;
     bk.typePreference=ty;if(patch.price!==undefined)bk.price=patch.price;
   }
   // A walk-up's row holds its own price once a payment state was picked (Pending stores the fare):
@@ -18252,9 +18267,13 @@ async function _giveDeskBike(id){
   // Otherwise tonight's ride, as Bookings opens on. The first live session in date order was
   // often last week's: a night stays open or full after it ends, and nothing closes it, so the
   // rider, the capacity and the money all landed on a night long gone.
-  const _cur=_currentSessId();
-  const sess=_open.find(x=>x.id===_aimedMw)||_open.find(x=>x.id===_cur)||_open.find(x=>!_sessPastDay(x))||_open[0];
-  if(!sess){toast(t('noSessionsAvail'),'warning');return;}
+  // Never a night that is over (last night's still running past midnight is not), and no other night in place of tonight's
+  // when that one is closed: tomorrow's or last week's took the walk-up unseen. Staff are told and aim the list at a ride,
+  // as above (bug hunt 2026-11-18). Another ride of tonight's with bikes (a morning run is not one) still serves.
+  const _cur=_currentSessId(),_td=todayStr();
+  const _c=_open.find(x=>x.id===_cur&&(!_sessPastDay(x)||!_sessEnded(x)));
+  const sess=_aimedMw?_open.find(x=>x.id===_aimedMw):(_c||_open.filter(x=>String(x.session_date||x.id).slice(0,10)===_td).sort((a,b)=>_sessEnded(a)-_sessEnded(b))[0]);
+  if(!sess){toast(t(_open.length?'wlAimedClosedMsg':'noSessionsAvail'),'warning');return;}
   // Link a known customer account (phone, email, then name) so the booking shows in their My Bookings.
   let _match=_linkCustomer(w.name,w.phone,w.email);
   // The only account on the number is not always the rider's: the pop-up's extra riders share the first rider's phone,
@@ -19078,7 +19097,7 @@ const TB_KEY={queue:'tabQueue',lockers:'tabLockers',community:'tabPeople',cashie
 // open on the Dashboard; every other role keeps TB_TABS. Whatever the account cannot open drops out, as before.
 const N6U_TB={admin:['queue','sessions','community','cashier'],manager:['dashboard','queue','community','cashier'],owner:['dashboard','queue','community','analytics']};
 function _n6uTbDef(){return((_own(N6U_TB,S.staffRole)&&N6U_TB[S.staffRole])||TB_TABS).filter(_deskTabOk).slice(0,4);}
-function _tbMine(){const l=_pref('tabbar',null);return Array.isArray(l)&&l.length?l.map(k=>k==='customers'?'community':k).filter((k,i,a)=>typeof k==='string'&&a.indexOf(k)===i&&_staffSections().includes(k)).slice(0,4):null;}
+function _tbMine(){const l=_pref('tabbar',null),m=Array.isArray(l)&&l.length?l.map(k=>k==='customers'?'community':k).filter((k,i,a)=>typeof k==='string'&&a.indexOf(k)===i&&_staffSections().includes(k)&&_deskTabOk(k)).slice(0,4):[];return m.length?m:null;} // a pick of sections the account no longer has is no pick: the role's usual tabs (bug hunt 2026-11-18)
 function _tbRender(){
   const v=document.getElementById('view-staff');if(!v)return;
   let bar=document.getElementById('staff-tabbar');
@@ -19104,9 +19123,14 @@ async function _n6rRotaLoad(force){
   S._n6rRotaBusy=true;S._n6rRotaAt=Date.now();
   try{
     const since=new Date(Date.parse(todayStr()+'T12:00:00Z')-14*864e5).toISOString().slice(0,10);
-    const r=await sb.from('session_rota').select('id,session_id,role,name').gte('session_id',since).order('created_at').limit(3000);
-    if(r.error){if(/session_rota|PGRST205|42P01/i.test(String(r.error.message||'')+' '+String(r.error.code||'')))S._n6rRotaNo=true;return;}
-    const m=new Map();(r.data||[]).forEach(x=>{if(!m.has(x.session_id))m.set(x.session_id,[]);m.get(x.session_id).push(x);});
+    // Page by page: the server answers at most 1,000 rows a request, and the newest (the nights ahead) were the ones cut.
+    const all=[];
+    for(let from=0;from<50000;from+=1000){
+      const r=await sb.from('session_rota').select('id,session_id,role,name').gte('session_id',since).order('created_at').order('id').range(from,from+999);
+      if(r.error){if(/session_rota|PGRST205|42P01/i.test(String(r.error.message||'')+' '+String(r.error.code||'')))S._n6rRotaNo=true;return;}
+      const d=r.data||[];all.push(...d);if(d.length<1000)break;
+    }
+    const m=new Map();all.forEach(x=>{if(!m.has(x.session_id))m.set(x.session_id,[]);m.get(x.session_id).push(x);});
     S._n6rRota=m;
     if(S.view==='staff'&&document.visibilityState!=='hidden'){if(S.staffTab==='sessions')renderSessions();else if(S.staffTab==='queue'&&m.size)renderStaffQueue();}
   }catch(_){}finally{S._n6rRotaBusy=false;}
@@ -19292,6 +19316,8 @@ function _regTyBarred(ty,sess){
 
 // A type closed on this ride (_typeClosed) is shut to a row of the form: never picked, never carried over. A rider
 // changing a booking keeps the type that row already holds, as the database does (_type_closed_guard).
+// A booking being changed keeps the type a row already holds, though staff hid it from this rider since (bug hunt 2026-11-18).
+function _regTyKept(ty,i){if(!S.modifyEntryId||!ty)return false;const e=_modEntries(S.loggedIn||getSession(),S.selSession)[i];return !!e&&e.typePreference===ty;}
 function _regTypeShut(s,ty,i){
   if(!_typeClosed(s,ty)&&!_regTyFull(s,ty,i))return false;
   if(!S.modifyEntryId)return true;
@@ -19700,7 +19726,7 @@ function renderRegister(){
     
     // Types hidden for this customer drop out of their picker (fall back to the full list
     // if staff somehow hid everything).
-    let _tyOpts=bikeTypeOpts(_ownOffered(_selSessObj),_noCarbonSel).filter(ty=>ty!=='Any'&&!_regTypeHidden(ty));
+    let _tyOpts=bikeTypeOpts(_ownOffered(_selSessObj),_noCarbonSel).filter(ty=>ty!=='Any'&&(!_regTypeHidden(ty)||_regTyKept(ty,i)));
     if(!_tyOpts.length)_tyOpts=bikeTypeOpts(_ownOffered(_selSessObj),_noCarbonSel).filter(ty=>ty!=='Any');
     // Our bikes all taken for members (member_cap): own bike only, picked for them.
     if(_mbOnlyOwn){if(!_tyOpts.includes('Own'))_tyOpts.push('Own');if(S.regBikeTypes[i]!=='Own'){S.regBikeTypes[i]='Own';}}
@@ -19773,8 +19799,8 @@ function renderRegister(){
   function renderOneTicket(tkt,idx,total){
     // v2 ticket: centered queue number over a dashed perforation rule, 4 detail columns,
     // 124px QR on a white tile captioned "Scan on arrival", ghost calendar + directions actions.
-    const _sess=_sessDisp(tkt.sessionId),_hold=_arHold(_sess,tkt);
-    const qrHtml=_hold||_tkPending(tkt)?'':ticketQR(bookingRef(tkt),124,_qrTone(_sess,[tkt])); // not sent yet: nothing to scan (row 2)
+    const _sess=_sessDisp(tkt.sessionId),_hold=_arHold(_sess,tkt),_pend=_tkPending(tkt);
+    const qrHtml=_hold||_pend?'':ticketQR(bookingRef(tkt),124,_qrTone(_sess,[tkt])); // not sent yet: nothing to scan (row 2), no number (the server gives it) and no Wallet
     const _commT=_isApprovalRide(_sess); // a reservation-style ticket: no number, meet point instead of directions
     const sessTime=sessionTime(_sess);
     // When to turn up. On a ride that hands out bikes that is when they start going out; on
@@ -19809,13 +19835,13 @@ function renderRegister(){
       <div class="ticket-top">
         <div class="ticket-num-label wl-loud">${t('wlOnList')}</div>
         ${_wlc?_wlCollectHtml(_sess):''}
-        <div class="ticket-num">#${tkt.queueNum}</div>
+        ${_pend?'':`<div class="ticket-num">#${tkt.queueNum}</div>`}
         <div class="wl-note">${t('wlPosNoNumMsg')}</div>
         <div class="ticket-qr-wrap">${qrHtml}</div>
       </div>`:`
       <div class="ticket-top">
-        <div class="ticket-num-label">${t(_isBlood(_sess)?(_bldVis(tkt)?'bldVisNumLabel':'bldNumLabel'):_isRun(_sess)?'runNumLabel':_isRace(_sess)?'vlNumLabel':'queueNumLabel')}</div>
-        <div class="ticket-num">#${tkt.queueNum}</div>
+        ${_pend?`<div class="ticket-num-label">${t('tkNotSentTitle')}</div>`:`<div class="ticket-num-label">${t(_isBlood(_sess)?(_bldVis(tkt)?'bldVisNumLabel':'bldNumLabel'):_isRun(_sess)?'runNumLabel':_isRace(_sess)?'vlNumLabel':'queueNumLabel')}</div>
+        <div class="ticket-num">#${tkt.queueNum}</div>`}
         <div class="ticket-qr-wrap">${qrHtml}</div>
       </div>`}
       <div class="ticket-cols">
@@ -19831,7 +19857,7 @@ function renderRegister(){
       ${_vlOf(tkt)?`<div class="vl-tk-wrap">${_vlTkHtml([tkt],_sess,false)}</div>`:''}
       ${_isBlood(_sess)?_bldTkHtml(tkt,_sess,false):''}
       ${(_owe>0&&!_isRace(_sess))?`<div class="price-note tk-owe">${esc(t('tkPayAmount').replace('{0}',_sar(_owe)))}</div>`:''}
-      ${(_owe>0)?_cwPaySlot([tkt],_sess):''}
+      ${(_owe>0&&!_pend)?_cwPaySlot([tkt],_sess):''}
       ${(!_wl&&_needsBike(_sess))?`<div class="price-note">${t(_commT?'tkHelmetFree':'tkHelmetLine')}</div>`:''}
       ${_spotSaid(_sess)?_revealNoteHtml(_sess):''}
       <div class="cu-tk-acts">
@@ -19844,7 +19870,7 @@ function renderRegister(){
           ${_meetsAt(_sess)?t('meetPointLbl'):t('ticketDirections')}
         </a>`}
       </div>
-      ${(!_wl&&_hasWallet()&&_walletOk(_sess,[tkt]))?`<div class="wallet-slot cu-tk-wallet"><button type="button" class="btn-wallet" data-on-click="${_on("addBookingToWallet",tkt.id,_EL)}" aria-label="${t('addToWallet')}">${WALLET_GLYPH} ${t('addToWallet')}</button></div>`:''}${(!_wl&&_hasGWallet()&&_gwReady!==false&&_walletOk(_sess,[tkt]))?`<div class="wallet-slot cu-tk-wallet"${_gwWait()}><button type="button" class="btn-wallet gwallet" data-on-click="${_on("addBookingToGWallet",tkt.id,_EL)}" aria-label="${t('addToGWallet')}">${t('addToGWallet')}</button></div>`:''}
+      ${(!_wl&&!_pend&&_hasWallet()&&_walletOk(_sess,[tkt]))?`<div class="wallet-slot cu-tk-wallet"><button type="button" class="btn-wallet" data-on-click="${_on("addBookingToWallet",tkt.id,_EL)}" aria-label="${t('addToWallet')}">${WALLET_GLYPH} ${t('addToWallet')}</button></div>`:''}${(!_wl&&!_pend&&_hasGWallet()&&_gwReady!==false&&_walletOk(_sess,[tkt]))?`<div class="wallet-slot cu-tk-wallet"${_gwWait()}><button type="button" class="btn-wallet gwallet" data-on-click="${_on("addBookingToGWallet",tkt.id,_EL)}" aria-label="${t('addToGWallet')}">${t('addToGWallet')}</button></div>`:''}
     </div>`;
   }
   const tickets=S.lastTickets||[];
@@ -20053,7 +20079,7 @@ function renderRegister(){
         <div class="cu-sum-lbl">${t('reviewTotalLabel')}</div>
         <div class="cu-sum-total"><bdi>${_sarA(esc(grandStr))}</bdi></div>
       </div>
-      ${_cwReviewSlot(_selSessObj,grandStr,_freeSel,_promoAf!=null?_promoAf+_xtra:totalMax+_xtra)}
+      ${_cwReviewSlot(_selSessObj,grandStr,_freeSel||isModifyMode,_promoAf!=null?_promoAf+_xtra:totalMax+_xtra)/* not on an edit: its save takes nothing from the wallet (the ticket's own switch pays the rows after) */}
       ${_isRace(_selSessObj)?`<div class="price-note vl-pay-note">${t(_isArena(_selSessObj)?'arPriceNote':'vlPriceNote')} ${esc(_vlPayLine(_selSessObj))}</div>`:''}`;
     })()}</div>`}
     ${waiverCard}
@@ -20520,7 +20546,7 @@ function validateRegInputs(){
   }
   const _vSess=_sessDisp(S.selSession);
   for(let i=0;i<qty;i++){
-    if(_regTyBarred(S.regBikeTypes[i],_vSess))S.regBikeTypes[i]=undefined; // hidden from this rider: asked again (2026-10-05)
+    if(_regTyBarred(S.regBikeTypes[i],_vSess)&&!_regTyKept(S.regBikeTypes[i],i))S.regBikeTypes[i]=undefined; // hidden from this rider: asked again (2026-10-05), unless the row being changed holds it
     if(_regTypeShut(_vSess,S.regBikeTypes[i],i))S.regBikeTypes[i]=undefined; // closed on this ride since it was picked: asked again
     if(S.regBikeTypes[i]==='Any'||S.regBikeTypes[i]==='None')S.regBikeTypes[i]=undefined; // Any is staff's to give: the rider picks a bike (2026-10-09); None is no bike, never one on a bike night (bug hunt 2026-10-28)
     if(!S.regBikeTypes[i]){
@@ -21415,7 +21441,7 @@ async function submitModifyBooking(){
     toast(t('toastBookingUpdated'));
   }
 
-  S.modifyEntryId=null;S._modKey=null;S.selSession=null;S.regStep=1;S.waiverOk=false;S._waiverSess=null;
+  S.modifyEntryId=null;S._modKey=null;S.selSession=null;S.regStep=1;S.waiverOk=false;S._waiverSess=null;S._cwUse=false;
   S.regBikeSizes=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRiderNames=[];S.regQty=1;S.regBikeHeights=[];
   S.regSubmitting=false; // before the render so the confirm button comes back enabled
   renderRegister();renderMyRides();

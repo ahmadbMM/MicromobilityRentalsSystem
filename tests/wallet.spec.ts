@@ -328,6 +328,17 @@ test.describe('@customer:account wallet', () => {
     expect(free).toBe('');
   });
 
+  // Bug hunt 2026-11-18: an edit's save takes nothing from the wallet, so its review offers no switch that says it does.
+  test('editing a booking draws no Wallet switch on the review', async ({ page }) => {
+    await rider(page, { queue_entries: [bk('q1', 1)], 'rpc:my_bookings': [bk('q1', 1)], 'rpc:customer_wallet': mine });
+    await page.evaluate(`S._cwUse=true;S.lastTickets=[];S.selEvent='jcc';S.selSession='s1';S.regStep=2;setCustTab('register')`);
+    await expect.poll(() => page.evaluate('S.modifyEntryId')).toBe('q1');
+    await page.evaluate(`S.waiverOk=true;S._waiverSess=S.selSession;S.regStep=3;renderRegister()`);
+    await expect(page.locator('#reg-sum')).toBeVisible();
+    await expect(page.locator('#reg-sum .cw-use-slot')).toHaveCount(0);
+    expect(await page.evaluate('S._cwUse')).toBe(false);
+  });
+
   test('what is left is what the ticket and the money read', async ({ page }) => {
     const held = bk('q1', 1, { price: 80, wallet_paid: 50 });
     await rider(page, { queue_entries: [held], 'rpc:my_bookings': [held], 'rpc:customer_wallet': { balance: 0, rows: [] } });
