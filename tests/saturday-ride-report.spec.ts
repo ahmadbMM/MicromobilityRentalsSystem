@@ -1,8 +1,11 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
-import { tapReports, lastReport, viewerFrame } from './helpers/reports';
+import { tapReports, lastReport, reports, viewerFrame } from './helpers/reports';
 
-// The Saturday Social Ride report (2026-11-18, migrations 20261119130500 and 20261119141500): every booking given a place
+const reportsCount = async (page: Page) => (await reports(page)).length;
+
+// The Saturday Social Ride report (2026-11-18, migrations 20261119130500, 20261119141500 and 20261119150000), in three
+// versions that are reports of their own: checked in, bookings before check-ins began, and every booking given a place
 // since the first Saturday ride, checked in or not (five bookings count five), the unique riders, the first ride's date and more, from one staff-only server call, opened from
 // its card in Reports > Rides and bookings and extracted through the viewer (Print, PDF, Excel, CSV).
 
@@ -13,7 +16,7 @@ const REPORT = {
     attendances: 2253, checked_in: 1847, not_checked_in: 29, unique_riders: 825, first_ride: '2099-01-03', rides_held: 3, avg_per_ride: 115.4,
     best_count: 180, best_date: '2099-01-10', last_count: 135, last_date: '2099-01-17', prev_count: 137, prev_date: '2099-01-10',
     last_new: 29, repeat_riders: 318, repeat_pct: 46, five_plus: 121, five_plus_pct: 17.5, most_rides: 15, rides_per_rider: 2.67,
-    came_back_pct: 48, no_shows: 377, cancellations: 444, noshow_rides: 2, show_rate: 70.4, groups_from: '2099-01-10',
+    came_back_pct: 48, no_shows: 377, cancellations: 444, noshow_rides: 2, show_rate: 70.4, groups_from: '2099-01-10', checkin_from: '2026-09-05',
   },
   rides: [
     { date: '2099-01-03', state: 'held', attended: 11, checked_in: 8, not_checked_in: 3, first_timers: 11, returning: 0, no_shows: 0, cancelled: 17, requests: 0, beginner: 0, intermediate: 0, own_bike: 0, riders_to_date: 10, attended_to_date: 11, capacity: 40 },
@@ -38,6 +41,7 @@ async function boot(page: Page, answer: { status: number; body: unknown }) {
   await stubSupabase(page, { sessions: [], queue_entries: [] });
   await page.route(/\/rest\/v1\/rpc\/staff_saturday_ride_report/, (r) => {
     (page as unknown as { __calls?: number }).__calls = ((page as unknown as { __calls?: number }).__calls || 0) + 1;
+    (page as unknown as { __modes?: string[] }).__modes = [...((page as unknown as { __modes?: string[] }).__modes || []), (r.request().postDataJSON() || {}).p_mode];
     return r.fulfill({ status: answer.status, headers: json, body: JSON.stringify(answer.body) });
   });
   await page.route(/\/rest\/v1\/rpc\/report_log_add/, (r) => r.fulfill({ status: 200, headers: json, body: JSON.stringify({ id: 9, no: 'MM-RPT-2099-00009' }) }));
@@ -47,14 +51,34 @@ async function boot(page: Page, answer: { status: number; body: unknown }) {
 }
 
 test.describe('@staff:reports the Saturday Social Ride report', () => {
-  test('its card is in Reports for the accounts that open Analytics, not for the front desk', async ({ page }) => {
+  test('its three versions are cards of their own in Reports for the accounts that open Analytics, not for the front desk', async ({ page }) => {
     await boot(page, { status: 200, body: REPORT });
     await page.evaluate(`setStaffTab('reports')`);
-    const card = page.locator('#tab-reports .rp2-card[data-rp2="satride"]');
-    await expect(card).toBeVisible();
-    await expect(card).toContainText('Saturday Social Ride report');
+    await expect(page.locator('#tab-reports .rp2-card[data-rp2="satci"]')).toContainText('Saturday Social Ride report: checked in');
+    await expect(page.locator('#tab-reports .rp2-card[data-rp2="satmx"]')).toContainText('Saturday Social Ride report: bookings before check-ins began');
+    await expect(page.locator('#tab-reports .rp2-card[data-rp2="satride"]')).toContainText('Saturday Social Ride report: all bookings');
     await page.evaluate(`S.staffRole='frontdesk';S._isAdmin=false;renderReports()`);
-    await expect(page.locator('#tab-reports .rp2-card[data-rp2="satride"]')).toHaveCount(0);
+    await expect(page.locator('#tab-reports .rp2-card[data-rp2^="sat"]')).toHaveCount(0);
+  });
+
+  test('each card asks the server for its own version and names what it counts', async ({ page }) => {
+    await boot(page, { status: 200, body: REPORT });
+    await tapReports(page);
+    await page.evaluate(`setStaffTab('reports')`);
+    await page.locator('#tab-reports .rp2-card[data-rp2="satci"] .rp2-go').click();
+    await expect.poll(() => reportsCount(page)).toBe(1);
+    const ci = await lastReport(page);
+    expect(ci).toContain('Total attendances');
+    expect(ci).not.toContain('Given a place, never checked in'); // a check-in is the booking: nothing left unchecked
+    expect(ci).toMatch(/<th>Date<\/th><th>Checked in<\/th><th>No-show<\/th><th>First-timers<\/th>/);
+    expect(ci).toContain('An attendance is a booking staff checked in');
+    await page.locator('#tab-reports .rp2-card[data-rp2="satmx"] .rp2-go').click();
+    await expect.poll(() => reportsCount(page)).toBe(2);
+    const mx = await lastReport(page);
+    expect(mx).toContain('Total attendances');
+    expect(mx).toMatch(/Before 5 Sept? 2026, when staff began checking riders in one by one/); // the browser's month: Sep or Sept
+    expect(mx).toMatch(/<th>Date<\/th><th>Bookings<\/th><th>Checked in<\/th>/);
+    expect((page as unknown as { __modes?: string[] }).__modes).toEqual(['checked_in', 'mixed']);
   });
 
   test('Open draws every booking, the unique riders, the first ride and the tables from the server', async ({ page }) => {
@@ -81,7 +105,7 @@ test.describe('@staff:reports the Saturday Social Ride report', () => {
     expect(html).toContain('<bdi>Female</bdi>');
     expect(html).toContain('<bdi>Not given</bdi>');
     expect(html).toContain('<bdi>Other</bdi>');
-    expect(html).toContain('Ride group, bookings since 10 Jan 2099');
+    expect(html).toContain('Ride group, since 10 Jan 2099');
     expect(html).toContain('<bdi>134</bdi>'); // coming up: bookings so far
     expect(html).not.toMatch(/Rider\b.*05\d{8}/); // counts only, no names or phones
   });
@@ -89,7 +113,7 @@ test.describe('@staff:reports the Saturday Social Ride report', () => {
   test('the viewer extracts it: Excel is a workbook, a second tap while it loads opens it once', async ({ page }) => {
     await boot(page, { status: 200, body: REPORT });
     await page.evaluate(`window.__x=[];const _B=window.Blob;window.Blob=function(p,o){window.__x.push({type:o&&o.type,parts:p});return new _B(p,o);};`);
-    await page.evaluate(`Promise.all([_srrOpen(),_srrOpen()])`);
+    await page.evaluate(`Promise.all([_srrOpen('all'),_srrOpen('all')])`);
     const fr = await viewerFrame(page);
     await expect(fr.locator('.rx-main .total-item.dark .total-num')).toHaveText('2253');
     expect((page as unknown as { __calls?: number }).__calls).toBe(1);
@@ -99,7 +123,7 @@ test.describe('@staff:reports the Saturday Social Ride report', () => {
 
   test('before the database update it says so and opens nothing', async ({ page }) => {
     await boot(page, { status: 404, body: { code: 'PGRST202', message: 'Could not find the function public.staff_saturday_ride_report' } });
-    await page.evaluate(`_srrOpen()`);
+    await page.evaluate(`_srrOpen('all')`);
     await expect(page.locator('#toast-container')).toContainText('Waiting for the database update.');
     await expect(page.locator('#rx-modal .rx-frame')).toHaveCount(0);
   });
