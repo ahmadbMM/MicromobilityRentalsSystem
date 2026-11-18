@@ -7983,6 +7983,7 @@
   "lkAddNone": "Esses cacifos já existem",
   "lkRetireQ": "Retirar o cacifo {0}?",
   "lkRehomed": "Reservas retiradas deste cacifo: {0}",
+  "lkRehomeLeft": "Reservas que continuam neste cacifo: {0}",
   "lkLinkCopied": "Ligação copiada",
   "lkHistEmpty": "Nenhum aluguer de cacifos nos últimos 60 dias",
   "lkSearch": "Procurar um nome ou cacifo",

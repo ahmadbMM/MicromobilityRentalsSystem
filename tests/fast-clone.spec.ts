@@ -91,6 +91,12 @@ test.describe('@staff:fast-clone Fast clone asks only for a date and a status', 
     expect([fu.status, fu.draft]).toEqual(['full', false]);
   });
 
+  test('Copy a week and Fast clone keep the Arabic name, the members\' waitlist and the race settings (bug hunt 2026-11-18)', async ({ page }) => {
+    await staff(page, [JCC]);
+    const r = (await page.evaluate(`_n6sCopyRow({..._sessGet('${JCC.id}'),member_cap:10,member_wl:15,vl:{races:['r1']}},7)`)) as Record<string, unknown>;
+    expect(r).toMatchObject({ session_date: '2099-03-10', title_ar: 'ركوب ليلي', member_cap: 10, member_wl: 15, vl: { races: ['r1'] } });
+  });
+
   test('a Petromin night keeps its mark, takes tonight\'s collection time and no invitation', async ({ page }) => {
     await staff(page, [PM]);
     const r = (await page.evaluate(`_fcRow(_sessGet('${PM.id}'),'2099-03-11','open')`)) as Record<string, unknown>;

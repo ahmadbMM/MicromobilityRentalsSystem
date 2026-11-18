@@ -507,6 +507,15 @@ test.describe('@staff:lockers round two', () => {
     await expect(page.getByRole('button', { name: 'Export CSV' })).toBeEnabled();
   });
 
+  test('the history reads the house and refund columns: a free or refunded locker says so, not paid at Sales (bug hunt 2026-11-18)', async ({ page }) => {
+    const urls: string[] = [];
+    page.on('request', (r) => { if (r.method() === 'GET' && /\/rest\/v1\/locker_rentals/.test(r.url())) urls.push(decodeURIComponent(r.url())); });
+    await staff(page, { locker_rentals: [rent('H1', { day: ksaDay(-1), status: 'returned', locker_id: 'L1', name: 'Rana Rider', price: 0, house: true, refunded: 10, pay: 'wallet', receipt_id: 'rc1' })] });
+    await page.evaluate(`setStaffTab('lockers');_lkView('history')`);
+    await expect(page.locator('#lk-hist')).toContainText('On the house · refunded');
+    expect(urls.some((u) => /order=day\.desc/.test(u) && /select=[^&]*house,refunded/.test(u))).toBe(true);
+  });
+
   test('items left behind: a note, the state, kept until 14 days after; WhatsApp to the rider; saved to locker_items', async ({ page }) => {
     const w = writes(page, 'locker_items');
     await staff(page, { locker_items: [] });

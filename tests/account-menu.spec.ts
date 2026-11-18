@@ -111,6 +111,18 @@ test.describe('@customer:account the account menu and its pages', () => {
     expect(saves).toHaveLength(0);
   });
 
+  test('a bike type picked and not saved is still saved after the tab is painted again (bug hunt 2026-11-18)', async ({ page }) => {
+    await open(page);
+    const saves = sent(page, 'customer_update_profile');
+    await page.evaluate(`setCustTab('account','riding')`);
+    await page.locator('#atp-Mountain').click();
+    await page.evaluate(`renderAccount()`); // the deletion or consent answer, a language switch, the tab tapped again
+    await expect(page.locator('#atp-Mountain')).toHaveClass(/active/);
+    await page.locator('#acc-save-riding').click();
+    await expect.poll(() => saves.length).toBe(1);
+    expect(saves[0]).toMatchObject({ p_type_preference: 'Mountain' });
+  });
+
   test('leaving a page with unsaved edits asks first: Keep editing stays, Discard goes back to the menu', async ({ page }) => {
     await open(page);
     await row(page, 'personal').click();

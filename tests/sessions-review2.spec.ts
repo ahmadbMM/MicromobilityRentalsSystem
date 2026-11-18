@@ -63,12 +63,15 @@ test.describe('@staff:sessions the Sessions section, second round', () => {
 
   test('Announce gives English and Arabic words with the booking link', async ({ page }) => {
     await open(page);
-    await page.evaluate(`selectSessionDetail('2099-03-03')`);
+    await page.evaluate(`Object.assign(_sessGet('2099-03-03'),{title:'Night ride',title_ar:'ركوب ليلي'});selectSessionDetail('2099-03-03')`);
     await page.locator('#tab-sessions .sess-detail-actions .sh-more').click(); // a tile in the detail's More (staff round s10)
     await page.getByRole('menuitem', { name: 'Announce' }).click();
     const dlg = page.getByRole('dialog', { name: /Announce/ });
-    await expect(dlg.locator('#n6r-ann-en')).toHaveValue(/is open for booking.*\?ev=jcc&session=2099-03-03/s);
-    await expect(dlg.locator('#n6r-ann-ar')).toHaveValue(/الحجز مفتوح/);
+    // the link above the words, not after them (the booking link opens every prepared message; bug hunt 2026-11-18)
+    await expect(dlg.locator('#n6r-ann-en')).toHaveValue(/\?ev=jcc&session=2099-03-03\n\nNight ride is open for booking/);
+    await expect(dlg.locator('#n6r-ann-en')).not.toHaveValue(/Book here/);
+    // the Arabic text names the Arabic title
+    await expect(dlg.locator('#n6r-ann-ar')).toHaveValue(/\?ev=jcc&session=2099-03-03\n\nالحجز مفتوح الآن في ركوب ليلي/);
     await expect(dlg.locator('#n6r-ann-link')).toHaveValue(/\?ev=jcc&session=2099-03-03$/);
   });
 
@@ -128,6 +131,20 @@ test.describe('@staff:sessions the Sessions section, second round', () => {
     expect(await page.evaluate(`_n6rLeadText(_sessGet('2099-03-03'))`)).toContain('Sara');
     await page.evaluate(`_ssToBookings('2099-03-03')`);
     await expect(page.locator('#tab-queue .n6r-rota-line')).toContainText('Lead: Sara');
+  });
+
+  test('a name added while the rota is unread waits for the read and keeps every other night\'s rota (bug hunt 2026-11-18)', async ({ page }) => {
+    await open(page, '/sessions', { session_rota: [{ id: 'r1', session_id: '2099-03-03', role: 'lead', name: 'Sara' }, { id: 'r2', session_id: '2099-03-05', role: 'lead', name: 'Huda' }] });
+    await page.evaluate(`selectSessionDetail('2099-03-03')`);
+    await expect(page.locator('#tab-sessions .n6r-box')).toContainText('Sara');
+    await page.evaluate(`S._n6rRota=null;S._n6rRotaAt=Date.now()`); // a first read that failed: not asked again for ten minutes
+    const w = writes(page, /\/rest\/v1\/session_rota/);
+    await page.locator('#n6r-rr').selectOption('desk');
+    await page.locator('#n6r-rn').fill('Omar');
+    await page.locator('#tab-sessions .n6r-rota-add').getByRole('button', { name: 'Add' }).click();
+    await expect.poll(() => w.length).toBe(1);
+    await expect(page.locator('#tab-sessions .n6r-box')).toContainText('Omar');
+    expect(await page.evaluate(`[_n6rRotaOf('2099-03-03').map(x=>x.name).sort().join(','),_n6rRotaOf('2099-03-05').map(x=>x.name).join(',')]`)).toEqual(['Omar,Sara', 'Huda']);
   });
 
   test('minimum riders stay hidden until the Settings switch, then a short session is flagged and offers the cancel', async ({ page }) => {
