@@ -212,9 +212,13 @@ grant execute on function public.member_interests_set(text, text, text[]) to ano
 alter table public.ask_pages add column if not exists interest_keys text[] not null default '{}';
 alter table public.ask_pages drop constraint if exists ask_pages_audience_check;
 alter table public.ask_pages add constraint ask_pages_audience_check check (audience in ('link', 'accounts', 'tags', 'interests'));
+-- The list is written out here, not read from _interest_keys(): staff write ask_pages as themselves (the table's RLS
+-- policies), and a CHECK runs its functions as the writing role, which may not execute _interest_keys() (revoked from
+-- clients above); every staff save of an Ask page would fail with 42501. Keep this list the same as _interest_keys().
 alter table public.ask_pages drop constraint if exists ask_pages_interests;
 alter table public.ask_pages add constraint ask_pages_interests
-  check (cardinality(interest_keys) <= 12 and interest_keys <@ public._interest_keys()
+  check (cardinality(interest_keys) <= 12
+         and interest_keys <@ array['saturday', 'circuit', 'road', 'petromin', 'women', 'learn', 'runs', 'races', 'swim', 'yoga', 'farm', 'charity']::text[]
          and (audience <> 'interests' or cardinality(interest_keys) >= 1));
 
 -- Whether this account (null: nobody signed in) may see the page: its audience, then the rules that narrow it
@@ -357,6 +361,15 @@ begin
   end if;
   if position('member_interests' in pg_get_functiondef('public._purge_old(boolean)'::regprocedure)) = 0 then
     raise exception '_purge_old does not delete interests';
+  end if;
+  -- staff write ask_pages as themselves: none of its CHECKs may call a function clients cannot execute
+  if exists (select 1 from pg_constraint c where c.conrelid = 'public.ask_pages'::regclass and c.contype = 'c'
+              and position('_interest_keys(' in pg_get_constraintdef(c.oid)) > 0) then
+    raise exception 'an ask_pages CHECK calls _interest_keys(), which staff cannot execute';
+  end if;
+  if (select array_agg(x order by x) from unnest(public._interest_keys()) x)
+     is distinct from (select array_agg(x order by x) from unnest(array['saturday', 'circuit', 'road', 'petromin', 'women', 'learn', 'runs', 'races', 'swim', 'yoga', 'farm', 'charity']::text[]) x) then
+    raise exception 'ask_pages_interests lists other keys than _interest_keys()';
   end if;
 end $chk$;
 
