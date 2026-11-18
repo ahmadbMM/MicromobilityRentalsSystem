@@ -23,13 +23,15 @@
 --  3. Categories made by staff (store_categories, two levels, a template and filters each), seeded with the six the
 --     staff app shows today; store_products.category becomes a foreign key to them (the fixed check goes);
 --     staff_store_category_delete moves a category's products and deletes it. 'gift' stays (STORE_CAT_GIFT).
+--     _store_cat_root(slug) gives a category's top-level one, so a sub-category of bikes is bikes everywhere code asks.
 --  4. Collections (store_collections, store_collection_items) and store_bestsellers (anyone; '[]' without orders).
 --  5. More product fields (badge, SEO, max per order, pre-order with a ships-on date, weight, dimensions, tags,
 --     low-stock level) and store_variants.barcode. Trigger store_products_tidy trims the tags.
 --  6. Staff-only data: store_suppliers, store_product_private (supplier, cost, staff note), store_variant_costs.
 --  7. Stock moves: store_stock_moves, written by the trigger store_variants_stock_log on every stock change (the
---     reason from the local setting mm.stock_reason, else 'edit' for staff and 'order' for everyone else), and
---     staff_store_stock_move / _count / _receive / _moves.
+--     reason from the local setting mm.stock_reason, else 'sync' for the service key (the hourly copy from live to
+--     staging), 'edit' for staff and 'order' for everyone else), and staff_store_stock_move / _count / _receive / _moves.
+--     The service key may read and write the catalogue tables the hourly copy moves (where service_role exists).
 --  8. Product operations: staff_store_duplicate, staff_store_import (CSV rows; dry run; all or nothing),
 --     staff_store_bulk, staff_store_sort.
 --  9. staff_store_report: stock value, products by state and category, stock moves, and sales where orders exist.
@@ -47,9 +49,16 @@
 --       store_promo_check, store_stock_request   20261115235500_store_build.sql
 --       store_checkout                           20261119000800_bh18_r2stg_staging.sql
 --       _store_restock                           20261110150000_online_payments.sql
---     store_checkout_plus (20261119300000) calls store_checkout and is not changed. Non-ASCII literals of those texts
---     (Arabic digits, the Arabic name of Jeddah, the middle dot, the bullet) are written as chr() so this file stays
---     ASCII; they make the same strings.
+--     A late payment for an order let go unpaid takes a pre-order line's stock again as checkout does (what is there,
+--     never below zero) instead of refunding (_pay_apply). A sub-category of bikes counts as bikes in the store's bike
+--     checks (store_checkout_plus: handover, still learning, small things; the Bike owner badge; the bike credit;
+--     store_rode_type), through _store_cat_root.
+--       _pay_apply                    20261119000500_bh18_dbstg_staging.sql
+--       store_checkout_plus, _store_after_grant_bike, _xp_bike_credit_follow, _xp_bike_credit_tick
+--                                     20261119300000_sx_do_all.sql
+--     store_checkout_plus's checkout rules are store_checkout's (it calls it). Non-ASCII literals of those texts (Arabic
+--     digits, the Arabic name of Jeddah, the middle dot, the bullet) are written as chr() so this file stays ASCII; they
+--     make the same strings.
 --
 -- Rollback idea: drop the functions and triggers this file adds; drop the tables store_stock_moves,
 -- store_variant_costs, store_product_private, store_suppliers, store_collection_items, store_collections; put
@@ -275,6 +284,15 @@ insert into public.store_categories (slug, name_en, name_ar, sort, template) val
   ('gift', 'Gift cards', convert_from(decode('d8a8d8b7d8a7d982d8a7d8aa20d987d8afd8a7d98ad8a7', 'hex'), 'UTF8'), 60, '{}')
 on conflict (slug) do nothing;
 
+-- A category's top-level category: itself when it has no parent, else its parent (two levels only); an unknown slug is
+-- itself. Code that asks "is it a bike" asks _store_cat_root(category) = 'bikes', so a sub-category of bikes counts.
+create or replace function public._store_cat_root(p_slug text) returns text
+language sql stable security definer set search_path = public as $$
+  select coalesce((select coalesce(c.parent, c.slug) from store_categories c where c.slug = p_slug), p_slug)
+$$;
+revoke all on function public._store_cat_root(text) from public;
+grant execute on function public._store_cat_root(text) to anon, authenticated;
+
 alter table public.store_categories enable row level security;
 revoke all on public.store_categories from anon, authenticated;
 drop policy if exists "store categories public read" on public.store_categories;
@@ -429,6 +447,15 @@ end $$;
 revoke all on function public.store_bestsellers(int, int) from public;
 grant execute on function public.store_bestsellers(int, int) to anon, authenticated;
 
+-- The hourly copy from live to staging runs with the service key: it reads and writes the catalogue tables (where the
+-- role exists; staff-only tables are not copied).
+do $svc$ begin
+  if exists (select 1 from pg_roles where rolname = 'service_role') then
+    grant select, insert, update, delete on public.store_products, public.store_variants, public.store_categories,
+          public.store_collections, public.store_collection_items to service_role;
+  end if;
+end $svc$;
+
 -- === 6. Staff-only data ==========================================================================
 create table if not exists public.store_suppliers (
   id         bigint generated always as identity primary key,
@@ -515,7 +542,7 @@ create table if not exists public.store_stock_moves (
 );
 alter table public.store_stock_moves drop constraint if exists store_stock_moves_reason_check;
 alter table public.store_stock_moves add constraint store_stock_moves_reason_check
-  check (reason in ('receive', 'count', 'damaged', 'lost', 'return', 'order', 'cancel', 'edit', 'import', 'other'));
+  check (reason in ('receive', 'count', 'damaged', 'lost', 'return', 'order', 'cancel', 'edit', 'import', 'sync', 'other'));
 alter table public.store_stock_moves drop constraint if exists store_stock_moves_text_check;
 alter table public.store_stock_moves add constraint store_stock_moves_text_check
   check ((note is null or length(note) <= 300) and (ref is null or length(ref) <= 60) and (label is null or length(label) <= 200)
@@ -533,17 +560,28 @@ revoke all on sequence public.store_suppliers_id_seq, public.store_stock_moves_i
 
 -- Every stock change is a move. The reason, note, reference, supplier and unit cost come from the transaction's local
 -- settings mm.stock_reason / mm.stock_note / mm.stock_ref / mm.stock_supplier / mm.stock_cost (the functions below set
--- and clear them); without a reason a staff member's change is 'edit' and anyone else's (a checkout) 'order'.
+-- and clear them); without a reason a write with the service key (the hourly copy from live to staging) is 'sync', a
+-- staff member's change 'edit' and anyone else's (a checkout) 'order'.
 create or replace function public._store_stock_log() returns trigger
 language plpgsql security definer set search_path = public as $$
 declare d int; r text := nullif(current_setting('mm.stock_reason', true), ''); who text; lbl text; sup bigint; cst numeric;
-        s text;
+        s text; jr text;
 begin
   if tg_op = 'INSERT' then d := new.stock; if coalesce(d, 0) <= 0 then return null; end if;
   else d := new.stock - old.stock; if coalesce(d, 0) = 0 then return null; end if;
   end if;
+  if r is null then
+    /* the service key: the request's role, or the role set for it (current_user is this function's owner here) */
+    begin
+      jr := nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'role';
+    exception when others then jr := null;
+    end;
+    if coalesce(jr, '') = 'service_role' or coalesce(current_setting('role', true), '') = 'service_role' or current_user = 'service_role' then
+      r := 'sync';
+    end if;
+  end if;
   r := coalesce(r, case when is_staff() then 'edit' else 'order' end);
-  if r not in ('receive', 'count', 'damaged', 'lost', 'return', 'order', 'cancel', 'edit', 'import', 'other') then r := 'other'; end if;
+  if r not in ('receive', 'count', 'damaged', 'lost', 'return', 'order', 'cancel', 'edit', 'import', 'sync', 'other') then r := 'other'; end if;
   select left(coalesce(nullif(btrim(st.display_name), ''), 'Staff'), 60) into who from staff st where st.user_id = auth.uid();
   select left(concat_ws(' ' || chr(183) || ' ', p.name_en, nullif(new.size, ''), nullif(new.color_en, '')), 200) into lbl
     from store_products p where p.id = new.product_id;
@@ -668,7 +706,7 @@ create or replace function public.staff_store_stock_moves(p_product uuid default
 language plpgsql stable security definer set search_path = public as $$
 begin
   if not is_staff() then raise exception 'STAFF_ONLY' using errcode = '42501'; end if;
-  if p_reason is not null and p_reason not in ('receive', 'count', 'damaged', 'lost', 'return', 'order', 'cancel', 'edit', 'import', 'other') then
+  if p_reason is not null and p_reason not in ('receive', 'count', 'damaged', 'lost', 'return', 'order', 'cancel', 'edit', 'import', 'sync', 'other') then
     raise exception 'STORE_REASON' using errcode = 'P0001';
   end if;
   return coalesce((select jsonb_agg(jsonb_build_object('id', m.id, 'at', m.at, 'variant_id', m.variant_id, 'product_id', m.product_id,
@@ -1233,7 +1271,7 @@ begin
                 group by p.category) b on b.category = c.slug;
 
   select jsonb_object_agg(r.reason, coalesce(m.s, 0)) into moves
-    from unnest(array['receive', 'count', 'damaged', 'lost', 'return', 'order', 'cancel', 'edit', 'import', 'other']) r(reason)
+    from unnest(array['receive', 'count', 'damaged', 'lost', 'return', 'order', 'cancel', 'edit', 'import', 'sync', 'other']) r(reason)
     left join (select x.reason, sum(x.delta) s from store_stock_moves x
                 where (x.at at time zone 'Asia/Riyadh')::date between d_from and d_to group by x.reason) m on m.reason = r.reason;
 
@@ -1823,7 +1861,7 @@ end $fn$
   execute $f$ revoke execute on function public.store_fleet_record(uuid) from public $f$;
   execute $f$ grant execute on function public.store_fleet_record(uuid) to anon, authenticated $f$;
 
-  -- store_rode_type (20261119300000): a live bike product
+  -- store_rode_type (20261119300000): a live bike product, a sub-category of bikes too
   execute $f$
 create or replace function public.store_rode_type(p_id text, p_token text, p_product uuid)
  returns jsonb
@@ -1839,10 +1877,10 @@ declare
 begin
   if p_id is null or p_token is null or p_product is null or length(p_id) > 80 or length(p_token) > 200 then return null; end if;
   if not _cust_token_ok(p_id, p_token) then return null; end if;
-  /* live: published and inside its schedule (store catalogue plus, 20261119400100) */
+  /* live: published and inside its schedule; a sub-category of bikes too (store catalogue plus, 20261119400100) */
   select cm.ride_type into v_type
     from store_products sp join catalog_models cm on cm.id = sp.catalog_model
-   where sp.id = p_product and _store_live(sp) and sp.category = 'bikes';
+   where sp.id = p_product and _store_live(sp) and _store_cat_root(sp.category) = 'bikes';
   if v_type is null then return null; end if;
 
   select count(*) into v_n
@@ -1861,6 +1899,435 @@ end $fn$
   $f$;
   execute $f$ revoke execute on function public.store_rode_type(text, text, uuid) from public $f$;
   execute $f$ grant execute on function public.store_rode_type(text, text, uuid) to anon, authenticated $f$;
+  -- _pay_apply (20261119000500_bh18_dbstg_staging.sql): a pre-order line paid late takes what is there
+  execute $f$
+create or replace function public._pay_apply(p payments)
+ RETURNS numeric
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $fn$
+declare l jsonb; q queue_entries%rowtype; amt numeric; back numeric := 0; o store_orders%rowtype; i store_order_items%rowtype;
+        r locker_rentals%rowtype; j workshop_jobs%rowtype; ok boolean; w numeric; due numeric; d date; ev record;
+        tk int;   -- what a pre-order line takes again (store catalogue plus, 20261119400100)
+begin
+  perform set_config('mm.pay_ok', '1', true);
+  if p.kind = 'booking' then
+    for l in select x from jsonb_array_elements(p.lines) x order by x ->> 'id' loop
+      amt := (l ->> 'amount')::numeric;
+      select * into q from queue_entries where id = l ->> 'id' for update;
+      if q.id is null or coalesce(q.paid, false) then back := back + amt; continue; end if;
+      if q.status in ('cancelled', 'removed') then
+        if q.cancel_reason is distinct from 'unpaid' then back := back + amt; continue; end if;
+        ok := true;
+        begin  -- the place was let go when the hold ran out: back on it when there is still room
+          /* the room counted as for a new booking (bug hunt 2026-11-10): no trigger counts places on a change of status */
+          if not _pay_place_free(q) then raise exception 'SESSION_FULL'; end if;
+          update queue_entries set status = 'waiting', cancel_reason = null, cancelled_at = null, cancelled_by = null where id = q.id;
+          /* the wallet's part went back to the wallet when the place was let go: taken again, as the order's branch
+             below does - all of it or none, and only from a rider who let the wallet pay this booking; else the card
+             is refunded and the booking stays cancelled (bug hunt 2026-11-10) */
+          select * into q from queue_entries where id = q.id;
+          w := round(_wallet_amount(q.price, q.addons) - coalesce(q.wallet_paid, 0) - amt, 2);
+          if w > 0 then
+            if not exists (select 1 from wallet_ledger x where x.booking_id = q.id and x.kind = 'spend') then
+              raise exception 'PAY_SHORT';
+            end if;
+            perform _wallet_post(_wallet_owner(q.customer_id), -w, 'spend', null, null, q.id, null, q.session_id);
+            perform set_config('mm.wallet_ok', '1', true);
+            update queue_entries set wallet_paid = coalesce(wallet_paid, 0) + w where id = q.id;
+            perform set_config('mm.wallet_ok', '', true);
+          end if;
+        exception when others then ok := false;
+        end;
+        if not ok then back := back + amt; continue; end if;
+      end if;
+      /* what the booking owes now against what this payment brings for it: while the card payment was open the wallet
+         may have paid part of it, its wallet part may have been taken back, or staff may have changed its price, and it
+         was marked paid at the amount frozen when the payment started (100 by card on top of 40 from the wallet: 140
+         for a 100 SAR ride). A payment bringing more than is owed now pays what is owed and the rest is refunded; one
+         bringing less, or a booking owing nothing, is refunded whole and the booking stays to pay (no longer held by
+         this payment), as a workshop job's payment is (bug hunt 2026-11-11 (20261111235200)) */
+      select * into q from queue_entries where id = q.id;
+      due := _pay_due(q);
+      if due <= 0 or due > round(amt, 2) then
+        back := back + amt;
+        update queue_entries set pay_hold_until = null where id = q.id and payment_id = p.id and pay_hold_until is not null;
+        continue;
+      end if;
+      if due < round(amt, 2) then
+        back := back + (amt - due);
+        amt := due;
+      end if;
+      update queue_entries set paid = true, pay_method = 'online', card_amount = amt, paid_at = now(),
+                               pay_hold_until = null, payment_id = p.id
+       where id = q.id;
+    end loop;
+  elsif p.kind = 'order' then
+    select * into o from store_orders where id = p.ref::uuid for update;
+    if o.id is null then return p.amount; end if;
+    if o.status = 'pending' then
+      null;
+    elsif o.status = 'cancelled' and o.cancel_reason = 'unpaid' then
+      ok := true;
+      begin  -- the stock was put back when the hold ran out: taken again when it is still there
+        for i in select * from store_order_items where order_id = o.id and not held order by variant_id loop
+          /* a pre-order line (or a line of a product on pre-order now) takes what is there, never below zero, and keeps
+             how much it took; any other line needs all of its qty, as before (store catalogue plus, 20261119400100) */
+          if i.preorder or coalesce((select sp.preorder from store_products sp where sp.id = i.product_id), false) then
+            select least(greatest(v.stock, 0), i.qty) into tk from store_variants v where v.id = i.variant_id for update;
+            tk := coalesce(tk, 0);
+            update store_variants set stock = stock - tk where id = i.variant_id;
+            update store_order_items set held = true, stock_taken = case when tk < i.qty then tk end,
+                                         preorder = (i.preorder or tk < i.qty)
+             where id = i.id;
+          else
+            update store_variants set stock = stock - i.qty where id = i.variant_id and stock >= i.qty;
+            if not found then raise exception 'STORE_STOCK'; end if;
+            update store_order_items set held = true where id = i.id;
+          end if;
+        end loop;
+        if o.wallet_paid > 0 then  -- the wallet's part went back on the cancel: taken again
+          perform _wallet_post(_wallet_owner(o.customer_id), -o.wallet_paid, 'sale', null, null, null, 'ord-' || o.no, null);
+        end if;
+        /* the gift card's part went back onto it on the cancel: taken again while the card still holds it and has not
+           expired, else the payment is refunded; the code's use is counted again (store build 2026-11-15 (20261115235500)) */
+        if o.gift_card_id is not null and o.gift_paid > 0 then
+          update store_gift_cards set balance = balance - o.gift_paid
+           where id = o.gift_card_id and status = 'active' and balance >= o.gift_paid and expires_at > now();
+          if not found then raise exception 'STORE_GIFT'; end if;
+          insert into store_gift_card_moves (card_id, order_id, amount, kind, by_name) values (o.gift_card_id, o.id, -o.gift_paid, 'spend', 'system');
+        end if;
+        if o.promo_code is not null then
+          perform set_config('mm.store_ok', '1', true);
+          update store_promo_codes set uses = uses + 1 where code = o.promo_code;
+          perform set_config('mm.store_ok', '', true);
+        end if;
+      exception when others then ok := false;
+      end;
+      if not ok then return p.amount; end if;
+    else
+      return p.amount;
+    end if;
+    update store_orders set status = 'paid', paid_at = now(), expires_at = null, cancel_reason = null where id = o.id returning * into o;
+    insert into store_order_events (order_id, status, note) values (o.id, 'paid', null);
+    insert into receipt_numbers (receipt_id) values ('ord-' || o.no) on conflict (receipt_id) do nothing;
+    /* its gift cards, and a gift card order delivered at once (store build 2026-11-15 (20261115235500)) */
+    perform _store_paid(o);
+  elsif p.kind = 'locker' then
+    for l in select x from jsonb_array_elements(p.lines) x loop
+      amt := (l ->> 'amount')::numeric;
+      /* the evening's lock before the rental's row, as every locker function takes them (bug hunt 2026-11-18 (20261119000500)) */
+      d := (select x.day from locker_rentals x where x.id = (l ->> 'id')::uuid);
+      if d is not null then perform _lk_lock(d); end if;
+      select * into r from locker_rentals where id = (l ->> 'id')::uuid for update;
+      if r.id is null or r.receipt_id is not null then back := back + amt; continue; end if;
+      if r.status = 'cancelled' then
+        if r.day is distinct from d then perform _lk_lock(r.day); end if;
+        select * into ev from _lk_evening(r.day);
+        /* let go unpaid, it comes back only as a new reservation would be taken (customer_locker_book): an evening still
+           offering lockers for its time (not called off or deleted), the time not over, its locker still in service and
+           free, room in each slot, and no more than 3 lockers of the account's for each time; else the card is refunded
+           (bug hunt 2026-11-18 (20261119000500), sql02-3: a late card payment brought a locker back on a night called
+           off, kept no refund, and could give a unit taken meanwhile) */
+        if r.cancel_reason is distinct from 'unpaid'
+           or ev.session_id is null or not _lk_period_ok(ev.kind, r.period) or _lk_ended(r.day, r.period)
+           or (r.locker_id is not null and not exists (select 1 from lockers k where k.id = r.locker_id and k.status = 'available'))
+           or not _lk_room(r.day, r.period, 1)
+           or (r.booking_id is null and r.customer_id is not null
+               and (select count(*) from locker_rentals x where x.day = r.day and x.customer_id = r.customer_id
+                      and x.booking_id is null and x.id <> r.id and x.status in ('reserved', 'in_use')
+                      and _lk_slots(x.period) && _lk_slots(r.period)) >= 3)
+           or exists (select 1 from locker_rentals x where x.locker_id = r.locker_id and x.day = r.day and x.id <> r.id
+                        and x.status in ('reserved', 'in_use') and _lk_slots(x.period) && _lk_slots(r.period)) then
+          back := back + amt; continue;
+        end if;
+        update locker_rentals set status = 'reserved', cancelled_at = null, cancelled_by = null, cancel_reason = null where id = r.id;
+      elsif r.status not in ('reserved', 'in_use', 'returned') then
+        back := back + amt; continue;
+      end if;
+      update locker_rentals set receipt_id = 'pay-' || p.id, payment_id = p.id where id = r.id;
+    end loop;
+  elsif p.kind = 'topup' then
+    perform set_config('mm.wallet_op', 'Online top-up', true);
+    perform _wallet_post(_wallet_owner(p.customer_id), p.amount, 'topup', 'online', p.amount, null, 'pay-' || p.id, null);
+    perform set_config('mm.wallet_op', '', true);
+  elsif p.kind = 'workshop' then
+    select * into j from workshop_jobs where id = p.ref::bigint for update;
+    /* a payment started before staff changed the price pays the old price: refunded, the job stays to pay
+       (bug hunt 2026-11-10) */
+    if j.id is null or j.paid_at is not null or p.amount is distinct from round(j.price_final, 2) then return p.amount; end if;
+    update workshop_jobs set paid_at = now(), paid_receipt = 'pay-' || p.id, payment_id = p.id where id = j.id;
+  end if;
+  perform set_config('mm.pay_ok', '', true);
+  return round(back, 2);
+end $fn$
+  $f$;
+  execute $f$ revoke execute on function public._pay_apply(payments) from public, anon, authenticated $f$;
+  -- store_checkout_plus (20261119300000): a sub-category of bikes is bikes (handover, still learning, small things)
+  execute $f$
+create or replace function public.store_checkout_plus(p_key text, p_id text, p_token text, p_order jsonb) returns jsonb
+language plpgsql security definer set search_path = public as $fn$
+declare r jsonb; o store_orders%rowtype; q store_quotes%rowtype; c jsonb; a jsonb; nm text; lat numeric; lng numeric;
+        cfg jsonb; hday date; hat text; hto text; hm int; taken int; e queue_entries%rowtype; sh jsonb; ready date;
+        bikes boolean; small boolean; qitems jsonb; oitems jsonb; sl jsonb; sday date;
+        today date := _pay_today(); nowm int := _store_hm(to_char(now() at time zone 'Asia/Riyadh', 'HH24:MI'));
+begin
+  if not _pay_key_ok(p_key) then raise exception 'NOT_AUTHORIZED' using errcode = '42501'; end if;
+
+  /* N23: a quote that cannot be used refuses before anything is held */
+  if p_order ? 'quote' then
+    select * into q from store_quotes where token = p_order ->> 'quote' for update;
+    if q.id is null or q.status <> 'open' then raise exception 'STORE_QUOTE' using errcode = 'P0001'; end if;
+    if q.order_id is not null and exists (select 1 from store_orders x where x.id = q.order_id and x.status not in ('pending', 'cancelled')) then
+      raise exception 'STORE_QUOTE_USED' using errcode = 'P0001';
+    end if;
+    if q.expires_at <= now() then raise exception 'STORE_QUOTE_EXPIRED' using errcode = 'P0001'; end if;
+    select coalesce(jsonb_agg(jsonb_build_object('variant', lower(x ->> 'variant'), 'qty', (x ->> 'qty')::int) order by lower(x ->> 'variant')), '[]'::jsonb)
+      into qitems from jsonb_array_elements(q.items) x;
+    select coalesce(jsonb_agg(jsonb_build_object('variant', lower(coalesce(x ->> 'variant', '')),
+                                                 'qty', case when (x ->> 'qty') ~ '^[0-9]{1,2}$' then (x ->> 'qty')::int end) order by lower(coalesce(x ->> 'variant', ''))), '[]'::jsonb)
+      into oitems from jsonb_array_elements(case when jsonb_typeof(p_order -> 'items') = 'array' then p_order -> 'items' else '[]'::jsonb end) x;
+    if qitems is distinct from oitems then raise exception 'STORE_QUOTE_CHANGED' using errcode = 'P0001'; end if;
+  end if;
+
+  r := store_checkout(p_key, p_id, p_token, p_order);
+  select * into o from store_orders where id = (r #>> '{order,id}')::uuid for update;
+  /* a sub-category of bikes counts as bikes (store catalogue plus, 20261119400100) */
+  bikes := exists (select 1 from store_order_items i join store_products p on p.id = i.product_id where i.order_id = o.id and _store_cat_root(p.category) = 'bikes');
+  small := not exists (select 1 from store_order_items i left join store_products p on p.id = i.product_id
+                        where i.order_id = o.id and (p.id is null or not p.ship_ksa or _store_cat_root(p.category) = 'bikes' or p.kind = 'gift_card'));
+
+  /* N34 buying for a company: a standard tax invoice names the buyer, its VAT number and its address */
+  if p_order ? 'company' then
+    c := p_order -> 'company'; a := c -> 'address';
+    nm := btrim(regexp_replace(coalesce(c ->> 'name', ''), '\s+', ' ', 'g'));
+    if not _pay_on('store.company.on') or jsonb_typeof(c) is distinct from 'object' or jsonb_typeof(a) is distinct from 'object'
+       or length(nm) not between 2 and 100
+       or coalesce(c ->> 'vat', '') !~ '^3[0-9]{13}3$'
+       or (nullif(c ->> 'cr', '') is not null and (c ->> 'cr') !~ '^[0-9]{10}$')
+       or coalesce(a ->> 'building', '') !~ '^[0-9]{4}$'
+       or length(btrim(coalesce(a ->> 'street', ''))) not between 1 and 80
+       or length(btrim(coalesce(a ->> 'district', ''))) not between 1 and 60
+       or length(btrim(coalesce(a ->> 'city', ''))) not between 1 and 40
+       or coalesce(a ->> 'postal', '') !~ '^[0-9]{5}$' then
+      raise exception 'STORE_COMPANY' using errcode = 'P0001';
+    end if;
+    update store_orders set company = jsonb_strip_nulls(jsonb_build_object('name', nm, 'vat', c ->> 'vat', 'cr', nullif(c ->> 'cr', ''),
+             'address', jsonb_build_object('building', a ->> 'building', 'street', btrim(a ->> 'street'), 'district', btrim(a ->> 'district'),
+                                           'city', btrim(a ->> 'city'), 'postal', a ->> 'postal')))
+     where id = o.id;
+  end if;
+
+  /* N07 the Jeddah delivery's map pin, for the driver */
+  if p_order ? 'pin' then
+    begin
+      lat := case when jsonb_typeof(p_order #> '{pin,lat}') = 'number' then (p_order #>> '{pin,lat}')::numeric end;
+      lng := case when jsonb_typeof(p_order #> '{pin,lng}') = 'number' then (p_order #>> '{pin,lng}')::numeric end;
+    exception when others then lat := null;
+    end;
+    if not _pay_on('store.pin.on') or o.fulfil <> 'jeddah' or lat is null or lng is null
+       or lat not between 21 and 22.4 or lng not between 38.8 and 39.8 then
+      raise exception 'STORE_PIN' using errcode = 'P0001';
+    end if;
+    update store_orders set pin = jsonb_build_object('lat', round(lat, 5), 'lng', round(lng, 5)) where id = o.id;
+  end if;
+
+  /* N15 handed over at one of the account's own seated bookings */
+  if p_order ? 'session' then
+    sh := _pay_setting('store.sessionHandover');
+    if jsonb_typeof(sh) is distinct from 'object' or (sh -> 'on') is distinct from 'true'::jsonb or o.fulfil <> 'pickup' or p_id is null or not small then
+      raise exception 'STORE_SESSION' using errcode = 'P0001';
+    end if;
+    ready := _store_working_day(today, coalesce(_store_days_hi(_pay_setting('store.delivery') #>> '{pickup,days}'), 1));
+    select * into e from queue_entries where id = p_order ->> 'session' and customer_id = p_id;
+    if e.id is null or e.status is distinct from 'active' or coalesce(e.session_date::text, '') !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+       or e.session_date::text < to_char(ready, 'YYYY-MM-DD')
+       or e.session_date::text > to_char(today + _store_jint(sh -> 'days', 21, 1, 60), 'YYYY-MM-DD') then
+      raise exception 'STORE_SESSION' using errcode = 'P0001';
+    end if;
+    update store_orders set handover_entry = e.id, handover_session = e.session_id where id = o.id;
+  /* N13 the handover slot of "Collect fully built", under a lock so two orders never take a slot's last place */
+  elsif p_order ? 'handover' then
+    cfg := _store_handover_cfg();
+    if cfg is null or o.fulfil <> 'pickup' or not bikes then raise exception 'STORE_HANDOVER' using errcode = 'P0001'; end if;
+    begin
+      hday := case when (p_order #>> '{handover,day}') ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' then (p_order #>> '{handover,day}')::date end;
+    exception when others then hday := null;
+    end;
+    hat := p_order #>> '{handover,at}';
+    if hday is null or not (hday = any(_store_handover_days(cfg, today, nowm))) then raise exception 'STORE_HANDOVER' using errcode = 'P0001'; end if;
+    select x.to_hm, x.m into hto, hm from _store_handover_grid(cfg, hday) x where x.at_hm = hat and (hday > today or x.m > nowm) limit 1;
+    if hto is null then raise exception 'STORE_HANDOVER' using errcode = 'P0001'; end if;
+    /* the day's lock, the one B4's change of time (N30) takes too, so the two never both take a slot's last place */
+    perform pg_advisory_xact_lock(hashtext('store_handover:' || to_char(hday, 'YYYY-MM-DD')));
+    select count(*) into taken from store_orders x
+     where x.id <> o.id and x.handover is not null and x.handover ->> 'day' = to_char(hday, 'YYYY-MM-DD') and x.handover ->> 'at' = hat
+       and x.status not in ('cancelled', 'refunded');
+    if taken >= (cfg ->> 'cap')::int then raise exception 'STORE_HANDOVER: full' using errcode = 'P0001'; end if;
+    update store_orders set handover = jsonb_build_object('day', to_char(hday, 'YYYY-MM-DD'), 'at', hat, 'to', hto) where id = o.id;
+  end if;
+
+  /* N17 still learning to ride, with a bike */
+  if p_order -> 'learning' = 'true'::jsonb then
+    if not _pay_on('store.learning.on') or not bikes then raise exception 'STORE_LEARNING' using errcode = 'P0001'; end if;
+    update store_orders set learning = true where id = o.id;
+  end if;
+
+  /* N36 a Jeddah slot: Ramadan's windows on its days, the usual ones on the others (store_checkout took any) */
+  if o.fulfil = 'jeddah' and o.slot is not null then
+    sl := _store_slots();
+    if sl ? 'season' then
+      begin sday := (o.slot ->> 'day')::date; exception when others then sday := null; end;
+      if sday is null or ((sl #> '{season,ids}') ? (o.slot ->> 'time'))
+                         is distinct from (sday between (sl #>> '{season,from}')::date and (sl #>> '{season,to}')::date) then
+        raise exception 'STORE_SLOT' using errcode = 'P0001';
+      end if;
+    end if;
+  end if;
+
+  /* N23 the quote is this order's now (it reads as used once the order is paid) */
+  if q.id is not null then
+    update store_quotes set order_id = o.id, updated_at = now() where id = q.id;
+    update store_orders set quote_id = q.id where id = o.id;
+  end if;
+
+  select * into o from store_orders where id = o.id;
+  return jsonb_set(r, '{order}', _store_order_json(o));
+end $fn$
+  $f$;
+  execute $f$ revoke execute on function public.store_checkout_plus(text, text, text, jsonb) from public $f$;
+  execute $f$ grant execute on function public.store_checkout_plus(text, text, text, jsonb) to anon, authenticated $f$;
+  -- _store_after_grant_bike (20261119300000): the Bike owner badge for a sub-category of bikes too
+  execute $f$
+create or replace function public._store_after_grant_bike(p_order uuid) returns void
+language plpgsql security definer set search_path = public as $fn$
+declare o store_orders%rowtype; b text;
+begin
+  select * into o from store_orders where id = p_order;
+  if o.id is null or o.customer_id is null or o.paid_at is null or o.status in ('pending', 'cancelled') then return; end if;
+  /* a sub-category of bikes counts as bikes (store catalogue plus, 20261119400100) */
+  if not exists (select 1 from store_order_items i join store_products p on p.id = i.product_id
+                  where i.order_id = o.id and _store_cat_root(p.category) = 'bikes' and not coalesce(i.gift_card, false)) then return; end if;
+  select id into b from badges where slug = 'bike_owner' and not retired;
+  if b is null or not exists (select 1 from customers c where c.id = o.customer_id) then return; end if;
+  insert into customer_badges (customer_id, badge_id, note, awarded_by) values (o.customer_id, b, 'MM-' || o.no, 'store')
+  on conflict (customer_id, badge_id) do nothing;
+end $fn$
+  $f$;
+  execute $f$ revoke execute on function public._store_after_grant_bike(uuid) from public, anon, authenticated $f$;
+  -- _xp_bike_credit_follow (20261119300000): the bike credit for a sub-category of bikes too
+  execute $f$
+create or replace function public._xp_bike_credit_follow() returns trigger
+language plpgsql security definer set search_path = public as $fn$
+declare cfg jsonb := _pay_setting('xp.bikeCredit'); days int; cap numeric; amt numeric; ids text[]; since date;
+        c xp_bike_credits%rowtype; who text; bal numeric;
+begin
+  if new.customer_id is null or new.status is not distinct from old.status then return new; end if;
+  if new.status in ('cancelled', 'refunded') then
+    select * into c from xp_bike_credits where order_id = new.id and state <> 'void' and reversed is null for update;
+    if c.order_id is null then return new; end if;
+    if c.state = 'held' then
+      update xp_bike_credits set state = 'void' where order_id = c.order_id;
+      return new;
+    end if;
+    who := _wallet_owner(c.customer_id);
+    select balance into bal from wallet_balances where customer_id = who for update;
+    bal := round(least(c.amount, greatest(coalesce(bal, 0), 0)), 2);
+    update xp_bike_credits set reversed = bal, reversed_at = now() where order_id = c.order_id;
+    if bal > 0 then
+      perform set_config('mm.wallet_op', 'Bike credit back', true);
+      perform set_config('mm.wallet_note', 'Bike order ' || coalesce(new.no::text, new.id::text) || ' ' || new.status, true);
+      perform _wallet_post(who, -bal, 'adjust', null, null, null, 'bkc-' || new.id, null);
+      perform set_config('mm.wallet_op', '', true);
+      perform set_config('mm.wallet_note', '', true);
+    end if;
+    return new;
+  end if;
+  if coalesce(cfg ->> 'on', 'false') <> 'true' or new.status <> 'paid' then return new; end if;
+  if exists (select 1 from xp_bike_credits b where b.order_id = new.id) then return new; end if;
+  /* a sub-category of bikes counts as bikes (store catalogue plus, 20261119400100) */
+  if not exists (select 1 from store_order_items i join store_products sp on sp.id = i.product_id
+                  where i.order_id = new.id and _store_cat_root(sp.category) = 'bikes') then return new; end if;
+  perform pg_advisory_xact_lock(hashtext('xp_bike_credit:' || new.customer_id));
+  days := least(greatest(coalesce((cfg ->> 'days')::int, 30), 1), 365);
+  cap := least(greatest(coalesce((cfg ->> 'max')::numeric, 300), 0), 5000);
+  since := (coalesce(new.paid_at, now()) at time zone 'Asia/Riyadh')::date - days;
+  /* the rider's own ridden, paid rides in the window that no other bike order holds or was credited for */
+  select coalesce(sum(q.price), 0), coalesce(array_agg(q.id), '{}') into amt, ids
+    from queue_entries q
+   where q.customer_id = new.customer_id and q.status = 'done' and coalesce(q.paid, false) and coalesce(q.price, 0) > 0
+     and left(q.session_date, 10) >= to_char(since, 'YYYY-MM-DD')
+     and not exists (select 1 from xp_bike_credits b where b.customer_id = new.customer_id and b.state <> 'void' and q.id = any(b.bookings));
+  amt := round(least(amt, cap), 2);
+  if amt <= 0 then return new; end if;
+  /* F1 (H1): held, not paid: _xp_bike_credit_tick pays it once the bike is kept past the return window */
+  insert into xp_bike_credits (order_id, customer_id, amount, bookings, state) values (new.id, new.customer_id, amt, ids, 'held');
+  return new;
+exception when others then
+  /* a credit that cannot be held or taken back never blocks the order's payment or refund */
+  return new;
+end $fn$
+  $f$;
+  execute $f$ revoke execute on function public._xp_bike_credit_follow() from public, anon, authenticated $f$;
+  -- _xp_bike_credit_tick (20261119300000): bike lines of a sub-category of bikes too
+  execute $f$
+create or replace function public._xp_bike_credit_tick() returns int
+language plpgsql security definer set search_path = public as $fn$
+declare c xp_bike_credits%rowtype; o store_orders%rowtype; dat timestamptz; bikes numeric; amt numeric; n int := 0;
+begin
+  /* a sub-category of bikes counts as bikes (store catalogue plus, 20261119400100) */
+  for c in select * from xp_bike_credits where state = 'held' order by created_at limit 200 for update skip locked loop
+    begin
+      select * into o from store_orders where id = c.order_id;
+      if o.id is null or o.status in ('cancelled', 'refunded') then
+        update xp_bike_credits set state = 'void' where order_id = c.order_id;
+        continue;
+      end if;
+      if o.status <> 'delivered' then continue; end if;
+      select e.at into dat from store_order_events e where e.order_id = o.id and e.status = 'delivered' order by e.id limit 1;
+      if dat is null or _pay_today() - (dat at time zone 'Asia/Riyadh')::date <= 15 then continue; end if;
+      if exists (select 1 from store_return_requests rr cross join jsonb_array_elements(rr.items) y
+                   join store_order_items i on i.id = (y ->> 'item_id')::bigint and i.order_id = o.id
+                   join store_products sp on sp.id = i.product_id and _store_cat_root(sp.category) = 'bikes'
+                  where rr.order_id = o.id and rr.status = 'open') then
+        continue;
+      end if;
+      select coalesce(sum(i.unit_price * i.qty), 0) into bikes
+        from store_order_items i join store_products sp on sp.id = i.product_id and _store_cat_root(sp.category) = 'bikes'
+       where i.order_id = o.id;
+      if exists (select 1 from store_return_requests rr cross join jsonb_array_elements(rr.items) y
+                   join store_order_items i on i.id = (y ->> 'item_id')::bigint and i.order_id = o.id
+                   join store_products sp on sp.id = i.product_id and _store_cat_root(sp.category) = 'bikes'
+                  where rr.order_id = o.id and rr.status = 'approved' and rr.kind = 'return')
+         or _xp_order_given_back(o) > greatest(o.total - bikes, 0) then
+        update xp_bike_credits set state = 'void' where order_id = c.order_id;
+        continue;
+      end if;
+      /* a ride fee refunded since the order was paid is not paid back again */
+      select round(least(coalesce(sum(q.price), 0), c.amount), 2) into amt
+        from queue_entries q
+       where q.id = any(c.bookings) and q.customer_id = c.customer_id and q.status = 'done' and coalesce(q.paid, false)
+         and coalesce(q.price, 0) > 0;
+      if amt <= 0 then
+        update xp_bike_credits set state = 'void' where order_id = c.order_id;
+        continue;
+      end if;
+      update xp_bike_credits set state = 'paid', paid_at = now(), amount = amt where order_id = c.order_id;
+      perform set_config('mm.wallet_op', 'Bike credit', true);
+      perform set_config('mm.wallet_note', 'Ride fees back on bike order ' || coalesce(o.no::text, o.id::text), true);
+      perform _wallet_post(_wallet_owner(c.customer_id), amt, 'adjust', null, null, null, 'bkc-' || o.id, null);
+      perform set_config('mm.wallet_op', '', true);
+      perform set_config('mm.wallet_note', '', true);
+      n := n + 1;
+    exception when others then
+      raise warning 'xp bike credit for order %: %', c.order_id, sqlerrm;
+    end;
+  end loop;
+  return n;
+end $fn$
+  $f$;
+  execute $f$ revoke execute on function public._xp_bike_credit_tick() from public, anon, authenticated $f$;
 end $stg$;
 
 -- === Checks ======================================================================================
@@ -1870,7 +2337,7 @@ end $stg$;
 do $chk$
 declare f text; t text; defs text[]; inner_fns text[]; staff_fns text[]; anon_fns text[];
 begin
-  defs := array['public.staff_store_mode()', 'public._store_tags_ok(text[])', 'public._store_product_tidy()',
+  defs := array['public.staff_store_mode()', 'public._store_tags_ok(text[])', 'public._store_product_tidy()', 'public._store_cat_root(text)',
                 'public._store_live(public.store_products)', 'public._store_cat_guard()', 'public.staff_store_category_delete(text,text)',
                 'public.store_bestsellers(integer,integer)', 'public._store_stock_log()',
                 'public.staff_store_stock_move(uuid,integer,text,text)', 'public.staff_store_stock_count(uuid,integer,text)',
@@ -1885,18 +2352,21 @@ begin
                      'public.staff_store_stock_moves(uuid,uuid,text,date,date,integer)', 'public.staff_store_duplicate(uuid,text,text)',
                      'public.staff_store_import(jsonb,boolean)', 'public.staff_store_bulk(uuid[],text,jsonb)',
                      'public.staff_store_sort(text,text[])', 'public.staff_store_report(date,date)'];
-  anon_fns := array['public._store_live(public.store_products)', 'public.store_bestsellers(integer,integer)'];
+  anon_fns := array['public._store_live(public.store_products)', 'public.store_bestsellers(integer,integer)', 'public._store_cat_root(text)'];
   if to_regclass('public.store_orders') is not null then
     defs := defs || array['public._store_restock(uuid)', 'public._store_quote_json(public.store_quotes)', 'public.staff_store_quote_save(jsonb)',
                           'public.store_promo_check(text,text,jsonb)', 'public.store_stock_request(text,uuid,text,text,text)',
                           'public.store_checkout(text,text,text,jsonb)', 'public._store_order_json(public.store_orders,boolean)',
-                          'public.store_fleet_record(uuid)', 'public.store_rode_type(text,text,uuid)'];
+                          'public.store_fleet_record(uuid)', 'public.store_rode_type(text,text,uuid)',
+                          'public._pay_apply(public.payments)', 'public.store_checkout_plus(text,text,text,jsonb)',
+                          'public._store_after_grant_bike(uuid)', 'public._xp_bike_credit_follow()', 'public._xp_bike_credit_tick()'];
     inner_fns := inner_fns || array['public._store_restock(uuid)', 'public._store_quote_json(public.store_quotes)',
-                                    'public._store_order_json(public.store_orders,boolean)'];
+                                    'public._store_order_json(public.store_orders,boolean)', 'public._pay_apply(public.payments)',
+                                    'public._store_after_grant_bike(uuid)', 'public._xp_bike_credit_follow()', 'public._xp_bike_credit_tick()'];
     staff_fns := staff_fns || array['public.staff_store_quote_save(jsonb)'];
     anon_fns := anon_fns || array['public.store_promo_check(text,text,jsonb)', 'public.store_stock_request(text,uuid,text,text,text)',
                                   'public.store_checkout(text,text,text,jsonb)', 'public.store_fleet_record(uuid)',
-                                  'public.store_rode_type(text,text,uuid)'];
+                                  'public.store_rode_type(text,text,uuid)', 'public.store_checkout_plus(text,text,text,jsonb)'];
   end if;
   foreach f in array defs loop
     if not exists (select 1 from pg_proc p where p.oid = f::regprocedure and p.prosecdef
@@ -1926,6 +2396,10 @@ begin
     if has_table_privilege('anon', 'public.' || t, 'select') then raise exception 'anon can read %', t; end if;
   end loop;
   if has_table_privilege('authenticated', 'public.store_stock_moves', 'insert') then raise exception 'clients can write stock moves'; end if;
+  if exists (select 1 from pg_roles where rolname = 'service_role')
+     and not has_table_privilege('service_role', 'public.store_categories', 'insert') then
+    raise exception 'the hourly copy (service key) cannot write store_categories';
+  end if;
   if has_sequence_privilege('anon', 'public.store_stock_moves_id_seq', 'update') or has_sequence_privilege('authenticated', 'public.store_stock_moves_id_seq', 'update')
      or has_sequence_privilege('anon', 'public.store_suppliers_id_seq', 'update') or has_sequence_privilege('authenticated', 'public.store_suppliers_id_seq', 'update') then
     raise exception 'a client can move a store sequence';
