@@ -12602,6 +12602,20 @@ body:not(.view-staff) .feat-card.feat-yg:focus-visible{outline-color:var(--yg-cl
 @media(max-width:400px){body:not(.view-staff) .feat-card{gap:12px;padding:12px 14px;}.feat-date{min-width:50px;}.feat-date b{font-size:20px;}.feat-yg .feat-name.yg-card-title{font-size:18px;}}
 /* staff: the mark beside a featured date in every session list */
 body.view-staff .ssx-feat{font-weight:600;color:var(--sf-green-ink,var(--green));}
+/* MEMBERS BOOK FIRST (the user, 2026-11-18; sessions.public_at, _mfAt): a member's mark, the status everyone else reads
+   on a held date (the not-open-yet card, greyed) with when everyone may book under it, the staff badge and the form's switch */
+body:not(.view-staff) .mf-mark{display:inline-flex;align-items:center;gap:5px;}
+body:not(.view-staff) .mf-mark .cu-ic{flex-shrink:0;}
+body:not(.view-staff) .sess-card-spots.spots-mf{color:var(--go);font-weight:600;}
+body:not(.view-staff) .hub-chip.hub-mf{display:inline-flex;align-items:center;gap:5px;margin-inline-start:6px;vertical-align:1px;}
+body:not(.view-staff) .sess-card-mf .sess-mf-l{margin-top:6px;}
+body.view-staff .badge-mf,body.view-staff .ssx-mf{display:inline-flex;align-items:center;gap:6px;font-size:var(--sf-fs-xs);font-weight:600;color:var(--sf-plum-ink,var(--text));}
+body.view-staff .badge-mf{margin-inline-start:8px;}
+body.view-staff .badge-mf::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;}
+body.view-staff .mf-sess .mf-for{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;}
+body.view-staff .mf-sess [hidden]{display:none;}
+body.view-staff .mf-sess .mf-for select{max-width:180px;}
+body.view-staff .mf-sess .mf-until{margin-top:6px;font-size:var(--sf-fs-sm);font-weight:600;color:var(--sf-plum-ink,var(--text));}
 /* STAFF COMMENTS (2026-10-23): a staff-only thread on a booking or an application (_scOpen, staff_comments) */
 .sc-chip{display:flex;align-items:center;gap:4px;margin-top:3px;max-width:24ch;padding:1px 6px;border:1px solid var(--border);background:var(--surface,transparent);color:var(--text);font:inherit;font-size:var(--staff-fs-sm,12px);cursor:pointer;border-radius:0;}
 .sc-chip .sc-chip-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-weight:500;}

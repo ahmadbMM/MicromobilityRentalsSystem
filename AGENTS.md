@@ -2116,6 +2116,38 @@ the Farmhouse Night (79 of 130 places held) said nothing about filling up.
 - Tests: `tests/few-spots.spec.ts`. Website: `lib/rides.ts` `fewOf`, the date card's and Featured card's status
   (`stateOf`), Details (`infoPlaces`), `src/lib/__tests__/few-spots.test.ts`.
 
+## Members book first (2026-11-18, migration 20261118210800)
+The user: "Members book first: featured or limited sessions open to community members a few hours before everyone else.
+It isn't worth money, and it makes membership mean something now that sessions sell out."
+- **Stored**: `sessions.public_at` (timestamptz, null = no window) and the hours staff chose in `bike_slots._mfh` (3, 6, 12,
+  24 or 48: `MF_HOURS`). Riders read `public_at` with the row (`list_sessions` is `setof sessions`; column grants too).
+  `_mfAt(s)` is the window's end while it is ahead, else 0.
+- **The database** (`_members_first_guard`, trigger `queue_entries_members_first`, BEFORE INSERT OR UPDATE OF status,
+  session_id): while `public_at` is ahead, a rider's request (`auth.role()` anon or authenticated, not `is_staff()`) that makes
+  a place or a waitlist row is refused unless the booking's account is `_member_active`: `MEMBERS_FIRST` (P0001), detail =
+  `public_at` in UTC. The paths: `customer_create_booking` (and through it `saturday_book`, `farm_book`, `petromin_guest_book`,
+  `partner_book`), `petromin_invite_book`, `customer_booking_update` (a move, a cancelled place taken back). A live row that
+  stays on its session (a waitlist place moving up, a payment landing) is not judged again; a partner's own places
+  (`mm.partner`), staff, the timer and the service role pass. `_session_published` starts the window when a session first
+  opens (a draft, a timed opening) or opens with none yet: `now()` + `_mfh` hours; a re-open after Close keeps the one it had.
+- **Staff** (Sessions part): a "Members book first" switch with "Members only for" on both forms (`_mfSessSwitch`, `#es-mf` /
+  `#ns-mf`, `#es-mf-h` / `#ns-mf-h`), only on a session everyone may book (`_mfOk`, `_mfOkNew`: not a members-only Community
+  session, not tag-gated). New: Open now writes `public_at` = now + the hours, Open at = `opens_at` + the hours, a Draft the
+  hours alone (the server starts it). The editor (`_mfPlan`): a window the session has keeps its start (the hours may change),
+  one switched on while open starts now, off (or members-only) is null; sent only when it changed; it says "Members only
+  until <day time>" (`#es-mf-until`). `public_at` is in `SESS_EDIT_COLS` (Undo). A copied week, a fast clone and a clone start
+  without it; a template push keeps each night's own `_mfh`. The table's status and the agenda say "Members first" while it
+  runs (`_mfBadge`, `.ssx-mf`).
+- **Riders**: it rides the booking window's path (`_bwOpensOn(s, mem)` is `{mf:1}` for anyone `_infoMember()` does not
+  answer yes for), so whatever waits for a window waits for this: the date's card is greyed (`.sess-card-mf`: "Members book
+  first", "Everyone from <day time>" under it with `data-bw`, so `_bwTick` repaints it when it passes), the Featured card says
+  it, Details has its row and no Choose this date, Reschedule does not offer it. A member sees "Members first"
+  (`_mfMarkHtml`, `.spots-mf`) on the date's card, the Featured card and the Community tab's next session and Coming up
+  (`_hubMf`; `_hubOpen` asks `_bwOpen(s, 1)`). `MEMBERS_FIRST` is said by `_mfErrOf` (`_bookRefused`, `_errMessage`,
+  `_rsRefused`). Words `mfMark`, `mfStatus`, `mfEveryone`, `mfRefused`, `mfFor`, `mfUntil`; the hours are `accVolHrs`.
+- Tests: `tests/members-first.spec.ts`. The SQL was run twice on a local Postgres with stubs (`auth.role()`, `is_staff()`,
+  `_member_active`). Website: not mirrored yet (it reads `public_at` from the same rows).
+
 ## Blood Donation event (2026-11-03)
 - **Blood Donor badge (2026-11-05):** `blood_donor`, the drop on the red medal, earned from staff's Donated mark (`donatedAt`), so taking the mark back takes the badge; shown only once held. **Volunteer badge:** `volunteer`, the raised hand on its own blue special medal (`BDG_SPECIAL.volunteer`, `.sp-volunteer`), given by staff from Community > Badges. Catalogue rows: migration 20261105100000. Mirrored in the website's `lib/ride-record.ts`.
 - **Blood Donation Visitor badge (2026-11-06):** `blood_visitor`, the drop's outline with a heart inside on the teal medal (glyph `dropo`), earned by everyone who came, donors and visitors alike: any booking on a `blood` session that staff checked out (status done), or one marked Donated (the owner, 2026-11-06: "the blood donation visitor badge give it to donors and visitors"); Blood Donor stays with those marked Donated only. Shown only once held. Catalogue row in migration 20261106100000.

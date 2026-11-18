@@ -18,7 +18,7 @@
 /* global S, sb, esc, _on, getSession, _cssv, shortDate, t, _cuIc, sessionTime, _dayWord, _evName, _evOf, _evKindName, allSessions,
    _isCommunity, _sessPastDay, _sessEnded, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
    _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard, _bookingAhead, _ptnAll,
-   _arHold, _isApprovalRide, _commPublished, _needsBike, _typeClosed,
+   _arHold, _isApprovalRide, _commPublished, _needsBike, _typeClosed, _mfMarkHtml,
    NATIONALITIES, nationalityLabel, _natFor, _selOnce, askConfirm, closeConfirm, _EL, _EV */
 const HUB_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 const HUB_T = {
@@ -266,9 +266,11 @@ function _feedHtml(c, d, stale) {
 // (bug hunt 2026-11-18 mod1-1, mod1-3).
 function _hubOpen(c, n, skip) {
   const me = S.loggedIn || c, mine = new Set(getQueue().filter((e) => e.customerId === c.id && e.status !== 'cancelled').map((e) => e.sessionId));
-  return allSessions().filter((s) => s && _isCommunity(s) && s.status === 'open' && !s.cancelled_at && s.ride_status !== 'cancelled' && !_sessPastDay(s) && !_sessEnded(s) && _bwOpen(s) && !_sessFull(s) && _sgOk(s, me) && !mine.has(s.id) && s.id !== skip)
+  return allSessions().filter((s) => s && _isCommunity(s) && s.status === 'open' && !s.cancelled_at && s.ride_status !== 'cancelled' && !_sessPastDay(s) && !_sessEnded(s) && _bwOpen(s, 1) && !_sessFull(s) && _sgOk(s, me) && !mine.has(s.id) && s.id !== skip)
     .sort((a, b) => String(a.session_date || a.id).localeCompare(String(b.session_date || b.id))).slice(0, n);
 }
+// Members book first (20261118210800): a member books as usual, and the session wears the app's own mark while it runs.
+function _hubMf(s) { return typeof _mfMarkHtml === 'function' ? _mfMarkHtml(s, 'hub-chip hub-mf') : ''; }
 function _hubWhen(s) { const d = String(s.session_date || s.id).slice(0, 10); return `<bdi>${esc(_dayWord(d) || '')}${_dayWord(d) ? ' · ' : ''}${esc(shortDate(d))}</bdi> · <bdi>${sessionTime(s)}</bdi>`; }
 // Staff's word on the ride (R10): the start moved, the route shortened, or the ride cancelled; a chip, never a sentence.
 const HUB_RS = { moved: 'rsMoved', shortened: 'rsShort', cancelled: 'rsCancel' };
@@ -398,7 +400,7 @@ function _heroHtml(c, d) {
   const s = c ? _hubOpen(c, 1)[0] : null;
   if (s) {
     return { recap, open: s.id, html: `<div class="hub-hero"><span class="hub-k">${_hT('nextOpen')}</span><strong class="hub-hero-t"><bdi>${esc(_evName(s))}</bdi></strong>
-      <span class="hub-hero-m">${_hubWhen(s)}</span>${_sgChip(s)}${_hubRs(s)}
+      <span class="hub-hero-m">${_hubWhen(s)}</span>${_sgChip(s)}${_hubMf(s)}${_hubRs(s)}
       <button type="button" class="btn-primary hub-hero-b" data-on-click="${_on('_hubBook', s.id)}">${_hT('book')}</button></div>` };
   }
   return { recap, html: `<div class="hub-hero"><strong class="hub-hero-t">${_hT('noneOpen')}</strong>
@@ -432,7 +434,7 @@ function _soonHtml(c, skip) {
   const all = _hubOpen(c, 99, skip), list = [...all.filter(_intHit), ...all.filter((s) => !_intHit(s))].slice(0, 3);
   if (!list.length) return '';
   return `<div class="hub-card"><span class="hub-k">${_hT('soon')}</span>${list.map((s) => `<div class="hub-soon${_intHit(s) ? ' int-on' : ''}">
-      <span class="hub-soon-t"><strong><bdi>${esc(_evName(s))}</bdi></strong> ${_sgChip(s)}<small>${_hubWhen(s)}</small></span>
+      <span class="hub-soon-t"><strong><bdi>${esc(_evName(s))}</bdi></strong> ${_sgChip(s)}${_hubMf(s)}<small>${_hubWhen(s)}</small></span>
       <button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_hubBook', s.id)}">${_hT('book')}</button></div>`).join('')}</div>`;
 }
 
