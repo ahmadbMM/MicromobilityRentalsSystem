@@ -50492,7 +50492,7 @@ function _rbBar(rid,cb){
   const team=(L||[]).filter(x=>x.scope==='team'),mine=(L||[]).filter(x=>x.scope==='mine');
   const cur=(L||[]).find(x=>String(x.id)===String(sel)),me=_rbMe();
   setTimeout(()=>{_rbMount();_rbPreview(rid);},0);
-  return`<div class="rb-bar" role="group" aria-label="${esc(t('rbSetups'))}">
+  return`<div class="rb-bar" data-rb="${esc(rid)}" role="group" aria-label="${esc(t('rbSetups'))}">
     <label class="rb-sel"><span>${t('rbSetups')}</span><select class="filter-select" data-on-change="${_on('_rbApply',rid,_P('value'))}"><option value="">${esc(L?t('rbChoose'):t('loadingLabel'))}</option>${team.length?`<optgroup label="${esc(t('rbTeam'))}">${team.map(opt).join('')}</optgroup>`:''}${mine.length?`<optgroup label="${esc(t('rbMine'))}">${mine.map(opt).join('')}</optgroup>`:''}</select></label>
     <span class="rb-acts"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_rbSaveAsk',rid,'team')}">${t('rbSaveTeam')}</button><button type="button" class="btn-sm btn-muted" data-on-click="${_on('_rbSaveAsk',rid,'mine')}">${t('rbSaveMine')}</button>${cur&&(cur.created_by===me||isAdmin())?`<button type="button" class="btn-sm btn-muted" data-on-click="${_on('_rbDelete',rid,cur.id)}">${t('rbDelete')}</button>`:''}</span></div>`;
 }
@@ -50509,7 +50509,8 @@ async function _rbLoad(rid){
   const C=S._rbSets||(S._rbSets={});C[rid]=Object.assign(C[rid]||{list:null,at:0},{busy:true});
   let r;try{r=await sb.from('report_setups').select('id,name,scope,opts,created_by,by_name,updated_at').eq('report',rid).order('name');}catch(e){r={error:e};}
   C[rid]={list:r&&!r.error?(r.data||[]):(C[rid].list||[]),at:Date.now(),busy:false};
-  const cb=S._rbCur;if(cb&&cb.rid===rid&&cb.reopen)try{cb.reopen();}catch(_){}
+  // Only a builder still on screen is painted again: a dialog closed while its setups were loading stays closed.
+  const cb=S._rbCur;if(cb&&cb.rid===rid&&cb.reopen&&document.querySelector(`.rb-bar[data-rb="${rid}"]`))try{cb.reopen();}catch(_){}
 }
 function _rbApply(rid,id){
   const cb=S._rbCur;if(!cb||cb.rid!==rid)return;
