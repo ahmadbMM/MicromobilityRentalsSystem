@@ -3439,6 +3439,7 @@
   "cochsStEnded": "Finalizado",
   "cochsErrFields": "Indica la empresa, un código de 4 a 12 letras o números, las dos fechas (el fin el día del inicio o después) y un tamaño de equipo de 10 a 500.",
   "cochsErrTaken": "Otro reto ya usa este código.",
+  "cochsErrGone": "Este reto se eliminó en otro dispositivo.",
   "cochsDelAsk": "¿Eliminar este reto de empresa?",
   "cochsRemoveAsk": "¿Quitar a {0} de este reto?",
   "ridersFilterAll": "Todos",

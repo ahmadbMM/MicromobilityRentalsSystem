@@ -3439,6 +3439,7 @@
   "cochsStEnded": "Terminé",
   "cochsErrFields": "Indiquez l’entreprise, un code de 4 à 12 lettres ou chiffres, les deux dates (la fin le jour du début ou après) et une taille d’équipe de 10 à 500.",
   "cochsErrTaken": "Un autre défi utilise déjà ce code.",
+  "cochsErrGone": "Ce défi a été supprimé sur un autre appareil.",
   "cochsDelAsk": "Supprimer ce défi d’entreprise ?",
   "cochsRemoveAsk": "Retirer {0} de ce défi ?",
   "ridersFilterAll": "Tous",

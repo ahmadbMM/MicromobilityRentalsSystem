@@ -166,6 +166,27 @@ test.describe('@staff:people the People round: watch, family, rides with, last b
     expect(new URL(del.url).searchParams.get('customer_id')).toMatch(/^in\.\(.*cust-amal.*cust-sami.*\)$|^in\.\(.*cust-sami.*cust-amal.*\)$/);
   });
 
+  // The device's copy of the family links is up to five minutes old (bug hunt 2026-11-18, ppl-rentals0-3): an account another desk
+  // had put in a family meanwhile looked unlinked, and the add moved it out to a new family. The add reads the two links first.
+  test('family links: an account linked on another desk meanwhile keeps its family', async ({ page }) => {
+    await boot(page);
+    const held: Record<string, unknown>[] = [];
+    const sent = await serveTable(page, 'account_family', held, 'customer_id', (x) => ({ added_by_name: 'Desk One', added_at: NOW.toISOString(), ...x }));
+    await page.evaluate(`openAccountHistory('cust-amal')`);
+    await page.waitForFunction(`_prdO().got&&!_prdO().busy`);
+    const F1 = '11111111-0000-4000-8000-000000000001';
+    held.push({ customer_id: 'cust-amal', family_id: F1, role: 'parent', added_by_name: 'Desk Two', added_at: NOW.toISOString() },
+      { customer_id: 'cust-rana', family_id: F1, role: null, added_by_name: 'Desk Two', added_at: NOW.toISOString() });
+    await more(page, 'Add to family');
+    await dlg(page).getByLabel('Role in the family').selectOption('child');
+    await dlg(page).getByLabel(/Find/).fill('Sami');
+    await dlg(page).locator('.prd-fhit', { hasText: 'Sami Road' }).click();
+    await expect(dlg(page)).toHaveCount(0);
+    const post = sent.find((s) => s.m === 'POST')!.b as Record<string, unknown>[];
+    expect(post.map((x) => [x.customer_id, x.family_id, x.role])).toEqual([['cust-sami', F1, 'child']]);
+    await expect(page.locator('#cust-modal .prd-fam .prd-fam-li')).toHaveCount(3);
+  });
+
   test('the account owner: More > Owner, the window, My people, a follow-up for the owner and the bell', async ({ page }) => {
     await boot(page);
     const owners: Record<string, unknown>[] = [];

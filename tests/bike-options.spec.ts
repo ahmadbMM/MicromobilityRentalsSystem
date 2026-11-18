@@ -18,8 +18,9 @@ async function boot(page: import('@playwright/test').Page) {
   // The stub answers every read from the fixtures: a saved list must land in them too, or the
   // reference reload that follows a write would hand the old list straight back.
   await page.route(/\/rest\/v1\/staff_options/, async (route) => {
-    if (route.request().method() === 'POST') {
+    if (route.request().method() === 'POST' || route.request().method() === 'PATCH') {
       const b = JSON.parse(route.request().postData() || '{}');
+      if (route.request().method() === 'PATCH') b.key = (new URL(route.request().url()).searchParams.get('key') || '').replace(/^eq\./, '');
       const row = lists.find(r => r.key === b.key); if (row) row.items = b.items; else lists.push({ key: b.key, items: b.items });
     }
     await route.fallback();
@@ -30,6 +31,7 @@ async function boot(page: import('@playwright/test').Page) {
   await page.waitForFunction(`S.staffOptions && S.staffOptions.bike_brands`);
   await page.waitForTimeout(300);               // let the boot's reference reload land (the app never goes network-idle: it polls)
   await page.evaluate(`setStaffTab('inventory');S.invSection='bikes';renderInventory();S.showAddBike=true;S._bkBrand='';S._bkModel='';renderBikes()`);   // the Bikes UI lives under Inventory > Bikes
+  return lists;
 }
 const upserts = (page: import('@playwright/test').Page) => {
   const out: Record<string, unknown>[] = [];
@@ -51,9 +53,13 @@ test('Model waits for a Brand, then offers only that brand\'s models', async ({ 
   expect(await page.evaluate(`[...document.querySelectorAll('#bk-model option')].map(o=>o.value)`)).toEqual(['', 'TCR', '__add__']);
 });
 
+// An add goes onto the list as the database holds it now (bug hunt 2026-11-18, app40-3): read fresh, then written over that row
+// only (a PATCH guarded on its updated_at), so an entry another device added meanwhile stays.
 test('a new model typed in lands under the chosen brand, in the shared list', async ({ page }) => {
-  await boot(page);
-  const posts = upserts(page);
+  const lists = await boot(page);
+  (lists[0].items as { name: string; models: string[] }[]).push({ name: 'Cube', models: ['Attain'] }); // added on another device since this one read the list
+  const posts: Record<string, unknown>[] = [];
+  page.on('request', r => { if (r.method() === 'PATCH' && /staff_options/.test(r.url())) posts.push({ key: (new URL(r.url()).searchParams.get('key') || '').replace(/^eq\./, ''), ...JSON.parse(r.postData() || '{}') }); });
   await page.selectOption('#bk-brand', 'Trek');
   await page.selectOption('#bk-model', '__add__');
   await page.fill('#bk-model', 'Madone');
@@ -62,6 +68,7 @@ test('a new model typed in lands under the chosen brand, in the shared list', as
   expect(posts[0].key).toBe('bike_brands');
   const trek = (posts[0].items as { name: string; models: string[] }[]).find(b => b.name === 'Trek')!;
   expect(trek.models).toEqual(['Domane', 'Emonda', 'Madone']);
+  expect((posts[0].items as { name: string }[]).map(b => b.name)).toEqual(['Cube', 'Giant', 'Trek']);
   expect(await page.evaluate('S._bkModel')).toBe('Madone');
 });
 

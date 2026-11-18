@@ -49,6 +49,26 @@ test('never-serviced counts every ride and says so, flagged only past the thresh
   await expect(m.locator('.art-warn')).toHaveCount(0);
 });
 
+// A booking on two bikes counted its whole fare on each of them (bug hunt 2026-11-18, app40-1): each bike's Revenue and history
+// row now show its own part, shared by the bikes' list fares (a Road 75 and a Hybrid 57.50 on one 132.50 booking).
+test('a booking on two bikes counts each bike its own part of the fare', async ({ page }) => {
+  await stubSupabase(page, { sessions, queue_entries: [ride(1, { assigned_bike_id: JSON.stringify(['b1', 'b2']), price: 132.5 })], bikes: [
+    { id: 'b1', name: 'R-01', type: 'Road', size: 'M', status: 'available', colors: [] },
+    { id: 'b2', name: 'H-01', type: 'Hybrid', size: 'M', status: 'available', colors: [] }] });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction(`getBikes().length>1&&getQueue().length>0`);
+  const m = page.locator('#bike-profile-modal');
+  const revenue = m.locator('.flt-kpi', { hasText: 'Revenue' }).locator('.flt-kpiv');
+  await page.evaluate(`openBikeProfile('b1')`);
+  await expect(revenue).toHaveText('SAR 75');
+  await expect(m.locator('.flt-hpay')).toHaveText('SAR 75');
+  await page.evaluate(`closeBikeProfile();openBikeProfile('b2')`);
+  await expect(revenue).toHaveText('SAR 57.50');
+  await expect(m.locator('.flt-hpay')).toHaveText('SAR 57.50');
+});
+
 test('Mark serviced writes the stamp', async ({ page }) => {
   await stubSupabase(page, { sessions, queue_entries: [ride(1)], bikes: [
     { id: 'b1', name: 'R-01', type: 'Road', size: 'M', status: 'available', colors: [] }] });
