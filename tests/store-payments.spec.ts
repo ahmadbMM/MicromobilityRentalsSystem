@@ -290,6 +290,36 @@ test.describe('@staff:payments payments, refunds owed, settings', () => {
     expect(seen.find((c) => c.name === 'staff_payment_figures')!.body).toHaveProperty('p_from');
   });
 
+  // The list page by page (bug hunt 2026-11-18, sql11-4; staging's staff_payments p_offset / p_limit): it stopped at the newest
+  // 500 of the range, so older payments could not be found or refunded from it. A database without the paging: one read.
+  const payRoute = async (page: Page, answer: (b: Record<string, unknown>) => { status: number; body: unknown }) => {
+    await page.route('**/rest/v1/rpc/staff_payments', async (route) => {
+      if (route.request().method() !== 'POST') return route.fallback();
+      const a = answer((route.request().postDataJSON() || {}) as Record<string, unknown>);
+      return route.fulfill({ status: a.status, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(a.body) });
+    });
+  };
+  test('the list is read 500 at a time until a page is short', async ({ page }) => {
+    const seen = rpcCalls(page);
+    const many = Array.from({ length: 1200 }, (_, i) => ({ ...pays[0], id: 'pp' + i }));
+    await staff(page, { 'rpc:staff_store_ready': true, payment_refunds: [], store_orders: [] });
+    await payRoute(page, (b) => ({ status: 200, body: many.slice(Number(b.p_offset) || 0, (Number(b.p_offset) || 0) + (Number(b.p_limit) || 500)) }));
+    await page.evaluate(`setStaffTab('payments')`);
+    await expect.poll(() => page.evaluate(`(S._pay.rows||[]).length`)).toBe(1200);
+    expect(seen.filter((c) => c.name === 'staff_payments').map((c) => (c.body as Record<string, unknown>).p_offset)).toEqual([0, 500, 1000]);
+    expect(new Set(((await page.evaluate(`S._pay.rows.map(x=>x.id)`)) as string[])).size).toBe(1200);
+  });
+  test('a database without the paging is read once, as before', async ({ page }) => {
+    const seen = rpcCalls(page);
+    await staff(page, { 'rpc:staff_store_ready': true, payment_refunds: [], store_orders: [] });
+    await payRoute(page, (b) => ('p_offset' in b
+      ? { status: 404, body: { code: 'PGRST202', message: 'Could not find the function public.staff_payments(p_from, p_kind, p_limit, p_offset, p_to) in the schema cache' } }
+      : { status: 200, body: pays }));
+    await page.evaluate(`setStaffTab('payments')`);
+    await expect(page.locator('#tab-payments .pay-row')).toHaveCount(2);
+    expect(seen.filter((c) => c.name === 'staff_payments').map((c) => 'p_offset' in (c.body as Record<string, unknown>))).toEqual([true, false]);
+  });
+
   test('Settings writes the pay.* and store.* keys as the Website editor does', async ({ page }) => {
     const sc = writes(page, 'site_content');
     await staff(page, { 'rpc:staff_store_ready': true, site_content: [

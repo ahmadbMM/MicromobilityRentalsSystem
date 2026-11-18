@@ -63,6 +63,34 @@ test.describe('@staff:bookings waitlist offers', () => {
     expect(await page.evaluate(`_ptList().includes('e3')`)).toBe(false);
   });
 
+  // Give the place on the server (bug hunt 2026-11-18, app33-3; staff_give_spot, 20261119000700): the database counts the places
+  // under the ride's promotion lock, so two desks never both give the last one. Its NO_PLACE says the ride is full and writes nothing.
+  test('in Staff choose, Give the place goes through staff_give_spot when the database has it', async ({ page }) => {
+    await open(page, 'staff', { sessions: [{ ...sessions[0], capacity: 3 }], 'rpc:staff_give_spot': { ok: true, id: 'e3' } });
+    const w = writes(page);
+    const calls: { name: string; body: unknown }[] = [];
+    page.on('request', (r) => { const m = r.url().match(/\/rpc\/([^/?]+)/); if (m) calls.push({ name: m[1], body: r.postDataJSON() }); });
+    await page.evaluate(`setStaffTab('queue');setSfSession('s1');doNoShow('e1')`);
+    const dlg = page.locator('[role="dialog"][aria-labelledby="wlo-title"]');
+    await dlg.locator('.rem-row').first().getByRole('button', { name: 'Give the place' }).click();
+    await expect.poll(() => calls.find((c) => c.name === 'staff_give_spot')).toBeTruthy();
+    expect(calls.find((c) => c.name === 'staff_give_spot')!.body).toEqual({ p_session_id: 's1', p_booking_id: 'e3' });
+    await expect(dlg.getByText('Has the place now')).toBeVisible();
+    expect(w.filter((x) => /"status":"waiting"/.test(x))).toHaveLength(0); // the database wrote it
+  });
+
+  test('in Staff choose, the database\'s NO_PLACE says the ride is full and gives nothing', async ({ page }) => {
+    await open(page, 'staff', { sessions: [{ ...sessions[0], capacity: 3 }], 'rpc:staff_give_spot': { __rpcError: { status: 400, code: 'P0001', message: 'NO_PLACE' } } });
+    const w = writes(page);
+    await page.evaluate(`setStaffTab('queue');setSfSession('s1');doNoShow('e1')`);
+    const dlg = page.locator('[role="dialog"][aria-labelledby="wlo-title"]');
+    await dlg.locator('.rem-row').first().getByRole('button', { name: 'Give the place' }).click();
+    await expect(page.getByText('The ride has no free place now.').first()).toBeVisible();
+    await expect(dlg.getByText('Has the place now')).toHaveCount(0);
+    expect(w.filter((x) => /"status":"waiting"/.test(x))).toHaveLength(0);
+    expect(await page.evaluate(`_qGet('e3').status`)).toBe('waitlist');
+  });
+
   test('in Automatic the next in line gets the place at once, as before', async ({ page }) => {
     await open(page, 'auto');
     const w = writes(page);

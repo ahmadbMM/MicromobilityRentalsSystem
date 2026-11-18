@@ -76,7 +76,10 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   'circuit_lap', 'staff_circuit_totals',
   // "Still coming?" (20261114080200): a ticket shows its two buttons only once a booking row carries coming_at, and a
   // database without the function hides them; tests/still-coming.spec.ts stubs it by name.
-  'booking_coming']);
+  'booking_coming',
+  // Give the place and the till's close on the server (20261119000700): without them the page writes the row itself, as
+  // before; tests/s1010-remind-waitlist.spec.ts and tests/s1009-money-cashier.spec.ts stub them by name.
+  'staff_give_spot', 'till_close']);
 // (staff_pii_reveal and staff_access_reviewed, 20261009220000, are NOT listed: every look at personal data calls the
 // first, so the generic [] answers it; tests/s1010-pii-*.spec.ts give the missing function's answer by name.)
 /** Tables a migration adds that production may not have yet (20261009150000: the till and the receipt

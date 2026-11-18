@@ -3540,6 +3540,7 @@ function entryFromDB(e){
     inviteNo:e.invite_no||null, // a Petromin invitee's I-001 on its night (petromin_invite_book, 20261112234500)
     inviteCo:e.invite_company||null, // the company the guest typed at micromobility.sa/petromin (petromin_guest_book, 20261113150000)
     pmVisitor:!!e.pm_visitor, // a Petromin night's visitor: staff's pick, the ride free (20261117120000); a rider's own rows read false
+    houseFrom:e.house_from!=null&&isFinite(e.house_from)?Number(e.house_from):null, // on the house: the price it had before (20261119000700)
     remindedAt:e.reminded_at===undefined?undefined:(e.reminded_at||null),remindedKind:e.reminded_kind||null, // the last ride reminder staff sent, and which (20261009225000); undefined: read without the column
     comingAt:e.coming_at===undefined?undefined:(e.coming_at||null), // "Still coming?": when the rider said they are coming (booking_coming, 20261114080200); undefined: read without the column
     bikeReportAt:e.bike_report_at===undefined?undefined:(e.bike_report_at||null), // "Report a bike problem": the rider's last report on this booking (bike_report, 20261114081500); undefined: read without the column
@@ -26168,7 +26169,20 @@ async function _payLoad(force){
   // beside the list (the newest 500), the figures over every payment in the range, by status (staff_payment_figures): the
   // Paid, Taken and Refunded numbers were the newest 500's alone (bug hunt 2026-11-18, app17-3); a database without it: the list's
   const args={p_from:W.from||null,p_to:W.to||null,p_kind:W.kind||null};
-  let r,f;try{[r,f]=await Promise.all([sb.rpc('staff_payments',args),W.figsGone?null:sb.rpc('staff_payment_figures',args).then(x=>x,e=>({error:e}))]);}catch(e){r={error:e};}
+  // Page by page, 500 at a time (bug hunt 2026-11-18, sql11-4: staff_payments p_offset / p_limit): the list stopped at the newest
+  // 500 of the range, so older payments could not be found or refunded from it. A database without the paging: one read, as before.
+  const pages=async()=>{
+    if(!W.pgGone){const all=[],seen=new Set();
+      for(let off=0;off<20000;off+=500){
+        let p;try{p=await sb.rpc('staff_payments',{...args,p_offset:off,p_limit:500});}catch(e){p={error:e};}
+        if(p.error){if(off===0&&_rpcAbsent(p.error)){W.pgGone=true;break;}return p;}
+        const d=Array.isArray(p.data)?p.data:[];d.forEach(x=>{const k=x&&x.id;if(k==null||!seen.has(k)){if(k!=null)seen.add(k);all.push(x);}});
+        if(d.length<500||key!==W.from+'|'+W.to+'|'+W.kind)return{data:all,error:null};
+      }
+      if(!W.pgGone)return{data:all,error:null};}
+    return sb.rpc('staff_payments',args);
+  };
+  let r,f;try{[r,f]=await Promise.all([pages(),W.figsGone?null:sb.rpc('staff_payment_figures',args).then(x=>x,e=>({error:e}))]);}catch(e){r={error:e};}
   W.busy=false;
   if(key!==W.from+'|'+W.to+'|'+W.kind){_payLoad(true);return;} // the filter moved while it was on the way
   if(f&&f.error&&_rpcAbsent(f.error))W.figsGone=true;
@@ -34835,8 +34849,8 @@ async function _saveSessionEdit(){
     }else{
       const _mu=_safeUrl(S.editSessMapUrl);_ce.meet_url=_mu||null;
       await _bfSaveNew('editSessBfSel','editSessBfName','editSessBfUrl',sess.breakfast_name);
-      const _bn=(S.editSessBfName||'').trim().slice(0,80);_ce.breakfast_name=_bn||null;
-      const _bu=_safeUrl(S.editSessBfUrl);_ce.breakfast_url=_bu||null;
+      const _bn=(S.editSessBfName||'').trim().slice(0,80),_bu=_safeUrl(S.editSessBfUrl); // sent only when changed here (bug hunt 2026-11-18, sql04-1): a date move's new row already has the new day's confirmed venue
+      if((_bn||null)!==(sess.breakfast_name||null)||(_bu||null)!==(sess.breakfast_url||null)){_ce.breakfast_name=_bn||null;_ce.breakfast_url=_bu||null;}
     }
     Object.assign(_patch,_ce);
     // Sent only when the time changed (a kind without a breakfast has none).
@@ -45360,7 +45374,10 @@ async function togglePayment(id,mode){
   
   // A price of exactly 0 from a promo (e.g. a 100%-off code) is DELIBERATE - marking the rider paid
   // must keep it free, not restore the bike's list price. Only an incidental 0 (no promo) falls back.
-  const _payPrice=(entry.price===0&&!entry.promoCode)?_entryFallbackPrice(entry):(entry.price??DEFAULT_PRICE);
+  // On the house, the price it had before (house_from, bug hunt 2026-11-18, app30-1): a promo booking taken off the house pays
+  // its promo price again, not 0. A 100%-off promo row never put on the house has none and stays free, as before.
+  const _hf=entry.price===0&&entry.houseFrom!=null&&isFinite(entry.houseFrom)?Number(entry.houseFrom):null;
+  const _payPrice=_hf!=null?_hf:(entry.price===0&&!entry.promoCode)?_entryFallbackPrice(entry):(entry.price??DEFAULT_PRICE);
   let newPaid,newPrice;
   if(mode==='house'){newPaid=true;newPrice=0;}
   else if(mode===true||mode==='paid'||mode==='cash'||mode==='card'){newPaid=true;newPrice=_payPrice;}
@@ -45369,7 +45386,7 @@ async function togglePayment(id,mode){
     
     if(!entry.paid){newPaid=true;newPrice=entry.price;}
     else if(!isHouse){newPaid=true;newPrice=0;}
-    else{newPaid=false;newPrice=_entryFallbackPrice(entry);}
+    else{newPaid=false;newPrice=_hf!=null?_hf:_entryFallbackPrice(entry);}
   }
   let newMethod=entry.pay_method||null; // card vs cash for the rental (aggregates to the close-out split)
   if(mode==='card'||mode==='cash'||mode==='paid'||mode===true)newMethod='card';else if(mode==='house'||mode==='pending'||mode===false||(newPaid&&newPrice===0))newMethod=null; // every paid rental is a card payment now
@@ -49661,7 +49678,13 @@ async function _wloGive(id){
     await loadDataLight();if(_wlMode()==='claim'){await _wloLoad(g.sid);if(g.err)return;} // offers unknown: the dialog says the connection
     e=_qGet(id);if(!e||e.status!=='waitlist'){await _lostRace();return;}
     if(_wloRoom(g,id)<=0){toast(t('wloFull'),'info');return;}
-    const r=await sb.from('queue_entries').update({status:'waiting'}).eq('id',id).eq('status','waitlist').select('id');
+    // The database gives it, counting the places under the ride's promotion lock (bug hunt 2026-11-18, app33-3: staff_give_spot):
+    // two desks never both give the last place. Where it is missing, the update as before.
+    let r;try{r=await sb.rpc('staff_give_spot',{p_session_id:g.sid,p_booking_id:id});}catch(er){r={error:er};}
+    if(r.error&&_rpcAbsent(r.error))r=await sb.from('queue_entries').update({status:'waiting'}).eq('id',id).eq('status','waitlist').select('id');
+    else if(r.error&&/NO_PLACE/.test(String(r.error.message||''))){toast(t('wloFull'),'info');_wloLoad(g.sid);return;} // as _wloOffer
+    else if(r.error&&/NOT_WAITLISTED/.test(String(r.error.message||''))){await _lostRace();return;}
+    else if(!r.error)r={data:r.data&&r.data.ok?[{id}]:[],error:null};
     if(_writeErr(r,'promote from waitlist'))return;
     if(!_landed(r)){await _lostRace();return;}
     e.status='waiting';S.queue=(S.queue||[]).slice();
@@ -66393,12 +66416,14 @@ function _catUuid(){
 async function _catLoad(){
   const C=_cat();if(C.busy)return;C.busy=true;C.err=null;
   try{
+    // Pages of 1000, each read ending its order on a unique column (bug hunt 2026-11-18, web-lib2-1): one read stopped at 1000
+    // rows without a word, so past that the editor showed a catalogue short of its colours and photos.
     const rs=await Promise.all([
-      sb.from('catalog_categories').select('*').order('sort').order('name_en'),
-      sb.from('catalog_spec_fields').select('*').order('sort').order('key'),
-      sb.from('catalog_models').select('*').order('sort').order('name'),
-      sb.from('catalog_colors').select('*').order('sort'),
-      sb.from('catalog_photos').select('*').order('sort')]);
+      _pagedAll(()=>sb.from('catalog_categories').select('*').order('sort').order('name_en').order('id')),
+      _pagedAll(()=>sb.from('catalog_spec_fields').select('*').order('sort').order('key')),
+      _pagedAll(()=>sb.from('catalog_models').select('*').order('sort').order('name').order('id')),
+      _pagedAll(()=>sb.from('catalog_colors').select('*').order('sort').order('id')),
+      _pagedAll(()=>sb.from('catalog_photos').select('*').order('sort').order('id'))]);
     const bad=rs.find(r=>r.error);if(bad)throw bad.error;
     C.cats=rs[0].data||[];C.fields=rs[1].data||[];C.models=rs[2].data||[];C.colors=rs[3].data||[];C.photos=rs[4].data||[];
     C.loaded=true;
@@ -70389,8 +70414,10 @@ async function _tillCountGo(){
   T.busy=false;
   if(_writeErr(r,'till count')){_tillDraw();return;}
   T.counts.push((r.data||[])[0]||{at:new Date().toISOString(),counted_by_name:_opName(),counted_cash:cash,expected_cash:exp,note});
-  const diff=Math.round((cash-exp)*100)/100;
-  logAction(`${t('drawerCountTitle')} · ${T.c.label} · ${t('drawerExpected')} ${exp} · ${t('drawerCounted')} ${cash} · ${diff>=0?'+':''}${diff}`,{k:'till_count',e:'till',id:T.row.id,amt:diff});
+  // what the count is checked against is the database's (bug hunt 2026-11-18, sql14-2): it works it out for anyone but an admin
+  const k0=(r.data||[])[0],ex=k0&&k0.expected_cash!=null&&isFinite(k0.expected_cash)?Number(k0.expected_cash):exp;
+  const diff=Math.round((cash-ex)*100)/100;
+  logAction(`${t('drawerCountTitle')} · ${T.c.label} · ${t('drawerExpected')} ${ex} · ${t('drawerCounted')} ${cash} · ${diff>=0?'+':''}${diff}`,{k:'till_count',e:'till',id:T.row.id,amt:diff});
   toast(diff===0?t('drawerExactToast'):t('drawerDiffToast').replace('{0}',(diff>0?'+':'')+diff),diff===0?undefined:'warning');
   _tillDraw();
 }
@@ -70406,15 +70433,20 @@ async function _tillCloseGo(){
   if(S._till!==T||!T.row){T.busy=false;return;}
   const take=_tillNet(T),exp=Math.round(((Number(T.row.float)||0)+take.cash+(take.dep||0))*100)/100;
   const patch={closed_at:new Date().toISOString(),closed_by_name:(_opName()||'').slice(0,60)||null,expected_cash:exp,counted_cash:cash,card_expected:take.card,card_terminal_total:card===undefined?null:card,notes};
-  const r=await sb.from('till_sessions').update(patch).eq('id',T.row.id).is('closed_at',null).select('*');
+  // Closed by the database, which works out the expected cash and card itself (bug hunt 2026-11-18, sql14-2: till_close): the
+  // cashier being checked no longer sends the figure they are checked against. Where it is missing, the update as before.
+  let r;try{r=await sb.rpc('till_close',{p_id:T.row.id,p_counted:cash,p_card:patch.card_terminal_total,p_notes:notes,p_by_name:patch.closed_by_name});}catch(e){r={error:e};}
+  if(r.error&&_rpcAbsent(r.error))r=await sb.from('till_sessions').update(patch).eq('id',T.row.id).is('closed_at',null).select('*');
+  else if(!r.error)r={data:r.data&&r.data.ok&&r.data.row?[r.data.row]:[],error:null}; // {ok:false, reason:'CLOSED'}: closed already
   T.busy=false;
   if(_writeErr(r,'close till')){_tillDraw();return;}
   if(!(r.data||[]).length){if(T.last){_tillDraw();return;}toast(t('tillGone'),'warning');return recordDrawerCount(T.c.sid||SHOP_CTX);}
   T.last={...T.row,...r.data[0]};T.row=null;
   // History > Till's copy of this till, closed now (app40-2): it read open, and the Z-report printed from it
   {const H=S._tillH;if(H&&Array.isArray(H.rows)){const i=H.rows.findIndex(x=>x.id===T.last.id);if(i>=0)H.rows[i]=T.last;}}
-  const diff=Math.round((cash-exp)*100)/100;
-  logAction(`${t('tillClose')} · ${T.c.label} · ${t('drawerExpected')} ${exp} · ${t('drawerCounted')} ${cash} · ${diff>=0?'+':''}${diff}`,{k:'till_close',e:'till',id:T.last.id,amt:diff});
+  const ex=T.last.expected_cash!=null&&isFinite(T.last.expected_cash)?Number(T.last.expected_cash):exp; // the database's figure
+  const diff=Math.round((cash-ex)*100)/100;
+  logAction(`${t('tillClose')} · ${T.c.label} · ${t('drawerExpected')} ${ex} · ${t('drawerCounted')} ${cash} · ${diff>=0?'+':''}${diff}`,{k:'till_close',e:'till',id:T.last.id,amt:diff});
   toast(diff===0?t('drawerExactToast'):t('drawerDiffToast').replace('{0}',(diff>0?'+':'')+diff),diff===0?undefined:'warning');
   _tillDraw();
   if(S.staffTab==='history'&&S.histView==='till')_tillHistLoad();

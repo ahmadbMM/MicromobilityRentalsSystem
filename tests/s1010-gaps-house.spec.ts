@@ -53,6 +53,20 @@ test.describe('@staff:bookings on the house through the server', () => {
     expect(await page.evaluate('S._houseNoDb')).toBe(true);
   });
 
+  // Taken off the house from the pay menu, a promo booking pays its promo price again (bug hunt 2026-11-18, app30-1): the row
+  // keeps the price it had before the house (house_from, 20261119000700). A 100%-off promo row never on the house stays free.
+  test('Paid or Pending on a ride on the house charges the price it had before, not 0', async ({ page }) => {
+    await boot(page, { queue_entries: [rider('e1', 1, { paid: true, price: 0, promo_code: 'SAVE20', house_from: 48 }),
+      rider('e2', 2, { paid: false, price: 0, promo_code: 'FREE100', house_from: null })] });
+    const calls = watch(page);
+    await page.evaluate(`togglePayment('e1','card')`);
+    await expect.poll(() => calls.filter((c) => c.name === 'queue_entries' && c.method === 'PATCH').length).toBe(1);
+    expect(calls.find((c) => c.name === 'queue_entries' && c.method === 'PATCH')!.body).toMatchObject({ paid: true, price: 48 });
+    await page.evaluate(`togglePayment('e2','card')`);
+    await expect.poll(() => calls.filter((c) => c.name === 'queue_entries' && c.method === 'PATCH').length).toBe(2);
+    expect(calls.filter((c) => c.name === 'queue_entries' && c.method === 'PATCH')[1].body).toMatchObject({ paid: true, price: 0 });
+  });
+
   test('a refusal from the server is said and nothing is written', async ({ page }) => {
     await boot(page, { 'rpc:staff_set_house': { __rpcError: { status: 403, code: '42501', message: 'ADMIN_ONLY' } } });
     const calls = watch(page);

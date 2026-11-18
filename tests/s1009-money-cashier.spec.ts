@@ -129,6 +129,33 @@ test.describe('@staff:sales money controls at the desk', () => {
     expect(logged).toEqual(expect.arrayContaining(['till_open', 'till_count', 'till_close']));
   });
 
+  // The close on the server (bug hunt 2026-11-18, sql14-2; till_close, 20261119000700): the cashier sends what they counted, the
+  // database works out what the drawer is checked against, and the summary and the log read its figure.
+  test('the till closes through till_close: the database\'s expected cash is the one shown and logged', async ({ page }) => {
+    await boot(page, { till_sessions: [], till_counts: [], queue_entries: [row('c1', { paid: true, price: 75, pay_method: 'cash' })],
+      'rpc:till_close': { ok: true, row: { day: TOMORROW, session_id: 's0', float: 100, opened_by_name: 'Spec Staff', closed_at: new Date().toISOString(), closed_by_name: 'Spec Staff', expected_cash: 190, counted_cash: 185, card_expected: 0, card_terminal_total: 0, notes: '' } } });
+    const ts = posts(page, 'till_sessions');
+    const calls = rpcs(page);
+    await page.evaluate(`setStaffTab('cashier');S._ctSession='s0';renderCashier()`);
+    await page.locator('#tab-cashier').getByRole('button', { name: 'Till', exact: true }).click();
+    const dlg = page.getByRole('dialog', { name: /^Till/ });
+    await dlg.locator('#mny-till-float').fill('100');
+    await dlg.getByRole('button', { name: 'Open till' }).click();
+    await expect.poll(() => ts.filter((x) => x.method === 'POST').length).toBe(1);
+    await expect(dlg).toContainText('SAR 185');
+    const id = await page.evaluate(`S._till.row.id`);
+    await dlg.locator('#mny-till-cash').fill('185');
+    await dlg.locator('#mny-till-card').fill('0');
+    await dlg.getByRole('button', { name: 'Close till' }).click();
+    await expect.poll(() => calls.filter((c) => c.name === 'till_close').length).toBe(1);
+    expect(calls.find((c) => c.name === 'till_close')!.body).toMatchObject({ p_id: id, p_counted: 185, p_card: 0, p_by_name: 'Spec Staff' });
+    expect(Object.keys(calls.find((c) => c.name === 'till_close')!.body)).not.toContain('p_expected');
+    await expect(dlg).toContainText('Till closed');
+    await expect(dlg).toContainText('Short SAR 5');
+    expect(ts.filter((x) => x.method === 'PATCH')).toHaveLength(0);
+    await expect.poll(() => page.evaluate(`((S.fullLog||[]).slice(-1)[0]||{}).label||''`)).toContain('190');
+  });
+
   test('with no ride at all, the shop sells: no session, the seller named', async ({ page }) => {
     await boot(page, { sessions: [], queue_entries: [], cashier_sales: [] });
     const cs = posts(page, 'cashier_sales');

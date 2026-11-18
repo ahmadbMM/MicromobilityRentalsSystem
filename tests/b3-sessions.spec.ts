@@ -61,6 +61,25 @@ test.describe('@staff:sessions one Save, one write', () => {
     expect(reads(l, 'sessions').some((x) => /id=in\./.test(x.url))).toBe(true);
   });
 
+  // The breakfast stop goes in the update only when it was changed here (bug hunt 2026-11-18, sql04-1): after a date move the
+  // new row holds the new day's confirmed venue (the database's), which a save of the stop the editor opened with wrote over.
+  test('a save that leaves the breakfast stop as it was does not send it; a changed one is sent', async ({ page }) => {
+    await staff(page, { sessions: [sat(`${D1}-s`, D1, { breakfast_name: 'Cafe Bloom', breakfast_url: 'https://maps.example.com/bloom' })] });
+    const l = sent(page);
+    await page.evaluate(`startEditSession('${D1}-s');renderSessions()`);
+    await page.fill('#es-spots', '44');
+    await page.evaluate('_saveSessionEdit()');
+    await expect.poll(() => page.evaluate('S.editSessionId')).toBe(null);
+    expect(patches(l)).toHaveLength(1);
+    expect(patches(l)[0].body).toMatchObject({ capacity: 44 });
+    expect(patches(l)[0].body).not.toHaveProperty('breakfast_name');
+    expect(patches(l)[0].body).not.toHaveProperty('breakfast_url');
+    await page.evaluate(`startEditSession('${D1}-s');S.editSessBfName='Cafe';S.editSessBfSel='__x';renderSessions()`);
+    await page.evaluate('_saveSessionEdit()');
+    await expect.poll(() => patches(l).length).toBe(2);
+    expect(patches(l)[1].body).toMatchObject({ breakfast_name: 'Cafe' });
+  });
+
   test('a refused save writes nothing more, and the form stays open', async ({ page }) => {
     await staff(page);
     const l = sent(page);

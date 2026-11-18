@@ -203,28 +203,20 @@ test.describe('@customer:members R9 R10 the next session', () => {
 test.describe('@customer:members R13 R20 the report and the goal', () => {
   const post = { id: 'post_7', auto: true, line: 'A calm morning on the Corniche.', line_ar: 'صباح هادئ على الكورنيش', riders: 96, rides: 96, first_rides: 12, leads: 4, volunteers: 11, prev_riders: 88, mine: 3, kind: 'saturday', date: '2026-11-07', img: false };
 
-  test('the Saturday report is number tiles, the member\'s own line, and the staff\'s line', async ({ page }) => {
+  // No head counts (bug hunt 2026-11-18, mod1-2; the owner's rule of 2026-11-13): the riders, first rides, leads, volunteers, the
+  // change from last week and the month's club total were tiles here; the member's own Saturdays and the staff's line stay.
+  test('the Saturday report is the member\'s own line and the staff\'s line, with no head count', async ({ page }) => {
     await member(page, { 'rpc:hub_feed': feed({ post }) });
     const card = page.locator('#hub-body .hub-report');
-    const tile = (l: string) => card.locator('.hub-stat').filter({ has: page.getByText(l, { exact: true }) });
-    await expect(tile('Riders')).toContainText('96');
-    await expect(tile('First Saturday rides')).toContainText('12');
-    await expect(tile('Volunteers')).toContainText('11');
-    await expect(tile('Change from last week')).toContainText('+8');
-    await expect(tile('Community goal')).toContainText('312 / 446');
-    await expect(tile('Rides')).toHaveCount(0); // rides as many as riders: one tile
-    await expect(tile('Ride leads')).toHaveCount(0); // under 10 never shows
     await expect(card.locator('.hub-mine')).toContainText('Your Saturday rides this month');
     await expect(card.locator('.hub-mine')).toContainText('3');
     await expect(card).toContainText('A calm morning on the Corniche.');
+    await expect(card.locator('.hub-stat')).toHaveCount(0);
+    await expect(card).not.toContainText(/Riders|First Saturday rides|Volunteers|Change from last week|Community goal|96|12|312/);
     await expect(page.locator('#hub-body')).not.toContainText('Tip of the week');
-    await page.evaluate(`Object.assign(S._hub.d.post,{prev_riders:101,mine:null,rides:98});S._hub.d.club={name:'Cool Season',name_ar:'موسم',scope:'saturday',target:8,n:2,mine:1,from:'2026-11-01',ends_on:'2027-02-28'};_hubRender()`);
-    await expect(tile('Change from last week')).toContainText('-5');
-    await expect(tile('Rides')).toContainText('98');
-    await expect(tile('Community goal')).toHaveCount(0); // a staff goal running is not the month's own
+    await page.evaluate(`Object.assign(S._hub.d.post,{prev_riders:101,mine:null,rides:98});_hubRender()`);
     await expect(card.locator('.hub-mine')).toHaveCount(0);
-    await page.evaluate(`setLang('ar')`);
-    await expect(page.locator('#hub-body .hub-report .hub-stat bdi[dir=ltr]').first()).toHaveText('-5');
+    await expect(card).not.toContainText(/98|-5/);
     await page.evaluate(`setLang('bn')`);
     expect(await page.evaluate(`/[০-৯०-९٠-٩]/.test(document.getElementById('hub-body').textContent)`)).toBe(false);
   });

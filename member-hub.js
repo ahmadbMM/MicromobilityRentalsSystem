@@ -57,12 +57,6 @@ const HUB_T = {
   clubHit: ['The club reached it', 'حقّق النادي الهدف', 'Le club l’a atteint', 'El club lo logró', 'O clube conseguiu', 'کلب نے ہدف حاصل کر لیا', 'क्लब ने लक्ष्य पा लिया', 'Naabot ito ng club', 'क्लबले लक्ष्य पूरा गर्‍यो', 'ক্লাব লক্ষ্যে পৌঁছেছে'],
   report: ['Saturday report', 'تقرير السبت', 'Le samedi en bref', 'Crónica del sábado', 'Resumo de sábado', 'ہفتے کی رپورٹ', 'शनिवार की रिपोर्ट', 'Ulat ng Sabado', 'शनिबारको रिपोर्ट', 'শনিবারের প্রতিবেদন'],
   // The Saturday report's tiles, the ride's status chip and the next Saturday's target (2026-11-13, R10 R13 R20).
-  tRiders: ['Riders', 'الراكبون', 'Cyclistes', 'Ciclistas', 'Ciclistas', 'سوار', 'राइडर', 'Rider', 'राइडर', 'রাইডার'],
-  tRides: ['Rides', 'الرحلات', 'Sorties', 'Salidas', 'Passeios', 'سواریاں', 'राइड', 'Ride', 'राइड', 'রাইড'],
-  tFirst: ['First Saturday rides', 'أول رحلة سبت', 'Premières sorties du samedi', 'Primeras salidas de sábado', 'Primeiros passeios de sábado', 'ہفتے کی پہلی سواریاں', 'पहली शनिवार राइड', 'Unang Saturday ride', 'पहिलो शनिबारे राइड', 'প্রথম শনিবারের রাইড'],
-  tLeads: ['Ride leads', 'قادة الرحلة', 'Responsables de sortie', 'Guías de la salida', 'Líderes do passeio', 'رائیڈ لیڈر', 'राइड लीडर', 'Ride leader', 'राइड लिडर', 'রাইড লিডার'],
-  tVols: ['Volunteers', 'المتطوعون', 'Bénévoles', 'Voluntarios', 'Voluntários', 'رضاکار', 'स्वयंसेवक', 'Volunteer', 'स्वयंसेवक', 'স্বেচ্ছাসেবক'],
-  tChange: ['Change from last week', 'التغيّر عن الأسبوع الماضي', 'Par rapport à la semaine dernière', 'Respecto a la semana pasada', 'Face à semana passada', 'پچھلے ہفتے کے مقابلے میں', 'पिछले हफ़्ते से बदलाव', 'Kumpara sa nakaraang linggo', 'गत हप्ताभन्दा फरक', 'গত সপ্তাহের তুলনায়'],
   tMine: ['Your Saturday rides this month', 'رحلاتك يوم السبت هذا الشهر', 'Vos sorties du samedi ce mois-ci', 'Tus salidas de sábado este mes', 'Os seus passeios de sábado este mês', 'اس مہینے آپ کی ہفتے کی سواریاں', 'इस महीने आपकी शनिवार राइड', 'Ang Saturday ride mo ngayong buwan', 'यो महिना तपाईंका शनिबारे राइड', 'এই মাসে আপনার শনিবারের রাইড'],
   rsMoved: ['Start moved', 'تغيّر موعد الانطلاق', 'Départ décalé', 'Salida cambiada', 'Partida alterada', 'آغاز کا وقت بدل گیا', 'शुरुआत का समय बदला', 'Inilipat ang simula', 'सुरुवातको समय सारियो', 'শুরুর সময় বদলেছে'],
   rsShort: ['Shortened', 'تم تقصير المسار', 'Parcours raccourci', 'Recorrido acortado', 'Percurso encurtado', 'راستہ مختصر', 'रास्ता छोटा किया गया', 'Pinaikli', 'बाटो छोटो गरियो', 'পথ ছোট করা হয়েছে'],
@@ -707,27 +701,18 @@ function _clubHtml(g) {
 // No "club in numbers" card (riders last Saturday, Saturday rides this month and since the start): the user, 2026-11-13,
 // does not want them shown to customers. hub_feed's `numbers` may still arrive, and nothing on the page reads it.
 // One staff card: the Saturday report showing now, else the site's first announcement, else the tip of the week.
-// The report is number tiles (R13, 2026-11-13; the server writes one after each Saturday ride, staff may add a line and a
-// photo): riders, rides when they differ, first Saturday rides, ride leads, volunteers, each only as the server sends it
-// (10 or more), the change from the week before, the month's total toward the club's own goal, and the member's own
-// Saturdays this month when they rode it. No names, no ranking.
-function _hubBig(v) { return v != null && v !== '' && Number.isFinite(Number(v)) && Number(v) >= 10; }
+// The report (R13, 2026-11-13; the server writes one after each Saturday ride, staff may add a line and a photo) is its
+// photo, the member's own Saturdays this month when they rode it, and the staff's line. No head counts: the riders, rides,
+// first Saturday rides, ride leads, volunteers, the change from last week and the month's club total were tiles here until
+// bug hunt 2026-11-18 (mod1-2; the owner's rule of 2026-11-13: members never see the club's numbers). No names, no ranking.
 function _staffHtml(d) {
   const p = d.post;
   if (p) {
-    const line = _hPick(p, 'line', 'line_ar'), cl = d.club, cells = [];
-    const tile = (v, k) => cells.push(`<div class="hub-stat"><strong>${v}</strong><span>${esc(_hT(k))}</span></div>`);
-    if (_hubBig(p.riders)) tile(_hN(p.riders), 'tRiders');
-    if (_hubBig(p.rides) && Number(p.rides) !== Number(p.riders)) tile(_hN(p.rides), 'tRides');
-    if (_hubBig(p.first_rides)) tile(_hN(p.first_rides), 'tFirst');
-    if (_hubBig(p.leads)) tile(_hN(p.leads), 'tLeads');
-    if (_hubBig(p.volunteers)) tile(_hN(p.volunteers), 'tVols');
-    if (_hubBig(p.riders) && _hubBig(p.prev_riders)) { const x = Number(p.riders) - Number(p.prev_riders); tile(`<bdi dir="ltr">${x > 0 ? '+' : x < 0 ? '-' : ''}${Math.abs(x)}</bdi>`, 'tChange'); }
-    if (cl && !cl.name && Number(cl.target) > 0 && _hubBig(cl.n) && (!p.date || !cl.from || String(p.date).slice(0, 7) === String(cl.from).slice(0, 7))) tile(`<bdi dir="ltr">${esc(String(Number(cl.n) || 0))} / ${esc(String(Number(cl.target)))}</bdi>`, 'goalAll');
+    const line = _hPick(p, 'line', 'line_ar');
     const mine = p.mine != null && Number(p.mine) > 0 ? `<div class="hub-mine"><span>${esc(_hT('tMine'))}</span><strong>${_hN(p.mine)}</strong></div>` : '';
     return `<div class="hub-card hub-flat hub-report"><span class="hub-k">${_hT('report')}${p.date ? ` · <bdi>${esc(_hDate(p.date))}</bdi>` : ''}</span>
       ${p.img ? `<img class="hub-photo" data-hubimg="${esc(p.id)}" alt="">` : ''}
-      ${cells.length ? `<div class="hub-stats">${cells.join('')}</div>` : ''}${mine}${line ? `<p class="hub-line"><bdi>${esc(line)}</bdi></p>` : ''}</div>`;
+      ${mine}${line ? `<p class="hub-line"><bdi>${esc(line)}</bdi></p>` : ''}</div>`;
   }
   const a = Array.isArray(d.announce) ? d.announce.map((m) => (m && m.text ? _hPick(m.text, 'en', 'ar') : '')).find(Boolean) : '';
   if (a) return `<div class="hub-card hub-flat"><span class="hub-k">${_hT('news')}</span><p class="hub-line"><bdi>${esc(a)}</bdi></p></div>`;
