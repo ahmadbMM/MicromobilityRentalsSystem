@@ -68,14 +68,34 @@
 --     promo); a booking moved to another session keeps the share only while that session still earns it; a share a
 --     client wrote into xp_early is never taken (only this trigger stamps it).
 --
+-- Fixes from the independent security review of 2026-11-18 (F1, marked "F1" where they sit):
+--  H1. The bike credit (EF22) is no longer paid when the bike order is paid: it is held, and the hourly job
+--      mm-xp-bike-credit (_xp_bike_credit_tick) pays it only once the order was delivered or collected, 15 Riyadh days
+--      have passed (the return and exchange window), no return or exchange of a bike line is open, none was approved,
+--      and the money given back stays clear of the bike lines; else it is voided. A paid credit is still taken back
+--      when the order is later refunded (never below zero, once). Staff read only paid credits.
+--  M1. store_quote_get refuses a token that cannot be one before the visitor's meter (the website now names the visitor).
+--  M2. The store-claims bucket takes a photo only at a name the database handed the website's server for a delivered
+--      order (store_after_photo_tickets, store_after_photo_slot, five minutes, once, 24 a day per order); the public key
+--      alone stores nothing.
+--  L1. A refund staff start on a gift (GF-) or pack (PK-) is refused (XP_CODE_IN_USE) while a booking still to come
+--      carries its code, and ends the code at once; a part refund voids the code as a full one does.
+--  L3. store_order_pass meters only misses, per visitor the Wallet signer names (x-mm-visitor-ip), so junk never locks
+--      out a pass for an order's own key.
+--  L5. The checks run inside the transaction, before the ledger row and the commit.
+--  B9 (the staff Store builder): build photos (N29) live under store-builds/<random uuid>/ (the review's L6), which
+--      staff_store_after_build now takes instead of the order number's folder, and staff (not only admins) may add
+--      them there in the site bucket ("store builds staff add", insert only, that folder only).
+--
 -- Rollback idea: run 20261115235500's _store_slots and 20261119000800's _store_order_json again; drop the triggers
 -- store_orders_slot_season, store_orders_bike_owner, store_order_items_bike_owner, trg_xp_pay_follow,
--- trg_xp_bike_credit and trg_enforce_booking_price_xp; drop the functions this file adds; drop store_orders.quote_id,
--- then the tables store_quotes, store_after_builds, store_after_arrivals, store_after_claims, store_after_push,
--- store_after_slot_changes, xp_bike_credits, xp_purchases, xp_packs; drop the new columns (store_orders company, pin,
+-- trg_xp_bike_credit, trg_enforce_booking_price_xp and trg_xp_refund_guard (on payment_refunds); unschedule the job
+-- mm-xp-bike-credit; drop the functions this file adds; drop store_orders.quote_id, then the tables store_quotes,
+-- store_after_builds, store_after_arrivals, store_after_claims, store_after_push, store_after_slot_changes,
+-- store_after_photo_tickets, xp_bike_credits, xp_purchases, xp_packs; drop the new columns (store_orders company, pin,
 -- handover, handover_entry, handover_session, learning; store_products.fleet_bike_id; store_return_requests.photos;
 -- queue_entries.xp_early); put the payments kind check back without 'xp' (once no 'xp' payment is left); drop the
--- store-claims policies, empty and delete the bucket; update badges set retired = true where slug = 'bike_owner';
+-- store-claims policies and "store builds staff add", empty and delete the bucket; update badges set retired = true where slug = 'bike_owner';
 -- delete the settings keys of part 1; B1: the seven updates with the two names swapped.
 --
 -- Idempotent (create ... if not exists, create or replace, constraints and policies dropped and added again, seeds on
@@ -576,14 +596,16 @@ $$;
 revoke execute on function public._store_quote_json(store_quotes) from public, anon, authenticated;
 
 -- The website's /store/q/<token> (server key): {state, no, expires_at, items (open only), fulfil, slot, handover, name
--- and phone (open only), order_no (used only)}; NOT_FOUND for a token that names none. Metered per visitor.
+-- and phone (open only), order_no (used only)}; NOT_FOUND for a token that names none. Metered per visitor: the website
+-- names the visitor (x-mm-visitor-ip, F1: the page now sends it, as payRpc's `from` does), and a token that cannot be one
+-- is refused before the meter, so junk never fills it (the review's M1).
 create or replace function public.store_quote_get(p_key text, p_token text) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare q store_quotes%rowtype; j jsonb; st text;
 begin
   if not _pay_key_ok(p_key) then raise exception 'NOT_AUTHORIZED' using errcode = '42501'; end if;
-  if not _ip_gate('storequote' || _store_visitor(), 30, interval '10 minutes') then raise exception 'STORE_BUSY' using errcode = 'P0001'; end if;
   if coalesce(p_token, '') !~ '^[a-z0-9]{24,40}$' then raise exception 'NOT_FOUND' using errcode = 'P0002'; end if;
+  if not _ip_gate('storequote' || _store_visitor(), 30, interval '10 minutes') then raise exception 'STORE_BUSY' using errcode = 'P0001'; end if;
   select * into q from store_quotes where token = p_token;
   if q.id is null then raise exception 'NOT_FOUND' using errcode = 'P0002'; end if;
   j := _store_quote_json(q); st := j ->> 'state';
@@ -981,6 +1003,19 @@ create table if not exists public.store_after_slot_changes (
 );
 create index if not exists store_after_slot_changes_order on public.store_after_slot_changes (order_id, id);
 
+-- F1 (the review's M2): one photo's upload into store-claims, named by the database for a delivered order the website
+-- read with its key (store_after_photo_slot): the object's name, five minutes to use it, used once. The bucket's insert
+-- policy takes only a name that has one (_store_after_photo_take), so the public key alone stores nothing.
+create table if not exists public.store_after_photo_tickets (
+  name        text primary key check (name ~ '^o[0-9]{1,9}/[0-9a-f]{32}\.jpg$'),
+  order_id    uuid not null references public.store_orders (id) on delete cascade,
+  expires_at  timestamptz not null,
+  used_at     timestamptz,
+  created_at  timestamptz not null default now()
+);
+create index if not exists store_after_photo_tickets_order on public.store_after_photo_tickets (order_id, created_at);
+create index if not exists store_after_photo_tickets_old on public.store_after_photo_tickets (expires_at);
+
 alter table public.store_return_requests add column if not exists photos text[] not null default '{}';
 alter table public.store_return_requests drop constraint if exists store_return_requests_photos_check;
 alter table public.store_return_requests add constraint store_return_requests_photos_check check (cardinality(photos) <= 3);
@@ -988,7 +1023,8 @@ alter table public.store_return_requests add constraint store_return_requests_ph
 do $rls$
 declare t text;
 begin
-  foreach t in array array['store_after_builds', 'store_after_arrivals', 'store_after_claims', 'store_after_push', 'store_after_slot_changes'] loop
+  foreach t in array array['store_after_builds', 'store_after_arrivals', 'store_after_claims', 'store_after_push', 'store_after_slot_changes',
+                           'store_after_photo_tickets'] loop
     execute format('alter table public.%I enable row level security', t);
     execute format('revoke all on public.%I from anon, authenticated', t);
     execute format('drop policy if exists "staff read" on public.%I', t);
@@ -1012,10 +1048,25 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values ('store-claims', 'store-claims', false, 716800, array['image/jpeg'])
 on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
 
+-- F1 (the review's M2): the public key may add a photo only at a name the database handed the website's server for a
+-- delivered order (store_after_photo_slot), unexpired and not used yet; the check marks it used. Each name holds one
+-- file (no update policy, never an overwrite), so a ticket stores one photo at most even where Storage tests the policy
+-- in a transaction it rolls back. Executable by the API roles because a policy runs as the uploader; it answers false for
+-- any other bucket or name, and a name it takes is 128 random bits.
+create or replace function public._store_after_photo_take(p_bucket text, p_name text) returns boolean
+language plpgsql volatile security definer set search_path = public as $$
+begin
+  if p_bucket is distinct from 'store-claims' or coalesce(p_name, '') !~ '^o[0-9]{1,9}/[0-9a-f]{32}\.jpg$' then return false; end if;
+  update store_after_photo_tickets set used_at = now() where name = p_name and used_at is null and expires_at > now();
+  return found;
+end $$;
+revoke execute on function public._store_after_photo_take(text, text) from public;
+grant execute on function public._store_after_photo_take(text, text) to anon, authenticated;
+
 drop policy if exists "store claims add" on storage.objects;
 create policy "store claims add" on storage.objects
   for insert to anon, authenticated
-  with check (bucket_id = 'store-claims' and name ~ '^o[0-9]{1,9}/[0-9a-f]{32}\.jpg$');
+  with check (bucket_id = 'store-claims' and name ~ '^o[0-9]{1,9}/[0-9a-f]{32}\.jpg$' and public._store_after_photo_take(bucket_id, name));
 drop policy if exists "store claims staff read" on storage.objects;
 create policy "store claims staff read" on storage.objects
   for select to authenticated
@@ -1024,6 +1075,18 @@ drop policy if exists "store claims admin remove" on storage.objects;
 create policy "store claims admin remove" on storage.objects
   for delete to authenticated
   using (bucket_id = 'store-claims' and (select public.is_admin()));
+
+-- F1 (B9, the staff Store builder): build photos (N29) go to the public site bucket at store-builds/<random uuid>/
+-- (the review's L6: never under the order number, which runs in sequence), and that bucket takes inserts from admins
+-- only (20260924150000 "site photos upload"), so a cashier or manager preparing a bike could not add them. Staff may
+-- add there and only there: a uuid folder, one safe file name, jpg/png/webp (the bucket's own size and type limits
+-- still apply). Insert only: replacing, removing and listing stay admins'. Nothing for anon.
+drop policy if exists "store builds staff add" on storage.objects;
+create policy "store builds staff add" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'site'
+              and name ~ '^store-builds/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[0-9a-f]{32})/[A-Za-z0-9][A-Za-z0-9._-]{0,79}\.(jpg|png|webp)$'
+              and (select public.is_staff()));
 
 -- ── 7c. Helpers ────────────────────────────────────────────────────────────────────────────────────
 
@@ -1185,6 +1248,28 @@ end $$;
 revoke execute on function public.store_after_slot_change(text, bigint, text, date, text) from public;
 grant execute on function public.store_after_slot_change(text, bigint, text, date, text) to anon, authenticated;
 
+-- F1 (the review's M2): a name to store one claim or return photo at, for a delivered order read with its key (the
+-- website's /api/store/claim-photo asks for it after checking the JPEG, then uploads to it at once): {path, expires_at},
+-- path o<no>/<32 hex>.jpg, good for five minutes, once. 24 a day per order at most (a claim takes 3 photos, five claims a
+-- day; a return 3). NOT_AUTHORIZED, NOT_FOUND, STORE_AFTER_STATE (not delivered, or a gift card order), STORE_AFTER_BUSY.
+create or replace function public.store_after_photo_slot(p_key text, p_no bigint, p_track text) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare o store_orders%rowtype; v_name text; v_exp timestamptz := now() + interval '5 minutes';
+begin
+  if not _pay_key_ok(p_key) then raise exception 'NOT_AUTHORIZED' using errcode = '42501'; end if;
+  o := _store_after_order(p_no, p_track, true);
+  if o.status <> 'delivered' or o.fulfil = 'digital' then raise exception 'STORE_AFTER_STATE' using errcode = 'P0001'; end if;
+  delete from store_after_photo_tickets where expires_at < now() - interval '2 days';
+  if (select count(*) from store_after_photo_tickets t where t.order_id = o.id and t.created_at > now() - interval '1 day') >= 24 then
+    raise exception 'STORE_AFTER_BUSY' using errcode = 'P0001';
+  end if;
+  v_name := 'o' || o.no || '/' || replace(gen_random_uuid()::text, '-', '') || '.jpg';
+  insert into store_after_photo_tickets (name, order_id, expires_at) values (v_name, o.id, v_exp);
+  return jsonb_build_object('path', v_name, 'expires_at', v_exp);
+end $$;
+revoke execute on function public.store_after_photo_slot(text, bigint, text) from public;
+grant execute on function public.store_after_photo_slot(text, bigint, text) to anon, authenticated;
+
 -- A warranty claim from an order line (N31): a handed-over order's own line, not a gift card, within its warranty
 -- (the product's own months when longer than the law's: 24 new, 12 certified pre-owned; counted from the day it was
 -- delivered or collected), 10-600 characters, up to three photos from the order's folder, no claim open on the line,
@@ -1266,15 +1351,22 @@ grant execute on function public.store_after_push(text, bigint, text, boolean, t
 -- the order's own key is the right to read it, exactly as the order's link is. Only what the pass prints: the number,
 -- whether it is live and ready, the first name, the handover (day, from, to), up to six lines (name, variant, qty), the
 -- counter code (MMO-<no>-<first six of the key>: the staff scanner opens the order with it), the order page's path and
--- the showroom's address from the site's settings. Metered per address (the Worker's: 120 in 10 minutes).
+-- the showroom's address from the site's settings. F1 (the review's L3): only misses are metered, per visitor the signer
+-- names (x-mm-visitor-ip: its caller's CF-Connecting-IP; 120 misses in 10 minutes), so junk numbers and keys never
+-- lock out a pass for an order's own key: a right key is answered whatever the meter says. The header is not the
+-- server key's word here (the signer has the public key only); a caller who changes it only gets more misses against
+-- a 128-bit key.
 create or replace function public.store_order_pass(p_no bigint, p_track text) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare o store_orders%rowtype; addr jsonb := _pay_setting('site.contact.address');
 begin
-  if not _ip_gate('storepass', 120, interval '10 minutes') then return jsonb_build_object('ok', false, 'error', 'throttled'); end if;
-  if coalesce(p_track, '') !~ '^[0-9a-f]{32}$' then return jsonb_build_object('ok', false, 'error', 'not_found'); end if;
-  select * into o from store_orders where no = p_no and track_key = p_track;
-  if o.id is null then return jsonb_build_object('ok', false, 'error', 'not_found'); end if;
+  if coalesce(p_track, '') ~ '^[0-9a-f]{32}$' then
+    select * into o from store_orders where no = p_no and track_key = p_track;
+  end if;
+  if o.id is null then
+    if not _ip_gate('storepass' || _store_visitor(), 120, interval '10 minutes') then return jsonb_build_object('ok', false, 'error', 'throttled'); end if;
+    return jsonb_build_object('ok', false, 'error', 'not_found');
+  end if;
   if o.fulfil <> 'pickup' then return jsonb_build_object('ok', false, 'error', 'not_pickup'); end if;
   return jsonb_build_object('ok', true, 'pass', jsonb_build_object(
     'no', o.no, 'status', o.status, 'live', o.status in ('paid', 'preparing', 'ready'), 'ready', o.status = 'ready',
@@ -1345,8 +1437,8 @@ revoke execute on function public.staff_store_after_queue() from public, anon;
 grant execute on function public.staff_store_after_queue() to authenticated;
 
 -- "Your bike is built" (N29): 1-3 photos the staff page shrank and stored in the site bucket at
--- store-builds/<order no>/<stamp>.<jpg|png|webp> (the catalogue's _catUploadImage(file, 'store-builds/' + no), which
--- also writes the .w640/.w1280 copies), and the check sheet {brakes, gears, torque, tyres: true|false}. Saving it again
+-- store-builds/<random uuid>/<stamp>.<jpg|png|webp> (F1, B9: one unguessable folder per order's build, the review's L6;
+-- the catalogue's _catUploadImage, which also writes the .w640 copy), and the check sheet {brakes, gears, torque, tyres: true|false}. Saving it again
 -- replaces it. The customer sees it on the order's page at once (not on a pending, cancelled or refunded order).
 create or replace function public.staff_store_after_build(p_order uuid, p_photos text[], p_checks jsonb, p_note text default null) returns jsonb
 language plpgsql security definer set search_path = public as $$
@@ -1356,7 +1448,9 @@ begin
   select * into o from store_orders where id = p_order for update;
   if o.id is null then raise exception 'NOT_FOUND' using errcode = 'P0002'; end if;
   if o.status not in ('paid', 'preparing', 'ready', 'shipped', 'out', 'delivered') then raise exception 'STORE_AFTER_STATE' using errcode = 'P0001'; end if;
-  if cardinality(ph) > 3 or exists (select 1 from unnest(ph) x where x is null or x !~ ('^/media/store-builds/' || o.no || '/[A-Za-z0-9._-]{1,80}\.(jpg|png|webp)$')) then
+  /* F1 (B9, the review's L6): store-builds/<random uuid>/<file>, never the order number's folder */
+  if cardinality(ph) > 3 or exists (select 1 from unnest(ph) x where x is null
+        or x !~ '^/media/store-builds/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[0-9a-f]{32})/[A-Za-z0-9][A-Za-z0-9._-]{0,79}\.(jpg|png|webp)$') then
     raise exception 'STORE_AFTER_PHOTOS' using errcode = 'P0001';
   end if;
   foreach k in array array['brakes', 'gears', 'torque', 'tyres'] loop
@@ -1667,8 +1761,10 @@ end $$;
 revoke execute on function public.xp_pack_start(text, text, text, uuid, text) from public;
 grant execute on function public.xp_pack_start(text, text, text, uuid, text) to anon, authenticated;
 
--- Paid: the code is issued; refunded in full: it is voided if unused (a used gift stays used; a pack's spent sessions
--- stay spent and the rest go). Runs inside pay_settle / the refund functions, after they set the payment's status.
+-- Paid: the code is issued; refunded, in full or in part (F1, the review's L1: a part refund left the code live): it is
+-- voided (a used gift stays used; a pack's spent sessions stay spent and the rest go). Runs inside pay_settle / the
+-- refund functions, after they set the payment's status. A refund staff start is refused while a booking still to come
+-- carries the code, and ends the code at once (_xp_refund_guard, below).
 create or replace function public._xp_pay_follow() returns trigger
 language plpgsql security definer set search_path = public as $$
 declare x xp_purchases%rowtype; c text; mo int;
@@ -1692,7 +1788,7 @@ begin
       update xp_purchases set status = 'paid', code = c, paid_at = now(), expires_on = (_pay_today() + make_interval(months => mo))::date
        where id = x.id;
     end if;
-  elsif new.status = 'refunded' and x.status = 'paid' then
+  elsif new.status in ('refunded', 'partly_refunded') and x.status = 'paid' then
     update promo_codes set active = false where lower(code) = lower(x.code);
     update xp_purchases set status = 'void' where id = x.id;
   end if;
@@ -1702,6 +1798,39 @@ revoke execute on function public._xp_pay_follow() from public, anon, authentica
 drop trigger if exists trg_xp_pay_follow on public.payments;
 create trigger trg_xp_pay_follow after update of status on public.payments
   for each row when (new.kind = 'xp') execute function public._xp_pay_follow();
+
+-- F1 (the review's L1): a booking that already carries a gift's or a pack's code keeps the price the code gave it
+-- (_enforce_booking_price prices a code only when it is newly applied), so a refund of the purchase while such a booking
+-- is still to come gave the money back AND the ride. Repricing those rows from here was not safe (a staff write skips
+-- the price function, and a free row may already be marked paid), so the refund is refused instead: XP_CODE_IN_USE
+-- while a booking that carries the code is waiting, on the waitlist or riding, on today or a later day; staff cancel
+-- it first (the code's use comes back with it) and refund then. Allowed, the refund ends the code at once (no booking can
+-- take it while the refund is on its way; a wallet refund never changes the payment's status) and voids the purchase.
+-- Only refunds staff start on the purchase's own payment are judged: one the system owes by itself (by 'system') or
+-- one on another Moyasar payment of it (paid twice) is never refused, so pay_settle never fails here.
+create or replace function public._xp_refund_guard() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare p payments%rowtype; x xp_purchases%rowtype; today text := to_char(_pay_today(), 'YYYY-MM-DD');
+begin
+  select * into p from payments where id = new.payment_id;
+  if p.id is null or p.kind <> 'xp' then return new; end if;
+  if coalesce(new.by_name, '') = 'system' or new.provider_id is distinct from p.provider_id then return new; end if;
+  select * into x from xp_purchases where id::text = p.ref for update;
+  if x.id is null or x.code is null then return new; end if;
+  if exists (select 1 from queue_entries q
+              where lower(coalesce(q.promo_code, '')) = lower(x.code)
+                and coalesce(q.status, 'waiting') in ('waiting', 'waitlist', 'active')
+                and left(coalesce(q.session_date, (select s.session_date from sessions s where s.id = q.session_id), '9999-12-31'), 10) >= today) then
+    raise exception 'XP_CODE_IN_USE: cancel the bookings that carry % first', x.code using errcode = 'P0001';
+  end if;
+  update promo_codes set active = false where lower(code) = lower(x.code);
+  update xp_purchases set status = 'void' where id = x.id and status = 'paid';
+  return new;
+end $$;
+revoke execute on function public._xp_refund_guard() from public, anon, authenticated;
+drop trigger if exists trg_xp_refund_guard on public.payment_refunds;
+create trigger trg_xp_refund_guard before insert on public.payment_refunds
+  for each row execute function public._xp_refund_guard();
 
 -- The rider's own gifts and packs, with their codes (the account page, the payment page once paid).
 create or replace function public.customer_xp_purchases(p_id text, p_token text) returns jsonb
@@ -1760,27 +1889,39 @@ revoke execute on function public.staff_xp_purchases(int) from public, anon;
 grant execute on function public.staff_xp_purchases(int) to authenticated;
 
 -- ── 8d. Bike credit (EF22) ───────────────────────────────────────────────────────────────────────────
+-- F1 (the review's H1): a credit is never paid while the bike can still go back. The order's payment only holds it
+-- ('held': the amount and the ride fees it covers, so no other bike order counts them); it is paid into the wallet by
+-- the hourly job mm-xp-bike-credit once the order was delivered or collected, the return and exchange window is over (15
+-- Riyadh days after the handover: return within 7 days, exchange within 15, store_return_request), no return or exchange
+-- of a bike line is still open, no return of one was approved, and the money given back on the order stays clear of its
+-- bike lines. Otherwise it is voided ('void'), never paid. A credit paid and later undone (the order refunded) is taken
+-- back from the wallet as before. Staff read only paid ones (the order sheet shows what went into the wallet).
 create table if not exists public.xp_bike_credits (
   order_id     uuid primary key,
   customer_id  text not null check (length(customer_id) between 1 and 64),
   amount       numeric(10,2) not null check (amount > 0 and amount <= 5000),
   bookings     text[] not null default '{}',
   created_at   timestamptz not null default now(),
+  state        text not null default 'held' check (state in ('held', 'paid', 'void')),                 -- F1 (H1)
+  paid_at      timestamptz,                                                                              -- F1 (H1)
   reversed     numeric(10,2) check (reversed is null or (reversed >= 0 and reversed <= amount)),   -- B8 (f): taken back
   reversed_at  timestamptz
 );
+create index if not exists xp_bike_credits_held on public.xp_bike_credits (created_at) where state = 'held';
 alter table public.xp_bike_credits enable row level security;
 revoke all on public.xp_bike_credits from anon, authenticated;
 drop policy if exists "xp_bike_credits staff read" on public.xp_bike_credits;
-create policy "xp_bike_credits staff read" on public.xp_bike_credits for select to authenticated using ((select is_staff()));
+create policy "xp_bike_credits staff read" on public.xp_bike_credits for select to authenticated
+  using ((select is_staff()) and state = 'paid');
 grant select on public.xp_bike_credits to authenticated;
 
 -- When a store order with a bike becomes paid (switch xp.bikeCredit on): the buyer's own paid, ridden ride fees of the
--- last N days come back to their wallet, capped, once per order, never a fee an earlier bike order was credited for.
+-- last N days are held for them, capped, once per order, never a fee another bike order holds or was credited for.
 -- B8 (f): one customer's bike orders take turns (an advisory lock on the customer), so two bike orders paid at once
--- never both credit the same fees; and a credited order that is cancelled or refunded takes its credit back from the
--- wallet as far as the balance goes (never below zero), once, whether the switch is still on or not. The rides stay
--- counted as credited, so they are never paid back twice. Nothing here ever blocks the order's payment or refund.
+-- never hold the same fees. An order cancelled or refunded voids a held credit (nothing was paid) and takes a paid one
+-- back from the wallet as far as the balance goes (never below zero), once, whether the switch is still on or not; the
+-- rides of a paid credit stay counted, so they are never paid back twice, while a void one frees them. Nothing here
+-- ever blocks the order's payment or refund.
 create or replace function public._xp_bike_credit_follow() returns trigger
 language plpgsql security definer set search_path = public as $$
 declare cfg jsonb := _pay_setting('xp.bikeCredit'); days int; cap numeric; amt numeric; ids text[]; since date;
@@ -1788,8 +1929,12 @@ declare cfg jsonb := _pay_setting('xp.bikeCredit'); days int; cap numeric; amt n
 begin
   if new.customer_id is null or new.status is not distinct from old.status then return new; end if;
   if new.status in ('cancelled', 'refunded') then
-    select * into c from xp_bike_credits where order_id = new.id and reversed is null for update;
+    select * into c from xp_bike_credits where order_id = new.id and state <> 'void' and reversed is null for update;
     if c.order_id is null then return new; end if;
+    if c.state = 'held' then
+      update xp_bike_credits set state = 'void' where order_id = c.order_id;
+      return new;
+    end if;
     who := _wallet_owner(c.customer_id);
     select balance into bal from wallet_balances where customer_id = who for update;
     bal := round(least(c.amount, greatest(coalesce(bal, 0), 0)), 2);
@@ -1811,29 +1956,104 @@ begin
   days := least(greatest(coalesce((cfg ->> 'days')::int, 30), 1), 365);
   cap := least(greatest(coalesce((cfg ->> 'max')::numeric, 300), 0), 5000);
   since := (coalesce(new.paid_at, now()) at time zone 'Asia/Riyadh')::date - days;
-  /* the rider's own ridden, paid rides in the window that no earlier bike order was credited for */
+  /* the rider's own ridden, paid rides in the window that no other bike order holds or was credited for */
   select coalesce(sum(q.price), 0), coalesce(array_agg(q.id), '{}') into amt, ids
     from queue_entries q
    where q.customer_id = new.customer_id and q.status = 'done' and coalesce(q.paid, false) and coalesce(q.price, 0) > 0
      and left(q.session_date, 10) >= to_char(since, 'YYYY-MM-DD')
-     and not exists (select 1 from xp_bike_credits b where b.customer_id = new.customer_id and q.id = any(b.bookings));
+     and not exists (select 1 from xp_bike_credits b where b.customer_id = new.customer_id and b.state <> 'void' and q.id = any(b.bookings));
   amt := round(least(amt, cap), 2);
   if amt <= 0 then return new; end if;
-  insert into xp_bike_credits (order_id, customer_id, amount, bookings) values (new.id, new.customer_id, amt, ids);
-  perform set_config('mm.wallet_op', 'Bike credit', true);
-  perform set_config('mm.wallet_note', 'Ride fees back on bike order ' || coalesce(new.no::text, new.id::text), true);
-  perform _wallet_post(_wallet_owner(new.customer_id), amt, 'adjust', null, null, null, 'bkc-' || new.id, null);
-  perform set_config('mm.wallet_op', '', true);
-  perform set_config('mm.wallet_note', '', true);
+  /* F1 (H1): held, not paid: _xp_bike_credit_tick pays it once the bike is kept past the return window */
+  insert into xp_bike_credits (order_id, customer_id, amount, bookings, state) values (new.id, new.customer_id, amt, ids, 'held');
   return new;
 exception when others then
-  /* a credit that cannot be posted or taken back never blocks the order's payment or refund */
+  /* a credit that cannot be held or taken back never blocks the order's payment or refund */
   return new;
 end $$;
 revoke execute on function public._xp_bike_credit_follow() from public, anon, authenticated;
 drop trigger if exists trg_xp_bike_credit on public.store_orders;
 create trigger trg_xp_bike_credit after update of status on public.store_orders
   for each row execute function public._xp_bike_credit_follow();
+
+-- F1 (H1): the money given back on a store order so far, every way: card or wallet refunds owed, being sent or done
+-- (payment_refunds names the order), the wallet's own part given back (sale_back on the order's receipt, a gift card's
+-- part that went to the wallet included) and a gift card's part put back on it.
+create or replace function public._xp_order_given_back(o store_orders) returns numeric
+language sql stable security definer set search_path = public as $$
+  select round(coalesce((select sum(r.amount) from payment_refunds r where r.order_id = o.id and r.status in ('due', 'pending', 'done')), 0)
+             + coalesce((select sum(l.amount) from wallet_ledger l where l.receipt_id = 'ord-' || o.no and l.kind = 'sale_back'), 0)
+             + coalesce((select sum(m.amount) from store_gift_card_moves m where m.order_id = o.id and m.kind in ('back', 'refund')), 0), 2)
+$$;
+revoke execute on function public._xp_order_given_back(store_orders) from public, anon, authenticated;
+
+-- F1 (H1): pays the held bike credits whose bike was kept (mm-xp-bike-credit, hourly; the switch only decides when the
+-- order is paid, so a credit held while it was on is honoured after it is turned off). Per held credit:
+--   the order cancelled or refunded, or gone            -> void;
+--   not delivered yet, or 15 Riyadh days not yet over    -> wait;
+--   a return or exchange of a bike line still open       -> wait for staff's answer;
+--   a return of a bike line approved, or more given back than the order's non-bike part -> void;
+--   else the rides it holds that are still ridden, paid fees (never more than held) go into the wallet -> paid.
+-- Each credit is its own step: one that cannot be posted is left held and tried again next hour. Answers how many paid.
+create or replace function public._xp_bike_credit_tick() returns int
+language plpgsql security definer set search_path = public as $$
+declare c xp_bike_credits%rowtype; o store_orders%rowtype; dat timestamptz; bikes numeric; amt numeric; n int := 0;
+begin
+  for c in select * from xp_bike_credits where state = 'held' order by created_at limit 200 for update skip locked loop
+    begin
+      select * into o from store_orders where id = c.order_id;
+      if o.id is null or o.status in ('cancelled', 'refunded') then
+        update xp_bike_credits set state = 'void' where order_id = c.order_id;
+        continue;
+      end if;
+      if o.status <> 'delivered' then continue; end if;
+      select e.at into dat from store_order_events e where e.order_id = o.id and e.status = 'delivered' order by e.id limit 1;
+      if dat is null or _pay_today() - (dat at time zone 'Asia/Riyadh')::date <= 15 then continue; end if;
+      if exists (select 1 from store_return_requests rr cross join jsonb_array_elements(rr.items) y
+                   join store_order_items i on i.id = (y ->> 'item_id')::bigint and i.order_id = o.id
+                   join store_products sp on sp.id = i.product_id and sp.category = 'bikes'
+                  where rr.order_id = o.id and rr.status = 'open') then
+        continue;
+      end if;
+      select coalesce(sum(i.unit_price * i.qty), 0) into bikes
+        from store_order_items i join store_products sp on sp.id = i.product_id and sp.category = 'bikes'
+       where i.order_id = o.id;
+      if exists (select 1 from store_return_requests rr cross join jsonb_array_elements(rr.items) y
+                   join store_order_items i on i.id = (y ->> 'item_id')::bigint and i.order_id = o.id
+                   join store_products sp on sp.id = i.product_id and sp.category = 'bikes'
+                  where rr.order_id = o.id and rr.status = 'approved' and rr.kind = 'return')
+         or _xp_order_given_back(o) > greatest(o.total - bikes, 0) then
+        update xp_bike_credits set state = 'void' where order_id = c.order_id;
+        continue;
+      end if;
+      /* a ride fee refunded since the order was paid is not paid back again */
+      select round(least(coalesce(sum(q.price), 0), c.amount), 2) into amt
+        from queue_entries q
+       where q.id = any(c.bookings) and q.customer_id = c.customer_id and q.status = 'done' and coalesce(q.paid, false)
+         and coalesce(q.price, 0) > 0;
+      if amt <= 0 then
+        update xp_bike_credits set state = 'void' where order_id = c.order_id;
+        continue;
+      end if;
+      update xp_bike_credits set state = 'paid', paid_at = now(), amount = amt where order_id = c.order_id;
+      perform set_config('mm.wallet_op', 'Bike credit', true);
+      perform set_config('mm.wallet_note', 'Ride fees back on bike order ' || coalesce(o.no::text, o.id::text), true);
+      perform _wallet_post(_wallet_owner(c.customer_id), amt, 'adjust', null, null, null, 'bkc-' || o.id, null);
+      perform set_config('mm.wallet_op', '', true);
+      perform set_config('mm.wallet_note', '', true);
+      n := n + 1;
+    exception when others then
+      raise warning 'xp bike credit for order %: %', c.order_id, sqlerrm;
+    end;
+  end loop;
+  return n;
+end $$;
+revoke execute on function public._xp_bike_credit_tick() from public, anon, authenticated;
+
+do $cron$ begin
+  if exists (select 1 from cron.job where jobname = 'mm-xp-bike-credit') then perform cron.unschedule('mm-xp-bike-credit'); end if;
+  perform cron.schedule('mm-xp-bike-credit', '23 * * * *', 'select public._xp_bike_credit_tick()');
+end $cron$;
 
 -- ── 8e. Early bird (EF29) ────────────────────────────────────────────────────────────────────────────
 alter table public.queue_entries add column if not exists xp_early smallint check (xp_early is null or xp_early between 1 and 50);
@@ -1956,14 +2176,11 @@ update public.store_products set name_ar = 'Varia RTL515'      where slug = 'var
 -- select slug, brand, name_ar from public.store_products
 --  where name_ar ~ '^(ألفاس|الفاس|قارمن|جارمن)\s' or (brand is not null and lower(name_ar) like lower(brand) || ' %');
 
-insert into supabase_migrations.schema_migrations (version, name) values ('20261119300000', 'sx_do_all') on conflict do nothing;
-
-commit;
-
 -- ── Checks (as 20261110235200's and every builder's own): every definer function written here is SECURITY DEFINER with
 -- a search_path, the plain helpers have a search_path, no helper is a client's to run, staff functions are not anon's,
 -- the website's are reachable, every new table has row level security and nothing for anon, the bucket is private,
--- the badge is there, payments take 'xp', and _store_order_json kept 20261119000800's text with B3's line.
+-- the badge is there, payments take 'xp', and _store_order_json kept 20261119000800's text with B3's line. F1 (the
+-- review's L5): inside the transaction, before the ledger row and the commit, so a failed check rolls the whole file back.
 do $chk$
 declare f text; t text;
 begin
@@ -1988,11 +2205,13 @@ begin
       'public.staff_store_after_seen(uuid)', 'public.staff_store_after_claim_set(uuid,text,text,text)',
       'public._store_after_order(bigint,text,boolean)', 'public._store_after_json(public.store_orders)', 'public._store_after_staffer()',
       'public._store_after_bike_owner()', 'public._store_after_grant_bike(uuid)',
+      'public.store_after_photo_slot(text,bigint,text)', 'public._store_after_photo_take(text,text)',
       -- part 8 (B6)
       'public._xp_code(text)', 'public.xp_packs_list()', 'public.staff_xp_packs()', 'public.staff_xp_pack_save(jsonb)',
       'public.xp_gift_start(text,text,text,text,text,text,text,text)', 'public.xp_pack_start(text,text,text,uuid,text)',
       'public._xp_pay_follow()', 'public.customer_xp_purchases(text,text)', 'public.xp_gift_view(text,text)',
       'public.staff_xp_purchases(integer)', 'public._xp_bike_credit_follow()', 'public._xp_early_bird()',
+      'public._xp_refund_guard()', 'public._xp_order_given_back(public.store_orders)', 'public._xp_bike_credit_tick()',
       -- part 9 (B5)
       'public.xp_kind_ratings()'] loop
     if not exists (select 1 from pg_proc p where p.oid = f::regprocedure and p.prosecdef
@@ -2016,6 +2235,7 @@ begin
       'public._store_after_order(bigint,text,boolean)', 'public._store_after_json(public.store_orders)', 'public._store_after_photos(bigint,text[])',
       'public._store_after_staffer()', 'public._store_after_bike_owner()', 'public._store_after_grant_bike(uuid)',
       'public._xp_code(text)', 'public._xp_pay_follow()', 'public._xp_bike_credit_follow()', 'public._xp_early_bird()',
+      'public._xp_refund_guard()', 'public._xp_order_given_back(public.store_orders)', 'public._xp_bike_credit_tick()',
       'public._pay_int(text,integer,integer,integer)'] loop
     if has_function_privilege('anon', f, 'execute') or has_function_privilege('authenticated', f, 'execute') then
       raise exception '% is executable by a client', f;
@@ -2037,15 +2257,16 @@ begin
       'public.store_rode_type(text,text,uuid)', 'public.store_after_read(text,bigint,text)', 'public.store_after_arrive(text,bigint,text,text)',
       'public.store_after_slot_change(text,bigint,text,date,text)', 'public.store_after_claim(text,bigint,text,bigint,text,text[])',
       'public.store_after_return_photos(text,bigint,text,text[])', 'public.store_after_push(text,bigint,text,boolean,text,text)',
-      'public.store_order_pass(bigint,text)', 'public.xp_packs_list()', 'public.xp_gift_start(text,text,text,text,text,text,text,text)',
+      'public.store_order_pass(bigint,text)', 'public.store_after_photo_slot(text,bigint,text)',
+      'public._store_after_photo_take(text,text)', 'public.xp_packs_list()', 'public.xp_gift_start(text,text,text,text,text,text,text,text)',
       'public.xp_pack_start(text,text,text,uuid,text)', 'public.customer_xp_purchases(text,text)', 'public.xp_gift_view(text,text)',
       'public.xp_kind_ratings()'] loop
     if not has_function_privilege('anon', f, 'execute') then raise exception 'the website cannot reach %', f; end if;
   end loop;
   -- new tables: row level security, nothing for anon, staff read through a policy
   foreach t in array array['public.store_quotes', 'public.store_after_builds', 'public.store_after_arrivals', 'public.store_after_claims',
-                           'public.store_after_push', 'public.store_after_slot_changes', 'public.xp_packs', 'public.xp_purchases',
-                           'public.xp_bike_credits'] loop
+                           'public.store_after_push', 'public.store_after_slot_changes', 'public.store_after_photo_tickets',
+                           'public.xp_packs', 'public.xp_purchases', 'public.xp_bike_credits'] loop
     if not exists (select 1 from pg_class where oid = t::regclass and relrowsecurity) then raise exception '% has no row level security', t; end if;
     if has_table_privilege('anon', t, 'select') or has_table_privilege('anon', t, 'insert') or has_table_privilege('anon', t, 'update')
        or has_table_privilege('anon', t, 'delete') then
@@ -2074,10 +2295,24 @@ begin
     raise exception '_store_order_json lost 20261119000800''s text or B3''s line';
   end if;
   foreach t in array array['store_orders_slot_season', 'store_orders_bike_owner', 'store_order_items_bike_owner', 'trg_xp_pay_follow',
-                           'trg_xp_bike_credit', 'trg_enforce_booking_price_xp'] loop
+                           'trg_xp_bike_credit', 'trg_enforce_booking_price_xp', 'trg_xp_refund_guard'] loop
     if not exists (select 1 from pg_trigger where tgname = t and not tgisinternal) then raise exception 'trigger % is missing', t; end if;
   end loop;
+  -- F1: the bike credit's hourly job; the claim photos' policy and the build photos' staff policy
+  if not exists (select 1 from cron.job where jobname = 'mm-xp-bike-credit') then raise exception 'the job mm-xp-bike-credit is missing'; end if;
+  if not exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname = 'store claims add'
+                   and position('_store_after_photo_take' in coalesce(with_check, '')) > 0) then
+    raise exception 'the store-claims insert policy does not ask for a ticket';
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname = 'store builds staff add'
+                   and roles = '{authenticated}'::name[] and cmd = 'INSERT') then
+    raise exception 'the store builds staff policy is missing or not authenticated-only';
+  end if;
 end $chk$;
+
+insert into supabase_migrations.schema_migrations (version, name) values ('20261119300000', 'sx_do_all') on conflict do nothing;
+
+commit;
 
 -- check (read only): the settings, the ledger row, the functions' attributes, the tables' row security, the bucket, the
 -- badge, the payments kind check, the queue_entries triggers in the order they fire
