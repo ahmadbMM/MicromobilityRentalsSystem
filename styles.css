@@ -1342,6 +1342,10 @@
     /* Accounts: the tag manager, the filter pills and the rows */
     :is(#tab-community,#tab-customers,#tab-analytics) .cmy-am-tacts{margin-inline-start:auto;display:flex;gap:6px;flex-shrink:0;}
     :is(#tab-community,#tab-customers,#tab-analytics) .cmy-am-sub{font-size:var(--staff-fs-sm,12px);color:var(--muted);margin:-6px 0 12px;}
+    :is(#tab-community,#tab-customers,#tab-analytics) .ac-upd-l{display:block;font-weight:600;margin-bottom:6px;}
+    :is(#tab-community,#tab-customers,#tab-analytics) .ac-upd-h{font-size:var(--staff-fs-md,15px);margin:20px 0 4px;}
+    :is(#tab-community,#tab-customers,#tab-analytics) .ac-upd-txt{display:flex;flex-direction:column;gap:2px;min-width:0;}
+    :is(#tab-community,#tab-customers,#tab-analytics) .ac-upd-txt small{color:var(--muted);}
     :is(#tab-community,#tab-customers,#tab-analytics) .cmy-tc-orange{--tc:var(--orange);}
     :is(#tab-community,#tab-customers,#tab-analytics) .cmy-tc-red{--tc:var(--red);}
     :is(#tab-community,#tab-customers,#tab-analytics) .cmy-tc-green{--tc:var(--green);}
@@ -9366,6 +9370,13 @@ body:not(.view-staff) .mt-lbl{font-weight:600;font-size:13px;color:var(--ink-2);
 body:not(.view-staff) .mt-picks{display:flex;flex-wrap:wrap;gap:8px;}
 body:not(.view-staff) .mt-chip{min-height:40px;padding:6px 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);font-size:var(--fs-15);font-weight:500;cursor:pointer;}
 body:not(.view-staff) .mt-chip.on{border-color:var(--go);background:var(--go-wash);color:var(--go-2);font-weight:600;}
+/* My interests (2026-11-18): the card's chips and its buttons; Coming up marks a picked interest's session with a line at
+   its start edge, no word. */
+body:not(.view-staff) .int-picks{margin:8px 0 4px;}
+body:not(.view-staff) .int-acts{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:10px;}
+body:not(.view-staff) .int-acts .btn-primary,body:not(.view-staff) .int-acts .btn-secondary{min-height:44px;}
+body:not(.view-staff) .int-card .int-go{margin-top:10px;}
+body:not(.view-staff) .hub-soon.int-on{border-inline-start:3px solid var(--go);padding-inline-start:10px;}
 body:not(.view-staff) .pg-field.err .mt-chip{border-color:var(--red);}
 body:not(.view-staff) .mt-rules{margin-top:16px;font-size:var(--fs-15);color:var(--ink-2);}
 body:not(.view-staff) .mt-rules summary{cursor:pointer;font-weight:600;color:var(--go-2);min-height:32px;display:flex;align-items:center;}
@@ -13960,6 +13971,8 @@ body.view-staff .sess-summary-chip:is(.th-jcc,.th-snd96) .n6c-left.n6c-full{colo
 .n6p-dr{display:flex;gap:8px;min-width:0;font-size:var(--staff-fs-sm,13px);}
 .n6p-dr dt{color:var(--muted);flex:0 0 auto;}
 .n6p-dr dt::after{content:':';}
+.n6p-ints{display:flex;flex-wrap:wrap;gap:4px;}
+.n6p-int{padding:1px 8px;border-radius:999px;border:1px solid var(--border);font-size:var(--staff-fs-xs,12px);}
 .n6p-dr dd{margin:0;min-width:0;overflow-wrap:anywhere;}
 .n6p-notes .sc-card-last{margin-bottom:6px;}
 .n6p-note-btn{border-radius:0;}

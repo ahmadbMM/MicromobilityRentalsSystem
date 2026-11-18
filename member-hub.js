@@ -12,10 +12,11 @@
 // time to turn up; the Saturday report is number tiles; a club goal reached names the next Saturday's own target.
 // 2026-11-13: the Mentorship programme (its card in the feed, its own page S._hubView 'mentor', its read mentor_feed);
 // see the block above window._hubRender.
+// 2026-11-18: My interests (its card, and Coming up led by the sessions of a picked interest); the last block of this file.
 /* global S, sb, esc, _on, getSession, _cssv, shortDate, t, _cuIc, sessionTime, _dayWord, _evName, _evOf, _evKindName, allSessions,
    _isCommunity, _sessPastDay, _sessEnded, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
    _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard, _bookingAhead, _ptnAll,
-   _arHold, _isApprovalRide, _commPublished,
+   _arHold, _isApprovalRide, _commPublished, _needsBike, _typeClosed,
    NATIONALITIES, nationalityLabel, _natFor, _selOnce, askConfirm, closeConfirm, _EL, _EV */
 const HUB_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 const HUB_T = {
@@ -199,6 +200,7 @@ function _hubRender() {
   _hubVisitNow();
   _mtFetch();
   _akListFetch();
+  _intFetch();
   // An open's first read goes at once, the copy on the phone painted meanwhile. A failed read (the copy kept and marked
   // stale, or none at all) is tried again two minutes on too, not only by Retry.
   if ((S._hubVisit && S._hubVisit.due && !S._hubVisit.sent) || !h || (d && !h.stale && Date.now() - h.at >= 12e4) || ((h.stale || !d) && Date.now() - (h.failAt || 0) >= 12e4)) _hubFetch();
@@ -235,6 +237,7 @@ function _feedHtml(c, d, stale) {
     d.birthday ? `<div class="hub-card hub-bday">${_cuIc('gift', 20)}<strong>${esc(_hF('bday', String((c && c.name) || '').trim().split(/\s+/)[0] || ''))}</strong></div>` : '',
     hero.recap ? staff : '',
     hero.html,
+    _intHtml(false),
     d.year ? _yrCardHtml(d.year) : '',
     _monHtml(c, d),
     _soonHtml(c, hero.open),
@@ -245,6 +248,7 @@ function _feedHtml(c, d, stale) {
     d.club ? _clubHtml(d.club) : '',
     hero.recap ? '' : staff,
     _mtCardHtml(),
+    _intHtml(true),
     d.volunteer && dep.vol ? `<div class="hub-card hub-flat"><span class="hub-k">${_cuIc('people', 16)} ${_hT('vol')}</span><a class="btn-secondary hub-wide hub-link" href="${esc(dep.vol + '/#o/' + encodeURIComponent(d.volunteer))}" target="_blank" rel="noopener">${_hT('volBtn')}</a></div>` : '',
     dep.inv ? `<div class="hub-card hub-flat"><button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_hubInvite')}">${esc(dep.invLabel())}</button></div>` : '',
   ].join('');
@@ -416,11 +420,12 @@ async function _hubBook(id) {
   if (S.selEvent !== ev || S.view !== 'customer' || S.custTab !== 'register') return;
   await selectSessCard(id);
 }
+// A picked interest's sessions come first (in date order among themselves), each marked by a class only (My interests).
 function _soonHtml(c, skip) {
   if (!c) return '';
-  const list = _hubOpen(c, 3, skip).slice(0, 3);
+  const all = _hubOpen(c, 99, skip), list = [...all.filter(_intHit), ...all.filter((s) => !_intHit(s))].slice(0, 3);
   if (!list.length) return '';
-  return `<div class="hub-card"><span class="hub-k">${_hT('soon')}</span>${list.map((s) => `<div class="hub-soon">
+  return `<div class="hub-card"><span class="hub-k">${_hT('soon')}</span>${list.map((s) => `<div class="hub-soon${_intHit(s) ? ' int-on' : ''}">
       <span class="hub-soon-t"><strong><bdi>${esc(_evName(s))}</bdi></strong> ${_sgChip(s)}<small>${_hubWhen(s)}</small></span>
       <button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_hubBook', s.id)}">${_hT('book')}</button></div>`).join('')}</div>`;
 }
@@ -1241,6 +1246,121 @@ function _akLoadRetry() { S._akLoadErr = false; _akLoad(); _hubRender(); }
 function _akShellHtml() {
   return `<div class="hub-card ak-head"><div class="mt-head"><h2 class="mt-h1"></h2><button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_akClose')}">${_hT('close')}</button></div>
     ${S._akLoadErr ? `<p class="ak-line" role="status">${_hT('err')}</p><button type="button" class="btn-primary hub-wide" data-on-click="${_on('_akLoadRetry')}">${_hT('retry')}</button>` : _skelHtml(2, 'hub-skel')}</div>`;
+}
+
+// ── My interests (the user, 2026-11-18: "the member picks what they want ... Coming up and Updates then show those first";
+// migration 20261118210300) ─────────────────────────────────────────────────────────────────────────────────────────
+// One card: until the member has saved once it sits right after the next session, its chips ticked from their sport answer
+// (member_interests_get's 'suggested'; nothing is kept until Save); afterwards it sits near the end of the feed with their
+// picks and Change. Coming up lists the sessions of a picked interest first, each marked by a class, no word. The list of
+// keys is the database's _interest_keys() and the staff side's INT_K; 'women' only for an account the database offers it
+// to. The read is its own, never kept on the phone; a database without it hides the card.
+const INT_KEYS = ['saturday', 'circuit', 'road', 'petromin', 'women', 'learn', 'runs', 'races', 'swim', 'yoga', 'farm', 'charity'];
+// The kind each session counts under (the app's _rideKind); road, women and a triathlon event are read off the session.
+const INT_KIND = { saturday: 'saturday', jcc: 'circuit', petromin: 'petromin', workshop: 'learn', runher: 'runs', defe5k: 'runs', vlap: 'races', arena: 'races', swim: 'swim', yoga: 'yoga', farm: 'farm', blood: 'charity' };
+Object.assign(HUB_T, {
+  intTitle: ['Your interests', 'اهتماماتك', 'Vos centres d’intérêt', 'Tus intereses', 'Os seus interesses', 'آپ کی دلچسپیاں', 'आपकी रुचियाँ', 'Ang iyong mga interes', 'तपाईंका रुचिहरू', 'আপনার আগ্রহ'],
+  intSave: ['Save', 'حفظ', 'Enregistrer', 'Guardar', 'Salvar', 'محفوظ کریں', 'सहेजें', 'I-save', 'सेभ गर्नुहोस्', 'সংরক্ষণ করুন'],
+  intChange: ['Change', 'تغيير', 'Modifier', 'Cambiar', 'Alterar', 'تبدیل کریں', 'बदलें', 'Baguhin', 'परिवर्तन गर्नुहोस्', 'পরিবর্তন করুন'],
+  intChoose: ['Choose', 'اختر', 'Choisir', 'Elegir', 'Escolher', 'منتخب کریں', 'चुनें', 'Pumili', 'छान्नुहोस्', 'বেছে নিন'],
+  intLimit: ['Too many changes. Please try again in an hour.', 'تغييرات كثيرة. يرجى المحاولة بعد ساعة.', 'Trop de modifications. Réessayez dans une heure.', 'Demasiados cambios. Inténtalo de nuevo en una hora.', 'Alterações demais. Tente novamente daqui a uma hora.', 'بہت زیادہ تبدیلیاں۔ ایک گھنٹے بعد دوبارہ کوشش کریں۔', 'बहुत ज़्यादा बदलाव। एक घंटे बाद फिर कोशिश करें।', 'Masyadong maraming pagbabago. Subukang muli pagkalipas ng isang oras.', 'धेरै परिवर्तन भए। एक घण्टापछि फेरि प्रयास गर्नुहोस्।', 'অনেক বেশি পরিবর্তন। এক ঘণ্টা পরে আবার চেষ্টা করুন।'],
+  int_saturday: ['Saturday Social Rides', 'جولات السبت الاجتماعية', 'Sorties sociales du samedi', 'Salidas sociales del sábado', 'Passeios sociais de sábado', 'ہفتے کی سوشل رائیڈز', 'शनिवार की सोशल राइड', 'Mga Social Ride tuwing Sabado', 'शनिबारको सोसल राइड', 'শনিবারের সোশ্যাল রাইড'],
+  int_circuit: ['Circuit nights', 'ليالي الحلبة', 'Soirées sur circuit', 'Noches en el circuito', 'Noites no circuito', 'سرکٹ کی راتیں', 'सर्किट नाइट्स', 'Mga gabi sa circuit', 'सर्किट रातहरू', 'সার্কিট নাইট'],
+  int_road: ['Road bike rides', 'جولات الدراجات الطرقية', 'Sorties en vélo de route', 'Salidas en bici de carretera', 'Passeios de bicicleta de estrada', 'روڈ بائیک رائیڈز', 'रोड बाइक राइड', 'Mga ride sa road bike', 'रोड बाइक राइड', 'রোড বাইক রাইড'],
+  int_petromin: ['Petromin nights', 'ليالي بترومين', 'Soirées Petromin', 'Noches Petromin', 'Noites Petromin', 'پیٹرومن کی راتیں', 'पेट्रोमिन नाइट्स', 'Mga gabi ng Petromin', 'पेट्रोमिन रातहरू', 'পেট্রোমিন নাইট'],
+  int_women: ['Women’s sessions', 'جلسات للسيدات', 'Séances pour femmes', 'Sesiones para mujeres', 'Sessões para mulheres', 'خواتین کے سیشن', 'महिलाओं के सत्र', 'Mga session para sa kababaihan', 'महिलाका सत्रहरू', 'নারীদের সেশন'],
+  int_learn: ['Learning and workshops', 'التعلّم وورش العمل', 'Apprentissage et ateliers', 'Aprendizaje y talleres', 'Aprendizado e workshops', 'سیکھنا اور ورکشاپس', 'सीखना और वर्कशॉप', 'Pag-aaral at mga workshop', 'सिकाइ र कार्यशाला', 'শেখা ও কর্মশালা'],
+  int_runs: ['Runs', 'الجري', 'Courses à pied', 'Carreras a pie', 'Corridas', 'دوڑ', 'दौड़', 'Takbo', 'दौड', 'দৌড়'],
+  int_races: ['Races', 'السباقات', 'Compétitions', 'Competiciones', 'Competições', 'ریسز', 'रेस', 'Mga karera', 'रेसहरू', 'রেস'],
+  int_swim: ['Swimming', 'السباحة', 'Natation', 'Natación', 'Natação', 'تیراکی', 'तैराकी', 'Paglangoy', 'पौडी', 'সাঁতার'],
+  int_yoga: ['Yoga', 'اليوغا', 'Yoga', 'Yoga', 'Ioga', 'یوگا', 'योग', 'Yoga', 'योग', 'যোগ'],
+  int_farm: ['Farm House Nights', 'ليالي المزرعة', 'Soirées à la ferme', 'Noches en la granja', 'Noites na fazenda', 'فارم ہاؤس کی راتیں', 'फ़ार्म हाउस नाइट्स', 'Mga gabi sa Farm House', 'फार्म हाउस रातहरू', 'ফার্ম হাউস নাইট'],
+  int_charity: ['Charity and blood donation', 'العمل الخيري والتبرع بالدم', 'Solidarité et don du sang', 'Solidaridad y donación de sangre', 'Solidariedade e doação de sangue', 'خیرات اور خون کا عطیہ', 'परोपकार और रक्तदान', 'Kawanggawa at pag-donate ng dugo', 'परोपकार र रक्तदान', 'দাতব্য ও রক্তদান'],
+});
+function _intData() { const c = _hCust(), x = S._int; return c && x && x.forId === c.id && !x.off ? x.d : null; }
+async function _intFetch(force) {
+  const c = _hCust(); if (!c || !sb || S._intBusy) return;
+  const x = S._int;
+  if (x && x.forId === c.id && (x.off || (!force && Date.now() - x.at < 12e4))) return;
+  S._intBusy = true;
+  let r; try { r = await sb.rpc('member_interests_get', _hTok(c)); } catch (e) { r = { error: e }; }
+  S._intBusy = false;
+  const now = _hCust(); if (!now || now.id !== c.id) return;
+  const e = r && r.error, d = r && !e && r.data;
+  if (e && (e.code === 'PGRST202' || e.code === '42883')) S._int = { forId: c.id, at: Date.now(), off: true };
+  else if (d && d.ok === true) {
+    const ok = (a) => (Array.isArray(a) ? a : []).filter((k) => INT_KEYS.includes(k));
+    S._int = { forId: c.id, at: Date.now(), d: { saved: !!d.saved, keys: ok(d.keys), suggested: ok(d.suggested), offered: ok(d.offered) } };
+  } else if (x && x.forId === c.id && x.d) x.at = Date.now();
+  else S._int = { forId: c.id, at: Date.now(), d: null };
+  if (S.custTab === 'members' && !S._hubView) _hubRender();
+}
+// The keys a session counts under.
+function _intOf(s) {
+  const k = _rideKind(s), out = INT_KIND[k] ? [INT_KIND[k]] : [];
+  if (k === 'event' && /triathlon|ترايثلون/i.test(String(s.title || '') + ' ' + String(s.title_ar || ''))) out.push('swim');
+  if (_needsBike(s) && !_typeClosed(s, 'Road')) out.push('road');
+  if (s.gender_only === 'female') out.push('women');
+  return out;
+}
+// The member's saved picks (none before a first save: suggestions order nothing).
+function _intMine() { const d = _intData(); return d && d.saved ? d.keys : []; }
+function _intHit(s) { const m = _intMine(); return m.length > 0 && _intOf(s).some((k) => m.includes(k)); }
+// The draft while the chips are open: a first-time member's suggestions, else what they saved.
+function _intDraft(d) {
+  const c = _hCust(), e = S._intEd;
+  if (e && c && e.forId === c.id) return e;
+  if (d.saved) return null;
+  return (S._intEd = { forId: c && c.id, keys: d.suggested.filter((k) => d.offered.includes(k)) });
+}
+function _intHtml(end) {
+  const d = _intData(); if (!d || d.saved !== end) return '';
+  const ed = _intDraft(d), head = `<span class="hub-k" id="int-t">${_cuIc('star', 16)} ${_hT('intTitle')}</span>`;
+  if (!ed) {
+    const mine = d.keys.filter((k) => HUB_T['int_' + k]);
+    return `<div class="hub-card int-card">${head}${mine.length ? `<ul class="mt-chips">${mine.map((k) => `<li>${esc(_hT('int_' + k))}</li>`).join('')}</ul>` : ''}
+      <button type="button" class="btn-secondary hub-wide int-go" id="int-change" data-on-click="${_on('_intEdit')}">${_hT(mine.length ? 'intChange' : 'intChoose')}</button></div>`;
+  }
+  const chips = INT_KEYS.filter((k) => d.offered.includes(k) || ed.keys.includes(k)).map((k) => {
+    const on = ed.keys.includes(k);
+    return `<button type="button" class="mt-chip int-chip${on ? ' on' : ''}" aria-pressed="${on}" data-k="${k}" data-on-click="${_on('_intTog', _EL)}">${esc(_hT('int_' + k))}</button>`;
+  }).join('');
+  return `<div class="hub-card int-card">${head}<div class="mt-picks int-picks" role="group" aria-labelledby="int-t">${chips}</div>
+    <div class="int-acts">${d.saved ? `<button type="button" class="btn-secondary" data-on-click="${_on('_intCancel')}">${esc(t('cancelBtn'))}</button>` : ''}<button type="button" class="btn-primary int-go" id="int-save" data-on-click="${_on('_intSave')}">${_hT('intSave')}</button></div></div>`;
+}
+function _intEdit() {
+  const d = _intData(), c = _hCust(); if (!d || !c) return;
+  S._intEd = { forId: c.id, keys: d.keys.slice() };
+  _hubRender();
+  const f = document.querySelector('#hub-body .int-chip'); if (f) try { f.focus({ preventScroll: true }); } catch (_) {}
+}
+function _intCancel() { S._intEd = null; _hubRender(); const b = document.getElementById('int-change'); if (b) try { b.focus({ preventScroll: true }); } catch (_) {} }
+// A tap flips the chip where it is: no repaint, so the focus stays on it.
+function _intTog(el) {
+  const c = _hCust(), d = _intData(), k = el && el.getAttribute('data-k'); if (!c || !d || !INT_KEYS.includes(k)) return;
+  const ed = _intDraft(d) || (S._intEd = { forId: c.id, keys: d.keys.slice() });
+  const on = !ed.keys.includes(k);
+  ed.keys = on ? INT_KEYS.filter((x) => x === k || ed.keys.includes(x)) : ed.keys.filter((x) => x !== k);
+  el.setAttribute('aria-pressed', String(on)); el.classList.toggle('on', on);
+}
+async function _intSave() {
+  const c = _hCust(), d = _intData(); if (!c || !d || S._intSending) return;
+  const ed = _intDraft(d); if (!ed) return;
+  const go = document.getElementById('int-save');
+  S._intSending = true; if (go) go.disabled = true;
+  let r; try { r = await sb.rpc('member_interests_set', { ..._hTok(c), p_keys: ed.keys.slice() }); } catch (e) { r = { error: e }; }
+  S._intSending = false; if (go) go.disabled = false;
+  const res = r && !r.error && r.data;
+  if (!res || res.ok !== true) {
+    if (typeof toast === 'function') toast(_hT(res && res.error === 'limit' ? 'intLimit' : 'err'), 'error');
+    if (res && (res.error === 'member' || res.error === 'women')) { _intFetch(true); if (res.error === 'member') _hubFetch(true); }
+    return;
+  }
+  const now = _hCust(); if (!now || now.id !== c.id) return;
+  d.saved = true; d.keys = (Array.isArray(res.keys) ? res.keys : ed.keys).filter((k) => INT_KEYS.includes(k)); d.suggested = [];
+  S._intEd = null; if (S._int) S._int.at = Date.now();
+  _hubRender();
+  const b = document.getElementById('int-change'); if (b) try { b.focus({ preventScroll: true }); } catch (_) {}
 }
 
 window._hubRender = _hubRender;

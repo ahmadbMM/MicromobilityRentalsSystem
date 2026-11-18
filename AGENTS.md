@@ -978,6 +978,43 @@ the staff section Ask (section "Ask") are answered in the app too, as on micromo
   /ask/<slug>, `MembersArea.tsx`).
 - **Tests**: `tests/member-ask.spec.ts` (`@customer:members`).
 
+## My interests (2026-11-18, migration 20261118210300)
+
+The user, 2026-11-18: "My interests: the member picks what they want, such as Road rides, night rides, Petromin nights,
+women's sessions or learning. Coming up and Updates then show those first, and staff can aim an Ask page or an update at
+one interest. It can reuse the sport answer every account already has." Spec `tests/member-interests.spec.ts`
+(`@customer:members`, `@staff:ask`, `@staff:community`).
+
+- **The list** (12 keys, one list in three places: `_interest_keys()` in SQL, `INT_KEYS` in member-hub.js, `INT_K` in
+  app.src.html with the names `int*`): saturday, circuit (jcc), road (a bike session whose Road type is not closed: every
+  bike session offers Road, so this is wide), petromin, women (`gender_only` female; offered to and kept for female
+  accounts only), learn (the workshop kind; learn to ride is an application, not a session), runs (runher, defe5k), races
+  (vlap, arena), swim (swim, and an `event` whose title says triathlon), yoga, farm, charity (blood). Which session counts
+  under which key is the app's (`_intOf` in member-hub.js); the database keeps only the keys. A new kind joins `INT_KIND`.
+- **Stored**: `member_interests` (one row per member, keys checked against the list, a save meter of 20 an hour; staff read
+  it under `_staff_mod('community', false)`, nobody writes it but the function). `member_interests_get(p_id, p_token)` ->
+  `{ok, saved, keys, suggested, offered}`; `member_interests_set(p_id, p_token, p_keys)` -> `{ok, keys}` or `error`
+  member / keys / women / limit. While a member has never saved, `suggested` comes from the sport answer
+  (`_interest_suggest`: cycling -> saturday, circuit, road; triathlon -> swim, runs, road; athletics -> runs; swimming ->
+  swim; yoga; sports for all -> saturday); nothing is kept until Save. `_purge_old` deletes an anonymised account's row.
+- **Rider** (member-hub.js, last block): the "Your interests" card of chips (`aria-pressed`, `_intTog` flips in place) with
+  Save sits right after the hero until the first save, then near the end with the picks and Change (Cancel while open).
+  Coming up lists the sessions of a saved interest first (date order among themselves) with the class `int-on` (a line at
+  the start edge, no word); the hero is unchanged. Its own read, never kept on the phone; PGRST202 hides the card.
+- **Ask**: audience `interests` with `ask_pages.interest_keys` (1 to 12): `_ask_sees` (rebuilt from 20261113010000) lets
+  in an active member who picked one of them; not-tags, gender and ages still narrow it. Staff's Who sees it has "Members
+  by interest" and its chips (`_askInt`); the page writes `interest_keys` only to a database that has the column
+  (`hasInt`). The website's /ask follows through the same SQL.
+- **Send an update** (Community > Activities, pill "Send an update", peoplemore part, `_acUpd*`): who gets it (All members
+  or one interest, each with `staff_interest_counts`'s number), the text in English and Arabic (both required, 300 each),
+  a centred confirm with the reach, then `staff_updates_interest(p_interest, p_en, p_ar)` (edit right on People, five an
+  hour for everyone: RATE_LIMIT). It writes `interest_updates` (listed under the form) and one `push_outbox` row per
+  matching active member, key `note`, tag `hub-note-i<id>`, so the Updates list calls it a note from the team and push
+  stays dormant; a staff_actions line (kind `update`).
+- **Staff account window**: an "Interests" row of chips in the details (`_n6pIntLoad`, one read per window).
+- **Privacy Notice**: a row and a retention line (en + ar), PRIVACY_VERSION unchanged (2026-11-18), nobody asked again.
+- **Website (not built yet)**: the card on /club, the Updates entries already follow; /ask follows through SQL.
+
 ## New features build (2026-11-13/14)
 
 Sixteen items the owner marked "Build now" on 2026-11-13, released together. Specs (`tests/`, `.spec.ts`): first-five-rides, still-coming,
