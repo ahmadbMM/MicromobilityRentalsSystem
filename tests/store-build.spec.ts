@@ -717,9 +717,9 @@ test.describe('@staff:payments Settings: the delivery as charged, pickup days, s
     await sec.locator('#ps-sl').check();
     await sec.locator('#ps-sk6').check(); // no delivery on Saturdays too
     await sec.locator('input[aria-label="Time 2, from"]').fill('17:00');
-    await sec.locator('button', { hasText: 'Add a time' }).click();
+    await sec.locator('button', { hasText: 'Add a time' }).first().click(); // the slots' (the handover's and Ramadan's follow, 2026-11-18)
     await sec.locator('input[aria-label="Time 3, from"]').fill('21:00');
-    await sec.locator('input[aria-label="Time 3, to"]').fill('20:00');
+    await sec.locator('input[aria-label="Time 3, to"]').fill('21:00'); // a time may run past midnight since 2026-11-18 (21:00 to 01:00), never end where it starts
     await sec.locator('#ps-save').click();
     await expect(page.locator('#toast-container')).toContainText('Time 3');
     await sec.locator('input[aria-label="Time 3, to"]').fill('23:00');
