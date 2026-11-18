@@ -3,8 +3,8 @@
 // finished challenge on the Community tab. This file opens the pop-up that follows: the picture, a switch to add the
 // rider's first name (off every time it opens), and one button. The picture is drawn here, on the phone, in the year
 // recap's look (member-hub.js, _yrPrep): 1080 x 1920, the MicroMobility mark, the badge as the app draws it, its name,
-// its level, the day it was earned when the app holds one, and for a member's club things the club's Saturday rides
-// (a total of 10 or more only, as the Community tab's own read sends it). Nothing about anyone else, no ticket, no number.
+// its level and the day it was earned when the app holds one. Nothing about anyone else, no club total (owner rule
+// 2026-11-13: no club totals on customer screens; bug hunt 2026-11-18 mods0-1), no ticket, no number.
 // The button hands the picture alone to the phone's share sheet (no words beside it: some iPhones drop the file when
 // text travels with it); where a browser cannot share files it reads Save image and saves the picture instead.
 // The picture is made before the button can be tapped, because a phone only opens its share sheet from the tap itself.
@@ -21,8 +21,6 @@ const SHR_T = {
   mSecond: ['Second session', 'الجلسة الثانية', 'Deuxième séance', 'Segunda sesión', 'Segunda sessão', 'دوسرا سیشن', 'दूसरा सत्र', 'Ikalawang session', 'दोस्रो सत्र', 'দ্বিতীয় সেশন'],
   mBack: ['Back with the club', 'عودة إلى النادي', 'De retour au club', 'De vuelta al club', 'De volta ao clube', 'کلب میں واپسی', 'क्लब में वापसी', 'Balik sa club', 'क्लबमा फिर्ता', 'ক্লাবে ফিরে আসা'],
   mLevel: ['{0} sessions in a month', '{0} جلسات في شهر', '{0} séances en un mois', '{0} sesiones en un mes', '{0} sessões num mês', 'ایک مہینے میں {0} سیشن', 'एक महीने में {0} सत्र', '{0} session sa isang buwan', 'एक महिनामा {0} सत्र', 'এক মাসে {0}টি সেশন'],
-  club: ['The club: {0} Saturday rides since {1}', 'النادي: {0} رحلة سبت منذ {1}', 'Le club : {0} sorties du samedi depuis {1}', 'El club: {0} salidas de sábado desde {1}', 'O clube: {0} passeios de sábado desde {1}', 'کلب: {1} سے ہفتے کی {0} سواریاں', 'क्लब: {1} से {0} शनिवार राइड', 'Ang club: {0} Saturday ride mula {1}', 'क्लब: {1} देखि {0} शनिबारे राइड', 'ক্লাব: {1} থেকে শনিবারের {0}টি রাইড'],
-  clubN: ['The club: {0} Saturday rides', 'النادي: {0} رحلة سبت', 'Le club : {0} sorties du samedi', 'El club: {0} salidas de sábado', 'O clube: {0} passeios de sábado', 'کلب: ہفتے کی {0} سواریاں', 'क्लब: {0} शनिवार राइड', 'Ang club: {0} Saturday ride', 'क्लब: {0} शनिबारे राइड', 'ক্লাব: শনিবারের {0}টি রাইড'],
   nameSw: ['Include my first name', 'إضافة اسمي الأول', 'Ajouter mon prénom', 'Incluir mi nombre', 'Incluir o meu primeiro nome', 'میرا پہلا نام شامل کریں', 'मेरा पहला नाम जोड़ें', 'Isama ang unang pangalan ko', 'मेरो पहिलो नाम राख्नुहोस्', 'আমার প্রথম নাম যোগ করুন'],
   save: ['Save image', 'حفظ الصورة', 'Enregistrer l’image', 'Guardar imagen', 'Guardar imagem', 'تصویر محفوظ کریں', 'चित्र सहेजें', 'I-save ang larawan', 'तस्बिर सेभ गर्नुहोस्', 'ছবি সেভ করুন'],
   saved: ['Image saved', 'تم حفظ الصورة', 'Image enregistrée', 'Imagen guardada', 'Imagem guardada', 'تصویر محفوظ ہو گئی', 'चित्र सहेजा गया', 'Na-save ang larawan', 'तस्बिर सेभ भयो', 'ছবি সেভ হয়েছে'],
@@ -49,16 +47,6 @@ function _sMonth(ymd) { // "2026-11-30" -> "November 2026" in the page's languag
 }
 
 // ── What is shared ──────────────────────────────────────────────────────────────────────────────
-// The club's Saturday rides, for a member's club things: from the Community tab's read (hub_feed sends the total only
-// at 10 or more; checked again here), the copy in memory, else the one that tab keeps on the phone. A rider who is not
-// a member has neither, so their picture carries no club line.
-function _shrClub(c) {
-  let d = S._hub && S._hub.forId === c.id ? S._hub.d : null;
-  if (!d) { try { const x = JSON.parse(localStorage.getItem('cq_hub_' + c.id) || 'null'); d = x && x.d && x.d.ok ? x.d : null; } catch (_) { d = null; } }
-  const nb = d && d.numbers, n = nb && nb.all != null ? Math.floor(Number(nb.all)) : NaN;
-  if (!Number.isFinite(n) || n < 10) return '';
-  return /^\d{4}-\d\d/.test(String(nb.since || '')) ? _sF('club', _sLtr(n), _sMonth(nb.since)) : _sF('clubN', _sLtr(n));
-}
 // The day a badge earned by riding was reached, for the two ladders that count nights: the rider's bike rides (First Lap
 // to Corniche 25) and their Saturday social rides (Rolling Start to Hall of Fame). The nights are counted as the badge
 // list counts them (_mrBadges in app.src.html), from the rider's own bookings on the phone, and the day is that of the
@@ -81,7 +69,7 @@ function _shrRodeOn(c, slug) {
     return days.length < n || days[0] === '' ? '' : days[n - 1];
   } catch (_) { return ''; }
 }
-// { label, name, level, date, club, medal: {icon, color} or chip: {color}, file }, or null when there is nothing earned
+// { label, name, level, date, medal: {icon, color} or chip: {color}, file }, or null when there is nothing earned
 // to share (the list changed under the pop-up, another account signed in).
 function _shrSubject(job, c) {
   const w = _sWords();
@@ -93,7 +81,6 @@ function _shrSubject(job, c) {
       label: _sT('kBadge'), name: _bdgName(x.b),
       level: x.lv && x.lvN && w.level ? w.level.replace('{0}', _sLtr(x.lvN)).replace('{1}', _sLtr(x.lv.length)) : '',
       date: at ? _bdgDay(at) : '',
-      club: typeof _hubBdg === 'function' && _hubBdg(x.b.slug) ? _shrClub(c) : '',
       medal: { icon: x.b.icon, color: _bdgCol(x.b) },
       file: 'micromobility-' + (String(x.b.slug || '').replace(/[^a-z0-9_]+/gi, '-') || 'badge'),
     };
@@ -102,7 +89,7 @@ function _shrSubject(job, c) {
     const a = S._ttMine, x = a && a.forId === c.id && Array.isArray(a.titles) ? a.titles.find((y) => y && y.id === job.id) : null;
     if (!x) return null;
     // at: the day it was given or reached (customer_my_titles from migration 20261114081200 on; none before it)
-    return { label: _sT('kTitle'), name: _ttName(x), level: '', date: x.at ? _bdgDay(x.at) : '', club: _shrClub(c), chip: { color: x.color }, file: 'micromobility-title' };
+    return { label: _sT('kTitle'), name: _ttName(x), level: '', date: x.at ? _bdgDay(x.at) : '', chip: { color: x.color }, file: 'micromobility-title' };
   }
   if (job.kind === 'mile') {
     const h = S._hub, d = h && h.forId === c.id ? h.d : null;
@@ -111,12 +98,12 @@ function _shrSubject(job, c) {
       const me = d.me, n = me ? Number(me.n) || 0 : 0, tg = me ? Number(me.target) || 1 : 1;
       if (!me || !me.kind || n < tg) return null;
       const name = me.kind === 'first' ? _sT('mFirst') : me.kind === 'second' ? _sT('mSecond') : me.kind === 'back' ? _sT('mBack') : _sF('mLevel', _sLtr(tg));
-      return { label: _sT('kMile'), name, level: '', date: /^\d{4}-\d\d/.test(String(me.ends_on || '')) ? _sMonth(me.ends_on) : '', club: _shrClub(c), medal: { icon: 'calcheck', color: 'green' }, file: 'micromobility-challenge' };
+      return { label: _sT('kMile'), name, level: '', date: /^\d{4}-\d\d/.test(String(me.ends_on || '')) ? _sMonth(me.ends_on) : '', medal: { icon: 'calcheck', color: 'green' }, file: 'micromobility-challenge' };
     }
     const g = (Array.isArray(d.goals) ? d.goals : []).find((y) => y && y.id === job.id);
     if (!g || (Number(g.n) || 0) < (Number(g.target) || 1)) return null;
     const name = String((S.lang === 'ar' && g.name_ar) || g.name || '');
-    return { label: _sT('kMile'), name, level: '', date: '', club: _shrClub(c), medal: g.badge ? { icon: g.badge.icon, color: g.badge.color } : { icon: 'flag', color: 'gold' }, file: 'micromobility-challenge' };
+    return { label: _sT('kMile'), name, level: '', date: '', medal: g.badge ? { icon: g.badge.icon, color: g.badge.color } : { icon: 'flag', color: 'gold' }, file: 'micromobility-challenge' };
   }
   // A member's "My month" card (new features build F13): worded where the card is drawn (member-hub.js, _monSub), with
   // its numbers as `lines` under the month's name.
@@ -231,7 +218,7 @@ async function _shrDraw(sub, first, a) {
     x.save(); _shrBox(x, X, Y, W, H, 30); x.clip(); x.fillStyle = a.tint; x.fillRect(rtl ? X + W - 20 : X, Y, 20, H); x.restore();
     x.fillStyle = SHR_INK.hi; put(sub.name, Y + 132, W - 90); said.push(sub.name);
   }
-  // the words under it, as one block centred between the medal and the club line
+  // the words under it, as one block centred between the medal and the address
   const rows = [];
   if (first) rows.push({ t: first, w: 600, s: 60, c: SHR_INK.hi, h: 92 });
   if (sub.medal) {
@@ -250,12 +237,6 @@ async function _shrDraw(sub, first, a) {
   if (sub.level) said.push(sub.level);
   if (sub.date) said.push(sub.date);
   if (Array.isArray(sub.lines)) said.push(...sub.lines);
-  if (sub.club) {
-    x.fillStyle = SHR_INK.low; x.font = `400 40px ${fam}`;
-    const L = _shrWrap(x, sub.club, 960);
-    L.forEach((t, i) => put(t, 1660 - (L.length - 1 - i) * 56));
-    said.push(sub.club);
-  }
   x.fillStyle = SHR_INK.foot; x.font = `400 40px ${fam}`; put('experiences.micromobility.sa', 1790);
   let blob = null;
   try { blob = await new Promise((res) => cv.toBlob(res, 'image/png')); } catch (_) { blob = null; }

@@ -40,7 +40,8 @@ const feed = (o: Record<string, unknown> = {}) => ({
 // Five circuit rides ridden: the monthly challenge's slot shows the challenge, which a finished one is shared from. Under
 // five rides that slot shows the first-five-rides path instead (new features build F1, tests/first-five-rides.spec.ts).
 const rode5 = ['2026-08-28', '2026-09-04', '2026-09-11', '2026-09-18', '2026-09-25'].map((d, i) => ({ id: 'o' + i, name: 'Lina Haddad', customer_id: 'c1', session_id: 'j-' + d, session_day: 'Friday', session_date: d, queue_num: 1, status: 'done', paid: true, price: 30 }));
-// The Community tab's copy on the phone: where a member's picture finds the club's total away from that tab.
+// The Community tab's copy on the phone, holding the club's total: the picture never draws it (owner rule 2026-11-13, no
+// club totals on customer screens; bug hunt 2026-11-18 mods0-1).
 const hubCopy = (page: Page, numbers: Record<string, unknown>) =>
   page.addInitScript((v) => localStorage.setItem('cq_hub_c1', v), JSON.stringify({ at: Date.now(), d: { ok: true, numbers } }));
 
@@ -213,7 +214,7 @@ test.describe('@customer:account share a badge, a title or a finished challenge'
     await expect(pic(page)).toBeVisible();
   });
 
-  test('a title: the picture carries its chip in its colour, the day it was earned and the club total; no name', async ({ page }) => {
+  test('a title: the picture carries its chip in its colour and the day it was earned; no club total, no name', async ({ page }) => {
     await hubCopy(page, { all: 2104, since: '2026-06-13' });
     await rider(page, { 'rpc:community_member': true, 'rpc:customer_my_titles': titles });
     await canShare(page);
@@ -221,7 +222,7 @@ test.describe('@customer:account share a badge, a title or a finished challenge'
     await expect(btn).toHaveText('Share');
     await btn.click();
     await expect(pic(page)).toBeVisible();
-    await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Title · Legend · 2 Nov\w* 2026 · The club: 2104 Saturday rides since June 2026$/);
+    await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Title · Legend · 2 Nov\w* 2026$/);
     await expect(page.locator('#shr-name')).not.toBeChecked();
     const chip = await near(page, shown, [90, 640, 900, 210], [157, 108, 255]); // the chip's bar and edge, in the title's purple
     expect([chip.w, chip.h]).toEqual([1080, 1920]);
@@ -242,11 +243,11 @@ test.describe('@customer:account share a badge, a title or a finished challenge'
     await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Title · Ride Captain$/);
   });
 
-  test('the club total goes on a Community badge, not on another badge, and only for a member who has it on the phone', async ({ page }) => {
+  test('no club total on a Community badge or on another badge, even with the Community copy on the phone', async ({ page }) => {
     await hubCopy(page, { all: 2104 });
     await rider(page, { 'rpc:customer_my_badges': [marshal, met], 'rpc:badge_catalog': catalog });
     await shareBadge(page, 'Challenge Met');
-    await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Badge earned · Challenge Met · .*31 Oct\w* 2026 · The club: 2104 Saturday rides$/);
+    await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Badge earned · Challenge Met · .*31 Oct\w* 2026$/);
     await pop(page).getByRole('button', { name: 'Close' }).click();
     await shareBadge(page, 'Marshal');
     await expect(pic(page)).not.toHaveAttribute('alt', /club/i);
@@ -268,7 +269,7 @@ test.describe('@customer:account share a badge, a title or a finished challenge'
     await expect(pop(page).locator('button')).toHaveText(['Share', 'Community', 'Done']);
     await expect(pop(page).locator('button', { hasText: 'Done' })).toBeFocused(); // Done keeps the focus
     await pop(page).locator('.badge-pop-shr button').click();
-    await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Badge earned · Challenge Met · .*31 Oct\w* 2026 · The club: 2104 Saturday rides$/);
+    await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Badge earned · Challenge Met · .*31 Oct\w* 2026$/);
     await expect(page.locator('#shr-name')).not.toBeChecked();
     await pop(page).getByRole('button', { name: 'Close' }).click();
     await expect(pop(page)).toHaveCount(0);
@@ -306,14 +307,14 @@ test.describe('@customer:members share a finished challenge', () => {
     await expect(mine.locator('.shr-btn')).toHaveText('Share');
     await mine.locator('.shr-btn').click();
     await expect(pic(page)).toBeVisible();
-    await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Challenge completed · 2 sessions in a month · November 2026 · The club: 2104 Saturday rides since June 2026$/);
+    await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Challenge completed · 2 sessions in a month · November 2026$/);
     await expect(page.locator('#shr-name')).not.toBeChecked();
     expect((await near(page, shown, [280, 460, 520, 520], [3, 255, 137])).n).toBeGreaterThan(2000); // its medal, in green
     await pop(page).locator('#shr-go').click();
     await expect.poll(() => page.evaluate('window._shared&&window._shared.files[0].name')).toBe('micromobility-challenge.png');
     await pop(page).getByRole('button', { name: 'Close' }).click();
     await season.locator('.shr-btn').click();
-    await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Challenge completed · Cool Season: 8 Saturdays · The club: 2104/);
+    await expect(pic(page)).toHaveAttribute('alt', /^MicroMobility · Challenge completed · Cool Season: 8 Saturdays$/);
     await pop(page).getByRole('button', { name: 'Close' }).click();
     // not finished: no button
     await page.evaluate(`S._hub.d.me.n=1;S._hub.d.goals[0].n=3;_hubRender()`);

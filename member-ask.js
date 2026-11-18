@@ -321,7 +321,9 @@ function _akFull(o) {
   const me = _akO(o.me), score = _akNum(me && me.score), rank = _akInt(me && me.rank), players = _akInt(me && me.players);
   const look = _akO(p.look) || {};
   return {
-    signed: o.signed === true, canAnswer: o.can_answer === true && o.preview !== true, rk: _akS(o.rk),
+    // canAnswer is the account's part only (signed in, not a preview): whether the page is open is _akPageOpen's, which the
+    // polls keep up to date, so a page staff end and start again takes answers again (bug hunt 2026-11-18 mod0-1)
+    signed: o.signed === true, canAnswer: o.signed === true && o.preview !== true, rk: _akS(o.rk),
     page: {
       id, title: _akTx(p.title_en, p.title_ar), intro: _akTx(p.intro_en, p.intro_ar), pace: p.pace === 'live' ? 'live' : 'self', current_q: _akInt(p.current_q),
       closes_at: _akWhenOk(p.closes_at), round: _akInt(p.round) ?? 1, open: p.open !== false,
@@ -341,12 +343,13 @@ function _akView(raw) {
   if (o.state === 'signin' || o.state === 'audience') return { state: o.state };
   return { state: 'none' };
 }
-// A live answer taken in. `reload`: the page itself must be read again (a question it does not hold, a new round, a quiz
-// revealed: the viewer's own score is the page's to say). A version older than the page's is dropped.
+// A live answer taken in. `reload`: the page itself must be read again (a question it does not hold, a new round, a
+// question revealed: the viewer's own score and the right answer are the page's to say; bug hunt 2026-11-18 mod0-4).
+// A version older than the page's is dropped.
 function _akApplyLive(full, live) {
   if (full.live && live.ver < full.live.ver) return false;
   const held = new Set(full.questions.map((q) => String(q.id)));
-  const revealed = full.questions.some((q) => _akQuiz(q.kind) && !q.reveal && live.q[String(q.id)] && live.q[String(q.id)].reveal);
+  const revealed = full.questions.some((q) => !q.reveal && live.q[String(q.id)] && live.q[String(q.id)].reveal);
   const reload = Object.keys(live.q).some((id) => !held.has(id)) || live.round !== full.page.round || revealed;
   full.questions.forEach((q) => { const n = live.q[String(q.id)]; if (n) Object.assign(q, n); });
   full.live = live;
@@ -370,6 +373,7 @@ function _akState(q, full) {
 function _akShown(q, full) {
   if (q.kind === 'info' || !_akDrawn(q.kind) || q.results === 'staff') return false;
   if (_akQuiz(q.kind) && !q.reveal) return false;
+  if (q.results === 'closed') return !(_akPageOpen(full) && q.open); // as _ask_live sends them (bug hunt 2026-11-18 mod0-3)
   if (q.results !== 'answered') return true;
   return _akMine(full, q).length > 0 || !(_akPageOpen(full) && q.open);
 }
@@ -443,6 +447,12 @@ function _akRetry() { const a = S._ak; if (!a) return; a.failed = false; a.readA
 // minutes at most); never while the page is hidden or another tab is open (a return asks at once).
 function _akArm() {
   const a = S._ak, full = _akFullNow();
+  // a page without its questions (closed and hidden after close, or not open yet): read again each minute while it is on
+  // screen, so a page staff start again, or one that opens, comes back (bug hunt 2026-11-18 mod0-1)
+  if (a && !full && a.view && (a.view.state === 'closed' || a.view.state === 'soon') && !a.later && !a.reading && _akOnView() && !document.hidden) {
+    a.later = setTimeout(() => { a.later = null; if (S._ak === a && _akOnView()) _akRead(false); }, 60000);
+    return;
+  }
   if (!a || a.timer || a.polling || a.quiet || !full || !full.rk || !_akOnView() || document.hidden) return;
   const ms = Math.min(120000, (_akPaced(full) && _akPageOpen(full) ? 2000 : 10000) * 2 ** Math.min(a.fails, 6));
   a.timer = setTimeout(_akPoll, ms);
@@ -486,7 +496,7 @@ async function _akPoll() {
   _akRepaint();
   _akArm();
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden && S._ak && _akOnView()) _akPollNow(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S._ak && _akOnView()) { _akPollNow(); _akArm(); } });
 function _akStop() { const a = S._ak; if (!a) return; clearTimeout(a.timer); a.timer = null; clearTimeout(a.later); a.later = null; clearInterval(a.tick); a.tick = null; }
 
 // ── Drawing: the page in blocks of parts, each part written again only when its markup changed ─────
@@ -943,6 +953,7 @@ async function _akSend(q, value) {
   const code = o ? o.error : 'generic';
   a.errs[k] = _akErrText(code);
   if (code === 'signin' || code === 'audience' || code === 'closed') _akRead(false); // the page is not what it was
+  else if (code === 'answered' || code === 'limit') _akRead(true); // answered elsewhere: their own answers read again (bug hunt 2026-11-18 mod0-2)
   _akRepaint();
   return false;
 }

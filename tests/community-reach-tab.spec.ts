@@ -245,3 +245,19 @@ test.describe('@customer:members R13 R20 the report and the goal', () => {
     await expect(card.locator('.hub-next')).toHaveCount(0); // not reached: no next target
   });
 });
+
+test.describe('@customer:members the next session to book (bug hunt 2026-11-18 mod1-1, mod1-3)', () => {
+  test('a session over earlier today and one staff marked cancelled are not offered to book', async ({ page }) => {
+    const over = sess('2026-11-14', '2026-11-14'); // 06:00 - 06:30, still open at 10:00 as staff left it
+    const off = sess('2026-11-21', '2026-11-21', { ride_status: 'cancelled' }); // open, with staff's word Cancelled
+    await member(page, { sessions: [over, off, ...open] }, '2026-11-14T10:00:00+03:00');
+    const h = hero(page);
+    await expect(h.locator('.hub-k').first()).toHaveText('Next session to book');
+    await expect(h.locator('.hub-hero-m')).toContainText('2099');
+    await expect(h.locator('.hub-rs')).toHaveCount(0);
+    await expect(page.locator('#hub-body .hub-soon')).toHaveCount(2);
+    await expect(page.locator('#hub-body .hub-soon', { hasText: '2026' })).toHaveCount(0);
+    await h.locator('button', { hasText: 'Book' }).click();
+    await expect.poll(() => page.evaluate('S.selSession')).toBe('2099-01-03');
+  });
+});

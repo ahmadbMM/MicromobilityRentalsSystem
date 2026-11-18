@@ -13,7 +13,7 @@
 // 2026-11-13: the Mentorship programme (its card in the feed, its own page S._hubView 'mentor', its read mentor_feed);
 // see the block above window._hubRender.
 /* global S, sb, esc, _on, getSession, _cssv, shortDate, t, _cuIc, sessionTime, _dayWord, _evName, _evOf, _evKindName, allSessions,
-   _isCommunity, _sessPastDay, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
+   _isCommunity, _sessPastDay, _sessEnded, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
    _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard, _bookingAhead, _ptnAll,
    _arHold, _isApprovalRide, _commPublished,
    NATIONALITIES, nationalityLabel, _natFor, _selOnce, askConfirm, closeConfirm, _EL, _EV */
@@ -252,9 +252,11 @@ function _feedHtml(c, d, stale) {
 
 // The member's next session: booked (soonest first, as Bookings lists them), else the next one they may book. Bookings and
 // Reserve stay the only places that book: the card opens one of them.
+// Not one over earlier today (the server refuses it, as the Reserve list drops it) and not one staff marked cancelled
+// (bug hunt 2026-11-18 mod1-1, mod1-3).
 function _hubOpen(c, n, skip) {
   const me = S.loggedIn || c, mine = new Set(getQueue().filter((e) => e.customerId === c.id && e.status !== 'cancelled').map((e) => e.sessionId));
-  return allSessions().filter((s) => s && _isCommunity(s) && s.status === 'open' && !_sessPastDay(s) && _bwOpen(s) && !_sessFull(s) && _sgOk(s, me) && !mine.has(s.id) && s.id !== skip)
+  return allSessions().filter((s) => s && _isCommunity(s) && s.status === 'open' && !s.cancelled_at && s.ride_status !== 'cancelled' && !_sessPastDay(s) && !_sessEnded(s) && _bwOpen(s) && !_sessFull(s) && _sgOk(s, me) && !mine.has(s.id) && s.id !== skip)
     .sort((a, b) => String(a.session_date || a.id).localeCompare(String(b.session_date || b.id))).slice(0, n);
 }
 function _hubWhen(s) { const d = String(s.session_date || s.id).slice(0, 10); return `<bdi>${esc(_dayWord(d) || '')}${_dayWord(d) ? ' · ' : ''}${esc(shortDate(d))}</bdi> · <bdi>${sessionTime(s)}</bdi>`; }
@@ -710,7 +712,7 @@ function _yrSlides(y) {
   const n = Number(y.sessions) || 0, first = _hDate(y.first);
   if (n <= 1) return [`<div class="hub-big">${esc(_hF('yrFirstOnly', first))}</div>`];
   // A session without a ride kind is the circuit's own (the database says 'rental'): named as the circuit, once.
-  const kinds = [...new Set((Array.isArray(y.kinds) ? y.kinds : []).map((k) => (k === 'rental' ? 'jcc' : k)))].map((k) => `<li>${_cuIc(k === 'swim' ? 'wave' : k === 'runher' || k === 'defe5k' ? 'run' : k === 'workshop' ? 'info' : 'bike', 18)} <span>${esc(_evKindName(k))}</span></li>`).join('');
+  const kinds = [...new Set((Array.isArray(y.kinds) ? y.kinds : []).map((k) => (k === 'rental' ? 'jcc' : k)))].map((k) => `<li>${_cuIc(_monIc(k), 18)} <span>${esc(_evKindName(k))}</span></li>`).join('');
   const share = Number(y.club) >= 10 ? `<div class="hub-meta">${esc(_hF('yrShareOf', n, y.club))}</div>` : '';
   return [
     `<div class="hub-big">${esc(_hF('yrTitle', y.year))}</div>${_yrRange(y) ? `<div class="hub-meta">${esc(_yrRange(y))}</div>` : ''}<div class="hub-meta">${esc(_hF('yrSince', first))}</div>`,
@@ -1219,6 +1221,7 @@ function _akOpen(slug) {
 }
 function _akClose() {
   if (window._akStop) window._akStop();
+  S._ak = null; // opened again, the page is read again (answers sent elsewhere, edits by staff; bug hunt 2026-11-18 mod0-2)
   S._hubView = null;
   _hubRender();
   _akListFetch(true);

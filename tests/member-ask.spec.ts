@@ -315,3 +315,37 @@ test.describe('@customer:members Ask in the Community tab', () => {
     expect(await page.evaluate('document.documentElement.scrollWidth<=window.innerWidth')).toBe(true);
   });
 });
+
+test.describe('@customer:members Ask: a page that changes under the member (bug hunt 2026-11-18)', () => {
+  const opts = [{ id: 'a', en: 'Yes', ar: 'نعم' }, { id: 'b', en: 'No', ar: 'لا' }];
+  test('a page read while closed takes answers again once staff start it again (mod0-1)', async ({ page }) => {
+    const st = {
+      list: list([card('farm-ideas')]),
+      page: askPage([q(1, 'choice', { config: { options: opts } })], { state: 'closed', can_answer: false, live: live({ state: 'closed', open: false }) }, { open: false }) as Doc,
+      live: live({ state: 'closed', open: false }) as Doc,
+    };
+    await member(page, st);
+    await openPage(page);
+    await expect(page.locator('#ak-view .ak-flags')).toBeVisible();
+    await expect(page.locator('#ak-q-1').getByRole('button', { name: 'Send' })).toHaveCount(0);
+    st.live = live({ ver: 2, state: 'ok', open: true });
+    await page.evaluate('_akPollNow()');
+    await expect(page.locator('#ak-view .ak-flags')).toHaveCount(0);
+    await page.locator('#ak-q-1').getByRole('radio', { name: 'Yes' }).click();
+    await expect(page.locator('#ak-q-1').getByRole('button', { name: 'Send' })).toBeEnabled();
+  });
+
+  test('a choice question revealed with results for staff only reads the page again and marks the right answer (mod0-4)', async ({ page }) => {
+    const st = {
+      list: list([card('farm-ideas')]),
+      page: askPage([q(1, 'choice', { results: 'staff', config: { options: opts } })]) as Doc,
+    };
+    await member(page, st);
+    await openPage(page);
+    await expect(page.locator('#ak-q-1 .ak-right')).toHaveCount(0);
+    const shown = live({ ver: 2, q: { 1: { open: false, reveal: true, started_at: null } } });
+    st.page = askPage([q(1, 'choice', { results: 'staff', open: false, reveal: true, config: { options: opts, correct: ['b'] } })], { live: shown });
+    await page.evaluate('S._ak.readAt=0;_akPollNow()');
+    await expect(page.locator('#ak-q-1 .ak-reveal')).toContainText('No');
+  });
+});

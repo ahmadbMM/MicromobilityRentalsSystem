@@ -28,8 +28,9 @@ function _cochT(k) {
   const r = COCH_T[k] || [], i = COCH_LANGS.indexOf(S.lang);
   return r[i < 0 ? 0 : i] || r[0] || '';
 }
-// What the page holds between paints: the code being typed, the refusal under it, and a join on its way.
-const _cochSt = { busy: false, err: '', code: '', at: null };
+// What the page holds between paints: the code being typed, the refusal under it, and a join on its way, for the
+// account in `for` (another account signed in on the same phone starts with an empty box; bug hunt 2026-11-18 mods0-7).
+const _cochSt = { busy: false, err: '', code: '', at: null, for: null };
 
 function _cochRows() {
   const c = S.loggedIn || getSession(), m = S._coch;
@@ -89,6 +90,8 @@ async function _cochJoin(code) {
 function _cochRender() {
   const h = document.getElementById('acc-co-host'), rows = _cochRows(), st = _cochSt, D = window._cochDeps || {};
   if (!h || !rows) return;
+  const me = S.loggedIn || getSession();
+  if (me && st.for !== me.id) { st.for = me.id; st.code = ''; st.err = ''; st.at = null; }
   // a join link's code, kept by the page until now: joined at once, and off the device whatever the answer
   const parked = D.parked ? D.parked() : '';
   if (parked && !st.busy) { D.park(''); _cochJoin(parked); return; }

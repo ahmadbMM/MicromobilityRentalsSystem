@@ -141,9 +141,13 @@ async function _rhSend() {
   M.busy = true; _rhErr('');
   const btn = document.querySelector('#rh-help .rh-send');
   if (btn) btn.disabled = true;
+  // the account's name as site_message_send's name check takes it (_name_chars_ok: letters, marks, spaces and a period
+  // after a letter): a name staff typed with a dash or a digit, or one from before the name rule, is refused with 'name'
+  // otherwise, which the rider cannot change here (bug hunt 2026-11-18 mods0-6). The message carries the account's id.
+  const name = String(c.name || '').replace(/[^\p{L}\p{M}\s.]+/gu, ' ').replace(/(^|[\s.])\.+/gu, '$1').replace(/\s+/g, ' ').trim().slice(0, 120).trim() || 'Rider';
   let r;
   try {
-    r = await sb.rpc('site_message_send', { p: { kind: 'help', topic: 'app', name: c.name || '', phone, email, message: msg, lang: S.lang || 'en', customer_id: c.id, token: c.session_token || '' } });
+    r = await sb.rpc('site_message_send', { p: { kind: 'help', topic: 'app', name, phone, email, message: msg, lang: S.lang || 'en', customer_id: c.id, token: c.session_token || '' } });
   } catch (e) { r = { error: e }; }
   M.busy = false;
   const d = r && !r.error ? r.data : null;
