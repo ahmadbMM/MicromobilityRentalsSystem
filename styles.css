@@ -14917,7 +14917,7 @@ body.view-staff.view-staff :is(#pay-rf,#sto-dlg) .confirm-box{width:min(var(--sf
 #tab-store .sto-arr-r>:last-child{margin-inline-start:auto;}
 #tab-store .sto-arr-seen{opacity:.7;}
 #tab-store .sto-cl-b{flex:2 1 240px;font-size:var(--sf-fs-sm);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-body.view-staff #staff-tab-nav .tab-btn .tab-badge.sto-arr-badge{background:var(--green);color:var(--bg);border-color:var(--green);}
+:root body.view-staff #staff-tab-nav .tab-btn .tab-badge.sto-arr-badge{background:var(--green);color:var(--bg);border-color:var(--green);} /* over both themes' rail badge */
 .sto-pill:is(.sto-p-cl-open,.sto-p-cl-in_progress,.sto-p-q-open,.sto-p-learn){border-color:var(--orange);color:var(--orange);}
 .sto-pill:is(.sto-p-cl-resolved,.sto-p-q-used){border-color:var(--green);color:var(--green);}
 .sto-pill:is(.sto-p-cl-refused,.sto-p-q-expired,.sto-p-q-void){color:var(--muted);}
