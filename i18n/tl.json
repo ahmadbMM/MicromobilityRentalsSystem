@@ -9762,5 +9762,22 @@
   "ckAutoRebook": "Natanong ang mga baguhan tungkol sa susunod na linggo",
   "bnwCkAll": "Nag-book ulit ang lahat ng baguhan",
   "bnwCkN": "{0} ang hindi pa nagbu-book",
-  "bnwCkTick": "Markahang natanong"
+  "bnwCkTick": "Markahang natanong",
+  "bmvBtn": "Ilipat ang {0}",
+  "bmvTitle": "Ilipat sa ibang sesyon",
+  "bmvTo": "Ilipat sa",
+  "bmvPick": "Pumili ng sesyon",
+  "bmvLeft": "Natitirang puwesto: {0}",
+  "bmvParty": "Ilipat ang buong grupo nila",
+  "bmvGoR": "Ilipat ang {0} rider",
+  "bmvGoR1": "Ilipat ang 1 rider",
+  "bmvGoP": "Ilipat ang {0} kalahok",
+  "bmvGoP1": "Ilipat ang 1 kalahok",
+  "bmvFullQ": "Puno na ang {0} ({1} sa {2}). Ilipat pa rin?",
+  "bmvTypeQ": "Puno na ang {0} sa {1} ({2} sa {3}). Ilipat pa rin?",
+  "bmvAnyway": "Ilipat pa rin",
+  "bmvPickOther": "Pumili ng ibang sesyon",
+  "bmvNotMoved": "Hindi nailipat ang {0}:",
+  "bmvLog": "Inilipat",
+  "bmvUndo": "I-undo ang paglipat"
 }

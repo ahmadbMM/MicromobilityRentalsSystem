@@ -9762,5 +9762,22 @@
   "ckAutoRebook": "Estreantes questionados sobre a próxima semana",
   "bnwCkAll": "Todos os estreantes reservaram de novo",
   "bnwCkN": "{0} ainda sem reserva",
-  "bnwCkTick": "Marcar como perguntado"
+  "bnwCkTick": "Marcar como perguntado",
+  "bmvBtn": "Mover {0}",
+  "bmvTitle": "Mover para outra sessão",
+  "bmvTo": "Mover para",
+  "bmvPick": "Escolher uma sessão",
+  "bmvLeft": "Lugares restantes: {0}",
+  "bmvParty": "Mover todo o grupo",
+  "bmvGoR": "Mover {0} ciclistas",
+  "bmvGoR1": "Mover 1 ciclista",
+  "bmvGoP": "Mover {0} participantes",
+  "bmvGoP1": "Mover 1 participante",
+  "bmvFullQ": "{0} está cheia ({1} de {2}). Mover mesmo assim?",
+  "bmvTypeQ": "{0} está cheio em {1} ({2} de {3}). Mover mesmo assim?",
+  "bmvAnyway": "Mover mesmo assim",
+  "bmvPickOther": "Escolher outra sessão",
+  "bmvNotMoved": "{0} não movidos:",
+  "bmvLog": "Movido",
+  "bmvUndo": "Desfazer a mudança"
 }

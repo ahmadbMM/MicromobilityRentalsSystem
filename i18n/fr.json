@@ -9762,5 +9762,22 @@
   "ckAutoRebook": "Nouveaux venus interrogés sur la semaine prochaine",
   "bnwCkAll": "Tous les nouveaux venus ont réservé à nouveau",
   "bnwCkN": "{0} pas encore réservé",
-  "bnwCkTick": "Marquer comme demandé"
+  "bnwCkTick": "Marquer comme demandé",
+  "bmvBtn": "Déplacer {0}",
+  "bmvTitle": "Déplacer vers une autre session",
+  "bmvTo": "Déplacer vers",
+  "bmvPick": "Choisir une session",
+  "bmvLeft": "Places restantes : {0}",
+  "bmvParty": "Déplacer tout leur groupe",
+  "bmvGoR": "Déplacer {0} cyclistes",
+  "bmvGoR1": "Déplacer 1 cycliste",
+  "bmvGoP": "Déplacer {0} participants",
+  "bmvGoP1": "Déplacer 1 participant",
+  "bmvFullQ": "{0} est complète ({1} sur {2}). Déplacer quand même ?",
+  "bmvTypeQ": "{0} est complet sur {1} ({2} sur {3}). Déplacer quand même ?",
+  "bmvAnyway": "Déplacer quand même",
+  "bmvPickOther": "Choisir une autre session",
+  "bmvNotMoved": "{0} non déplacés :",
+  "bmvLog": "Déplacé",
+  "bmvUndo": "Annuler le déplacement"
 }

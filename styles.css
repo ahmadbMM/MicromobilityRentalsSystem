@@ -12588,11 +12588,11 @@ body.view-staff .ssx-feat{font-weight:600;color:var(--sf-green-ink,var(--green))
 /* Round s10 (2026-11-10): the figures bar's places left by bike type and the night's Notes; the notes' and Record incident
    pop-ups (the desk sheet, centred); incidents in the account window and History > Incidents */
 body.view-staff :is(#tab-queue,#tab-waitlist) .s10-figs{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;padding-inline-start:8px;border-inline-start:1px solid var(--sf-line,var(--border));}
-body.view-staff #tab-queue .tyl-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;font-size:var(--sf-fs-sm);font-weight:600;color:var(--muted);}
-body.view-staff #tab-queue .tyl{white-space:nowrap;}
-body.view-staff #tab-queue .tyl b{color:var(--text);}
-body.view-staff #tab-queue .tyl-0 b{color:var(--orange);}
-body.view-staff #tab-queue .tyl-x{color:var(--red);}
+body.view-staff :is(#tab-queue,#desk-sheet) .tyl-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;font-size:var(--sf-fs-sm);font-weight:600;color:var(--muted);}
+body.view-staff :is(#tab-queue,#desk-sheet) .tyl{white-space:nowrap;}
+body.view-staff :is(#tab-queue,#desk-sheet) .tyl b{color:var(--text);}
+body.view-staff :is(#tab-queue,#desk-sheet) .tyl-0 b{color:var(--orange);}
+body.view-staff :is(#tab-queue,#desk-sheet) .tyl-x{color:var(--red);}
 body.view-staff #tab-queue .snt-chip{white-space:nowrap;}
 @media(max-width:767px){body.view-staff #tab-queue .s10-figs,body.view-staff #tab-queue .tyl-row{flex-wrap:nowrap;}}
 body.view-staff #walkin-modal .tyl-wi{display:block;font-size:var(--sf-fs-xs);font-weight:600;opacity:.8;}
@@ -12611,6 +12611,9 @@ body.view-staff #desk-sheet .inc-k[aria-pressed="true"]{border-color:var(--green
 body.view-staff #desk-sheet .inc-k:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
 body.view-staff #desk-sheet .inc-err{color:var(--red);font-size:var(--sf-fs-sm);font-weight:600;}
 body.view-staff #desk-sheet .inc-err:empty{display:none;}
+body.view-staff #desk-sheet #bmv-figs:empty{display:none;}
+body.view-staff #desk-sheet .bmv-party{display:flex;align-items:center;gap:8px;font-size:var(--sf-fs-sm);font-weight:600;cursor:pointer;min-height:44px;}
+body.view-staff #desk-sheet .bmv-party input{width:18px;height:18px;margin:0;accent-color:var(--green);}
 body.view-staff #cust-modal .inc-list{margin-bottom:10px;}
 body.view-staff .rmt-chip.rmt-inc{color:var(--orange);display:inline-flex;align-items:center;gap:4px;}
 body.view-staff #tab-dashboard .snt-dash-b{white-space:normal;overflow-wrap:anywhere;}
