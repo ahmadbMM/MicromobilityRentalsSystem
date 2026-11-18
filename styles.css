@@ -15134,6 +15134,19 @@ body.view-staff #confirm-modal .fup-err:empty{display:none;}
 body.view-staff #cust-modal .wal-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;}
 body.view-staff #cust-modal .wal-li{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;font-size:var(--sf-fs-sm,.8125rem);}
 body.view-staff #cust-modal .wal-what{font-weight:600;overflow-wrap:anywhere;}
+/* People round (2026-11-18): the account window's owner and family, rides with; the family picker; the last bike */
+body.view-staff #cust-modal .fup-who{background:none;border:0;padding:4px;margin:-4px;font:inherit;font-weight:600;color:var(--text);text-decoration:underline;cursor:pointer;}
+body.view-staff #cust-modal .prd-fam-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+body.view-staff #cust-modal .prd-fam-li{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+body.view-staff #cust-modal .prd-fam-who{flex:1 1 auto;min-width:0;overflow-wrap:anywhere;}
+body.view-staff #cust-modal .prd-role{font:inherit;font-size:var(--sf-fs-sm,.8125rem);padding:4px 6px;border-radius:8px;}
+body.view-staff #cust-modal .prd-fam-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+body.view-staff #cust-modal .prd-with{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;}
+body.view-staff #confirm-modal .fup-form select{width:100%;box-sizing:border-box;font:inherit;padding:8px;border-radius:8px;}
+body.view-staff #confirm-modal .prd-fres{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;max-height:40vh;overflow:auto;}
+body.view-staff #confirm-modal .prd-fhit{width:100%;text-align:start;background:none;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font:inherit;color:var(--text);cursor:pointer;display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;}
+body.view-staff #confirm-modal .prd-fhit:hover{border-color:var(--text);}
+body.view-staff .prd-last{display:flex;align-items:center;gap:6px;margin:4px 0;font-size:var(--sf-fs-sm,.8125rem);font-weight:600;color:var(--muted);}
 #gs-panel .gs-tips{border-top:1px solid var(--border);font-size:var(--sf-fs-xs,.75rem);padding:10px 16px;}
 #gs-panel .gs-tips[hidden]{display:none;}
 /* ══ Ask (/ask; the owner, 2026-11-13): questions put to an audience under micromobility.sa/ask - the list of pages, a

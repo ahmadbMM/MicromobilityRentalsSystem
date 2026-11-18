@@ -2412,6 +2412,39 @@ management dashboard page"); on 2026-11-06 the user asked to merge them and make
   ids in `staff_options` `dup_ok`. The merge dialog says what the kept account takes. Undoing a merge asks and takes the PIN.
 - `tests/people-review.spec.ts`.
 
+### The People round (2026-11-18, migration 20261118210000)
+The user's picks from a list of new People features ("2 3 5 6 7 8"). All in People's part (`_prd*`, listed in
+`_n6pAhLoad`), except the last bike, which is desk code. Strings start with `prd` (and `afu` for follow-ups).
+- **Watch a person**: More > Watch on the account window (staff with People) puts the account on the staffer's own list,
+  staff prefs `state.watch` (`[[customer id, since ms]]`, at most 100, `_prdWatchList`/`_prdWatchTog`). The bell kind
+  `watch` (NT_KINDS, under People in Settings; `_ntKindsNow` calls `_prdBell` by a built name) has one line per ride they
+  book and one per arrival, from the moment they went on the list and within two weeks. The Accounts filter `amWatch`.
+  `_prdWatchTog` drops the bell's cache (`_ntkOut`); a pref changed another way shows within the minute.
+- **Account owner**: `account_owners` (customer_id pk, owner_id, owner_name stamped by `_account_owners_stamp`, which
+  refuses a staff account that is off). More > Owner (People change) picks from `staff_owner_choices()` (staff accounts that
+  are on, not volunteer or door); the Account part shows the owner once set. Accounts filter `amOwner` (a main filter):
+  My people (`_prdMe`, the signed-in staff id), Has an owner, No owner, each owner by name.
+- **Follow-ups for someone**: `account_followups.assignee`. The Follow up pop-up's "For" starts on the account's owner;
+  the list shows "For X" and has a Mine view; the bell's `fup` lines go to the staffer a follow-up is for, and to everyone
+  when it is for nobody. The Dashboard and the People count still count them all.
+- **Family links**: `account_family` (customer_id pk, family_id uuid, role parent/child/none). More > Add to family (and
+  the family's own button) finds an account by the find box's rule (`_dkXAcctHit`); someone already in another family brings
+  that family in. The Account part lists the family with each one's role (a select for People change) and Book for the
+  family: the walk-in form with this account first and the rest as its other riders, each carrying `custId`, which
+  `_wiInsertRiders` links before `_linkCustomer` (a changed name drops it, `_wiSync`). Removing one of two removes both.
+  Staff only: members never see each other (the rule of 2026-11-04). Accounts filter `amFamily`.
+- **Rides with** (`_prdWith`, the Stats part): the people on the same group or account booking, ride after ride, from the
+  rides the device holds; the person's own row is the one under their name; an account opens its window.
+- **Last bike** (`_prdLast`, `_prdLastTxt`, `_prdLastCi`; desk core): the type, size and bike of the newest ride that
+  started, the person's own row first, leaving out the night being checked in. In the window's Stats facts and in the
+  check-in drawer's `_hBadge`, only on the account holder's own booking.
+- **Download their data** (admins, More's record group): `staff_customer_export(p_id)` returns the account row and every
+  row of every table with a `customer_id` (bar `customer_owner_pwd`, `customer_handoffs`, `push_outbox`, `pii_reveals`), plus
+  the staff notes on the person; keys like password hashes, tokens, the feed key and push keys are stripped by name. Saved
+  as `<name>-data-<day>.json`; one Action Log line and one personal-data export line (`_piiExport`).
+- The two tables are small and read whole (`_prdLoad`, five minutes; a failed read again after a minute); a missing table
+  says "Waiting for the database update". `tests/people-round.spec.ts`.
+
 ## Applications, made the admins' own (2026-10-07)
 
 The owner: "add more customization in it" (Applications); picked: views and bulk actions, message templates, default
