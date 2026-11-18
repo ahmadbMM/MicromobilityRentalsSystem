@@ -62294,7 +62294,8 @@ async function riderCheckinParty(id){
 }
 // Everyone in the party out on a bike: returned together, or their check-in undone together.
 function _riderRiding(id){const r=(S.riders||[]).find(x=>String(x.id)===String(id));return r?_riderParty(r).filter(x=>x.checked_in_at&&!x.checked_out_at):[];}
-function _riderNames(list){return list.map(x=>`${esc(x.badge||'')} · ${esc(x.name||'')}`).join('<br>');}
+// A Dukan stand-in badge is no badge (_riderBadge): the name alone, with no separator (bug hunt 2026-11-18).
+function _riderNames(list){return list.map(x=>{const b=_riderBadge(x);return`${b?esc(b)+' · ':''}${esc(x.name||'')}`;}).join('<br>');}
 function riderReturnParty(id){
   const list=_riderRiding(id);if(!list.length)return;
   confirmDialog({title:t('partyReturnTitle').replace('{0}',list.length),body:_riderNames(list),confirmLabel:t('returnAllBtn'),confirmClass:'btn-green',onConfirm:async()=>{
@@ -62497,7 +62498,7 @@ function _renderRidersReport(){
 function exportRidersReportCsv(co){
   const rows=_riderReportRows(co);if(!rows.length){toast(t('ridersReportEmpty'),'info');return;}
   const head=['booking_no','session','company','badge','name','phone','bike_type','checked_in','checked_out','price_sar'];
-  const lines=[head].concat(rows.map(r=>[r.booking_no||'',r.session_id||'',co,r.badge,r.name,r.phone||'',r.type_preference,_riderClock(r.checked_in_at),_riderClock(r.checked_out_at),_riderPrice(r).toFixed(2)]));
+  const lines=[head].concat(rows.map(r=>[r.booking_no||'',r.session_id||'',co,_riderBadge(r),r.name,r.phone||'',r.type_preference,_riderClock(r.checked_in_at),_riderClock(r.checked_out_at),_riderPrice(r).toFixed(2)]));
   const total=rows.reduce((s,r)=>s+_riderPrice(r),0);
   lines.push(['','','','','','','','','TOTAL',total.toFixed(2)]);
   const sc=_pmbScope(); // named for its period: the night, the month, or all
@@ -63000,8 +63001,11 @@ async function submitRiderWalkin(){
   // The companions this badge already has on the night, as this tab holds them: the registration goes
   // over theirs (same badge, same night), and one it leaves off is deleted by rider_register, booking
   // and all to cancel (_rwFinish, 2026-10-05).
-  const _bk=String(badge).toLowerCase().replace(/[^a-z0-9]/g,'');
-  const prevComp=(S.riders||[]).filter(x=>String(x.badge||'').toLowerCase().replace(/[^a-z0-9]/g,'')===_bk&&(x.session_id||'')===d.session&&_riderPartyNo(x)>=2)
+  // A new Dukan walk-in sends no badge: rider_register keys it 'DK' and the phone's last nine digits, so its companions
+  // already on the night are found by that key (bug hunt 2026-11-18); with no key there are none to find.
+  const _dkKey=d.company==='Dukan'&&!badge&&phone?'dk'+String(phone).replace(/\D/g,'').slice(-9):'';
+  const _bk=(_dkKey||String(badge)).toLowerCase().replace(/[^a-z0-9]/g,'');
+  const prevComp=(S.riders||[]).filter(x=>_bk&&String(x.badge||'').toLowerCase().replace(/[^a-z0-9]/g,'')===_bk&&(x.session_id||'')===d.session&&_riderPartyNo(x)>=2)
     .map(x=>({id:x.id,entry:x.matched_entry_id||null}));
   d.saving=true;renderRiderWalkin();
   let res;
@@ -63050,7 +63054,8 @@ function _rwPick(rows,name,phone){
   const same=e=>String(e.name||'').trim().replace(/\s+/g,' ').toLowerCase()===nm;
   // A party's bookings all carry the mobile it was booked with (the desk writes the employee's on each): the one
   // with the rider's own name too comes first, then the first by number.
-  if(mine){const ph=(rows||[]).filter(e=>_phoneKey(e.phone)===mine),hit=ph.find(same)||ph[0];if(hit)return{entry:hit,weak:false};}
+  // A mobile shared with family (2026-11-18): a booking under it in another name is asked about, not taken as theirs.
+  if(mine){const ph=(rows||[]).filter(e=>_phoneKey(e.phone)===mine),hit=ph.find(same)||ph[0];if(hit)return{entry:hit,weak:!same(hit)};}
   const weak=(rows||[]).find(e=>same(e)&&(!mine||!_phoneKey(e.phone)));
   return weak?{entry:weak,weak:true}:{entry:null,weak:false};
 }
@@ -63859,6 +63864,7 @@ async function _wsScheduleSave(id){
 function _wsReady(id){
   const j=_wsFind(id);if(!j)return;
   const v=j.price_final!=null?j.price_final:(j.price_quoted!=null?j.price_quoted:'');
+  S._wsDlgBase={k:'ready',id:j.id,price:String(v)}; // the price shown, to tell a typed one from the job's own
   _wsDlg(t('wsReadyTitle').replace('{0}',_wsRef(j)),esc(t('wsReadyBody')),
     `<div class="form-group"><label for="ws-p">${t('wsLblPrice')}</label><input type="number" id="ws-p" inputmode="decimal" min="0" max="100000" step="0.01" value="${esc(v)}"></div>`,
     `<button type="button" class="btn-secondary" data-on-click="${_on("closeConfirm")}">${t('cancelBtn')}</button><button type="button" class="btn-primary ws-dlg-save" data-on-click="${_on("_wsReadySave",j.id)}">${t('wsReadySave')}</button>`);
@@ -63867,12 +63873,26 @@ async function _wsReadySave(id){
   const j=_wsFind(id);if(!j)return;
   const price=_wsPriceIn(_wsVal('ws-p'));
   if(price===undefined)return _wsDlgErr('wsPriceErr');
+  // A price left as shown is the job's own price when it is saved (bug hunt 2026-11-18, app42-1): the one shown when the
+  // dialog opened was written back, and a part another device added meanwhile lost its price. Written onto the version
+  // it was worked out from; changed since, the job is read again (three tries), as a part is added (_wsPartSave).
+  const b=S._wsDlgBase,typed=!(b&&b.k==='ready'&&String(b.id)===String(j.id))||_wsPriceIn(b.price)!==price;
   closeConfirm();
-  if(await _wsSave(j,{status:'ready',price_final:price},t('wsMovedToast').replace('{0}',_wsRef(j)).replace('{1}',_wsStage('ready'))))_wsMsgOpen(j.id);
+  const msg=t('wsMovedToast').replace('{0}',_wsRef(j)).replace('{1}',_wsStage('ready'));
+  let ok=false;
+  for(let k=0;k<3;k++){
+    if(k&&!await _wsFresh(j))break;
+    const own=j.price_final!=null?j.price_final:(j.price_quoted!=null?j.price_quoted:'');
+    ok=await _wsSave(j,{status:'ready',price_final:typed?price:own===''?null:Number(own)},msg,j.updated_at||null);
+    if(ok!=='stale')break;
+  }
+  if(ok==='stale'){toast(t('wsSaveErr'),'error');_wsLoad();}
+  if(ok===true)_wsMsgOpen(j.id);
 }
 function _wsEdit(id){
   const j=_wsFind(id);if(!j)return;
   const cur=j.scheduled_for?_wsLocal(j.scheduled_for):null;
+  S._wsDlgBase={k:'edit',id:j.id,status:j.status,scheduled_for:j.scheduled_for||null,price_final:j.price_final==null?null:Number(j.price_final),staff_notes:j.staff_notes||''};
   const stages=Object.keys(WS_STAGE_KEY).map(s=>`<option value="${s}"${s===j.status?' selected':''}>${esc(_wsStage(s))}</option>`).join('');
   _wsDlg(t('wsEditTitle').replace('{0}',_wsRef(j)),`${esc(j.name)} · ${esc(j.service_label||j.service)}`,
     `<div class="form-group"><label for="ws-st">${t('wsLblStage')}</label><select id="ws-st">${stages}</select></div>
@@ -63888,12 +63908,16 @@ async function _wsEditSave(id){
   if(!!d!==!!tm||(d&&(!/^\d{4}-\d{2}-\d{2}$/.test(d)||!/^\d{2}:\d{2}$/.test(tm))))return _wsDlgErr('wsSchedErr');
   const price=_wsPriceIn(_wsVal('ws-p'));
   if(price===undefined)return _wsDlgErr('wsPriceErr');
-  const cur=j.scheduled_for?_wsLocal(j.scheduled_for):null;
+  // Against the values the dialog opened with (bug hunt 2026-11-18, app42-1): the list is read again every 30 s, and
+  // measured against the job as read since, every field left alone read as changed and was written back, putting a stage,
+  // a time or a price another device had set meanwhile back as it was.
+  const b0=S._wsDlgBase,b=b0&&b0.k==='edit'&&String(b0.id)===String(j.id)?b0:{status:j.status,scheduled_for:j.scheduled_for||null,price_final:j.price_final==null?null:Number(j.price_final),staff_notes:j.staff_notes||''};
+  const cur=b.scheduled_for?_wsLocal(b.scheduled_for):null;
   const patch={};
-  if(st!==j.status)patch.status=st;
+  if(st!==b.status)patch.status=st;
   if((cur?cur.date+'T'+cur.time:'')!==(d?d+'T'+tm:''))patch.scheduled_for=d?`${d}T${tm}:00+03:00`:null;
-  if((j.price_final==null?null:Number(j.price_final))!==price)patch.price_final=price;
-  if((j.staff_notes||'')!==nt)patch.staff_notes=nt||null;
+  if(b.price_final!==price)patch.price_final=price;
+  if(b.staff_notes!==nt)patch.staff_notes=nt||null;
   closeConfirm();
   if(Object.keys(patch).length)await _wsSave(j,patch,t('wsSavedToast').replace('{0}',_wsRef(j)));
 }
@@ -63988,13 +64012,14 @@ async function _wsPaySave(id){
 }
 function _wsMechOpen(id){
   const j=_wsFind(id);if(!j)return;
+  S._wsDlgBase={k:'mech',id:j.id,mechanic:j.mechanic||''}; // a name left as it was is not written back (_wsMechSave)
   _wsDlg(t('wsMechTitle').replace('{0}',_wsRef(j)),'',`<div class="form-group"><label for="ws-me">${t('svcMechanic')}</label><input id="ws-me" type="text" maxlength="120" list="ws-me-list" value="${esc(j.mechanic||'')}"><datalist id="ws-me-list"></datalist></div>`,
     `<button type="button" class="btn-secondary" data-on-click="${_on("closeConfirm")}">${t('cancelBtn')}</button><button type="button" class="btn-primary ws-dlg-save" data-on-click="${_on("_wsMechSave",j.id)}">${t('saveBtn')}</button>`);
   _opList().then(o=>{const dl=document.getElementById('ws-me-list');if(dl)dl.innerHTML=(o&&o.list||[]).map(x=>x&&(x.name||x.display_name)).filter(Boolean).map(n=>`<option value="${esc(n)}"></option>`).join('');}).catch(()=>{});
 }
 async function _wsMechSave(id){
   const j=_wsFind(id);if(!j)return;const v=_nameClean(_wsVal('ws-me')).slice(0,120); // names are letters and spaces
-  closeConfirm();if((j.mechanic||'')===v)return;
+  const b=S._wsDlgBase;closeConfirm();if((b&&b.k==='mech'&&String(b.id)===String(j.id)?b.mechanic:(j.mechanic||''))===v)return;
   await _wsSave(j,{mechanic:v||null},t('wsMechSaved').replace('{0}',_wsRef(j)).replace('{1}',v||'—'));
 }
 function _wsPartOpen(id){
@@ -64017,7 +64042,7 @@ async function _wsPartSave(id){
   try{
     closeConfirm();
     const mv=await _invMove(it.id,-q,'workshop_part',{ref:'ws:'+j.id,note:_wsRef(j)});if(!mv)return;
-    const pr=Number(it.price)||0,line={id:it.id,name:it.name,qty:q,cost:it.cost!=null?Number(it.cost):null,price:pr};
+    const pr=Number(it.price)||0,line={id:it.id,name:it.name,qty:q,price:pr}; // no unit cost: every workshop reader gets parts_used, cost is for can_see_costs only (bug hunt 2026-11-18)
     // Worked out from the job as this device holds it, and written only onto that version (2026-11-10): the list is read
     // every 30 s, and a part another device added meanwhile was overwritten, its line and its price gone while its stock
     // stayed taken. Changed since: the job is read again and the line goes on what is there now (three tries).
@@ -64231,10 +64256,11 @@ async function _smLoad(){
   renderMessages(!!(a&&a.id==='sm-search-input'));
 }
 // Kept current the way the Workshop list is (_wsPoll): a head-only "anything newer?" every 30
-// seconds, the whole list on a full refresh. Admins only - Front Desk has no Messages.
+// seconds, the whole list on a full refresh. Every account that has Messages (managers and owners too: an admin-only
+// check froze their inbox at its first read, bug hunt 2026-11-18); Front Desk has none.
 async function _smPoll(full){
   const W=_sm();
-  if(!sb||W.busy||S.view!=='staff'||!S._staffAuthed||!isAdmin())return;
+  if(!sb||W.busy||S.view!=='staff'||!S._staffAuthed||!_deskTabOk('messages'))return;
   if(W.missing&&!full)return;
   if(full||!W.rows){await _smLoad();return;}
   try{
@@ -64813,7 +64839,7 @@ function _vendorTabLabelSync(){const l=document.querySelector('#staff-tab-nav .t
 // Kept current like Ambassadors: two head-sized reads every 30 seconds on the section (the
 // pending count and the newest change), the five-minute tick elsewhere; a change reloads the lists.
 async function _vendorPoll(full){
-  if(!sb||S.view!=='staff'||!S._staffAuthed||!isAdmin()||S._vendorPolling)return;
+  if(!sb||S.view!=='staff'||!S._staffAuthed||!_deskTabOk('vendors')||S._vendorPolling)return; // every account with Vendors, not admins only (bug hunt 2026-11-18)
   const W=S._vendor;
   if(W&&W.missing&&!full)return;
   if(full&&W&&W.bk){renderVendors('reload');return;}
@@ -65243,6 +65269,7 @@ function _vendorVenRender(){
   _vendorVenGrab(); // a redraw keeps what was typed and not saved yet
   const W=_vendor(),v=V.id!=null?_vendorVen(V.id):null,f=V.f||{};
   const val=k=>f[k]!=null?f[k]:v&&v[k]!=null?String(v[k]):k==='kind'?'cafe':k==='tier_id'?'single':k==='status'?'active':'';
+  if(v&&!V.orig&&!V.f){V.orig={};VENDOR_VF.forEach(k=>{V.orig[k]=val(k);});} // what the dialog opened with (_vendorVenSave)
   const inp=(k,key,attrs)=>`<div class="form-group"><label for="vendor-v-${k}">${t(key)}</label><input type="text" id="vendor-v-${k}" value="${esc(val(k))}" autocomplete="off" ${attrs||''}></div>`;
   const ta=(k,key,dir)=>`<div class="form-group"><label for="vendor-v-${k}">${t(key)}</label><textarea id="vendor-v-${k}" rows="2" maxlength="1000"${dir?` dir="${dir}"`:''}>${esc(val(k))}</textarea></div>`;
   const sel=(k,key,opts)=>`<div class="form-group"><label for="vendor-v-${k}">${t(key)}</label><select id="vendor-v-${k}">${opts.map(([o,l])=>`<option value="${esc(o)}"${val(k)===o?' selected':''}>${esc(l)}</option>`).join('')}</select></div>`;
@@ -65379,19 +65406,26 @@ async function _vendorTellCopy(i){
 async function _vendorVenSave(){
   const V=S._vendorVen;if(!V||S._vendorW)return;
   _vendorVenGrab();const f=V.f||{},p={};
-  VENDOR_VF.forEach(k=>{p[k]=String(f[k]||'').trim();});p.seats=_asciiDigits(p.seats); // ٤٠ from an Arabic keyboard is 40 (2026-10-07)
-  const err=p.name.length<2||p.name.length>80?'vndErrName':p.map_url&&!/^https:\/\//i.test(p.map_url)?'vndErrMap':p.seats&&!(/^\d+$/.test(p.seats)&&+p.seats>=1&&+p.seats<=2000)?'vndErrSeats':'';
+  const norm=src=>{const o={};VENDOR_VF.forEach(k=>{o[k]=String(src[k]||'').trim();});o.seats=_asciiDigits(o.seats);return o;}; // ٤٠ from an Arabic keyboard is 40 (2026-10-07)
+  const a=norm(f);
+  const err=a.name.length<2||a.name.length>80?'vndErrName':a.map_url&&!/^https:\/\//i.test(a.map_url)?'vndErrMap':a.seats&&!(/^\d+$/.test(a.seats)&&+a.seats>=1&&+a.seats<=2000)?'vndErrSeats':'';
   if(err){V.err=t(err);_vendorVenRender();return;}
+  // Only what staff changed in the dialog (bug hunt 2026-11-18, app43-3): every field went from the copy it opened with,
+  // and an offer, map link, contact or seats the venue had changed on its portal meanwhile was put back, and synced onto
+  // its Saturday breakfast stops. The server keeps a field that is not sent.
+  const o=V.id!=null&&V.orig?norm(V.orig):null;
+  VENDOR_VF.forEach(k=>{if(!o||o[k]!==a[k])p[k]=a[k];});
   if(V.id!=null)p.id=V.id;
   p.by=_opName()||'';
   S._vendorW=true;
   let res;try{res=await sb.rpc('staff_vendor_venue_save',{p});}catch(e){res={error:e};}
   S._vendorW=false;
   if(_writeErr(res,'vendor venue save'))return;
-  const id=typeof res.data==='number'||typeof res.data==='string'?res.data:V.id,W=_vendor(),row={...p,id,seats:p.seats?Number(p.seats):null};delete row.by;
+  const id=typeof res.data==='number'||typeof res.data==='string'?res.data:V.id,W=_vendor(),row={...p,id};delete row.by;
+  if('seats' in p)row.seats=p.seats?Number(p.seats):null;
   const v=id!=null&&_vendorVen(id);if(v)Object.assign(v,row);else if(id!=null)W.venues.push({...row,created_by:p.by,created_at:new Date().toISOString()});
-  V.id=id;V.f=null;V.err='';
-  const msg=t('vndVenueSaved').replace('{0}',p.name);logAction(msg);toast(msg,'success');
+  V.id=id;V.f=null;V.orig={...a};V.err=''; // what is saved now is what the next Save is measured against
+  const msg=t('vndVenueSaved').replace('{0}',a.name);logAction(msg);toast(msg,'success');
   renderVendors();_vendorVenRender();
 }
 async function _vendorUserAdd(){
@@ -65619,16 +65653,22 @@ const SITE_PAGES=[
 function _web(){return S.web||(S.web={rows:{},draft:{},hist:[],loaded:false,busy:false,missing:false,err:null,saving:false});}
 async function _webLoad(){
   const W=_web();if(W.busy)return;W.busy=true;
+  // The newest read wins (bug hunt 2026-11-18, app44-3): a save reads again at once, also while an earlier read is out,
+  // and that older read landing last put the rows from before the second save back in the form. One left behind stops.
+  const gen=W.loadGen=(W.loadGen||0)+1;
   try{
     // No updated_by (2026-10-07, migration 20261007233000): the row names nobody since, as anyone may read it; who
     // saved what is site_content_history's changed_by, which only admins read (below).
     const r=await sb.from('site_content').select('key,value,updated_at');
+    if(gen!==W.loadGen)return;
     if(r.error)throw r.error;
     W.rows=Object.fromEntries((r.data||[]).map(x=>[x.key,x]));
     const h=await sb.from('site_content_history').select('id,key,old_value,new_value,changed_at,changed_by').order('id',{ascending:false}).limit(40);
+    if(gen!==W.loadGen)return;
     W.hist=h.error?[]:(h.data||[]);
     W.missing=false;W.err=null;
   }catch(e){
+    if(gen!==W.loadGen)return;
     const msg=String((e&&e.message)||'');
     // Before the migration is applied the table is simply not there: say so, not "failed".
     W.missing=(e&&(e.code==='PGRST205'||e.code==='42P01'))||(/site_content/.test(msg)&&/could not find|does not exist/i.test(msg));
@@ -66222,11 +66262,22 @@ async function _catDraw(bmp,max,type,q){
   return new Promise(r=>c.toBlob(r,type,q));
 }
 const _catStamp=()=>Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
+// Any see-through pixel in the picture drawn at up to max px; a picture that cannot be read keeps its PNG.
+function _catSeeThrough(bmp,max){
+  try{
+    const sc=Math.min(1,max/Math.max(bmp.width,bmp.height)),w=Math.max(1,Math.round(bmp.width*sc)),h=Math.max(1,Math.round(bmp.height*sc));
+    const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(bmp,0,0,w,h);
+    const d=x.getImageData(0,0,w,h).data;for(let i=3;i<d.length;i+=4)if(d[i]<255)return true;
+    return false;
+  }catch(_){return true;}
+}
 async function _catUploadImage(file,folder){
   if(!/^image\/(jpeg|png|webp|avif)$/.test(file.type))throw new Error('type');
   const bmp=await createImageBitmap(file);
   try{ // the decoded photo is let go of however this ends: a batch of photos held each at full size
-  const png=file.type==='image/png'||(file.type!=='image/jpeg'&&_imgHasAlpha(bmp)),type=png?'image/png':'image/jpeg',ext=png?'png':'jpg'; // PNG keeps a cut-out background
+  // PNG keeps a cut-out background. A PNG is read whole, at the size it is drawn, and an opaque one goes as a JPEG
+  // (bug hunt 2026-11-18, app44-2, as _webShrink since app40-2): kept a PNG, a photo came out over the 10 MB limit.
+  const png=file.type==='image/png'?_catSeeThrough(bmp,2000):file.type!=='image/jpeg'&&_imgHasAlpha(bmp),type=png?'image/png':'image/jpeg',ext=png?'png':'jpg';
   const main=await _catDraw(bmp,2000,type,.85);
   if(!main||main.size>10*1024*1024)throw new Error('big');
   const base=folder+'/'+_catStamp();
@@ -66279,7 +66330,18 @@ function _catFocusLater(id){
   },60);
 }
 function _catEdit(id){
-  const C=_cat(),m=id?C.models.find(x=>x.id===id):null;
+  const C=_cat();
+  // A model being edited is not swapped for another without asking (bug hunt 2026-11-18, app44-1), as Cancel asks: its
+  // typed text, colours and photos were dropped. Its own Edit again keeps the draft; a save under way is not swapped out.
+  if(C.ed){
+    if(C.ed.busy)return;
+    if(C.ed.dirty||C.ed.up>0){
+      if(id&&C.ed.id===id)return;
+      confirmDialog({title:t('catUnsaved'),confirmLabel:t('leaveNoSaveBtn'),confirmClass:'btn-primary',onConfirm:()=>{_cat().ed=null;_catEdit(id);}});
+      return;
+    }
+  }
+  const m=id?C.models.find(x=>x.id===id):null;
   const top=_catTop();
   C.ed={id:m?m.id:_catUuid(),isNew:!m,slugAuto:!m,busy:false,dirty:false,err:'',
     d:m?JSON.parse(JSON.stringify(m)):{brand:'',name:'',slug:'',category_id:top.length?top[0].id:null,subtype_id:null,model_year:null,ride_type:null,tagline_en:'',tagline_ar:'',description_en:'',description_ar:'',specs:{},spec_sheet:null,sort:0,published:false},
@@ -67459,6 +67521,9 @@ function _n6wAnPaint(){
   const host=document.getElementById('an-vl-host');if(!host)return;
   const D=_n6wAnData();
   if(!D){const A=S._n6wAn;host.innerHTML=A&&A.err?_loadErr(esc(t('zwAnErr')),_on("_n6wAnRetry")):skeletonList();_n6wAnLoad();return;}
+  // Its own read is read again once ten minutes old (bug hunt 2026-11-18, app45-3): once held it was never asked again.
+  // _n6wAnLoad keeps to its ten minutes and paints again when the rows come.
+  {const vw=S.vm;if(!(vw&&vw.hoursAll&&Array.isArray(vw.rows)&&Date.now()-(vw.at||0)<600000))_n6wAnLoad();}
   const ym=d=>String(d||'').slice(0,7),now=_ksaYmd(Date.now()),months=[];
   for(let i=11;i>=0;i--){const d=new Date(Date.UTC(+now.slice(0,4),+now.slice(5,7)-1-i,1));months.push(d.toISOString().slice(0,7));}
   const first=new Map(),days=new Map(),M=new Map(months.map(m=>[m,{h:0,who:new Set(),fresh:0}]));
@@ -68184,12 +68249,34 @@ function closeCashierModal(){const m=document.getElementById('cashier-modal');if
 // these paths used caught nothing: a sale rung up on a dead connection said "added" and took the
 // stock off the shelf, then vanished on the next reload; a void put the stock back while the sale
 // stayed on the booking, so voiding it again restocked it twice.
+// The list is written only over the one it was worked out from (bug hunt 2026-11-18, app45-4): written whole from this
+// device's copy, a sale another desk had rung up that had not reached it yet was overwritten, its stock taken and its log
+// line kept. next is the change (list => new list, or null when there is nothing left to change); when the booking's list
+// has moved on, it is read again and the change made on what is there now. An empty copy is read first: the server may
+// hold it as null, '' or '[]'.
 async function _savePurchases(e,next,ctx){
-  const prev=e.purchases;e.purchases=next;
-  let res;try{res=await sb.from('queue_entries').update({purchases:JSON.stringify(next)}).eq('id',e.id).select('id');}catch(err){res={error:err};}
-  if(_writeErr(res,ctx)){e.purchases=prev;return false;}
-  if(!(res&&Array.isArray(res.data)&&res.data.length)){e.purchases=prev;errorBar(t('errSomethingWrong'));return false;} // no row took it (the booking is gone)
-  return true;
+  const prev=e.purchases,fn=typeof next==='function'?next:()=>next;
+  let cur=entryPurchases(e),raw=cur.length?JSON.stringify(cur):undefined,res;
+  for(let k=0;k<4;k++){
+    if(k||raw===undefined||raw.length>3000){ // the list as the server holds it now
+      let r;try{r=await sb.from('queue_entries').select('id,purchases').eq('id',e.id);}catch(err){r={error:err};}
+      if(_writeErr(r,ctx)){e.purchases=prev;return false;}
+      const row=(Array.isArray(r&&r.data)?r.data:[]).find(x=>x&&String(x.id)===String(e.id));
+      if(!row)break; // the booking is gone
+      raw=row.purchases==null?null:row.purchases;
+      try{cur=Array.isArray(raw)?raw:raw?JSON.parse(raw):[];}catch(_){cur=[];}
+      if(!Array.isArray(cur))cur=[];
+    }
+    const list=fn(cur);
+    if(!list){e.purchases=cur;return false;} // nothing left to change: another desk took the line off first
+    e.purchases=list;
+    let q=sb.from('queue_entries').update({purchases:JSON.stringify(list)}).eq('id',e.id);
+    if(raw===null)q=q.is('purchases',null);else if(typeof raw==='string'&&raw.length<=3000)q=q.eq('purchases',raw);
+    try{res=await q.select('id');}catch(err){res={error:err};}
+    if(_writeErr(res,ctx)){e.purchases=prev;return false;}
+    if(res&&Array.isArray(res.data)&&res.data.length)return true;
+  }
+  e.purchases=prev;errorBar(t('errSomethingWrong'));return false; // no row took it (the booking is gone)
 }
 // Where a purchase sits in the booking's list NOW: the list can be reloaded while a confirm is open.
 function _purchaseIdx(arr,line){const i=arr.indexOf(line);return i>=0?i:arr.findIndex(p=>p&&p.at===line.at&&p.name===line.name&&Number(p.qty)===Number(line.qty));}
@@ -68209,7 +68296,7 @@ async function _rentalSaleDelete(entryId,pidx){
     // writing its list back dropped a sale another desk had rung up on it meanwhile (2026-10-05).
     const e=_qGet(entryId);if(!e){renderCashier();return;}
     const cur=entryPurchases(e),at=_purchaseIdx(cur,line);if(at<0){renderCashier();return;}
-    if(!await _savePurchases(e,cur.filter((_,i)=>i!==at),'void rental sale')){renderCashier();return;}
+    if(!await _savePurchases(e,l=>{const i0=_purchaseIdx(l,line);return i0<0?null:l.filter((_,i)=>i!==i0);},'void rental sale')){renderCashier();return;}
     if(line.id)await _addonStock([line.id],Number(line.qty)||1);
     logAction(`${t('cashierTitle')}: ${t('cashVoid')} · ${line.name} ×${Number(line.qty)||1} - #${e.queueNum} ${e.name} · ${why.txt}`,{k:'void',e:'booking',id:e.id,amt:_lineCharge(line)}); // a house line keeps its price but took nothing, as _cashVoid (bug hunt 2026-10-28)
     toast(t('cashVoidedToast'));renderCashier();
@@ -68255,7 +68342,7 @@ async function _cashAddLine(){
   const e=_qGet(e0.id);if(!e)return;
   const cat=isCustom?(S._cashCat||'Other'):(it?(it.category||'Other'):'Other');
   const line={id:it?it.id:null,name,cat,qty,price:Math.round(price*100)/100,pay,team:pay==='team'?(S._cashTeam||'').trim():'',at:new Date().toISOString()};if(method)line.method=method;
-  if(!await _savePurchases(e,[...entryPurchases(e),line],'ring up sale')){renderCashierModal();return;} // not saved: the stock stays and the form keeps the sale to try again
+  if(!await _savePurchases(e,l=>[...l,line],'ring up sale')){renderCashierModal();return;} // not saved: the stock stays and the form keeps the sale to try again
   if(it)await _addonStock([it.id],-qty); // point-of-sale: decrement inventory stock by quantity sold
   if(S._retAfterTill&&S._retAfterTill.id===e.id)S._retAfterTill.sold=true; // the return comes back on Paid
   S._cashItem='';S._cashQty='1';S._cashAmt='';S._cashName='';S._cashCat='Other'; // keep payment selection
@@ -68280,7 +68367,7 @@ async function _cashVoid(i){
   const e=_qGet(e0.id);if(!e){if(S._cashEntry)renderCashierModal();return;}
   const cur=entryPurchases(e),at=_purchaseIdx(cur,line);
   if(at<0){if(S._cashEntry)renderCashierModal();return;}
-  if(!await _savePurchases(e,cur.filter((_,idx)=>idx!==at),'void sale')){if(S._cashEntry)renderCashierModal();return;} // still on the booking: nothing goes back on the shelf
+  if(!await _savePurchases(e,l=>{const i0=_purchaseIdx(l,line);return i0<0?null:l.filter((_,idx)=>idx!==i0);},'void sale')){if(S._cashEntry)renderCashierModal();return;} // still on the booking: nothing goes back on the shelf
   if(line.id)await _addonStock([line.id],Number(line.qty)||1); // void restocks inventory items
   logAction(`${t('cashierTitle')}: ${t('cashVoid')} · ${line.name} ×${Number(line.qty)||1} - #${e.queueNum} ${e.name} · ${why.txt}`,{k:'void',e:'booking',id:e.id,amt:_lineCharge(line)});
   toast(t('cashVoidedToast'));
@@ -68594,11 +68681,23 @@ async function _outboxApprove(){
 // Giving up on what is stuck. A void or delete in it never reached the server, so its rows come off
 // this device's voided list and the ledger is read again: they used to stay hidden here for good while
 // the server still held them (2026-10-05).
+// A receipt whose lines are thrown away gives back the wallet part the server took for it first (bug hunt 2026-11-18,
+// app46-2), as _ctBook does when nothing could be stored: the rider stayed charged for a sale that does not exist. The
+// server keeps the part when a line of that receipt did arrive (WALLET_NOT_OPEN), which is right: that sale exists.
 function _outboxDiscard(){
-  const back=[];_outbox().forEach(op=>{if(op.kind==='delete')back.push(op.id);else if(op.kind==='void'&&Array.isArray(op.rows))back.push(...op.rows);});
+  const back=[],rids=new Set();_outbox().forEach(op=>{if(op.kind==='delete')back.push(op.id);else if(op.kind==='void'&&Array.isArray(op.rows))back.push(...op.rows);else if(op.kind==='upsert'&&op.data&&op.data.receipt_id)rids.add(String(op.data.receipt_id));});
+  const wal=[...rids].filter(rid=>(S.cashSales||[]).some(r=>r&&r.id==='wal-'+rid));
   _outboxSave([]);_voidedDrop(back);
   toast(t('syncDiscardedToast'));
-  Promise.resolve(loadDataLight()).catch(()=>{}).then(()=>{if(S.view==='staff'&&S.staffTab==='cashier')renderCashier();});
+  (async()=>{
+    for(const rid of wal){
+      let r;try{r=await sb.rpc('staff_wallet_unpay_sale',{p_receipt_id:rid});}catch(e){r={error:e};}
+      if(r&&r.error&&!/WALLET_NOT_OPEN/.test(String(r.error.message||'')))toast(_cwSay(r.error),'error');
+    }
+    if(wal.length)_cwLoad(true).catch(()=>{});
+    try{await loadDataLight();}catch(_){}
+    if(S.view==='staff'&&S.staffTab==='cashier')renderCashier();
+  })();
 }
 // Badge click: try once more to sync; if the ops are still stuck and we're online, let the operator discard them so the "pending sync" chip can clear.
 async function _outboxRetryOrClear(){
@@ -73005,6 +73104,9 @@ async function _mgRun(keepId,dropId){
   // merged account used to stay in the list until the next read.
   S.customers=_custLiveRows((S.customers||[]).map(c=>c&&c.id===dropId?{...c,merged_into:keepId}:c));
   S._mgRows=null;S._mgA=null;S._mgB=null;
+  // The owners and families are read again (bug hunt 2026-11-18): the window and the Accounts list kept the links as
+  // they were before the merge for five minutes.
+  if(S._prdO)S._prdO.at=0;
   refDirty();await loadData();renderCommunity();
 }
 async function _mgLoad(){
@@ -73026,7 +73128,7 @@ async function _mgUndoWrite(id){
   const nm=r&&r.data&&r.data.drop_name;
   toast('✓ '+t('mgUndone').replace('{0}',nm||''));
   logAction(t('mgUndone').replace('{0}',nm||''));
-  S._mgRows=null;
+  S._mgRows=null;if(S._prdO)S._prdO.at=0; // the owners and families are read again too
   refDirty();await loadData();if(_pplOpen())renderCommunity(); // the account is a plain row again: read the list, do not rebuild it here
   return true;
 }

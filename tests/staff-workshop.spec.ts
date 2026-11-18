@@ -150,6 +150,34 @@ test('Edit keeps staff notes and can clear the time', async ({ page }) => {
   expect(writes[0].body).toEqual({ scheduled_for: null, staff_notes: 'Customer will bring the old chain', updated_by: 'Spec Staff' });
 });
 
+// The list is read again every 30 s while a dialog is open (bug hunt 2026-11-18, app42-1): a field left alone is not
+// written back over what another device set meanwhile.
+const otherDevice = (o: Record<string, unknown>) => `_ws().jobs=_ws().jobs.map(j=>j.id===42?{...j,...${JSON.stringify(o)}}:j)`;
+
+test('Edit writes only what was changed in it, not the stage or price another device set meanwhile', async ({ page }) => {
+  const writes = await open(page, { workshop_jobs: [job({ status: 'confirmed', scheduled_for: '2099-05-06T14:00:00Z' })] });
+  await panel(page).locator('[data-ws-filter="booked"]').click();
+  await card(page, 42).getByRole('button', { name: 'Edit' }).click();
+  await expect(dialog(page).locator('#ws-st')).toHaveValue('confirmed');
+  await page.evaluate(otherDevice({ status: 'ready', price_final: 469, updated_at: '2099-05-02T10:00:00Z' }));
+  await dialog(page).locator('#ws-n').fill('Customer will bring the old chain');
+  await dialog(page).getByRole('button', { name: 'Save' }).click();
+  await expect.poll(() => writes.length).toBe(1);
+  expect(writes[0].body).toEqual({ staff_notes: 'Customer will bring the old chain', updated_by: 'Spec Staff' });
+});
+
+test('Ready with the price left as shown takes the job\'s price as it is now', async ({ page }) => {
+  const writes = await open(page, { workshop_jobs: [job({ status: 'in_workshop' })] });
+  await panel(page).locator('[data-ws-filter="shop"]').click();
+  await card(page, 42).getByRole('button', { name: 'Ready for pickup' }).click();
+  await expect(dialog(page).locator('#ws-p')).toHaveValue('409');
+  await page.evaluate(otherDevice({ price_final: 469, updated_at: '2099-05-02T10:00:00Z' })); // a part added with its price
+  await dialog(page).getByRole('button', { name: 'Mark ready' }).click();
+  await expect.poll(() => writes.length).toBe(1);
+  expect(writes[0].body).toEqual({ status: 'ready', price_final: 469, updated_by: 'Spec Staff' });
+  expect(writes[0].url).toContain('updated_at=eq.2099-05-02T10:00:00Z'); // only over that version
+});
+
 test('Front desk cannot delete a request', async ({ page }) => {
   await open(page);
   await page.evaluate(`S.staffRole='frontdesk';renderStaffTabs();setStaffTab('workshop')`);

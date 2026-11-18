@@ -137,6 +137,16 @@ test('notes are saved, and admins can delete spam', async ({ page }) => {
   await expect(page.locator('.toast').last()).toContainText('M-0007 deleted');
 });
 
+test('a manager\'s inbox is read again too, not only an admin\'s (bug hunt 2026-11-18)', async ({ page }) => {
+  const rows = [msg({})];
+  await open(page, { site_messages: rows });
+  await expect(card(page, 7)).toBeVisible();
+  await page.evaluate(`S.staffRole='manager';S._staffAuthed=true`); // a signed-in manager (the stub signs nobody in)
+  rows.push(msg({ id: 8, name: 'Lina Fahad', message: 'A late question.' }));
+  await page.evaluate(`_smPoll(true)`);
+  await expect(card(page, 8)).toContainText('Lina Fahad');
+});
+
 test('the From filter and search narrow the list', async ({ page }) => {
   await open(page, { site_messages: [msg({}), msg({ id: 8, kind: 'help', topic: 'faq', name: 'Sara Ali', company: null, email: 'sara@example.test', phone: null, message: 'Where are you?' })] });
   await expect(panel(page).locator('.sm-row')).toHaveCount(2);

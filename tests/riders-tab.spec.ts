@@ -623,6 +623,30 @@ test.describe('walk-in at the desk', () => {
     await expect(page.locator('#rw-dup')).toHaveCount(0);
   });
 
+  test('the same mobile on another rider\'s booking is a question, not a merge (a family phone)', async ({ page }) => {
+    await stubSupabase(page, {
+      sessions, queue_entries, rider_registrations,
+      'rpc:rider_register': { ok: true, id: 9, match: 'none', resubmitted: false, booking_no: 'P-004' },
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('riders')`);
+    const booked = await captureBookingRows(page);
+    await page.evaluate(`showRiderWalkin()`);
+    await page.fill('#rw-badge', 'A-97');
+    await page.fill('#rw-name', 'Omar Parent');       // another name...
+    await page.fill('#rw-phone', '0500000001');       // ...on the mobile Amal's booking carries
+    await page.fill('#rw-height', '178');
+    await page.locator('#rider-walkin-modal .toggle-btn', { hasText: 'Hybrid' }).click();
+    await page.click('#rw-submit');
+    await expect(page.locator('#rw-dup')).toContainText('#7');
+    expect(booked).toHaveLength(0);
+    await page.locator('#rw-dup button', { hasText: /add a booking/i }).click();
+    await expect.poll(() => booked.length).toBe(1);                            // Amal keeps her own
+    expect(booked[0]).toMatchObject({ name: 'Omar Parent', session_id: SESS, status: 'waiting' });
+  });
+
   test('a failed insert leaves one way forward, and the retry does not register the rider twice', async ({ page }) => {
     await stubSupabase(page, {
       sessions, queue_entries, rider_registrations,

@@ -170,6 +170,22 @@ test.describe('@staff:money b1 B: money by how it was taken', () => {
     await expect(page.locator('#tab-cashier .sl-cc')).toContainText('Card: SAR 8');
     await expect(page.locator('#tab-cashier .sl-cc')).toContainText('Cash: SAR 12');
   });
+
+  // Bug hunt 2026-11-18 (app45-4): the list was written whole from this device's copy, over a sale another desk had rung up
+  // that had not reached it yet. It goes onto the list as the server holds it, and only over that list.
+  test('a sale goes onto the booking\'s list as the server holds it, not over a sale this device has not seen yet', async ({ page }) => {
+    const water = { id: null, name: 'Water', cat: 'Other', qty: 1, price: 12, pay: 'paid', team: '', at: '2099-02-08T10:00:00.000Z', method: 'cash' };
+    await boot(page, { queue_entries: [qe('q1', 1, 'Buyer', { status: 'active', paid: true, price: 75, pay_method: 'card', purchases: JSON.stringify([water]) })] });
+    await page.waitForFunction(`getQueue().length===1`);
+    await page.evaluate(`_qGet('q1').purchases=[]`); // the other desk's sale, not here yet
+    const sent = writes(page, 'queue_entries');
+    await page.evaluate(`showCashierModal('q1')`);
+    await page.evaluate(`S._cashPay='card';S._cashItem='__custom__';S._cashName='Gel';S._cashAmt='8';_cashAddLine()`);
+    await expect.poll(() => sent.length).toBe(1);
+    const list = JSON.parse(String((sent[0].body as Record<string, unknown>).purchases)) as Record<string, unknown>[];
+    expect(list.map((l) => l.name)).toEqual(['Water', 'Gel']);
+    expect(decodeURIComponent(sent[0].url)).toContain('purchases=eq.[{'); // written only over the list it was read from
+  });
 });
 
 // The Petromin page's Billing report (S05-core5-03, S13-open-items-04): a period of a night, all nights or one month,

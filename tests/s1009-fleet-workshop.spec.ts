@@ -59,7 +59,9 @@ test.describe('@staff:workshop money, parts and mechanic', () => {
     await d.locator('#ws-pq').fill('2');
     await d.getByRole('button', { name: 'Add part' }).click();
     await expect.poll(() => calls.find((c) => c.name === 'staff_inventory_move')?.body).toMatchObject({ p_item: 'pads', p_delta: -2, p_reason: 'workshop_part', p_ref: 'ws:42' });
-    await expect.poll(() => calls.find((c) => c.name === 'workshop_jobs')?.body).toMatchObject({ price_final: 470, parts_used: [{ id: 'pads', name: 'Brake pads', qty: 2, cost: 25, price: 60 }] });
+    await expect.poll(() => calls.find((c) => c.name === 'workshop_jobs')?.body).toMatchObject({ price_final: 470, parts_used: [{ id: 'pads', name: 'Brake pads', qty: 2, price: 60 }] });
+    // no unit cost on the job: every workshop reader gets parts_used, and cost is for can_see_costs only (bug hunt 2026-11-18)
+    expect(((calls.find((c) => c.name === 'workshop_jobs')?.body as Record<string, unknown>).parts_used as Record<string, unknown>[])[0]).not.toHaveProperty('cost');
   });
 
   test('the mechanic is saved as letters and spaces', async ({ page }) => {
