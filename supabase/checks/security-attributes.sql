@@ -686,6 +686,14 @@ with expected(fname, want_definer, note) as (values
   ('staff_store_bulk', true, 'one change to many products and their rows; admins'),
   ('staff_store_sort', true, 'writes the sort of products, categories, collections and collection rows; admins'),
   ('staff_store_report', true, 'reads costs and stock moves (staff only) and orders (staging); staff'),
+  ('booking_late', true, 'Running late: stamps the caller''s own booking past RLS; token-checked (20261119600100)'),
+  ('_open_at', true, 'Remind me: reads site_content and the session for the opening; no client grant (20261119600200)'),
+  ('_open_remind_ok', true, 'Remind me: reads customer_tags and membership; no client grant (20261119600200)'),
+  ('open_reminder_set', true, 'Remind me: writes the caller''s own open_reminders (no grants); token-checked (20261119600200)'),
+  ('open_reminders_mine', true, 'Remind me: reads the caller''s own open_reminders (no grants); token-checked (20261119600200)'),
+  ('session_opening', true, 'Remind me: an ungated session''s opening for the iPhone calendar file, no account (20261119600200)'),
+  ('_open_remind_tick', true, 'Remind me: the mm-open-remind job writes push_outbox; no client grant (20261119600200)'),
+  ('booking_note_set', true, 'Note for the desk: writes the caller''s own booking past RLS; token-checked (20261119600300)'),
   ('_purge_old',                   true,  'retention: reaches every personal table; service_role only (20261009165000)')
 )
 select e.fname,

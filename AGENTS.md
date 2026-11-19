@@ -4970,3 +4970,35 @@ rides. Then we publish them in a testimonials page." The website (mm-platform) s
   are `qt*` for that reason (the rider's row title is `tstRow`, customer-side).
 - Privacy Notice: a testimonials row, a consent line and a retention line (en and ar); `PRIVACY_VERSION` stays 2026-11-18
   and `PRIVACY_ASK_FROM` is unchanged (no re-ask). Tests: `tests/testimonials.spec.ts`.
+
+## The customer features round (2026-11-19, migrations 20261119600100, 600200, 600300)
+
+The user asked "what features for customers can we add to the booking app that will enhance their experience" and
+answered "do 1 2 3 5 7 9 11". Items 5 (text size) and 11 (the dark look) have their own section. Specs:
+`running-late`, `open-reminders`, `same-group-again`, `several-dates`, `desk-note`. Privacy Notice 2026-11-19 (no re-ask).
+- **Running late (1).** `_stcHtml` draws a third answer beside I'm coming / Can't come, only where Late arrivals has a
+  time to turn up (`_ltrAt`), from 2 h before it until 1 h after the start (`_rlWin`), on a held, confirmed booking with
+  nobody checked in. A centred pop-up picks 10 / 20 / 30 min (`_rlPick` -> `_rlSave` -> `booking_late`), the amber chip
+  reopens it, "I'm on time" clears it; it stamps `coming_at` too. Staff: `_rlStMark` first in the status cell's second
+  line, `_rlCiHtml` in the check-in drawer, "Said running late" in Filters and `status:runninglate`; BK13's "Running
+  late?" message leaves those riders out but the sheet still opens on that kind (`_n6cRemRows(sid,'late',1)`).
+  `_coming_guard` clears `late_min` / `late_at` with `coming_at` on a move or cancel.
+- **Remind me when booking opens (2).** A bell (`_ormBtn`) on a list row not open yet for this rider (`_ormAt`, booking
+  window, timed opening, members first for a non-member), never on a date they could not book (`_ormMay`, mirror of the
+  server's `_open_remind_ok`) and never before the members check has answered (`_ormKnown`). The pop-up: Add to my
+  calendar (`_ormCal`: VALARM at the opening and 10 min before, UID `opens-<session>@micromobility.sa`; on iPhone/iPad
+  `/api/ics` kind `o`, written from `session_opening`, every refusal a 303 back to the date) and Tell me in Updates
+  (`open_reminder_set`; `open_reminders_mine` read once when a not-open row first shows). The job `mm-open-remind`
+  ('1-59/5') writes one push_outbox row (key `bookopen`, tag `open-<session>-<opening epoch>`) when it opens for that
+  rider; push stays dormant, so it lands in Updates. `downloadBookingICS` is `_icsPost` / `_icsSave`.
+- **Same group again (3).** `bookMyUsual` fills the latest circuit party (holder first, capped at `_maxRiders`, the cap
+  sentence `_qtyCapNote`) and the button reads "Same group again"; solo history is unchanged.
+- **Several dates (7).** Circuit nights only (every other list asks something per date). The `.reg-tools` switch
+  (`_mdtSwHtml`) turns rows into checkboxes (`S._mdt`, up to `MDT_MAX` 8, `_mdtOk`); add-ons, lockers, promo, wallet
+  are hidden; one review (`_mdtRvHtml`), one waiver, `_mdtSubmit` creates one booking per date, names the failures
+  (`_mdtFails`) and reopens owed details for FIX_FIRST dates with `_mdtRetry`. One tick = the old single path.
+- **Note for the desk (9).** The review step's field (`_dntRvHtml`, 200 characters), saved after each booking by
+  `booking_note_set` (`_dntAfter`; a failure says so with Try again), changed from the ticket's Edit, read-only in
+  Details. Staff: `_dntRow` mark on the roster (live rows only), `_dntCi` in the drawer, the Booking card.
+- **`_regDrop()`** clears the note, the ticked dates and pending retries on sign-out, a new event, Book another, Book
+  my usual / again, the waiver re-ask, and whenever the signed-in account changes (`S._regFor`): staff share phones.
