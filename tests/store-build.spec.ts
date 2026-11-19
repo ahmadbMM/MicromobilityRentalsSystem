@@ -515,6 +515,9 @@ test.describe('@staff:store products: low stock, bulk prices, Duplicate, the edi
     await pe.locator('#sto-pe-name_en').fill('Trail Helmet Pro');
     await pe.locator('button', { hasText: 'Duplicate' }).click();
     await expect(page.locator('#toast-container')).toContainText('Save or discard the changes first');
+    // An error toast stays 7 s and waits while the pointer is on it; with CI's Linux fonts it lands on the Duplicate
+    // button, and Playwright's retried click keeps the pointer there, so it never leaves. Take it away before the second tap.
+    await page.locator('#toast-container .toast').evaluateAll((els) => els.forEach((e) => e.remove()));
     await pe.locator('#sto-pe-name_en').fill('Trail Helmet');
     await pe.locator('button', { hasText: 'Duplicate' }).click();
     await expect(pe.locator('#sto-pe-t')).toHaveText('New product');
