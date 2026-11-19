@@ -10693,5 +10693,7 @@
   "spc7d": "Huling 7 araw",
   "spc30d": "Huling 30 araw",
   "spc90d": "Huling 90 araw",
-  "spcRsSync": "Kinopya mula sa live"
+  "spcRsSync": "Kinopya mula sa live",
+  "grpAgainBtn": "Parehong grupo ulit",
+  "grpAgainToast": "Napunan na ang iyong grupo - kumpirmahin na lang."
 }

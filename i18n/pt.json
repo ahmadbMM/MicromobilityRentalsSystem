@@ -10693,5 +10693,7 @@
   "spc7d": "Últimos 7 dias",
   "spc30d": "Últimos 30 dias",
   "spc90d": "Últimos 90 dias",
-  "spcRsSync": "Copiado da versão em produção"
+  "spcRsSync": "Copiado da versão em produção",
+  "grpAgainBtn": "O mesmo grupo de novo",
+  "grpAgainToast": "Seu grupo foi preenchido - é só confirmar."
 }
