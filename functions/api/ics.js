@@ -13,6 +13,9 @@
 //
 // The same address, asked with GET and a key, is the rider's own calendar address (onRequestGet, further down): every
 // booking they still hold, one event each, written by the same lines.
+//
+// And posted with o=<session>, a date's booking opening (openingIcs, further down; "Remind me when booking opens",
+// 2026-11-19): no account, and every word written here from the database's row.
 
 const LIVE = new Set(['waiting', 'waitlist', 'active']);
 const STAMP = /^\d{8}T\d{6}Z$/;
@@ -21,6 +24,7 @@ export async function onRequestPost(context) {
   const { request, env } = context;
   let form;
   try { form = await request.formData(); } catch { return text('Bad request', 400); }
+  if (form.has('o')) return openingIcs(request, env, form);
   const f = (k, max) => String(form.get(k) || '').slice(0, max);
   const c = f('c', 64), k = f('k', 256), b = f('b', 64);
   const st = f('st', 16), en = f('en', 16);
@@ -81,7 +85,7 @@ function icsEvent(ev, seq, now) {
     `DESCRIPTION:${esc(ev.de)}`,
     `URL:${ev.url}`,
     // a club session the rider has not booked rings no alarm (2026-11-18): only their own bookings do
-    ...(ev.alarm === false ? [] : ['BEGIN:VALARM', 'TRIGGER:-PT2H', 'ACTION:DISPLAY', `DESCRIPTION:${esc(ev.al || ev.ti)}`, 'END:VALARM']),
+    ...(ev.alarm === false ? [] : (ev.alarms || ['-PT2H']).flatMap((tr) => ['BEGIN:VALARM', `TRIGGER:${tr}`, 'ACTION:DISPLAY', `DESCRIPTION:${esc(ev.al || ev.ti)}`, 'END:VALARM'])),
     'END:VEVENT'];
 }
 
@@ -283,4 +287,61 @@ function feedEvent(r, w, lang, origin) {
     uid: `${club ? 'club' : 'booking'}-${id}@micromobility.sa`, st: icsStamp(base + s * 6e4), en: icsStamp(endMs), endMs,
     ti: name, lo, de: de.join('\n'), al: w('alarm').replace('{0}', () => name), url: page || `${origin}/my-bookings`, alarm: !club,
   };
+}
+
+// ── A date's booking opening (the customer round, 2026-11-19, item 2: "On a date that isn't open yet, one tap adds the
+// opening time to the rider's calendar with an alarm") ─────────────────────────────────────────────────────────────────
+// POST o=<session id>, w=m (a member's opening) or a (everyone's), l=<language>: what an iPhone gets from the Remind me
+// pop-up (_ormCal in app.src.html; any other phone saves the page's own file, the same lines). No account is needed, so
+// nothing the page sent is written into the file: the name, the date and the opening come from session_opening
+// (migration 20261119600200), which answers only for an ungated date that is not open yet ('none', 'open' otherwise),
+// and the words are OPEN_WORDS and FEED_WORDS. Metered per caller with the calendar address's own gate.
+// One event at the opening, 15 minutes, an alarm then and ten minutes before, UID opens-<session>, the URL and the
+// description the booking app's link to that date on Reserve.
+export const OPEN_WORDS = {
+  // the app's string ormIcsT, in FEED_LANGS order (tests/open-reminders.spec.ts holds them equal)
+  title: ['Booking opens: {0}', 'يفتح الحجز: {0}', 'Ouverture des réservations : {0}', 'Abren las reservas: {0}', 'Abertura das reservas: {0}', 'بکنگ کھلے گی: {0}', 'बुकिंग खुलेगी: {0}', 'Magbubukas ang booking: {0}', 'बुकिङ खुल्छ: {0}', 'বুকিং খুলবে: {0}'],
+};
+const OPEN_ID = /^\d{4}-\d{2}-\d{2}(-[a-z0-9]{1,6}){0,2}$/;
+// The event card a date lives under, as the app's _evOf reads it (a Petromin night opens under Experiences).
+function openEv(r) {
+  const k = String(r.rk || ''), comm = r.ek === 'community' && k !== 'snd96';
+  if (k === 'snd96') return 'snd96';
+  if (!comm) return 'jcc';
+  return ['event', 'workshop', 'runher', 'vlap', 'arena', 'blood', 'testride'].includes(k) ? k : 'community';
+}
+async function openingIcs(request, env, form) {
+  const id = String(form.get('o') || '').slice(0, 64), li = FEED_LANGS.indexOf(String(form.get('l') || '')), L = li < 0 ? 0 : li;
+  if (!OPEN_ID.test(id)) return text('Bad request', 400);
+  const now = Date.now();
+  if (!feedGate(request.headers.get('cf-connecting-ip') || 'unknown', now)) return text('Too many requests', 429);
+  const SUPA = env.SUPABASE_URL || 'https://qpffkzmsfyilicwcsszz.supabase.co';
+  const ANON = env.SUPABASE_ANON_KEY;
+  if (!ANON) return text('Not configured', 501);
+  let d;
+  try {
+    const r = await fetch(`${SUPA}/rest/v1/rpc/session_opening`, {
+      method: 'POST',
+      headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_session: id, p_member: form.get('w') === 'm' }),
+    });
+    if (!r.ok) return text('Lookup failed', 502);
+    d = await r.json();
+  } catch { return text('Lookup failed', 502); }
+  if (!d || d.ok !== true) return d && d.error === 'open' ? text('Booking is open.', 409) : text('No such date.', 404);
+  const ms = Date.parse(d.at || ''), day = String(d.date || '').slice(0, 10);
+  if (!isFinite(ms) || ms <= now) return text('Booking is open.', 409);
+  if (String(d.id) !== id || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return text('Lookup failed', 502);
+  const w = (k) => { const row = FEED_WORDS[k] || ['']; return row[L] || row[0]; };
+  const kind = feedKind(d), name = kind === 'jcc' ? w('ride') : (FEED_LANGS[L] === 'ar' && feedText(d.title_ar)) || feedText(d.title) || w(kind);
+  const ti = OPEN_WORDS.title[L].replace('{0}', () => name), url = `${new URL(request.url).origin}/?ev=${openEv(d)}&session=${encodeURIComponent(id)}`;
+  const body = icsBody({ uid: `opens-${id}@micromobility.sa`, st: icsStamp(ms), en: icsStamp(ms + 15 * 60000), ti, de: url, al: ti, url, alarms: ['PT0M', '-PT10M'] });
+  return new Response(body, {
+    headers: {
+      'content-type': 'text/calendar; charset=utf-8',
+      'content-disposition': `inline; filename="micromobility-opens-${day.replace(/-/g, '')}.ics"`,
+      'cache-control': 'no-store',
+      'x-content-type-options': 'nosniff',
+    },
+  });
 }

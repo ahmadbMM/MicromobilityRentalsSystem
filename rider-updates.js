@@ -8,7 +8,7 @@
 // languages; the words it shares with the page (the tabs' names, Try again) are the page's own, which rider code names
 // already. Hand-written, not generated; the build stamps its address (INB_V).
 /* global S, sb, esc, t, _on, getSession, shortDate, _cuIc, _dayWord, _ksaYmd, _skelHtml, _rpcAbsent, setCustTab, _parsePath,
-   _wlcOk, _wlcOpen, _commNavOn, _hubGo, VOL_PORTAL, _inbMark */
+   _wlcOk, _wlcOpen, _commNavOn, _hubGo, VOL_PORTAL, _inbMark, _featOpen */
 const INB_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 const INB_T = {
   empty: ['No updates yet', 'لا توجد تحديثات بعد', 'Aucune nouveauté pour le moment', 'Aún no hay novedades', 'Ainda não há novidades', 'ابھی کوئی اپ ڈیٹ نہیں', 'अभी कोई अपडेट नहीं', 'Wala pang update', 'अहिलेसम्म कुनै अपडेट छैन', 'এখনও কোনো আপডেট নেই'],
@@ -45,6 +45,7 @@ function _inbNav(url) {
   const u = new URL(String(url), location.origin);
   if (w === 'claim') _wlcOpen(u.searchParams.get('claim').toLowerCase());
   else if (w === 'members') { if (u.searchParams.get('hv') === 'suggest') S._hubView = 'suggest'; _hubGo('link'); } // a suggestion's news opens the member's suggestions (20261118210500)
+  else if (w === 'register' && /^\d{4}-\d{2}-\d{2}/.test(u.searchParams.get('session') || '')) _featOpen(u.searchParams.get('session')); // "Booking is open" opens that date on Reserve (20261119600200)
   else setCustTab(w, w === 'account' ? (_parsePath(u.pathname) || {}).sub : undefined);
 }
 // The read marked every row read: the count the page holds (S._inb) goes to none, and with it the dot and the icon's badge.

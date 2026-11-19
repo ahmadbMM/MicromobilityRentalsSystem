@@ -10702,5 +10702,14 @@
   "rlNoMore": "Já é tarde para mudar isto",
   "rlNoPlace": "Esta reserva já não tem vaga",
   "rlSt": "Atrasado · ~{0} min",
-  "rlSaidOpt": "Avisou que vai se atrasar"
+  "rlSaidOpt": "Avisou que vai se atrasar",
+  "ormBtn": "Lembrar-me",
+  "ormSet": "Lembrete ativado",
+  "ormOpens": "As reservas abrem {0}",
+  "ormCal": "Adicionar ao meu calendário",
+  "ormUpd": "Avisar-me em Novidades",
+  "ormRm": "Remover lembrete",
+  "ormIcsT": "Abertura das reservas: {0}",
+  "ormIsOpen": "As reservas já estão abertas",
+  "ormNo": "Não é possível definir um lembrete para esta data"
 }

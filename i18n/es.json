@@ -10702,5 +10702,14 @@
   "rlNoMore": "Ya es tarde para cambiar esto",
   "rlNoPlace": "Esta reserva ya no tiene plaza",
   "rlSt": "Llega tarde · ~{0} min",
-  "rlSaidOpt": "Avisó que llega tarde"
+  "rlSaidOpt": "Avisó que llega tarde",
+  "ormBtn": "Recordármelo",
+  "ormSet": "Recordatorio activado",
+  "ormOpens": "Las reservas abren el {0}",
+  "ormCal": "Añadir a mi calendario",
+  "ormUpd": "Avisarme en Novedades",
+  "ormRm": "Quitar recordatorio",
+  "ormIcsT": "Abren las reservas: {0}",
+  "ormIsOpen": "Las reservas ya están abiertas",
+  "ormNo": "No se puede poner un recordatorio para esta fecha"
 }

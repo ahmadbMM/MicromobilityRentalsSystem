@@ -10702,5 +10702,14 @@
   "rlNoMore": "Il est trop tard pour modifier cela",
   "rlNoPlace": "Cette réservation n’a plus de place",
   "rlSt": "En retard · ~{0} min",
-  "rlSaidOpt": "A prévenu d’un retard"
+  "rlSaidOpt": "A prévenu d’un retard",
+  "ormBtn": "Me le rappeler",
+  "ormSet": "Rappel activé",
+  "ormOpens": "Ouverture des réservations : {0}",
+  "ormCal": "Ajouter à mon agenda",
+  "ormUpd": "Me prévenir dans Nouveautés",
+  "ormRm": "Supprimer le rappel",
+  "ormIcsT": "Ouverture des réservations : {0}",
+  "ormIsOpen": "Les réservations sont ouvertes",
+  "ormNo": "Impossible de programmer un rappel pour cette date"
 }

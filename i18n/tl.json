@@ -10702,5 +10702,14 @@
   "rlNoMore": "Huli na para baguhin ito ngayon",
   "rlNoPlace": "Wala nang puwesto ang booking na ito",
   "rlSt": "Mahuhuli · ~{0} min",
-  "rlSaidOpt": "Nagsabing mahuhuli"
+  "rlSaidOpt": "Nagsabing mahuhuli",
+  "ormBtn": "Paalalahanan ako",
+  "ormSet": "Naka-set ang paalala",
+  "ormOpens": "Magbubukas ang booking sa {0}",
+  "ormCal": "Idagdag sa aking kalendaryo",
+  "ormUpd": "Sabihan ako sa Mga update",
+  "ormRm": "Alisin ang paalala",
+  "ormIcsT": "Magbubukas ang booking: {0}",
+  "ormIsOpen": "Bukas na ang booking",
+  "ormNo": "Hindi makapag-set ng paalala para sa petsang ito"
 }

@@ -9945,6 +9945,16 @@ body:not(.view-staff) .rl-acts{display:grid;grid-template-columns:repeat(3,minma
 body:not(.view-staff) .rl-acts button{min-height:48px;min-width:0;padding-inline:6px;white-space:nowrap;font-size:var(--fs-15);font-weight:600;}
 body:not(.view-staff) .rl-acts [aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink);}
 body:not(.view-staff) .rl-acts .rl-ontime{grid-column:1/-1;}
+/* Remind me when booking opens (the customer round, 2026-11-19, item 2): a small bell at the row's end, filled once set,
+   and the pop-up's two offers */
+body:not(.view-staff) .sess-wrap .orm-btn{position:absolute;inset-inline-end:6px;bottom:0;z-index:1;display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:0;padding:0 12px;border:0;border-radius:999px;background:transparent none;color:var(--go);font:inherit;font-size:var(--fs-13);font-weight:600;cursor:pointer;}
+body:not(.view-staff) .sess-wrap .orm-btn:hover{background:var(--go-wash);}
+body:not(.view-staff) .sess-wrap .orm-btn:focus-visible{outline:2px solid currentColor;outline-offset:-4px;}
+body:not(.view-staff) .orm-btn.orm-on svg{fill:currentColor;}
+body:not(.view-staff) .orm-state{display:flex;align-items:center;gap:8px;margin:0 20px 12px;color:var(--go);font-weight:600;}
+body:not(.view-staff) .orm-state svg{fill:currentColor;}
+body:not(.view-staff) .orm-acts{display:grid;gap:10px;padding:4px 20px 20px;}
+body:not(.view-staff) .orm-acts button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;font-size:var(--fs-15);font-weight:600;}
 
 /* ── The booked moment: a tick drawn in a disc that settles, once, on the booking (.play) ── */
 body:not(.view-staff) .bk-ok{display:grid;justify-items:center;gap:8px;margin:6px 0 24px;text-align:center;}
