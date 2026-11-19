@@ -86,7 +86,7 @@ test('the actions sit under headings, the rare ones last in theirs with no More 
   await expect(s.locator('.rmt-chips')).toContainText('Road');
   await expect(s.locator('.rmt-chips .rmt-pending')).toHaveText('Pending');
   // headings in their order, each action under its own
-  await expect(s.locator('.rmt-grp-h')).toHaveText(['Status', 'Booking', 'Party']);
+  await expect(s.locator('.rmt-grp-h')).toHaveText(['Status', 'Booking', 'Account', 'Party']); // Account: Invite, on every booking (2026-11-19)
   await expect(s.getByRole('group', { name: 'Status' }).getByRole('menuitem', { name: 'No-show' })).toBeVisible();
   await expect(s.getByRole('group', { name: 'Booking' }).getByRole('menuitem', { name: 'Edit' })).toBeVisible();
   // no More fold (the user, 2026-11-10): a rarely used action shows under its own heading, after the everyday ones
@@ -96,5 +96,5 @@ test('the actions sit under headings, the rare ones last in theirs with no More 
   await expect(s.locator('.rmt-foot [role="menuitem"]')).toHaveText(['Cancel']);
   // the registry is stored in the order shown: group by group, the rare ones last in theirs, the dangerous one last
   const reg = await page.evaluate(`S._rowMenus['q1'].map(i=>(i.danger?'d':i.g+(i.rare?'r':'s')))`) as string[];
-  expect(reg.join(' ')).toMatch(/^(sts )+(str )+(bks )+(ptr )+d$/);
+  expect(reg.join(' ')).toMatch(/^(sts )+(str )+(bks )+(acs )+(ptr )+d$/);
 });

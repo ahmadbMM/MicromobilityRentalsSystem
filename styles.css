@@ -16145,6 +16145,11 @@ body.view-staff .ann-miss p{margin:0 0 6px;}
 body.view-staff .ann-miss ul{margin:0 0 6px;padding:0;list-style:none;}
 body.view-staff .ann-miss li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;}
 body.view-staff .ann-box .rm-list{max-height:min(60vh,520px);overflow-y:auto;}
+/* Invite to a session (2026-11-19): the sessions to pick from scroll under a find box; one the rider already holds is greyed. */
+body.view-staff .ivt-box .ivt-q{width:100%;box-sizing:border-box;margin:0 0 10px;}
+body.view-staff .ivt-box .rm-list{max-height:min(55vh,480px);overflow-y:auto;}
+body.view-staff .ivt-box .rm-opt:disabled{cursor:default;opacity:.6;border-color:var(--border);background:var(--s3);}
+body.view-staff .ivt-box .ivt-none{padding:8px 2px;}
 /* Last feedback at check-in and Book next week (2026-11-18): the drawer's Last ride block (the note look; red with a score of 3
    or under or an incident), tonight's first-timers on the First-timers pop-up, the close-night list's rebook item. */
 #checkin-modal .lfb{margin:6px 0;padding:6px 10px;border-radius:var(--r-md,var(--sf-r-ctl));background:rgba(var(--warn-rgb),.12);color:var(--text);font-size:var(--sf-fs-sm);display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere;}

@@ -561,7 +561,7 @@ export const STAFF_PARTS = {
   remind: ['openRemindSheet', 'openWlOffers', '_ptOpen'],
   // 2026-11-16: the week's WhatsApp announcement and each session's (the dialog from the Bookings week's head, the types' built-in
   // texts in English and Arabic, which the templates editor asks for through _annDef)
-  announce: ['_annOpen', '_annDef'],
+  announce: ['_annOpen', '_annDef', '_ivtOpen'], // 2026-11-19: + Invite to a session (a booking's ⋯ menu, an account window), with its ready message
   // 2026-11-11 (staff round s10, item 47): People's rarely opened views, out of the community part, each set fetched the
   // first time one of its views is opened (STAFF_PART_TABS: none), and inside community (STAFF_PART_UP): Applications
   // (community and learning to ride) in one; in the other Recognition (badges, titles, the members' page), Birthdays (and
