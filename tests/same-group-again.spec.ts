@@ -87,6 +87,21 @@ test.describe('@customer:reserve Same group again', () => {
     expect(await page.evaluate('S.selSession')).toBe(S1); // none fits: the one with the most places, and step one's checks speak
   });
 
+  test('a party past the riders an account may book is cut there, the holder first, and the riders step says so', async ({ page }) => {
+    const four = [...party, row('p4', 'Fourth Rider', 7, { type_preference: 'Road', height: 180 })];
+    // the sooner night has three places: enough for the three an account may book, so it is the one picked
+    await open(page, four, [night(S1, { capacity: 3 }), night(S2)]);
+    await usual(page).click();
+    expect(await page.evaluate('S.selSession')).toBe(S1);
+    expect(await page.evaluate('S.regQty')).toBe(3);
+    expect(await page.evaluate('S.regRiderNames.slice(0,3)')).toEqual(['Spec Rider', 'Kid One', 'Friend Two']);
+    await expect(page.locator('#tab-register .qty-cap-note')).toHaveText('One account can book up to 3 riders.');
+    // a party within the cap does not say it
+    await page.evaluate(`S.queue=${JSON.stringify(party)}.map(entryFromDB);S.lastTickets=[];S.selSession=null;S.regStep=1;renderRegister()`);
+    await usual(page).click();
+    await expect(page.locator('#tab-register .qty-cap-note')).toHaveCount(0);
+  });
+
   test('solo history keeps Book my usual as it was', async ({ page }) => {
     await open(page, [row('s1', 'Spec Rider', 1), row('x1', 'Gone Friend', 2, { status: 'cancelled' })]);
     await expect(usual(page)).toHaveText(/Book my usual/);

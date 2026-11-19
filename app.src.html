@@ -22583,7 +22583,7 @@ function bookMyUsual(){
   const open=_usualNights(cust);
   if(!open.length){toast(t('noSessionsAvail'),'warning');return;}
   // A party (Same group again) wants a night with a place for each of them, else the night with the most places.
-  const party=_usualParty(cust),need=party?party.length:1;
+  const party=_usualParty(cust),need=party?Math.min(party.length,_maxRiders(open[0])):1; // no more than an account may book on a night (JCC_ACCOUNT_CAP)
   const withSpot=open.filter(s=>spotsLeft(s.id)>=need);
   const pool=withSpot.length?withSpot:party?[open.slice().sort((a,b)=>spotsLeft(b.id)-spotsLeft(a.id))[0]]:open;
   const pick=(favTime&&pool.find(s=>(parseSlots(s.bike_slots)||{})._time===favTime))||pool[0];
@@ -22599,7 +22599,8 @@ function bookMyUsual(){
   S.regBikeHeights=[cust.height?String(cust.height):''];
   S.regRiderNames=[cust.name||''];
   S.regBikeSizes=[''];
-  if(party)_usualPartyFill(party,cust,_usualTy,_tyOk);
+  S._qtyCapNote=!!party&&party.length>need; // the riders step's own sentence: up to N riders a night
+  if(party){const g=party.slice(0,need);g.me=party.me;_usualPartyFill(g,cust,_usualTy,_tyOk);} // the account holder first, then the others in order
   S.lastTickets=[];S.modifyEntryId=null;S._alreadyBookedSession=null;
   S.promoApplied=null;S._promoMsg='';S.regAddons=[];_lkRegReset(); // nor a locker picked on another night's review (it was booked and charged on this one)
   // If we already know their setup the riders step has nothing to ask, but the waiver is not
