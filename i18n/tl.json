@@ -10695,5 +10695,22 @@
   "spc90d": "Huling 90 araw",
   "spcRsSync": "Kinopya mula sa live",
   "grpAgainBtn": "Parehong grupo ulit",
-  "grpAgainToast": "Napunan na ang iyong grupo - kumpirmahin na lang."
+  "grpAgainToast": "Napunan na ang iyong grupo - kumpirmahin na lang.",
+  "mdtSwitch": "Ilang petsa",
+  "mdtDates_zero": "{0} petsa",
+  "mdtDates_one": "{0} petsa",
+  "mdtDates_two": "{0} petsa",
+  "mdtDates_few": "{0} petsa",
+  "mdtDates_many": "{0} petsa",
+  "mdtDates_other": "{0} petsa",
+  "mdtBooked_zero": "{0} petsa ang na-book",
+  "mdtBooked_one": "{0} petsa ang na-book",
+  "mdtBooked_two": "{0} petsa ang na-book",
+  "mdtBooked_few": "{0} petsa ang na-book",
+  "mdtBooked_many": "{0} petsa ang na-book",
+  "mdtBooked_other": "{0} petsa ang na-book",
+  "mdtShowTk": "Ipakita ang mga ticket ko",
+  "mdtNotT": "Hindi na-book ang mga petsang ito",
+  "mdtWhyFull": "Wala nang natitirang puwesto",
+  "mdtWhySoon": "Hindi pa bukas ang booking"
 }

@@ -10695,5 +10695,22 @@
   "spc90d": "پچھلے 90 دن",
   "spcRsSync": "لائیو سے نقل کیا گیا",
   "grpAgainBtn": "وہی گروپ دوبارہ",
-  "grpAgainToast": "آپ کا گروپ پہلے سے بھر دیا گیا - بس تصدیق کریں۔"
+  "grpAgainToast": "آپ کا گروپ پہلے سے بھر دیا گیا - بس تصدیق کریں۔",
+  "mdtSwitch": "کئی تاریخیں",
+  "mdtDates_zero": "{0} تاریخیں",
+  "mdtDates_one": "{0} تاریخ",
+  "mdtDates_two": "{0} تاریخیں",
+  "mdtDates_few": "{0} تاریخیں",
+  "mdtDates_many": "{0} تاریخیں",
+  "mdtDates_other": "{0} تاریخیں",
+  "mdtBooked_zero": "{0} تاریخیں بک ہو گئیں",
+  "mdtBooked_one": "{0} تاریخ بک ہو گئی",
+  "mdtBooked_two": "{0} تاریخیں بک ہو گئیں",
+  "mdtBooked_few": "{0} تاریخیں بک ہو گئیں",
+  "mdtBooked_many": "{0} تاریخیں بک ہو گئیں",
+  "mdtBooked_other": "{0} تاریخیں بک ہو گئیں",
+  "mdtShowTk": "میرے ٹکٹ دکھائیں",
+  "mdtNotT": "یہ تاریخیں بک نہیں ہوئیں",
+  "mdtWhyFull": "کوئی جگہ باقی نہیں",
+  "mdtWhySoon": "بکنگ ابھی نہیں کھلی"
 }

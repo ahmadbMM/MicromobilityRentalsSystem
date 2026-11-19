@@ -10695,5 +10695,22 @@
   "spc90d": "Últimos 90 dias",
   "spcRsSync": "Copiado da versão em produção",
   "grpAgainBtn": "O mesmo grupo de novo",
-  "grpAgainToast": "Seu grupo foi preenchido - é só confirmar."
+  "grpAgainToast": "Seu grupo foi preenchido - é só confirmar.",
+  "mdtSwitch": "Várias datas",
+  "mdtDates_zero": "{0} datas",
+  "mdtDates_one": "{0} data",
+  "mdtDates_two": "{0} datas",
+  "mdtDates_few": "{0} datas",
+  "mdtDates_many": "{0} datas",
+  "mdtDates_other": "{0} datas",
+  "mdtBooked_zero": "{0} datas reservadas",
+  "mdtBooked_one": "{0} data reservada",
+  "mdtBooked_two": "{0} datas reservadas",
+  "mdtBooked_few": "{0} datas reservadas",
+  "mdtBooked_many": "{0} datas reservadas",
+  "mdtBooked_other": "{0} datas reservadas",
+  "mdtShowTk": "Ver meus ingressos",
+  "mdtNotT": "Estas datas não foram reservadas",
+  "mdtWhyFull": "Não há mais vagas",
+  "mdtWhySoon": "As reservas ainda não abriram"
 }

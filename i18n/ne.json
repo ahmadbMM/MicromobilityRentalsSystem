@@ -10695,5 +10695,22 @@
   "spc90d": "पछिल्ला 90 दिन",
   "spcRsSync": "लाइभबाट प्रतिलिपि गरिएको",
   "grpAgainBtn": "उही समूह फेरि",
-  "grpAgainToast": "तपाईंको समूह पहिले नै भरियो - पुष्टि मात्र गर्नुहोस्।"
+  "grpAgainToast": "तपाईंको समूह पहिले नै भरियो - पुष्टि मात्र गर्नुहोस्।",
+  "mdtSwitch": "धेरै मितिहरू",
+  "mdtDates_zero": "{0} मिति",
+  "mdtDates_one": "{0} मिति",
+  "mdtDates_two": "{0} मिति",
+  "mdtDates_few": "{0} मिति",
+  "mdtDates_many": "{0} मिति",
+  "mdtDates_other": "{0} मिति",
+  "mdtBooked_zero": "{0} मिति बुक भयो",
+  "mdtBooked_one": "{0} मिति बुक भयो",
+  "mdtBooked_two": "{0} मिति बुक भयो",
+  "mdtBooked_few": "{0} मिति बुक भयो",
+  "mdtBooked_many": "{0} मिति बुक भयो",
+  "mdtBooked_other": "{0} मिति बुक भयो",
+  "mdtShowTk": "मेरा टिकटहरू देखाउनुहोस्",
+  "mdtNotT": "यी मितिहरू बुक भएनन्",
+  "mdtWhyFull": "कुनै ठाउँ बाँकी छैन",
+  "mdtWhySoon": "बुकिङ अझै खुलेको छैन"
 }
