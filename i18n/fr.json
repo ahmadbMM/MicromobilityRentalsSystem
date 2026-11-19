@@ -10712,5 +10712,8 @@
   "mdtShowTk": "Voir mes billets",
   "mdtNotT": "Ces dates n'ont pas été réservées",
   "mdtWhyFull": "Plus de places",
-  "mdtWhySoon": "Les réservations ne sont pas encore ouvertes"
+  "mdtWhySoon": "Les réservations ne sont pas encore ouvertes",
+  "dntLabel": "Note pour l'accueil",
+  "dntFail": "Votre note pour l'accueil n'a pas été enregistrée.",
+  "dntRider": "Note du client"
 }

@@ -10712,5 +10712,8 @@
   "mdtShowTk": "Ver meus ingressos",
   "mdtNotT": "Estas datas não foram reservadas",
   "mdtWhyFull": "Não há mais vagas",
-  "mdtWhySoon": "As reservas ainda não abriram"
+  "mdtWhySoon": "As reservas ainda não abriram",
+  "dntLabel": "Nota para o balcão",
+  "dntFail": "Sua nota para o balcão não foi salva.",
+  "dntRider": "Nota do cliente"
 }

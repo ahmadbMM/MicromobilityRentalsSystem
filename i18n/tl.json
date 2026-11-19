@@ -10712,5 +10712,8 @@
   "mdtShowTk": "Ipakita ang mga ticket ko",
   "mdtNotT": "Hindi na-book ang mga petsang ito",
   "mdtWhyFull": "Wala nang natitirang puwesto",
-  "mdtWhySoon": "Hindi pa bukas ang booking"
+  "mdtWhySoon": "Hindi pa bukas ang booking",
+  "dntLabel": "Tala para sa desk",
+  "dntFail": "Hindi na-save ang tala mo para sa desk.",
+  "dntRider": "Tala ng customer"
 }
