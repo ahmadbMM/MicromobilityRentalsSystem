@@ -110,13 +110,14 @@ test.describe('@staff:reports the Saturday Social Ride report', () => {
     expect(html).not.toMatch(/Rider\b.*05\d{8}/); // counts only, no names or phones
   });
 
-  // 20261119830000 (the user, 2026-11-19): the first ride and the riders of the months before the booking system, by hand
-  test('the months counted by hand lead the total, the first ride and a month table; unique riders and rides say since when', async ({ page }) => {
+  // 20261119830000 and 20261119840000 (the user, 2026-11-19): the first ride, the riders of the months before the booking
+  // system, counted by hand, and their rides (every Saturday but Ramadan's and the Summer Splash Run's)
+  test('the months counted by hand lead the total, the rides, the first ride and a month table; unique riders say since when', async ({ page }) => {
     const body = {
       ...REPORT,
-      summary: { ...REPORT.summary, first_ride: '2098-01-24', system_from: '2099-01-03', hand_from: '2098-01-24', hand_to: '2098-07-31', hand_riders: 185, all_time: 511 },
+      summary: { ...REPORT.summary, first_ride: '2098-01-24', system_from: '2099-01-03', hand_from: '2098-01-24', hand_to: '2098-07-31', hand_riders: 185, all_time: 511, hand_rides: 5, rides_all_time: 8, avg_all_time: 63.9 },
       months: [
-        { month: '2098-01-01', riders: 45, rides: null, by_hand: true }, { month: '2098-07-01', riders: 140, rides: null, by_hand: true },
+        { month: '2098-01-01', riders: 45, rides: 2, by_hand: true }, { month: '2098-07-01', riders: 140, rides: 3, by_hand: true },
         { month: '2099-01-01', riders: 326, rides: 3, by_hand: false },
       ],
     };
@@ -129,12 +130,14 @@ test.describe('@staff:reports the Saturday Social Ride report', () => {
     expect(html).toMatch(/total-item dark"><span class="total-num"><bdi>511<\/bdi><\/span><span class="total-lbl">Total attendances/);
     expect(html).toContain('24 Jan 2098</bdi></span><span class="total-lbl">First Saturday Social Ride');
     expect(html).toContain('<bdi>825</bdi></span><span class="total-lbl">Unique riders since 3 Jan 2099');
-    expect(html).toContain('<bdi>3</bdi></span><span class="total-lbl">Rides held since 3 Jan 2099');
+    expect(html).toContain('<bdi>8</bdi></span><span class="total-lbl">Rides held</span>'); // every ride, by hand too
+    expect(html).toContain('<td class="rp-name"><bdi>Riders per ride on average</bdi></td><td><bdi>63.9</bdi></td>');
     expect(html).toMatch(/<h2>Riders by month<\/h2><table><thead><tr><th>Month<\/th><th>Checked in<\/th><th>Rides<\/th><th>Counted<\/th>/);
-    expect(html).toContain('<td class="rp-name"><bdi>January 2098</bdi></td><td><bdi>45</bdi></td><td><bdi>—</bdi></td><td><bdi>By hand</bdi></td>');
+    expect(html).toContain('<td class="rp-name"><bdi>January 2098</bdi></td><td><bdi>45</bdi></td><td><bdi>2</bdi></td><td><bdi>By hand</bdi></td>');
     expect(html).toContain('<td class="rp-name"><bdi>January 2099</bdi></td><td><bdi>326</bdi></td><td><bdi>3</bdi></td><td><bdi>Booking system</bdi></td>');
-    expect(html).toContain('<tr class="rp-b8"><td class="rp-name"><bdi>Total</bdi></td><td><bdi>511</bdi></td>');
+    expect(html).toContain('<tr class="rp-b8"><td class="rp-name"><bdi>Total</bdi></td><td><bdi>511</bdi></td><td><bdi>8</bdi></td>');
     expect(html).toContain('24 Jan 2098 to 31 Jul 2098: Saturday riders counted by hand, month by month');
+    expect(html).toContain('with a ride every Saturday except those in Ramadan and the Summer Splash Run');
     expect(html).toContain('booking system only, from 3 Jan 2099.');
   });
 

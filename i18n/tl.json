@@ -935,7 +935,7 @@
   "srrHFrom": "Bilang",
   "srrByHand": "Mano-mano",
   "srrBySys": "Booking system",
-  "srrNoteHand": "{0} hanggang {1}: mano-manong binilang ang mga Saturday rider, buwan-buwan, at idinagdag sa kabuuan. Ang magkakaibang rider, mga ride na naganap at bawat table ayon sa ride ay mula lang sa booking system, mula {2}.",
+  "srrNoteHand": "{0} hanggang {1}: mano-manong binilang ang mga Saturday rider, buwan-buwan, at idinagdag sa kabuuan, na may ride tuwing Sabado maliban sa mga Sabado ng Ramadan at sa Sabado ng Summer Splash Run. Ang magkakaibang rider at bawat table ayon sa ride ay mula lang sa booking system, mula {2}.",
   "rp2Money": "Pera",
   "rp2People": "Mga tao",
   "rp2Events": "Mga event",
