@@ -1241,7 +1241,7 @@
        or it vanished on the light theme; on dark the button's edge is lifted off the race's black. */
     .am-pick .tag-img-vl{background:#0d0d0d;padding:2px 5px;box-sizing:content-box;}
     /* The IMC logo (2026-11-13) keeps its white plate on a tag button, so its blue still reads on the dark theme. */
-    .am-pick .tag-img-imc{background:#fff;padding:2px 4px;border-radius:var(--sf-r-xs);box-sizing:content-box;}
+    .am-pick .tag-img-imc,.am-pick .tag-img-pif{background:#fff;padding:2px 4px;border-radius:var(--sf-r-xs);box-sizing:content-box;}
     html[data-staff-theme="dark"] body.view-staff .am-pick:has(.tag-img-vl){border-color:rgba(237,237,234,.55);color:#ededea;}
     html[data-staff-theme="dark"] body.view-staff .am-pick.on:has(.tag-img-vl){border-color:#ededea;background:rgba(237,237,234,.12);}
     /* The blacklist tag (2026-09-27): black, the white mark struck through by a no-entry ring. */
@@ -12234,6 +12234,14 @@ html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(
 .hrt-row{--pro-c:#a61e4d;--pro-cn:#f29bb8;}
 .snr-row{--pro-c:#8a4b1f;--pro-cn:#d9a273;}
 .mkt-row{--pro-c:#4c3fd1;--pro-cn:#aba4f6;}
+/* The Medical doctor and PIF & subsidiaries tags (2026-11-19, the user's picks): a heart with a heartbeat cut out of it on
+   hospital blue; PIF's seal and letters on a white plate edged in PIF gold, white in both themes as the IMC mark. Also
+   beside the account's name (inside .food-nm). The band only: the holder's name keeps its own colour (.pro-nt). */
+.doc-mk{background:#1971c2;}
+.pif-mk{width:auto;padding:0 3px;background:#fff;border:1px solid #8c6a2c;box-sizing:border-box;}
+.pif-mk img{display:block;height:13px;width:auto;}
+.doc-row{--pro-c:#1971c2;--pro-cn:#74c0fc;}
+.pif-row{--pro-c:#8c6a2c;--pro-cn:#e0c48f;}
 .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row) td:first-child,.q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row),.ho-row.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row){box-shadow:inset 3px 0 0 var(--pro-c);}
 html[dir="rtl"] .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row) td:first-child,html[dir="rtl"] .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row),html[dir="rtl"] .ho-row.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row){box-shadow:inset -3px 0 0 var(--pro-c);}
 .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark,.ho-row.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 var(--pro-c);}
@@ -12254,8 +12262,8 @@ body.view-staff .queue-mobile-view .q-card.pro-row:not(.inf-row):not(.bdf-row):n
 html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark{box-shadow:inset -3px 0 0 #0c7a3d,inset -6px 0 0 var(--pro-c),inset -10px 0 0 var(--rs-edge,transparent);}
 body.view-staff .queue-mobile-view .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 7px 0 0 #0c7a3d,inset 10px 0 0 var(--pro-c),inset 14px 0 0 var(--rs-edge,transparent);}
 html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -7px 0 0 #0c7a3d,inset -10px 0 0 var(--pro-c),inset -14px 0 0 var(--rs-edge,transparent);}
-body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).pro-row:not(.inf-row):not(.food-row):not(.fwk-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:var(--pro-c);}
-html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).pro-row:not(.inf-row):not(.food-row):not(.fwk-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:var(--pro-cn);}
+body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).pro-row:not(.pro-nt):not(.inf-row):not(.food-row):not(.fwk-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:var(--pro-c);}
+html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(tr,.q-card).pro-row:not(.pro-nt):not(.inf-row):not(.food-row):not(.fwk-row):not(.cm-row-mark):not(.bdf-row) .rider-name{color:var(--pro-cn);}
 /* Tapping a tag's mark or chip opens its name and description (_tagInfo, 2026-11-18), above any dialog it sits in. */
 [data-tag-tap]{cursor:pointer;}
 .tag-info-bd{z-index:210;}
@@ -12265,6 +12273,11 @@ html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(
 .tag-info-dot{flex:none;width:14px;height:14px;border-radius:50%;background:var(--tc);}
 .tag-info-d p{margin:0;line-height:1.5;color:var(--text);}
 .tag-info-d .tag-info-none{color:var(--muted);}
+/* A PIF holder's company in the tag's pop-up, with the button that changes it, and the company picker (2026-11-19). */
+.tag-info-co{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+.tag-info-co b{font-weight:600;margin-inline-end:4px;}
+.pif-co select,.pif-co input{width:100%;box-sizing:border-box;}
+.pif-co input{margin-top:8px;}
 /* The special needs tag (2026-10-23): a figure in a wheelchair, white on orange (the owner, 2026-10-23; it was blue) - on its tag chip (.tag-svg) and after
    a holder's name wherever staff meet the booking (.sn-mk, _snChip). */
 .sn-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#e8590c;color:#fff;border-radius:var(--sf-r-xs);vertical-align:middle;}

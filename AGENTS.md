@@ -535,6 +535,32 @@ held tag's own class (`.law-row` ...), which sets `--pro-c` / `--pro-cn` (dark n
 leaves out `.inf-row`, `.bdf-row`, `.food-row`, `.fwk-row`. The Marketing word's 10px size is in staff-css-allow.json.
 tests/work-tags.spec.ts.
 
+## The Medical doctor and PIF & subsidiaries tags (2026-11-19, migration 20261119700000)
+
+`tags` rows `tag_doctor` (slug `doctor`, name "Medical doctor") and `tag_pif` (slug `pif`, name "PIF & subsidiaries");
+locked, never auto-granted, staff-only. The user's picks on their pick page: Medical doctor a heart with a heartbeat cut
+out of it (one `evenodd` path, so it reads on a chip and on the picker's clear ground) on hospital blue `#1971c2`; PIF
+& subsidiaries PIF's own seal and letters (`assets/tag-pif.png`, 108x48, cut from PIF's logo with the Arabic name left
+off, as the IMC tag) on a white chip edged in PIF gold `#8c6a2c` (`TAG_BRANDS.pif`, `img` + `fill:'#fff'`; `.am-pick
+.tag-img-pif` keeps a white plate on the picker). They are two more rows of `PRO_TAGS` (`k` doc / pif, `sf` `sfDoc` /
+`sfPif`, `am` `amDoc` / `amPif`, `rk` `proDoc` / `proPif`) with three flags the work tags do not have: `acct` (the
+mark beside the account's name: `_proAcct` inside `.food-nm` on Accounts and Members and on the account page's title),
+`nt` (the band only: `_proRow` adds `.pro-nt`, which the name-colour rules leave out) and `np` (off the printed sheets:
+the four printed rosters call `_proChips(e,1)`; their report tiles still count them). Shown: the mark after the
+holder's name on bookings, beside the account's name, the band, filters on People and Bookings, report counts.
+
+**The PIF company** (the user: "let the staff have the option to put the company in pif or not include one"). Giving
+the PIF tag shows a Company picker in the grant dialog: No company (the default), the fixed list `PIF_COS` (PIF, NEOM,
+ROSHN, Red Sea Global, Qiddiya, Diriyah Company, New Murabba, Riyadh Air, Sela, Elm, stc, Ma'aden, SAMI, Savvy Games
+Group, Saudi Electricity, Humain) or Other with a typed name (60 characters). It is kept in `customer_tags.note` (a
+column that was already there and whole in the sync and the staff-ref broadcast); `_pifCo(cid)` reads it. The PIF chip
+on Accounts says the company after the logo; a PIF mark's title names it; tapping a PIF holder's mark or chip (`_tagTap(id,
+cid)` now carries the account) shows the company in the tag's pop-up with **Change company** (`_pifCoEdit` /
+`_pifCoSave`, an update of `note`). The People filter's PIF choices add each company held and No company (`co:<name>`);
+the account report's PIF column says the company (Yes when none) and its section adds a count per company. The bulk
+grant gives no company. Writes repaint through `_rtPaint` (the Accounts row painter is in the community part; calling it
+from the desk core pulled the part into staff.js). tests/doctor-pif-tags.spec.ts.
+
 ## Tapping a tag shows its name and description (2026-11-18)
 
 The user: "make clicking on a tag from staff shows the name and description of it". `_tagTap(id)` adds
