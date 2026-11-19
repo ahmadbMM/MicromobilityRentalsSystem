@@ -10446,6 +10446,27 @@ body:not(.view-staff) .rc-day.fb .rc-marks>i{opacity:.4;}
 body:not(.view-staff) .rc-mine{position:absolute;top:3px;inset-inline-end:3px;display:inline-grid;place-items:center;width:14px;height:14px;border-radius:50%;background:var(--go);color:var(--paper);}
 body:not(.view-staff) .rc-mine .cu-ic{stroke-width:3;}
 
+/* Several dates (2026-11-19, item 7): the rows turn to checkboxes with a square tick; a date that cannot be ticked now
+   is quiet; the review lists the dates with their prices; the pop-up names the dates not booked and why */
+body:not(.view-staff) .sess-card[role="checkbox"] .sess-tick{border-radius:7px;}
+body:not(.view-staff) .sess-card.sess-card-off{opacity:.55;cursor:default;}
+body:not(.view-staff) .mdt-rv{list-style:none;margin:2px 0 6px;padding:0;}
+body:not(.view-staff) .mdt-rv li{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:var(--fs-15);color:var(--ink);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .mdt-rv li:first-child{border-top:0;}
+body:not(.view-staff) .mdt-w{display:flex;flex-direction:column;min-width:0;}
+body:not(.view-staff) .mdt-w bdi{font-size:var(--fs-13);color:var(--ink-2);}
+body:not(.view-staff) #tab-register .cu-rv-head>div:first-child:has(.mdt-rv){flex:1;min-width:0;}
+body:not(.view-staff) .mdt-fl{list-style:none;margin:6px 0 16px;padding:0;}
+body:not(.view-staff) .mdt-fl li{display:flex;flex-direction:column;gap:2px;padding:9px 0;border-top:1px solid var(--line);}
+body:not(.view-staff) .mdt-fl li:first-child{border-top:0;}
+body:not(.view-staff) .mdt-fl b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .mdt-fl span{font-size:var(--fs-13);color:var(--ink-2);}
+
+/* A note for the desk (2026-11-19, item 9): the review's field, and the line in a ticket's Details */
+body:not(.view-staff) .dnt-l{display:block;margin:0 0 8px;font-size:var(--fs-15);font-weight:600;color:var(--ink);}
+body:not(.view-staff) .dnt-in{display:block;width:100%;box-sizing:border-box;min-height:76px;resize:vertical;}
+body:not(.view-staff) .tk-dnt{display:flex;flex-direction:column;gap:2px;margin:10px 0 0;overflow-wrap:anywhere;}
+
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).
@@ -14222,6 +14243,8 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2{display:block;margin-top:3
 body.view-staff :is(#tab-queue,#tab-waitlist) .queue-table .rq-st2{max-width:128px;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-el,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-el-late,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-held,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-by,
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .cx-why,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-dnote,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-wnum,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .n6p-pin{display:inline;margin:0;padding:0;white-space:nowrap;}
+body.view-staff :is(#tab-queue,#tab-waitlist) .rq-rnote{display:inline-grid;place-items:center;flex:none;width:24px;height:24px;min-width:0;min-height:0;align-self:center;margin:0;margin-inline-start:4px;padding:0;border:0;border-radius:var(--sf-r-pill,999px);background:rgba(var(--blue-rgb),.12);color:var(--blue);cursor:pointer;vertical-align:middle;} /* the rider's note for the desk (2026-11-19) */
+body.view-staff :is(#tab-queue,#tab-waitlist) .q-card .rq-rnote{width:44px;margin-block:-16px;background:transparent none;} /* a card's buttons are 44px to touch: the mark takes no more of the line */
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .pos-badge{display:inline;margin:0;padding:0;border:0;background:transparent;font:inherit;font-weight:600;color:var(--text);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-wnum{font-weight:600;color:var(--orange);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-ltr{display:inline;margin:0;padding:0;white-space:nowrap;font-weight:600;color:var(--orange);} /* Late arrivals (2026-11-18) */
@@ -16125,6 +16148,8 @@ body.view-staff .ann-box .rm-list{max-height:min(60vh,520px);overflow-y:auto;}
 #checkin-modal .lfb-sc .lfb-lo b{color:var(--red);}
 #checkin-modal .lfb-tags span{padding:0 6px;border:1px solid var(--border);border-radius:var(--sf-r-pill);font-size:var(--sf-fs-xs);}
 #checkin-modal .lfb-note{font-style:italic;}
+#checkin-modal .lfb.dnt-ci{background:rgba(var(--blue-rgb),.1);} /* the rider's note for the desk (2026-11-19) */
+#checkin-modal .dnt-ci .lfb-note{font-style:normal;}
 #checkin-modal .lfb-inc{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
 #checkin-modal .lfb-inc .inc-li{border-top:1px solid rgba(var(--red-rgb),.25);padding-top:4px;}
 #confirm-modal .bnw-ft-h{margin:0 0 4px;font-size:var(--sf-fs-sm);font-weight:600;}
