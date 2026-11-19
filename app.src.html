@@ -52461,7 +52461,7 @@ function openRemindSheet(sid,kind){
   if(!kind){const st=_hhmmToMin(String((parseSlots(sess.bike_slots)||{})._time||'').split('-')[0].trim());
     let now=0;try{now=_hhmmToMin(new Intl.DateTimeFormat('en-GB',{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date()))||0;}catch(_){}
     kind=String(sess.session_date||sid).slice(0,10)===todayStr()&&st!=null&&st-now<=6*60?'2h':'24h';
-    if(kind==='2h'&&_n6cRemRows(sid,'late').length)kind='late';} // the ride has begun with riders not here: Running late? (BK13)
+    if(kind==='2h'&&_n6cRemRows(sid,'late',1).length)kind='late';} // the ride has begun with riders not here: Running late? (BK13), even when every one of them already said so (the list then has nobody to send to)
   {const ae=document.activeElement;S._remRet=ae&&ae!==document.body?ae:null;}
   S._rem={sid,kind,run:null,lang:{}};
   _tplLoad().then(()=>{if(S._rem&&S._rem.sid===sid)_remPaint();});
@@ -84071,10 +84071,12 @@ function _n6cCoHtml(list){
     ${anyIn?`<div class="co-out-help">${esc(t('n6cCoInHelp'))}</div>`:''}
     <ul class="n6c-co-list">${all.map(e=>{const x=_n6cStOf(e),at=_n6cLateAt(e);return`<li><bdi>#${esc(String(e.queueNum??''))} ${esc(e.name||'')}</bdi>${x?` <span class="n6c-st n6c-st-${x.color}">${esc(_n6cStLabel(x))}</span>`:''}${at?` <span class="n6c-co-late">${esc(t('n6cCoNoReply').replace('{0}',_n6cHm(at)))}</span>`:''}</li>`;}).join('')}</ul></div>`;
 }
-// The bookings the reminder sheet lists for a kind: "Running late?" goes to the riders not here yet once the ride began.
-function _n6cRemRows(sid,kind){
+// The bookings the reminder sheet lists for a kind: "Running late?" goes to the riders not here yet once the ride began,
+// less those who already said on their ticket that they are running late (20261119600100); all: with them, which is how
+// the sheet decides that the ride has begun with riders not here.
+function _n6cRemRows(sid,kind,all){
   const r=_remTargets(sid);if(kind!=='late')return r;
-  const d=todayStr(),n=Date.now();return r.filter(e=>_notHere(e,d,n)&&!e.checkedInAt&&!_rlMin(e)); // not a rider who already said they are running late (20261119600100)
+  const d=todayStr(),n=Date.now();return r.filter(e=>_notHere(e,d,n)&&!e.checkedInAt&&(all||!_rlMin(e)));
 }
 function _n6cLateColOk(){return(S.queue||[]).some(e=>e.lateMsgAt!==undefined);}
 async function _n6cLateMark(list){

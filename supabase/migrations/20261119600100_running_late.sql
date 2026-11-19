@@ -17,7 +17,7 @@
 --     or a workshop, event, yoga or the Defe run; never the circuit, Petromin, the pool, blood, the Arena race or a test
 --     ride), and loosely in time: from 3 hours before its first time until 2 hours after its start (the app offers it
 --     from 2 hours before the time to turn up until an hour after the start), else 'closed'; a session called off or
---     deleted is 'closed' too. 'none' when the rider holds no seated, approved booking there; 'bad' for any other
+--     deleted is 'closed' too, and so is a party one of whose riders is already checked in (active or done). 'none' when the rider holds no seated, approved booking there; 'bad' for any other
 --     number. Running late counts as coming: it stamps coming_at when the booking has no answer for this date.
 --     booking_coming keeps its arguments (micromobility.sa calls it): this is a new function beside it.
 --  3. _coming_guard (from 20261114080200_still_coming.sql, its only definition): a rider's direct write can set neither
@@ -78,6 +78,10 @@ begin
   if v_to < v_from then v_to := v_to + interval '1 day'; end if; -- a session that runs past midnight
   v_start := case when v_kind in ('saturday', 'snd96', 'runher', 'vlap', 'farm') then v_to else v_from end;
   if v_from is null or now() < v_from - interval '3 hours' or now() >= v_start + interval '2 hours' then
+    return jsonb_build_object('ok', false, 'error', 'closed');
+  end if;
+  -- a party partly (or wholly) checked in is past asking: the desk sees them (review fix)
+  if exists (select 1 from queue_entries q where q.session_id = p_session and q.customer_id = p_id and q.status in ('active', 'done')) then
     return jsonb_build_object('ok', false, 'error', 'closed');
   end if;
   v_at := case when p_min is null then null else now() end;

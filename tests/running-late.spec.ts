@@ -194,14 +194,14 @@ const desk = [
   bk('r2', 2, 'Sami Silent'),
   bk('r3', 3, 'Omar Arrived', { status: 'active', checked_in_at: ksa('06:05'), late_min: 10, late_at: ksa('05:40') }),
 ];
-async function staff(page: Page) {
+async function staff(page: Page, rows: Record<string, unknown>[] = desk) {
   await page.clock.setFixedTime(new Date(ksa('06:20')));
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await stubSupabase(page, { sessions: [gather], bikes: [], customers: [], staff_options: [], queue_entries: desk });
+  await stubSupabase(page, { sessions: [gather], bikes: [], customers: [], staff_options: [], queue_entries: rows });
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  await page.waitForFunction(`getQueue().length===${desk.length}`);
+  await page.waitForFunction(`getQueue().length===${rows.length}`);
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfShowFinished=true;setSfSession('g0')`);
 }
 const tr = (page: Page, id: string) => page.locator(`#q-results [data-id="${id}"]`).first();
@@ -230,6 +230,15 @@ test.describe('@staff:bookings Running late on the roster', () => {
     await page.evaluate(`openRemindSheet('g0','late')`);
     await expect(page.locator('#confirm-modal .rem-row')).toHaveCount(1);
     await expect(page.locator('#confirm-modal .rem-row')).toContainText('Sami Silent');
+  });
+
+  test('when every rider not here said so, the sheet still opens on "Running late?" (with nobody to send to), never the 2-hour one', async ({ page }) => {
+    await staff(page, [desk[0], { ...desk[1], late_min: 10, late_at: ksa('06:10'), coming_at: ksa('06:10') }, desk[2]]);
+    expect(await page.evaluate(`_n6cRemRows('g0','late').length`)).toBe(0);
+    expect(await page.evaluate(`_n6cRemRows('g0','late',1).map(e=>e.id).sort()`)).toEqual(['r1', 'r2']);
+    await page.evaluate(`openRemindSheet('g0')`);
+    await expect.poll(() => page.evaluate('S._rem&&S._rem.kind')).toBe('late');
+    await expect(page.locator('#confirm-modal .rem-row')).toHaveCount(0);
   });
 
   test('"Said running late" in the Filters panel, and status:runninglate (Arabic too)', async ({ page }) => {
@@ -279,6 +288,7 @@ test.describe('@customer:bookings the running_late migration', () => {
     expect(sql).toMatch(/revoke all on function public\.booking_late\(text, text, text, integer\) from public;\s*grant execute on function public\.booking_late\(text, text, text, integer\) to anon, authenticated;/);
     expect(sql).toMatch(/before insert or update of coming_at, late_min, late_at, session_id, status on public\.queue_entries/);
     expect((sql.match(/new\.late_min := (old\.late_min|null); new\.late_at := (old\.late_at|null);/g) || []).length).toBe(3);
+    expect(sql).toMatch(/q\.session_id = p_session and q\.customer_id = p_id and q\.status in \('active', 'done'\)\) then\s*return jsonb_build_object\('ok', false, 'error', 'closed'\);/); // a party partly checked in
     expect(sql).toContain("values ('20261119600100', 'running_late')");
   });
 });
