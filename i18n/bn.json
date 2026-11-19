@@ -8992,7 +8992,7 @@
   "walTitle": "পাঠানো বার্তা",
   "walRate": "আপনার রাইড রেট করুন",
   "logCatWa": "WhatsApp",
-  "sqTips": "খোঁজার টিপস: tag:vip, type:road, status:waiting, onbike, done, noshow, waitlist বা late, paid:yes বা no, size:m, session:কোনো তারিখ বা শিরোনাম, phone:, email:, যেকোনো শব্দের সাথে",
+  "sqTips": "খোঁজার টিপস: tag:vip, type:road, status:waiting, onbike, done, noshow, waitlist, late বা runninglate, paid:yes বা no, size:m, session:কোনো তারিখ বা শিরোনাম, phone:, email:, যেকোনো শব্দের সাথে",
   "roleDoor": "প্রবেশদ্বার",
   "tmDoorNote": "একটি লক করা স্ক্রিনে টিকিট স্ক্যান করে এবং যারা টাকা দিয়েছেন বা বিনামূল্যে এসেছেন তাদের চেক-ইন করে। কোনো সেকশন নেই।",
   "zgTitle": "প্রবেশদ্বারে চেক-ইন",
@@ -10693,5 +10693,14 @@
   "spc7d": "গত 7 দিন",
   "spc30d": "গত 30 দিন",
   "spc90d": "গত 90 দিন",
-  "spcRsSync": "লাইভ থেকে কপি করা"
+  "spcRsSync": "লাইভ থেকে কপি করা",
+  "rlBtn": "দেরি হচ্ছে",
+  "rlAsk": "আপনার কত দেরি হবে?",
+  "rlMin": "{0} মিনিট",
+  "rlChip": "প্রায় {0} মিনিট দেরি",
+  "rlOnTime": "আমি সময়মতো আসছি",
+  "rlNoMore": "এখন এটি বদলানোর সময় পেরিয়ে গেছে",
+  "rlNoPlace": "এই বুকিংয়ে আর জায়গা নেই",
+  "rlSt": "দেরিতে · ~{0} মিনিট",
+  "rlSaidOpt": "দেরির কথা জানিয়েছেন"
 }

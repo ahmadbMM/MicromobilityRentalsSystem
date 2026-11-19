@@ -8992,7 +8992,7 @@
   "walTitle": "Mensajes enviados",
   "walRate": "Valora tu salida",
   "logCatWa": "WhatsApp",
-  "sqTips": "Consejos de búsqueda: tag:vip, type:road, status:waiting, onbike, done, noshow, waitlist o late, paid:yes o no, size:m, session:una fecha o un título, phone:, email:, con cualquier palabra",
+  "sqTips": "Consejos de búsqueda: tag:vip, type:road, status:waiting, onbike, done, noshow, waitlist, late o runninglate, paid:yes o no, size:m, session:una fecha o un título, phone:, email:, con cualquier palabra",
   "roleDoor": "Entrada",
   "tmDoorNote": "Escanea entradas y registra la llegada de quienes han pagado o vienen gratis, en una sola pantalla bloqueada. Sin secciones.",
   "zgTitle": "Registro en la entrada",
@@ -10693,5 +10693,14 @@
   "spc7d": "Últimos 7 días",
   "spc30d": "Últimos 30 días",
   "spc90d": "Últimos 90 días",
-  "spcRsSync": "Copiado de la versión en vivo"
+  "spcRsSync": "Copiado de la versión en vivo",
+  "rlBtn": "Llego tarde",
+  "rlAsk": "¿Cuánto vas a tardar?",
+  "rlMin": "{0} min",
+  "rlChip": "Llego unos {0} min tarde",
+  "rlOnTime": "Llegaré a tiempo",
+  "rlNoMore": "Ya es tarde para cambiar esto",
+  "rlNoPlace": "Esta reserva ya no tiene plaza",
+  "rlSt": "Llega tarde · ~{0} min",
+  "rlSaidOpt": "Avisó que llega tarde"
 }

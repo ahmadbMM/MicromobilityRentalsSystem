@@ -8992,7 +8992,7 @@
   "walTitle": "بھیجے گئے پیغامات",
   "walRate": "اپنی سواری کی درجہ بندی کریں",
   "logCatWa": "واٹس ایپ",
-  "sqTips": "تلاش کے نکات: tag:vip، type:road، status:waiting، onbike، done، noshow، waitlist یا late، paid:yes یا no، size:m، session:کوئی تاریخ یا عنوان، phone:، email:، کسی بھی الفاظ کے ساتھ",
+  "sqTips": "تلاش کے نکات: tag:vip، type:road، status:waiting، onbike، done، noshow، waitlist، late یا runninglate، paid:yes یا no، size:m، session:کوئی تاریخ یا عنوان، phone:، email:، کسی بھی الفاظ کے ساتھ",
   "roleDoor": "داخلہ",
   "tmDoorNote": "ایک لاک اسکرین پر ٹکٹ اسکین کرتا ہے اور ادائیگی کرنے والوں یا مفت آنے والوں کی آمد درج کرتا ہے۔ کوئی سیکشن نہیں۔",
   "zgTitle": "داخلے پر چیک اِن",
@@ -10693,5 +10693,14 @@
   "spc7d": "پچھلے 7 دن",
   "spc30d": "پچھلے 30 دن",
   "spc90d": "پچھلے 90 دن",
-  "spcRsSync": "لائیو سے نقل کیا گیا"
+  "spcRsSync": "لائیو سے نقل کیا گیا",
+  "rlBtn": "دیر ہو رہی ہے",
+  "rlAsk": "آپ کتنی دیر سے آئیں گے؟",
+  "rlMin": "{0} منٹ",
+  "rlChip": "تقریباً {0} منٹ کی دیر",
+  "rlOnTime": "میں وقت پر ہوں",
+  "rlNoMore": "اب اسے بدلنے کا وقت گزر گیا ہے",
+  "rlNoPlace": "اس بکنگ میں اب جگہ نہیں ہے",
+  "rlSt": "دیر سے · ~{0} منٹ",
+  "rlSaidOpt": "دیر کی اطلاع دی"
 }

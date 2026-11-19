@@ -9934,6 +9934,17 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.
 body:not(.view-staff) .hub-hero .stc-row{margin:10px 0 0;}
 body:not(.view-staff) .hub-hero .stc-no{background:transparent;color:var(--night-ink);border-color:var(--night-line);}
 body:not(.view-staff) .hub-hero .stc-no:hover{background:var(--night-2);border-color:var(--night-ink-2);color:var(--night-ink);}
+/* Running late (the customer round, 2026-11-19, item 1): a third button beside them, one alone after the start, or one chip
+   that says the answer and opens it again; the pop-up's three times */
+body:not(.view-staff) .stc-row.stc-3{grid-template-columns:repeat(3,minmax(0,1fr));}
+body:not(.view-staff) .stc-row.rl-one{grid-template-columns:minmax(0,1fr);}
+body:not(.view-staff) .rl-chip{justify-self:start;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:4px 14px;border-radius:999px;border:1px solid var(--amber-2);background:var(--amber-wash);color:inherit;font:inherit;font-size:var(--fs-13);font-weight:600;cursor:pointer;text-align:start;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .rl-chip,body:not(.view-staff) .hub-hero .rl-chip{border-color:var(--night-amber);background:transparent none;}
+body:not(.view-staff) .hub-hero .rl-btn{background:transparent;color:var(--night-ink);border-color:var(--night-line);}
+body:not(.view-staff) .rl-acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:4px 20px 20px;}
+body:not(.view-staff) .rl-acts button{min-height:48px;min-width:0;padding-inline:6px;white-space:nowrap;font-size:var(--fs-15);font-weight:600;}
+body:not(.view-staff) .rl-acts [aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+body:not(.view-staff) .rl-acts .rl-ontime{grid-column:1/-1;}
 
 /* ── The booked moment: a tick drawn in a disc that settles, once, on the booking (.play) ── */
 body:not(.view-staff) .bk-ok{display:grid;justify-items:center;gap:8px;margin:6px 0 24px;text-align:center;}
@@ -14204,6 +14215,8 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .cx-why,body.view-staff :i
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .pos-badge{display:inline;margin:0;padding:0;border:0;background:transparent;font:inherit;font-weight:600;color:var(--text);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-wnum{font-weight:600;color:var(--orange);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-ltr{display:inline;margin:0;padding:0;white-space:nowrap;font-weight:600;color:var(--orange);} /* Late arrivals (2026-11-18) */
+body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st2 .rq-rl{display:inline;margin:0;padding:0;white-space:nowrap;font-weight:600;color:var(--orange);} /* Running late, said by the rider (2026-11-19) */
+.rl-ci{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-weight:600;color:var(--orange);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-dot{margin-inline:4px;color:var(--muted-l);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-st1 .rq-nowv{white-space:nowrap;font-size:var(--sf-fs-xs);}
 body.view-staff :is(#tab-queue,#tab-waitlist) .rq-apok,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-apchip,body.view-staff :is(#tab-queue,#tab-waitlist) .rq-apchip-rej{display:inline-flex;align-items:center;min-height:24px;padding:1px 8px;border:1px solid;border-radius:var(--sf-r-pill,var(--sf-r-pill));font-size:var(--sf-fs-xs);font-weight:600;white-space:nowrap;}

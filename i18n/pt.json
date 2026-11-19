@@ -8992,7 +8992,7 @@
   "walTitle": "Mensagens enviadas",
   "walRate": "Avalie seu passeio",
   "logCatWa": "WhatsApp",
-  "sqTips": "Dicas de busca: tag:vip, type:road, status:waiting, onbike, done, noshow, waitlist ou late, paid:yes ou no, size:m, session:uma data ou um título, phone:, email:, com quaisquer palavras",
+  "sqTips": "Dicas de busca: tag:vip, type:road, status:waiting, onbike, done, noshow, waitlist, late ou runninglate, paid:yes ou no, size:m, session:uma data ou um título, phone:, email:, com quaisquer palavras",
   "roleDoor": "Entrada",
   "tmDoorNote": "Lê os ingressos e faz o check-in de quem pagou ou veio de graça, em uma única tela bloqueada. Sem seções.",
   "zgTitle": "Check-in na entrada",
@@ -10693,5 +10693,14 @@
   "spc7d": "Últimos 7 dias",
   "spc30d": "Últimos 30 dias",
   "spc90d": "Últimos 90 dias",
-  "spcRsSync": "Copiado da versão em produção"
+  "spcRsSync": "Copiado da versão em produção",
+  "rlBtn": "Vou me atrasar",
+  "rlAsk": "Quanto vai se atrasar?",
+  "rlMin": "{0} min",
+  "rlChip": "Atraso de cerca de {0} min",
+  "rlOnTime": "Vou chegar a tempo",
+  "rlNoMore": "Já é tarde para mudar isto",
+  "rlNoPlace": "Esta reserva já não tem vaga",
+  "rlSt": "Atrasado · ~{0} min",
+  "rlSaidOpt": "Avisou que vai se atrasar"
 }
