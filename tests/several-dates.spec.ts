@@ -19,11 +19,13 @@ const mine = (id: string, sid: string) => ({
 });
 
 async function open(page: Page, sessions: Record<string, unknown>[] = N.slice(0, 4), rows: Record<string, unknown>[] = [], lang = '') {
-  await stubSupabase(page, { sessions, 'rpc:list_sessions': sessions, queue_entries: rows, 'rpc:my_bookings': rows });
+  const fx: Record<string, unknown> = { sessions, 'rpc:list_sessions': sessions, queue_entries: rows, 'rpc:my_bookings': rows };
+  await stubSupabase(page, fx);
   await loginCustomer(page, { height: 175, type_preference: 'Road', nationality: 'SA', birth_date: '1990-01-01' });
   await page.goto('/' + (lang ? `?lang=${lang}` : ''));
   await waitForSb(page);
   await page.evaluate(`S.lastTickets=[];S.selEvent='jcc';S.selSession=null;S._mdt=null;S.regStep=1;S.regView='list';setCustTab('register')`);
+  return fx;
 }
 const sw = (page: Page) => page.locator('#mdt-sw');
 const row = (page: Page, n: number) => page.locator(`#tab-register [id="sc-${day(n)}"]`);
@@ -181,6 +183,61 @@ test.describe('@customer:reserve several dates at once', () => {
     await expect(page.locator('#tab-register .bk-ok-t')).toHaveText('2 dates booked');
     await dlg.getByRole('button', { name: 'Close' }).click();
     await expect(dlg).toHaveCount(0);
+  });
+
+  test('a single booking ends the switch; Edit then Save comes back to step one with it off; stale ticks go', async ({ page }) => {
+    const fx = await open(page, N.slice(0, 4), [mine('h1', day(1))]);
+    fx['rpc:customer_booking_update'] = true;
+    await sw(page).click();
+    await row(page, 2).click();
+    await page.evaluate(`S.regQty=1;S.regBikeHeights=['175'];S.regBikeTypes=['Road'];S.waiverOk=true;S._waiverSess='${day(2)}';S.regStep=3;renderRegister()`);
+    await page.evaluate('submitReg()');
+    await expect(page.locator('#tab-register .bk-ok-t')).toBeVisible();
+    expect(await page.evaluate('S._mdt')).toBeNull(); // one date booked through the single path: the ticks are gone
+    // My Bookings' Edit on the held night, Save from the review: back on step one, the switch off, the rows radios
+    await page.evaluate(`_on_renderBookingTicket_1(null,null,'jcc','${day(1)}')`);
+    await expect.poll(() => page.evaluate('S.modifyEntryId')).toBe('h1');
+    await page.evaluate('S.regStep=3;renderRegister()');
+    await page.locator('#tab-register .mm-reg-foot .btn-primary').click(); // Update booking
+    await expect.poll(() => page.evaluate('S.regStep')).toBe(1);
+    expect(await page.evaluate('S._mdt')).toBeNull();
+    await page.locator('#tab-register .cu-w100-mt18').click(); // the updated ticket's Book another ride: step one
+    await expect(sw(page)).toHaveAttribute('aria-pressed', 'false');
+    await expect(row(page, 3)).toHaveAttribute('role', 'radio');
+    // ticks left over that are no longer bookable (the held night) go, and the first one left is the ride read
+    await page.evaluate(`S.lastTickets=[];S.selSession=null;S._mdt=['${day(1)}','${day(3)}','${day(4)}'];S.regStep=1;renderRegister()`);
+    expect(await page.evaluate('[S._mdt,S.selSession,S.modifyEntryId]')).toEqual([[day(3), day(4)], day(3), null]);
+  });
+
+  test('details the account owes, refused on later dates, open their request; saving it books those dates again', async ({ page }) => {
+    const fx = await open(page);
+    fx['rpc:customer_fix_fields'] = [];
+    fx['rpc:customer_fix_save'] = [];
+    fx['rpc:customer_profile'] = [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', nationality: 'Jordan', gender: 'male', birth_date: '1990-01-01' }];
+    let refuse = true;
+    await page.route(/\/rest\/v1\/rpc\/customer_create_booking/, async (route: Route) => {
+      const head = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*', 'content-type': 'application/json' };
+      if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 200, headers: head });
+      const e = (route.request().postDataJSON().p_entries || []) as Record<string, unknown>[];
+      if (refuse && e[0].session_id !== day(1)) return route.fulfill({ status: 400, headers: head, body: JSON.stringify({ code: 'P0001', message: 'FIX_FIRST', details: null, hint: null }) });
+      return route.fulfill({ status: 200, headers: head, body: JSON.stringify(e.map((r) => ({ id: r.id, queue_num: r.queue_num, status: r.status, waitlist_num: null, price: r.price }))) });
+    });
+    const sent = creates(page);
+    await page.evaluate(`S._mdt=['${day(1)}','${day(2)}','${day(3)}'];S.selSession='${day(1)}';S.waiverOk=true;S._waiverSess='${day(1)}';${toReview}`);
+    fx['rpc:customer_fix_fields'] = ['email']; // the server knows of it from here on
+    await page.evaluate('submitReg()');
+    await expect.poll(() => sent.length).toBe(3);
+    await expect(page.locator('#fix-gate .fx-item[data-fx="email"]')).toBeVisible(); // the request, not a sentence
+    await expect(page.locator('.mdt-dlg')).toHaveCount(0); // nothing else failed: no list of dates
+    await expect(page.locator('#tab-register .bk-ok-t')).toBeVisible(); // the first date stands
+    refuse = false;
+    fx['rpc:customer_fix_fields'] = [];
+    await page.fill('#fx-email', 'new@example.com');
+    await page.click('#fx-save');
+    await expect.poll(() => sent.length).toBe(5);
+    expect(sent.slice(3).map((c) => (c.p_entries as Record<string, unknown>[])[0].session_id)).toEqual([day(2), day(3)]); // those two only
+    expect((sent[3].p_entries as Record<string, unknown>[]).map((r) => r.name)).toEqual(['Spec Rider', 'Second Rider']); // the same riders
+    await expect(page.locator('#tab-register .bk-ok-t')).toHaveText('2 dates booked');
   });
 
   test('offline it stops in the centred dialog before anything is sent', async ({ page }) => {

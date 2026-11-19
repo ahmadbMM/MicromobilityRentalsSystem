@@ -7861,7 +7861,7 @@ function doLogout(silent){
   S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regVl=null;S.regBldRole=null;S.regBldClub=null;S.regBldClubNone=false;S.regRiderNames=[];S.regQty=1;S.regType=null;S.selSession=null;S.lastTickets=[];S._alreadyBookedSession=null;S.regSubmitting=false;S.waiverOk=false;S.regShare=null;S.regStep=1;
   // The next person on this device starts clean: a code, add-ons or a booking being changed
   // belonged to the account that just left (a promo can be tied to one customer).
-  S.promoApplied=null;S._promoMsg='';S.regAddons=[];S.modifyEntryId=null;
+  S.promoApplied=null;S._promoMsg='';S.regAddons=[];S.modifyEntryId=null;_regDrop(); // the note for the desk and the dates ticked too (2026-11-19)
   // Nor the sign-up answers (bug hunt 2026-11-10): the signed-out page draws the form still in 'signup', and the next
   // person's account took the last one's gender, privacy tick and ride-news consent. Ride news starts empty.
   S.signupGender=null;S.signupAck=false;S.signupRideNews=false;S.suEm2=false;S.authMode='login';
@@ -14754,7 +14754,7 @@ async function selectSessCard(id){
   S._qtyCapNote=false;
   if(_isCommunity(s)&&_needsBike(s)&&s.member_cap!=null)_mbAsk(id,true); // the members' bikes may be all taken (member_cap)
   if(_rideKind(s)==='saturday'&&S._satLink===true){_satLinkModal();return;} // the answer came while the gates were asked
-  S.selSession=id;S._tickFor=id;renderRegister();S._tickFor=null; // the tick settles in on this repaint only
+  S._mdt=null;S.selSession=id;S._tickFor=id;renderRegister();S._tickFor=null; // the tick settles in on this repaint only; one date picked ends several (item 7)
 }
 // ── A link that opens an event, and a date ────────────────────────────────────
 // micromobility.sa/experiences hands a rider over with ?ev=<event>&session=<id> - the event and
@@ -14922,7 +14922,7 @@ async function selectEvent(ev){
   // A new event starts at its first step. The tickets of the ride just booked kept the page on
   // them, and a one-date event (opened straight on its ride, below) inherited the step, the
   // add-ons and the booking being changed from the last one.
-  S.lastTickets=[];S.regStep=1;S.regKind=null;S.regAddons=[];_lkRegReset();S.regAddonsOpen=null;S.modifyEntryId=null;S._modKey=null;S._alreadyBookedSession=null;S._mdt=null;
+  S.lastTickets=[];S.regStep=1;S.regKind=null;S.regAddons=[];_lkRegReset();S.regAddonsOpen=null;S.modifyEntryId=null;S._modKey=null;S._alreadyBookedSession=null;_regDrop();
   if(S.regRiderNames&&S.regRiderNames.length)S.regRiderNames[0]=undefined; // rider 1 is the account holder again (2026-10-05)
   _perksHydrate();
   // A one-date event has nothing to choose between. The National Day ride is a single night,
@@ -19619,6 +19619,8 @@ function _nextOpenRide(){
 async function _bookNextOpen(id){await selectEvent('jcc');if(S.selEvent!=='jcc'||S.view!=='customer'||S.custTab!=='register')return;await selectSessCard(id);}
 function renderRegister(){
   const cust=S.loggedIn||getSession();
+  // What one account typed or ticked is never the next one's (a phone the desk shares between accounts, 2026-11-19).
+  if(S._regFor!==String((cust&&cust.id)||'')){S._regFor=String((cust&&cust.id)||'');_regDrop();}
   // Open sessions are bookable; full sessions are joinable via the waitlist. The list shows
   // ONLY the event picked on the landing page: JCC rides for 'jcc', Saturday Social Rides
   // for 'community' - switching events happens on the landing event cards.
@@ -19664,6 +19666,7 @@ function renderRegister(){
   // are checkboxes. The first ticked (else the first that can be) holds the tab stop.
   const _mdC=_ev==='jcc'&&!_soleSessionFor(_ev)&&available.filter(_mdtOk).length>1;
   if(!_mdC&&S._mdt&&(S.regStep||1)===1)S._mdt=null;
+  if(_mdC&&S._mdt){const k=S._mdt.filter(id=>_mdtOk(_sessDisp(id)));if(k.length!==S._mdt.length){S._mdt=k;S.selSession=k[0]||null;}} // a date booked, filled or shut since it was ticked goes
   const _md=_mdC&&!!S._mdt,_mdL=_rc?_rc.list:available,_mdF=_md&&(_mdL.find(x=>S._mdt.includes(x.id))||_mdL.find(_mdtOk)||{}).id;
   ensureBikeSizes();
   // No bike anywhere in what is in front of the rider (2026-10-18): the picked session, else the event card's
@@ -20359,7 +20362,10 @@ function _pgOther(){_pgClose();S.regReturn=null;regGoStep(1);}
 // ticked in: the first is the ride the riders step and the review read (S.selSession), and the pick when the switch goes off.
 const MDT_MAX=8;
 function _mdtOk(s){return !!s&&_rideKind(s)==='jcc'&&s.status==='open'&&!_sessPastDay(s)&&!_sessEnded(s)&&_bwOpen(s)&&!_sessGender(s)&&spotsLeft(s.id)>0&&!_capAll(s)&&!_heldSt(s)&&!_wasRejectedFor(s.id);}
-function _mdtIds(){return(S.selEvent||'jcc')==='jcc'&&Array.isArray(S._mdt)&&!S.modifyEntryId?S._mdt.filter(_sessGet):[];}
+function _mdtIds(){return(S.selEvent||'jcc')==='jcc'&&Array.isArray(S._mdt)&&!S.modifyEntryId?S._mdt.filter(id=>_mdtOk(_sessGet(id))):[];}
+// What a booking that starts over (another event, Book again, my usual, Book another, the waiver asked again, a sign-out,
+// another account) leaves behind: the note for the desk typed, and the dates ticked.
+function _regDrop(){S.regNote='';S._dntMod=0;S._dntOwe=null;S._mdt=null;S._mdtFix=null;}
 function _mdtMany(){return _mdtIds().length>1;}
 function _mdtList(){return _mdtIds().map(_sessDisp).sort((a,b)=>String(a.session_date||a.id).localeCompare(String(b.session_date||b.id)));}
 function _mdtDone(tks){return new Set((tks||[]).map(x=>x.sessionId)).size>1;}
@@ -20371,8 +20377,8 @@ function _mdtSet(){
 }
 async function _mdtTick(id){
   if(await _profileGate(()=>_mdtTick(id)))return;
-  const a=(S._mdt||[]).slice(),i=a.indexOf(id);
-  if(i>=0)a.splice(i,1);else if(a.length<MDT_MAX&&_mdtOk(_sessDisp(id)))a.push(id);else return;
+  const a=(S._mdt||[]).filter(x=>_mdtOk(_sessDisp(x))),i=a.indexOf(id);
+  if(i>=0)a.splice(i,1);else if(a.length<MDT_MAX&&_mdtOk(_sessDisp(id)))a.push(id);
   if(S.selSession!==(a[0]||null)){S.regAddons=[];S.promoApplied=null;S._promoMsg='';_lkRegReset();} // as selectSessCard: one ride's offers
   S._mdt=a;S.selSession=a[0]||null;S._tickFor=i<0?id:null;renderRegister();S._tickFor=null;
 }
@@ -20397,6 +20403,7 @@ async function _mdtSubmit(){
   ensureBikeSizes();if(!validateRegInputs())return;
   if(_needsWaiver(s0)&&!_waiverAgreed()){_waiverBack();return;}
   S.regSubmitting=true;_fnl('confirm');renderRegister();
+  const R={q:S.regQty,h:S.regBikeHeights.slice(),ty:S.regBikeTypes.slice(),nm:S.regRiderNames.slice(),n:S.regNote||''}; // the form, for a retry
   const ok=[],bad=[],nb=[],dn=String(S.regNote||'').trim(),hs=Array.from({length:qty},(_,i)=>parseInt(S.regBikeHeights[i])||null);
   const names=Array.from({length:qty},(_,i)=>{const en=qty>1?S.regRiderNames[i]:undefined;return(en!==undefined&&String(en).trim())?_titleCaseName(en):(i===0?cust.name:'');});
   try{
@@ -20423,7 +20430,11 @@ async function _mdtSubmit(){
     if(ok.length&&!cust.height&&self>=0&&hs[self])await _saveFirstHeight(cust,hs[self]);
     await loadDataLight();
     const e0=bad.length&&bad[0].err,m0=e0?[e0.code,e0.message,e0.details].join(' '):'',k0=(/[A-Z][A-Z_]{3,}/.exec(m0)||[''])[0];
-    if(!ok.length&&/STALE_SESSION|FIX_FIRST|WAIVER_|GENDER_ONLY/.test(m0)){_fnl('refused',k0);_bookRefused(e0,s0);return;} // the account's, not a date's: said as a single booking says it
+    if(!ok.length&&/STALE_SESSION|WAIVER_|GENDER_ONLY/.test(m0)){_fnl('refused',k0);_bookRefused(e0,s0);return;} // the account's, not a date's: said as a single booking says it
+    // Details the account owes (FIX_FIRST: a booking count crossed, staff asked): their request opens, after the pop-up when other
+    // dates failed for other reasons, and saving it books the dates it stopped again, with the same riders.
+    const fx=bad.filter(x=>_isFixFirst(x.err));
+    S._mdtFix=fx.length?{err:fx[0].err,ids:fx.map(x=>x.s.id),R}:null;
     if(ok.length){
       S.lastTickets=ok.map(e=>_qGet(e.id)||e);
       S._mdt=null;S.selSession=null;S.regQty=1;S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRiderNames=[];S.regStep=1;
@@ -20433,7 +20444,7 @@ async function _mdtSubmit(){
     }else _fnl('refused',k0);
     S.regSubmitting=false;renderRegister();renderMyRides();_regFocus();
     S._dntOwe=nb.length?{ids:nb,n:dn}:null;
-    if(bad.length)_mdtFails(bad);else{_dntAsk(S._dntOwe);S._dntOwe=null;} // a note that did not save is said after the dates not booked
+    if(bad.length>fx.length)_mdtFails(bad);else _mdtNext(); // a note that did not save is said after the dates not booked
   }finally{if(S.regSubmitting){S.regSubmitting=false;renderRegister();}}
 }
 function _mdtWhy(e){
@@ -20455,7 +20466,20 @@ function _mdtFails(L){
   m.style.display='block';
   requestAnimationFrame(()=>{const b=m.querySelector('.mdt-dlg .btn-primary');if(b)try{b.focus();}catch(e){}});
 }
-function _mdtFailX(){const m=document.getElementById('bike-info-modal');if(m&&m.querySelector('.mdt-dlg')){m.style.display='none';m.innerHTML='';}_regFocus();_dntAsk(S._dntOwe);S._dntOwe=null;}
+function _mdtFailX(){const m=document.getElementById('bike-info-modal');if(m&&m.querySelector('.mdt-dlg')){m.style.display='none';m.innerHTML='';}_regFocus();_mdtNext();}
+// After the dates: the owed details' request (its save books the dates it stopped again), else a note that did not save.
+function _mdtNext(){
+  const f=S._mdtFix;S._mdtFix=null;
+  if(f){S._dntOwe=null;_fixRefused(f.err,()=>_mdtRetry(f));return;}
+  _dntAsk(S._dntOwe);S._dntOwe=null;
+}
+function _mdtRetry(f){
+  const c=S.loggedIn||getSession();if(!c)return;
+  S.lastTickets=[];S.selEvent='jcc';S.modifyEntryId=null;S._mdt=f.ids.slice();S.selSession=f.ids[0];
+  S.regQty=f.R.q;S.regBikeHeights=f.R.h.slice();S.regBikeTypes=f.R.ty.slice();S.regRiderNames=f.R.nm.slice();S.regBikeSizes=f.R.h.map(()=>'');S.regNote=f.R.n;
+  S.waiverOk=true;S._waiverSess=f.ids[0];S.regStep=3; // the waiver ticked for these dates on the review that sent them
+  setCustTab('register');submitReg();
+}
 // The booked moment for several dates: how many, which, and the way to their tickets (My Bookings, one ticket a date).
 function _mdtOkHtml(tks){
   const L=[...new Set(tks.map(x=>x.sessionId))].map(_sessDisp).filter(Boolean);
@@ -20613,7 +20637,7 @@ function regNextToReview(){
 }
 function regBookAnother(){
   _fnlNew();S._promoOpen=false;S.regReturn=null;S._wlJoin=null;
-  S.lastTickets=[];S.selSession=null;S.regStep=1;S.regQty=1;S._mdt=null;
+  S.lastTickets=[];S.selSession=null;S.regStep=1;S.regQty=1;_regDrop();
   S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regVl=null;S.regShare=null;S.regBldRole=null;S.regBldClub=null;S.regBldClubNone=false;S.regRiderNames=[];S.modifyEntryId=null;S._alreadyBookedSession=null;S.promoApplied=null;S._promoMsg='';S.regAddons=[];
   renderRegister();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}
 }
@@ -21147,7 +21171,7 @@ function _waiverReask(rows){
   S.selEvent=_evOf(sess);S.selSession=sess.id;S.modifyEntryId=null;S.lastTickets=[];S._alreadyBookedSession=null;
   S.regQty=rows.length;S.regRiderNames=rows.map(r=>r.name||'');S.regBikeTypes=rows.map(r=>r.type_preference||undefined);
   S.regBikeHeights=rows.map(r=>r.height?String(r.height):'');S.regBikeSizes=rows.map(r=>r.size||'');
-  S.promoApplied=null;S._promoMsg='';S.regAddons=[];
+  S.promoApplied=null;S._promoMsg='';S.regAddons=[];_regDrop();
   setCustTab('register');_waiverBack();
 }
 // A booking the server refused, said in the rider's language. The booking RPC and its triggers
@@ -21535,7 +21559,7 @@ async function _submitReg(){
     S._rHeight='';S._rDate='';S.selSession=null;S.regType=null;
     S.regQty=1;S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regVl=null;S.regShare=null;S.regBldRole=null;S.regBldClub=null;S.regBldClubNone=false;S.regRiderNames=[];S._alreadyBookedSession=null;S.regStep=1;S.promoApplied=null;S._promoMsg='';S.regAddons=[];
     S.waiverOk=false;S._waiverSess=null; // agreed for THIS booking; the next one asks again
-    S._wlJoin=null;S._promoOpen=false;S.regReturn=null;
+    S._wlJoin=null;S._promoOpen=false;S.regReturn=null;S._mdt=null;
     _fnl(bookingStatus==='waitlist'&&!entries.some(e=>e.status!=='waitlist')?'waitlisted':'booked');_fnlNew(); // the attempt ends here (row 20)
     S._okPlay=true;setTimeout(()=>{S._okPlay=false;},0); // the booked moment plays on this booking's paints only
     const _qn=entries.map(e=>e.queueNum);
@@ -21766,7 +21790,7 @@ async function submitModifyBooking(){
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 // Edit opens on the ride's own first step after the date (_regNextStep): a bike ride's or an event's
 // riders, a swim's or a workshop's waiver. A fixed step 2 was a page those rides do not have.
-function _on_renderBookingTicket_1(event,el,a0,a1){if(_offlineStop(()=>_on_renderBookingTicket_1(event,el,a0,a1)))return;S.lastTickets=[];S.selEvent=a0;S.selSession=a1;S.regStep=_regNextStep(_sessDisp(a1),1);setCustTab('register')}
+function _on_renderBookingTicket_1(event,el,a0,a1){if(_offlineStop(()=>_on_renderBookingTicket_1(event,el,a0,a1)))return;S.lastTickets=[];S.selEvent=a0;S._mdt=null;S.selSession=a1;S.regStep=_regNextStep(_sessDisp(a1),1);setCustTab('register')}
 function _on_renderBookingTicket_2(event,el){if(event.key==='Enter'||event.key===' '){event.preventDefault();_photoZoom(el);}}
 // The MicroMobility logo in the booking card's top corner (the owner, 2026-09-30: "make the booking
 // card include micromobility's logo in the top corner"): the start corner, away from the QR code the
@@ -22587,7 +22611,7 @@ function bookMyUsual(){
   const withSpot=open.filter(s=>spotsLeft(s.id)>=need);
   const pool=withSpot.length?withSpot:party?[open.slice().sort((a,b)=>spotsLeft(b.id)-spotsLeft(a.id))[0]]:open;
   const pick=(favTime&&pool.find(s=>(parseSlots(s.bike_slots)||{})._time===favTime))||pool[0];
-  S.selEvent=_evOf(pick);S.selSession=pick.id;S._mdt=null;
+  S.selEvent=_evOf(pick);S.selSession=pick.id;_regDrop();
   S.regQty=need;
   // A hidden type never pre-seeds (staff hid it from this customer's picker — the shortcut
   // must not tunnel past that); stale promo/add-ons from an abandoned run don't ride along.
@@ -22656,7 +22680,7 @@ function bookAgain(ids){
   S.regBikeSizes=entries.map(()=>'');
   // On the event the booking was for: a Saturday ride's Book again used to open the circuit list.
   const _bs=_sessDisp(entries[0].sessionId);if(_bs)S.selEvent=_evOf(_bs);
-  S.selSession=null;S.regStep=1;S.lastTickets=[];S.modifyEntryId=null;S._alreadyBookedSession=null;S._mdt=null;
+  S.selSession=null;S.regStep=1;S.lastTickets=[];S.modifyEntryId=null;S._alreadyBookedSession=null;_regDrop();
   S.promoApplied=null;S._promoMsg='';S.regAddons=[];
   setCustTab('register');
   try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}
@@ -54040,8 +54064,8 @@ function _n6bByLine(e){
 // cancelled, the desk note, the staff note), each whole in its own tip. pre: the place in line or W number (the roster's).
 // The rider's note for the desk (item 9, 20261119600300): a drawn mark beside the status of the row that carries it (the
 // booking's first; a folded party's row and card), named with the note; a tap opens the whole note in the centred pop-up
-// (_dntOpen, desk part). Read-only; the row keeps its height.
-function _dntRow(e){return e.riderNote?`<button type="button" class="rq-rnote" aria-label="${esc(t('dntRider')+': '+e.riderNote)}" title="${esc(e.riderNote)}" data-on-click="${_on('_dntOpen',e.id,_EV)}">${_artIcon('chat',13)}</button>`:'';}
+// (_dntOpen, desk part). Live bookings only (a cancelled one's old note is not news). Read-only; the row keeps its height.
+function _dntRow(e){return e.riderNote&&(e.status==='waiting'||e.status==='waitlist'||e.status==='active')?`<button type="button" class="rq-rnote" aria-label="${esc(t('dntRider')+': '+e.riderNote)}" title="${esc(e.riderNote)}" data-on-click="${_on('_dntOpen',e.id,_EV)}">${_artIcon('chat',13)}</button>`:'';}
 function _dntGrp(g){const e=g.find(x=>x.riderNote);return e?_dntRow(e):'';} // a folded party's row and card
 function statusCellHtml(e,pre){
   const min=e.status==='active'?_activeMinutes(e):null;
@@ -84339,7 +84363,8 @@ function _lfbBox(e){
 // ── The rider's note for the desk (item 9, the user, 2026-11-19: "Staff see it on the booking") ─────────────────────────────
 // In the check-in drawer beside the last ride (_lfbBox): the booking's note, on whichever of its riders checks in. Read-only.
 function _dntCi(e){
-  const n=e&&(e.riderNote||(e.customerId&&(getQueue().find(x=>x.customerId===e.customerId&&x.sessionId===e.sessionId&&x.riderNote)||{}).riderNote));
+  const live=x=>x.status==='waiting'||x.status==='waitlist'||x.status==='active';
+  const n=e&&live(e)&&(e.riderNote||(e.customerId&&(getQueue().find(x=>x.customerId===e.customerId&&x.sessionId===e.sessionId&&live(x)&&x.riderNote)||{}).riderNote));
   return n?`<div class="lfb dnt-ci" role="note" aria-label="${esc(t('dntRider'))}"><div class="lfb-h">${_artIcon('chat',12)} <b>${esc(t('dntRider'))}</b></div><div class="lfb-note"><bdi>${esc(n)}</bdi></div></div>`:'';
 }
 // The roster row's mark, tapped: the whole note in the centred pop-up (as a tag's tap, _tagInfo); the row does not open too.

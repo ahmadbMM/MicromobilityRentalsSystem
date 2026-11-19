@@ -130,6 +130,26 @@ test.describe('@customer:reserve note for the desk', () => {
     expect(await page.evaluate('S.regNote||""')).toBe('');
   });
 
+  test('a note one account typed never reaches the next on a shared phone, nor a new start', async ({ page }) => {
+    await rider(page);
+    await page.evaluate(at(D1, 3));
+    await field(page).fill('My son is nervous, asthma');
+    // signed out without booking; another rider signs in on the same phone
+    await page.evaluate('doLogout(true)');
+    await page.evaluate(`_signinApply({id:'c2',name:'Other Rider',email:'other@example.com',phone:'0500000002',session_token:'tok-c2',height:170,type_preference:'Road',nationality:'SA',birth_date:'1990-01-01'})`);
+    await page.evaluate(at(D1, 3));
+    await expect(field(page)).toHaveValue('');
+    // another account signing in on the tab, with no sign-out between
+    await field(page).fill('Typed by the second rider');
+    await page.evaluate(`_signinApply({id:'c3',name:'Third Rider',email:'third@example.com',phone:'0500000003',session_token:'tok-c3',height:170,type_preference:'Road',nationality:'SA',birth_date:'1990-01-01'})`);
+    await page.evaluate(at(D1, 3));
+    await expect(field(page)).toHaveValue('');
+    // the same account starting another booking starts empty too
+    await field(page).fill('For the first ride');
+    await page.evaluate(`selectEvent('jcc')`);
+    expect(await page.evaluate('S.regNote')).toBe('');
+  });
+
   test('Arabic', async ({ page }) => {
     await rider(page, {}, [], 'ar');
     await page.evaluate(at(D1, 3));
@@ -148,7 +168,9 @@ const srow = (id: string, qn: number, name: string, cid: string | null, extra: R
 const A = 'aaaa0001-0000-4000-8000-000000000000';
 const A2 = 'aaaa0002-0000-4000-8000-000000000000';
 const B = 'aaaa0003-0000-4000-8000-000000000000';
-const staffRows = [srow(A, 1, 'Amal Road', 'cust-amal', { rider_note: NOTE }), srow(A2, 2, 'Sami Road', 'cust-amal', { height: 140, type_preference: 'Kids' }), srow(B, 3, 'Badr Top', 'cust-badr')];
+const B0 = 'aaaa0004-0000-4000-8000-000000000000';
+const staffRows = [srow(A, 1, 'Amal Road', 'cust-amal', { rider_note: NOTE }), srow(A2, 2, 'Sami Road', 'cust-amal', { height: 140, type_preference: 'Kids' }), srow(B, 3, 'Badr Top', 'cust-badr'),
+  srow(B0, 4, 'Badr Top', 'cust-badr', { status: 'cancelled', rider_note: 'An old note on a cancelled booking' })]; // never shown beside Badr's live booking
 const customers = [
   { id: 'cust-amal', name: 'Amal Road', phone: '0500000011', created_at: '2099-01-01T00:00:00Z' },
   { id: 'cust-badr', name: 'Badr Top', phone: '0500000012', created_at: '2099-01-01T00:00:00Z' },

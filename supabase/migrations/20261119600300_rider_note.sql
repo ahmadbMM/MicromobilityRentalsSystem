@@ -14,8 +14,9 @@
 --  2. booking_note_set(p_id, p_token, p_booking, p_note): token-checked, the rider's own booking only, while it is live
 --     (waiting, on the waitlist or on a bike; never a cancelled, removed, finished or no-show one). The note is trimmed,
 --     runs of spaces and line breaks become one space, and an empty one is stored as null (that clears it); over 200
---     characters after that is refused ('long'). It is written on the row named and taken off the account's other
---     live rows on that session, so a booking keeps one note wherever the row order moves. Answers
+--     characters after that is refused ('long'). It is written on the row named and taken off every other row the account
+--     has on that session, live or not (a cancelled booking's old note is not shown beside a new booking's), so a night
+--     keeps one note wherever the row order moves. Answers
 --     {ok, note} or {ok:false, error: denied | none | long}. The app calls it after customer_create_booking (which is
 --     not rebuilt here) and from the ticket's Edit.
 --
@@ -62,7 +63,7 @@ begin
   end if;
   update queue_entries q
      set rider_note = case when q.id = p_booking then v_note else null end
-   where q.customer_id = p_id and q.session_id = v_sess and q.status in ('waiting', 'waitlist', 'active')
+   where q.customer_id = p_id and q.session_id = v_sess
      and (q.id = p_booking or q.rider_note is not null)
      and q.rider_note is distinct from (case when q.id = p_booking then v_note else null end);
   return jsonb_build_object('ok', true, 'note', v_note);
