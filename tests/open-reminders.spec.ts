@@ -23,11 +23,15 @@ const sessions = [
 ];
 type Sent = { p_id?: string; p_token?: string; p_session?: string; p_on?: boolean };
 
-async function boot(page: Page, o: { member?: boolean; signedIn?: boolean; lang?: string; fx?: Fixtures } = {}) {
+async function boot(page: Page, o: { member?: boolean; signedIn?: boolean; lang?: string; fx?: Fixtures; hold?: Promise<void> } = {}) {
   const calls: Sent[] = [], mine: unknown[] = [];
   await page.clock.setFixedTime(NOW);
   if (o.lang) await page.addInitScript((l) => localStorage.setItem('cq_lang', l), o.lang);
   await stubSupabase(page, { sessions, queue_entries: [], 'rpc:my_bookings': [], 'rpc:community_member': !!o.member, ...(o.fx || {}) });
+  if (o.hold) { // the members check answers only when the test lets it
+    const hold = o.hold;
+    await page.route('**/rest/v1/rpc/community_member*', async (r) => { await hold; await r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: 'false' }); });
+  }
   if (!(o.fx && 'rpc:open_reminder_set' in o.fx)) {
     await page.route('**/rest/v1/rpc/open_reminder_set*', async (r) => {
       const b = (r.request().postDataJSON() || {}) as Sent;
@@ -42,6 +46,7 @@ async function boot(page: Page, o: { member?: boolean; signedIn?: boolean; lang?
   await page.evaluate(`S._bw={days:7,at:'20:00'};goLanding()`);
   await page.evaluate(`selectEvent('jcc')`);
   if (o.member) await expect.poll(() => page.evaluate('_infoMember()')).toBe(true);
+  if (!o.hold) await expect.poll(() => page.evaluate('_ormKnown()')).toBe(true); // the members check has answered
   await page.evaluate('renderRegister()');
   return { calls, mine };
 }
@@ -75,6 +80,49 @@ test.describe('@customer:reserve Remind me when booking opens', () => {
     await boot(page, { member: true });
     await expect(btn(page, FAR)).toHaveText('Remind me');
     await expect(btn(page, MF)).toHaveCount(0);
+  });
+
+  test('no bell until the members check has answered', async ({ page }) => {
+    let release = () => {};
+    const hold = new Promise<void>((r) => { release = r; });
+    await boot(page, { hold });
+    await expect(row(page, FAR).locator('.sess-card')).toBeVisible();
+    await expect.poll(() => page.evaluate('!!(S._infoMem&&S._infoMem.busy)')).toBe(true);
+    await expect(page.locator('#tab-register .orm-btn')).toHaveCount(0);
+    release();
+    await expect(btn(page, FAR)).toHaveText('Remind me'); // the answer repaints the list
+    await expect(btn(page, MF)).toHaveText('Remind me'); // not a member: members first holds the date for them
+  });
+
+  test('only on a date the rider could book once it opens: members only, a Petromin or Victory Lap tag, never Saturday by code', async ({ page }) => {
+    const x = (o: Record<string, unknown>) => JSON.stringify({ id: '2099-11-22', session_date: '2099-11-22', day: 'Sunday', status: 'open', capacity: 40, bike_slots: '{"_time":"06:00 - 06:30"}', event_kind: 'community', ride_kind: 'saturday', open_to_all: false, ...o });
+    const has = (o: Record<string, unknown>) => page.evaluate(`_ormBtn(${x(o)}).includes('orm-btn')`);
+    await boot(page);
+    expect(await has({})).toBe(false); // members only, not a member
+    expect(await has({ open_to_all: true })).toBe(true);
+    expect(await has({ ride_kind: 'petromin' })).toBe(false);
+    expect(await page.evaluate(`(()=>{const c=getSession();S._pmMem={id:c.id,ok:true};return _ormBtn(${x({ ride_kind: 'petromin' })}).includes('orm-btn');})()`)).toBe(true);
+    // Victory Lap is booked from the day it is announced (no window); members book first can still hold it for a tag holder
+    expect(await has({ ride_kind: 'vlap', public_at: '2099-11-12T09:00:00Z' })).toBe(false);
+    expect(await page.evaluate(`(()=>{const c=getSession();S._vlMem={id:c.id,ok:true};return _ormBtn(${x({ ride_kind: 'vlap', public_at: '2099-11-12T09:00:00Z' })}).includes('orm-btn');})()`)).toBe(true);
+    expect(await page.evaluate(`(()=>{S._satLink=true;return _ormBtn(${x({ open_to_all: true })}).includes('orm-btn');})()`)).toBe(false); // by code alone at micromobility.sa/saturday
+    expect(await has({ open_to_all: true, ride_kind: 'yoga' })).toBe(true);
+  });
+
+  test('a member: members-only dates carry the bell', async ({ page }) => {
+    await boot(page, { member: true });
+    const x = JSON.stringify({ id: '2099-11-22', session_date: '2099-11-22', day: 'Sunday', status: 'open', capacity: 40, bike_slots: '{"_time":"06:00 - 06:30"}', event_kind: 'community', ride_kind: 'saturday', open_to_all: false });
+    expect(await page.evaluate(`_ormBtn(${x}).includes('orm-btn')`)).toBe(true);
+  });
+
+  test('a failed read of the rider\'s asks is read again on the next paint', async ({ page }) => {
+    const { mine } = await boot(page, { fx: { 'rpc:open_reminders_mine': { __rpcError: { status: 500, code: 'XX000', message: 'boom' } } } });
+    await expect.poll(() => page.evaluate('S._orm')).toBe(null); // the failed read is not kept
+    const n = mine.length;
+    expect(n).toBeGreaterThan(0);
+    await page.evaluate('renderRegister()');
+    await expect.poll(() => mine.length).toBe(n + 1);
+    await expect(btn(page, FAR)).toHaveText('Remind me');
   });
 
   test('the pop-up names the opening in Saudi time, and the calendar file is one event at it with two alarms', async ({ page }) => {
@@ -209,23 +257,42 @@ test.describe('@customer:reserve /api/ics, a date\'s opening', () => {
     expect(c).toContain('URL:https://site.test/?ev=jcc&session=2099-11-20');
   });
 
-  test('refuses an unknown date, one already open, a bad id, and answers no account check', async () => {
+  test('a refusal sends the phone back to the booking app, on that date when the database named its kind; never English text', async () => {
     const fn = (await freshModule('functions/api/ics.js')).onRequestPost as Fn;
-    answer({ ok: false, error: 'none' });
-    expect((await fn({ request: post({ o: '2099-11-20' }), env })).status).toBe(404);
-    answer({ ok: false, error: 'open' });
-    expect((await fn({ request: post({ o: '2099-11-20' }), env })).status).toBe(409);
-    answer({ ok: true, id: '2099-11-20', date: '2099-11-20', at: '2000-01-01T00:00:00Z' }); // past, whatever the row says
-    expect((await fn({ request: post({ o: '2099-11-20' }), env })).status).toBe(409);
+    const go = async (fields: Record<string, string>, e: Record<string, string> = env, ip?: string) => { const r = await fn({ request: post(fields, ip), env: e }); return [r.status, r.headers.get('location'), await r.text()]; };
+    answer({ ok: false, error: 'none' }); // unknown or tag-gated: nothing said about it
+    expect(await go({ o: '2099-11-20' })).toEqual([303, 'https://site.test/', '']);
+    answer({ ok: false, error: 'open', rk: 'saturday', ek: 'community' }); // opened meanwhile: to the date, now bookable
+    expect(await go({ o: '2099-11-21' })).toEqual([303, 'https://site.test/?ev=community&session=2099-11-21', '']);
+    answer({ ok: false, error: 'none', rk: null, ek: null }); // called off: to the date, which says so
+    expect(await go({ o: '2099-11-20' })).toEqual([303, 'https://site.test/?ev=jcc&session=2099-11-20', '']);
+    answer({ ok: true, id: '2099-11-20', date: '2099-11-20', rk: null, ek: null, at: '2000-01-01T00:00:00Z' }); // past, whatever the row says
+    expect(await go({ o: '2099-11-20' })).toEqual([303, 'https://site.test/?ev=jcc&session=2099-11-20', '']);
     const asked = answer({ ok: true });
-    expect((await fn({ request: post({ o: '../etc' }), env })).status).toBe(400);
-    expect((await fn({ request: post({ o: '2099-11-20' }), env: {} })).status).toBe(501);
+    for (const bad of ['../etc', 'a b', '-2099', 'x'.repeat(49), '2099-11-20?x=1']) expect(await go({ o: bad }), bad).toEqual([303, 'https://site.test/', '']);
+    expect(await go({ o: '2099-11-20' }, {})).toEqual([303, 'https://site.test/', '']); // not configured
     expect(asked).toHaveLength(0);
-    // the per-caller gate the calendar address uses
-    answer({ ok: false, error: 'none' });
-    let last = 0;
-    for (let i = 0; i < 61; i++) last = (await fn({ request: post({ o: '2099-11-20' }, '198.51.100.4'), env })).status;
-    expect(last).toBe(429);
+    // the per-caller gate the calendar address uses: past it, the database is not asked
+    const metered = answer({ ok: false, error: 'none' });
+    for (let i = 0; i < 61; i++) await go({ o: '2099-11-20' }, env, '198.51.100.4');
+    expect(metered).toHaveLength(60);
+  });
+
+  test('every session id the app and the database make is taken', async () => {
+    const fn = (await freshModule('functions/api/ics.js')).onRequestPost as Fn;
+    // the editor's marks per kind (_sessIdSuffix, staff code: read from the source), a second of a kind on one date ("-2"),
+    // staff_move_session's "-n" up to 25, and the hand-made ones the migrations seeded
+    const src = readFileSync(resolve(__dirname, '../app.src.html'), 'utf8').split('\n').find((l) => l.startsWith('function _sessIdSuffix('))!;
+    const sfx = new Function(`${src};return _sessIdSuffix;`)() as (k: string) => string;
+    const ids = ['jcc', 'saturday', 'petromin', 'workshop', 'snd96', 'event', 'runher', 'vlap', 'arena', 'defe5k', 'blood', 'yoga', 'farm', 'testride'].flatMap((k) => { const d = '2099-11-20' + sfx(k); return [d, d + '-2', d + '-25']; });
+    ids.push('2099-11-18-ws', '2026-11-06-ah', '2099-11-20-rh-2');
+    expect(new Set(ids).size).toBeGreaterThan(30);
+    for (const id of ids) {
+      answer({ ok: true, id, date: id.slice(0, 10), rk: null, ek: null, at: '2099-11-13T17:00:00Z' });
+      const r = await fn({ request: post({ o: id }, '192.0.2.' + (ids.indexOf(id) % 200)), env });
+      expect(r.status, id).toBe(200);
+      expect(await r.text(), id).toContain(`UID:opens-${id}@micromobility.sa`);
+    }
   });
 
   test('its words are the app\'s own, in all ten languages', async ({ page }) => {
@@ -254,11 +321,17 @@ test.describe('@customer:reserve the open_reminders migration', () => {
       expect(sql).toMatch(new RegExp(`revoke all on function public\\.${f} from public;\\s*grant execute on function public\\.${f} to anon, authenticated;`));
     }
     expect(sql).toMatch(/revoke all on function public\._open_remind_tick\(\) from public, anon, authenticated;/);
-    expect(sql).toMatch(/cron\.schedule\('mm-open-remind', '\*\/5 \* \* \* \*', 'select public\._open_remind_tick\(\)'\)/);
+    expect(sql).toMatch(/cron\.schedule\('mm-open-remind', '1-59\/5 \* \* \* \*', 'select public\._open_remind_tick\(\)'\)/);
     expect(sql).toMatch(/if exists \(select 1 from cron\.job where jobname = 'mm-open-remind'\) then perform cron\.unschedule\('mm-open-remind'\)/);
     expect(sql).toMatch(/not _cust_token_ok\(p_id, p_token\)/);
     expect(sql).toMatch(/'open-' \|\| s\.id/);
-    expect(sql).toMatch(/created_at < now\(\) - interval '30 days'/);
+    // a row goes 30 days after it was sent; one never sent only when its date passed or its session went
+    expect(sql).toMatch(/where \(o\.sent_at is not null and o\.sent_at < now\(\) - interval '30 days'\)\s*or \(o\.sent_at is null and not exists/);
+    expect(sql).not.toMatch(/created_at < now\(\) - interval '30 days'/);
+    expect(sql).toMatch(/'open-' \|\| s\.id \|\| '-' \|\| coalesce\(floor\(extract\(epoch from v_at\)\)::bigint, 0\)/); // the opening in the tag
+    expect(sql).toMatch(/or not _open_remind_ok\(s, p_id\) then/); // the ask
+    expect(sql).toMatch(/or s\.session_date < v_today or not _open_remind_ok\(s, r\.to_id\)/); // and the tick
+    expect(sql).toMatch(/s\.status = 'closed' and s\.opens_at is not null and s\.opens_at <= now\(\)/); // a timer that has passed counts as open
     const words = [...sql.matchAll(/^\s*\('bookopen', '([a-z]{2})', '((?:[^']|'')*)', '((?:[^']|'')*)'\)/gm)];
     expect(words.map((w) => w[1])).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']);
     for (const w of words) for (const p of ['{0}', '{1}', '{2}']) expect(w[3], w[1]).toContain(p);

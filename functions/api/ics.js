@@ -296,13 +296,18 @@ function feedEvent(r, w, lang, origin) {
 // nothing the page sent is written into the file: the name, the date and the opening come from session_opening
 // (migration 20261119600200), which answers only for an ungated date that is not open yet ('none', 'open' otherwise),
 // and the words are OPEN_WORDS and FEED_WORDS. Metered per caller with the calendar address's own gate.
+// A refusal (a date that opened meanwhile, one called off, a bad id, the meter, the database out of reach) is never a page
+// of English: a 303 back to the booking app, on that date when the database named its kind (/?ev=<event>&session=<id>),
+// else its front page, which then says what holds in the rider's language.
 // One event at the opening, 15 minutes, an alarm then and ten minutes before, UID opens-<session>, the URL and the
 // description the booking app's link to that date on Reserve.
 export const OPEN_WORDS = {
   // the app's string ormIcsT, in FEED_LANGS order (tests/open-reminders.spec.ts holds them equal)
   title: ['Booking opens: {0}', 'يفتح الحجز: {0}', 'Ouverture des réservations : {0}', 'Abren las reservas: {0}', 'Abertura das reservas: {0}', 'بکنگ کھلے گی: {0}', 'बुकिंग खुलेगी: {0}', 'Magbubukas ang booking: {0}', 'बुकिङ खुल्छ: {0}', 'বুকিং খুলবে: {0}'],
 };
-const OPEN_ID = /^\d{4}-\d{2}-\d{2}(-[a-z0-9]{1,6}){0,2}$/;
+// A session id is its date, a kind's mark and a number when a date holds two of a kind (app.src.html _sessIdSuffix, the
+// editor's "-2", staff_move_session's "-n"; older ones carry other marks, "-ws", "-ah"): letters, digits and dashes.
+const OPEN_ID = /^[A-Za-z0-9][A-Za-z0-9-]{0,47}$/;
 // The event card a date lives under, as the app's _evOf reads it (a Petromin night opens under Experiences).
 function openEv(r) {
   const k = String(r.rk || ''), comm = r.ek === 'community' && k !== 'snd96';
@@ -312,12 +317,14 @@ function openEv(r) {
 }
 async function openingIcs(request, env, form) {
   const id = String(form.get('o') || '').slice(0, 64), li = FEED_LANGS.indexOf(String(form.get('l') || '')), L = li < 0 ? 0 : li;
-  if (!OPEN_ID.test(id)) return text('Bad request', 400);
+  const origin = new URL(request.url).origin;
+  const back = (r) => new Response(null, { status: 303, headers: { location: r && typeof r === 'object' && 'ek' in r ? `${origin}/?ev=${openEv(r)}&session=${encodeURIComponent(id)}` : `${origin}/`, 'cache-control': 'no-store' } });
+  if (!OPEN_ID.test(id)) return back(null);
   const now = Date.now();
-  if (!feedGate(request.headers.get('cf-connecting-ip') || 'unknown', now)) return text('Too many requests', 429);
+  if (!feedGate(request.headers.get('cf-connecting-ip') || 'unknown', now)) return back(null);
   const SUPA = env.SUPABASE_URL || 'https://qpffkzmsfyilicwcsszz.supabase.co';
   const ANON = env.SUPABASE_ANON_KEY;
-  if (!ANON) return text('Not configured', 501);
+  if (!ANON) return back(null);
   let d;
   try {
     const r = await fetch(`${SUPA}/rest/v1/rpc/session_opening`, {
@@ -325,16 +332,15 @@ async function openingIcs(request, env, form) {
       headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ p_session: id, p_member: form.get('w') === 'm' }),
     });
-    if (!r.ok) return text('Lookup failed', 502);
+    if (!r.ok) return back(null);
     d = await r.json();
-  } catch { return text('Lookup failed', 502); }
-  if (!d || d.ok !== true) return d && d.error === 'open' ? text('Booking is open.', 409) : text('No such date.', 404);
+  } catch { return back(null); }
+  if (!d || d.ok !== true) return back(d);
   const ms = Date.parse(d.at || ''), day = String(d.date || '').slice(0, 10);
-  if (!isFinite(ms) || ms <= now) return text('Booking is open.', 409);
-  if (String(d.id) !== id || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return text('Lookup failed', 502);
+  if (!isFinite(ms) || ms <= now || String(d.id) !== id || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return back(d);
   const w = (k) => { const row = FEED_WORDS[k] || ['']; return row[L] || row[0]; };
   const kind = feedKind(d), name = kind === 'jcc' ? w('ride') : (FEED_LANGS[L] === 'ar' && feedText(d.title_ar)) || feedText(d.title) || w(kind);
-  const ti = OPEN_WORDS.title[L].replace('{0}', () => name), url = `${new URL(request.url).origin}/?ev=${openEv(d)}&session=${encodeURIComponent(id)}`;
+  const ti = OPEN_WORDS.title[L].replace('{0}', () => name), url = `${origin}/?ev=${openEv(d)}&session=${encodeURIComponent(id)}`;
   const body = icsBody({ uid: `opens-${id}@micromobility.sa`, st: icsStamp(ms), en: icsStamp(ms + 15 * 60000), ti, de: url, al: ti, url, alarms: ['PT0M', '-PT10M'] });
   return new Response(body, {
     headers: {

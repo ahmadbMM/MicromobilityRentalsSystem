@@ -14500,7 +14500,7 @@ function _infoMember(){
   if(S._commAccess&&S._commAccess.custId===c.id&&S._commAccess.ok)return true;
   const m=S._infoMem;if(m&&m.id===c.id&&(m.busy||m.ok||Date.now()-m.at<6e4))return !!m.ok;
   const cur={id:c.id,ok:false,busy:true,at:Date.now()};S._infoMem=cur;
-  Promise.resolve(commAccess()).then(a=>{cur.busy=false;cur.at=Date.now();if(S._infoMem!==cur)return;cur.ok=a===true;if(cur.ok)_infoRepaint();},()=>{cur.busy=false;});
+  Promise.resolve(commAccess()).then(a=>{cur.busy=false;cur.at=Date.now();if(S._infoMem!==cur)return;cur.ok=a===true;S._infoMemAns=cur.id;if(cur.ok||S._ormWait){S._ormWait=0;_infoRepaint();}},()=>{cur.busy=false;S._infoMemAns=cur.id;if(S._ormWait){S._ormWait=0;_infoRepaint();}}); // a Remind me bell waits for this answer (_ormKnown)
   return false;
 }
 function _infoRepaint(){_commNavPaint();if(S.view==='landing')renderLandingAvail();else if(S.view==='customer'&&S.custTab==='register')renderRegister();else if(S.view==='customer'&&S.custTab==='myrides')renderMyRides();} // and My Bookings: a members-only breakfast spot shows once the answer comes (_bfOff)
@@ -22417,19 +22417,26 @@ function _icsBody(ev){
 // When booking opens for this rider (epoch ms), 0 when nothing holds it.
 function _ormAt(s){const o=_bwWinOn(s),a=o?Date.parse(o.day+'T'+(o.at||'00:00')+':00+03:00'):0;return Math.max(a||0,_mfHeld(s)?_mfAt(s):0);}
 function _ormOn(id){const c=S.loggedIn||getSession(),m=S._orm;return !!(c&&m&&m.id===c.id&&m.ids.includes(id));}
+// Whether the rider is a member is known (an answer came for this account; signed out is known): until then no bell, as
+// members book first holds a non-member's date later than a member's (review fix).
+function _ormKnown(){const c=S.loggedIn||getSession();if(!c||!c.id||_infoMember()||S._infoMemAns===c.id)return true;S._ormWait=1;return false;}
+// Could this rider book the date once it opens (the server's _open_remind_ok): a members-only Community date only for a
+// member (a Petromin night also for its tag's holders, Victory Lap for its), never a Saturday ride taken by code alone.
+function _ormMay(s){const k=_rideKind(s);return !(_isCommunity(s)&&!_openToAll(s)&&!_infoMember()&&!(k==='petromin'&&_pmHeld())&&!(k==='vlap'&&_vlHeld()))&&!(k==='saturday'&&S._satLink===true);}
 function _ormBtn(s){
-  if(!_bwOpensText(s)||!_sessLive(s)||_sessFull(s)||_heldSt(s)||!_ormAt(s))return'';
+  if(!_bwOpensText(s)||!_sessLive(s)||_sessFull(s)||_heldSt(s)||!_ormKnown()||!_ormAt(s)||!_ormMay(s))return'';
   _ormMine();const on=_ormOn(s.id),w=t(on?'ormSet':'ormBtn');
   return`<button type="button" class="orm-btn${on?' orm-on':''}" aria-haspopup="dialog" aria-label="${esc(w+' · '+_evName(s)+' · '+shortDate(s.session_date||s.id))}" data-on-click="${_on('_ormOpen',s.id)}">${_cuIc('bell',16)}<span>${w}</span></button>`;
 }
+// S._orm {id, ids, part}: part = only what this page set, not read yet. A read that failed is dropped, so the next paint reads again.
 function _ormMine(){
-  const c=S.loggedIn||getSession();if(!c||!c.session_token||!sb||S._ormOff||(S._orm&&S._orm.id===c.id))return;
-  const cur=S._orm={id:c.id,ids:[]};
+  const c=S.loggedIn||getSession(),p=S._orm;if(!c||!c.session_token||!sb||S._ormOff||(p&&p.id===c.id&&!p.part))return;
+  const cur=S._orm={id:c.id,ids:p&&p.id===c.id?p.ids.slice():[]};
   Promise.resolve(sb.rpc('open_reminders_mine',{p_id:c.id,p_token:c.session_token})).then(({data,error})=>{
     if(S._orm!==cur)return;
-    if(error&&_rpcAbsent(error))S._ormOff=true;
-    else if(data&&data.ok===true&&Array.isArray(data.ids)&&data.ids.length){cur.ids=data.ids.map(String);if(S.view==='customer'&&S.custTab==='register')renderRegister();}
-  },()=>{});
+    if(error){if(_rpcAbsent(error))S._ormOff=true;else S._orm=null;return;}
+    if(data&&data.ok===true&&Array.isArray(data.ids)){const was=cur.ids.join();cur.ids=data.ids.map(String);if(was!==cur.ids.join()&&S.view==='customer'&&S.custTab==='register')renderRegister();}
+  },()=>{if(S._orm===cur)S._orm=null;});
 }
 function _ormOpen(sid){
   const s=_sessDisp(sid),m=document.getElementById('confirm-modal'),at=s&&_ormAt(s);if(!m||!at)return;
@@ -22456,7 +22463,7 @@ async function _ormSet(sid,on){
   S._ormBusy=true;document.querySelectorAll('#confirm-modal .orm-acts button').forEach(b=>{b.disabled=true;});
   let r;try{r=await sb.rpc('open_reminder_set',{p_id:c.id,p_token:c.session_token,p_session:sid,p_on:on});}catch(e){r={error:e};}
   S._ormBusy=false;
-  const d=r&&!r.error&&r.data,m=S._orm&&S._orm.id===c.id?S._orm:(S._orm={id:c.id,ids:[]});
+  const d=r&&!r.error&&r.data,m=S._orm&&S._orm.id===c.id?S._orm:(S._orm={id:c.id,ids:[],part:1});
   if(r&&r.error&&_rpcAbsent(r.error))S._ormOff=true;
   else if(d&&d.ok===true){m.ids=m.ids.filter(x=>x!==sid);if(on)m.ids.push(sid);}
   else if(d&&d.error==='open'){toast(t('ormIsOpen'),'error');_bwLoad(true);} // it opened meanwhile: the list is read again and the date becomes bookable
