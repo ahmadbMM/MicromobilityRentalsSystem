@@ -15278,6 +15278,73 @@ body.view-staff.view-staff #spc-dlg .confirm-box{width:min(var(--sf-dlg-l),calc(
 #tab-store .spc-bar{height:12px;border-radius:var(--sf-r-pill);background:var(--s1);overflow:hidden;}
 #tab-store .spc-bar-f{display:block;height:100%;width:var(--w,0%);background:var(--green);border-radius:var(--sf-r-pill);}
 #tab-store .spc-bar-v{display:flex;flex-direction:column;align-items:flex-end;font-weight:600;font-variant-numeric:tabular-nums;}
+/* ══ MK-S2: the Marketplace section's second half (2026-11-20): Shops, Our listings, Commission, Settings and Categories
+   on #tab-market, and their one centred pop-up (#mks-pop) with the confirm dialog's chrome. Every selector names an
+   mks- class or #mks-pop, so the customer's stylesheet carries none of it. ══ */
+#mks-pop .chrome-dh10{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+#mks-pop .chrome-dt{font-size:var(--sf-fs-lg);font-weight:600;overflow-wrap:anywhere;}
+#mks-pop .chrome-xt{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:var(--sf-fs-xl);line-height:1;padding:0 4px;min-width:44px;min-height:44px;}
+#mks-pop .chrome-dact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:12px;}
+#mks-pop .confirm-box{max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;}
+body.view-staff.view-staff #mks-pop .confirm-box{width:min(var(--sf-dlg-l),calc(100vw - 32px));}
+#mks-pop .chrome-dbody{overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:12px;}
+#mks-pop .chrome-dbody>*{flex-shrink:0;}
+#mks-pop .chrome-dbody>.mks-ph-add{align-self:flex-start;}
+#mks-pop .form-group,#tab-market .mks-set .form-group{margin:0;}
+#mks-pop :is(input[type=text],input[type=number],select,textarea),#tab-market .mks-set :is(input[type=number],textarea){width:100%;}
+#mks-pop .mks-err{color:var(--red);font-weight:600;font-size:var(--sf-fs-sm);}
+#mks-pop .mks-h{font-size:var(--sf-fs-sm);font-weight:600;color:var(--text);margin-top:4px;}
+#mks-pop .mks-del{margin-inline-end:auto;}
+#mks-pop .mks-dl{display:grid;gap:8px;margin:0;}
+#mks-pop .mks-kv{display:grid;grid-template-columns:minmax(120px,34%) minmax(0,1fr);gap:2px 12px;font-size:var(--sf-fs-sm);}
+#mks-pop .mks-kv dt{margin:0;color:var(--muted);}
+#mks-pop .mks-kv dd{margin:0;color:var(--text);overflow-wrap:anywhere;white-space:pre-line;}
+#mks-pop .mks-logo{display:block;width:72px;height:72px;object-fit:cover;border-radius:var(--sf-r-ctl);background:var(--s1);}
+#mks-pop .mks-chks{display:flex;flex-wrap:wrap;gap:0 18px;}
+#mks-pop .mks-ph{display:flex;flex-wrap:wrap;gap:10px;}
+#mks-pop .mks-ph1{width:150px;display:flex;flex-direction:column;gap:4px;padding:6px;border:1px solid var(--border);border-radius:var(--sf-r-ctl);background:var(--bg);}
+#mks-pop .mks-ph1 img{display:block;width:100%;height:100px;object-fit:cover;border-radius:var(--sf-r-ctl);background:var(--s1);}
+#mks-pop .mks-ph-acts{display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
+:is(#tab-market,#mks-pop) .mks-grid{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));}
+:is(#tab-market,#mks-pop) .mks-chk{display:flex;align-items:center;gap:8px;min-height:44px;font-size:var(--sf-fs-md);cursor:pointer;}
+:is(#tab-market,#mks-pop) .mks-chk input[type=checkbox]{-webkit-appearance:checkbox;appearance:auto;display:block;position:static;flex:none;width:18px;height:18px;min-height:0;margin:0;padding:0;opacity:1;}
+:is(#tab-market,#mks-pop) .mks-meta{font-size:var(--sf-fs-sm);font-weight:400;color:var(--muted);overflow-wrap:anywhere;}
+:is(#tab-market,#mks-pop) .mks-pill{display:inline-flex;align-items:center;padding:2px 9px;border:1px solid var(--border);border-radius:var(--sf-r-pill);font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);white-space:nowrap;}
+:is(#tab-market,#mks-pop) .mks-pill.mks-p-ok{border-color:var(--green);color:var(--green);}
+:is(#tab-market,#mks-pop) .mks-pill.mks-p-warn{border-color:var(--orange);color:var(--orange);}
+:is(#tab-market,#mks-pop) .mks-pill.mks-p-bad{border-color:var(--red);color:var(--red);}
+:is(#tab-market,#mks-pop) .mks-who{padding:0;border:0;background:transparent none;color:var(--text);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+#tab-market .mks-bar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px;}
+#tab-market .filter-bar>.mks-bar{margin:10px 0 0;}
+#tab-market .mks-list{display:flex;flex-direction:column;}
+#tab-market .mks-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:10px 4px;border-top:1px solid var(--border);}
+#tab-market .mks-row.mks-kid{padding-inline-start:44px;}
+#tab-market .mks-main{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 220px;}
+#tab-market .mks-name{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;font-size:var(--sf-fs-md);font-weight:600;color:var(--text);overflow-wrap:anywhere;}
+#tab-market .mks-acts{display:flex;flex-wrap:wrap;gap:6px;margin-inline-start:auto;}
+#tab-market .mks-amt{font-size:var(--sf-fs-md);font-weight:600;white-space:nowrap;}
+#tab-market .mks-none{padding:14px 4px;}
+#tab-market .mks-more{margin-top:10px;}
+#tab-market .mks-thumb{flex:0 0 52px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:var(--sf-r-ctl);background:var(--s1);color:var(--muted);}
+#tab-market .mks-thumb img{display:block;width:100%;height:100%;object-fit:cover;}
+#tab-market .mks-tog{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;margin-inline-start:-8px;padding:0;border:0;background:transparent none;color:var(--muted);cursor:pointer;}
+#tab-market .mks-sum{display:flex;flex-wrap:wrap;gap:8px 28px;margin:0 0 12px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--sf-r-card);}
+#tab-market .mks-sum>div{display:flex;flex-direction:column;gap:2px;}
+#tab-market .mks-sum b{font-size:var(--sf-fs-lg);font-weight:600;color:var(--text);}
+#tab-market .mks-set{display:flex;flex-direction:column;gap:16px;max-width:760px;}
+#tab-market .mks-sec{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid var(--border);}
+#tab-market .mks-sec:first-child{padding-top:0;border-top:0;}
+#tab-market .mks-sec h2{margin:0;font-size:var(--sf-fs-lg);font-weight:600;}
+#tab-market .mks-sec h3{margin:8px 0 0;font-size:var(--sf-fs-md);font-weight:600;}
+#tab-market .mks-sw{display:inline-flex;align-items:center;gap:8px;font-size:var(--sf-fs-md);cursor:pointer;}
+#tab-market .mks-set-acts{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;}
+@media (max-width:767px){
+  :is(#tab-market,#mks-pop) .mks-grid{grid-template-columns:minmax(0,1fr);}
+  #mks-pop .mks-kv{grid-template-columns:minmax(0,1fr);}
+  #mks-pop .mks-ph1{width:calc(50% - 5px);}
+  #tab-market .mks-row.mks-kid{padding-inline-start:16px;}
+  #tab-market .mks-acts{margin-inline-start:0;}
+}
 /* ══ Sessions in order and in colour, and the details a row carries (2026-11-10, the user: "show the sessions with the
    chronological order starting from today ... show with a green or grey color if the session is open or closed"; and
    the five extras: places left, waitlist, meeting place, place in a series, code). Staff only. ══ */
