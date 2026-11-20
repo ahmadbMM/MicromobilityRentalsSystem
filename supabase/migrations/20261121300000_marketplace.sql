@@ -69,8 +69,26 @@
 --     website, which removes the live database's files, not staging's. Staging's files go when a selling route
 --     removes them (the website's purgeLater), not by the night's call.
 --
+-- After the review (2026-11-21), also:
+--   * a photo counts as stored when its object is in storage.objects, not when the insert policy marked its slot:
+--     the hosted Storage tests that policy in a transaction it rolls back, so the mark is never kept there (4,
+--     _mkt_slots_settle). With the mark alone no photo could be put on a listing on the hosted service, and the
+--     daily job would have cleared the slots of files that are there;
+--   * "Checked by our team" comes off when the seller changes what was checked (the item's words, facts, frame
+--     number or photos; not its price, city or "negotiable"): event uncheck, actor system;
+--   * "first name + last initial" is not offered (names.short null, MKT_INPUT: name_mode) when the account's name
+--     would put a phone number or a link there;
+--   * a sold listing that comes back on sale is held ('serial') when its frame number went on sale meanwhile;
+--   * the grid's lists of filters to offer (sports, categories) leave out a category a form can no longer choose
+--     (visible false); its listings stay on the grid;
+--   * more indexes than the contract's: market_photo_slots_shop, market_reports_listing, market_listings_commission,
+--     market_threads_buyer_unread / _seller_unread / _buyer_wa / _seller_wa.
+--   Locks: the account's (_mkt_account_lock, also taken by staff when they act on the account), then 'mkt:shops'
+--   when a shop is written, then rows, then a frame number's (_mkt_serial_lock).
+--
 -- Tested on a local Postgres 17 only (stub + tests in the session's scratch folder mk/db: mkstub.sh, fixtures.sql,
--- tests_a.sql, tests_b.sql, run.sh; see the commit body). Never run against a remote database by its author.
+-- tests_a.sql, tests_b.sql, tests_c.sql and race.sh (the review's: two connections at once), run.sh; see the commit
+-- body). Never run against a remote database by its author or its reviewer.
 --
 -- Rollback:
 --   select cron.unschedule('mm-market-tick');
@@ -277,6 +295,9 @@ create index if not exists market_listings_category on public.market_listings (c
 create index if not exists market_listings_serial on public.market_listings (serial)
   where serial is not null and status in ('live', 'reserved', 'held');
 create index if not exists market_listings_expiry on public.market_listings (expires_at) where status in ('live', 'reserved');
+-- staff's commission list and the count on their rail (asked every few minutes by every staff device)
+create index if not exists market_listings_commission on public.market_listings (sold_at desc, id desc)
+  where sold_at is not null and commission_due > 0;
 alter table public.market_listings enable row level security;
 revoke all on public.market_listings from public, anon, authenticated;
 
@@ -295,6 +316,7 @@ create table if not exists public.market_photo_slots (
 );
 create index if not exists market_photo_slots_customer on public.market_photo_slots (customer_id, created_at);
 create index if not exists market_photo_slots_listing on public.market_photo_slots (listing_id);
+create index if not exists market_photo_slots_shop on public.market_photo_slots (shop_id) where shop_id is not null;
 create index if not exists market_photo_slots_gone on public.market_photo_slots (gone_at) where gone_at is not null and purged_at is null;
 alter table public.market_photo_slots enable row level security;
 revoke all on public.market_photo_slots from public, anon, authenticated;
@@ -324,6 +346,12 @@ create table if not exists public.market_threads (
 create index if not exists market_threads_buyer on public.market_threads (buyer_id, last_at desc);
 create index if not exists market_threads_seller on public.market_threads (seller_id, last_at desc);
 create index if not exists market_threads_last on public.market_threads (last_at);
+-- the unread count is asked on every page a signed-in visitor opens, and the day's WhatsApp shares on every form:
+-- each reads only the few threads that have something unread, or a number shared, not every thread of the account
+create index if not exists market_threads_buyer_unread on public.market_threads (buyer_id) where buyer_unread > 0;
+create index if not exists market_threads_seller_unread on public.market_threads (seller_id) where seller_unread > 0;
+create index if not exists market_threads_buyer_wa on public.market_threads (buyer_id, buyer_wa_at) where buyer_wa_at is not null;
+create index if not exists market_threads_seller_wa on public.market_threads (seller_id, seller_wa_at) where seller_wa_at is not null;
 alter table public.market_threads enable row level security;
 revoke all on public.market_threads from public, anon, authenticated;
 
@@ -356,6 +384,8 @@ create unique index if not exists market_reports_one_listing on public.market_re
 create unique index if not exists market_reports_one_thread on public.market_reports (thread_id, reporter_id) where target = 'thread';
 create index if not exists market_reports_list on public.market_reports (status, created_at desc);
 create index if not exists market_reports_thread on public.market_reports (thread_id) where thread_id is not null;
+-- staff's lists count a listing's reports of both kinds (a thread's report carries its listing too)
+create index if not exists market_reports_listing on public.market_reports (listing_id) where listing_id is not null;
 create index if not exists market_reports_reporter on public.market_reports (reporter_id, created_at);
 alter table public.market_reports enable row level security;
 revoke all on public.market_reports from public, anon, authenticated;
@@ -584,6 +614,10 @@ on conflict (id) do update
 -- yet: the check marks it stored, so each name holds one file once (no update policy, never an overwrite). The full
 -- copy sets used_at, its small copy (<name>.w480.<ext>) small_at on the same row. Executable by the API roles because
 -- a policy runs as the uploader; it answers false for any other bucket or name, and a name is 128 random bits.
+-- Supabase Storage tests this policy in a transaction it rolls back and then writes the object's row itself (the
+-- store's claim photos carry the same note, 20261119300000), so on the hosted service the mark made here is NOT
+-- kept. Nothing may lean on it: one file per name still holds there (the storage's own key on bucket and name, and
+-- no update policy), and whether a photo was stored is read from storage.objects (_mkt_slots_settle below).
 create or replace function public._mkt_photo_take(p_bucket text, p_name text) returns boolean
 language plpgsql volatile security definer set search_path = public as $$
 begin
@@ -612,6 +646,38 @@ language sql stable security definer set search_path = public as $$
 $$;
 revoke all on function public._mkt_photo_gone(text) from public;
 grant execute on function public._mkt_photo_gone(text) to anon, authenticated;
+
+-- What the storage holds is the truth about a name (see _mkt_photo_take: on the hosted service the policy's own mark
+-- is rolled back). A photo counts as stored when its object is in storage.objects; this stamps used_at (the full
+-- copy) and small_at (the .w480 copy) from there, with the time the object was written, on the slots of one listing
+-- ('listing'), of one shop ('shop') or of everyone ('all', the daily job). Without it a slot's used_at would stay
+-- null for ever on the hosted service: no photo could be put on a listing, and the daily job would clear the slot of
+-- a file that is there, which could then never be removed.
+create or replace function public._mkt_slots_settle(p_scope text, p_ref bigint default null) returns integer
+language plpgsql security definer set search_path = public as $$
+declare n integer;
+begin
+  if p_scope is null or p_scope not in ('listing', 'shop', 'all') or (p_scope <> 'all' and p_ref is null) then return 0; end if;
+  update market_photo_slots s
+     set used_at = coalesce(s.used_at, (select coalesce(f.created_at, now()) from storage.objects f
+                                         where f.bucket_id = 'market' and f.name = s.name)),
+         small_at = coalesce(s.small_at, (select coalesce(f.created_at, now()) from storage.objects f
+                                           where f.bucket_id = 'market'
+                                             and f.name = regexp_replace(s.name, '\.(jpg|webp)$', '.w480.\1')))
+   where (s.used_at is null or s.small_at is null)
+     and (p_scope = 'all' or (p_scope = 'listing' and s.listing_id = p_ref) or (p_scope = 'shop' and s.shop_id = p_ref))
+     and exists (select 1 from storage.objects f
+                  where f.bucket_id = 'market'
+                    and ((s.used_at is null and f.name = s.name)
+                      or (s.small_at is null and f.name = regexp_replace(s.name, '\.(jpg|webp)$', '.w480.\1'))));
+  get diagnostics n = row_count;
+  return n;
+end $$;
+-- Is this name's full copy in the storage now.
+create or replace function public._mkt_photo_stored(p_name text) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from storage.objects f where f.bucket_id = 'market' and f.name = p_name)
+$$;
 
 drop policy if exists "market photos add" on storage.objects;
 create policy "market photos add" on storage.objects
@@ -739,15 +805,24 @@ begin
     'drafts_used', (select count(*) from market_listings l where l.customer_id = p_id and l.status = 'draft'),
     'price_max', case when est then 500000 else (lim->>'new_price_max')::integer end,
     'threads_day', case when est then (lim->>'est_threads_day')::integer else (lim->>'new_threads_day')::integer end,
-    'threads_used', (select count(*) from market_threads t where t.buyer_id = p_id and t.created_at > now() - interval '24 hours'),
+    -- (a thread's last_at is never before its created_at, nor before any message in it: both counts read only the
+    --  threads that moved in the last 24 hours, through market_threads_buyer and market_threads_seller, not every
+    --  message the account ever sent or was sent)
+    'threads_used', (select count(*) from market_threads t
+                      where t.buyer_id = p_id and t.last_at > now() - interval '24 hours'
+                        and t.created_at > now() - interval '24 hours'),
     'wa_day', case when est then (lim->>'est_wa_day')::integer else (lim->>'new_wa_day')::integer end,
-    'wa_used', (select count(*) from market_threads t
-                 where (t.buyer_id = p_id and t.buyer_wa_at > now() - interval '24 hours')
-                    or (t.seller_id = p_id and t.seller_wa_at > now() - interval '24 hours')),
+    'wa_used', (select count(*) from market_threads t where t.buyer_id = p_id and t.buyer_wa_at > now() - interval '24 hours')
+             + (select count(*) from market_threads t where t.seller_id = p_id and t.seller_wa_at > now() - interval '24 hours'),
     'messages_day', (lim->>'messages_day')::integer,
-    'messages_used', (select count(*) from market_messages m join market_threads t on t.id = m.thread_id
-                       where m.created_at > now() - interval '24 hours'
-                         and ((m.side = 'buyer' and t.buyer_id = p_id) or (m.side = 'seller' and t.seller_id = p_id))));
+    'messages_used', (select count(*)
+                        from (select t.id, 'buyer'::text as side from market_threads t
+                               where t.buyer_id = p_id and t.last_at > now() - interval '24 hours'
+                              union all
+                              select t.id, 'seller'::text from market_threads t
+                               where t.seller_id = p_id and t.last_at > now() - interval '24 hours') x
+                        join market_messages m on m.thread_id = x.id and m.side = x.side
+                       where m.created_at > now() - interval '24 hours'));
 end $$;
 
 -- A phone number in a text: Arabic-Indic (1632-1641) and Persian (1776-1785) digits read as Western ones, then a
@@ -783,6 +858,15 @@ end $$;
 create or replace function public._mkt_wa_of(p_id text) returns text
 language sql stable security definer set search_path = public as $$
   select _mkt_digits(case when c.whatsapp_same is false then c.whatsapp else c.phone end) from customers c where c.id = p_id
+$$;
+
+-- "First name + last initial" of the account, as a listing or a thread may show it. Null when there is no name, and
+-- when what is on file would put a phone number or a link there: the account's name is the customer's own to type,
+-- and it is the one text of a listing or a thread that no other check reads.
+create or replace function public._mkt_short_name(p_id text) returns text
+language sql stable security definer set search_path = public as $$
+  select case when x.n is null or _ask_has_link(x.n) or _mkt_has_phone(x.n) then null else x.n end
+    from (select _tm_short(_ask_text(c.name)) as n from customers c where c.id = p_id) x
 $$;
 
 -- A text as the blocked words are looked for in it: _ask_norm's reading (lower case, Arabic vowel marks and the
@@ -821,6 +905,16 @@ language sql stable security definer set search_path = public as $$
            (select string_agg(f.value #>> '{}', ' . ') from jsonb_each(coalesce(l.facts, '{}'::jsonb)) f)))
 $$;
 
+-- The account's lock, for the rest of the transaction. Its own calls that count a cap or change what it has on sale
+-- take it first (_mkt_enter); so do staff's when they act on the account (suspend, restore, approve its shop, put a
+-- listing of its back), so a suspension and a publish of the same moment cannot pass each other. Order, everywhere:
+-- the account's lock, then the shops' lock ('mkt:shops', when a shop is written), then rows, then a frame number's.
+create or replace function public._mkt_account_lock(p_id text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if p_id is not null then perform pg_advisory_xact_lock(hashtextextended('mkt:' || p_id, 0)); end if;
+end $$;
+
 -- The start of every signed-in customer function: the session, the account's meter (600 calls in 10 minutes; per
 -- account because every call reaches the database from the website's Worker), and, for a function that counts a
 -- cap, the account's lock for the rest of the transaction.
@@ -829,7 +923,7 @@ language plpgsql security definer set search_path = public as $$
 begin
   if p_id is null or p_token is null or not _cust_token_ok(p_id, p_token) then raise exception 'MKT_SIGNIN'; end if;
   if not _ip_gate('mkt:' || p_id, 600, interval '10 minutes') then raise exception 'MKT_BUSY'; end if;
-  if p_lock then perform pg_advisory_xact_lock(hashtextextended('mkt:' || p_id, 0)); end if;
+  if p_lock then perform _mkt_account_lock(p_id); end if;
 end $$;
 
 -- 18 years by the birth date on file ("today" is Riyadh's); null when there is no usable date.
@@ -1102,6 +1196,14 @@ language sql stable security definer set search_path = public as $$
      and exists (select 1 from market_listings o
                   where o.serial = l.serial and o.id is distinct from l.id and o.status in ('live', 'reserved', 'held'))
 $$;
+-- Whoever is about to look for a frame number holds that number until its transaction ends: two accounts putting
+-- the same number on sale in the same instant would otherwise each find the other not there yet, and both go live.
+-- (The account's own lock does not cover it: the two are different accounts.) Always the last lock taken.
+create or replace function public._mkt_serial_lock(p_serial text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if p_serial is not null then perform pg_advisory_xact_lock(hashtextextended('mkt:serial:' || p_serial, 0)); end if;
+end $$;
 
 -- A shop as a card, a listing or a thread names it.
 create or replace function public._mkt_shop_ref(p_shop bigint) returns jsonb
@@ -1254,22 +1356,23 @@ $$;
 -- ── 5b. Selling ──────────────────────────────────────────────────────────────────────────────────────────────────
 
 -- The account's threads with something unread, leaving out those with a person the account blocked.
+-- (Each side through its own small index, market_threads_buyer_unread and market_threads_seller_unread.)
 create or replace function public._mkt_unread(p_id text) returns integer
 language sql stable security definer set search_path = public as $$
-  select count(*)::integer from market_threads t
-   where ((t.buyer_id = p_id and t.buyer_unread > 0) or (t.seller_id = p_id and t.seller_unread > 0))
-     and not exists (select 1 from market_blocks b
-                      where b.blocker_id = p_id
-                        and b.blocked_id = case when t.buyer_id = p_id then t.seller_id else t.buyer_id end)
+  select ((select count(*) from market_threads t
+            where t.buyer_id = p_id and t.buyer_unread > 0
+              and not exists (select 1 from market_blocks b where b.blocker_id = p_id and b.blocked_id = t.seller_id))
+        + (select count(*) from market_threads t
+            where t.seller_id = p_id and t.seller_unread > 0
+              and not exists (select 1 from market_blocks b where b.blocker_id = p_id and b.blocked_id = t.buyer_id)))::integer
 $$;
 
 -- What the account may do, for the forms.
 create or replace function public.market_me(p_id text, p_token text) returns jsonb
 language plpgsql security definer set search_path = public as $$
-declare v_name text; s market_sellers%rowtype; h market_shops%rowtype; v_terms text := _mkt_terms();
+declare s market_sellers%rowtype; h market_shops%rowtype; v_terms text := _mkt_terms();
 begin
   perform _mkt_enter(p_id, p_token);
-  select c.name into v_name from customers c where c.id = p_id;
   select * into s from market_sellers where customer_id = p_id;
   select * into h from market_shops where owner_id = p_id;
   return jsonb_build_object(
@@ -1278,7 +1381,7 @@ begin
     'established', _mkt_established(p_id),
     'seller', jsonb_build_object('status', coalesce(s.status, 'ok'), 'terms_ok', coalesce(s.terms_version = v_terms, false)),
     'terms_version', v_terms,
-    'names', jsonb_build_object('short', _tm_short(_ask_text(v_name))),
+    'names', jsonb_build_object('short', _mkt_short_name(p_id)),
     'has_whatsapp', _mkt_wa_of(p_id) is not null,
     'shop', case when h.id is not null then jsonb_build_object('id', h.id, 'slug', h.slug, 'status', h.status,
                                                                'name_en', h.name_en, 'name_ar', h.name_ar) end,
@@ -1314,7 +1417,8 @@ begin
   o := l;
   l := _mkt_apply(l, p, false);
 
-  -- photos: each name is already on this listing, or a stored, unreleased slot of this caller for this listing
+  -- photos: each name is already on this listing, or an unreleased slot of this caller for this listing whose file
+  -- is in the storage (the storage, not the slot's used_at, says so: see _mkt_slots_settle)
   if p ? 'photos' then
     v_ph := p->'photos';
     if jsonb_typeof(v_ph) = 'null' then v_ph := '[]'::jsonb; end if;
@@ -1329,10 +1433,11 @@ begin
       if not (o.photos ? x)
          and not exists (select 1 from market_photo_slots s
                           where s.name = x and s.customer_id = p_id and s.listing_id = l.id
-                            and s.used_at is not null and s.gone_at is null) then
+                            and s.gone_at is null and _mkt_photo_stored(s.name)) then
         raise exception 'MKT_PHOTOS';
       end if;
     end loop;
+    if l.id is not null then perform _mkt_slots_settle('listing', l.id); end if;
     select coalesce(array_agg(e.n), '{}') into v_drop from jsonb_array_elements_text(o.photos) as e(n) where e.n <> all (v_names);
     l.photos := to_jsonb(v_names);
   end if;
@@ -1344,6 +1449,7 @@ begin
   end if;
   -- on sale: its words are read again, and a changed frame number is looked for on the other listings
   if l.status in ('live', 'reserved') then
+    if l.serial is distinct from o.serial then perform _mkt_serial_lock(l.serial); end if;
     v_hit := _mkt_listing_hit(l);
     if v_hit is not null then v_hold := 'words';
     elsif l.serial is distinct from o.serial and _mkt_serial_taken(l) then v_hold := 'serial';
@@ -1355,6 +1461,15 @@ begin
   if array_length(v_drop, 1) > 0 then
     update market_photo_slots s set gone_at = now() where s.name = any (v_drop) and s.gone_at is null;
     get diagnostics v_purge = row_count;
+  end if;
+  -- "Checked by our team" is about what staff looked at: when the seller changes any of it (the item's words, facts,
+  -- frame number or photos; not its price, city or "negotiable"), the mark comes off and staff check it again
+  if o.checked_at is not null
+     and (l.category, l.title, l.description, l.condition, l.faults, l.facts, l.serial, l.photos)
+         is distinct from (o.category, o.title, o.description, o.condition, o.faults, o.facts, o.serial, o.photos) then
+    update market_listings m set checked_at = null, checked_by = null where m.id = l.id returning * into l;
+    perform _mkt_event('system', null, 'listing', 'uncheck', l.id, l.shop_id, null, null, p_id,
+                       _mkt_snap(l) || jsonb_build_object('on', 'edit', 'checked_at', o.checked_at, 'checked_by', o.checked_by));
   end if;
   if o.status is distinct from 'draft' and o.id is not null then
     perform _mkt_event('customer', p_id, 'listing', 'edit', l.id, l.shop_id, null, null, p_id,
@@ -1429,7 +1544,7 @@ begin
   else
     l.seller_kind := 'private'; l.shop_id := null; l.name_mode := p_name_mode; l.display_name := null;
     if p_name_mode = 'short' then
-      select _tm_short(_ask_text(c.name)) into v_name from customers c where c.id = p_id;
+      v_name := _mkt_short_name(p_id);
       if v_name is null then raise exception 'MKT_INPUT: name_mode'; end if;
       l.display_name := v_name;
     end if;
@@ -1439,6 +1554,7 @@ begin
   if l.price > (lim->>'price_max')::integer then raise exception 'MKT_PRICE'; end if;
   if (lim->>'live_used')::integer >= (lim->>'live')::integer then raise exception 'MKT_LIMIT: live'; end if;
 
+  perform _mkt_serial_lock(l.serial);
   v_hit := _mkt_listing_hit(l);
   if v_hit is not null then v_hold := 'words';
   elsif _mkt_serial_taken(l) then v_hold := 'serial';
@@ -1498,8 +1614,13 @@ begin
         lim := _mkt_limits(l.customer_id);
         if (lim->>'live_used')::integer >= (lim->>'live')::integer then raise exception 'MKT_LIMIT: live'; end if;
         l := _mkt_as_shop(l);
+        -- while it was sold its frame number may have gone on sale on another listing (the buyer selling it on):
+        -- the one coming back is held, as a publish would be
+        perform _mkt_serial_lock(l.serial);
+        if _mkt_serial_taken(l) then v_hold := 'serial'; end if;
       end if;
-      l.status := 'live'; l.sold_at := null; l.sold_price := null; l.commission_pct := null; l.commission_due := null;
+      l.status := case when v_hold is null then 'live' else 'held' end; l.hold_reason := v_hold;
+      l.sold_at := null; l.sold_price := null; l.commission_pct := null; l.commission_due := null;
       v_event := 'unsold'; v_detail := jsonb_build_object('sold_price', o.sold_price, 'commission_due', o.commission_due);
     else
       raise exception 'MKT_STATE';
@@ -1534,6 +1655,7 @@ begin
         lim := _mkt_limits(l.customer_id);
         if l.price > (lim->>'price_max')::integer then raise exception 'MKT_PRICE'; end if;
         if (lim->>'live_used')::integer >= (lim->>'live')::integer then raise exception 'MKT_LIMIT: live'; end if;
+        perform _mkt_serial_lock(l.serial);
       end if;
       v_hit := _mkt_listing_hit(l);
       if v_hit is not null then v_hold := 'words';
@@ -1564,7 +1686,8 @@ begin
                      case when v_event = 'delete' then v_detail else _mkt_snap(o) || v_detail end);
   if v_hold is not null then
     perform _mkt_event('system', null, 'listing', 'hold', l.id, l.shop_id, null, null, l.customer_id,
-                       _mkt_snap(l) || jsonb_build_object('reason', v_hold, 'word', v_hit, 'on', 'renew'));
+                       _mkt_snap(l) || jsonb_build_object('reason', v_hold, 'word', v_hit,
+                                                          'on', case when p_action = 'live' then 'unsold' else 'renew' end));
   end if;
   return jsonb_build_object('commission', v_com, 'purge', v_purge);
 end $$;
@@ -1599,12 +1722,21 @@ end $$;
 
 -- One page of the grid: listings on sale (live and reserved) only. A key that is not of its shape is ignored. No
 -- seller kind is placed ahead of another.
+-- How it reads: each of the two statuses is walked in the order asked for through its own index
+-- (market_listings_new, market_listings_price: status first, then the order), the filters applied on the way, and
+-- the two short lists are merged; so a page costs about a page, not a sort of everything on sale. The search words
+-- are substrings of search_text (which holds no punctuation, so no LIKE wildcard can come from a visitor). The two
+-- lists of filters to offer are one index probe per product type (market_listings_category), and name only
+-- categories a form may still choose (visible): the website holds no name for a hidden one.
+-- plan_cache_mode: every call is planned with its own filters. A plan kept for "any filters" cannot know which of
+-- them are absent, takes them all for narrow, and may then read every listing on sale to sort a handful; the
+-- website's connections to the database are long-lived, so such a plan would stay.
 create or replace function public.market_browse(p jsonb default '{}'::jsonb) returns jsonb
-language plpgsql stable security definer set search_path = public as $$
+language plpgsql stable security definer set search_path = public set plan_cache_mode = force_custom_plan as $$
 declare
-  v_sport text; v_cat text; v_kind text; v_city text; v_cond text; v_min integer; v_max integer; v_words text[];
-  v_sort text := 'new'; v_limit integer; v_shop bigint; v_after text; v_has boolean := false;
-  a_ts timestamptz; a_price integer; a_id bigint; v_ids bigint[]; v_next text; v_last market_listings%rowtype;
+  v_sport text; v_cat text; v_kind text; v_city text; v_cond text; v_min integer; v_max integer; v_likes text[];
+  v_sort text := 'new'; v_limit integer; v_shop bigint; v_after text; v_cats text[]; v_on text[];
+  a_ts timestamptz := 'infinity'; a_price integer; a_id bigint := 0; v_ids bigint[]; v_next text; v_last market_listings%rowtype;
 begin
   if p is null or jsonb_typeof(p) <> 'object' then p := '{}'::jsonb; end if;
   if jsonb_typeof(p->'sport') = 'string' then v_sport := p->>'sport'; end if;
@@ -1614,54 +1746,94 @@ begin
   if jsonb_typeof(p->'condition') = 'string' and p->>'condition' in ('new', 'excellent', 'good', 'fair', 'parts') then
     v_cond := p->>'condition';
   end if;
-  v_min := _mkt_num(p->'price_min', null, 0, 500000)::integer;
-  v_max := _mkt_num(p->'price_max', null, 0, 500000)::integer;
+  -- (a price range always, so it is a bound of the price index's walk and never an "or")
+  v_min := _mkt_num(p->'price_min', 0, 0, 500000)::integer;
+  v_max := _mkt_num(p->'price_max', 500000, 0, 500000)::integer;
   if jsonb_typeof(p->'sort') = 'string' and p->>'sort' in ('new', 'price_asc', 'price_desc') then v_sort := p->>'sort'; end if;
   v_limit := _mkt_num(p->'limit', 24, 1, 24)::integer;
   if jsonb_typeof(p->'q') = 'string' then
-    -- up to five words, each as the search text keeps words (_ask_norm)
-    select array_agg(z.w) into v_words
+    -- up to five words, each as the search text keeps words (_ask_norm); only the start of a long text is read
+    select array_agg('%' || z.w || '%') into v_likes
       from (select _ask_norm(e.w) as w
-              from regexp_split_to_table(left(_ask_text(p->>'q'), 80), ' ') with ordinality as e(w, ord)
+              from regexp_split_to_table(left(_ask_text(left(p->>'q', 400)), 80), ' ') with ordinality as e(w, ord)
              where _ask_norm(e.w) <> '' order by e.ord limit 5) z;
   end if;
   if jsonb_typeof(p->'shop') = 'string' then
     select h.id into v_shop from market_shops h where h.slug = p->>'shop' and h.status = 'approved';
     v_shop := coalesce(v_shop, -1);   -- no such shop: nothing to list
   end if;
-  -- the cursor: "<published_at in microseconds>.<id>" by date, "<price>.<id>" by price
+  -- the product types asked for: a sport's, or one (an unknown slug lists nothing)
+  if v_sport is not null or v_cat is not null then
+    select coalesce(array_agg(c.slug), '{}') into v_cats from market_categories c
+     where (v_sport is null or c.parent = v_sport) and (v_cat is null or c.slug = v_cat);
+  end if;
+  -- the cursor: "<published_at in microseconds>.<id>" by date, "<price>.<id>" by price. With none (or one that is
+  -- not of its shape) the walk starts before the first row: the end of time by date, a price no listing has by
+  -- price. So the place to start from is always a bound of the index's walk, and never an "or" the plan cannot use.
+  a_price := case when v_sort = 'price_asc' then -1 else 500001 end;
   if jsonb_typeof(p->'after') = 'string' then
     v_after := p->>'after';
     if v_sort = 'new' and v_after ~ '^[0-9]{1,18}\.[0-9]{1,18}$' then
       a_ts := 'epoch'::timestamptz + split_part(v_after, '.', 1)::bigint * interval '1 microsecond';
-      a_id := split_part(v_after, '.', 2)::bigint; v_has := true;
+      a_id := split_part(v_after, '.', 2)::bigint;
     elsif v_sort <> 'new' and v_after ~ '^[0-9]{1,6}\.[0-9]{1,18}$' then
       a_price := split_part(v_after, '.', 1)::integer;
-      a_id := split_part(v_after, '.', 2)::bigint; v_has := true;
+      a_id := split_part(v_after, '.', 2)::bigint;
     end if;
   end if;
 
-  select array_agg(x.id order by x.rn) into v_ids
-    from (select l.id, row_number() over (
-                   order by case when v_sort = 'price_asc' then l.price end asc,
-                            case when v_sort = 'price_desc' then l.price end desc,
-                            case when v_sort = 'new' then l.published_at end desc, l.id desc) as rn
-            from market_listings l join market_categories c on c.slug = l.category
-           where l.status in ('live', 'reserved')
-             and (v_sport is null or c.parent = v_sport)
-             and (v_cat is null or l.category = v_cat)
-             and (v_kind is null or l.seller_kind = v_kind)
-             and (v_city is null or l.city = v_city)
-             and (v_cond is null or l.condition = v_cond)
-             and (v_min is null or l.price >= v_min)
-             and (v_max is null or l.price <= v_max)
-             and (v_shop is null or l.shop_id = v_shop)
-             and (v_words is null or not exists (select 1 from unnest(v_words) w where strpos(l.search_text, w) = 0))
-             and (not v_has
-                  or (v_sort = 'new' and (l.published_at, l.id) < (a_ts, a_id))
-                  or (v_sort = 'price_asc' and (l.price > a_price or (l.price = a_price and l.id < a_id)))
-                  or (v_sort = 'price_desc' and (l.price < a_price or (l.price = a_price and l.id < a_id))))
-           order by rn limit v_limit + 1) x;
+  if v_sort = 'new' then
+    select array_agg(x.id order by x.published_at desc, x.id desc) into v_ids
+      from (select u.id, u.published_at
+              from unnest(array['live', 'reserved']) as st(status)
+             cross join lateral (
+                    select l.id, l.published_at from market_listings l
+                     where l.status = st.status
+                       and (v_cats is null or l.category = any (v_cats))
+                       and (v_kind is null or l.seller_kind = v_kind)
+                       and (v_city is null or l.city = v_city)
+                       and (v_cond is null or l.condition = v_cond)
+                       and l.price >= v_min and l.price <= v_max
+                       and (v_shop is null or l.shop_id = v_shop)
+                       and (v_likes is null or l.search_text like all (v_likes))
+                       and (l.published_at, l.id) < (a_ts, a_id)
+                     order by l.published_at desc, l.id desc limit v_limit + 1) u
+             order by u.published_at desc, u.id desc limit v_limit + 1) x;
+  elsif v_sort = 'price_asc' then
+    select array_agg(x.id order by x.price asc, x.id desc) into v_ids
+      from (select u.id, u.price
+              from unnest(array['live', 'reserved']) as st(status)
+             cross join lateral (
+                    select l.id, l.price from market_listings l
+                     where l.status = st.status
+                       and (v_cats is null or l.category = any (v_cats))
+                       and (v_kind is null or l.seller_kind = v_kind)
+                       and (v_city is null or l.city = v_city)
+                       and (v_cond is null or l.condition = v_cond)
+                       and l.price >= v_min and l.price <= v_max
+                       and (v_shop is null or l.shop_id = v_shop)
+                       and (v_likes is null or l.search_text like all (v_likes))
+                       and l.price >= a_price and (l.price > a_price or l.id < a_id)
+                     order by l.price asc, l.id desc limit v_limit + 1) u
+             order by u.price asc, u.id desc limit v_limit + 1) x;
+  else
+    select array_agg(x.id order by x.price desc, x.id desc) into v_ids
+      from (select u.id, u.price
+              from unnest(array['live', 'reserved']) as st(status)
+             cross join lateral (
+                    select l.id, l.price from market_listings l
+                     where l.status = st.status
+                       and (v_cats is null or l.category = any (v_cats))
+                       and (v_kind is null or l.seller_kind = v_kind)
+                       and (v_city is null or l.city = v_city)
+                       and (v_cond is null or l.condition = v_cond)
+                       and l.price >= v_min and l.price <= v_max
+                       and (v_shop is null or l.shop_id = v_shop)
+                       and (v_likes is null or l.search_text like all (v_likes))
+                       and l.price <= a_price and (l.price < a_price or l.id < a_id)
+                     order by l.price desc, l.id desc limit v_limit + 1) u
+             order by u.price desc, u.id desc limit v_limit + 1) x;
+  end if;
 
   if coalesce(array_length(v_ids, 1), 0) > v_limit then
     select * into v_last from market_listings where id = v_ids[v_limit];
@@ -1670,19 +1842,25 @@ begin
     v_ids := v_ids[1:v_limit];
   end if;
 
+  -- the product types with something on sale: one probe of market_listings_category each. The LIMIT keeps each a
+  -- probe of its own (never a join over every listing); the ORDER BY is what makes it the index's: without it the
+  -- plan may walk the whole table "until the first match", which for a product type with nothing on sale is all of it.
+  select coalesce(array_agg(c.slug), '{}') into v_on
+    from market_categories c join market_categories sp on sp.slug = c.parent
+   where c.visible and sp.visible
+     and (select 1 from market_listings l
+           where l.category = c.slug and l.status in ('live', 'reserved') order by l.status limit 1) is not null;
+
   return jsonb_build_object(
     'items', coalesce((select jsonb_agg(_mkt_card(l) order by o.ord)
                          from unnest(v_ids) with ordinality as o(id, ord) join market_listings l on l.id = o.id), '[]'::jsonb),
     'next', v_next,
     'sports', coalesce((select jsonb_agg(s.slug order by s.sort, s.slug) from market_categories s
                          where s.parent is null
-                           and exists (select 1 from market_listings l join market_categories c on c.slug = l.category
-                                        where c.parent = s.slug and l.status in ('live', 'reserved'))), '[]'::jsonb),
+                           and exists (select 1 from market_categories c where c.parent = s.slug and c.slug = any (v_on))), '[]'::jsonb),
     'categories', case when v_sport is null then '[]'::jsonb else
                   coalesce((select jsonb_agg(c.slug order by c.sort, c.slug) from market_categories c
-                             where c.parent = v_sport
-                               and exists (select 1 from market_listings l
-                                            where l.category = c.slug and l.status in ('live', 'reserved'))), '[]'::jsonb) end);
+                             where c.parent = v_sport and c.slug = any (v_on)), '[]'::jsonb) end);
 end $$;
 
 -- A listing's page. To everyone: live, reserved, or sold in the last 14 days. To its seller (a token that passes):
@@ -1744,10 +1922,14 @@ $$;
 create or replace function public.market_index() returns jsonb
 language sql stable security definer set search_path = public as $$
   select jsonb_build_object(
+    -- (each status through market_listings_new, as the grid reads them: the newest 2,000, not a sort of them all)
     'listings', coalesce((select jsonb_agg(jsonb_build_object('id', x.id, 'title', x.title) order by x.published_at desc, x.id desc)
-                            from (select l.id, l.title, l.published_at from market_listings l
-                                   where l.status in ('live', 'reserved')
-                                   order by l.published_at desc, l.id desc limit 2000) x), '[]'::jsonb),
+                            from (select u.id, u.title, u.published_at
+                                    from unnest(array['live', 'reserved']) as st(status)
+                                   cross join lateral (select l.id, l.title, l.published_at from market_listings l
+                                                        where l.status = st.status
+                                                        order by l.published_at desc, l.id desc limit 2000) u
+                                   order by u.published_at desc, u.id desc limit 2000) x), '[]'::jsonb),
     'shops', coalesce((select jsonb_agg(jsonb_build_object('slug', h.slug, 'name_en', h.name_en, 'name_ar', h.name_ar)
                                         order by h.name_en, h.id)
                          from market_shops h where h.status = 'approved'), '[]'::jsonb))
@@ -1805,6 +1987,10 @@ begin
   if _mkt_suspended(p_id) then raise exception 'MKT_SUSPENDED'; end if;
   perform _mkt_need_adult(p_id);
   if p is null or jsonb_typeof(p) <> 'object' then p := '{}'::jsonb; end if;
+  -- one shop is written at a time (by its owner here, by staff in staff_market_shop_set), so two accounts sending
+  -- the same CR number or the same name in the same instant get MKT_DUP and a numbered slug, not a bare
+  -- unique-violation. Taken after the account's lock and before the shop's row, in both places.
+  perform pg_advisory_xact_lock(hashtextextended('mkt:shops', 0));
   select * into h from market_shops where owner_id = p_id for update;
   v_new := not found;
   if not v_new and h.status = 'suspended' then raise exception 'MKT_SUSPENDED'; end if;
@@ -1842,7 +2028,8 @@ begin
   if v ? 'returns_en' then h.returns_en := v->>'returns_en'; end if;
   if v ? 'returns_ar' then h.returns_ar := v->>'returns_ar'; end if;
   if v ? 'sells' then h.sells := v->>'sells'; end if;
-  -- the logo: a stored, unreleased photo slot of this caller's shop (so the shop is there first), or none
+  -- the logo: an unreleased photo slot of this caller's shop whose file is in the storage (so the shop is there
+  -- first), or none
   if p ? 'logo' then
     if jsonb_typeof(p->'logo') = 'null' then
       h.logo := null;
@@ -1852,9 +2039,10 @@ begin
          or not (v_logo is not distinct from o.logo
                  or exists (select 1 from market_photo_slots s
                              where s.name = v_logo and s.customer_id = p_id and s.shop_id = h.id
-                               and s.used_at is not null and s.gone_at is null)) then
+                               and s.gone_at is null and _mkt_photo_stored(s.name))) then
         raise exception 'MKT_INPUT: logo';
       end if;
+      perform _mkt_slots_settle('shop', h.id);
       h.logo := v_logo;
     end if;
   end if;
@@ -1991,7 +2179,7 @@ begin
   if _mkt_blocked(p_id, l.customer_id) then raise exception 'MKT_BLOCKED'; end if;
   if p_name_mode is null or p_name_mode not in ('short', 'none') then raise exception 'MKT_INPUT: name_mode'; end if;
   if p_name_mode = 'short' then
-    select _tm_short(_ask_text(c.name)) into v_name from customers c where c.id = p_id;
+    v_name := _mkt_short_name(p_id);
     if v_name is null then raise exception 'MKT_INPUT: name_mode'; end if;
   end if;
   v_body := _mkt_body(p_body);
@@ -2030,8 +2218,12 @@ begin
                                        where b.blocker_id = p_id
                                          and b.blocked_id = case when (x.t).buyer_id = p_id then (x.t).seller_id else (x.t).buyer_id end))
            order by (x.t).last_at desc, (x.t).id desc)
-      from (select t from market_threads t where t.buyer_id = p_id or t.seller_id = p_id
-             order by t.last_at desc, t.id desc limit 200) x), '[]'::jsonb));
+      -- the newest 200 of each side through its own index (buyer_id / seller_id, last_at desc), then the newest 200
+      -- of the two: an account is never both sides of one thread, and nothing sorts every thread it ever had
+      from (select u.t from ((select t from market_threads t where t.buyer_id = p_id order by t.last_at desc, t.id desc limit 200)
+                             union all
+                             (select t from market_threads t where t.seller_id = p_id order by t.last_at desc, t.id desc limit 200)) u
+             order by (u.t).last_at desc, (u.t).id desc limit 200) x), '[]'::jsonb));
 end $$;
 
 -- One thread and its messages (the latest hundred, or the hundred before message p_before), the oldest first. It
@@ -2190,6 +2382,16 @@ begin
   -- 0. an account that was closed (archived, 20261111200000) or merged into another sells nothing: its listings
   --    are deleted (the whole row kept in the trail; photos follow the 30 days, a draft's go at once) and its shop
   --    is taken down. The kept account of a merge lists again itself.
+  -- (the shop's row before its listings' rows: the order staff_market_shop_set locks them in, so the two never
+  --  wait on each other)
+  for h in select s.* from market_shops s join customers c on c.id = s.owner_id
+            where s.status in ('approved', 'pending') and (c.archived_at is not null or c.merged_into is not null) for update of s loop
+    update market_shops set status = case when h.status = 'approved' then 'suspended' else 'rejected' end,
+                            decided_by = 'system', decided_at = now(), decision_note = 'The account was closed.'
+     where id = h.id;
+    perform _mkt_event('system', null, 'shop', case when h.status = 'approved' then 'shop_suspend' else 'shop_reject' end,
+                       null, h.id, null, null, h.owner_id, jsonb_build_object('name_en', h.name_en, 'account_closed', true));
+  end loop;
   for l in select m.* from market_listings m join customers c on c.id = m.customer_id
             where m.status <> 'deleted' and (c.archived_at is not null or c.merged_into is not null) for update of m loop
     perform _mkt_event('system', null, 'listing', 'delete', l.id, l.shop_id, null, null, l.customer_id,
@@ -2203,14 +2405,6 @@ begin
       update market_listings set status = 'deleted', deleted_at = now(), hold_reason = null where id = l.id;
     end if;
     v_closed := v_closed + 1;
-  end loop;
-  for h in select s.* from market_shops s join customers c on c.id = s.owner_id
-            where s.status in ('approved', 'pending') and (c.archived_at is not null or c.merged_into is not null) for update of s loop
-    update market_shops set status = case when h.status = 'approved' then 'suspended' else 'rejected' end,
-                            decided_by = 'system', decided_at = now(), decision_note = 'The account was closed.'
-     where id = h.id;
-    perform _mkt_event('system', null, 'shop', case when h.status = 'approved' then 'shop_suspend' else 'shop_reject' end,
-                       null, h.id, null, null, h.owner_id, jsonb_build_object('name_en', h.name_en, 'account_closed', true));
   end loop;
 
   -- 1. past its date: expired
@@ -2241,6 +2435,17 @@ begin
     get diagnostics n = row_count; v_gone := v_gone + n;
     update market_listings set photos = '[]'::jsonb where id = l.id;
   end loop;
+  -- ... what the storage holds is the truth about a name: the slots whose file is there are stamped from it first
+  --     (on the hosted service the upload's own mark is rolled back, see _mkt_photo_take), so the two clean-ups
+  --     below never take a stored file for an unused name
+  perform _mkt_slots_settle('all');
+  -- ... and a file that arrived after its slot was seen gone (an upload still in flight when its draft was deleted
+  --     and the purge came by) is listed for removal again
+  update market_photo_slots s set purged_at = null
+   where s.purged_at is not null
+     and exists (select 1 from storage.objects f
+                  where f.bucket_id = 'market' and f.name in (s.name, regexp_replace(s.name, '\.(jpg|webp)$', '.w480.\1')));
+  get diagnostics n = row_count; v_gone := v_gone + n;
   -- ... files whose listing and shop are no more (their account was closed)
   update market_photo_slots s set gone_at = now() where s.gone_at is null and s.listing_id is null and s.shop_id is null;
   get diagnostics n = row_count; v_gone := v_gone + n;
@@ -2252,7 +2457,10 @@ begin
   get diagnostics n = row_count; v_gone := v_gone + n;
 
   -- 4. names issued and never used, after a day; rows of files seen gone 30 days ago
-  delete from market_photo_slots s where s.used_at is null and s.small_at is null and s.created_at < now() - interval '1 day';
+  delete from market_photo_slots s
+   where s.used_at is null and s.small_at is null and s.created_at < now() - interval '1 day'
+     and not exists (select 1 from storage.objects f
+                      where f.bucket_id = 'market' and f.name in (s.name, regexp_replace(s.name, '\.(jpg|webp)$', '.w480.\1')));
   get diagnostics n = row_count; v_slots := v_slots + n;
   delete from market_photo_slots s where s.purged_at < now() - interval '30 days';
   get diagnostics n = row_count; v_slots := v_slots + n;
@@ -2264,9 +2472,15 @@ begin
   -- 6. a file is waiting to be removed: the website does it
   if exists (select 1 from market_photo_slots s where s.gone_at is not null and s.purged_at is null)
      and exists (select 1 from pg_extension where extname = 'pg_net') then
-    perform net.http_post(url := 'https://micromobility.sa/api/market/purge', body := '{}'::jsonb,
-                          headers := '{"Content-Type":"application/json"}'::jsonb, timeout_milliseconds := 20000);
-    v_post := true;
+    -- a call that cannot be queued (pg_net's own trouble) must not undo the night's work: the files wait for the
+    -- next selling route's purge, or the next night
+    begin
+      perform net.http_post(url := 'https://micromobility.sa/api/market/purge', body := '{}'::jsonb,
+                            headers := '{"Content-Type":"application/json"}'::jsonb, timeout_milliseconds := 20000);
+      v_post := true;
+    exception when others then
+      v_post := false;
+    end;
   end if;
   return jsonb_build_object('closed', v_closed, 'expired', v_expired, 'deleted', v_deleted, 'photos_gone', v_gone,
                             'slots_cleared', v_slots, 'threads_deleted', v_threads, 'purge_asked', v_post);
@@ -2309,6 +2523,11 @@ begin
               and p.proname not in ('_mkt_photo_take', '_mkt_photo_gone') loop
     execute format('revoke all on function %s from public, anon, authenticated', r.sig);
   end loop;
+  -- the tables' own counters: nothing for a client either (default privileges hand a new sequence to the API roles)
+  for r in select c.oid::regclass::text as seq from pg_class c
+            where c.relnamespace = 'public'::regnamespace and c.relkind = 'S' and c.relname like 'market\_%' loop
+    execute format('revoke all on sequence %s from public, anon, authenticated', r.seq);
+  end loop;
 end $grants$;
 
 -- ── 8. Checks ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -2330,7 +2549,9 @@ begin
     'public.market_report(text,text,text,bigint,text,text)', 'public.market_block(text,text,bigint,boolean)',
     'public._mkt_photo_take(text,text)', 'public._mkt_photo_gone(text)', 'public._mkt_tick()',
     'public._mkt_enter(text,text,boolean)', 'public._mkt_limits(text)', 'public._mkt_established(text)',
-    'public._mkt_listing_removed()', 'public._mkt_listing_stamp()', 'public._mkt_category_guard()'] loop
+    'public._mkt_listing_removed()', 'public._mkt_listing_stamp()', 'public._mkt_category_guard()',
+    'public._mkt_slots_settle(text,bigint)', 'public._mkt_photo_stored(text)', 'public._mkt_short_name(text)',
+    'public._mkt_serial_lock(text)', 'public._mkt_account_lock(text)'] loop
     if not exists (select 1 from pg_proc p where p.oid = f::regprocedure and p.prosecdef
                      and exists (select 1 from unnest(coalesce(p.proconfig, '{}')) c where c like 'search_path=%')) then
       raise exception '% is missing, or lost SECURITY DEFINER or its search_path', f;
@@ -2376,6 +2597,18 @@ begin
       raise exception '% has a policy: it is reached through its functions only', tb;
     end if;
   end loop;
+  for r in select c.oid, c.relname from pg_class c
+            where c.relnamespace = 'public'::regnamespace and c.relkind = 'S' and c.relname like 'market\_%' loop
+    if has_sequence_privilege('anon', r.oid, 'usage') or has_sequence_privilege('anon', r.oid, 'select')
+       or has_sequence_privilege('authenticated', r.oid, 'usage') or has_sequence_privilege('authenticated', r.oid, 'select') then
+      raise exception 'the counter % is open to a client', r.relname;
+    end if;
+  end loop;
+  -- the grid reads each status through these two, and the filters to offer through the third
+  if to_regclass('public.market_listings_new') is null or to_regclass('public.market_listings_price') is null
+     or to_regclass('public.market_listings_category') is null then
+    raise exception 'an index the grid reads through is missing';
+  end if;
   if (select count(*) from pg_policies where schemaname = 'public' and tablename = 'market_categories') <> 2 then
     raise exception 'market_categories does not have its two read policies';
   end if;

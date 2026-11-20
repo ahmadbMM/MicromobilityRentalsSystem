@@ -30,6 +30,14 @@
 --     suspended seller's listings are never on sale;
 --   * the commission list and its count read every listing that was marked sold with a commission due, whatever
 --     happened to the listing afterwards (hidden, deleted by its seller): the commission is still due.
+-- After the review (2026-11-21), also:
+--   * staff take the account's own lock before they act on it (staff_market_seller_set, staff_market_shop_set,
+--     staff_market_listing_set), and the shops' lock before a shop is written: a publish cannot pass a suspension
+--     being written, and a CR number or a slug sent twice in the same instant is MKT_DUP;
+--   * bounded reads: staff_market_thread returns the newest 1,000 messages and "more" (the contract: all),
+--     staff_market_shops 500 shops, a listing's reports the newest 200;
+--   * staff_market_sellers' search does not offer an account that was deleted (archived) and never sold;
+--   * a product type that listings name cannot be made a sport (BAD_INPUT): its listings would have no sport.
 --
 -- Rollback: drop every function public.staff_market_* and the helpers _mkt_staff_seller(text),
 --   _mkt_staff_shop(public.market_shops), _mkt_staff_report(public.market_reports), _mkt_reported(public.market_reports),
@@ -107,8 +115,9 @@ language sql stable security definer set search_path = public as $$
     'shop', (select _mkt_staff_shop(h) from market_shops h where h.id = l.shop_id),
     'category_name_en', (select c.name_en from market_categories c where c.slug = l.category),
     'category_name_ar', (select c.name_ar from market_categories c where c.slug = l.category),
-    'reports', coalesce((select jsonb_agg(_mkt_staff_report(r) order by r.created_at desc, r.id desc)
-                           from market_reports r where r.listing_id = l.id), '[]'::jsonb),
+    'reports', coalesce((select jsonb_agg(_mkt_staff_report(x.r) order by (x.r).created_at desc, (x.r).id desc)
+                           from (select r from market_reports r where r.listing_id = l.id
+                                  order by r.created_at desc, r.id desc limit 200) x), '[]'::jsonb),
     'events', coalesce((select jsonb_agg(jsonb_build_object('id', e.id, 'at', e.at, 'actor_kind', e.actor_kind, 'actor', e.actor,
                                                             'action', e.action, 'detail', e.detail) order by e.at desc, e.id desc)
                           from (select * from market_events x where x.listing_id = l.id order by x.at desc, x.id desc limit 100) e), '[]'::jsonb),
@@ -236,13 +245,18 @@ end $$;
 create or replace function public.staff_market_listing_set(p_listing bigint, p_action text, p_note text default null) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare l market_listings%rowtype; v_who text; v_note text := nullif(_ask_text(p_note), ''); v_to text;
-        v_stopped boolean;
+        v_stopped boolean; v_cust text;
 begin
   if not _staff_mod('market', true) then raise exception 'FORBIDDEN' using errcode = '42501'; end if;
   if p_action is null or p_action not in ('hide', 'restore', 'release', 'check', 'uncheck') then
     raise exception 'BAD_INPUT' using errcode = '22023';
   end if;
   v_who := _ask_who();
+  -- the seller's own lock before the row (see _mkt_account_lock): a restore or a release reads whether the seller
+  -- is suspended, and must not pass a suspension being written at the same moment
+  select m.customer_id into v_cust from market_listings m where m.id = p_listing;
+  if not found then raise exception 'MKT_GONE'; end if;
+  perform _mkt_account_lock(v_cust);
   select * into l from market_listings where id = p_listing for update;
   if not found then raise exception 'MKT_GONE'; end if;
   v_stopped := l.customer_id is not null and _mkt_sell_stopped(l.customer_id);
@@ -404,8 +418,11 @@ begin
                  from customers c where c.id = t.seller_id),
     'buyer_wa_at', t.buyer_wa_at, 'seller_wa_at', t.seller_wa_at,
     'blocked', _mkt_blocked(t.buyer_id, t.seller_id), 'created_at', t.created_at,
-    'messages', coalesce((select jsonb_agg(jsonb_build_object('id', m.id, 'side', m.side, 'body', m.body, 'at', m.created_at) order by m.id)
-                            from market_messages m where m.thread_id = t.id), '[]'::jsonb));
+    -- the newest 1,000, oldest first (a thread can hold 400 a day for a year); more: older ones were left out
+    'messages', coalesce((select jsonb_agg(jsonb_build_object('id', z.id, 'side', z.side, 'body', z.body, 'at', z.created_at) order by z.id)
+                            from (select m.id, m.side, m.body, m.created_at from market_messages m
+                                   where m.thread_id = t.id order by m.id desc limit 1000) z), '[]'::jsonb),
+    'more', (select count(*) > 1000 from (select 1 from market_messages m where m.thread_id = t.id limit 1001) z));
 end $$;
 
 -- ── 6. Sellers ───────────────────────────────────────────────────────────────────────────────────────────────────
@@ -427,7 +444,7 @@ begin
   with f as (
     select c.id, c.name, s.updated_at
       from customers c left join market_sellers s on s.customer_id = c.id
-     where (s.customer_id is not null or (v_q is not null and c.merged_into is null))
+     where (s.customer_id is not null or (v_q is not null and c.merged_into is null and c.archived_at is null))
        and (v_status = 'all' or coalesce(s.status, 'ok') = v_status)
        and (v_q is null or c.name ilike v_like or c.id = v_q
             or (char_length(v_qd) >= 4 and regexp_replace(coalesce(c.phone, ''), '[^0-9]', '', 'g') like '%' || v_qd || '%')))
@@ -453,6 +470,9 @@ begin
   end if;
   if p_customer is null or not exists (select 1 from customers c where c.id = p_customer) then raise exception 'MKT_GONE'; end if;
   v_who := _ask_who();
+  -- the account's own lock (see _mkt_account_lock): a suspension holds what is on sale, and a publish of the same
+  -- moment must wait for it and then be refused, not slip between the two
+  perform _mkt_account_lock(p_customer);
   insert into market_sellers (customer_id) values (p_customer) on conflict (customer_id) do nothing;
   select * into s from market_sellers where customer_id = p_customer for update;
   if p_action = 'note' then
@@ -500,14 +520,16 @@ begin
     raise exception 'BAD_INPUT' using errcode = '22023';
   end if;
   return jsonb_build_object(
-    'items', coalesce((select jsonb_agg(_mkt_staff_shop(h) order by (h.status = 'pending') desc, h.updated_at desc, h.id desc)
-                         from market_shops h where p_status is null or h.status = p_status), '[]'::jsonb),
+    'items', coalesce((select jsonb_agg(_mkt_staff_shop(x.h) order by ((x.h).status = 'pending') desc, (x.h).updated_at desc, (x.h).id desc)
+                         from (select h from market_shops h where p_status is null or h.status = p_status
+                                order by (h.status = 'pending') desc, h.updated_at desc, h.id desc limit 500) x), '[]'::jsonb),
     'total', (select count(*) from market_shops h where p_status is null or h.status = p_status));
 end $$;
 
 create or replace function public.staff_market_shop_set(p_shop bigint, p_action text, p jsonb default '{}'::jsonb) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare h market_shops%rowtype; o market_shops%rowtype; v jsonb; v_who text; v_note text; v_n integer := 0; v_slug text; k text;
+        v_owner text;
 begin
   if not _staff_mod('market', true) then raise exception 'FORBIDDEN' using errcode = '42501'; end if;
   if p_action is null or p_action not in ('approve', 'reject', 'suspend', 'restore', 'edit') then
@@ -520,6 +542,13 @@ begin
     raise exception 'BAD_INPUT' using errcode = '22023';
   end if;
   v_who := _ask_who();
+  -- the owner's own lock (an approval or a suspension moves or holds the owner's listings: a publish of the same
+  -- moment waits for it), then the shops' lock (one shop is written at a time, so a CR number or a slug sent twice
+  -- in the same instant is MKT_DUP, not a bare unique-violation), then the row: the order market_shop_apply takes
+  select m.owner_id into v_owner from market_shops m where m.id = p_shop;
+  if not found then raise exception 'MKT_GONE'; end if;
+  perform _mkt_account_lock(v_owner);
+  perform pg_advisory_xact_lock(hashtextextended('mkt:shops', 0));
   select * into h from market_shops where id = p_shop for update;
   if not found then raise exception 'MKT_GONE'; end if;
   o := h;
@@ -662,7 +691,7 @@ end $$;
 -- stays a sport. Nothing is deleted: visible false takes a category out of the forms and the filters.
 create or replace function public.staff_market_category_save(p jsonb) returns jsonb
 language plpgsql security definer set search_path = public as $$
-declare c market_categories%rowtype; v_slug text; v_new boolean; v_who text; n numeric;
+declare c market_categories%rowtype; v_slug text; v_new boolean; v_who text; n numeric; v_was text;
 begin
   if not _staff_mod('market', true) then raise exception 'FORBIDDEN' using errcode = '42501'; end if;
   if p is null or jsonb_typeof(p) <> 'object' or jsonb_typeof(p->'slug') is distinct from 'string' then
@@ -675,6 +704,7 @@ begin
   v_who := _ask_who();
   select * into c from market_categories where slug = v_slug for update;
   v_new := not found;
+  v_was := c.parent;
   if v_new then
     c.slug := v_slug; c.sort := 0; c.visible := true; c.tier := 'open'; c.needs_serial := false; c.min_photos := 1;
     c.facts := '[]'::jsonb;
@@ -712,6 +742,12 @@ begin
      or (c.parent is not null and (c.parent = c.slug
            or not exists (select 1 from market_categories s where s.slug = c.parent and s.parent is null)
            or exists (select 1 from market_categories k where k.parent = c.slug))) then
+    raise exception 'BAD_INPUT' using errcode = '22023';
+  end if;
+  -- a product type that listings name stays a product type: made a sport, its listings would have no sport (the
+  -- pages read a listing's sport as never null) and could not be edited
+  if not v_new and v_was is not null and c.parent is null
+     and exists (select 1 from market_listings l where l.category = c.slug) then
     raise exception 'BAD_INPUT' using errcode = '22023';
   end if;
   insert into market_categories (slug, parent, name_en, name_ar, sort, visible, tier, needs_serial, min_photos, facts)
@@ -787,6 +823,10 @@ begin
   end if;
   if to_regclass('public.market_listings') is null or to_regprocedure('public._mkt_move(public.market_listings,text,integer,text,text)') is null then
     raise exception '20261121300000_marketplace is not applied';
+  end if;
+  -- the staff functions take the account's lock through a helper of the first file as it stands after the review
+  if to_regprocedure('public._mkt_account_lock(text)') is null then
+    raise exception '20261121300000_marketplace is an older copy (no _mkt_account_lock): apply the current one first';
   end if;
 end $chk$;
 
