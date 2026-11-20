@@ -2456,7 +2456,7 @@
     :is(#tab-queue,#tab-waitlist) .rq-fill-full{width:var(--rq-w);background:var(--red-fill);}
     :is(#tab-queue,#tab-waitlist) .rq-sesssel{width:100%;font-size:var(--sf-fs-md);height:44px;}
     :is(#tab-queue,#tab-waitlist) .rq-cx{display:flex;align-items:center;gap:10px;padding:9px 14px;margin-bottom:6px;background:rgba(var(--red-rgb),.07);border:1px solid rgba(var(--red-rgb),.2);border-radius:var(--sf-r-xs);font-size:var(--sf-fs-xs);}
-    :is(#tab-queue,#tab-waitlist) .rq-cxh{font-weight:600;color:var(--red);}
+    :is(#tab-queue,#tab-waitlist) .rq-cxh{font-weight:600;color:var(--red);white-space:nowrap;}
     :is(#tab-queue,#tab-waitlist) .rq-cxr{margin-inline-start:auto;background:rgba(var(--tint-rgb),.07);padding:2px 8px;border-radius:var(--sf-r-xs);color:var(--muted-l);font-size:var(--staff-fs-sm,12px);}
     :is(#tab-queue,#tab-waitlist) #staff-refresh-label.sync-unsent{color:var(--orange);font-weight:700;}
     :is(#tab-queue,#tab-waitlist) .rq-cxx{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:var(--sf-fs-md);line-height:1;padding:0;margin-inline-start:auto;flex-shrink:0;}
@@ -5809,6 +5809,10 @@ body.view-staff .q-card.row-reserved{background:rgba(29,78,216,.04);border-color
 /* Why a rider cancelled: under the badge on the roster, in Bookings & history, in Analytics */
 .cx-why{font-size:var(--staff-fs-sm,12px);color:var(--muted);font-weight:600;margin-top:3px;max-width:200px;white-space:normal;overflow-wrap:anywhere;}
 .ah-rider-sub .cx-why{display:inline;margin:0;font-size:inherit;}
+/* When it was cancelled ("Cancelled: 20 Nov 2026, 14:32"), beside the badge wherever a cancelled booking shows (2026-11-20) */
+.cx-at{font-size:var(--staff-fs-sm,12px);color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
+div.cx-at{margin-top:3px;}
+.ah-rider-sub .cx-at{font-size:inherit;}
 .cx-pick{margin-top:12px;font-weight:600;color:var(--text);}
 .cx-pick-lbl{font-size:var(--staff-fs-sm,12px);font-weight:600;letter-spacing:0;text-transform:none;color:var(--muted);margin-bottom:6px;}
 .cx-chips{display:flex;flex-wrap:wrap;gap:6px;}
@@ -10346,6 +10350,7 @@ body:not(.view-staff) #tab-myrides .mr-cx-top{display:flex;align-items:center;ju
 body:not(.view-staff) #tab-myrides .mr-cx-n{min-width:0;font-size:var(--fs-15);font-weight:600;color:var(--ink-2);}
 body:not(.view-staff) #tab-myrides .mr-cx-chip{flex:none;padding:3px 10px;border-radius:999px;background:var(--card);border:1px solid var(--red-line);color:var(--red);font-size:var(--fs-12);font-weight:600;}
 body:not(.view-staff) #tab-myrides .mr-cx-w{margin-top:3px;font-size:var(--fs-13);color:var(--ink-2);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) #tab-myrides .mr-cx-at{margin-top:2px;font-size:var(--fs-12);color:var(--ink-3);font-variant-numeric:tabular-nums;}
 /* painted from the phone's own copy: a mark beside the title, no sentence */
 body:not(.view-staff) #tab-myrides .mr-title{display:flex;align-items:center;gap:10px;}
 body:not(.view-staff) #tab-myrides .mr-saved{display:inline-flex;flex:none;width:22px;height:22px;color:var(--ink-3);}

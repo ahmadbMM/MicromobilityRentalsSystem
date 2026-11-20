@@ -6604,6 +6604,20 @@ function statusBadgeFor(e){
     :e.cancelledBy==='customer'?'statusCancelledByCustomer':'statusCancelled';
   return`<span class="status-badge st-cancelled ${STATUS_CLS.cancelled||'badge-done'}">${t(k)}</span>`;
 }
+// When a booking was cancelled, said as the In / Out lines say theirs: "Cancelled: 20 Nov 2026, 14:32" (the user, 2026-11-20:
+// "whenever anyone cancels their booking show the time of cancellation too"). The server's own stamp (cancelled_at, which the
+// status trigger of 20260928200000 sets), so every device shows the same time. A booking, or a party's bookings (the latest
+// cancel). A row cancelled before that column existed has no stamp and says nothing; one taken back off cancelled neither.
+function _cxAtMs(x){let at=0;(Array.isArray(x)?x:[x]).forEach(e=>{const ms=e&&e.status==='cancelled'&&e.cancelledAt?Date.parse(e.cancelledAt)||0:0;if(ms>at)at=ms;});return at;}
+function _cxAtTxt(x){const at=_cxAtMs(x),s=at?fmtStamp(new Date(at).toISOString()):'';return s?t('statusCancelled')+': '+s:'';}
+// Short, where a line is narrow and the badge beside it already says Cancelled (the roster's second line, a chip): "15 Oct,
+// 14:32", or the time alone (hm) where it is today's news; the whole stamp on hover.
+const _cxAtF=new Map();
+function _cxAtShort(x,hm){
+  const at=_cxAtMs(x);if(!at)return'';
+  try{const L=_locale(),k=L+(hm?'|t':'');let f=_cxAtF.get(k);if(!f){f=new Intl.DateTimeFormat(L,{timeZone:KSA_TZ,...(hm?{}:{day:'numeric',month:'short'}),hour:'2-digit',minute:'2-digit',hour12:false});_cxAtF.set(k,f);}return f.format(new Date(at));}catch(_){return'';}
+}
+function _cxAtHtml(x,cls){const s=_cxAtShort(x);return s?`<span class="${cls||'cx-at'}" title="${esc(_cxAtTxt(x))}">${_artIcon('clock',11)} <bdi>${esc(s)}</bdi></span>`:'';}
 function esc(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 // esc, with each phone number, booking code and amount in the text isolated (<bdi>), so "+966 5…", "BD-89E0AB7D" and "SAR 75" keep
 // their order inside an Arabic line (staff round s10, item 46): free text such as a History log line.
@@ -10726,7 +10740,7 @@ function _doorPaint(){
   const rows=Q.filter(e=>e.sessionId===D.sid),inn=rows.filter(e=>e.status==='active'||e.status==='done').sort((a,b)=>String(b.checkedInAt||'').localeCompare(String(a.checkedInAt||''))),left=rows.filter(e=>e.status==='waiting').length;
   const fig=(n,k)=>`<div class="zg-fig"><b>${n}</b>${T(k)}</div>`;
   put('zg-figs',D.sid&&S.dataLoaded?`<div class="zg-figs" role="status">${fig(inn.length,'zgArrived')}${fig(left,'zgToCome')}${fig(inn.length+left,'statExpected')}</div>`:'');
-  put('zg-hits',!D.hits?'':D.hits.length?`<ul class="zg-list">${D.hits.map(e=>`<li><button type="button" class="zg-row" data-on-click="${_on('_doorOpen',e.id)}"><span class="zg-rn">${num(e)}</span>${statusBadgeFor(e)}</button></li>`).join('')}</ul>`:`<p class="zg-none" role="status">${T('zgNoMatch')}</p>`);
+  put('zg-hits',!D.hits?'':D.hits.length?`<ul class="zg-list">${D.hits.map(e=>`<li><button type="button" class="zg-row" data-on-click="${_on('_doorOpen',e.id)}"><span class="zg-rn">${num(e)}</span>${statusBadgeFor(e)}${_cxAtHtml(e)}</button></li>`).join('')}</ul>`:`<p class="zg-none" role="status">${T('zgNoMatch')}</p>`);
   // The card: the rider, then the rest of the party, each with Check in or what sends them to the desk.
   const e=D.open&&_qGet(D.open),list=e?_doorParty(e):[],ready=list.filter(_doorReady);
   put('zg-card',!e?'':`<section class="zg-card" aria-labelledby="zg-card-t"><div class="zg-top"><h2 id="zg-card-t" class="zg-h2">${list.length>1?esc(t('zgParty').replace('{0}',list.length)):T('gsKindBooking')}</h2>
@@ -17478,6 +17492,7 @@ function _rowMenu(id,items,title,who){
     const s=_sessGet(e.sessionId),out=[];
     if(!party){
       out.push(statusBadgeFor(e));
+      if(_cxAtTxt(e))out.push(_cxAtHtml(e,'rmt-chip')); // when it was cancelled (2026-11-20)
       if(_apprSessIds.has(e.sessionId)&&(e.status==='waiting'||e.status==='waitlist')){const a=_apprOf(e);if(a==='pending'||a==='rejected')out.push(`<span class="${a==='rejected'?'rq-apchip-rej':'rq-apchip'}">${t(a==='rejected'?'filterRejected':'apprPendingChip')}</span>`);} // a request not approved yet, as the Status cell says it
       if(s&&_needsBike(s))out.push(typeBadge(resolvedType(e)));
       const ni=_incRows('booking_id',e.id).length;if(ni)out.push(`<span class="rmt-chip rmt-inc">${_artIcon('warn',11)} ${esc(t('incdTitle'))} ${ni}</span>`); // round s10
@@ -22418,6 +22433,7 @@ function renderBookingTicket(entries,opts){
       ${(e.status==='done'&&e.rideDuration)?`<div class="cu-tr-dur"> ${t('colDuration')}: ${fmtDur(e.rideDuration)}</div>`:''}
       ${(e.status==='done'&&e.checkedInAt)?`<div class="cu-tr-in">${t('histInLabel')}: ${fmtStamp(e.checkedInAt)}</div>`:''}
       ${(e.status==='done'&&e.checkedOutAt)?`<div class="cu-tr-out">${t('histOutLabel')}: ${fmtStamp(e.checkedOutAt)}</div>`:''}
+      ${_cxAtTxt(e)?`<div class="cu-tr-out">${esc(_cxAtTxt(e))}</div>`:''}
       ${(_comm||_isBlood(sess)||_ygFree)?'':`<div class="cu-tr-money">
         <bdi class="cu-fw800-13 ${e.paid?'cu-c-green':'cu-c-mutedl'}">${esc(_sar(_pr))}</bdi>
         ${payBadge}
@@ -24514,6 +24530,7 @@ function _mrCxRow(g){
   return`<div class="mr-cx" id="mrcx-${esc(_wlKey(p))}">
     <div class="mr-cx-top"><span class="mr-cx-n">${esc(sess?_evName(sess):t('landCommTitle'))}</span><span class="mr-cx-chip">${esc(chip)}</span></div>
     <div class="mr-cx-w"><bdi>${esc(dayLabel(p.sessionDay))} ${esc(shortDate(p.sessionDate||p.sessionId))}</bdi>${sess?` · <bdi>${sessionTime(sess)}</bdi>`:''}</div>
+    ${_cxAtTxt(g)?`<div class="mr-cx-at">${esc(_cxAtTxt(g))}</div>`:''}
   </div>`;
 }
 // Past rides as Apple Wallet keeps passes (the owner, 2026-10-31: "make the past bookings be sorted the
@@ -46474,7 +46491,7 @@ function renderQRow(e){
         ${_qc.bike?`<td class="rq-vm">${bikesHeld.length?bikesHeld.map(b=>`<span class="rq-bkname">${esc(b)}</span>`).join('<br>'):'<span class="rq-mut">—</span>'}</td>`:''}
         ${_qc.money?`<td class="rq-vm rq-price rq-num">${priceSpan}</td>`:''}
         ${_qc.money?`<td class="rq-vm rq-pcnt">${_freeSessIds.has(primary.sessionId)?'<span class="rq-mut">—</span>':`${paidCount}/${activeGroup.length} ${t('paidLabel')}`}</td>`:''}
-        <td class="rq-vm rq-st rq-stc"><div class="rq-st1">${group.some(e=>e.status==='active')?statusBadge('active'):group.some(_isReserved)?`<span class="status-badge st-reserved badge-reserved">${t('statusReserved')}</span>`:group.some(e=>e.status==='waiting'||e.status==='waitlist')?statusBadge(group.some(e=>e.status==='waiting')?'waiting':'waitlist'):statusBadgeFor(primary)}${_dntGrp(group)}</div>${primary.status==='waiting'&&lp?`<div class="rq-st2">${posCell}</div>`:''}</td>
+        <td class="rq-vm rq-st rq-stc"><div class="rq-st1">${group.some(e=>e.status==='active')?statusBadge('active'):group.some(_isReserved)?`<span class="status-badge st-reserved badge-reserved">${t('statusReserved')}</span>`:group.some(e=>e.status==='waiting'||e.status==='waitlist')?statusBadge(group.some(e=>e.status==='waiting')?'waiting':'waitlist'):statusBadgeFor(primary)}${_dntGrp(group)}</div>${primary.status==='waiting'&&lp?`<div class="rq-st2">${posCell}</div>`:primary.status==='cancelled'&&_cxAtTxt(group)?`<div class="rq-st2">${_cxAtHtml(group)}</div>`:''}</td>
         <td class="rq-vm rq-mng"><div class="actions-cell rq-acts">${_pBtn}${partyMenu}</div>${_pErr}</td>
       </tr>`;
     }
@@ -46872,7 +46889,7 @@ function renderQRow(e){
       if(!recent.length)return'';
       return`<div class="rq-mb14">
         ${recent.map(c=>{const why=c.cancelReason?_cancelReasonText(c):'';return`<div class="rq-cx">
-          <span class="rq-cxh">${t('filterCancelled')}</span>
+          <span class="rq-cxh">${t('filterCancelled')}${_cxAtShort(c,true)?` <bdi title="${esc(_cxAtTxt(c))}">${esc(_cxAtShort(c,true))}</bdi>`:''}</span>
           <span class="rq-b700">#${esc(c.queueNum??'')} ${esc(c.name||'')}</span>
           <span class="rq-mut">${esc(dayLabel(c.sessionDay)+' '+shortDate(c.sessionDate))}</span>
           ${why?`<span class="rq-cxr">${esc(why)}</span>`:''}
@@ -54382,6 +54399,7 @@ function statusCellHtml(e,pre){
     held?`<span class="rq-held" title="${esc(held)}">${esc(held)}</span>`:'',
     _ltrMark(e),
     _n6bByLine(e),
+    _cxAtHtml(e), // when it was cancelled (2026-11-20)
     e.status==='cancelled'&&e.cancelReason?`<span class="cx-why" title="${esc(t('cancelReasonTitle')+': '+_cancelReasonText(e))}">${esc(_cancelReasonText(e))}</span>`:'',
     e.deskNote?`<span class="rq-dnote" title="${esc(t('deskNoteTitle')+': '+e.deskNote)}">${_artIcon('note',11)} ${esc(e.deskNote)}</span>`:'',
     _n6pNote(e)].filter(Boolean); // the account's newest staff note (People, 2026-11-06)
@@ -56929,7 +56947,7 @@ function _vlStaffPaint(){
       <tbody>${rowsT.length?rowsT.map(e=>{const v=_vlOf(e)||{},mate=_vlMate(e),stt=_vlStateOf(e);
         return`<tr class="${_vlDblCls(e).trim()}"><td>#${e.queueNum||''}</td><td><bdi>${esc(_vlName(e))}</bdi></td><td>${esc(_vlRaceTxt(v.race)||'—')}</td><td>${esc(_vlDivTxt(v.div)||'—')}</td>
           <td>${v.team&&_vlIsDbl(v.race)?`<span class="vl-dbl-chip">${esc(t('vlDblTeam'))}</span> <span dir="ltr">${esc(v.team)}</span>`:''}</td><td>${mate?`<bdi>${esc(_vlName(mate))}</bdi>`:_vlIsDbl(v.race)?`<span class="vl-wait">${esc(_vlStTxt(stt))}</span>`:''}</td>
-          ${ar?`<td><bdi>${esc(v.email||'')}</bdi></td><td dir="ltr">${esc(v.phone||'')}</td>`:`<td>${esc(v.shirt||'—')}</td><td>${esc(_vlT5Txt(v.t5k)||'')}</td>`}<td>${statusBadgeFor(e)}</td><td>${e.paid?t('paidLabel'):(Number(e.price)>0?esc(_sar(e.price)):'')}</td>
+          ${ar?`<td><bdi>${esc(v.email||'')}</bdi></td><td dir="ltr">${esc(v.phone||'')}</td>`:`<td>${esc(v.shirt||'—')}</td><td>${esc(_vlT5Txt(v.t5k)||'')}</td>`}<td>${statusBadgeFor(e)}${_cxAtTxt(e)?`<div class="cx-at">${esc(_cxAtTxt(e))}</div>`:''}</td><td>${e.paid?t('paidLabel'):(Number(e.price)>0?esc(_sar(e.price)):'')}</td>
           <td class="vl-st-acts"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vlAthleteEdit",e.id)}">${ICON_PENCIL} ${t('editBtn')}</button>${['pair','noteam','wait'].includes(stt)?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vlPairOpen",e.id)}">${t('vlPairBtn')}</button>`:''}</td></tr>`;}).join('')
         :`<tr><td colspan="11" class="vl-st-none">${t('vlNoAthletes')}</td></tr>`}</tbody></table></div>`;
   }else if(st.tab==='teams'){
@@ -65450,7 +65468,7 @@ function _ahRender(force){
       const bike=getAssignedBikes(x)[0]||null;
       const price=Number(x.price??DEFAULT_PRICE)||0;
       const stars=x.ratingExp||x.ratingBike;
-      const sub=[typeLabel(resolvedType(x)),bike?esc(bike.name):'',stars?`★ ${stars}/10`:'',x.status==='cancelled'&&x.cancelReason?`<span class="cx-why">${esc(_cancelReasonText(x))}</span>`:''].filter(Boolean).join(' · ');
+      const sub=[typeLabel(resolvedType(x)),bike?esc(bike.name):'',stars?`★ ${stars}/10`:'',_cxAtHtml(x),x.status==='cancelled'&&x.cancelReason?`<span class="cx-why">${esc(_cancelReasonText(x))}</span>`:''].filter(Boolean).join(' · ');
       const canEdit=_ahIsAhead(x);
       return`<div class="ah-rider">
         <span class="queue-num-cell ah-num">#${esc(x.queueNum)}</span>
@@ -70586,6 +70604,7 @@ function renderHistory(_resultsOnly){
       <td class="hist-dur">${fmtDur(e.rideDuration)}
         ${e.checkedInAt?`<div class="hist-sub3">${t('histInLabel')}: ${fmtStamp(e.checkedInAt)}</div>`:''}
         ${e.checkedOutAt?`<div class="hist-sub">${t('histOutLabel')}: ${fmtStamp(e.checkedOutAt)}</div>`:''}
+        ${_cxAtTxt(e)?`<div class="hist-sub">${esc(_cxAtTxt(e))}</div>`:''}
       </td>
       <td class="hist-act"><div class="actions-cell">
         ${e.status==='removed'
