@@ -12,17 +12,17 @@
 // The pop-up sits under the forced pages (the rating, a waiver), which cover it; the lap is sent whatever is on screen.
 // Hand-written, not generated; the build stamps its address (LAP_V). Its words are here, in all ten languages.
 /* global S, sb, esc, _on, getSession, _cssv, _cuIc, _bdgMedal, _sbReady, openAuthModal, _lapName, _lapStatsPaint, LAP_KEY */
-const LAP_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
+const LAP_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms'];
 const LAP_T = {
-  title: ['Circuit challenge', 'تحدي الحلبة', 'Défi du circuit', 'Reto del circuito', 'Desafio do circuito', 'سرکٹ چیلنج', 'सर्किट चुनौती', 'Hamon sa circuit', 'सर्किट चुनौती', 'সার্কিট চ্যালেঞ্জ'],
-  laps: ['laps', 'لفة', 'tours', 'vueltas', 'voltas', 'چکر', 'लैप', 'lap', 'ल्याप', 'ল্যাপ'],
-  ofLaps: ['{0} of {1} laps', '{0} من {1} لفة', '{0} tours sur {1}', '{0} de {1} vueltas', '{0} de {1} voltas', '{1} میں سے {0} چکر', '{1} में से {0} लैप', '{0} sa {1} lap', '{1} मध्ये {0} ल्याप', '{1}টির মধ্যে {0}টি ল্যাপ'],
-  counted: ['Lap counted', 'تم احتساب اللفة', 'Tour compté', 'Vuelta contada', 'Volta contada', 'چکر شمار ہو گیا', 'लैप गिन लिया गया', 'Nabilang ang lap', 'ल्याप गणना भयो', 'ল্যাপ গোনা হয়েছে'],
-  kept: ['Lap saved. It will be sent when you are back online.', 'تم حفظ اللفة. ستُرسل عند عودة الاتصال.', 'Tour enregistré. Il sera envoyé au retour de la connexion.', 'Vuelta guardada. Se enviará cuando vuelva la conexión.', 'Volta salva. Será enviada quando a conexão voltar.', 'چکر محفوظ ہو گیا۔ کنکشن بحال ہوتے ہی بھیج دیا جائے گا۔', 'लैप सहेज लिया गया। कनेक्शन लौटते ही भेज दिया जाएगा।', 'Na-save ang lap. Ipapadala ito kapag may koneksyon na ulit.', 'ल्याप सुरक्षित भयो। जडान फर्किएपछि पठाइनेछ।', 'ল্যাপ সংরক্ষিত হয়েছে। সংযোগ ফিরে এলে পাঠানো হবে।'],
-  done: ['Challenge complete', 'اكتمل التحدي', 'Défi réussi', 'Reto completado', 'Desafio concluído', 'چیلنج مکمل', 'चुनौती पूरी', 'Tapos na ang hamon', 'चुनौती पूरा भयो', 'চ্যালেঞ্জ সম্পূর্ণ'],
-  badge: ['Season badge earned', 'حصلت على شارة الموسم', 'Badge de la saison obtenu', 'Insignia de la temporada conseguida', 'Emblema da temporada conquistado', 'سیزن کا بیج حاصل ہو گیا', 'सीज़न का बैज मिल गया', 'Nakuha ang badge ng season', 'सिजनको ब्याज प्राप्त भयो', 'মৌসুমের ব্যাজ অর্জিত'],
-  signIn: ['Sign in', 'تسجيل الدخول', 'Se connecter', 'Iniciar sesión', 'Entrar', 'لاگ اِن کریں', 'लॉग इन करें', 'Mag-log in', 'लग इन गर्नुहोस्', 'লগ ইন'], // the app's own words (authLoginBtn): the button opens that page
-  close: ['Close', 'إغلاق', 'Fermer', 'Cerrar', 'Fechar', 'بند کریں', 'बंद करें', 'Isara', 'बन्द गर्नुहोस्', 'বন্ধ করুন'],
+  title: ['Circuit challenge', 'تحدي الحلبة', 'Défi du circuit', 'Reto del circuito', 'Desafio do circuito', 'سرکٹ چیلنج', 'सर्किट चुनौती', 'Hamon sa circuit', 'सर्किट चुनौती', 'সার্কিট চ্যালেঞ্জ', 'Cabaran litar'],
+  laps: ['laps', 'لفة', 'tours', 'vueltas', 'voltas', 'چکر', 'लैप', 'lap', 'ल्याप', 'ল্যাপ', 'pusingan'],
+  ofLaps: ['{0} of {1} laps', '{0} من {1} لفة', '{0} tours sur {1}', '{0} de {1} vueltas', '{0} de {1} voltas', '{1} میں سے {0} چکر', '{1} में से {0} लैप', '{0} sa {1} lap', '{1} मध्ये {0} ल्याप', '{1}টির মধ্যে {0}টি ল্যাপ', '{0} daripada {1} pusingan'],
+  counted: ['Lap counted', 'تم احتساب اللفة', 'Tour compté', 'Vuelta contada', 'Volta contada', 'چکر شمار ہو گیا', 'लैप गिन लिया गया', 'Nabilang ang lap', 'ल्याप गणना भयो', 'ল্যাপ গোনা হয়েছে', 'Pusingan dikira'],
+  kept: ['Lap saved. It will be sent when you are back online.', 'تم حفظ اللفة. ستُرسل عند عودة الاتصال.', 'Tour enregistré. Il sera envoyé au retour de la connexion.', 'Vuelta guardada. Se enviará cuando vuelva la conexión.', 'Volta salva. Será enviada quando a conexão voltar.', 'چکر محفوظ ہو گیا۔ کنکشن بحال ہوتے ہی بھیج دیا جائے گا۔', 'लैप सहेज लिया गया। कनेक्शन लौटते ही भेज दिया जाएगा।', 'Na-save ang lap. Ipapadala ito kapag may koneksyon na ulit.', 'ल्याप सुरक्षित भयो। जडान फर्किएपछि पठाइनेछ।', 'ল্যাপ সংরক্ষিত হয়েছে। সংযোগ ফিরে এলে পাঠানো হবে।', 'Pusingan disimpan. Ia akan dihantar apabila anda kembali dalam talian.'],
+  done: ['Challenge complete', 'اكتمل التحدي', 'Défi réussi', 'Reto completado', 'Desafio concluído', 'چیلنج مکمل', 'चुनौती पूरी', 'Tapos na ang hamon', 'चुनौती पूरा भयो', 'চ্যালেঞ্জ সম্পূর্ণ', 'Cabaran selesai'],
+  badge: ['Season badge earned', 'حصلت على شارة الموسم', 'Badge de la saison obtenu', 'Insignia de la temporada conseguida', 'Emblema da temporada conquistado', 'سیزن کا بیج حاصل ہو گیا', 'सीज़न का बैज मिल गया', 'Nakuha ang badge ng season', 'सिजनको ब्याज प्राप्त भयो', 'মৌসুমের ব্যাজ অর্জিত', 'Lencana musim diperoleh'],
+  signIn: ['Sign in', 'تسجيل الدخول', 'Se connecter', 'Iniciar sesión', 'Entrar', 'لاگ اِن کریں', 'लॉग इन करें', 'Mag-log in', 'लग इन गर्नुहोस्', 'লগ ইন', 'Log masuk'], // the app's own words (authLoginBtn): the button opens that page
+  close: ['Close', 'إغلاق', 'Fermer', 'Cerrar', 'Fechar', 'بند کریں', 'बंद करें', 'Isara', 'बन्द गर्नुहोस्', 'বন্ধ করুন', 'Tutup'],
 };
 function _lpT(k) {
   const row = LAP_T[k] || [''], i = LAP_LANGS.indexOf(S.lang);

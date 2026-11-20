@@ -236,7 +236,7 @@ async function storeAsked(supa, service, customerId, no, key) {
 // Every other browser, and an older Safari, hands the same JSON to service-worker.js, which reads it as well as the old
 // {title, body, url, tag}. lang comes with the row or the staff call; without one, Arabic or Urdu script says so, and
 // anything else is left to the browser (dir auto).
-const PUSH_LANGS = new Set(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']);
+const PUSH_LANGS = new Set(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']);
 function pushLang(lang, text) {
   const l = String(lang || '').toLowerCase().slice(0, 2);
   if (PUSH_LANGS.has(l)) return l;

@@ -114,7 +114,7 @@ test.describe('@staff:bookings told of a place', () => {
     const t = String(await page.evaluate(`_remDefault('wl_moved','en',_sessGet('${today}'))`));
     expect(t).toContain('{first_name}');
     expect(t.replace(/\{[a-z_]+\}/g, '')).not.toMatch(/\b(ride|bike|cycling)\b/i);
-    const all = await page.evaluate(`['en','ar','fr','es','pt','ur','hi','tl','ne','bn'].map(l=>_remDefault('wl_moved',l,_sessGet('${today}')))`) as string[];
+    const all = await page.evaluate(`['en','ar','fr','es','pt','ur','hi','tl','ne','bn','ms'].map(l=>_remDefault('wl_moved',l,_sessGet('${today}')))`) as string[];
     all.forEach((x) => { expect(x).toContain('{cancel_link}'); expect(x).toContain('{date}'); });
     expect(await page.evaluate(`_tplDefault('wl_moved','en')`)).toContain('{first_name}');
   });

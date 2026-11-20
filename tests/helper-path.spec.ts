@@ -231,8 +231,8 @@ test.describe('@customer:account helper path', () => {
     await rider(page);
     await badges(page);
     await expect(page.locator('#hp-mine')).toBeVisible();
-    expect(await page.evaluate(`HP_LANGS`)).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']);
-    expect(await page.evaluate(`Object.entries(HP_T).filter(([k,v])=>v.length!==10||v.some(x=>!String(x).trim())).map(([k])=>k)`)).toEqual([]);
+    expect(await page.evaluate(`HP_LANGS`)).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']);
+    expect(await page.evaluate(`Object.entries(HP_T).filter(([k,v])=>v.length!==11||v.some(x=>!String(x).trim())).map(([k])=>k)`)).toEqual([]);
     expect(await page.evaluate(`Object.entries(HP_T).filter(([k,v])=>v.some(x=>x.includes('{0}')!==v[0].includes('{0}'))).map(([k])=>k)`)).toEqual([]);
     expect(await page.evaluate(`Object.entries(HP_T).filter(([k,v])=>v.some(x=>/[\\u0660-\\u0669\\u06f0-\\u06f9\\u0966-\\u096f\\u09e6-\\u09ef]/.test(x))).map(([k])=>k)`)).toEqual([]);
     expect(await page.evaluate(`['b5','b10','b25'].filter(k=>HP_T[k].some(x=>!x.includes(k.slice(1))))`)).toEqual([]); // each level's name carries its count
@@ -401,7 +401,7 @@ test.describe('@staff:community helper path', () => {
       expect(mod.includes(word), `helper-path.js: ${word}`).toBe(true);
     }
     expect(customer).toContain('/helper-path.js?v=');
-    for (const code of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) {
+    for (const code of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']) {
       const pack = JSON.parse(read(`lang/staff-peoplemore-${code}.json`));
       for (const k of ['hpTitle', 'hpSub', 'hpStep0', 'hpStep1', 'hpStep2', 'hpStep3', 'hpDaysN', 'hpStepFor', 'hpNone', 'hpLogStep']) expect(pack[k], `${code} ${k}`).toBeTruthy();
       expect(JSON.parse(read(`lang/${code}.json`)).hpTitle, code).toBeUndefined(); // never with the riders' strings

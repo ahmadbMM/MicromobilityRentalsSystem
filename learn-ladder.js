@@ -7,29 +7,29 @@
 // A file of its own, fetched when the row is tapped (_llOpen in app.src.html), with its own words in all ten languages.
 // Hand-written, not generated; the build stamps its address (LL_V).
 /* global S, esc, _on, _EV, _EL, getSession, _cuIc, toast, closeConfirm, shortDate, _ksaYmd, selectEvent, _llMineLoad */
-const LL_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
+const LL_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms'];
 const LL_T = {
-  title: ['Learn to ride', 'تعلّم ركوب الدراجة', 'Apprendre à rouler', 'Aprender a montar', 'Aprender a pedalar', 'سواری سیکھنا', 'सवारी सीखना', 'Pag-aaral magbisikleta', 'चलाउन सिक्ने', 'চালানো শেখা'],
-  lv1: ['Balance', 'التوازن', 'Équilibre', 'Equilibrio', 'Equilíbrio', 'توازن', 'संतुलन', 'Balanse', 'सन्तुलन', 'ভারসাম্য'],
-  lv2: ['Pedal', 'التبديل بالدواسات', 'Pédaler', 'Pedalear', 'Pedalar', 'پیڈل چلانا', 'पैडल चलाना', 'Pagpedal', 'पेडल चलाउने', 'প্যাডেল চালানো'],
-  lv3: ['Steer and brake', 'التوجيه والفرملة', 'Diriger et freiner', 'Girar y frenar', 'Virar e frear', 'موڑنا اور بریک لگانا', 'मोड़ना और ब्रेक लगाना', 'Pagliko at pagpreno', 'मोड्ने र ब्रेक लगाउने', 'ঘোরানো ও ব্রেক করা'],
-  lv4: ['Ride the circuit', 'الركوب في الحلبة', 'Rouler sur le circuit', 'Rodar en el circuito', 'Pedalar no circuito', 'سرکٹ پر سواری', 'सर्किट पर सवारी', 'Pagbisikleta sa circuit', 'सर्किटमा सवारी', 'সার্কিটে চালানো'],
-  lvOf: ['Level {0} of {1}', 'المستوى {0} من {1}', 'Niveau {0} sur {1}', 'Nivel {0} de {1}', 'Nível {0} de {1}', '{1} میں سے سطح {0}', '{1} में से स्तर {0}', 'Antas {0} ng {1}', '{1} मध्ये तह {0}', '{1}টির মধ্যে স্তর {0}'],
-  prac: ['Practising', 'قيد التمرين', 'En cours d’acquisition', 'Practicando', 'Praticando', 'مشق جاری ہے', 'अभ्यास जारी', 'Nagsasanay pa', 'अभ्यास गर्दै', 'অনুশীলন চলছে'],
-  got: ['Learned', 'تم إتقانها', 'Acquis', 'Aprendido', 'Aprendido', 'سیکھ لیا', 'सीख लिया', 'Natutunan na', 'सिकिसकियो', 'শেখা হয়েছে'],
-  fb: ['From your instructor', 'من مدرّبك', 'De votre moniteur', 'De tu instructor', 'Do seu instrutor', 'آپ کے انسٹرکٹر کی طرف سے', 'आपके प्रशिक्षक की ओर से', 'Mula sa iyong instructor', 'तपाईंको प्रशिक्षकबाट', 'আপনার প্রশিক্ষকের কাছ থেকে'],
-  cert: ['Certificate', 'شهادة', 'Certificat', 'Certificado', 'Certificado', 'سرٹیفکیٹ', 'प्रमाणपत्र', 'Sertipiko', 'प्रमाणपत्र', 'সনদ'],
-  certAlt: ['Certificate: {0}', 'شهادة: {0}', 'Certificat : {0}', 'Certificado: {0}', 'Certificado: {0}', 'سرٹیفکیٹ: {0}', 'प्रमाणपत्र: {0}', 'Sertipiko: {0}', 'प्रमाणपत्र: {0}', 'সনদ: {0}'],
-  wait: ['Preparing the certificate', 'جارٍ تجهيز الشهادة', 'Préparation du certificat', 'Preparando el certificado', 'Preparando o certificado', 'سرٹیفکیٹ تیار ہو رہا ہے', 'प्रमाणपत्र तैयार हो रहा है', 'Inihahanda ang sertipiko', 'प्रमाणपत्र तयार हुँदैछ', 'সনদ তৈরি হচ্ছে'],
-  save: ['Save image', 'حفظ الصورة', 'Enregistrer l’image', 'Guardar imagen', 'Salvar imagem', 'تصویر محفوظ کریں', 'इमेज सहेजें', 'I-save ang larawan', 'तस्बिर सेभ गर्नुहोस्', 'ছবি সংরক্ষণ করুন'],
-  share: ['Share', 'مشاركة', 'Partager', 'Compartir', 'Compartilhar', 'شیئر کریں', 'शेयर करें', 'Ibahagi', 'सेयर गर्नुहोस्', 'শেয়ার করুন'],
-  back: ['Back', 'رجوع', 'Retour', 'Volver', 'Voltar', 'واپس', 'वापस', 'Bumalik', 'फर्कनुहोस्', 'ফিরে যান'],
-  close: ['Close', 'إغلاق', 'Fermer', 'Cerrar', 'Fechar', 'بند کریں', 'बंद करें', 'Isara', 'बन्द गर्नुहोस्', 'বন্ধ করুন'],
-  inv: ['You are ready for an easy group on a Saturday ride', 'حان وقت الانضمام إلى مجموعة سهلة في جولة السبت', 'Vous pouvez rejoindre un groupe facile lors d’une sortie du samedi', 'Ya puedes unirte a un grupo fácil en una salida de sábado', 'Você já pode entrar em um grupo fácil em um passeio de sábado', 'اب آپ ہفتے کی سواری کے آسان گروپ میں شامل ہو سکتے ہیں', 'अब आप शनिवार राइड के आसान समूह में शामिल हो सकते हैं', 'Maaari ka nang sumali sa madaling grupo sa Saturday ride', 'अब तपाईं शनिबारे राइडको सजिलो समूहमा सामेल हुन सक्नुहुन्छ', 'এখন আপনি শনিবারের রাইডের সহজ দলে যোগ দিতে পারেন'],
-  invGo: ['Join a Saturday ride', 'انضم إلى جولة السبت', 'Rejoindre une sortie du samedi', 'Unirme a una salida de sábado', 'Participar de um passeio de sábado', 'ہفتے کی سواری میں شامل ہوں', 'शनिवार राइड में शामिल हों', 'Sumali sa Saturday ride', 'शनिबारे राइडमा सामेल हुनुहोस्', 'শনিবারের রাইডে যোগ দিন'],
-  who: ['Learner', 'المتعلّم', 'Apprenant', 'Alumno', 'Aluno', 'سیکھنے والا', 'शिक्षार्थी', 'Mag-aaral', 'सिक्ने व्यक्ति', 'শিক্ষার্থী'],
-  learner: ['Learner {0}', 'المتعلّم {0}', 'Apprenant {0}', 'Alumno {0}', 'Aluno {0}', 'سیکھنے والا {0}', 'शिक्षार्थी {0}', 'Mag-aaral {0}', 'सिक्ने व्यक्ति {0}', 'শিক্ষার্থী {0}'],
-  err: ['We could not do that. Please try again.', 'تعذّر ذلك. يرجى المحاولة مرة أخرى.', 'Action impossible. Veuillez réessayer.', 'No se pudo hacer. Inténtalo de nuevo.', 'Não foi possível. Tente novamente.', 'یہ نہیں ہو سکا۔ دوبارہ کوشش کریں۔', 'यह नहीं हो सका। फिर कोशिश करें।', 'Hindi ito nagawa. Pakisubukang muli.', 'यो हुन सकेन। फेरि प्रयास गर्नुहोस्।', 'এটি করা যায়নি। আবার চেষ্টা করুন।'],
+  title: ['Learn to ride', 'تعلّم ركوب الدراجة', 'Apprendre à rouler', 'Aprender a montar', 'Aprender a pedalar', 'سواری سیکھنا', 'सवारी सीखना', 'Pag-aaral magbisikleta', 'चलाउन सिक्ने', 'চালানো শেখা', 'Belajar berbasikal'],
+  lv1: ['Balance', 'التوازن', 'Équilibre', 'Equilibrio', 'Equilíbrio', 'توازن', 'संतुलन', 'Balanse', 'सन्तुलन', 'ভারসাম্য', 'Imbangan'],
+  lv2: ['Pedal', 'التبديل بالدواسات', 'Pédaler', 'Pedalear', 'Pedalar', 'پیڈل چلانا', 'पैडल चलाना', 'Pagpedal', 'पेडल चलाउने', 'প্যাডেল চালানো', 'Mengayuh'],
+  lv3: ['Steer and brake', 'التوجيه والفرملة', 'Diriger et freiner', 'Girar y frenar', 'Virar e frear', 'موڑنا اور بریک لگانا', 'मोड़ना और ब्रेक लगाना', 'Pagliko at pagpreno', 'मोड्ने र ब्रेक लगाउने', 'ঘোরানো ও ব্রেক করা', 'Mengemudi dan membrek'],
+  lv4: ['Ride the circuit', 'الركوب في الحلبة', 'Rouler sur le circuit', 'Rodar en el circuito', 'Pedalar no circuito', 'سرکٹ پر سواری', 'सर्किट पर सवारी', 'Pagbisikleta sa circuit', 'सर्किटमा सवारी', 'সার্কিটে চালানো', 'Berkayuh di litar'],
+  lvOf: ['Level {0} of {1}', 'المستوى {0} من {1}', 'Niveau {0} sur {1}', 'Nivel {0} de {1}', 'Nível {0} de {1}', '{1} میں سے سطح {0}', '{1} में से स्तर {0}', 'Antas {0} ng {1}', '{1} मध्ये तह {0}', '{1}টির মধ্যে স্তর {0}', 'Tahap {0} daripada {1}'],
+  prac: ['Practising', 'قيد التمرين', 'En cours d’acquisition', 'Practicando', 'Praticando', 'مشق جاری ہے', 'अभ्यास जारी', 'Nagsasanay pa', 'अभ्यास गर्दै', 'অনুশীলন চলছে', 'Sedang berlatih'],
+  got: ['Learned', 'تم إتقانها', 'Acquis', 'Aprendido', 'Aprendido', 'سیکھ لیا', 'सीख लिया', 'Natutunan na', 'सिकिसकियो', 'শেখা হয়েছে', 'Sudah dikuasai'],
+  fb: ['From your instructor', 'من مدرّبك', 'De votre moniteur', 'De tu instructor', 'Do seu instrutor', 'آپ کے انسٹرکٹر کی طرف سے', 'आपके प्रशिक्षक की ओर से', 'Mula sa iyong instructor', 'तपाईंको प्रशिक्षकबाट', 'আপনার প্রশিক্ষকের কাছ থেকে', 'Daripada jurulatih anda'],
+  cert: ['Certificate', 'شهادة', 'Certificat', 'Certificado', 'Certificado', 'سرٹیفکیٹ', 'प्रमाणपत्र', 'Sertipiko', 'प्रमाणपत्र', 'সনদ', 'Sijil'],
+  certAlt: ['Certificate: {0}', 'شهادة: {0}', 'Certificat : {0}', 'Certificado: {0}', 'Certificado: {0}', 'سرٹیفکیٹ: {0}', 'प्रमाणपत्र: {0}', 'Sertipiko: {0}', 'प्रमाणपत्र: {0}', 'সনদ: {0}', 'Sijil: {0}'],
+  wait: ['Preparing the certificate', 'جارٍ تجهيز الشهادة', 'Préparation du certificat', 'Preparando el certificado', 'Preparando o certificado', 'سرٹیفکیٹ تیار ہو رہا ہے', 'प्रमाणपत्र तैयार हो रहा है', 'Inihahanda ang sertipiko', 'प्रमाणपत्र तयार हुँदैछ', 'সনদ তৈরি হচ্ছে', 'Menyediakan sijil'],
+  save: ['Save image', 'حفظ الصورة', 'Enregistrer l’image', 'Guardar imagen', 'Salvar imagem', 'تصویر محفوظ کریں', 'इमेज सहेजें', 'I-save ang larawan', 'तस्बिर सेभ गर्नुहोस्', 'ছবি সংরক্ষণ করুন', 'Simpan imej'],
+  share: ['Share', 'مشاركة', 'Partager', 'Compartir', 'Compartilhar', 'شیئر کریں', 'शेयर करें', 'Ibahagi', 'सेयर गर्नुहोस्', 'শেয়ার করুন', 'Kongsi'],
+  back: ['Back', 'رجوع', 'Retour', 'Volver', 'Voltar', 'واپس', 'वापस', 'Bumalik', 'फर्कनुहोस्', 'ফিরে যান', 'Kembali'],
+  close: ['Close', 'إغلاق', 'Fermer', 'Cerrar', 'Fechar', 'بند کریں', 'बंद करें', 'Isara', 'बन्द गर्नुहोस्', 'বন্ধ করুন', 'Tutup'],
+  inv: ['You are ready for an easy group on a Saturday ride', 'حان وقت الانضمام إلى مجموعة سهلة في جولة السبت', 'Vous pouvez rejoindre un groupe facile lors d’une sortie du samedi', 'Ya puedes unirte a un grupo fácil en una salida de sábado', 'Você já pode entrar em um grupo fácil em um passeio de sábado', 'اب آپ ہفتے کی سواری کے آسان گروپ میں شامل ہو سکتے ہیں', 'अब आप शनिवार राइड के आसान समूह में शामिल हो सकते हैं', 'Maaari ka nang sumali sa madaling grupo sa Saturday ride', 'अब तपाईं शनिबारे राइडको सजिलो समूहमा सामेल हुन सक्नुहुन्छ', 'এখন আপনি শনিবারের রাইডের সহজ দলে যোগ দিতে পারেন', 'Anda sudah bersedia untuk kumpulan santai dalam kayuhan Sabtu'],
+  invGo: ['Join a Saturday ride', 'انضم إلى جولة السبت', 'Rejoindre une sortie du samedi', 'Unirme a una salida de sábado', 'Participar de um passeio de sábado', 'ہفتے کی سواری میں شامل ہوں', 'शनिवार राइड में शामिल हों', 'Sumali sa Saturday ride', 'शनिबारे राइडमा सामेल हुनुहोस्', 'শনিবারের রাইডে যোগ দিন', 'Sertai kayuhan Sabtu'],
+  who: ['Learner', 'المتعلّم', 'Apprenant', 'Alumno', 'Aluno', 'سیکھنے والا', 'शिक्षार्थी', 'Mag-aaral', 'सिक्ने व्यक्ति', 'শিক্ষার্থী', 'Pelajar'],
+  learner: ['Learner {0}', 'المتعلّم {0}', 'Apprenant {0}', 'Alumno {0}', 'Aluno {0}', 'سیکھنے والا {0}', 'शिक्षार्थी {0}', 'Mag-aaral {0}', 'सिक्ने व्यक्ति {0}', 'শিক্ষার্থী {0}', 'Pelajar {0}'],
+  err: ['We could not do that. Please try again.', 'تعذّر ذلك. يرجى المحاولة مرة أخرى.', 'Action impossible. Veuillez réessayer.', 'No se pudo hacer. Inténtalo de nuevo.', 'Não foi possível. Tente novamente.', 'یہ نہیں ہو سکا۔ دوبارہ کوشش کریں۔', 'यह नहीं हो सका। फिर कोशिश करें।', 'Hindi ito nagawa. Pakisubukang muli.', 'यो हुन सकेन। फेरि प्रयास गर्नुहोस्।', 'এটি করা যায়নি। আবার চেষ্টা করুন।', 'Kami tidak dapat melakukannya. Sila cuba lagi.'],
 };
 const LL_LEVELS = 4;
 function _lT(k) { const r = LL_T[k] || [], i = LL_LANGS.indexOf(S.lang); return r[i < 0 ? 0 : i] || r[0] || ''; }

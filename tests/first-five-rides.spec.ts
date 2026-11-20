@@ -305,7 +305,7 @@ test.describe('@customer:badges the Saturday ladder\'s steps at 2 and 3 rides', 
   });
 
   test('every new word is in the eight other languages, with the same placeholders and Latin digits', async () => {
-    for (const code of ['fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) {
+    for (const code of ['fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']) {
       const pack = JSON.parse(readFileSync(`i18n/${code}.json`, 'utf8')) as Record<string, string>;
       for (const k of KEYS) {
         expect(String(pack[k] || '').trim(), `${code} ${k}`).not.toBe('');

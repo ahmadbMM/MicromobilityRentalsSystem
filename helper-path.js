@@ -6,20 +6,20 @@
 // A file of its own, fetched only for a member (_hpShow in app.src.html), with its own words in all ten languages.
 // Hand-written, not generated; the build stamps its address (HP_V).
 /* global S, esc, getSession, _cuIc, _bdgMedal */
-const HP_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
+const HP_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms'];
 const HP_T = {
-  title: ['Helper path', 'مسار المساعد', 'Parcours d’assistant', 'Camino de ayudante', 'Percurso de ajudante', 'مددگار کا راستہ', 'सहायक पथ', 'Landas ng helper', 'सहयोगी पथ', 'সহায়ক পথ'],
-  s0: ['Rider', 'راكب', 'Cycliste', 'Ciclista', 'Ciclista', 'سوار', 'राइडर', 'Rider', 'राइडर', 'রাইডার'],
-  s1: ['Helper', 'مساعد', 'Assistant', 'Ayudante', 'Ajudante', 'مددگار', 'सहायक', 'Helper', 'सहयोगी', 'সহায়ক'],
-  s2: ['Trainee ride leader', 'قائد جولة متدرّب', 'Chef de sortie en formation', 'Líder de salida en formación', 'Líder de passeio em formação', 'زیرِ تربیت رائیڈ لیڈر', 'प्रशिक्षु राइड लीडर', 'Trainee ride leader', 'प्रशिक्षार्थी राइड लिडर', 'শিক্ষানবিশ রাইড লিডার'],
-  s3: ['Ride leader', 'قائد الجولة', 'Chef de sortie', 'Líder de salida', 'Líder de passeio', 'رائیڈ لیڈر', 'राइड लीडर', 'Ride leader', 'राइड लिडर', 'রাইড লিডার'],
-  next: ['Next step: {0}', 'الخطوة التالية: {0}', 'Prochaine étape : {0}', 'Siguiente paso: {0}', 'Próximo passo: {0}', 'اگلا مرحلہ: {0}', 'अगला चरण: {0}', 'Susunod na hakbang: {0}', 'अर्को चरण: {0}', 'পরের ধাপ: {0}'],
-  days: ['Helper days', 'أيام المساعدة', 'Jours d’aide', 'Días de ayuda', 'Dias de ajuda', 'مدد کے دن', 'सहायता के दिन', 'Mga araw ng pagtulong', 'सहयोगका दिन', 'সহায়তার দিন'],
-  line: ['Helper days: {0}', 'أيام المساعدة: {0}', 'Jours d’aide : {0}', 'Días de ayuda: {0}', 'Dias de ajuda: {0}', 'مدد کے دن: {0}', 'सहायता के दिन: {0}', 'Mga araw ng pagtulong: {0}', 'सहयोगका दिन: {0}', 'সহায়তার দিন: {0}'],
-  b1: ['1 helper day', 'يوم مساعدة واحد', '1 jour d’aide', '1 día de ayuda', '1 dia de ajuda', 'مدد کا 1 دن', 'सहायता का 1 दिन', '1 araw ng pagtulong', 'सहयोगको 1 दिन', 'সহায়তার 1 দিন'],
-  b5: ['5 helper days', '5 أيام مساعدة', '5 jours d’aide', '5 días de ayuda', '5 dias de ajuda', 'مدد کے 5 دن', 'सहायता के 5 दिन', '5 araw ng pagtulong', 'सहयोगका 5 दिन', 'সহায়তার 5 দিন'],
-  b10: ['10 helper days', '10 أيام مساعدة', '10 jours d’aide', '10 días de ayuda', '10 dias de ajuda', 'مدد کے 10 دن', 'सहायता के 10 दिन', '10 araw ng pagtulong', 'सहयोगका 10 दिन', 'সহায়তার 10 দিন'],
-  b25: ['25 helper days', '25 يوم مساعدة', '25 jours d’aide', '25 días de ayuda', '25 dias de ajuda', 'مدد کے 25 دن', 'सहायता के 25 दिन', '25 araw ng pagtulong', 'सहयोगका 25 दिन', 'সহায়তার 25 দিন'],
+  title: ['Helper path', 'مسار المساعد', 'Parcours d’assistant', 'Camino de ayudante', 'Percurso de ajudante', 'مددگار کا راستہ', 'सहायक पथ', 'Landas ng helper', 'सहयोगी पथ', 'সহায়ক পথ', 'Laluan pembantu'],
+  s0: ['Rider', 'راكب', 'Cycliste', 'Ciclista', 'Ciclista', 'سوار', 'राइडर', 'Rider', 'राइडर', 'রাইডার', 'Penunggang'],
+  s1: ['Helper', 'مساعد', 'Assistant', 'Ayudante', 'Ajudante', 'مددگار', 'सहायक', 'Helper', 'सहयोगी', 'সহায়ক', 'Pembantu'],
+  s2: ['Trainee ride leader', 'قائد جولة متدرّب', 'Chef de sortie en formation', 'Líder de salida en formación', 'Líder de passeio em formação', 'زیرِ تربیت رائیڈ لیڈر', 'प्रशिक्षु राइड लीडर', 'Trainee ride leader', 'प्रशिक्षार्थी राइड लिडर', 'শিক্ষানবিশ রাইড লিডার', 'Pelatih ketua kayuhan'],
+  s3: ['Ride leader', 'قائد الجولة', 'Chef de sortie', 'Líder de salida', 'Líder de passeio', 'رائیڈ لیڈر', 'राइड लीडर', 'Ride leader', 'राइड लिडर', 'রাইড লিডার', 'Ketua kayuhan'],
+  next: ['Next step: {0}', 'الخطوة التالية: {0}', 'Prochaine étape : {0}', 'Siguiente paso: {0}', 'Próximo passo: {0}', 'اگلا مرحلہ: {0}', 'अगला चरण: {0}', 'Susunod na hakbang: {0}', 'अर्को चरण: {0}', 'পরের ধাপ: {0}', 'Langkah seterusnya: {0}'],
+  days: ['Helper days', 'أيام المساعدة', 'Jours d’aide', 'Días de ayuda', 'Dias de ajuda', 'مدد کے دن', 'सहायता के दिन', 'Mga araw ng pagtulong', 'सहयोगका दिन', 'সহায়তার দিন', 'Hari sebagai pembantu'],
+  line: ['Helper days: {0}', 'أيام المساعدة: {0}', 'Jours d’aide : {0}', 'Días de ayuda: {0}', 'Dias de ajuda: {0}', 'مدد کے دن: {0}', 'सहायता के दिन: {0}', 'Mga araw ng pagtulong: {0}', 'सहयोगका दिन: {0}', 'সহায়তার দিন: {0}', 'Hari pembantu: {0}'],
+  b1: ['1 helper day', 'يوم مساعدة واحد', '1 jour d’aide', '1 día de ayuda', '1 dia de ajuda', 'مدد کا 1 دن', 'सहायता का 1 दिन', '1 araw ng pagtulong', 'सहयोगको 1 दिन', 'সহায়তার 1 দিন', '1 hari sebagai pembantu'],
+  b5: ['5 helper days', '5 أيام مساعدة', '5 jours d’aide', '5 días de ayuda', '5 dias de ajuda', 'مدد کے 5 دن', 'सहायता के 5 दिन', '5 araw ng pagtulong', 'सहयोगका 5 दिन', 'সহায়তার 5 দিন', '5 hari sebagai pembantu'],
+  b10: ['10 helper days', '10 أيام مساعدة', '10 jours d’aide', '10 días de ayuda', '10 dias de ajuda', 'مدد کے 10 دن', 'सहायता के 10 दिन', '10 araw ng pagtulong', 'सहयोगका 10 दिन', 'সহায়তার 10 দিন', '10 hari sebagai pembantu'],
+  b25: ['25 helper days', '25 يوم مساعدة', '25 jours d’aide', '25 días de ayuda', '25 dias de ajuda', 'مدد کے 25 دن', 'सहायता के 25 दिन', '25 araw ng pagtulong', 'सहयोगका 25 दिन', 'সহায়তার 25 দিন', '25 hari sebagai pembantu'],
 };
 // The helper-day ladder: [days, its name, the medal's colour], in the style of the rides-led ladder.
 const HP_LADDER = [[1, 'b1', 'green'], [5, 'b5', 'teal'], [10, 'b10', 'purple'], [25, 'b25', 'gold']];

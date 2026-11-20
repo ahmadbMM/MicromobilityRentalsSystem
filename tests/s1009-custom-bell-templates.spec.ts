@@ -61,7 +61,7 @@ test.describe('@staff:settings message templates in every language', () => {
     await page.waitForFunction(`S._tpl!==undefined`);
     await page.locator('#tab-settings .tpl-row[data-tpl="wa_turn"]').click();
     const langs = page.locator('.tpl-box [data-tpl-lang]');
-    await expect(langs).toHaveCount(10);
+    await expect(langs).toHaveCount(11);
     await page.locator('.tpl-box [data-tpl-lang="fr"]').click();
     await expect(page.locator('.tpl-box [data-tpl-lang="fr"]')).toHaveAttribute('aria-pressed', 'true');
     await page.fill('#tpl-text', 'C\'est votre tour !');

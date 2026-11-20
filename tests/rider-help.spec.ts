@@ -246,7 +246,7 @@ test.describe('@customer:account Help', () => {
 
   test('its words and answers are in all ten languages, with Latin digits and no emoji', async ({ page }) => {
     await help(page);
-    const ok = await page.evaluate(`RH_LANGS.length===10&&Object.values(RH_T).every(r=>r.length===10&&r.every(x=>typeof x==='string'&&x.trim()))&&RH_QA.length===6&&RH_QA.every(x=>[x.q,x.a].every(r=>r.length===10&&r.every(y=>typeof y==='string'&&y.trim())))`);
+    const ok = await page.evaluate(`RH_LANGS.length===11&&Object.values(RH_T).every(r=>r.length===11&&r.every(x=>typeof x==='string'&&x.trim()))&&RH_QA.length===6&&RH_QA.every(x=>[x.q,x.a].every(r=>r.length===11&&r.every(y=>typeof y==='string'&&y.trim())))`);
     expect(ok).toBe(true);
     const all = `[...Object.values(RH_T).flat(),...RH_QA.flatMap(x=>[...x.q,...x.a])]`;
     expect(await page.evaluate(`${all}.every(x=>!/[\\u0660-\\u0669\\u06F0-\\u06F9\\u0966-\\u096F\\u09E6-\\u09EF]/.test(x)&&!/\\p{Extended_Pictographic}/u.test(x))`)).toBe(true);

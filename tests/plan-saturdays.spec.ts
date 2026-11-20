@@ -228,7 +228,7 @@ test.describe('@customer:members F10 Plan my Saturdays', () => {
 
   test('its own words in all ten languages, and the card in Arabic', async ({ page }) => {
     await member(page);
-    expect(await page.evaluate(`HUB_T.plan.length===10&&HUB_T.plan.every(x=>String(x).trim())&&new Set(HUB_T.plan).size===10`)).toBe(true);
+    expect(await page.evaluate(`HUB_T.plan.length===11&&HUB_T.plan.every(x=>String(x).trim())&&new Set(HUB_T.plan).size===11`)).toBe(true);
     expect(await page.evaluate(`HUB_T.plan.filter(x=>/[\\u0660-\\u0669\\u06F0-\\u06F9\\u0966-\\u096F\\u09E6-\\u09EF]/.test(x))`)).toEqual([]);
     await page.evaluate(`setLang('ar')`);
     await expect(card(page).locator('.hub-k')).toHaveText(/خطتي لأيام السبت/);

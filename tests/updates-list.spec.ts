@@ -238,7 +238,7 @@ test.describe('@customer:account the Updates list', () => {
   test('its own words: all ten languages, and the list is asked for in the page\'s language', async ({ page }) => {
     const log = await boot(page, { 'rpc:customer_updates': list(rows.slice(0, 1)) }, { path: '/account/updates' });
     await expect(page.locator('#inb-body .inb-list > li')).toHaveCount(1);
-    const bad = await page.evaluate(`Object.entries(INB_T).filter(([k,v])=>v.length!==INB_LANGS.length||INB_LANGS.length!==10||v.some(x=>!String(x).trim())).map(([k])=>k)`);
+    const bad = await page.evaluate(`Object.entries(INB_T).filter(([k,v])=>v.length!==INB_LANGS.length||INB_LANGS.length!==11||v.some(x=>!String(x).trim())).map(([k])=>k)`);
     expect(bad).toEqual([]);
     // Latin digits in every language
     expect(await page.evaluate(`Object.values(INB_T).flat().filter(x=>/[\\u0660-\\u0669\\u06F0-\\u06F9\\u0966-\\u096F\\u09E6-\\u09EF]/.test(x))`)).toEqual([]);

@@ -208,7 +208,7 @@ test.describe('@customer:bookings Report a bike problem on the ticket', () => {
     await rider(page, [bk()], '2099-02-01T18:30:00+03:00');
     await btn(page).click();
     await expect(dlg(page)).toBeVisible();
-    const rowsOk = await page.evaluate(`Object.keys(BRP_T).length>=12&&Object.values(BRP_T).every(r=>Array.isArray(r)&&r.length===BRP_LANGS.length&&r.every(x=>typeof x==='string'&&x.trim()))&&BRP_LANGS.length===10&&BRP_FAULTS.every(k=>BRP_T[k])`);
+    const rowsOk = await page.evaluate(`Object.keys(BRP_T).length>=12&&Object.values(BRP_T).every(r=>Array.isArray(r)&&r.length===BRP_LANGS.length&&r.every(x=>typeof x==='string'&&x.trim()))&&BRP_LANGS.length===11&&BRP_FAULTS.every(k=>BRP_T[k])`);
     expect(rowsOk).toBe(true);
     // Latin digits in every language, and no emoji
     expect(await page.evaluate(`Object.values(BRP_T).flat().every(x=>!/[\\u0660-\\u0669\\u06F0-\\u06F9\\u0966-\\u096F\\u09E6-\\u09EF]/.test(x)&&!/\\p{Extended_Pictographic}/u.test(x))`)).toBe(true);

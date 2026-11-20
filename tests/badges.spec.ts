@@ -500,7 +500,7 @@ test.describe('@customer:account badges', () => {
     await expect(page.locator('#tab-account .mr-badge', { hasText: 'Ironman 70.3 Finisher' })).toHaveCount(0);
     // the T100 medals keep their blue ribbon; neither Ironman drawing is offered in the icon picker
     expect(await page.evaluate(`[_bdgMedal('t100','gold').includes('#1e4f96'),...['ironman_703','ironman_1406'].map(k=>BD_SYS[k][0]===k&&!!BDG_RACE[k]&&!BDG_GLYPH[k])]`)).toEqual([true, true, true]);
-    const langs = ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'].map((l) => JSON.parse(readFileSync(`lang/${l}.json`, 'utf8')));
+    const langs = ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms'].map((l) => JSON.parse(readFileSync(`lang/${l}.json`, 'utf8')));
     expect(langs[0].bdgIronman703).toBe('إنجاز آيرونمان 70.3');
     for (const L of langs) for (const k of ['bdgIronman703', 'bdgIronman703D', 'bdgIronman703A', 'bdgIronman1406', 'bdgIronman1406D', 'bdgIronman1406A']) expect(L[k], k).toBeTruthy();
   });

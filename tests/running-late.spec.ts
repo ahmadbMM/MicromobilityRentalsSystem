@@ -268,7 +268,7 @@ test.describe('@staff:bookings Running late on the roster', () => {
 
   test('the words are in every language pack: the rider\'s in the rider packs, the desk\'s in the staff packs', () => {
     const pack = (f: string) => JSON.parse(readFileSync(resolve(__dirname, '../lang', f), 'utf8')) as Record<string, string>;
-    for (const l of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) {
+    for (const l of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']) {
       const r = pack(`${l}.json`), s = pack(`staff-${l}.json`);
       for (const k of ['rlBtn', 'rlAsk', 'rlMin', 'rlChip', 'rlOnTime', 'rlNoMore', 'rlNoPlace']) expect((r[k] || '').length, `${l} ${k}`).toBeGreaterThan(2);
       for (const k of ['rlSt', 'rlSaidOpt']) { expect((s[k] || '').length, `staff ${l} ${k}`).toBeGreaterThan(3); expect(r[k], `${l}: ${k} stays out of the rider pack`).toBeUndefined(); }

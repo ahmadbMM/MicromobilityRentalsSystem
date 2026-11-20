@@ -47,7 +47,7 @@ test.describe('crawlable surface', () => {
 
   test('the sitemap lists each language and cross-links the alternates', async () => {
     const xml = await readFile(resolve(__dirname, '../sitemap.xml'), 'utf8');
-    for (const code of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) expect(xml).toContain(`?lang=${code}</loc>`);
+    for (const code of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']) expect(xml).toContain(`?lang=${code}</loc>`);
     expect(xml).toContain('hreflang="x-default"');
   });
 

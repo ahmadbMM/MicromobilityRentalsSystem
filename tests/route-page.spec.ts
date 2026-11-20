@@ -218,8 +218,8 @@ test.describe('@customer:bookings the route page', () => {
   test('every word of the file exists in all ten languages, with the same placeholders and Latin digits', async ({ page }) => {
     await rider(page, [ROUTES, TRACK]);
     await openFromTicket(page);
-    expect(await page.evaluate(`RTP_LANGS`)).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']);
-    expect(await page.evaluate(`Object.entries(RTP_T).filter(([k,v])=>v.length!==10||v.some(x=>!String(x).trim())).map(([k])=>k)`)).toEqual([]);
+    expect(await page.evaluate(`RTP_LANGS`)).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']);
+    expect(await page.evaluate(`Object.entries(RTP_T).filter(([k,v])=>v.length!==11||v.some(x=>!String(x).trim())).map(([k])=>k)`)).toEqual([]);
     expect(await page.evaluate(`Object.entries(RTP_T).filter(([k,v])=>{const h=x=>(x.match(/\\{\\d\\}/g)||[]).sort().join();return v.some(x=>h(x)!==h(v[0]));}).map(([k])=>k)`)).toEqual([]);
     expect(await page.evaluate(`Object.entries(RTP_T).filter(([k,v])=>v.some(x=>/[٠-٩۰-۹०-९০-৯]/.test(x))).map(([k])=>k)`)).toEqual([]);
   });

@@ -64,9 +64,9 @@ test.describe('@customer:members Ask in the Community tab', () => {
     expect(asked).toHaveLength(1);
     expect(asked[0]).toMatch(/member-ask\.js\?v=[a-f0-9]{10}$/);
     // every word of the page exists in all ten languages, with Latin digits only (tests/bh14-m.spec.ts's rule)
-    const bad = await page.evaluate(`Object.entries(AK_T).filter(([k,v])=>v.length!==10||v.some(x=>!String(x).trim()||/[\\u0660-\\u0669\\u06F0-\\u06F9\\u0966-\\u096F\\u09E6-\\u09EF]/.test(x))).map(([k])=>k)`);
+    const bad = await page.evaluate(`Object.entries(AK_T).filter(([k,v])=>v.length!==11||v.some(x=>!String(x).trim()||/[\\u0660-\\u0669\\u06F0-\\u06F9\\u0966-\\u096F\\u09E6-\\u09EF]/.test(x))).map(([k])=>k)`);
     expect(bad).toEqual([]);
-    const badHub = await page.evaluate(`['akTitle','akGo','akOpen','akProg','akUntil'].filter(k=>!HUB_T[k]||HUB_T[k].length!==10)`);
+    const badHub = await page.evaluate(`['akTitle','akGo','akOpen','akProg','akUntil'].filter(k=>!HUB_T[k]||HUB_T[k].length!==11)`);
     expect(badHub).toEqual([]);
   });
 

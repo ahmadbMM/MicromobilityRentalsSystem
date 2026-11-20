@@ -12,21 +12,21 @@
 // Hand-written, not generated; the build stamps its address (SHR_V).
 /* global S, esc, _on, _P, getSession, getQueue, _cuIc, _locale, _mrBadgeList, _bdgName, _bdgCol, _bdgMedal, _bdgDay,
    _bdgPopClose, _bdgRode, _ncEntry, _rideKind, _ttName, _hubBdg, BDG_COLORS, toast, _monSub */
-const SHR_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
+const SHR_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms'];
 const SHR_T = {
-  kBadge: ['Badge earned', 'وسام مكتسب', 'Badge obtenu', 'Insignia conseguida', 'Conquista obtida','بیج حاصل کیا', 'बैज अर्जित', 'Nakuhang badge', 'ब्याज कमाइयो', 'ব্যাজ অর্জিত'],
-  kTitle: ['Title', 'لقب', 'Titre', 'Título', 'Título', 'خطاب', 'खिताब', 'Titulo', 'उपाधि', 'উপাধি'],
-  kMile: ['Challenge completed', 'تحدٍّ مكتمل', 'Défi réussi', 'Reto completado', 'Desafio concluído', 'چیلنج مکمل', 'चुनौती पूरी', 'Natapos na hamon', 'चुनौती पूरा', 'চ্যালেঞ্জ সম্পন্ন'],
-  mFirst: ['First session', 'الجلسة الأولى', 'Première séance', 'Primera sesión', 'Primeira sessão', 'پہلا سیشن', 'पहला सत्र', 'Unang session', 'पहिलो सत्र', 'প্রথম সেশন'],
-  mSecond: ['Second session', 'الجلسة الثانية', 'Deuxième séance', 'Segunda sesión', 'Segunda sessão', 'دوسرا سیشن', 'दूसरा सत्र', 'Ikalawang session', 'दोस्रो सत्र', 'দ্বিতীয় সেশন'],
-  mBack: ['Back with the club', 'عودة إلى النادي', 'De retour au club', 'De vuelta al club', 'De volta ao clube', 'کلب میں واپسی', 'क्लब में वापसी', 'Balik sa club', 'क्लबमा फिर्ता', 'ক্লাবে ফিরে আসা'],
-  mLevel: ['{0} sessions in a month', '{0} جلسات في شهر', '{0} séances en un mois', '{0} sesiones en un mes', '{0} sessões num mês', 'ایک مہینے میں {0} سیشن', 'एक महीने में {0} सत्र', '{0} session sa isang buwan', 'एक महिनामा {0} सत्र', 'এক মাসে {0}টি সেশন'],
-  nameSw: ['Include my first name', 'إضافة اسمي الأول', 'Ajouter mon prénom', 'Incluir mi nombre', 'Incluir o meu primeiro nome', 'میرا پہلا نام شامل کریں', 'मेरा पहला नाम जोड़ें', 'Isama ang unang pangalan ko', 'मेरो पहिलो नाम राख्नुहोस्', 'আমার প্রথম নাম যোগ করুন'],
-  save: ['Save image', 'حفظ الصورة', 'Enregistrer l’image', 'Guardar imagen', 'Guardar imagem', 'تصویر محفوظ کریں', 'चित्र सहेजें', 'I-save ang larawan', 'तस्बिर सेभ गर्नुहोस्', 'ছবি সেভ করুন'],
-  saved: ['Image saved', 'تم حفظ الصورة', 'Image enregistrée', 'Imagen guardada', 'Imagem guardada', 'تصویر محفوظ ہو گئی', 'चित्र सहेजा गया', 'Na-save ang larawan', 'तस्बिर सेभ भयो', 'ছবি সেভ হয়েছে'],
-  making: ['Making the image', 'جارٍ تجهيز الصورة', 'Création de l’image', 'Creando la imagen', 'A criar a imagem', 'تصویر تیار ہو رہی ہے', 'चित्र बन रहा है', 'Ginagawa ang larawan', 'तस्बिर बन्दैछ', 'ছবি তৈরি হচ্ছে'],
-  err: ['We could not make the image. Please try again.', 'تعذّر تجهيز الصورة. يرجى المحاولة مرة أخرى.', 'Impossible de créer l’image. Veuillez réessayer.', 'No se pudo crear la imagen. Inténtalo de nuevo.', 'Não foi possível criar a imagem. Tente novamente.', 'تصویر نہیں بن سکی۔ دوبارہ کوشش کریں۔', 'चित्र नहीं बन सका। फिर कोशिश करें।', 'Hindi nagawa ang larawan. Pakisubukang muli.', 'तस्बिर बन्न सकेन। फेरि प्रयास गर्नुहोस्।', 'ছবি তৈরি করা যায়নি। আবার চেষ্টা করুন।'],
-  retry: ['Try again', 'حاول مرة أخرى', 'Réessayer', 'Reintentar', 'Tentar novamente', 'دوبارہ کوشش کریں', 'फिर कोशिश करें', 'Subukang muli', 'फेरि प्रयास गर्नुहोस्', 'আবার চেষ্টা করুন'],
+  kBadge: ['Badge earned', 'وسام مكتسب', 'Badge obtenu', 'Insignia conseguida', 'Conquista obtida','بیج حاصل کیا', 'बैज अर्जित', 'Nakuhang badge', 'ब्याज कमाइयो', 'ব্যাজ অর্জিত', 'Lencana diperoleh'],
+  kTitle: ['Title', 'لقب', 'Titre', 'Título', 'Título', 'خطاب', 'खिताब', 'Titulo', 'उपाधि', 'উপাধি', 'Tajuk'],
+  kMile: ['Challenge completed', 'تحدٍّ مكتمل', 'Défi réussi', 'Reto completado', 'Desafio concluído', 'چیلنج مکمل', 'चुनौती पूरी', 'Natapos na hamon', 'चुनौती पूरा', 'চ্যালেঞ্জ সম্পন্ন', 'Cabaran selesai'],
+  mFirst: ['First session', 'الجلسة الأولى', 'Première séance', 'Primera sesión', 'Primeira sessão', 'پہلا سیشن', 'पहला सत्र', 'Unang session', 'पहिलो सत्र', 'প্রথম সেশন', 'Sesi pertama'],
+  mSecond: ['Second session', 'الجلسة الثانية', 'Deuxième séance', 'Segunda sesión', 'Segunda sessão', 'دوسرا سیشن', 'दूसरा सत्र', 'Ikalawang session', 'दोस्रो सत्र', 'দ্বিতীয় সেশন', 'Sesi kedua'],
+  mBack: ['Back with the club', 'عودة إلى النادي', 'De retour au club', 'De vuelta al club', 'De volta ao clube', 'کلب میں واپسی', 'क्लब में वापसी', 'Balik sa club', 'क्लबमा फिर्ता', 'ক্লাবে ফিরে আসা', 'Kembali bersama kelab'],
+  mLevel: ['{0} sessions in a month', '{0} جلسات في شهر', '{0} séances en un mois', '{0} sesiones en un mes', '{0} sessões num mês', 'ایک مہینے میں {0} سیشن', 'एक महीने में {0} सत्र', '{0} session sa isang buwan', 'एक महिनामा {0} सत्र', 'এক মাসে {0}টি সেশন', '{0} sesi dalam sebulan'],
+  nameSw: ['Include my first name', 'إضافة اسمي الأول', 'Ajouter mon prénom', 'Incluir mi nombre', 'Incluir o meu primeiro nome', 'میرا پہلا نام شامل کریں', 'मेरा पहला नाम जोड़ें', 'Isama ang unang pangalan ko', 'मेरो पहिलो नाम राख्नुहोस्', 'আমার প্রথম নাম যোগ করুন', 'Sertakan nama pertama saya'],
+  save: ['Save image', 'حفظ الصورة', 'Enregistrer l’image', 'Guardar imagen', 'Guardar imagem', 'تصویر محفوظ کریں', 'चित्र सहेजें', 'I-save ang larawan', 'तस्बिर सेभ गर्नुहोस्', 'ছবি সেভ করুন', 'Simpan imej'],
+  saved: ['Image saved', 'تم حفظ الصورة', 'Image enregistrée', 'Imagen guardada', 'Imagem guardada', 'تصویر محفوظ ہو گئی', 'चित्र सहेजा गया', 'Na-save ang larawan', 'तस्बिर सेभ भयो', 'ছবি সেভ হয়েছে', 'Imej disimpan'],
+  making: ['Making the image', 'جارٍ تجهيز الصورة', 'Création de l’image', 'Creando la imagen', 'A criar a imagem', 'تصویر تیار ہو رہی ہے', 'चित्र बन रहा है', 'Ginagawa ang larawan', 'तस्बिर बन्दैछ', 'ছবি তৈরি হচ্ছে', 'Menghasilkan imej'],
+  err: ['We could not make the image. Please try again.', 'تعذّر تجهيز الصورة. يرجى المحاولة مرة أخرى.', 'Impossible de créer l’image. Veuillez réessayer.', 'No se pudo crear la imagen. Inténtalo de nuevo.', 'Não foi possível criar a imagem. Tente novamente.', 'تصویر نہیں بن سکی۔ دوبارہ کوشش کریں۔', 'चित्र नहीं बन सका। फिर कोशिश करें।', 'Hindi nagawa ang larawan. Pakisubukang muli.', 'तस्बिर बन्न सकेन। फेरि प्रयास गर्नुहोस्।', 'ছবি তৈরি করা যায়নি। আবার চেষ্টা করুন।', 'Kami tidak dapat menghasilkan imej. Sila cuba lagi.'],
+  retry: ['Try again', 'حاول مرة أخرى', 'Réessayer', 'Reintentar', 'Tentar novamente', 'دوبارہ کوشش کریں', 'फिर कोशिश करें', 'Subukang muli', 'फेरि प्रयास गर्नुहोस्', 'আবার চেষ্টা করুন', 'Cuba lagi'],
 };
 function _sT(k) {
   const row = SHR_T[k] || [''], i = SHR_LANGS.indexOf(S.lang);
@@ -129,7 +129,7 @@ function _shrImg(src) {
 // and the copy goes as a data: address (a picture from one does not close the canvas to reading). The page's green is
 // the one for its light paper, and a session's own colour on some pages: on the picture's dark ground a green badge is
 // the brand green, whatever page it is shared from.
-const _SHR_PAINT = ['fill', 'fill-opacity', 'stroke', 'stroke-opacity', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'opacity', 'font-family', 'font-weight'];
+const _SHR_PAINT = ['fill', 'fill-opacity', 'stroke', 'stroke-opacity', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'opacity', 'font-family', 'font-weight', 'fill'];
 function _shrMedalSrc(icon, color) {
   const box = document.createElement('div'); box.className = 'shr-probe'; box.setAttribute('aria-hidden', 'true');
   box.style.setProperty('--green', SHR_INK.go);

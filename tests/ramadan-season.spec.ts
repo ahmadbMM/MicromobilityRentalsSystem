@@ -141,7 +141,7 @@ test.describe('@customer:members the Ramadan season on the Community tab', () =>
 
   test('the words exist in all ten languages, with Latin digits; the crescent is a glyph of its own', async ({ page }) => {
     await member(page, '2027-02-20');
-    expect(await page.evaluate(`['ssnRam','ssnEid'].filter(k=>!HUB_T[k]||HUB_T[k].length!==10||HUB_T[k].some(x=>!String(x).trim()||/[٠-٩۰-۹०-९০-৯]/.test(x)))`)).toEqual([]);
+    expect(await page.evaluate(`['ssnRam','ssnEid'].filter(k=>!HUB_T[k]||HUB_T[k].length!==11||HUB_T[k].some(x=>!String(x).trim()||/[٠-٩۰-۹०-९০-৯]/.test(x)))`)).toEqual([]);
     expect(await page.evaluate(`HUB_T.ssnRam[1]+'|'+HUB_T.ssnEid[1]`)).toBe('رمضان كريم|عيد مبارك');
     const medal = await page.evaluate(`_bdgMedal('crescent','blue')`) as string;
     expect(medal).toContain('M15.6 3.2A9.3 9.3 0 1 0 15.6 20.8');

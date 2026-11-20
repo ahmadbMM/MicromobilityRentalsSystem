@@ -48,7 +48,7 @@ test.describe('@customer:members the Community tab', () => {
     await page.evaluate(`setCustTab('members')`);
     await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
     expect(asked).toHaveLength(1);
-    const bad = await page.evaluate(`Object.entries(HUB_T).filter(([k,v])=>v.length!==10||v.some(x=>!String(x).trim())).map(([k])=>k)`);
+    const bad = await page.evaluate(`Object.entries(HUB_T).filter(([k,v])=>v.length!==11||v.some(x=>!String(x).trim())).map(([k])=>k)`);
     expect(bad).toEqual([]);
     expect(await page.evaluate(`Array.from({length:HUB_TIPS},(_,i)=>'tip'+i).filter(k=>!HUB_T[k])`)).toEqual([]);
   });

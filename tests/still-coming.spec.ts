@@ -377,7 +377,7 @@ test.describe('@staff:bookings "Still coming?" on the roster', () => {
 
   test('the mark is named in every staff language pack, the rider\'s words in every rider pack', () => {
     const pack = (f: string) => JSON.parse(readFileSync(resolve(__dirname, '../lang', f), 'utf8')) as Record<string, string>;
-    for (const l of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) {
+    for (const l of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']) {
       expect((pack(`staff-${l}.json`).stillMark || '').length, `staff ${l}`).toBeGreaterThan(3);
       const r = pack(`${l}.json`);
       for (const k of ['stillYes', 'stillNo', 'stillOk', 'stillAsk', 'stcNoAsk', 'stcNoBody']) expect((r[k] || '').length, `${l} ${k}`).toBeGreaterThan(2);
@@ -391,7 +391,7 @@ test.describe('@customer:bookings the evening-before reminder', () => {
   const words = [...sql.matchAll(/^\s*\('(remind(?::nc)?)',\s*'([a-z]{2})',\s*'((?:[^']|'')*)',\s*'((?:[^']|'')*)'\)/gm)].map((m) => ({ key: m[1], lang: m[2], title: m[3], body: m[4].replace(/''/g, "'") }));
 
   test('both messages are written in all ten languages, with the session and the time, and a second sentence', () => {
-    const langs = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
+    const langs = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']; // Malay came later, in 20261120230000
     for (const key of ['remind', 'remind:nc']) {
       expect(words.filter((w) => w.key === key).map((w) => w.lang)).toEqual(langs);
     }

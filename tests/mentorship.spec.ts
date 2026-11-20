@@ -41,7 +41,7 @@ test.describe('@customer:members mentorship', () => {
     await expect(card.getByRole('button', { name: 'Register as a mentor' })).toBeVisible();
     await expect(card.getByRole('button', { name: 'See the students' })).toBeVisible();
     await expect(card.getByRole('button', { name: 'Register as a mentee' })).toBeVisible();
-    const bad = await page.evaluate(`Object.entries(HUB_T).filter(([k,v])=>v.length!==10||v.some(x=>!String(x).trim())).map(([k])=>k)`);
+    const bad = await page.evaluate(`Object.entries(HUB_T).filter(([k,v])=>v.length!==11||v.some(x=>!String(x).trim())).map(([k])=>k)`);
     expect(bad).toEqual([]);
   });
 

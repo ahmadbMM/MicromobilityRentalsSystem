@@ -11,7 +11,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/s
 // Nothing is sent as a message.
 
 const ROOT = resolve(__dirname, '..');
-const LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
+const LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms'];
 const pack = (code: string) => JSON.parse(readFileSync(resolve(ROOT, code === 'ar' ? 'lang/ar.json' : `i18n/${code}.json`), 'utf8')) as Record<string, string>;
 
 const sess = (id: string, date: string, o: Record<string, unknown> = {}): Record<string, unknown> => ({ id, day: 'Sunday', session_date: date, capacity: 20, status: 'closed', created_at: 1, location: 'JCC', bike_slots: '{"_time":"18:00 - 20:00","_total":20}', ...o });
@@ -213,7 +213,7 @@ test.describe('@staff:settings personal landmarks: the anniversary line in Messa
     const en = await page.evaluate(`LANG.en.lmLine`);
     expect(def.en).toBe(en);
     for (const code of LANGS.filter((c) => c !== 'en')) expect(def[code], code).toBe(pack(code).lmLine);
-    expect(new Set(Object.values(def)).size).toBe(10);
+    expect(new Set(Object.values(def)).size).toBe(11);
   });
 
   test('an admin rewrites the line on Settings and it is saved where the riders\' page reads it', async ({ page }) => {
@@ -229,7 +229,7 @@ test.describe('@staff:settings personal landmarks: the anniversary line in Messa
     const ed = page.locator('#confirm-modal .tpl-box');
     await expect(ed.locator('#tpl-text')).toHaveValue('Thank you for riding with us. Here is to many more rides together.');
     await expect(ed.locator('.tpl-fill')).toHaveCount(0); // a plain line: nothing to fill in
-    await expect(ed.locator('[data-tpl-lang]')).toHaveCount(10);
+    await expect(ed.locator('[data-tpl-lang]')).toHaveCount(11);
     await ed.locator('[data-tpl-lang="fr"]').click();
     await expect(ed.locator('#tpl-text')).toHaveValue(pack('fr').lmLine);
     await ed.locator('[data-tpl-lang="en"]').click();

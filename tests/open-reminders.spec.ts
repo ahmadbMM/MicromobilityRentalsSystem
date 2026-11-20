@@ -298,7 +298,7 @@ test.describe('@customer:reserve /api/ics, a date\'s opening', () => {
   test('its words are the app\'s own, in all ten languages', async ({ page }) => {
     const m = await freshModule('functions/api/ics.js');
     const langs = m.FEED_LANGS as string[], words = (m.OPEN_WORDS as Record<string, string[]>).title;
-    expect(words).toHaveLength(10);
+    expect(words).toHaveLength(11);
     await stubSupabase(page, { sessions: [], queue_entries: [] });
     await page.goto('/');
     await waitForSb(page);
@@ -333,7 +333,7 @@ test.describe('@customer:reserve the open_reminders migration', () => {
     expect(sql).toMatch(/or s\.session_date < v_today or not _open_remind_ok\(s, r\.to_id\)/); // and the tick
     expect(sql).toMatch(/s\.status = 'closed' and s\.opens_at is not null and s\.opens_at <= now\(\)/); // a timer that has passed counts as open
     const words = [...sql.matchAll(/^\s*\('bookopen', '([a-z]{2})', '((?:[^']|'')*)', '((?:[^']|'')*)'\)/gm)];
-    expect(words.map((w) => w[1])).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']);
+    expect(words.map((w) => w[1])).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']); // Malay came later, in 20261120230000
     for (const w of words) for (const p of ['{0}', '{1}', '{2}']) expect(w[3], w[1]).toContain(p);
     expect(sql).toContain("values ('20261119600200', 'open_reminders')");
   });

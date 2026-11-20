@@ -103,7 +103,7 @@ test.describe('@customer:account the club sessions switch in the Calendar pop-up
     await expect(box(page).locator('label.calf-club')).toHaveText('جلسات النادي أيضًا');
     await expect(sw(page)).toBeChecked();
     const row = await page.evaluate(`CALF_T.club`) as string[];
-    expect(row).toHaveLength(10);
+    expect(row).toHaveLength(11);
     expect(row.every((x) => !!x.trim() && !/[٠-٩۰-۹०-९০-৯]/.test(x))).toBe(true);
     // no inline handler or style in what the file drew
     expect(await box(page).evaluate((b) => b.outerHTML)).not.toMatch(/style=|\son[a-z]+=/i);

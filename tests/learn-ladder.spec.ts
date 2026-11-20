@@ -12,7 +12,8 @@ import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } fr
 // (learn_ladder; no row without a lesson or on a database without the function). A complete level gives a
 // certificate image drawn on the phone; the whole ladder also shows the way to a Saturday ride.
 
-const LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
+const LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']; // the seed's languages (Malay came later, in 20261120230000)
+const APP_LANGS = [...LANGS, 'ms'];
 type Skill = { key: string; level: number; sort: number; name: Record<string, string>; active: boolean };
 // The skills as the migration seeds them: the fixtures are the seed itself.
 const SQL = readFileSync(resolve(__dirname, '../supabase/migrations/20261114082100_learn_ladder.sql'), 'utf8');
@@ -239,9 +240,9 @@ test.describe('@customer:account the learn-to-ride ladder', () => {
     await expect(page.locator('#ll-box .ll-cert-b')).toHaveCount(0);
     await expect(page.locator('#ll-box .ll-inv')).toHaveCount(0);
     // every word of the file in all ten languages
-    const bad = await page.evaluate(`Object.entries(LL_T).filter(([k,v])=>v.length!==10||v.some(x=>!String(x).trim())).map(([k])=>k)`);
+    const bad = await page.evaluate(`Object.entries(LL_T).filter(([k,v])=>v.length!==11||v.some(x=>!String(x).trim())).map(([k])=>k)`);
     expect(bad).toEqual([]);
-    expect(await page.evaluate(`LL_LANGS.join()`)).toBe(LANGS.join());
+    expect(await page.evaluate(`LL_LANGS.join()`)).toBe(APP_LANGS.join());
     await page.locator('#ll-box .ll-x').click();
     await expect(page.locator('#ll-box')).toHaveCount(0);
     // in Arabic: the levels and the seeded skill names in Arabic

@@ -7,23 +7,23 @@
 // A file of its own, fetched on the first tap (_brpOpen in app.src.html), with its own words in all ten languages.
 // Hand-written, not generated; the build stamps its address (BRP_V).
 /* global S, sb, esc, _on, _EV, _EL, getSession, getQueue */
-const BRP_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
+const BRP_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms'];
 // The faults, as the database names them (bike_reports.fault).
 const BRP_FAULTS = ['brakes', 'gears', 'tyre', 'chain', 'saddle', 'lights', 'other'];
 const BRP_T = {
-  bike: ['Bike', 'الدراجة', 'Vélo', 'Bici', 'Bicicleta', 'سائیکل', 'साइकिल', 'Bike', 'साइकल', 'সাইকেল'],
-  brakes: ['Brakes', 'المكابح', 'Freins', 'Frenos', 'Travões', 'بریک', 'ब्रेक', 'Preno', 'ब्रेक', 'ব্রেক'],
-  gears: ['Gears', 'ناقل السرعات', 'Vitesses', 'Cambios', 'Mudanças', 'گیئر', 'गियर', 'Gear', 'गियर', 'গিয়ার'],
-  tyre: ['Tyre', 'الإطار', 'Pneu', 'Neumático', 'Pneu', 'ٹائر', 'टायर', 'Gulong', 'टायर', 'টায়ার'],
-  chain: ['Chain', 'السلسلة', 'Chaîne', 'Cadena', 'Corrente', 'چین', 'चेन', 'Kadena', 'चेन', 'চেইন'],
-  saddle: ['Saddle', 'المقعد', 'Selle', 'Sillín', 'Selim', 'سیٹ', 'सीट', 'Upuan', 'सिट', 'সিট'],
-  lights: ['Lights', 'الأضواء', 'Éclairage', 'Luces', 'Luzes', 'لائٹس', 'लाइट', 'Ilaw', 'बत्ती', 'লাইট'],
-  other: ['Other', 'أخرى', 'Autre', 'Otro', 'Outro', 'دیگر', 'अन्य', 'Iba pa', 'अन्य', 'অন্যান্য'],
-  note: ['Note (optional)', 'ملاحظة (اختياري)', 'Note (facultatif)', 'Nota (opcional)', 'Nota (opcional)', 'نوٹ (اختیاری)', 'नोट (वैकल्पिक)', 'Tala (opsyonal)', 'टिप्पणी (ऐच्छिक)', 'নোট (ঐচ্ছিক)'],
-  send: ['Send report', 'إرسال البلاغ', 'Envoyer le signalement', 'Enviar aviso', 'Enviar aviso', 'اطلاع بھیجیں', 'रिपोर्ट भेजें', 'Ipadala ang report', 'रिपोर्ट पठाउनुहोस्', 'রিপোর্ট পাঠান'],
-  close: ['Close', 'إغلاق', 'Fermer', 'Cerrar', 'Fechar', 'بند کریں', 'बंद करें', 'Isara', 'बन्द गर्नुहोस्', 'বন্ধ করুন'],
-  pick: ['Choose what is wrong.', 'اختر نوع المشكلة.', 'Choisissez le problème.', 'Elige el problema.', 'Escolha o problema.', 'خرابی منتخب کریں۔', 'समस्या चुनें।', 'Piliin ang problema.', 'समस्या छान्नुहोस्।', 'সমস্যাটি বেছে নিন।'],
-  err: ['We could not send it. Please try again.', 'تعذّر الإرسال. يرجى المحاولة مرة أخرى.', 'Envoi impossible. Veuillez réessayer.', 'No se pudo enviar. Inténtalo de nuevo.', 'Não foi possível enviar. Tente novamente.', 'بھیجا نہیں جا سکا۔ دوبارہ کوشش کریں۔', 'भेजा नहीं जा सका। फिर कोशिश करें।', 'Hindi naipadala. Pakisubukang muli.', 'पठाउन सकिएन। फेरि प्रयास गर्नुहोस्।', 'পাঠানো যায়নি। আবার চেষ্টা করুন।'],
+  bike: ['Bike', 'الدراجة', 'Vélo', 'Bici', 'Bicicleta', 'سائیکل', 'साइकिल', 'Bike', 'साइकल', 'সাইকেল', 'Basikal'],
+  brakes: ['Brakes', 'المكابح', 'Freins', 'Frenos', 'Travões', 'بریک', 'ब्रेक', 'Preno', 'ब्रेक', 'ব্রেক', 'Brek'],
+  gears: ['Gears', 'ناقل السرعات', 'Vitesses', 'Cambios', 'Mudanças', 'گیئر', 'गियर', 'Gear', 'गियर', 'গিয়ার', 'Gear'],
+  tyre: ['Tyre', 'الإطار', 'Pneu', 'Neumático', 'Pneu', 'ٹائر', 'टायर', 'Gulong', 'टायर', 'টায়ার', 'Tayar'],
+  chain: ['Chain', 'السلسلة', 'Chaîne', 'Cadena', 'Corrente', 'چین', 'चेन', 'Kadena', 'चेन', 'চেইন', 'Rantai'],
+  saddle: ['Saddle', 'المقعد', 'Selle', 'Sillín', 'Selim', 'سیٹ', 'सीट', 'Upuan', 'सिट', 'সিট', 'Pelana'],
+  lights: ['Lights', 'الأضواء', 'Éclairage', 'Luces', 'Luzes', 'لائٹس', 'लाइट', 'Ilaw', 'बत्ती', 'লাইট', 'Lampu'],
+  other: ['Other', 'أخرى', 'Autre', 'Otro', 'Outro', 'دیگر', 'अन्य', 'Iba pa', 'अन्य', 'অন্যান্য', 'Lain-lain'],
+  note: ['Note (optional)', 'ملاحظة (اختياري)', 'Note (facultatif)', 'Nota (opcional)', 'Nota (opcional)', 'نوٹ (اختیاری)', 'नोट (वैकल्पिक)', 'Tala (opsyonal)', 'टिप्पणी (ऐच्छिक)', 'নোট (ঐচ্ছিক)', 'Nota (pilihan)'],
+  send: ['Send report', 'إرسال البلاغ', 'Envoyer le signalement', 'Enviar aviso', 'Enviar aviso', 'اطلاع بھیجیں', 'रिपोर्ट भेजें', 'Ipadala ang report', 'रिपोर्ट पठाउनुहोस्', 'রিপোর্ট পাঠান', 'Hantar laporan'],
+  close: ['Close', 'إغلاق', 'Fermer', 'Cerrar', 'Fechar', 'بند کریں', 'बंद करें', 'Isara', 'बन्द गर्नुहोस्', 'বন্ধ করুন', 'Tutup'],
+  pick: ['Choose what is wrong.', 'اختر نوع المشكلة.', 'Choisissez le problème.', 'Elige el problema.', 'Escolha o problema.', 'خرابی منتخب کریں۔', 'समस्या चुनें।', 'Piliin ang problema.', 'समस्या छान्नुहोस्।', 'সমস্যাটি বেছে নিন।', 'Pilih bahagian yang bermasalah.'],
+  err: ['We could not send it. Please try again.', 'تعذّر الإرسال. يرجى المحاولة مرة أخرى.', 'Envoi impossible. Veuillez réessayer.', 'No se pudo enviar. Inténtalo de nuevo.', 'Não foi possível enviar. Tente novamente.', 'بھیجا نہیں جا سکا۔ دوبارہ کوشش کریں۔', 'भेजा नहीं जा सका। फिर कोशिश करें।', 'Hindi naipadala. Pakisubukang muli.', 'पठाउन सकिएन। फेरि प्रयास गर्नुहोस्।', 'পাঠানো যায়নি। আবার চেষ্টা করুন।', 'Kami tidak dapat menghantarnya. Sila cuba lagi.'],
 };
 function _brpT(k) {
   const r = BRP_T[k] || [], i = BRP_LANGS.indexOf(S.lang);

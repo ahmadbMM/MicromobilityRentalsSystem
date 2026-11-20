@@ -294,7 +294,7 @@ test.describe('@customer:account share a badge, a title or a finished challenge'
     await rider(page);
     await shareBadge(page, 'Marshal');
     expect(await page.evaluate(`Object.entries(SHR_T).filter(([k,v])=>v.length!==SHR_LANGS.length||v.some(x=>!String(x).trim())).map(([k])=>k)`)).toEqual([]);
-    expect(await page.evaluate('SHR_LANGS')).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']);
+    expect(await page.evaluate('SHR_LANGS')).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']);
     expect(EMOJI.test(await page.evaluate('JSON.stringify(SHR_T)'))).toBe(false);
     // the same placeholders in every language
     expect(await page.evaluate(`Object.entries(SHR_T).filter(([k,v])=>v.some(x=>(x.match(/\\{\\d\\}/g)||[]).sort().join()!==(v[0].match(/\\{\\d\\}/g)||[]).sort().join())).map(([k])=>k)`)).toEqual([]);

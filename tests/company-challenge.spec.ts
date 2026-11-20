@@ -243,7 +243,7 @@ test.describe('@customer:account company challenge: the row, joining, the card',
     expect(await page.evaluate(`BDG_HELD_ONLY.has('company_challenge')`)).toBe(true);
     const keys = ['bdgCompanyChallenge', 'bdgCompanyChallengeD', 'bdgCompanyChallengeA', 'cochTitle'];
     expect(await page.evaluate(`${JSON.stringify(keys)}.filter(k=>!LANG.en[k])`)).toEqual([]);
-    for (const lang of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) { // the riders' own pack of each language
+    for (const lang of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']) { // the riders' own pack of each language
       const pack = JSON.parse(readFileSync(resolve(__dirname, `../lang/${lang}.json`), 'utf8')) as Record<string, string>;
       expect(keys.filter((k) => !pack[k]), lang).toEqual([]);
     }
@@ -255,15 +255,15 @@ test.describe('@customer:account company challenge: the row, joining, the card',
     await rider(page, { 'rpc:company_challenge_mine': mine(ch({ state: 'ended', badge: true })) });
     await row(page).click();
     await expect(host(page).locator('[data-coch="7"]')).toBeVisible();
-    expect(await page.evaluate(`COCH_LANGS.join()`)).toBe('en,ar,fr,es,pt,ur,hi,tl,ne,bn');
-    expect(await page.evaluate(`Object.entries(COCH_T).filter(([k,v])=>v.length!==10||v.some(x=>!String(x).trim())).map(([k])=>k)`)).toEqual([]);
+    expect(await page.evaluate(`COCH_LANGS.join()`)).toBe('en,ar,fr,es,pt,ur,hi,tl,ne,bn,ms');
+    expect(await page.evaluate(`Object.entries(COCH_T).filter(([k,v])=>v.length!==11||v.some(x=>!String(x).trim())).map(([k])=>k)`)).toEqual([]);
     expect(await page.evaluate(`Object.values(COCH_T).flat().filter(x=>/[\\u0660-\\u0669\\u06F0-\\u06F9\\u0966-\\u096F\\u09E6-\\u09EF]/.test(x))`)).toEqual([]); // Latin digits everywhere
     await page.evaluate(`S.lang='ar';_cochRender()`);
     await expect(page.locator('label[for="coch-code"]')).toHaveText('رمز الشركة');
     await expect(page.locator('#coch-join')).toHaveText('انضم');
     await expect(page.locator('[data-coch="7"] [data-coch-n="team"]')).toContainText('المشاركون');
     await expect(page.locator('[data-coch="7"] .coch-badge-ok')).toHaveText('حصلت على الوسام');
-    expect(await page.evaluate(`['fr','es','pt','ur','hi','tl','ne','bn'].map(l=>{S.lang=l;return _cochT('join')}).filter(x=>!x||x==='Join')`)).toEqual([]);
+    expect(await page.evaluate(`['fr','es','pt','ur','hi','tl','ne','bn','ms'].map(l=>{S.lang=l;return _cochT('join')}).filter(x=>!x||x==='Join')`)).toEqual([]);
   });
 
   test('the box keeps what is being typed when the page is drawn again', async ({ page }) => {
@@ -529,7 +529,7 @@ test.describe('@staff:people company challenges', () => {
     await staff(page);
     const keys = ['cochsTab', 'cochsNew', 'cochsCode', 'cochsMin', 'cochsTeam', 'cochsSessions', 'cochsBadges', 'cochsRiders', 'cochsNone', 'cochsNoRiders', 'cochsStOn', 'cochsStEnded', 'cochsErrFields', 'cochsErrTaken', 'cochsDelAsk', 'cochsRemoveAsk'];
     expect(await page.evaluate(`${JSON.stringify(keys)}.filter(k=>!LANG.en[k])`)).toEqual([]);
-    for (const lang of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) {
+    for (const lang of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']) {
       const packs = ['community', 'peoplemore'].map((p) => JSON.parse(readFileSync(resolve(__dirname, `../lang/staff-${p}-${lang}.json`), 'utf8')) as Record<string, string>);
       const all = Object.assign({}, ...packs) as Record<string, string>;
       expect(keys.filter((k) => !all[k] || all[k] === ''), lang).toEqual([]);

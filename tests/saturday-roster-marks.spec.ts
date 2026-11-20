@@ -349,7 +349,7 @@ test.describe('@staff:bookings Marks on the Saturday roster', () => {
 
   test('every staff language pack holds the words, with their numbers\' places and Latin digits', async () => {
     const core = ['srmTitle', 'srmFirst', 'srmSecond', 'srmBack', 'srmMile'];
-    for (const code of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) {
+    for (const code of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']) {
       const pack = JSON.parse(readFileSync(`lang/staff-${code}.json`, 'utf8')) as Record<string, string>;
       const people = JSON.parse(readFileSync(`lang/staff-community-${code}.json`, 'utf8')) as Record<string, string>;
       const rider = JSON.parse(readFileSync(`lang/${code}.json`, 'utf8')) as Record<string, string>;

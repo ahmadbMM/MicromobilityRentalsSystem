@@ -417,7 +417,7 @@ test.describe('@customer:members Community chat', () => {
   test('every word of the chat in all ten languages, Latin digits in Nepali and Bengali', async ({ page }) => {
     await member(page);
     await openTab(page);
-    const bad = await page.evaluate(`Object.entries(HUB_T).filter(([k])=>k.startsWith('cht')).filter(([k,v])=>v.length!==10||v.some(x=>!String(x).trim())).map(([k])=>k)`);
+    const bad = await page.evaluate(`Object.entries(HUB_T).filter(([k])=>k.startsWith('cht')).filter(([k,v])=>v.length!==11||v.some(x=>!String(x).trim())).map(([k])=>k)`);
     expect(bad).toEqual([]);
     expect(await page.evaluate(`Object.keys(HUB_T).filter(k=>k.startsWith('cht')).length`)).toBeGreaterThanOrEqual(17);
     // the corner button's two words live with the app's own (every language file, check-i18n's parity)

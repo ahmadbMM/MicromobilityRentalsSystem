@@ -303,14 +303,14 @@ test.describe('@customer:laps circuit challenge: the lap page', () => {
     await lapServer(page);
     await scan(page);
     await expect(pop(page).locator('#lap-n')).toHaveText('1');
-    expect(await page.evaluate(`LAP_LANGS`)).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']);
+    expect(await page.evaluate(`LAP_LANGS`)).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']);
     const T = await page.evaluate(`LAP_T`) as Record<string, string[]>;
     expect(Object.keys(T).length).toBeGreaterThanOrEqual(9);
     // Sign in reads as the app's own button does (authLoginBtn), since it opens that page
     const own = (l: string) => (JSON.parse(readFileSync(resolve(ROOT, `lang/${l}.json`), 'utf8')) as Record<string, string>).authLoginBtn;
-    expect(T.signIn).toEqual([await page.evaluate(`t('authLoginBtn')`), ...['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'].map(own)]);
+    expect(T.signIn).toEqual([await page.evaluate(`t('authLoginBtn')`), ...['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms'].map(own)]);
     for (const [k, row] of Object.entries(T)) {
-      expect(row, k).toHaveLength(10);
+      expect(row, k).toHaveLength(11);
       const blanks = (s: string) => (s.match(/\{\d\}/g) || []).sort().join();
       for (const s of row) {
         expect(String(s).trim(), k).not.toBe('');

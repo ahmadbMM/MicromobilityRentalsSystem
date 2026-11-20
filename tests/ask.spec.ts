@@ -1022,7 +1022,7 @@ test.describe('@staff:ask Ask: questions put to an audience', () => {
     expect(core).toContain('function _askAddr');
     expect(part).not.toContain('function _askAddr');
     expect(core).toMatch(/"?tabAsk"?:"Ask"/);
-    for (const code of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) {
+    for (const code of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']) {
       expect(existsSync(resolve(__dirname, '..', `lang/staff-ask-${code}.json`)), code).toBe(true);
       expect(Object.keys(JSON.parse(read(`lang/staff-ask-${code}.json`))).every((k) => /^ask[A-Z0-9]/.test(k)), code).toBe(true);
       expect(JSON.parse(read(`lang/staff-${code}.json`)).tabAsk, code).toBeTruthy(); // the rail's name rides with the core

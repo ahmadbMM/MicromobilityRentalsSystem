@@ -132,7 +132,7 @@ test('admins customize: default tags and rules, the messages in every language, 
   // the messages: the applications' templates, in every language
   await set.getByRole('button', { name: 'Messages', exact: true }).click();
   await set.locator('.tpl-row[data-tpl="ca_approved"]').click();
-  await expect(page.locator('#confirm-modal [data-tpl-lang]')).toHaveCount(10);
+  await expect(page.locator('#confirm-modal [data-tpl-lang]')).toHaveCount(11);
   await page.locator('#confirm-modal [data-tpl-lang="fr"]').click();
   await expect(page.locator('#tpl-text')).toHaveValue(/Bienvenue/);
   await page.evaluate(`_tplEdClose()`);

@@ -181,7 +181,7 @@ test.describe('@customer:members Suggest a ride', () => {
   test('every word of the page in all ten languages, Latin digits in Nepali and Bengali', async ({ page }) => {
     await member(page);
     await openTab(page);
-    const bad = await page.evaluate(`Object.entries(HUB_T).filter(([k])=>k.startsWith('rsg')).filter(([k,v])=>v.length!==10||v.some(x=>!String(x).trim())).map(([k])=>k)`);
+    const bad = await page.evaluate(`Object.entries(HUB_T).filter(([k])=>k.startsWith('rsg')).filter(([k,v])=>v.length!==11||v.some(x=>!String(x).trim())).map(([k])=>k)`);
     expect(bad).toEqual([]);
     const native = await page.evaluate(`Object.entries(HUB_T).filter(([k])=>k.startsWith('rsg')).filter(([k,v])=>/[०-९০-৯]/.test(v[8]+v[9])).map(([k])=>k)`);
     expect(native).toEqual([]);

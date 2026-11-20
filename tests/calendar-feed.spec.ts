@@ -223,8 +223,8 @@ test.describe('@customer:account the calendar address', () => {
   test('every word of the file exists in all ten languages, with Latin digits', async ({ page }) => {
     await open(page, db());
     await openPop(page);
-    expect(await page.evaluate(`CALF_LANGS`)).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']);
-    expect(await page.evaluate(`Object.entries(CALF_T).filter(([k,v])=>v.length!==10||v.some(x=>!String(x).trim())).map(([k])=>k)`)).toEqual([]);
+    expect(await page.evaluate(`CALF_LANGS`)).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']);
+    expect(await page.evaluate(`Object.entries(CALF_T).filter(([k,v])=>v.length!==11||v.some(x=>!String(x).trim())).map(([k])=>k)`)).toEqual([]);
     expect(await page.evaluate(`Object.entries(CALF_T).filter(([k,v])=>{const h=x=>(x.match(/\\{\\d\\}/g)||[]).sort().join();return v.some(x=>h(x)!==h(v[0]));}).map(([k])=>k)`)).toEqual([]);
     expect(await page.evaluate(`Object.entries(CALF_T).filter(([k,v])=>v.some(x=>/[٠-٩۰-۹०-९০-৯]/.test(x))).map(([k])=>k)`)).toEqual([]);
   });
@@ -574,11 +574,11 @@ test.describe('@customer:account the calendar\'s events', () => {
   test('its words are the app\'s own, in all ten languages', async ({ page }) => {
     const m = await freshModule('functions/api/ics.js');
     const langs = m.FEED_LANGS as string[], words = m.FEED_WORDS as Record<string, string[]>;
-    expect(langs).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']);
+    expect(langs).toEqual(['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']);
     const KEY: Record<string, string> = { ride: 'icsRideTitle', petromin: 'evPetroName', swim: 'evSwimName', workshop: 'evWorkshopName', snd96: 'evSnd96Name', event: 'evEventName', runher: 'evRunHerName', vlap: 'evVlapName', arena: 'evArenaName', defe5k: 'evDefeName', blood: 'evBloodName', yoga: 'evYogaName', farm: 'evFarmName', saturday: 'evSatName', jcc: 'evJccName', jyc: 'venueJyc', gym: 'venueGymnation', meet: 'meetPointLbl', gather: 'commGatherShort', start: 'commStartShort', doors: 'vlDoorsShort', heat: 'vlHeatShort', arrive: 'fhArrive', dinner: 'fhDinner', dRide: 'icsDescRide', dMeet: 'icsDescMeet', dBike: 'icsDescBike', dVisit: 'icsDescVisit', alarm: 'icsAlarm' };
     expect(Object.keys(words).sort()).toEqual(Object.keys(KEY).sort());
     for (const [k, row] of Object.entries(words)) {
-      expect(row, k).toHaveLength(10);
+      expect(row, k).toHaveLength(11);
       expect(row.every((x) => typeof x === 'string' && !!x.trim()), k).toBe(true);
       expect(row.some((x) => /[٠-٩۰-۹०-९০-৯]/.test(x)), k).toBe(false);
     }

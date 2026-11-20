@@ -243,7 +243,7 @@ test.describe('@customer:members the My month card', () => {
   test('every word of the card exists in all ten languages', async ({ page }) => {
     await member(page, '2026-12-27', { 'rpc:hub_month': month() });
     const rows = await page.evaluate(`['monTitle','monSats','monBadges','monVs','yrSessions'].map(k=>[k,(HUB_T[k]||[]).length,(HUB_T[k]||[]).every(x=>String(x).trim()&&!/\\p{Extended_Pictographic}/u.test(x))])`);
-    expect(rows).toEqual([['monTitle', 10, true], ['monSats', 10, true], ['monBadges', 10, true], ['monVs', 10, true], ['yrSessions', 10, true]]);
+    expect(rows).toEqual([['monTitle', 11, true], ['monSats', 11, true], ['monBadges', 11, true], ['monVs', 11, true], ['yrSessions', 11, true]]);
     expect(await page.evaluate(`HUB_T.monVs.every(x=>x.includes('{0}'))`)).toBe(true);
   });
 });

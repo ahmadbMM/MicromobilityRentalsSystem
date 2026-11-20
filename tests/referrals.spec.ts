@@ -62,7 +62,7 @@ test.describe('@customer:account referrals', () => {
     const msg = await page.evaluate(`t('refMsg')`) as string;
     expect(msg).not.toMatch(/\{2\}|%|off/);
     expect(await page.evaluate(`t('refSignupNote')`)).toBe('A friend invited you.');
-    for (const l of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) {
+    for (const l of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn', 'ms']) {
       const j = JSON.parse(readFileSync(`lang/${l}.json`, 'utf8'));
       for (const k of ['refHow', 'refEarned', 'refWHeld', 'refBizDays', 'refBizCap', 'refBizPct']) expect(j[k], `${l} ${k}`).toBeUndefined();
       expect(j.refMsg, l).not.toContain('{2}'); expect(j.refMsg, l).toContain('{0}'); expect(j.refMsg, l).toContain('{1}');
