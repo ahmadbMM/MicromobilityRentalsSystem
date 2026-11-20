@@ -81216,9 +81216,12 @@ function _rp2Cat(){
   ];
 }
 function _rp2Ok(c){return (!REPORT_MONEY[c[0]]||isAdmin())&&_deskTabOk(c[3]);}
+// 'sat' (the Saturday roster) lists Saturday Social Rides alone (the user, 2026-11-20: "in saturday roster report let the
+// session selector only include saturday social rides"): it listed every community session, swims, Petromin nights,
+// Run for Her and yoga among them.
 function _rp2Sessions(kind){
   const qb=kind==='ptn'?_qBySession():null;
-  return(S.sessions||[]).filter(s=>s&&s.status!=='deleted'&&(kind==='any'||kind==='sat'&&_isCommunity(s)||kind==='run'&&_isRun(s)||kind==='race'&&_isRace(s)||kind==='ptn'&&(qb.get(s.id)||[]).some(e=>e.partner)))
+  return(S.sessions||[]).filter(s=>s&&s.status!=='deleted'&&(kind==='any'||kind==='sat'&&_rideKind(s)==='saturday'||kind==='run'&&_isRun(s)||kind==='race'&&_isRace(s)||kind==='ptn'&&(qb.get(s.id)||[]).some(e=>e.partner)))
     .sort(_sessOrder).slice(0,80);
 }
 function _rp2Fav(id){const f=new Set(_pref('state.repfav',[])||[]);if(f.has(id))f.delete(id);else f.add(id);_prefSet('state.repfav',[...f].slice(0,40));renderReports();}

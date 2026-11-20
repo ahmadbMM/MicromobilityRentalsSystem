@@ -157,4 +157,21 @@ test.describe('@staff:reports the reports rework', () => {
     expect(await page.locator('#ck-t th').nth(1).getAttribute('class')).toContain('ck-num');
     expect(await page.locator('#ck-t th').nth(2).getAttribute('class') || '').not.toContain('ck-num'); // a number that names something stays at the start
   });
+
+  // the user, 2026-11-20: "in saturday roster report let the session selector only include saturday social rides"
+  test('the Saturday roster picks from Saturday Social Rides alone, not the other community sessions', async ({ page }) => {
+    const c = (id: string, ride_kind: string | null) => ({ ...sessions[0], id, session_date: D, event_kind: 'community', ride_kind });
+    await stubSupabase(page, {
+      sessions: [...sessions, c('sat1', 'saturday'), c('sw1', 'swim'), c('pm1', 'petromin'), c('rh1', 'runher'), c('yg1', 'yoga')],
+      queue_entries,
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('reports')`);
+    const opts = page.locator('#rp2-s-roster option');
+    await expect(opts).toHaveCount(2); // "Pick a session" and the one Saturday ride
+    expect(await opts.nth(1).getAttribute('value')).toBe('sat1');
+    await expect(page.locator('#rp2-s-session option[value="sw1"]')).toHaveCount(1); // the session report still takes any session
+  });
 });
