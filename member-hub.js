@@ -17,11 +17,13 @@
 // its block is the last above window._hubRender.
 // 2026-11-18: the Ramadan season (its dates from hub_season, a card and the next session's accent; see _ssnCheck).
 // 2026-11-20: the feed in three parts behind a switch, Sessions, Challenges and Club (see the block above _feedHtml).
+// 2026-11-20: the Community chat (its card in the feed, its own page S._hubView 'chat', chat_read / chat_send; the one place
+// a member reads another member's full name, the owner's pick); its block is the last above window._hubRender.
 /* global S, sb, esc, _on, getSession, _cssv, shortDate, t, _cuIc, sessionTime, _dayWord, _evName, _evOf, _evKindName, allSessions,
    _isCommunity, _sessPastDay, _sessEnded, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
    _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard, _bookingAhead, _ptnAll,
    _arHold, _isApprovalRide, _commPublished, _needsBike, _typeClosed, _mfMarkHtml, todayStr,
-   NATIONALITIES, nationalityLabel, _natFor, _selOnce, askConfirm, closeConfirm, _EL, _EV */
+   NATIONALITIES, nationalityLabel, _natFor, _selOnce, askConfirm, closeConfirm, _EL, _EV, _sbCooling */
 const HUB_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 const HUB_T = {
   err: ['We could not do that. Please try again.', 'تعذّر ذلك. يرجى المحاولة مرة أخرى.', 'Action impossible. Veuillez réessayer.', 'No se pudo hacer. Inténtalo de nuevo.', 'Não foi possível. Tente novamente.', 'یہ نہیں ہو سکا۔ دوبارہ کوشش کریں۔', 'यह नहीं हो सका। फिर कोशिश करें।', 'Hindi ito nagawa. Pakisubukang muli.', 'यो हुन सकेन। फेरि प्रयास गर्नुहोस्।', 'এটি করা যায়নি। আবার চেষ্টা করুন।'],
@@ -277,6 +279,7 @@ function _hubRender() {
   _mtFetch();
   _akListFetch();
   _intFetch();
+  _chtPeek();
   // An open's first read goes at once, the copy on the phone painted meanwhile. A failed read (the copy kept and marked
   // stale, or none at all) is tried again two minutes on too, not only by Retry.
   if ((S._hubVisit && S._hubVisit.due && !S._hubVisit.sent) || !h || (d && !h.stale && Date.now() - h.at >= 12e4) || ((h.stale || !d) && Date.now() - (h.failAt || 0) >= 12e4)) _hubFetch();
@@ -292,6 +295,9 @@ function _hubRender() {
   // Suggest a ride: written once, then only its list again, so a repaint keeps what the member is typing.
   if (S._hubView === 'suggest' && S._rsgOff) S._hubView = null;
   if (S._hubView === 'suggest' && c) { _rsgPaint(body, c); return; }
+  // The Community chat: written once, then only its messages again, so a read landing never takes away what is being typed.
+  if (S._hubView === 'chat' && S._chtOff) S._hubView = null;
+  if (S._hubView === 'chat' && c) { _chtPaint(body, c); return; }
   if (!d) {
     body.innerHTML = h ? `<div class="hub-card" role="status"><strong class="hub-name">${_hT('err')}</strong><button type="button" class="btn-primary hub-wide" data-on-click="${_on('_hubRetry')}">${_hT('retry')}</button></div>` : _skelHtml(2, 'hub-skel');
     return;
@@ -366,6 +372,7 @@ function _feedHtml(c, d, stale) {
       d.club ? _clubHtml(d.club) : '',
     ].join(''),
     club: [
+      _chtCardHtml(), // the Community chat leads the Club part (2026-11-20)
       _akCardHtml(),
       _mtCardHtml(),
       d.volunteer && dep.vol ? `<div class="hub-card hub-flat"><span class="hub-k">${_cuIc('people', 16)} ${_hT('vol')}</span><a class="btn-secondary hub-wide hub-link" href="${esc(dep.vol + '/#o/' + encodeURIComponent(d.volunteer))}" target="_blank" rel="noopener">${_hT('volBtn')}</a></div>` : '',
@@ -1667,6 +1674,310 @@ async function _rsgSend() {
   if (!res || res.ok !== true || !res.row) { g.err = (res && RSG_ERR[res.error]) || 'err'; _rsgSync(g); return; }
   g.kind = ''; g.draft = ''; g.err = ''; if (ta) ta.value = '';
   g.rows = [res.row, ...(g.rows || []).filter((x) => x.id !== res.row.id)];
+  _hubRender();
+}
+
+// ── The Community chat (the user, 2026-11-20: "can we create a live chat in the booking app but only for community
+// members?"; asked how a member appears, where it lives and what may be sent: "Full name", "One club chat", "Text only")
+// One room for every active member. A card in the feed (how many new since this phone last read to the end, chat_peek)
+// opens a page of its own (S._hubView 'chat'; /members?hv=chat): the messages oldest to newest under their day, the
+// author's FULL NAME over a run of theirs (the owner's pick, the one exception here to "members see nothing of each
+// other"; nothing else about a member is ever sent), the team's under "MicroMobility team", the member's own on the other
+// side; the box to write in stays at the foot of the screen. Migration 20261120203000.
+// - Reads: chat_read gives the newest 50, then only what came after the last one held (p_after) or the 50 before the
+//   first (Earlier messages). Never kept on the phone. Only the id read to is (cq_cht_seen_<account>), for the card.
+// - Live: the page joins the realtime topic 'hub-chat' while it is open; the database sends an EMPTY 'tick' there for
+//   every change and the page then asks chat_read (the tick names nobody and carries no words). Ticks that bring nothing
+//   are answered less and less often (a topic anyone can write to must not make every phone read). Without a tick the
+//   page asks by itself: every 12 s while the topic is not joined, every 45 s while it is, never while hidden.
+// - Writes: chat_send (the first one asks for the member's yes to their full name, kept by the database), chat_remove
+//   (their own message) and chat_report (someone else's, to the team). A refusal is said over the box, no toast.
+// - The page is written once and then only its messages, so nothing typed is lost; the scroll stays with the reader:
+//   at the end it follows new messages, further up a "New messages" button appears instead.
+// A database without the functions (PGRST202) closes the page and hides the card.
+Object.assign(HUB_T, {
+  chtTitle: ['Community chat', 'دردشة المجتمع', 'Discussion de la communauté', 'Chat de la comunidad', 'Chat da comunidade', 'کمیونٹی چیٹ', 'कम्युनिटी चैट', 'Chat ng Community', 'कम्युनिटी च्याट', 'কমিউনিটি চ্যাট'],
+  chtOpen: ['Open the chat', 'افتح الدردشة', 'Ouvrir la discussion', 'Abrir el chat', 'Abrir o chat', 'چیٹ کھولیں', 'चैट खोलें', 'Buksan ang chat', 'च्याट खोल्नुहोस्', 'চ্যাট খুলুন'],
+  chtNewN: ['{0} new', '{0} جديدة', '{0} nouveaux', '{0} nuevos', '{0} novas', '{0} نئے', '{0} नए', '{0} bago', '{0} नयाँ', '{0} নতুন'],
+  chtLabel: ['Message', 'رسالة', 'Message', 'Mensaje', 'Mensagem', 'پیغام', 'संदेश', 'Mensahe', 'सन्देश', 'বার্তা'],
+  chtEmpty: ['No messages yet.', 'لا توجد رسائل بعد.', 'Aucun message pour le moment.', 'Aún no hay mensajes.', 'Ainda não há mensagens.', 'ابھی کوئی پیغام نہیں۔', 'अभी कोई संदेश नहीं।', 'Wala pang mensahe.', 'अहिलेसम्म कुनै सन्देश छैन।', 'এখনও কোনো বার্তা নেই।'],
+  chtOlder: ['Earlier messages', 'الرسائل السابقة', 'Messages précédents', 'Mensajes anteriores', 'Mensagens anteriores', 'پچھلے پیغامات', 'पहले के संदेश', 'Mga naunang mensahe', 'अघिल्ला सन्देशहरू', 'আগের বার্তাগুলো'],
+  chtNew: ['New messages', 'رسائل جديدة', 'Nouveaux messages', 'Mensajes nuevos', 'Novas mensagens', 'نئے پیغامات', 'नए संदेश', 'Mga bagong mensahe', 'नयाँ सन्देशहरू', 'নতুন বার্তা'],
+  chtTeam: ['MicroMobility team', 'فريق MicroMobility', 'Équipe MicroMobility', 'Equipo MicroMobility', 'Equipe MicroMobility', 'MicroMobility ٹیم', 'MicroMobility टीम', 'MicroMobility team', 'MicroMobility टिम', 'MicroMobility টিম'],
+  chtMember: ['Member', 'عضو', 'Membre', 'Miembro', 'Membro', 'ممبر', 'सदस्य', 'Miyembro', 'सदस्य', 'সদস্য'],
+  chtAgree: ['Other members will see your full name, {0}, with your messages.', 'سيرى الأعضاء الآخرون اسمك الكامل، {0}، مع رسائلك.', 'Les autres membres verront votre nom complet, {0}, avec vos messages.', 'Los demás miembros verán tu nombre completo, {0}, junto a tus mensajes.', 'Os outros membros verão o seu nome completo, {0}, com as suas mensagens.', 'دوسرے ممبران آپ کے پیغامات کے ساتھ آپ کا پورا نام، {0}، دیکھیں گے۔', 'दूसरे सदस्य आपके संदेशों के साथ आपका पूरा नाम, {0}, देखेंगे।', 'Makikita ng ibang miyembro ang buo mong pangalan, {0}, kasama ng mga mensahe mo.', 'अरू सदस्यहरूले तपाईंका सन्देशसँगै तपाईंको पूरा नाम, {0}, देख्नेछन्।', 'অন্য সদস্যরা আপনার বার্তার সাথে আপনার পুরো নাম, {0}, দেখতে পাবেন।'],
+  chtRemoveQ: ['Remove your message?', 'هل تريد حذف رسالتك؟', 'Supprimer votre message ?', '¿Eliminar tu mensaje?', 'Remover a sua mensagem?', 'اپنا پیغام ہٹائیں؟', 'अपना संदेश हटाएँ?', 'Alisin ang mensahe mo?', 'तपाईंको सन्देश हटाउने?', 'আপনার বার্তাটি সরাবেন?'],
+  chtRemove: ['Remove', 'حذف', 'Supprimer', 'Eliminar', 'Remover', 'ہٹائیں', 'हटाएँ', 'Alisin', 'हटाउनुहोस्', 'সরান'],
+  chtReportQ: ['Report this message to the team?', 'هل تريد إبلاغ الفريق عن هذه الرسالة؟', 'Signaler ce message à l’équipe ?', '¿Denunciar este mensaje al equipo?', 'Denunciar esta mensagem à equipe?', 'اس پیغام کی ٹیم کو اطلاع دیں؟', 'इस संदेश की टीम को रिपोर्ट करें?', 'I-report ang mensaheng ito sa team?', 'यो सन्देश टिमलाई रिपोर्ट गर्ने?', 'এই বার্তাটি টিমকে রিপোর্ট করবেন?'],
+  chtReport: ['Report', 'إبلاغ', 'Signaler', 'Denunciar', 'Denunciar', 'رپورٹ کریں', 'रिपोर्ट करें', 'I-report', 'रिपोर्ट गर्नुहोस्', 'রিপোর্ট করুন'],
+  chtReported: ['Reported', 'تم الإبلاغ', 'Signalé', 'Denunciado', 'Denunciada', 'رپورٹ ہو گیا', 'रिपोर्ट किया गया', 'Nai-report', 'रिपोर्ट गरियो', 'রিপোর্ট করা হয়েছে'],
+  chtFast: ['You are sending too fast. Please try again in a moment.', 'أنت ترسل بسرعة كبيرة. يرجى المحاولة بعد لحظة.', 'Vous envoyez trop vite. Réessayez dans un instant.', 'Estás enviando demasiado rápido. Inténtalo en un momento.', 'Você está enviando rápido demais. Tente novamente em instantes.', 'آپ بہت تیزی سے بھیج رہے ہیں۔ ذرا دیر بعد دوبارہ کوشش کریں۔', 'आप बहुत तेज़ी से भेज रहे हैं। थोड़ी देर बाद फिर कोशिश करें।', 'Masyadong mabilis ang pagpapadala mo. Subukang muli maya-maya.', 'तपाईं धेरै छिटो पठाउँदै हुनुहुन्छ। केही बेरपछि फेरि प्रयास गर्नुहोस्।', 'আপনি খুব দ্রুত পাঠাচ্ছেন। একটু পরে আবার চেষ্টা করুন।'],
+  chtLimit: ['You have sent many messages. Please try again in a few minutes.', 'أرسلت رسائل كثيرة. يرجى المحاولة بعد بضع دقائق.', 'Vous avez envoyé beaucoup de messages. Réessayez dans quelques minutes.', 'Has enviado muchos mensajes. Inténtalo en unos minutos.', 'Você enviou muitas mensagens. Tente novamente em alguns minutos.', 'آپ نے بہت سے پیغامات بھیجے ہیں۔ چند منٹ بعد دوبارہ کوشش کریں۔', 'आपने बहुत संदेश भेजे हैं। कुछ मिनट बाद फिर कोशिश करें।', 'Marami ka nang naipadalang mensahe. Subukang muli pagkalipas ng ilang minuto.', 'तपाईंले धेरै सन्देश पठाउनुभयो। केही मिनेटपछि फेरि प्रयास गर्नुहोस्।', 'আপনি অনেক বার্তা পাঠিয়েছেন। কয়েক মিনিট পরে আবার চেষ্টা করুন।'],
+  chtMuted: ['You cannot write in the chat for now.', 'لا يمكنك الكتابة في الدردشة حاليًا.', 'Vous ne pouvez pas écrire dans la discussion pour le moment.', 'Por ahora no puedes escribir en el chat.', 'Por enquanto você não pode escrever no chat.', 'آپ فی الحال چیٹ میں نہیں لکھ سکتے۔', 'आप अभी चैट में नहीं लिख सकते।', 'Hindi ka muna makakasulat sa chat.', 'तपाईं अहिले च्याटमा लेख्न सक्नुहुन्न।', 'আপনি আপাতত চ্যাটে লিখতে পারবেন না।'],
+  chtMutedTill: ['You cannot write in the chat until {0}.', 'لا يمكنك الكتابة في الدردشة حتى {0}.', 'Vous ne pouvez pas écrire dans la discussion avant le {0}.', 'No puedes escribir en el chat hasta el {0}.', 'Você não pode escrever no chat até {0}.', 'آپ {0} تک چیٹ میں نہیں لکھ سکتے۔', 'आप {0} तक चैट में नहीं लिख सकते।', 'Hindi ka makakasulat sa chat hanggang {0}.', 'तपाईं {0} सम्म च्याटमा लेख्न सक्नुहुन्न।', 'আপনি {0} পর্যন্ত চ্যাটে লিখতে পারবেন না।'],
+});
+const CHT_ERR = { fast: 'chtFast', limit: 'chtLimit' };
+const _CHT_SEEN = 'cq_cht_seen_';
+// S._cht: {forId, rows (null until read), more, me {agreed, muted, until}, draft, err, busy, loading, again, fail, html, jump,
+// keep, fresh (others' messages that came while the reader was further up), rep {id: 1}, readAt, selfAt, tickT, tickGap,
+// tickNext}; per account, in memory only. S._chtN: {id, at, n} = the card's count. S._chtCh: the joined topic.
+function _chtState(c) {
+  if (!c) return null;
+  if (!S._cht || S._cht.forId !== c.id) S._cht = { forId: c.id, rows: null, more: false, me: null, draft: '', err: '', busy: false, loading: false, again: false, fail: false, html: null, jump: true, keep: false, fresh: 0, rep: {}, readAt: 0, selfAt: 0, tickT: null, tickGap: 0, tickNext: 0 };
+  return S._cht;
+}
+function _chtSeenId(c) { try { const v = Number(localStorage.getItem(_CHT_SEEN + c.id)); return v > 0 ? v : null; } catch (_) { return null; } }
+function _chtOn() { return S.custTab === 'members' && S._hubView === 'chat' && !!document.getElementById('cht-page'); }
+function _chtCool() { try { return typeof _sbCooling === 'function' && !!_sbCooling(); } catch (_) { return false; } }
+
+// The card: its count is asked when the tab paints, at most every two minutes.
+async function _chtPeek(force) {
+  const c = _hCust(); if (!c || !c.session_token || !sb || S._chtOff || S._chtPeekBusy) return;
+  const p = S._chtN && S._chtN.id === c.id ? S._chtN : null;
+  if (!force && p && Date.now() - p.at < 12e4) return;
+  S._chtPeekBusy = true;
+  let r; try { r = await sb.rpc('chat_peek', { ..._hTok(c), p_after: _chtSeenId(c) }); } catch (e) { r = { error: e }; }
+  S._chtPeekBusy = false;
+  const now = _hCust(); if (!now || now.id !== c.id) return;
+  const e = r && r.error, d = r && !e && r.data, was = p ? p.n : 0, wasOff = !!S._chtOff;
+  if (e && (e.code === 'PGRST202' || e.code === '42883')) S._chtOff = true;
+  else if (d && d.ok === true) S._chtN = { id: c.id, at: Date.now(), n: Math.max(0, Number(d.n) || 0) };
+  else S._chtN = { id: c.id, at: Date.now() - 6e4, n: was }; // no answer: the count stays, asked again in a minute
+  if (S.custTab === 'members' && !S._hubView && (wasOff !== !!S._chtOff || (S._chtN && S._chtN.id === c.id ? S._chtN.n : 0) !== was)) _hubRender();
+}
+function _chtCardHtml() {
+  if (S._chtOff) return '';
+  const c = _hCust(), n = c && S._chtN && S._chtN.id === c.id ? S._chtN.n : 0;
+  return `<div class="hub-card hub-flat cht-card"><span class="hub-k cht-card-h">${_cuIc('chat', 16)} ${_hT('chtTitle')}${n > 0 ? ` <span class="cht-n">${esc(_hF('chtNewN', n >= 100 ? '99+' : n))}</span>` : ''}</span><button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_chtOpen')}">${_hT('chtOpen')}</button></div>`;
+}
+function _chtOpen() {
+  const g = _chtState(_hCust()); if (g) { g.jump = true; g.html = null; }
+  S._hubView = 'chat'; _hubRender();
+}
+function _chtClose() { S._hubView = null; _chtLeave(); _hubRender(); try { window.scrollTo(0, 0); } catch (_) {} }
+
+// The topic and the page's own clock: both live only while the chat is on screen.
+function _chtJoin() {
+  if (S._chtCh || !sb || !sb.channel) return;
+  try {
+    const ch = S._chtCh = sb.channel('hub-chat');
+    ch.on('broadcast', { event: 'tick' }, _chtTick).subscribe((st) => {
+      if (S._chtCh !== ch) return;
+      const live = st === 'SUBSCRIBED';
+      if (live && !S._chtLive && S._cht && S._cht.rows !== null) _chtFetch('new'); // joined, or joined again: what came meanwhile
+      S._chtLive = live;
+    });
+  } catch (_) { S._chtCh = null; S._chtLive = false; }
+}
+function _chtLeave() {
+  const ch = S._chtCh; S._chtCh = null; S._chtLive = false;
+  if (ch) try { sb.removeChannel(ch); } catch (_) {}
+  if (S._chtT) { clearInterval(S._chtT); S._chtT = null; }
+  const g = S._cht; if (g && g.tickT) { clearTimeout(g.tickT); g.tickT = null; }
+}
+function _chtWatch() {
+  if (!S._chtBound) {
+    S._chtBound = true;
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && _chtOn() && S._cht && S._cht.rows !== null) _chtFetch('new'); });
+    window.addEventListener('scroll', () => {
+      if (S._chtRaf || !S._cht || !S._cht.fresh || !_chtOn()) return;
+      S._chtRaf = requestAnimationFrame(() => { S._chtRaf = 0; const g = S._cht; if (g && g.fresh && _chtOn() && _chtNear()) { _chtMark(g); _chtSync(g); } });
+    }, { passive: true });
+  }
+  if (S._chtT) return;
+  S._chtT = setInterval(() => {
+    const g = S._cht;
+    if (!_chtOn() || !_hCust()) { _chtLeave(); return; }
+    if (document.visibilityState !== 'visible' || !g || g.rows === null || g.loading || _chtCool()) return;
+    if (Date.now() - g.readAt >= (S._chtLive ? 45e3 : 12e3)) _chtFetch('new');
+  }, 4e3);
+}
+// A tick: read soon, one read for a burst. A tick whose read brought nothing doubles the wait before the next tick is
+// answered (1.5 s up to 30 s); one that brought something sets it back.
+function _chtTick() {
+  const g = S._cht; if (!g || g.tickT || !_chtOn()) return;
+  g.tickT = setTimeout(() => { g.tickT = null; if (_chtOn() && !_chtCool()) _chtFetch('new', true); }, Math.max(350, g.tickNext - Date.now()));
+}
+
+async function _chtFetch(mode, viaTick) {
+  const c = _hCust(), g = _chtState(c); if (!g || !sb) return;
+  if (g.loading) { if (mode === 'new') g.again = true; return; }
+  const first = g.rows === null, args = _hTok(c);
+  if (!first && mode === 'older') { if (!g.more || !g.rows.length) return; args.p_before = g.rows[0].id; }
+  else if (!first) args.p_after = g.rows.length ? g.rows[g.rows.length - 1].id : 0;
+  g.loading = true; g.fail = false;
+  let r; try { r = await sb.rpc('chat_read', args); } catch (e) { r = { error: e }; }
+  g.loading = false; g.readAt = Date.now();
+  const now = _hCust(); if (!now || now.id !== c.id || S._cht !== g) return;
+  const e = r && r.error, d = r && !e && r.data;
+  let got = false;
+  if (e && (e.code === 'PGRST202' || e.code === '42883')) { S._chtOff = true; _chtLeave(); }
+  else if (d && d.ok === false && d.error === 'member') { S._hubView = null; _chtLeave(); _hubFetch(true); return; } // no longer a member: the feed's read sends them on
+  else if (d && d.ok === true && Array.isArray(d.rows)) {
+    if (d.me) g.me = d.me;
+    if (first || d.reset) { g.rows = d.rows; g.more = !!d.more; g.jump = true; g.fresh = 0; got = true; }
+    else if (args.p_before != null) {
+      const have = new Set(g.rows.map((x) => x.id)), add = d.rows.filter((x) => !have.has(x.id));
+      g.rows = [...add, ...g.rows]; g.more = !!d.more; g.keep = add.length > 0;
+    } else {
+      const gone = new Set(Array.isArray(d.gone) ? d.gone : []), have = new Set(g.rows.map((x) => x.id));
+      const add = d.rows.filter((x) => !have.has(x.id) && !gone.has(x.id)), n0 = g.rows.length;
+      g.rows = g.rows.filter((x) => !gone.has(x.id));
+      got = add.length > 0 || g.rows.length !== n0;
+      if (add.length) { g.rows = [...g.rows, ...add].sort((a, b) => a.id - b.id); g.fresh += add.filter((x) => !x.mine).length; }
+    }
+  } else if (first) g.fail = true; // a later read that failed: what is shown stays, the page asks again by itself
+  if (viaTick) { g.tickGap = got || Date.now() - g.selfAt < 4e3 ? 0 : Math.min(3e4, Math.max(1500, g.tickGap * 2)); g.tickNext = Date.now() + g.tickGap; }
+  if (S.custTab === 'members') _hubRender();
+  if (g.again) { g.again = false; _chtFetch('new'); }
+}
+function _chtRetry() { const g = S._cht; if (g) { g.fail = false; g.html = null; } _hubRender(); }
+function _chtOlder() { _chtFetch('older'); }
+
+// Where the reader is: the end of the page is where the box sits just as it stops floating.
+function _chtEnd() {
+  const pg = document.getElementById('cht-page'), ft = document.getElementById('cht-foot'); if (!pg || !ft) return null;
+  let b = 0; try { b = parseFloat(getComputedStyle(ft).bottom) || 0; } catch (_) {}
+  return Math.max(0, window.scrollY + pg.getBoundingClientRect().bottom - (window.innerHeight - b));
+}
+function _chtNear() { const end = _chtEnd(); return end === null || window.scrollY >= end - 160; }
+function _chtMark(g) {
+  g.fresh = 0;
+  const last = g.rows && g.rows.length ? g.rows[g.rows.length - 1].id : 0;
+  if (last) { try { localStorage.setItem(_CHT_SEEN + g.forId, String(last)); } catch (_) {} }
+  S._chtN = { id: g.forId, at: Date.now(), n: 0 };
+}
+function _chtDown() {
+  const g = S._cht, end = _chtEnd(); if (!g || end === null) return;
+  try { window.scrollTo(0, end); } catch (_) {}
+  _chtMark(g); _chtSync(g);
+}
+
+function _chtPaint(body, c) {
+  const g = _chtState(c), key = c.id + '|' + (S.lang || 'en');
+  if (g.rows === null) { if (!g.loading && !g.fail) _chtFetch('new'); }
+  else if (!g.loading && Date.now() - g.readAt > 15e3 && !_chtCool()) _chtFetch('new'); // back on the tab after a while
+  _chtJoin(); _chtWatch();
+  let pg = document.getElementById('cht-page');
+  if (!pg || !body.contains(pg) || pg.getAttribute('data-k') !== key) {
+    body.innerHTML = _chtPageHtml(key); g.html = null; g.jump = true;
+    const ta = document.getElementById('cht-text'); if (ta) ta.value = g.draft;
+  }
+  const L = document.getElementById('cht-log'), h = _chtLogHtml(g);
+  if (L && g.html !== h) {
+    const near = _chtNear(), sc = document.scrollingElement || document.documentElement, was = sc.scrollHeight;
+    L.innerHTML = h; g.html = h;
+    if (g.keep) { try { window.scrollTo(0, window.scrollY + (sc.scrollHeight - was)); } catch (_) {} } // earlier messages went in above: the reader stays where they were
+    else if (g.rows && (g.jump || near)) _chtDown();
+    if (g.rows) g.jump = false;
+    g.keep = false;
+  }
+  _chtSync(g);
+}
+function _chtPageHtml(key) {
+  return `<div id="cht-page" data-k="${esc(key)}"><div class="hub-card hub-flat mt-head"><h2 class="mt-h1" id="cht-h">${_hT('chtTitle')}</h2><button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_chtClose')}">${_hT('close')}</button></div>
+    <div id="cht-log" class="cht-log" role="log" aria-labelledby="cht-h"></div>
+    <div id="cht-foot" class="cht-foot"><button type="button" id="cht-new" class="cht-new" hidden data-on-click="${_on('_chtDown')}">${_hT('chtNew')}</button>
+      <p id="cht-msg" class="cht-msg" role="alert"></p>
+      <div class="cht-bar"><label class="sr-only" for="cht-text">${_hT('chtLabel')}</label>
+        <textarea id="cht-text" class="cht-text" rows="1" maxlength="500" dir="auto" placeholder="${esc(_hT('chtLabel'))}" data-on-input="${_on('_chtInput', _EL)}" data-on-keydown="${_on('_chtKey', _EV)}"></textarea>
+        <button type="button" id="cht-go" class="btn-primary cht-go" aria-label="${esc(_hT('rsgSend'))}" data-on-click="${_on('_chtSend')}">${_cuIc('go', 20, true)}</button></div></div></div>`;
+}
+function _chtTime(at) {
+  try {
+    const l = _locale();
+    if (!S._chtFmt || S._chtFmt.l !== l) S._chtFmt = { l, f: new Intl.DateTimeFormat(l, { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Riyadh' }) };
+    return S._chtFmt.f.format(new Date(at));
+  } catch (_) { return ''; }
+}
+function _chtLogHtml(g) {
+  if (g.rows === null) return g.fail ? `<div class="hub-card" role="status"><strong class="hub-name">${_hT('err')}</strong><button type="button" class="btn-primary hub-wide" data-on-click="${_on('_chtRetry')}">${_hT('retry')}</button></div>` : _skelHtml(2, 'hub-skel');
+  if (!g.rows.length) return `<p class="cht-empty">${_hT('chtEmpty')}</p>`;
+  let h = g.more ? `<button type="button" class="btn-secondary btn-sm cht-older" data-on-click="${_on('_chtOlder')}">${_hT('chtOlder')}</button>` : '', prev = null;
+  for (const x of g.rows) {
+    if (!prev || prev.day !== x.day) { h += `<div class="cht-day">${esc(_dayWord(x.day) || _hDate(x.day))}</div>`; prev = null; }
+    h += _chtRowHtml(x, prev, g); prev = x;
+  }
+  return h;
+}
+// One message. A run (the same author within five minutes) is drawn under one name. The member's own has Remove, another
+// member's has Report (until this phone reported it), the team's has neither.
+function _chtRowHtml(x, prev, g) {
+  const run = !!prev && prev.k === x.k && Date.parse(x.at) - Date.parse(prev.at) < 3e5, rep = !!g.rep[x.id];
+  const who = x.mine || run ? '' : `<span class="cht-who${x.team ? ' cht-who-team' : ''}"><bdi>${esc(x.team ? _hT('chtTeam') : x.name || _hT('chtMember'))}</bdi></span>`;
+  const act = x.mine ? `<button type="button" class="cht-more" aria-label="${esc(_hT('chtRemove'))}" data-on-click="${_on('_chtMore', x.id)}">${_cuIc('trash', 18)}</button>`
+    : x.team || rep ? '' : `<button type="button" class="cht-more" aria-label="${esc(_hT('chtReport'))}" data-on-click="${_on('_chtMore', x.id)}">${_cuIc('flag', 18)}</button>`;
+  return `<div class="cht-row${x.mine ? ' cht-mine' : ''}${x.team ? ' cht-team' : ''}${run ? ' cht-run' : ''}" data-id="${esc(String(x.id))}">${who}<div class="cht-line"><div class="cht-bub"><p class="cht-body" dir="auto">${esc(x.body || '')}</p><span class="cht-at">${esc(_chtTime(x.at))}</span></div>${act}</div>${rep ? `<span class="cht-rep">${_hT('chtReported')}</span>` : ''}</div>`;
+}
+// The foot as it stands: what was refused (or that the member is muted), the box and Send, the New messages button.
+function _chtSync(g) {
+  const muted = !!(g.me && g.me.muted);
+  const say = muted ? (g.me.until ? _hF('chtMutedTill', shortDate(String(g.me.until))) : _hT('chtMuted')) : g.err ? _hT(g.err) : '';
+  const m = document.getElementById('cht-msg'); if (m && m.textContent !== say) m.textContent = say;
+  const ta = document.getElementById('cht-text'); if (ta) ta.disabled = muted;
+  const go = document.getElementById('cht-go'); if (go) go.disabled = muted || !!g.busy;
+  const nb = document.getElementById('cht-new'); if (nb) nb.hidden = !(g.fresh > 0) || _chtNear();
+}
+function _chtInput(el) {
+  const g = _chtState(_hCust()); if (!g || !el) return;
+  g.draft = String(el.value || '');
+  if (g.err) { g.err = ''; _chtSync(g); }
+}
+// Enter sends where there is a keyboard and a mouse; on a phone it is a new line and Send is the button.
+function _chtKey(ev) {
+  if (!ev || ev.key !== 'Enter' || ev.shiftKey || ev.isComposing) return;
+  let fine = false; try { fine = window.matchMedia('(hover:hover) and (pointer:fine)').matches; } catch (_) {}
+  if (!fine) return;
+  ev.preventDefault(); _chtSend();
+}
+async function _chtSend() {
+  const c = _hCust(), g = _chtState(c); if (!g || !sb || g.busy || g.asking || (g.me && g.me.muted)) return;
+  const ta = document.getElementById('cht-text'); if (ta) g.draft = String(ta.value || '');
+  const text = g.draft.trim();
+  if (!text) { if (ta) try { ta.focus(); } catch (_) {} return; }
+  if (!g.yes && g.me && g.me.agreed === false) {
+    // the first message: the member's yes to their full name being shown, asked once (g.yes) and kept by the database
+    g.asking = true;
+    const ok = await askConfirm({ title: _hT('chtTitle'), body: esc(_hF('chtAgree', String(c.name || '').trim())), confirmLabel: esc(_hT('rsgSend')), confirmClass: 'btn-primary' });
+    g.asking = false;
+    if (!ok) return;
+    g.yes = true;
+  }
+  g.busy = true; g.err = ''; _chtSync(g);
+  let r; try { r = await sb.rpc('chat_send', { ..._hTok(c), p_body: text, p_agree: !!g.yes }); } catch (e) { r = { error: e }; }
+  g.busy = false;
+  const now = _hCust(); if (!now || now.id !== c.id || S._cht !== g) return;
+  const res = r && !r.error && r.data;
+  if (res && res.ok === false && res.error === 'agree' && !g.yes) { g.me = { ...(g.me || {}), agreed: false }; _chtSync(g); return _chtSend(); } // the page thought the yes was given: ask now
+  if (res && res.ok === false && res.error === 'member') { S._hubView = null; _chtLeave(); _hubFetch(true); return; }
+  if (!res || res.ok !== true || !res.row) {
+    if (res && res.error === 'muted') g.me = { ...(g.me || {}), muted: true, until: res.until || null };
+    else g.err = (res && CHT_ERR[res.error]) || 'err';
+    _chtSync(g); return;
+  }
+  g.me = { ...(g.me || {}), agreed: true }; g.yes = false; g.selfAt = Date.now();
+  // what was typed while it was being sent stays in the box
+  if (ta && String(ta.value || '').trim() === text) { ta.value = ''; g.draft = ''; } else if (ta) g.draft = String(ta.value || '');
+  if (g.rows && !g.rows.some((x) => x.id === res.row.id)) g.rows = [...g.rows, res.row].sort((a, b) => a.id - b.id);
+  g.jump = true;
+  _hubRender();
+  if (ta && _chtOn()) try { ta.focus({ preventScroll: true }); } catch (_) {}
+}
+// A message's one button: the member's own is removed for everyone, another member's is reported to the team.
+async function _chtMore(id) {
+  const c = _hCust(), g = _chtState(c), x = g && g.rows && g.rows.find((y) => y.id === id); if (!x || !sb || g.acting) return;
+  const cut = String(x.body || '').replace(/\s+/g, ' ').trim(), quote = esc((x.mine ? '' : (x.name || _hT('chtMember')) + ': ') + (cut.length > 140 ? cut.slice(0, 139) + '…' : cut));
+  if (x.team && !x.mine) return;
+  if (!await askConfirm(x.mine ? { title: _hT('chtRemoveQ'), body: quote, confirmLabel: esc(_hT('chtRemove')), confirmClass: 'btn-red' }
+    : { title: _hT('chtReportQ'), body: quote, confirmLabel: esc(_hT('chtReport')), confirmClass: 'btn-red' })) return;
+  g.acting = true;
+  let r; try { r = await sb.rpc(x.mine ? 'chat_remove' : 'chat_report', { ..._hTok(c), p_msg: id }); } catch (e) { r = { error: e }; }
+  g.acting = false;
+  const now = _hCust(); if (!now || now.id !== c.id || S._cht !== g) return;
+  const res = r && !r.error && r.data;
+  if (!res || res.ok !== true) { g.err = 'err'; _chtSync(g); return; }
+  g.selfAt = Date.now(); g.err = '';
+  if (x.mine) g.rows = (g.rows || []).filter((y) => y.id !== id); else g.rep[id] = 1;
   _hubRender();
 }
 

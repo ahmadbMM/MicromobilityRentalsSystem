@@ -857,7 +857,7 @@ Migration 20261102200000. `titles` (admins' catalogue: English and/or Arabic nam
 through `customer_title_prefs`; `hidden` is no longer read). Staff work in Community > Titles (`/community/titles`, `_commTitles`). An automatic title
 counts Saturday nights when read and stores nothing. The member's card on Account is `_ttMinePaint`. The Community page (`/members`, not `/community`, which is a staff
 address; `renderMembers`) has its own tab in both menus, shown only to members (`_commNavPaint`, on the members gate's `_infoMember`); a non-member opening the address is sent away.
-**Members see nothing about each other (2026-11-04, migration 20261104120000):** no customer-facing read may return another member's name, title, badges, rides, kudos, squad, photo or buddy. `member_directory` stays only as the page's "is this a member" gate and returns an empty list. Anything that would break this rule also needs a row in the privacy notice. The one exception is the mentorship programme (2026-11-13, the user's own request): an open mentee profile carries no name (and since 2026-11-18 only its number, university and field), and a first name and WhatsApp number reach only the other side of a match the student accepted, while it runs (section "Mentorship programme").
+**Members see nothing about each other (2026-11-04, migration 20261104120000):** no customer-facing read may return another member's name, title, badges, rides, kudos, squad, photo or buddy. `member_directory` stays only as the page's "is this a member" gate and returns an empty list. Anything that would break this rule also needs a row in the privacy notice. The one exception is the mentorship programme (2026-11-13, the user's own request): an open mentee profile carries no name (and since 2026-11-18 only its number, university and field), and a first name and WhatsApp number reach only the other side of a match the student accepted, while it runs (section "Mentorship programme"). A second exception since 2026-11-20, the owner's pick: the Community chat shows a message's writer by full name, and nothing else about them, to the members who open the chat (see "The Community chat").
 
 ## Helper path (2026-11-13, new features F23)
 
@@ -1073,6 +1073,65 @@ only their own suggestions, each marked Planned or Done. When one happens, an Up
   to the staff log (`logAction`).
 - **Privacy Notice:** the row after the Ask answers (en + ar), PRIVACY_VERSION unchanged (2026-11-18), nobody asked again.
 - **Spec:** `tests/ride-suggestions.spec.ts` (`@customer:members`, `@staff:community`).
+
+## The Community chat (2026-11-20, migration 20261120203000)
+
+The user, 2026-11-20: "can we create a live chat in the booking app but only for community members?", then, asked how a
+member appears, where the chat lives and what may be sent: "Full name", "One club chat", "Text only". Spec
+`tests/community-chat.spec.ts` (`@customer:members`, `@build`, `@staff:community`).
+
+- **The one place a member reads another member's name.** The full name is the owner's pick and the second allowed
+  exception to "members see nothing about each other" (the first is race partners). A chat read gives the writer's full
+  name and the message and NOTHING else about a member (`_chat_row`: id, time, Riyadh's day, body, team, mine, name, and
+  `k`, the writer's opaque `_member_ref`, so a run of one person's messages is drawn under one name). Do not add a title,
+  badge, photo, mobile or ride to it, and do not take this as leave to name members anywhere else. A member agrees to
+  the name once, with their first message (`hub_chat_members.agreed_at`, asked by `chat_send`'s `p_agree`); reading
+  shows nobody the reader.
+- **Stored:** `hub_chat` (one row a message; `customer_id` = the writer, null = the team with `staff_user`; `body` 1 to
+  500, text only; `removed_at` / `removed_by` self, staff or reports; `reports`; `checked_at` = staff looked),
+  `hub_chat_members` (`agreed_at`, `muted_until`: null, a time, or `infinity` = until lifted) and `hub_chat_reports` (who
+  reported what, once each). RLS on all three, staff read under `_staff_mod('community')`, nobody writes them directly.
+  `_chat_shown` is what members may see: not removed, its writer not archived, not asking for deletion, not blacklisted
+  (a member who left the Community keeps their old messages on the page). `_chat_purge` (pg_cron `mm-chat-purge`, daily)
+  deletes messages older than 12 months, as the Privacy Notice says.
+- **The member's calls** (token-checked, active members only): `chat_read(p_id, p_token, p_after, p_before)` (the newest
+  50; the 50 before an id; or what came after an id, with the last 15 seconds' messages just under it again for an insert
+  committed late, and `reset` with the newest 50 when the page is over 100 behind; also `gone` = ids removed in the last
+  two days, `more`, and `me` {agreed, muted, until}), `chat_peek` (how many from others after an id, for the card),
+  `chat_send` (errors denied, member, invalid, agree, muted, fast = under 1.5 s after their last, limit = 20 in five
+  minutes; the same words again within a minute answer the stored message, so a retry never doubles it), `chat_remove`
+  (their own) and `chat_report` (someone else's, once a person, 20 a day; the third person's report removes the message
+  until staff look, unless staff already kept it). `chat_read` and `chat_peek` are STABLE and in `_READ_RPC`.
+- **Live without a login.** Riders have no Supabase login, so a private realtime topic is closed to them. The trigger
+  `_chat_tick` sends an EMPTY broadcast (`tick` on the PUBLIC topic `hub-chat`) for a new message and for one removed or
+  put back; it names nobody and carries no words or id. The open chat page hears it and asks `chat_read`, which checks
+  the member. Anyone can write to a public topic, so a tick whose read brought nothing doubles the wait before the next
+  tick is answered (1.5 s up to 30 s). Without ticks the page asks by itself: every 12 s while the topic is not joined,
+  every 45 s while it is, never while hidden or under `_sbCooling()`. Never put a message, a name or an id in the tick,
+  and never add `hub_chat` to the `supabase_realtime` publication (postgres_changes sends whole rows to every listener).
+- **Rider** (`member-hub.js`, the last block above `window._hubRender`; names `_cht*`, `S._cht`, `CHT_*`, `#cht-*`,
+  `.cht-*`): the card (first in the tab's Club part; its "N new" from `chat_peek` against `cq_cht_seen_<account>`, the only
+  thing kept on the phone) opens `S._hubView = 'chat'` (`/members?hv=chat`; closing it returns to the Club part, `HUB_VIEW_SEC`). The page is written once and then only `#cht-log`
+  (`_chtPaint`), so a read landing never takes away what is typed. Others' messages sit at the start edge under the full
+  name, the member's own at the end edge, the team's outlined under "MicroMobility team". The box (`#cht-foot`) is
+  sticky above the tab bar; at the end of the page the reader follows new messages, further up a "New messages" button
+  shows. Enter sends only with a mouse and keyboard. One button a message: Remove on their own, Report on another
+  member's (both ask first, in the app's centred confirm), none on the team's. A refusal is said over the box, no toast.
+  The topic and the page's clock live only while the chat is on screen (`_chtJoin`, `_chtWatch`, `_chtLeave`). A
+  database without the functions (PGRST202) closes the page and hides the card.
+- **Staff** (Community > Activities > Chat, `_acCh*`): the pill counts reported messages nobody has looked at; All /
+  Reported / Removed / Muted; each card has the writer's name (opens `openAccountHistory`), Remove or Put back, Keep on a
+  reported one (`staff_chat_set`), Mute for 1 day, 7 days or until lifted and Lift mute (`staff_chat_mute`, p_days null
+  lifts, 0 = until lifted), and a box to write as the team (`staff_chat_send`). All need `_staff_mod('community', true)`.
+  The list reads again every 20 s while the pill is on screen and only `#ac-ch-list` is drawn again (`_acChPaint`), so
+  the team's box keeps what is being typed. Every change goes to the staff log.
+- **Privacy Notice:** a row, a legal-basis line (consent, asked with the first message) and a retention line (12
+  months), English and Arabic, PRIVACY_VERSION 2026-11-20, nobody asked again; the website's copy is synced from it.
+- **Website:** micromobility.sa/club shows a "Community chat" card that opens the chat in the booking app
+  (`ChatCard`, `chatHref`); the chat itself is the app's only.
+- **Limits to know:** the free realtime plan counts every tick per listener (2 million messages a month, 200 sockets):
+  1,000 messages a day read by 50 open pages is about 1.5 million a month. If the club outgrows it, lengthen the tick's
+  answer or drop the tick for the page's own clock before paying for more.
 
 ## The Ramadan season (2026-11-18)
 
