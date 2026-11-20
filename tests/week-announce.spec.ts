@@ -196,10 +196,31 @@ test.describe('@staff:bookings the week on Bookings', () => {
     // the week's message misses two types: a desk account is told to ask an admin, and is given no text to send
     await dlg(page).locator('.rm-opt[data-ann="week"]').click();
     await expect(dlg(page).locator('.ann-miss')).toContainText('no English block yet');
-    await expect(dlg(page).locator('.ann-miss li')).toHaveText(['Farm House Night', 'Hatha Yoga for Cyclists']);
+    await expect(dlg(page).locator('.ann-miss li b')).toHaveText(['Farm House Night', 'Hatha Yoga for Cyclists']);
     await expect(dlg(page).locator('.ann-write')).toHaveCount(0);
     await expect(dlg(page).locator('.ann-miss')).toContainText('Ask an admin to add it in Settings > Message templates.');
     await expect(dlg(page).locator('#ann-text, .ann-copy, .ann-wa')).toHaveCount(0);
+    // ...or skips them (the user, 2026-11-20: "in the weekly schedule message allow staff to skip creating a message for the
+    // new session type"): the week's message goes without those sessions, says what it left out, and Put back asks again
+    await expect(dlg(page).locator('.ann-skip')).toHaveCount(2);
+    await dlg(page).locator('.ann-skip[data-ann-skip="farm"]').click();
+    await expect(dlg(page).locator('.ann-miss li b')).toHaveText(['Hatha Yoga for Cyclists']);
+    await expect(dlg(page).locator('.ann-skipped')).toContainText('Left out: Farm House Night');
+    await dlg(page).locator('.ann-skip[data-ann-skip="yoga"]').click();
+    const txt = await dlg(page).locator('#ann-text').inputValue();
+    expect(txt).toContain('*MicroMobility’s Weekly Schedule*');
+    expect(txt).toContain('Petromin Night');
+    expect(txt).not.toMatch(/Farm|Yoga/i);
+    await expect(dlg(page).locator('.ann-skipped')).toContainText('Left out: Farm House Night, Hatha Yoga for Cyclists');
+    // the skip holds in Arabic too, and Put back brings the question back
+    await dlg(page).locator('[data-ann-lang="ar"]').click();
+    await expect(dlg(page).locator('#ann-text')).toBeVisible();
+    await dlg(page).locator('[data-ann-lang="en"]').click();
+    await dlg(page).locator('.ann-unskip').click();
+    await expect(dlg(page).locator('.ann-miss li b')).toHaveText(['Farm House Night', 'Hatha Yoga for Cyclists']);
+    await expect(dlg(page).locator('.ann-skipped')).toHaveCount(0);
+    // a session's own announcement has no Skip: it is that one session
+    expect(await page.evaluate(`JSON.stringify(_annWeek('2099-11-29','en',['runher']))`)).toBe('{"none":true}');
   });
 });
 

@@ -16157,11 +16157,24 @@ body.view-staff .ann-miss p{margin:0 0 6px;}
 body.view-staff .ann-miss ul{margin:0 0 6px;padding:0;list-style:none;}
 body.view-staff .ann-miss li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;}
 body.view-staff .ann-box .rm-list{max-height:min(60vh,520px);overflow-y:auto;}
+/* Skip (2026-11-20): a type with no block can be left out of the week's message; what was left out says so, with Put back */
+body.view-staff .ann-miss .ann-miss-acts{display:flex;flex:none;gap:6px;}
+body.view-staff .ann-skipped{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0;font-size:var(--sf-fs-sm);color:var(--muted);}
 /* Invite to a session (2026-11-19): the sessions to pick from scroll under a find box; one the rider already holds is greyed. */
 body.view-staff .ivt-box .ivt-q{width:100%;box-sizing:border-box;margin:0 0 10px;}
 body.view-staff .ivt-box .rm-list{max-height:min(55vh,480px);overflow-y:auto;}
 body.view-staff .ivt-box .rm-opt:disabled{cursor:default;opacity:.6;border-color:var(--border);background:var(--s3);}
 body.view-staff .ivt-box .ivt-none{padding:8px 2px;}
+/* The invite books the rider (2026-11-20): Booked rows open their message (green word); the add step's choices sit in a row. */
+body.view-staff .ivt-box .ivt-has span{color:var(--green);font-weight:600;}
+body.view-staff .ivt-box .ivt-add-step{margin-top:10px;}
+body.view-staff .ivt-box .ivt-dest{margin-bottom:12px;}
+body.view-staff .ivt-box .ivt-row{display:flex;gap:6px;margin-top:4px;}
+body.view-staff .ivt-box .ivt-row .toggle-btn{flex:1;}
+body.view-staff .ivt-box .ivt-own{display:flex;align-items:center;gap:8px;margin:12px 0;font-size:var(--sf-fs-sm);font-weight:600;letter-spacing:0;text-transform:none;color:var(--text);cursor:pointer;}
+/* inputs are appearance:none site-wide: the box asks for its checkbox back, as .ca-wa-opt does */
+body.view-staff .ivt-box .ivt-own input{-webkit-appearance:checkbox;appearance:checkbox;width:16px;height:16px;min-height:0;margin:0;flex:none;accent-color:var(--green);}
+body.view-staff .ivt-box .ivt-add:disabled{opacity:.5;cursor:default;}
 /* Last feedback at check-in and Book next week (2026-11-18): the drawer's Last ride block (the note look; red with a score of 3
    or under or an incident), tonight's first-timers on the First-timers pop-up, the close-night list's rebook item. */
 #checkin-modal .lfb{margin:6px 0;padding:6px 10px;border-radius:var(--r-md,var(--sf-r-ctl));background:rgba(var(--warn-rgb),.12);color:var(--text);font-size:var(--sf-fs-sm);display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere;}

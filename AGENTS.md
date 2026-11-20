@@ -4827,6 +4827,13 @@ a switch; admins write the texts; the circuit's running hours are fixed text in 
     (the templates editor; closing it comes back through `S._afterConfirm`), anyone else "Ask an admin". An extra
     Petromin night on a Monday is just another Petromin block. A language is missing on its own: an English-only
     block the admins wrote leaves the Arabic message asking.
+  - **Skip (2026-11-20).** The user: "in the weekly schedule message allow staff to skip creating a message for the new
+    session type". Every staffer, admin or not, gets Skip beside each missing type of the WEEK's message (`_annSkip`; a
+    session's own announcement has none, it is that one session): `_annWeek(sun, L, skip)` leaves that type's sessions
+    out, and the circuit days at the foot are counted without them. The skips last while the pop-up is open
+    (`S._ann.skip`, both languages); "Left out: <types>" (`.ann-skipped`) stands above the message with Put back
+    (`_annUnskip`), which asks for the blocks again. Nothing is saved: next week asks again until an admin writes the
+    block.
   - Each session's own message is `ann_<type>`; the Saturday ride's is its ride details (`_rmRideText`, rm_ride).
   - Fill-ins (`ANN_FILLS`, `_annVars`): title (title_ar in Arabic, else the type's name), day, date ("16th of November" /
     "16 نوفمبر"), time ("7:00 PM – 9:00 PM"), start_time, end_time, meet_time (a ride that gathers stores "gathering -
@@ -5045,28 +5052,60 @@ answered "do 1 2 3 5 7 9 11". Items 5 (text size) and 11 (the dark look) have th
 - **`_regDrop()`** clears the note, the ticked dates and pending retries on sign-out, a new event, Book another, Book
   my usual / again, the waiver re-ask, and whenever the signed-in account changes (`S._regFor`): staff share phones.
 
-## Invite to a session (2026-11-19, no migration)
+## Invite to a session (2026-11-19, no migration; books the rider since 2026-11-20)
 
 The user: "add a feature to include an invite button to any booking to invite its customer and on all accounts include an
-invite button to invite to any current or future session, include a ready message to any session he is invited to".
-Spec: `tests/session-invite.spec.ts` (`@staff:bookings`). Staff only: no website counterpart, nothing stored, so no
-Privacy Notice row.
+invite button to invite to any current or future session, include a ready message to any session he is invited to". Then
+(2026-11-20): "whenever an account is invited to a session especially saturday social ride make sure to add him to the
+session not only show the inviation message, give me more details to anc steps to add in the invitation message".
+Spec: `tests/session-invite.spec.ts` (`@staff:bookings`). Staff only: no website counterpart, no migration (the booking is
+an ordinary staff add), so no Privacy Notice row.
 - **Where.** Invite is a tile on every booking's ⋯ menu, whatever its status (`_mInv` in `_entryActions0`, group Account
   through `RS_ITEM._ivtOpen`, icon `_ART.invite`, an envelope), and a button in sight on every account window
   (`_n6pAhBar`'s `vis`, after WhatsApp). Both call `_ivtOpen(cid, bid)`, an entry of the **announce part**, which
-  already holds the announcements' fill-ins (`_annVars`, `_annRowLbl`).
+  already holds the announcements' fill-ins (`_annVars`, `_annRowLbl`). A booking typed without an account is matched to
+  the account on its mobile (or email) as a walk-in is (`_linkCustomer`).
 - **The pop-up** (`#confirm-modal .ivt-box`, centred): the sessions running now or still to come (`_ivtSess`: not
   `_sessEnded`, not deleted, called off or a draft; a ride staff approve for admins only, as the week and Ctrl K show
-  them), day then start order, with a find box (`_ivtFind` repaints the list alone). One the rider already holds a place
-  on (`_ivtHas`: the booking itself, the account's bookings, or with no account the same mobile; waiting, waitlisted, on
-  a bike or done) says Booked and is disabled; a closed one says Closed and is still offered.
+  them), day then start order, with a find box (`_ivtFind` repaints the list alone). Each row says, under its name:
+  - **Booked** (green, `.ivt-has`): the rider already holds a place there (`_ivtRow`: the booking itself, the account's
+    bookings, or with no account the same mobile; waiting, waitlisted, on a bike or done). A tap opens its message at
+    once, so a message closed unsent is never lost.
+  - **Message only**: the invite cannot book them there, so the message asks them to book: no account, or a kind staff
+    add no riders to (`_noAddRider`: circuit nights and Petromin, the owner's 2026-10-07 rule, and the blood donation,
+    whose donors register themselves). `_ivtCanBook` decides.
+  - the gender rule's reason, greyed and disabled (`_sgNo` / `_sgErr`: a men-only or women-only session).
+  - Closed (still offered: staff add riders to a closed session, as the Add rider dialog does).
+- **The add step** (`m.add`, `_ivtAddHtml`): any other pick asks what the Add rider dialog asks before booking: Final
+  list or Waiting on a ride staff approve (`_ivtDest`; Waiting = approval pending, community-add-waiting), the ride group
+  on the Saturday ride (`_rgField`, required), the distance on Run for Her (`_runKmField`, required, 18 and over), and
+  the own-bike box where owners ride (ticked when the account's type is Own). **Add to the session** (`_ivtAdd`, one run
+  at a time through `_busyRun`) books the account through the desk core's `_commBook` (one place per account checked on
+  the server, the account's bike type, its on-the-house terms, a full type's question), logs "Add rider: <name>
+  (<list> · <session>)", reloads, and shows the message. The booked row is kept on the pop-up (`m.row`) until the reload
+  brings it. A refusal, or Pick another on a full type's question, comes back to the add step.
 - **The message** is the template `ann_invite` (`TPL` group Announcements, label `ivtTpl`, fill-ins `IVT_FILLS`; built-in
   English and Arabic in `ANN_TPL`, so `ANN_HAS` lists it): the announcements' fill-ins, plus `first_name`; `time` is the
   window only for a session that does not gather, one that does (the Saturday ride, the farm) has `meet_time` and
-  `start_time` instead, and no `bikes_from`. `booking_link` is `_ivtLink(s)`: `CA_SITE/?ev=<card>&session=<id>` (the kinds with a card of
-  their own, else community or jcc, as `_evMatch` reads them), so the link opens that date; `_bkFirst` keeps it the first
-  link. English or Arabic on the switch the announcements share (`cq_rm_lang`).
+  `start_time` instead, and no `bikes_from`. The place's own fill-ins (`_ivtText`, words in `IVT_MSG`, en/ar, which the
+  part carries itself because the desk holds the app's Arabic words only when it runs in Arabic):
+  - `status`: "We have saved you a place." / "..., and we will confirm it before the day." (approval pending) /
+    "You are on the waitlist, and we will let you know as soon as a place opens." (never a position, no-waitlist-place) /
+    "Book your place at the link below." (not booked).
+  - `bike` (type and size, or "Your own bike"; nothing for Any), `group` ("Beginners' group (20 km)", the ride's own
+    distance), `distance` (Run for Her), `booking_no` ("#12", as the rider's ticket shows it: not on a ride staff approve
+    until its list is published, `_satNumOk`, and never on the waitlist).
+  - `steps`: "*What to do next*" and numbered steps. Booked on an account: sign in at the link, the booking is in
+    "Bookings"; accept the session's waiver when the app asks (staff-added rows are asked, waiver-gate-desk-added); arrive
+    by the meet up time (else bikes from, else the start) and show the QR code; cancel from "Bookings" if they cannot come.
+    Waitlisted: no arrive step. Not booked: open the link and book; arrive by. Booked with no account: arrive by; reply to
+    the message if they cannot come.
+  - `helmet`: "*Helmet comes free with every bike*" where the session has bikes (helmet-comes-with-bike).
+  `booking_link` is `CA_SITE/?tab=bookings` for a booked account (opens its Bookings), else `_ivtLink(s)`:
+  `CA_SITE/?ev=<card>&session=<id>` (the kinds with a card of their own, else community or jcc, as `_evMatch` reads
+  them), so the link opens that date; `_bkFirst` keeps it the first link. A line whose fill-in is empty drops
+  (`_tplFill`), so one text serves every case; admins can move or drop the fill-ins but the sentences in them are the
+  part's. English or Arabic on the switch the announcements share (`cq_rm_lang`).
 - **Sending.** Copy, WhatsApp to the account's WhatsApp number (else the booking's mobile; no number gives the share
   sheet) and Back. The WhatsApp link carries `data-wa-t="ann_invite"` and `data-wa-c` / `data-wa-b`, so `_waTap` logs it;
-  Copy logs "Invitation copied · <name> · <session>" (kind whatsapp), so both show in the account's Messages sent. Nothing
-  is booked or held.
+  Copy logs "Invitation copied · <name> · <session>" (kind whatsapp), so both show in the account's Messages sent.
