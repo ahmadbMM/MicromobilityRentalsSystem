@@ -4776,6 +4776,11 @@ of the first ride, the unique riders "and more info and stats", extracted from t
   bookings for the accounts that open Analytics (`_rp2Cat`: `satci`, `satmx`, `satride`), look C (`REPORT_LOOK`), drawn
   with `_reportShell` and opened in the viewer, whose Print, PDF, Share, Excel and CSV read it like any report. The
   checked-in version leaves out the Bookings and never-checked-in columns. Words `srr*`.
+- **Months and quarters with their growth** (2026-11-20, the user: "add the number of riders per month and per quarter and
+  Month-to-Month Growth Percentage & Quarter-To-Quarter Percentage"): worked out in `_srrBody` from `months`, no server
+  change. Riders by month gains a growth column; Riders by quarter sums the months into calendar quarters (Q1 = Jan-Mar).
+  Growth is (this - before) / before, one decimal, on the calendar month or quarter just before; '—' when that one has no
+  row or no riders. The month and the quarter still running carry ", so far" (`srrSoFar`).
 - A live web copy (claude.ai artifact 7k8jg1mg3j3cESNgkkerzx) runs the `checked_in` version as SQL on the reader's own
   Supabase connector; change both together.
 

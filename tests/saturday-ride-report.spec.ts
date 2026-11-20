@@ -132,10 +132,10 @@ test.describe('@staff:reports the Saturday Social Ride report', () => {
     expect(html).toContain('<bdi>825</bdi></span><span class="total-lbl">Unique riders since 3 Jan 2099');
     expect(html).toContain('<bdi>8</bdi></span><span class="total-lbl">Rides held</span>'); // every ride, by hand too
     expect(html).toContain('<td class="rp-name"><bdi>Riders per ride on average</bdi></td><td><bdi>63.9</bdi></td>');
-    expect(html).toMatch(/<h2>Riders by month<\/h2><table><thead><tr><th>Month<\/th><th>Checked in<\/th><th>Rides<\/th><th>Counted<\/th>/);
-    expect(html).toContain('<td class="rp-name"><bdi>January 2098</bdi></td><td><bdi>45</bdi></td><td><bdi>2</bdi></td><td><bdi>By hand</bdi></td>');
-    expect(html).toContain('<td class="rp-name"><bdi>January 2099</bdi></td><td><bdi>326</bdi></td><td><bdi>3</bdi></td><td><bdi>Booking system</bdi></td>');
-    expect(html).toContain('<tr class="rp-b8"><td class="rp-name"><bdi>Total</bdi></td><td><bdi>511</bdi></td><td><bdi>8</bdi></td>');
+    expect(html).toMatch(/<h2>Riders by month<\/h2><table><thead><tr><th>Month<\/th><th>Checked in<\/th><th>Month-to-month growth<\/th><th>Rides<\/th><th>Counted<\/th>/);
+    expect(html).toContain('<td class="rp-name"><bdi>January 2098</bdi></td><td><bdi>45</bdi></td><td><bdi>—</bdi></td><td><bdi>2</bdi></td><td><bdi>By hand</bdi></td>');
+    expect(html).toContain('<td class="rp-name"><bdi>January 2099</bdi></td><td><bdi>326</bdi></td><td><bdi>—</bdi></td><td><bdi>3</bdi></td><td><bdi>Booking system</bdi></td>');
+    expect(html).toContain('<tr class="rp-b8"><td class="rp-name"><bdi>Total</bdi></td><td><bdi>511</bdi></td><td><bdi>—</bdi></td><td><bdi>8</bdi></td>');
     expect(html).toContain('24 Jan 2098 to 31 Jul 2098: Saturday riders counted by hand, month by month');
     expect(html).toContain('with a ride every Saturday except those in Ramadan, 21 March and the Summer Splash Run');
     expect(html).toContain('booking system only, from 3 Jan 2099.');
@@ -150,7 +150,57 @@ test.describe('@staff:reports the Saturday Social Ride report', () => {
     expect(html).toContain('<span class="total-lbl">Unique riders</span>');
     expect(html).toContain('<span class="total-lbl">Rides held</span>');
     expect(html).not.toContain('Riders by month');
+    expect(html).not.toContain('Riders by quarter');
     expect(html).not.toContain('counted by hand');
+  });
+
+  // the user, 2026-11-20: "add the number of riders per month and per quarter and Month-to-Month Growth Percentage &
+  // Quarter-To-Quarter Percentage"
+  test('each month and each calendar quarter shows its riders and its growth on the one before', async ({ page }) => {
+    const body = {
+      ...REPORT,
+      summary: { ...REPORT.summary, first_ride: '2098-01-24', system_from: '2099-01-03', hand_from: '2098-01-24', hand_to: '2098-07-31', hand_riders: 575, all_time: 901, hand_rides: 12, rides_all_time: 15, avg_all_time: 60.1 },
+      months: [
+        { month: '2098-01-01', riders: 45, rides: 2, by_hand: true }, { month: '2098-02-01', riders: 120, rides: 2, by_hand: true },
+        { month: '2098-03-01', riders: 150, rides: 1, by_hand: true }, { month: '2098-04-01', riders: 120, rides: 4, by_hand: true },
+        { month: '2098-07-01', riders: 140, rides: 3, by_hand: true }, { month: '2099-01-01', riders: 326, rides: 3, by_hand: false },
+      ],
+    };
+    await boot(page, { status: 200, body });
+    await tapReports(page);
+    await page.evaluate(`_srrOpen('all')`);
+    await expect.poll(() => reportsCount(page)).toBe(1);
+    const html = await lastReport(page);
+    const row = (...c: (string | number)[]) => `<td class="rp-name"><bdi>${c[0]}</bdi></td>${c.slice(1).map((v) => `<td><bdi>${v}</bdi></td>`).join('')}</tr>`;
+    expect(html).toContain(row('January 2098', 45, '—', 2, 'By hand')); // no month before it
+    expect(html).toContain(row('February 2098', 120, '+166.7%', 2, 'By hand'));
+    expect(html).toContain(row('March 2098', 150, '+25%', 1, 'By hand'));
+    expect(html).toContain(row('April 2098', 120, '−20%', 4, 'By hand'));
+    expect(html).toContain(row('July 2098', 140, '—', 3, 'By hand')); // June has no row
+    expect(html).toMatch(/<h2>Riders by quarter<\/h2><table><thead><tr><th>Quarter<\/th><th>Bookings<\/th><th>Quarter-to-quarter growth<\/th><th>Rides<\/th><\/tr>/);
+    expect(html).toContain(row('Q1 2098', 315, '—', 5));
+    expect(html).toContain(row('Q2 2098', 120, '−61.9%', 4));
+    expect(html).toContain(row('Q3 2098', 140, '+16.7%', 3));
+    expect(html).toContain(row('Q1 2099', 326, '—', 3)); // Q4 2098 has no row
+    expect(html).toContain('<tr class="rp-b8">' + row('Total', 901, '—', 15).replace(/<\/tr>$/, '') + '</tr></tbody></table>');
+    expect(html).not.toContain(', so far'); // no month or quarter still running
+  });
+
+  test('the month and the quarter still running say so far', async ({ page }) => {
+    const body: Record<string, unknown> = { ...REPORT };
+    await boot(page, { status: 200, body });
+    const today = String(await page.evaluate('todayStr()'));
+    const [y, m] = today.split('-').map(Number);
+    const before = m === 1 ? `${y - 1}-12-01` : `${y}-${String(m - 1).padStart(2, '0')}-01`;
+    body.summary = { ...REPORT.summary, hand_to: '2026-07-31', hand_from: '2026-01-24', system_from: '2026-08-01', all_time: 150, rides_all_time: 6 };
+    body.months = [{ month: before, riders: 100, rides: 4, by_hand: false }, { month: today.slice(0, 7) + '-01', riders: 50, rides: 2, by_hand: false }];
+    await tapReports(page);
+    await page.evaluate(`_srrOpen('all')`);
+    await expect.poll(() => reportsCount(page)).toBe(1);
+    const html = await lastReport(page);
+    const label = String(await page.evaluate(`_rpiMonth(todayStr())`));
+    expect(html).toContain(`<bdi>${label}, so far</bdi></td><td><bdi>50</bdi></td><td><bdi>−50%</bdi></td>`);
+    expect(html).toContain(`<bdi>Q${Math.floor((m - 1) / 3) + 1} ${y}, so far</bdi></td>`);
   });
 
   test('the viewer extracts it: Excel is a workbook, a second tap while it loads opens it once', async ({ page }) => {
