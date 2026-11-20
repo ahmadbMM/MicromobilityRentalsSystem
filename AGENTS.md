@@ -4729,6 +4729,17 @@ the way all graphs and tables and visualizations are aligned and their design".
   the history (`report_log`) with Reprint, and for admins the automatic reports (`_rpi*`, moved here from Analytics;
   `setAnView('reports')` and the bell's close-out land here through `S._rp2Want`). Monthly KPIs and the month-end bill per
   company come from `report_month_tick` on the 1st (KSA).
+- **PDF beside each Open** (2026-11-20, the user: "in reports page add a download pdf button besides each open
+  button", then "call it pdf without download": the word PDF and the download icon, as in the viewer;
+  `tests/reports-pdf-button.spec.ts`). `.rp2-pdf` runs the card's own Open (`_rp2Run(id, 1, el)`) with
+  `S._rxAuto` set: the next `_rxView` takes it, draws the report on a hidden sheet (`.rx-modal.rx-bg`: laid out, never
+  seen; no focus, no scroll lock), runs the viewer's PDF (`_rxAutoPdf` -> `_rxAct('pdf')`: number, history line "PDF") and
+  closes it. A card whose open draws the report at once is marked `1` as `_rp2Cat`'s seventh item (sela, day, satci,
+  satmx, satride, vlrc): its button spins until the file is saved, and if no report came (no ride today, a failed read)
+  nothing waits. Any other card (a builder, or the report's own section) says `rp2PdfNext`, and the report made there is
+  saved: within 5 minutes, dropped by Open, by `setStaffTab` to another section, and 30 seconds after `_closePrintOpts`
+  (a builder's Cancel) or `closeRidersReport`. In Urdu, Hindi, Nepali and Bengali the sheet is shown (`_rxReveal`), as
+  their PDF is the browser's print.
 - **One builder frame** (S2, S3): each of the six builders draws `_rbBar(rid,{get,set,print,reopen})` under its title: the
   team's and one's own saved setups (`report_setups`) and, from 1100px, the live preview (`_rbPreview`: the builder's own
   print with `_openReport` caught by `S._rxSink` and `S._rxPrev` muting the log, the personal-data export line and toasts).
