@@ -71,6 +71,7 @@ export const STAFF_ENTRY = [
   '_askCount', // Ask's answers waiting for approval, on the rail (2026-11-13): asked by _secPolls too; only ever on a staff page
   '_tsmCount', // the testimonials waiting for review, on the rail (2026-11-18): asked by _secPolls too; only ever on a staff page
   '_chsCount', // the chat's reported messages nobody has looked at, on the rail (2026-11-20): asked by _secPolls too; only ever on a staff page
+  '_mkCount', // the Marketplace's waiting number on the rail (2026-11-20): asked by _secPolls too; only ever on a staff page
   '_stoCounts', // the Store's and Payments' numbers on the rail (2026-11-10): asked by _secPolls, which the customer half holds; only ever on a staff page
   '_brLoad', // the Workshop's bike reports (new features build F15, 2026-11-13): read beside the requests by _wsLoad and _wsPoll, which the customer half holds; only ever on a staff page
 ];
@@ -533,6 +534,7 @@ export const STAFF_PARTS = {
   ask: ['renderAsk'], // 2026-11-13: Ask (/ask) - the pages, a page's setup, answers and results; the rail's number stays in the core
   chat: ['renderChat'], // 2026-11-20: Chat (/chat) - the Community chat's staff page: the room live, edit, delete, keep, mute, the team's box; the rail's number stays in the core
   testimonials: ['renderTestimonials'], // 2026-11-18: Testimonials (/testimonials) - the list, its actions, the switch and Add testimonial; the rail's number stays in the core
+  market: ['renderMarket'], // 2026-11-20: the Marketplace (/marketplace) - listings, held, reports and sellers (MK-S1), shops, our listings, commission, settings and categories (MK-S2); the probe and the rail's number stay in the core
   store: ['renderStore', 'renderPayments', '_payRfOpen', '_stoScanOpen'], // 2026-11-10: the Store (orders, products) and Payments (online payments, refunds owed, settings) sections, and the refund dialog a booking's pay menu opens; 2026-11-18: a store order's pickup pass scanned at the desk (_stoScanOpen); the rail's probe and counts stay in the core
   sela: ['printSelaReport', 'exportSelaXlsx'], // 2026-10-08: Run for Her's report for Sela (print + .xlsx), read at each tap
   vlap: ['_vlStaffOpen', '_vlAthleteEdit', '_vlPairOpen', '_vlCfgOpen', 'printKaminReport', 'exportKaminXlsx', '_vrbOpen', '_prbOpen', 'printVlReceipts'], // 2026-10-17: Victory Lap - athletes and teams, an athlete's race, pairing, the race's settings, the report for Kamin Sports; 2026-10-23: the report builder, and the partner (Defe) report builder beside it, which shares its workbook writer

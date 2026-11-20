@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-e9409e2476';
+const CACHE = 'mmcq-a0c6666aec';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -15,26 +15,26 @@ const SHELL_KEY = './';
 // app.src.html (STAFF_PATHS, CUST_PATHS, SUB_PATHS), and tests/paths.spec.ts checks they agree.
 // On the live customer host a staff address is not the shell's: the server sends it on to the
 // staff address, and the worker lets it through to the network so that it can.
-const APP_ROUTE = /^\/(?:reserve|my-bookings|account|members|signup|bookings|waitlist|sessions|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|ask|testimonials|chat|reports|lockers|store|payments|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/[a-z0-9-]+){0,2}\/?$/;
-const STAFF_ROUTE = /^\/(?:bookings|waitlist|sessions|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|ask|testimonials|chat|reports|lockers|store|payments|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/;
+const APP_ROUTE = /^\/(?:reserve|my-bookings|account|members|signup|bookings|waitlist|sessions|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|ask|testimonials|chat|marketplace|reports|lockers|store|payments|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/[a-z0-9-]+){0,2}\/?$/;
+const STAFF_ROUTE = /^\/(?:bookings|waitlist|sessions|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|ask|testimonials|chat|marketplace|reports|lockers|store|payments|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/;
 const LIVE_CUSTOMER_HOST = self.location.hostname === 'experiences.micromobility.sa';
 const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) && !(LIVE_CUSTOMER_HOST && STAFF_ROUTE.test(p)));
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=3da2f7beb0';
+const STAFF_JS = './staff.js?v=96b9569fdb';
 // The page's own script and stylesheet (2026-10-01: out of the page into files named by their hash).
 // The shell cannot open offline without them. styles.css is the whole stylesheet the staff loader
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
-const STAFF_PARTS = ["./staff-parts/analytics.js?v=63439c6d51","./staff-parts/community.js?v=a2eb55ffd3","./staff-parts/bikes.js?v=eb4f7a42d5","./staff-parts/cashier.js?v=c581f11c97","./staff-parts/catalog.js?v=08c5345a69","./staff-parts/inventory.js?v=a56d0410bc","./staff-parts/website.js?v=049b58a7f0","./staff-parts/history.js?v=ea5c7f69e7","./staff-parts/wallet.js?v=4336c7103d","./staff-parts/workshop.js?v=dc4d4b506f","./staff-parts/ambassadors.js?v=8ff59be061","./staff-parts/messages.js?v=0c7b8a1be3","./staff-parts/volunteers.js?v=548c9df7c7","./staff-parts/vendors.js?v=6865ca075c","./staff-parts/sessions.js?v=a572cae059","./staff-parts/lockers.js?v=45da05e876","./staff-parts/ask.js?v=ffa99861b0","./staff-parts/chat.js?v=f175c63be9","./staff-parts/testimonials.js?v=960c4855c3","./staff-parts/store.js?v=6fe02669ef","./staff-parts/sela.js?v=a7ece2ddf1","./staff-parts/vlap.js?v=3c8739690f","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=f3753488ef","./staff-parts/settings.js?v=9df9bf09ca","./staff-parts/fleet.js?v=6c839872d1","./staff-parts/money.js?v=37c7b3c1b9","./staff-parts/desk.js?v=59cce0a050","./staff-parts/deskq.js?v=cc3cd11a1d","./staff-parts/kiosk.js?v=192ce76299","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=75c3a711a1","./staff-parts/announce.js?v=a64f805e96","./staff-parts/peopleapps.js?v=2b3cd960c4","./staff-parts/peoplemore.js?v=840bd5d07f","./staff-parts/sessreport.js?v=1a966fbe89","./staff-parts/reports.js?v=08b28fbf1d","./staff-parts/door.js?v=446b15322b"];
-const APP_JS = './app.js?v=59de3156d8';
-const APP_CSS = './app.css?v=72718005fa';
+const STAFF_PARTS = ["./staff-parts/analytics.js?v=63439c6d51","./staff-parts/community.js?v=a2eb55ffd3","./staff-parts/bikes.js?v=eb4f7a42d5","./staff-parts/cashier.js?v=c581f11c97","./staff-parts/catalog.js?v=08c5345a69","./staff-parts/inventory.js?v=a56d0410bc","./staff-parts/website.js?v=049b58a7f0","./staff-parts/history.js?v=ea5c7f69e7","./staff-parts/wallet.js?v=4336c7103d","./staff-parts/workshop.js?v=dc4d4b506f","./staff-parts/ambassadors.js?v=8ff59be061","./staff-parts/messages.js?v=0c7b8a1be3","./staff-parts/volunteers.js?v=548c9df7c7","./staff-parts/vendors.js?v=6865ca075c","./staff-parts/sessions.js?v=a572cae059","./staff-parts/lockers.js?v=45da05e876","./staff-parts/ask.js?v=ffa99861b0","./staff-parts/chat.js?v=f175c63be9","./staff-parts/testimonials.js?v=960c4855c3","./staff-parts/market.js?v=54e7ff970b","./staff-parts/store.js?v=6fe02669ef","./staff-parts/sela.js?v=a7ece2ddf1","./staff-parts/vlap.js?v=3c8739690f","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=01b45fe288","./staff-parts/settings.js?v=2d2e96cf40","./staff-parts/fleet.js?v=6c839872d1","./staff-parts/money.js?v=37c7b3c1b9","./staff-parts/desk.js?v=59cce0a050","./staff-parts/deskq.js?v=cc3cd11a1d","./staff-parts/kiosk.js?v=192ce76299","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=75c3a711a1","./staff-parts/announce.js?v=a64f805e96","./staff-parts/peopleapps.js?v=2b3cd960c4","./staff-parts/peoplemore.js?v=840bd5d07f","./staff-parts/sessreport.js?v=1a966fbe89","./staff-parts/reports.js?v=08b28fbf1d","./staff-parts/door.js?v=446b15322b"];
+const APP_JS = './app.js?v=a3444c0aba';
+const APP_CSS = './app.css?v=b5673fbee8';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=ed9652cf5c']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=f32a2b80f6']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',

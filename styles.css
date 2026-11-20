@@ -14729,6 +14729,83 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
 .tsm-add .tsm-a-file{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .tsm-add .tsm-a-thumb{width:64px;height:64px;object-fit:cover;border-radius:var(--sf-r-ctl,8px);}
 .tsm-add .tsm-a-pub{display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer;}
+/* ── The Marketplace, the staff section (MK-S1, 2026-11-20): #tab-market and its one pop-up host, #mk-modal. Classes mk-*
+   (MK-S2's are mks-*). Logical properties only; every size, weight and radius on the staff tokens. */
+#tab-market .mk-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+#tab-market .mk-head-acts{display:flex;gap:8px;flex-wrap:wrap;}
+#tab-market .mk-open{display:inline-flex;align-items:center;text-decoration:none;}
+#tab-market .mk-views .filter-row,#tab-market .mk-pills{flex-wrap:wrap;gap:6px;}
+#tab-market .mk-count{margin:10px 0 4px;}
+#tab-market .mk-more{display:flex;justify-content:center;padding:12px 0 4px;}
+:is(#tab-market,#mk-modal) .mk-muted{color:var(--muted);font-size:var(--sf-fs-xs);font-weight:400;}
+:is(#tab-market,#mk-modal) .mk-pill{display:inline-block;padding:2px 9px;border:1px solid var(--border);border-radius:var(--sf-r-pill);font-size:var(--sf-fs-xs);font-weight:600;white-space:nowrap;color:var(--muted);background:var(--s1);}
+:is(#tab-market,#mk-modal) .mk-pill:is(.mk-p-live,.mk-p-r-actioned){border-color:var(--green);color:var(--green);}
+:is(#tab-market,#mk-modal) .mk-pill:is(.mk-p-held,.mk-p-reserved,.mk-p-r-open){border-color:var(--orange);color:var(--orange);}
+:is(#tab-market,#mk-modal) .mk-pill.mk-p-hidden{border-color:var(--red);color:var(--red);}
+:is(#tab-market,#mk-modal) .mk-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border:1px solid var(--border);border-radius:var(--sf-r-pill);font-size:var(--sf-fs-xs);font-weight:500;color:var(--muted);}
+:is(#tab-market,#mk-modal) .mk-chip.mk-c-warn{border-color:currentColor;color:var(--orange);}
+:is(#tab-market,#mk-modal) .mk-chip.mk-c-ok{border-color:currentColor;color:var(--green);}
+:is(#tab-market,#mk-modal) .mk-tags{display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
+:is(#tab-market,#mk-modal) .mk-who{padding:0;border:0;background:transparent none;color:var(--text);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;text-align:start;cursor:pointer;}
+:is(#tab-market,#mk-modal) .mk-text{margin:0;font-size:var(--sf-fs-md);line-height:1.5;color:var(--text);white-space:pre-line;overflow-wrap:anywhere;}
+:is(#tab-market,#mk-modal) .mk-acts{display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
+:is(#tab-market,#mk-modal) .mk-th-no{display:inline-flex;align-items:center;justify-content:center;color:var(--muted);}
+:is(#tab-market,#mk-modal) .mk-img-off{visibility:hidden;}
+#tab-market :is(.mk-list,.mk-reps,.mk-sels){display:flex;flex-direction:column;}
+#tab-market .mk-row{display:flex;align-items:center;gap:0 10px;flex-wrap:wrap;border-top:1px solid var(--border);border-inline-start:3px solid transparent;}
+#tab-market .mk-row.mk-st-held{border-inline-start-color:var(--orange);}
+#tab-market .mk-row-open{flex:1 1 320px;min-width:0;display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;padding:10px 4px;border:0;background:transparent none;color:var(--text);font:inherit;text-align:start;cursor:pointer;}
+#tab-market .mk-row-open:hover{background:var(--s1);}
+#tab-market .mk-row-open>span{display:flex;flex-direction:column;gap:2px;min-width:0;}
+#tab-market .mk-th{flex:0 0 48px;width:48px;height:48px;object-fit:cover;border-radius:var(--sf-r-ctl);background:var(--s1);}
+#tab-market .mk-r-main{flex:2 1 200px;}
+#tab-market .mk-r-main>b{align-self:flex-start;max-width:100%;font-weight:600;overflow-wrap:anywhere;} /* a title in the other alphabet still starts where the row starts */
+#tab-market .mk-r-who{flex:1 1 150px;}
+#tab-market .mk-r-who>b{font-weight:500;overflow-wrap:anywhere;}
+#tab-market .mk-r-amt{flex:0 0 100px;font-weight:600;text-align:end;}
+#tab-market .mk-row-open>.mk-r-tags{flex:0 1 auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px;}
+#tab-market .mk-r-acts{display:flex;flex-wrap:wrap;gap:6px;padding:0 4px 8px;}
+@media(max-width:640px){#tab-market .mk-r-amt{flex-basis:auto;text-align:start;}}
+/* a wide desk: the same columns on every row */
+@media(min-width:1000px){#tab-market .mk-row-open{display:grid;grid-template-columns:48px minmax(0,2fr) minmax(0,1.4fr) 104px minmax(0,1.7fr);gap:12px;}#tab-market .mk-row-open>.mk-r-tags{justify-content:flex-end;}}
+#tab-market :is(.mk-rep,.mk-sel){display:grid;gap:8px;padding:12px 0;border-top:1px solid var(--border);}
+#tab-market :is(.mk-rep-h,.mk-sel-h){display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;}
+#tab-market .mk-rep-l{font-size:var(--sf-fs-md);overflow-wrap:anywhere;}
+#tab-market .mk-meta{display:grid;gap:2px;font-size:var(--sf-fs-sm);color:var(--muted);overflow-wrap:anywhere;}
+#tab-market .mk-tick{display:inline-flex;align-items:center;gap:8px;min-height:32px;margin-inline-end:6px;font-size:var(--sf-fs-sm);color:var(--text);cursor:pointer;}
+/* inputs are appearance:none site-wide and the staff skin draws no box of its own: ask for the native one */
+#tab-market .mk-tick input{-webkit-appearance:checkbox;appearance:auto;position:static;flex:none;width:18px;height:18px;min-height:0;margin:0;padding:0;opacity:1;accent-color:var(--green);}
+#mk-modal .mk-box{width:min(94vw,680px);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden;}
+#mk-modal .mk-box-s{width:min(92vw,440px);}
+/* the same pop-up drawn again (a write, a photo picked): it is already on screen, so it does not fade and slide in a second time */
+#mk-modal .mk-still,#mk-modal .mk-still .mk-box{animation:none;}
+#mk-modal .mk-pop-h{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px;}
+#mk-modal .mk-pop-t{min-width:0;font-size:var(--sf-fs-lg);font-weight:600;overflow-wrap:anywhere;}
+#mk-modal .mk-x{flex:none;min-width:44px;min-height:44px;margin-block-start:-10px;margin-inline-end:-10px;padding:0 4px;border:0;background:transparent none;color:var(--muted);font-size:var(--sf-fs-xl);line-height:1;cursor:pointer;}
+#mk-modal .mk-pop-b{min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:12px;}
+#mk-modal .mk-pop-a{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;padding-top:12px;}
+#mk-modal .mk-sec{display:flex;flex-direction:column;gap:6px;padding-top:10px;border-top:1px solid var(--border);}
+#mk-modal .mk-h{font-size:var(--sf-fs-sm);font-weight:600;color:var(--text);}
+#mk-modal .mk-kv{display:flex;justify-content:space-between;gap:12px;font-size:var(--sf-fs-sm);}
+#mk-modal .mk-kv>span{flex:none;color:var(--muted);}
+#mk-modal .mk-kv>b{min-width:0;font-weight:500;text-align:end;overflow-wrap:anywhere;}
+#mk-modal .mk-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.02em;}
+#mk-modal .mk-gal{display:flex;flex-direction:column;gap:8px;}
+#mk-modal .mk-gal-main{display:flex;align-items:center;justify-content:center;min-height:120px;border-radius:var(--sf-r-card);background:var(--s1);overflow:hidden;}
+#mk-modal .mk-gal-main img{display:block;max-width:100%;max-height:min(48vh,360px);object-fit:contain;}
+#mk-modal .mk-gal-th{display:flex;flex-wrap:wrap;gap:6px;}
+#mk-modal .mk-gal-b{flex:none;width:52px;height:52px;padding:0;border:2px solid transparent;border-radius:var(--sf-r-ctl);background:var(--s1);overflow:hidden;cursor:pointer;}
+#mk-modal .mk-gal-b.on{border-color:var(--green);}
+#mk-modal .mk-gal-i{display:block;width:100%;height:100%;object-fit:cover;}
+#mk-modal .mk-tl{margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:4px;font-size:var(--sf-fs-sm);}
+#mk-modal .mk-form{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:var(--sf-r-ctl);background:var(--s1);}
+#mk-modal .form-group{margin:0;}
+#mk-modal :is(select,textarea){width:100%;}
+#mk-modal .mk-bad{color:var(--red);font-size:var(--sf-fs-sm);font-weight:600;}
+#mk-modal .mk-msgs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+#mk-modal .mk-msg{max-width:88%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--sf-r-card);background:var(--s1);}
+#mk-modal .mk-msg-seller{align-self:flex-end;background:transparent none;}
+#mk-modal .mk-msg-h{display:flex;align-items:baseline;gap:8px;font-size:var(--sf-fs-xs);}
 #tab-badgereq .bdr-who{padding-block:5px;margin-block:-5px;} /* 24x24 hit area (WCAG 2.5.8, staff round s10): padding grows it, the negative margin gives the room back, so nothing moves */
 #tab-badgereq .bdr-cmt{margin-top:2px;font-size:var(--sf-fs-sm);line-height:1.45;color:var(--text);white-space:pre-line;overflow-wrap:anywhere;}
 #tab-badgereq .bdr-desc{line-height:1.45;overflow-wrap:anywhere;}

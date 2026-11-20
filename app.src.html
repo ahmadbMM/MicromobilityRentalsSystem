@@ -384,6 +384,7 @@ window.mmLoading=(function(){
     <button class="tab-btn"        data-stab="ask"       data-on-click='["setStaffTab","ask"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ask</span></button>
     <button class="tab-btn"        data-stab="testimonials" data-on-click='["setStaffTab","testimonials"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Testimonials</span></button>
     <button class="tab-btn"        data-stab="chat"      data-on-click='["setStaffTab","chat"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Chat</span></button>
+    <button class="tab-btn"        data-stab="market"    data-on-click='["setStaffTab","market"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Marketplace</span></button>
     <span class="snav-group" data-group="snavPartners" role="heading" aria-level="2">Partners &amp; web</span>
     <button class="tab-btn"        data-stab="vendors"       data-on-click='["setStaffTab","vendors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Vendors</span></button>
     <button class="tab-btn"        data-stab="ambassadors" data-on-click='["setStaffTab","ambassadors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ambassadors</span></button>
@@ -415,6 +416,7 @@ window.mmLoading=(function(){
     <div id="tab-ask"       class="tab-panel"></div>
     <div id="tab-testimonials" class="tab-panel"></div>
     <div id="tab-chat"      class="tab-panel"></div>
+    <div id="tab-market"    class="tab-panel"></div>
     <div id="tab-analytics"  class="tab-panel"></div>
     <div id="tab-history"   class="tab-panel"></div>
     <div id="tab-reports"   class="tab-panel"></div>
@@ -1408,6 +1410,24 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   askNoRight:'This account can look at Ask but not change it.',askNoOpen:'This account cannot open Ask.',askKindLocked:'This question has answers, so its type cannot change.',askPicAdmin:'Only an admin can upload pictures.',askRoundPick:'Round',askRoundNow:'Round {0} (now)',askTabStats:'Stats',askNotTags:'Not for accounts with',askGender:'Gender',askGenAll:'Everyone',askMinAge:'Youngest age',askMaxAge:'Oldest age',askAgeNote:'An age rule leaves out every account with no birth date. Most accounts have none.',askAgeBad:'Ages are whole years from 1 to 120, and the youngest cannot be above the oldest.',askGLook:'Look',askTheme:'Theme',askThlight:'Light',askThdark:'Dark',askThgreen:'Green',askThsand:'Sand',askPalette:'Chart colours',askPlbrand:'Brand',askPlforest:'Forest',askPlocean:'Ocean',askPlsunset:'Sunset',askPlberry:'Berry',askPlmono:'Mono',askPalPage:'As the page',askCover:'Cover picture',askPic:'Picture',askPicUp:'Upload picture',askPicNew:'Replace picture',askThanksEn:'Line after an answer (English)',askThanksAr:'Line after an answer (Arabic)',askLayout:'Questions shown',askLayStack:'All on one page',askLaySteps:'One at a time',askScr:'The big screen shows',askScrQr:'QR code',askScrCount:'How many answered',askRotate:'The big screen moves to the next question',askSecs:'Every {0} seconds',askOff:'Not by itself',askGWords:'Blocked words',askBwAdd:'Add words, with commas between them',askBwAddBtn:'Add',askBwFull:'A page takes 200 blocked words at most.',askChart:'Chart',askVzcloud:'Word cloud',askVzbubbles:'Bubbles',askVzbars:'Bars',askVztiles:'Tiles',askVzlist:'Ranked list',askVzcards:'Cards',askVzwall:'Sticky notes',askVzspotlight:'Spotlight',askVzstream:'Stream',askVzcolumns:'Columns',askVzdonut:'Donut',askVzpie:'Pie',askVzdots:'Dots',askVztracks:'Tracks',askVzradar:'Radar',askVzstacked:'Stacked bars',askVzheat:'Heat map',askVzpodium:'Podium',askVzladder:'Ladder',askVzhistogram:'Histogram',askVzgauge:'Gauge',askVzstrip:'Strip',askSort:'Order',askSogiven:'As written',askSocount:'Largest first',askValues:'Numbers on the chart',askVaboth:'Count and percent',askVacount:'Count',askVapercent:'Percent',askVanone:'None',askLimit:'How many it shows',askCase:'Letters',askCatyped:'As typed',askCaupper:'CAPITALS',askCalower:'small letters',askAngle:'Words',askAnflat:'All level',askAnmixed:'Some on their side',askSize:'Text size',askSzm:'Medium',askSzs:'Small',askSzl:'Large',askTotalOn:'Show how many answered',askOlder:'Show older answers',askNotGiven:'Not given',askOther:'Other',askTable:'Table',askSegPick:'Choose a question',askSegBy:'Group by',askSegNone:'No answer',askByAge:'Age',askByMember:'Community',askMembers:'Members',askByLang:'Language of the answers',askByNat:'Nationality',askByDay:'Answers by day',askByHour:'Answers by hour, Saudi time',askByQ:'Answers by question',askDay:'Day',askHour:'Hour',askFirst:'First answer',askLast:'Last answer',askReach:'Reach',askReachOf:'{0} of {1} accounts',askTop:'Answered most',askSeg:'One question, group by group',
   askDup:'Duplicate',askDupSave:'Save the page before duplicating it.',askGPace:'Pace',askPaceSelf:'Everyone at their own pace',askPaceLive:'We show one question at a time',askReact:'Reaction buttons under each question',askKgrid:'Two-axis grid',askKpin:'Pin on a picture',askKform:'Short form',askKquiz:'Quiz, pick the answer',askKquiz_text:'Quiz, type the answer',askVzscatter:'Scatter',askItems:'Items',askXEn:'Horizontal axis (English)',askXAr:'Horizontal axis (Arabic)',askYEn:'Vertical axis (English)',askYAr:'Vertical axis (Arabic)',askGridMax:'Highest value',askGridAxes:'Name both axes.',askFields:'Fields',askFieldEn:'Field {0}, English',askFieldAr:'Field {0}, Arabic',askFieldType:'Field {0}, what it takes',askFttext:'Text',askFtnumber:'Number',askFtchoice:'One of a list',askRequired:'Required',askFieldOptEn:'Field {0}, option {1}, English',askFieldOptAr:'Field {0}, option {1}, Arabic',askAddField:'Add field',askNeedField:'Add at least one field.',askFieldEmpty:'Give every field a label, or remove it.',askFieldOpts:'A list field needs at least 2 options, each filled in.',askSeconds:'Seconds to answer',askSpeed:'More points for a faster answer',askAccept:'Accepted answers, one a line',askNeedAccept:'Write at least one accepted answer.',askAcceptMany:'10 accepted answers at most.',askRight:'Right answer',askRightNum:'Right answer (optional)',askRightOpt:'Option {0} is right',askRightMark:'Right',askWrong:'Wrong',askNeedRight:'Mark the right answer.',askRightRange:'The right answer must be between the smallest and the largest number.',askPinRight:'Right area (optional): tap the picture',askPinAdd:'Mark a right area',askPinNone:'Remove the right area',askPinX:'Across',askPinY:'Down',askPinR:'Size',askPinNeedsPic:'A pin question needs its picture.',askPts:'{0} points',askSecN:'{0} s',askRightOf:'Right: {0} of {1}',askAccepted:'Accepted:',askSeeAnswers:'See the answers',askRevealed:'Answer revealed',askReveal:'Reveal the answer',askHide:'Hide the answer',askBoard:'Board',askPlaceCol:'Place',askPoints:'Points',askSecCol:'Seconds',askLive:'On screen now',askNoneShown:'Nothing shown yet',askOnScreen:'On screen',askShown:'Shown',askNotShown:'Not shown yet',askShowNow:'Show now',askPrev:'Previous',askNext:'Next',askOpenQ:'Open for answers',askCloseQ:'Close answers',askTimeUp:'Time is up',askHideA:'Hide',askHideOf:'Hide: {0}',
   tstRow:"Write a testimonial",qtTitle:"Testimonials",qtWaitN:"{0} waiting for review",qtNoDb:"Testimonials are not set up on the database yet.",qtSearch:"Search name, phone, words or note",qtFWait:"Waiting",qtFPub:"Published",qtFNot:"Not published",qtStWait:"Waiting",qtStPub:"Published",qtStRej:"Rejected",qtStHid:"Hidden",qtFeatured:"Featured",qtNotFeat:"Not featured",qtAbout:"About",qtAbSat:"Saturday community ride",qtAbSess:"Session or rental",qtAbLearn:"Learn to ride",qtAbEvent:"Event",qtAbShop:"Workshop or store",qtAbOther:"Something else",qtSource:"Source",qtSrcWeb:"Website",qtSrcApp:"Booking app",qtSrcRating:"After a rating",qtSrcOld:"Old comment",qtSrcStaff:"Added by staff",qtStarsL:"Stars",qtStarsOf:"{0} of 5 stars",qtNoStars:"No stars",qtPhoto:"Photo",qtWithPh:"With a photo",qtNoPh:"No photo",qtAccount:"Account",qtNoAcct:"No account",qtShowsAs:"Shows as",qtAnon:"Anonymous",qtAnonShows:"A MicroMobility rider (anonymous)",qtSince0:"Rider since {0}",qtSince1:"Rider since {0} · 1 ride",qtSinceN:"Rider since {0} · {1} rides",qtSent:"Sent {0}",qtBy:"by {0}",qtAgreed:"Agreed {0}",qtReviewed:"Reviewed by {0}, {1}",qtNoteIs:"Note",qtPhotoOf:"Photo sent with the testimonial of {0}",qtShowPh:"Show photo",qtHidePh:"Hide photo",qtPhGone:"This testimonial has no photo any more.",qtPublish:"Publish",qtReject:"Reject",qtRejectSure:"Reject now",qtRejNote:"Note for the team",qtHide:"Hide",qtBack:"Back to waiting",qtFeature:"Feature",qtUnfeature:"Unfeature",qtUp:"Move up",qtDown:"Move down",qtDropPh:"Remove photo",qtDropPhSure:"Tap again to remove the photo",qtDel:"Delete",qtDelSure:"Tap again to delete",qtFeatLimit:"12 are featured already. Unfeature one first.",qtNoChange:"Another device changed it first.",qtAvg:"average from {0} published",qtAvgNoStars:"{0} published, none with stars",qtAvgNone:"Nothing published yet",qtAsks:"Old comments: {0} said yes, {1} said no",qtOnLbl:"Riders see testimonials",qtOnNow:"On",qtOffNow:"Off: only the direct links work",qtOnAdmin:"Only an admin can change this.",qtOnQ:"Show testimonials to riders?",qtOnBody:"This turns on, together: the Testimonials link in the micromobility.sa menu and its sitemap, the page in search engines, the home page strip of featured ones, Write a testimonial on the booking app's Account, the ask after a rating of 9 or 10 on both, and the one-time ask about an old comment.",qtOnBtn:"Show them",qtOffQ:"Stop showing testimonials to riders?",qtOffBody:"This turns all of that off. The direct links keep working.",qtOffBtn:"Stop showing them",qtOnLog:"Testimonials shown to riders",qtOffLog:"Testimonials no longer shown to riders",qtOpenPage:"Open the page",qtAdd:"Add testimonial",qtAddT:"Add a testimonial",qtAAcct:"Their account",qtAAcctPh:"Search name, phone or email",qtAClear:"Clear",qtAName:"Name",qtAMode:"How the name shows",qtMFull:"Full name",qtMShort:"First name and last initial",qtMAnon:"Anonymous",qtAWords:"Their words",qtAPick:"Pick one",qtAWhere:"Where they agreed",qtAWherePh:"For example: WhatsApp, 12 November",qtAPub:"Publish now",qtEBody:"Write between 20 and 800 characters.",qtEAbout:"Pick what it is about.",qtEWhere:"Say where they agreed (3 characters at least).",qtEName:"Type the name, pick an account or choose Anonymous.",qtEStars:"Stars go from 1 to 5.",qtEPhoto:"This photo cannot be used. Try another one.",qtECust:"That account no longer exists.",qtDonePub:"Testimonial published: {0}",qtDoneRej:"Testimonial rejected: {0}",qtDoneHid:"Testimonial hidden: {0}",qtDoneBack:"Testimonial back to waiting: {0}",qtDoneFeat:"Testimonial featured: {0}",qtDoneUnfeat:"Testimonial no longer featured: {0}",qtDonePh:"Testimonial photo removed: {0}",qtDoneDel:"Testimonial deleted: {0}",qtDoneMove:"Testimonials' order changed: {0}",qtDoneAdd:"Testimonial added, waiting for review: {0}",qtDoneAddPub:"Testimonial added and published: {0}",qtShown:"Showing {0} of {1}",qtNoneWait:"Nothing is waiting for review.",qtNoneHere:"None here.",qtNoMatch:"Nothing matches the filter.",
+  mkTitle:"Marketplace",mkRailN:"{0} waiting for the team",mkNoDb:"The Marketplace is not set up on the database yet.",mkVListings:"Listings",mkVHeld:"Held",mkVReports:"Reports",mkVSellers:"Sellers",mkVShops:"Shops",mkVOurs:"Our listings",mkVCom:"Commission",
+  mkVSet:"Settings",mkVCats:"Categories",mkOpenPage:"Open the Marketplace",mkSearch:"Search title, number, serial, seller or phone",mkFKind:"Seller type",mkFSport:"Sport",mkFCity:"City",mkNList:"Listings: {0}",mkNoList:"No listings yet.",mkNoMatch:"Nothing matches.",
+  mkMore:"Show more",mkListing:"Listing",mkNoTitle:"No title",mkStDraft:"Draft",mkStLive:"On sale",mkStHeld:"Held",mkStReserved:"Reserved",mkStSold:"Sold",mkStExpired:"Expired",mkStHidden:"Hidden",
+  mkStDeleted:"Deleted",mkKPrivate:"Private seller",mkKShop:"Shop",mkKCompany:"MicroMobility",mkHWords:"Blocked words",mkHSerial:"Duplicate serial number",mkHReports:"Reported",mkHStaff:"Seller suspended",mkCNew:"New",mkCExcellent:"Excellent",
+  mkCGood:"Good",mkCFair:"Fair",mkCParts:"For parts or not working",mkChecked:"Checked by our team",mkRepN:"Open reports: {0}",mkNoHeld:"No listing is held.",mkRelease:"Release",mkRestore:"Restore",mkHide:"Hide",mkCheck:"Mark checked by our team",
+  mkUncheck:"Remove the checked mark",mkHideH:"Hide this listing",mkWhy:"Reason",mkWhyPick:"Choose a reason",mkNote:"Note",mkHideGo:"Hide listing",mkEWhy:"Choose a reason.",mkENote:"Write at least 3 characters.",mkWhyItem:"Item not allowed",mkWhyFake:"Counterfeit",
+  mkWhyOwner:"Ownership not confirmed",mkWhyWrong:"Misleading description",mkWhyRules:"Against the rules",mkWhyDup:"Duplicate listing",mkWhyContact:"Link or phone number in the text",mkWhyOther:"Other",mkTDesc:"Description",mkTFaults:"Known faults",mkTSeller:"Seller",mkTHistory:"History",
+  mkPrice:"Price",mkNegotiable:"Negotiable",mkCond:"Condition",mkCat:"Category",mkSerial:"Frame or serial number",mkFBrand:"Brand",mkFModel:"Model",mkFYear:"Year",mkFFrame:"Frame size",mkFWheel:"Wheel size",
+  mkFSize:"Size",mkFFor:"For",mkWMen:"Men",mkWWomen:"Women",mkWUnisex:"Unisex",mkWKids:"Kids",mkDecl:"Declared by the seller",mkDComplete:"Complete device",mkDUnmod:"Not modified",mkDSpeed:"25 km/h or less",
+  mkDCharger:"Original charger",mkShownAs:"Buyers see",mkThreads:"Conversations",mkPublished:"Published",mkExpires:"Expires",mkUpdated:"Updated",mkNoPhotos:"No photos.",mkPhotoN:"Photo {0} of {1}",mkAcct:"Account",mkPhone:"Phone",
+  mkAcctSince:"Account since",mkTerms:"Rules accepted",mkStrikes:"Strikes",mkSellerOk:"Active",mkSuspended:"Suspended",mkMet:"Met by our team",mkNewAcct:"New account",mkStaffNote:"Staff note",mkCr:"Commercial registration",mkVat:"VAT number",
+  mkOwnListing:"MicroMobility's own listing.",mkToSeller:"Open in Sellers",mkStrike:"Add a strike",mkUnstrike:"Remove a strike",mkSuspend:"Suspend",mkUnsuspend:"Lift the suspension",mkAskStrike:"Add a strike to {0}",mkAskSuspend:"Suspend {0}",mkAskNote:"Staff note about {0}",mkSelSearch:"Search name, phone or account",
+  mkNoSel:"No sellers yet.",mkNSel:"Sellers: {0}",mkRsOpen:"Open",mkRsActioned:"Actioned",mkRsDismissed:"Dismissed",mkNoRep:"No reports here.",mkNoRepOpen:"No open reports.",mkRTThread:"Conversation",mkRProhibited:"Prohibited item",mkRCounterfeit:"Counterfeit",
+  mkRStolen:"Stolen",mkRMisleading:"Misleading",mkRScam:"Scam",mkRAbuse:"Abuse",mkRSpam:"Spam",mkROther:"Other",mkRepBy:"Reported by",mkRepAbout:"About",mkDecided:"Decided by {0} · {1}",mkOpenListing:"Open listing",
+  mkReadThread:"Read the messages",mkDismiss:"Dismiss",mkReopen:"Reopen",mkThreadT:"Reported conversation",mkBuyer:"Buyer",mkWaShared:"Shared WhatsApp",mkBlocked:"One blocked the other",mkNoMsgs:"No messages.",mkErrThread:"Only a reported conversation can be read.",mkErrState:"That is not possible from this state. The page was read again.",
+  mkErrGone:"This no longer exists.",mkErrInput:"The database did not accept that.",mkErrRight:"This account cannot change the Marketplace.",mkDoneHide:"Marketplace: listing {0} hidden",mkDoneRestore:"Marketplace: listing {0} restored",mkDoneRelease:"Marketplace: listing {0} released",mkDoneCheck:"Marketplace: listing {0} marked checked by our team",mkDoneUncheck:"Marketplace: checked mark removed from listing {0}",mkDoneDismiss:"Marketplace: report on {0} dismissed",mkDoneAction:"Marketplace: report on {0} actioned",
+  mkDoneReopen:"Marketplace: report on {0} reopened",mkDoneStrike:"Marketplace: strike added to {0}",mkDoneUnstrike:"Marketplace: strike removed from {0}",mkDoneSuspend:"Marketplace: {0} suspended",mkDoneUnsuspend:"Marketplace: suspension lifted for {0}",mkDoneMet:"Marketplace: {0} marked met by our team",mkDoneUnmet:"Marketplace: met mark removed from {0}",mkDoneNote:"Marketplace: staff note saved for {0}",mkLogThread:"Marketplace: read the reported conversation on listing {0}",mkEvRelease:"Released",
+  mkEvRestore:"Restored",mkEvUncheck:"Checked mark removed",mkEvEdit:"Edited",mkEvUnreserve:"No longer reserved",mkEvUnsold:"Sale undone",mkEvRenew:"Renewed",mkEvReportSet:"Report decided",mkBySystem:"System",mkByCustomer:"Customer",mkMsgsMore:"Older messages are not shown.",mkEvThreadRead:"Conversation read",mkEvUnblock:"Block lifted",mkCityOther:"Another city",
   rlBtn:'Running late',rlAsk:'How late will you be?',rlMin:'{0} min',rlChip:'Running late, about {0} min',rlOnTime:'I’m on time',rlNoMore:'Too late to change this now',rlNoPlace:'This booking no longer holds a place',rlSt:'Running late · ~{0} min',rlSaidOpt:'Said running late',
   ormBtn:'Remind me',ormSet:'Reminder set',ormOpens:'Booking opens {0}',ormCal:'Add to my calendar',ormUpd:'Tell me in Updates',ormRm:'Remove reminder',ormIcsT:'Booking opens: {0}',ormIsOpen:'Booking is open now',ormNo:'A reminder can’t be set for this date',
   dntLabel:"Note for the desk",dntFail:"Your note for the desk did not save.",dntRider:"Rider's note",
@@ -2109,6 +2129,24 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   askNoRight:'هذا الحساب يمكنه عرض هذا القسم دون تعديله.',askNoOpen:'هذا الحساب لا يمكنه فتح هذا القسم.',askKindLocked:'لهذا السؤال إجابات، لذا لا يمكن تغيير نوعه.',askPicAdmin:'رفع الصور للمدير فقط.',askRoundPick:'الجولة',askRoundNow:'الجولة {0} (الحالية)',askTabStats:'الإحصاءات',askNotTags:'ليست للحسابات التي تحمل',askGender:'الجنس',askGenAll:'الجميع',askMinAge:'أصغر عمر',askMaxAge:'أكبر عمر',askAgeNote:'شرط العمر يستثني كل حساب بلا تاريخ ميلاد، ومعظم الحسابات بلا تاريخ ميلاد.',askAgeBad:'العمر بالسنوات الكاملة من 1 إلى 120، ولا يزيد الأصغر على الأكبر.',askGLook:'المظهر',askTheme:'السمة',askThlight:'فاتح',askThdark:'داكن',askThgreen:'أخضر',askThsand:'رملي',askPalette:'ألوان الرسوم',askPlbrand:'العلامة',askPlforest:'الغابة',askPlocean:'المحيط',askPlsunset:'الغروب',askPlberry:'التوت',askPlmono:'أحادي',askPalPage:'كالصفحة',askCover:'صورة الغلاف',askPic:'الصورة',askPicUp:'رفع صورة',askPicNew:'تغيير الصورة',askThanksEn:'سطر بعد الإجابة (بالإنجليزية)',askThanksAr:'سطر بعد الإجابة (بالعربية)',askLayout:'عرض الأسئلة',askLayStack:'كلها في صفحة واحدة',askLaySteps:'سؤال تلو الآخر',askScr:'تعرض الشاشة الكبيرة',askScrQr:'رمز QR',askScrCount:'عدد المجيبين',askRotate:'تنتقل الشاشة الكبيرة إلى السؤال التالي',askSecs:'كل {0} ثانية',askOff:'ليس تلقائياً',askGWords:'الكلمات المحظورة',askBwAdd:'أضف كلمات تفصل بينها فواصل',askBwAddBtn:'إضافة',askBwFull:'الحد الأقصى للصفحة 200 كلمة محظورة.',askChart:'الرسم',askVzcloud:'سحابة كلمات',askVzbubbles:'فقاعات',askVzbars:'أشرطة',askVztiles:'مربعات',askVzlist:'قائمة مرتبة',askVzcards:'بطاقات',askVzwall:'ملاحظات لاصقة',askVzspotlight:'إبراز',askVzstream:'تدفق',askVzcolumns:'أعمدة',askVzdonut:'حلقة',askVzpie:'دائرة',askVzdots:'نقاط',askVztracks:'مسارات',askVzradar:'رادار',askVzstacked:'أشرطة مكدسة',askVzheat:'خريطة حرارية',askVzpodium:'منصة تتويج',askVzladder:'سلّم',askVzhistogram:'مدرّج تكراري',askVzgauge:'عدّاد',askVzstrip:'شريط',askSort:'الترتيب',askSogiven:'كما كُتبت',askSocount:'الأكبر أولاً',askValues:'الأرقام على الرسم',askVaboth:'العدد والنسبة',askVacount:'العدد',askVapercent:'النسبة',askVanone:'بلا أرقام',askLimit:'كم يعرض',askCase:'الأحرف',askCatyped:'كما كُتبت',askCaupper:'أحرف كبيرة',askCalower:'أحرف صغيرة',askAngle:'الكلمات',askAnflat:'كلها أفقية',askAnmixed:'بعضها عمودي',askSize:'حجم النص',askSzm:'متوسط',askSzs:'صغير',askSzl:'كبير',askTotalOn:'إظهار عدد المجيبين',askOlder:'عرض إجابات أقدم',askNotGiven:'غير محدد',askOther:'أخرى',askTable:'جدول',askSegPick:'اختر سؤالاً',askSegBy:'التقسيم حسب',askSegNone:'بلا إجابة',askByAge:'العمر',askByMember:'المجتمع',askMembers:'الأعضاء',askByLang:'لغة الإجابات',askByNat:'الجنسية',askByDay:'الإجابات حسب اليوم',askByHour:'الإجابات حسب الساعة، بتوقيت السعودية',askByQ:'الإجابات حسب السؤال',askDay:'اليوم',askHour:'الساعة',askFirst:'أول إجابة',askLast:'آخر إجابة',askReach:'الوصول',askReachOf:'{0} من {1} حساب',askTop:'الأكثر إجابة',askSeg:'سؤال واحد، مجموعة بمجموعة',
   askDup:'نسخ الصفحة',askDupSave:'احفظ الصفحة قبل نسخها.',askGPace:'الإيقاع',askPaceSelf:'كلٌّ بإيقاعه',askPaceLive:'نعرض سؤالاً واحداً في كل مرة',askReact:'أزرار التفاعل تحت كل سؤال',askKgrid:'شبكة بمحورين',askKpin:'دبوس على صورة',askKform:'نموذج قصير',askKquiz:'مسابقة: اختر الإجابة',askKquiz_text:'مسابقة: اكتب الإجابة',askVzscatter:'نقاط على محورين',askItems:'العناصر',askXEn:'المحور الأفقي (بالإنجليزية)',askXAr:'المحور الأفقي (بالعربية)',askYEn:'المحور الرأسي (بالإنجليزية)',askYAr:'المحور الرأسي (بالعربية)',askGridMax:'أعلى قيمة',askGridAxes:'سمِّ المحورين.',askFields:'الحقول',askFieldEn:'الحقل {0}، بالإنجليزية',askFieldAr:'الحقل {0}، بالعربية',askFieldType:'الحقل {0}، نوع الإجابة',askFttext:'نص',askFtnumber:'رقم',askFtchoice:'واحد من قائمة',askRequired:'مطلوب',askFieldOptEn:'الحقل {0}، الخيار {1}، بالإنجليزية',askFieldOptAr:'الحقل {0}، الخيار {1}، بالعربية',askAddField:'إضافة حقل',askNeedField:'أضف حقلاً واحداً على الأقل.',askFieldEmpty:'اكتب اسماً لكل حقل أو احذفه.',askFieldOpts:'حقل القائمة يحتاج إلى خيارين على الأقل، وكل خيار مكتوب.',askSeconds:'ثوانٍ للإجابة',askSpeed:'نقاط أكثر للإجابة الأسرع',askAccept:'الإجابات المقبولة، واحدة في كل سطر',askNeedAccept:'اكتب إجابة مقبولة واحدة على الأقل.',askAcceptMany:'10 إجابات مقبولة على الأكثر.',askRight:'الإجابة الصحيحة',askRightNum:'الإجابة الصحيحة (اختياري)',askRightOpt:'الخيار {0} صحيح',askRightMark:'صحيح',askWrong:'خطأ',askNeedRight:'حدِّد الإجابة الصحيحة.',askRightRange:'يجب أن تكون الإجابة الصحيحة بين أصغر رقم وأكبر رقم.',askPinRight:'المنطقة الصحيحة (اختياري): اضغط على الصورة',askPinAdd:'حدِّد منطقة صحيحة',askPinNone:'إزالة المنطقة الصحيحة',askPinX:'أفقياً',askPinY:'رأسياً',askPinR:'الحجم',askPinNeedsPic:'سؤال الدبوس يحتاج إلى صورته.',askPts:'{0} نقطة',askSecN:'{0} ث',askRightOf:'الصحيحة: {0} من {1}',askAccepted:'المقبولة:',askSeeAnswers:'عرض الإجابات',askRevealed:'الإجابة مكشوفة',askReveal:'كشف الإجابة',askHide:'إخفاء الإجابة',askBoard:'لوحة النتائج',askPlaceCol:'المركز',askPoints:'النقاط',askSecCol:'الثواني',askLive:'على الشاشة الآن',askNoneShown:'لم يُعرض شيء بعد',askOnScreen:'على الشاشة',askShown:'عُرض',askNotShown:'لم يُعرض بعد',askShowNow:'اعرض الآن',askPrev:'السابق',askNext:'التالي',askOpenQ:'فتح الإجابات',askCloseQ:'إغلاق الإجابات',askTimeUp:'انتهى الوقت',askHideA:'إخفاء',askHideOf:'إخفاء: {0}',
   tstRow:"اكتب شهادة",qtTitle:"الشهادات",qtWaitN:"{0} بانتظار المراجعة",qtNoDb:"الشهادات غير مُعدّة في قاعدة البيانات بعد.",qtSearch:"ابحث بالاسم أو الجوال أو الكلمات أو الملاحظة",qtFWait:"بانتظار المراجعة",qtFPub:"منشورة",qtFNot:"غير منشورة",qtStWait:"بانتظار المراجعة",qtStPub:"منشورة",qtStRej:"مرفوضة",qtStHid:"مخفية",qtFeatured:"مميّزة",qtNotFeat:"غير مميّزة",qtAbout:"الموضوع",qtAbSat:"جولة السبت المجتمعية",qtAbSess:"جلسة أو استئجار",qtAbLearn:"تعلّم ركوب الدراجة",qtAbEvent:"فعالية",qtAbShop:"الورشة أو المتجر",qtAbOther:"شيء آخر",qtSource:"المصدر",qtSrcWeb:"الموقع الإلكتروني",qtSrcApp:"تطبيق الحجز",qtSrcRating:"بعد تقييم",qtSrcOld:"تعليق سابق",qtSrcStaff:"أضافها الموظفون",qtStarsL:"النجوم",qtStarsOf:"{0} من 5 نجوم",qtNoStars:"بلا نجوم",qtPhoto:"الصورة",qtWithPh:"بصورة",qtNoPh:"بلا صورة",qtAccount:"الحساب",qtNoAcct:"دون حساب",qtShowsAs:"يظهر باسم",qtAnon:"دون اسم",qtAnonShows:"أحد راكبي MicroMobility (دون اسم)",qtSince0:"راكب منذ {0}",qtSince1:"راكب منذ {0} · جولة واحدة",qtSinceN:"راكب منذ {0} · الجولات: {1}",qtSent:"أُرسلت {0}",qtBy:"بواسطة {0}",qtAgreed:"الموافقة {0}",qtReviewed:"راجعها {0}، {1}",qtNoteIs:"ملاحظة",qtPhotoOf:"الصورة المرسلة مع شهادة {0}",qtShowPh:"اعرض الصورة",qtHidePh:"أخفِ الصورة",qtPhGone:"لم تعد لهذه الشهادة صورة.",qtPublish:"انشر",qtReject:"ارفض",qtRejectSure:"ارفض الآن",qtRejNote:"ملاحظة للفريق",qtHide:"أخفِ",qtBack:"أعد إلى الانتظار",qtFeature:"ميّز",qtUnfeature:"ألغِ التمييز",qtUp:"انقل للأعلى",qtDown:"انقل للأسفل",qtDropPh:"احذف الصورة",qtDropPhSure:"اضغط مرة أخرى لحذف الصورة",qtDel:"احذف",qtDelSure:"اضغط مرة أخرى للحذف",qtFeatLimit:"توجد 12 شهادة مميّزة بالفعل. ألغِ تمييز إحداها أولاً.",qtNoChange:"غيّرها جهاز آخر قبلك.",qtAvg:"متوسط {0} شهادة منشورة",qtAvgNoStars:"{0} منشورة، دون نجوم",qtAvgNone:"لا شيء منشور بعد",qtAsks:"التعليقات السابقة: {0} وافقوا، و{1} رفضوا",qtOnLbl:"يرى الراكبون الشهادات",qtOnNow:"مفعّل",qtOffNow:"متوقف: الروابط المباشرة فقط تعمل",qtOnAdmin:"يستطيع المسؤول وحده تغييره.",qtOnQ:"هل تعرض الشهادات على الراكبين؟",qtOnBody:"يفعّل هذا معاً: رابط «الشهادات» في قائمة micromobility.sa وخريطة الموقع، وظهور الصفحة في محركات البحث، وشريط الشهادات المميّزة في الصفحة الرئيسية، و«اكتب شهادة» في «الحساب» بتطبيق الحجز، والسؤال بعد تقييم 9 أو 10 في كليهما، والسؤال لمرة واحدة عن تعليق سابق.",qtOnBtn:"اعرضها",qtOffQ:"هل توقف عرض الشهادات على الراكبين؟",qtOffBody:"يوقف هذا كل ما سبق، وتبقى الروابط المباشرة تعمل.",qtOffBtn:"أوقف العرض",qtOnLog:"أصبحت الشهادات معروضة على الراكبين",qtOffLog:"لم تعد الشهادات معروضة على الراكبين",qtOpenPage:"افتح الصفحة",qtAdd:"أضف شهادة",qtAddT:"إضافة شهادة",qtAAcct:"حسابه",qtAAcctPh:"ابحث بالاسم أو الجوال أو البريد",qtAClear:"مسح",qtAName:"الاسم",qtAMode:"كيف يظهر الاسم",qtMFull:"الاسم الكامل",qtMShort:"الاسم الأول والحرف الأول من اسم العائلة",qtMAnon:"دون اسم",qtAWords:"كلماته",qtAPick:"اختر",qtAWhere:"أين وافق",qtAWherePh:"مثلاً: واتساب، 12 نوفمبر",qtAPub:"انشرها الآن",qtEBody:"اكتب بين 20 و800 حرف.",qtEAbout:"اختر موضوعها.",qtEWhere:"اذكر أين وافق (3 أحرف على الأقل).",qtEName:"اكتب الاسم أو اختر حساباً أو «دون اسم».",qtEStars:"النجوم من 1 إلى 5.",qtEPhoto:"لا يمكن استخدام هذه الصورة. جرّب صورة أخرى.",qtECust:"لم يعد هذا الحساب موجوداً.",qtDonePub:"نُشرت الشهادة: {0}",qtDoneRej:"رُفضت الشهادة: {0}",qtDoneHid:"أُخفيت الشهادة: {0}",qtDoneBack:"أُعيدت الشهادة إلى الانتظار: {0}",qtDoneFeat:"مُيّزت الشهادة: {0}",qtDoneUnfeat:"أُلغي تمييز الشهادة: {0}",qtDonePh:"حُذفت صورة الشهادة: {0}",qtDoneDel:"حُذفت الشهادة: {0}",qtDoneMove:"تغيّر ترتيب الشهادات: {0}",qtDoneAdd:"أُضيفت الشهادة بانتظار المراجعة: {0}",qtDoneAddPub:"أُضيفت الشهادة ونُشرت: {0}",qtShown:"عرض {0} من {1}",qtNoneWait:"لا شيء بانتظار المراجعة.",qtNoneHere:"لا شيء هنا.",qtNoMatch:"لا شيء يطابق الفلتر.",
+  mkTitle:"السوق",mkRailN:"{0} بانتظار الفريق",mkNoDb:"السوق غير مُعدّ في قاعدة البيانات بعد.",mkVListings:"الإعلانات",mkVHeld:"الموقوفة",mkVReports:"البلاغات",mkVSellers:"البائعون",mkVShops:"المتاجر",mkVOurs:"إعلاناتنا",mkVCom:"العمولة",
+  mkVSet:"الإعدادات",mkVCats:"الفئات",mkOpenPage:"افتح السوق",mkSearch:"ابحث بالعنوان أو الرقم أو الرقم التسلسلي أو البائع أو الجوال",mkFKind:"نوع البائع",mkFSport:"الرياضة",mkFCity:"المدينة",mkNList:"الإعلانات: {0}",mkNoList:"لا توجد إعلانات بعد.",mkNoMatch:"لا توجد نتائج مطابقة.",
+  mkMore:"عرض المزيد",mkListing:"إعلان",mkNoTitle:"بلا عنوان",mkStDraft:"مسودة",mkStLive:"معروض للبيع",mkStHeld:"موقوف",mkStReserved:"محجوز",mkStSold:"مُباع",mkStExpired:"انتهت مدته",mkStHidden:"مخفي",
+  mkStDeleted:"محذوف",mkKPrivate:"بائع فرد",mkKShop:"متجر",mkKCompany:"MicroMobility",mkHWords:"كلمات محظورة",mkHSerial:"رقم تسلسلي مكرر",mkHReports:"مُبلَّغ عنه",mkHStaff:"البائع موقوف",mkCNew:"جديد",mkCExcellent:"ممتاز",
+  mkCGood:"جيد",mkCFair:"مقبول",mkCParts:"قطع غيار أو لا يعمل",mkChecked:"فحصه فريقنا",mkRepN:"بلاغات مفتوحة: {0}",mkNoHeld:"لا يوجد إعلان موقوف.",mkRelease:"إلغاء الإيقاف",mkRestore:"إعادة العرض",mkHide:"إخفاء",mkCheck:"وضع علامة «فحصه فريقنا»",
+  mkUncheck:"إزالة علامة الفحص",mkHideH:"إخفاء هذا الإعلان",mkWhy:"السبب",mkWhyPick:"اختر سبباً",mkNote:"ملاحظة",mkHideGo:"إخفاء الإعلان",mkEWhy:"اختر سبباً.",mkENote:"اكتب 3 أحرف على الأقل.",mkWhyItem:"منتج غير مسموح به",mkWhyFake:"مقلَّد",
+  mkWhyOwner:"الملكية غير مؤكدة",mkWhyWrong:"وصف مضلِّل",mkWhyRules:"مخالف للقواعد",mkWhyDup:"إعلان مكرر",mkWhyContact:"رابط أو رقم جوال في النص",mkWhyOther:"سبب آخر",mkTDesc:"الوصف",mkTFaults:"العيوب المعروفة",mkTSeller:"البائع",mkTHistory:"السجل",
+  mkPrice:"السعر",mkNegotiable:"قابل للتفاوض",mkCond:"الحالة",mkCat:"الفئة",mkSerial:"رقم الهيكل أو الرقم التسلسلي",mkFBrand:"العلامة التجارية",mkFModel:"الموديل",mkFYear:"السنة",mkFFrame:"مقاس الهيكل",mkFWheel:"مقاس العجلات",
+  mkFSize:"المقاس",mkFFor:"مناسب لـ",mkWMen:"الرجال",mkWWomen:"النساء",mkWUnisex:"الجنسين",mkWKids:"الأطفال",mkDecl:"إقرارات البائع",mkDComplete:"جهاز كامل",mkDUnmod:"غير معدَّل",mkDSpeed:"25 كم/س أو أقل",
+  mkDCharger:"الشاحن الأصلي",mkShownAs:"يراه المشترون باسم",mkThreads:"المحادثات",mkPublished:"نُشر",mkExpires:"ينتهي",mkUpdated:"آخر تحديث",mkNoPhotos:"لا توجد صور.",mkPhotoN:"الصورة {0} من {1}",mkAcct:"الحساب",mkPhone:"الجوال",
+  mkAcctSince:"الحساب منذ",mkTerms:"قبول القواعد",mkStrikes:"المخالفات",mkSellerOk:"نشط",mkSuspended:"موقوف",mkMet:"قابله فريقنا",mkNewAcct:"حساب جديد",mkStaffNote:"ملاحظة الفريق",mkCr:"السجل التجاري",mkVat:"الرقم الضريبي",
+  mkOwnListing:"إعلان خاص بـ MicroMobility.",mkToSeller:"افتح في البائعين",mkStrike:"إضافة مخالفة",mkUnstrike:"إزالة مخالفة",mkSuspend:"إيقاف",mkUnsuspend:"رفع الإيقاف",mkAskStrike:"إضافة مخالفة إلى {0}",mkAskSuspend:"إيقاف {0}",mkAskNote:"ملاحظة الفريق عن {0}",mkSelSearch:"ابحث بالاسم أو الجوال أو الحساب",
+  mkNoSel:"لا يوجد بائعون بعد.",mkNSel:"البائعون: {0}",mkRsOpen:"مفتوح",mkRsActioned:"اتُّخذ إجراء",mkRsDismissed:"مرفوض",mkNoRep:"لا توجد بلاغات هنا.",mkNoRepOpen:"لا توجد بلاغات مفتوحة.",mkRTThread:"محادثة",mkRProhibited:"منتج محظور",mkRCounterfeit:"مقلَّد",
+  mkRStolen:"مسروق",mkRMisleading:"مضلِّل",mkRScam:"احتيال",mkRAbuse:"إساءة",mkRSpam:"رسائل مزعجة",mkROther:"أخرى",mkRepBy:"المبلِّغ",mkRepAbout:"بخصوص",mkDecided:"قرّر {0} · {1}",mkOpenListing:"افتح الإعلان",
+  mkReadThread:"اقرأ الرسائل",mkDismiss:"رفض البلاغ",mkReopen:"إعادة فتح",mkThreadT:"محادثة مُبلَّغ عنها",mkBuyer:"المشتري",mkWaShared:"شارك واتساب",mkBlocked:"أحدهما حظر الآخر",mkNoMsgs:"لا توجد رسائل.",mkErrThread:"لا تُقرأ إلا المحادثة المُبلَّغ عنها.",mkErrState:"غير ممكن في هذه الحالة. أُعيدت قراءة الصفحة.",
+  mkErrGone:"لم يعد موجوداً.",mkErrInput:"لم تقبل قاعدة البيانات ذلك.",mkErrRight:"هذا الحساب لا يمكنه تعديل السوق.",mkDoneHide:"السوق: أُخفي الإعلان {0}",mkDoneRestore:"السوق: أُعيد عرض الإعلان {0}",mkDoneRelease:"السوق: أُلغي إيقاف الإعلان {0}",mkDoneCheck:"السوق: وُضعت علامة «فحصه فريقنا» على الإعلان {0}",mkDoneUncheck:"السوق: أُزيلت علامة الفحص عن الإعلان {0}",mkDoneDismiss:"السوق: رُفض البلاغ عن {0}",mkDoneAction:"السوق: اتُّخذ إجراء في البلاغ عن {0}",
+  mkDoneReopen:"السوق: أُعيد فتح البلاغ عن {0}",mkDoneStrike:"السوق: أُضيفت مخالفة إلى {0}",mkDoneUnstrike:"السوق: أُزيلت مخالفة عن {0}",mkDoneSuspend:"السوق: أُوقف {0}",mkDoneUnsuspend:"السوق: رُفع الإيقاف عن {0}",mkDoneMet:"السوق: سُجّل أن فريقنا قابل {0}",mkDoneUnmet:"السوق: أُزيلت علامة المقابلة عن {0}",mkDoneNote:"السوق: حُفظت ملاحظة الفريق عن {0}",mkLogThread:"السوق: قُرئت المحادثة المُبلَّغ عنها في الإعلان {0}",mkEvRelease:"أُلغي الإيقاف",
+  mkEvRestore:"أُعيد العرض",mkEvUncheck:"أُزيلت علامة الفحص",mkEvEdit:"عُدّل",mkEvUnreserve:"أُلغي الحجز",mkEvUnsold:"أُلغي البيع",mkEvRenew:"جُدّد",mkEvReportSet:"قرار في بلاغ",mkBySystem:"النظام",mkByCustomer:"العميل",mkMsgsMore:"الرسائل الأقدم غير معروضة.",mkEvThreadRead:"قُرئت المحادثة",mkEvUnblock:"رُفع الحظر",mkCityOther:"مدينة أخرى",
   rlBtn:'سأتأخر',rlAsk:'كم ستتأخر؟',rlMin:'{0} دقيقة',rlChip:'سأتأخر نحو {0} دقيقة',rlOnTime:'سأصل في الموعد',rlNoMore:'فات وقت تغيير هذا الآن',rlNoPlace:'لم يعد لهذا الحجز مكان محجوز',rlSt:'سيتأخر · نحو {0} دقيقة',rlSaidOpt:'أبلغ أنه سيتأخر',
   ormBtn:'ذكّرني',ormSet:'تم ضبط التذكير',ormOpens:'يفتح الحجز {0}',ormCal:'أضف إلى تقويمي',ormUpd:'أخبرني في التحديثات',ormRm:'إزالة التذكير',ormIcsT:'يفتح الحجز: {0}',ormIsOpen:'الحجز مفتوح الآن',ormNo:'لا يمكن ضبط تذكير لهذا الموعد',
   dntLabel:"ملاحظة لفريق الاستقبال",dntFail:"لم تُحفظ ملاحظتك لفريق الاستقبال.",dntRider:"ملاحظة العميل",
@@ -2382,19 +2420,20 @@ function isAdmin(){return S.staffRole==='admin';}
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
 // Inside Riders the summary report stays admin-only (renderRiders).
 const DESK_TABS=['queue','waitlist','lockers','cashier','workshop']; // Lockers (2026-11-09): the desk gives them // the Waitlist (2026-11-09): a section of its own, opened by whoever opens Bookings // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
-const ROLE_TABS={volunteer:[],door:[],manager:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','waitlist','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','store','inventory'],owner:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
+const ROLE_TABS={volunteer:[],door:[],manager:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','market','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','waitlist','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','store','inventory'],owner:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','market','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
 function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]||DESK_TABS).filter(_stoSecOk);}
 // The Store and Payments (2026-11-10) are sections only where the database has them (staff_store_ready, _stoProbe): not on
 // the rail, not among the Team page's sections, not in "every section" anywhere else. A catalogue-only database
 // (staff_store_mode() 'catalog', production since 2026-11-19) has the Store and no Payments.
-function _stoSecOk(k){if(k!=='store'&&k!=='payments')return true;try{return S._storeReady===true||(k==='store'&&S._storeMode==='catalog');}catch(_){return false;}}
+function _stoSecOk(k){if(k==='market'){try{return S._mkMode==='full';}catch(_){return false;}} // the Marketplace (2026-11-20): only where the database has it (staff_market_mode, _mkProbe)
+  if(k!=='store'&&k!=='payments')return true;try{return S._storeReady===true||(k==='store'&&S._storeMode==='catalog');}catch(_){return false;}}
 function _deskTabOk(tab){return tab==='settings'||tab==='reports'&&S.staffRole!=='volunteer'&&S.staffRole!=='door'||(_roleTabs(S.staffRole).includes(tab)&&_viewOk(tab));} // Settings is every account's own page // the role's sections, then the account's own list (#8) // Settings is every account's own page // the role's sections, then the account's own list (#8)
 // Which staff parts (scripts/split-staff.mjs, STAFF_PARTS) the desk fetches once it has painted
 // (2026-10-09): the ones whose sections this account can open, and the ones the desk's own actions
 // call into (a return's fleet check, a void's reason, the night summary). Every other part comes the first time something asks for it (its stand-in fetches it).
 // Before the role is known nothing is held back. People's rarely opened views (peopleapps, peoplemore: staff round s10,
 // item 47) come only when one is opened; a session's report (sessreport) with the desk's parts.
-const STAFF_PART_TABS={reports:[],peopleapps:[],peoplemore:[],sessreport:['queue'],sessions:['sessions'],lockers:['lockers'],store:['store','payments'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],ask:['ask'],testimonials:['testimonials'],chat:['chat'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist'],announce:['queue','settings'],door:[]}; // door: fetched by its stand-in when a Door account signs in
+const STAFF_PART_TABS={reports:[],peopleapps:[],peoplemore:[],sessreport:['queue'],sessions:['sessions'],lockers:['lockers'],store:['store','payments'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],ask:['ask'],testimonials:['testimonials'],chat:['chat'],market:['market'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist'],announce:['queue','settings'],door:[]}; // door: fetched by its stand-in when a Door account signs in
 function _staffPartWanted(n){const tabs=STAFF_PART_TABS[n];if(!tabs||!S.staffRole)return true;return tabs.some(_deskTabOk);}
 // A staff account's own preferences (2026-10-09): staff.prefs through staff_my_prefs, with this
 // device's copy (cq_prefs, kept per account) read at once so a reload starts as the person left it.
@@ -3269,7 +3308,7 @@ let _sbWritesOut=0;
 // wait in the request lane like any read (2026-10-27: the rider's page reads checked against their
 // migrations - customer_my_badges to petromin_member at the end - and the consents, the deletion request
 // and the last-seen stamp left out, which write).
-const _READ_RPC=new Set(['staff_owner_choices','staff_customer_export','staff_archived_list','staff_archived_account','staff_customer_stats','hub_overview','hub_photos_list','hub_photo_img','staff_rotm_tally','staff_goal_progress','customer_my_titles','member_directory','staff_title_auto_holders','staff_sync','staff_people','list_sessions','my_bookings','customer_profile','customer_exists','customer_token_ok','customer_pwd_state','customer_fix_fields','community_member','promo_lookup','staff_resolve_bike','staff_phone_accounts','staff_email_for_phone','staff_inventory_costs','staff_inventory_extras','staff_ambassador_stats','staff_team_list','staff_team_more','staff_purge_preview','staff_operator_list','staff_sign_in_methods','staff_last_seen','staff_sign_in_lock','staff_undo_code_state','staff_audit_search','staff_invite_check','customer_my_badges','customer_emergency','customer_about','badge_catalog','badge_seasons','badge_weeks','customer_blood_type','customer_whatsapp','customer_purchases','ambassador_mine','petromin_member','customer_sport','testimonial_mine','staff_testimonials','staff_testimonial_photo']);
+const _READ_RPC=new Set(['staff_owner_choices','staff_customer_export','staff_archived_list','staff_archived_account','staff_customer_stats','hub_overview','hub_photos_list','hub_photo_img','staff_rotm_tally','staff_goal_progress','customer_my_titles','member_directory','staff_title_auto_holders','staff_sync','staff_people','list_sessions','my_bookings','customer_profile','customer_exists','customer_token_ok','customer_pwd_state','customer_fix_fields','community_member','promo_lookup','staff_resolve_bike','staff_phone_accounts','staff_email_for_phone','staff_inventory_costs','staff_inventory_extras','staff_ambassador_stats','staff_team_list','staff_team_more','staff_purge_preview','staff_operator_list','staff_sign_in_methods','staff_last_seen','staff_sign_in_lock','staff_undo_code_state','staff_audit_search','staff_invite_check','customer_my_badges','customer_emergency','customer_about','badge_catalog','badge_seasons','badge_weeks','customer_blood_type','customer_whatsapp','customer_purchases','ambassador_mine','petromin_member','customer_sport','testimonial_mine','staff_testimonials','staff_testimonial_photo','staff_market_mode','staff_market_counts','staff_market_listings','staff_market_listing_get','staff_market_reports','staff_market_thread','staff_market_sellers','staff_market_shops','staff_market_commission']);
 function _fetchT(input,init){
   const m=String((init&&init.method)||(input&&input.method)||'GET').toUpperCase();
   const _rpc=m==='POST'&&/\/rest\/v1\/rpc\/([^/?#]+)/.exec(String((input&&input.url)||input));
@@ -8057,7 +8096,7 @@ let _navRestoring=false;
 // them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
-const STAFF_PATHS={reports:'reports',volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',store:'store',payments:'payments',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ask:'ask',testimonials:'testimonials',chat:'chat',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
+const STAFF_PATHS={reports:'reports',volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',store:'store',payments:'payments',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ask:'ask',testimonials:'testimonials',chat:'chat',market:'marketplace',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',members:'members'};
 // The account page's three parts (the owner, 2026-11-09): Account at /account, then /account/stats and /account/badges.
 const ACC_VIEWS=['account','stats','badges'];
@@ -8097,13 +8136,16 @@ const SUB_PATHS={
   volunteers:{shift:'',applications:'applications',roster:'people',sessions:'opportunities',hours:'hours',activity:'activity',settings:'settings'}, // /volunteers/interested (the page that joined Shifts, 2026-11-09) opens Shifts
   // Settings' pages (2026-10-09): the account's own at /settings, the business's at /settings/business and /settings/pricing.
   settings:{account:'',business:'business',pricing:'pricing'},
+  // The Marketplace's views (2026-11-20): the listings at /marketplace, then /marketplace/held, /reports, /sellers, /shops,
+  // /our-listings, /commission, /settings and /categories (S._mk.view).
+  market:{listings:'',held:'held',reports:'reports',sellers:'sellers',shops:'shops',ours:'our-listings',commission:'commission',settings:'settings',cats:'categories'},
 };
 const _WEB_PAGE=/^[a-z][a-z0-9_-]{0,40}$/,_SESSION_ID=/^\d{4}-\d{2}-\d{2}(-[a-z0-9]{1,6}){0,2}$/; // two segments: a second same-kind session on a date is 2026-10-30-tw-2 (bug hunt 2026-10-28)
 function _subOf(tab){
   const m=SUB_PATHS[tab];
   if(!m){if(tab==='website'){const pg=S.web&&S.web.ed&&S.web.ed.page;return pg&&pg!=='home'&&_WEB_PAGE.test(pg)?'pages/'+pg:'';}return'';}
   if(tab==='community'&&S.communityTab==='accounts'&&S.amMember)return S.amMember==='yes'?'members':'non-members'; // the scope is in the address
-  const v=tab==='volunteers'?(S.volView||'shift'):tab==='queue'?(S.queueView||'bookings'):tab==='sessions'?(S.sessView||'list'):tab==='history'?(S.histView||'rides'):tab==='inventory'?(S.invSection||'bikes'):tab==='community'?(S.communityTab||'overview'):tab==='vendors'?(S.vendorView||'calendar'):tab==='analytics'?(S.anView||'overview'):tab==='team'?(S.teamView||'access'):tab==='settings'?(S.setView||'account'):tab==='lockers'?(S.lkView||'board'):tab==='store'?(S.stoView||'orders'):tab==='payments'?(S.payView||'all'):((S.cat&&S.cat.view)||'models');
+  const v=tab==='volunteers'?(S.volView||'shift'):tab==='queue'?(S.queueView||'bookings'):tab==='sessions'?(S.sessView||'list'):tab==='history'?(S.histView||'rides'):tab==='inventory'?(S.invSection||'bikes'):tab==='community'?(S.communityTab||'overview'):tab==='vendors'?(S.vendorView||'calendar'):tab==='analytics'?(S.anView||'overview'):tab==='team'?(S.teamView||'access'):tab==='settings'?(S.setView||'account'):tab==='lockers'?(S.lkView||'board'):tab==='store'?(S.stoView||'orders'):tab==='payments'?(S.payView||'all'):tab==='market'?((S._mk&&S._mk.view)||'listings'):((S.cat&&S.cat.view)||'models');
   return m[v]||'';
 }
 // Opens the sub-view a segment names; a segment that names none opens the section's own page.
@@ -8134,6 +8176,7 @@ function _setSub(tab,seg){
   else if(tab==='store')S.stoView=key;
   else if(tab==='payments')S.payView=key;
   else if(tab==='volunteers')S.volView=key;
+  else if(tab==='market')(S._mk=S._mk||{}).view=key;
 }
 function _pathFor(st){
   if(st.view==='staff'){const b=STAFF_PATHS[st.stab]||'bookings';return'/'+b+(st.sub?'/'+st.sub:'');}
@@ -16586,6 +16629,7 @@ function setStaffTab(tab,o){
   if(tab==='customers')tab='community'; // Customers is part of People since 2026-11-06
   if(tab==='analytics'&&S.anView==='reports'){S.anView='overview';if(isAdmin())S._rp2Want='auto';tab='reports';} // Analytics > Reports moved to the Reports section (2026-11-13): an old address or the search lands there, as the button does
   if(tab==='riders'){S.queueView='petromin';if(!S.ridersSession||S.ridersSession==='all')S.ridersSession=_pmDefaultNight()||'all';tab='queue';} // the Riders tab is the Petromin page in Queue now
+  if(tab==='market'&&S._mkMode===undefined)S._mkWant=Date.now(); // the Marketplace, asked for before the database said it has it: opened once it does (_mkProbe), when asked for: an answer that comes much later leaves the page where the staffer is
   if((tab==='store'||tab==='payments')&&S._storeReady===undefined)S._stoWant=tab; // asked before the database said it has them: opened once it does (_stoProbe)
   if(!_deskTabOk(tab)){_n6uNoTab(tab);tab=_firstTab();} // Front Desk mode: only its own sections (DESK_TABS); an account: only its own list
   if(tab==='queue'&&S.staffTab!=='queue')_autoSelectSession(); // opening the queue: back to the current session
@@ -16611,6 +16655,7 @@ function setStaffTab(tab,o){
   else if(tab==='ask')renderAsk();
   else if(tab==='testimonials')renderTestimonials();
   else if(tab==='chat')renderChat(); // the Community chat (2026-11-20, migration 20261120233000)
+  else if(tab==='market')renderMarket();
   else if(tab==='reports')renderReports(); // every report in one place (the reports rework, 2026-11-13)
   else if(tab==='lockers')renderLockers();
   else if(tab==='store')renderStore();
@@ -17011,7 +17056,7 @@ function _meetLL(s){
 }
 function _meetNm(s){return String((s&&((S.lang==='ar'&&s.meet_name_ar)||s.meet_name))||'').trim();}
 
-const _SNAV_ICON={reports:'print',store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',ask:'ask',testimonials:'quote',chat:'chat',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={reports:'print',store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',ask:'ask',testimonials:'quote',chat:'chat',market:'grid',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   if(!_ART.bag)_ART.bag='<path opacity=".35" d="M4 8h16l-1.1 12.2A2 2 0 0 1 16.9 22H7.1a2 2 0 0 1-2-1.8z"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9h-2V6.5a2 2 0 0 0-4 0V9z"/>'; // the Store's mark (2026-11-10), kept here for the same reason
@@ -17123,6 +17168,8 @@ function renderStaffTabs(){
   _tsmRailSync();if(!S._tsmCAt&&S._staffAuthed&&_deskTabOk('testimonials'))_tsmCount(); // Testimonials' name, and those waiting for review (then _secPolls)
   document.getElementById('tab-chat')      .classList.toggle('active',S.staffTab==='chat');
   _chsRailSync();if(!S._chsCAt&&S._staffAuthed&&_deskTabOk('chat'))_chsCount(); // Chat's name, and the reported messages nobody has looked at (then _secPolls)
+  document.getElementById('tab-market').classList.toggle('active',S.staffTab==='market');
+  if(S._mkMode===undefined)_mkProbe();else{_mkRailSync();if(!S._mkCAt&&_deskTabOk('market'))_mkCount();} // the Marketplace: asked once whether the database has it, then its name and what waits for the team (then _secPolls)
   document.getElementById('tab-history')   .classList.toggle('active',S.staffTab==='history');
   document.getElementById('tab-analytics') .classList.toggle('active',S.staffTab==='analytics');
   document.getElementById('tab-website')   .classList.toggle('active',S.staffTab==='website');
@@ -18933,7 +18980,7 @@ const _N6T_REC='cq_gs_recent',_N6T_KIND_TAB={booking:'queue',acct:'community',bi
 // Every command says its keyboard shortcut (when this device has them on) and answers to its name in English and Arabic
 // whatever the language on screen (s10, item 29).
 const GS_AKA={dashboard:'لوحة القيادة',queue:'الحجوزات',waitlist:'قائمة الانتظار',sessions:'الجلسات',lockers:'الخزائن',cashier:'المبيعات till',store:'المتجر',payments:'المدفوعات',
-  inventory:'المخزون',workshop:'الورشة',community:'الأشخاص accounts',badgereq:'طلبات الأوسمة',ask:'اسأل',testimonials:'الشهادات',ambassadors:'السفراء',volunteers:'المتطوعون',vendors:'الموردون',website:'الموقع',
+  inventory:'المخزون',workshop:'الورشة',community:'الأشخاص accounts',badgereq:'طلبات الأوسمة',ask:'اسأل',testimonials:'الشهادات',market:'السوق',ambassadors:'السفراء',volunteers:'المتطوعون',vendors:'الموردون',website:'الموقع',
   catalog:'كتالوج الدراجات',messages:'الرسائل',analytics:'التحليلات',history:'السجل',team:'الفريق',settings:'الإعدادات',next:'تسجيل دخول التالي',walkin:'زيارة مباشرة',scan:'مسح التذكرة',newsess:'جلسة جديدة',closeout:'إنهاء الليلة'};
 function _gsAka(k,lk){return(GS_AKA[k]||'')+' '+((LANG.en||{})[lk]||'');}
 // Ctrl K opens every sub-view too ("People › Applications", "Analytics › Ratings"): one per SUB_PATHS entry named here
@@ -18944,7 +18991,8 @@ const GS_SUBS={queue:'petromin:ridersTitle',sessions:'table:ssLayTable cal:calVi
   community:'accounts:commTabAccounts applications:commTabApplications learning:appsLearn flagged:commTabFlagged tags:amTagsTitle badges:mrBadgesTitle titles:ttTab activities:acTab birthdays:commTabBirthdays mentors:mtsTitle wallets:cwTabWallets referrals:commTabReferrals activity:custTabActivity followups:afuTab duplicates:commTabDuplicates',
   catalog:'categories:catViewCats fields:catViewFields',vendors:'requests:vndVReq venues:vndVVen tiers:vndVTier feedback:vndVFb',
   analytics:'revenue:anRevenue ridership:anRidership operations:anOperations fleet:anFleetSection months:anNavMonths ratings:anRatingsNav customers:anNavCustomers growth:anNavGrowth leaderboard:commTabLeaderboard community:anNavCommunity volunteers:tabVolunteers team:anNavTeam',
-  team:'parttimers:ptTab',volunteers:'applications:zaTab roster:tabPeople sessions:zvTabSessions hours:zrTabHours activity:zvTabActivity settings:zvTabSettings',settings:'business:setTabBusiness pricing:setTabPricing'};
+  team:'parttimers:ptTab',volunteers:'applications:zaTab roster:tabPeople sessions:zvTabSessions hours:zrTabHours activity:zvTabActivity settings:zvTabSettings',settings:'business:setTabBusiness pricing:setTabPricing',
+  market:'held:mkVHeld reports:mkVReports sellers:mkVSellers'}; // the Marketplace's first half (MK-S1); the second half's five views (shops, ours, commission, settings, cats) join this line with MK-S2
 // The views only some open, as their sections offer them: the admins' alone, History's money views by role, Analytics'
 // volunteers with the Volunteers section.
 function _gsSubOk(k,v){
@@ -21203,7 +21251,7 @@ function _deferWhileTyping(tab){
   return true;
 }
 function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for something the staffer did
-  _dqInit();_stoTabLabelSync();_askRailSync();_tsmRailSync();_chsRailSync(); // the Store's, Payments', Ask's, Testimonials' and Chat's names, in the language on screen
+  _dqInit();_stoTabLabelSync();_askRailSync();_tsmRailSync();_chsRailSync();_mkRailSync(); // the Store's, Payments', Ask's, Testimonials' and Chat's names, in the language on screen
   if(S.staffRole==='door'){_doorShow();return;}
   const tab=S.staffTab;
   if(bg&&['cashier','inventory','community','customers','bikes'].includes(tab)&&_deferWhileTyping(tab)){try{_ahRefresh();}catch(_){}try{_ntSync();}catch(_){}return;}
@@ -21217,6 +21265,7 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
   else if(tab==='badgereq'){if(!bg)renderBadgeRequests();} // its own loader: the desk's data has nothing for it
   else if(tab==='testimonials'){if(!bg)renderTestimonials();} // its own loader
   else if(tab==='chat'){if(!bg)renderChat();else{const f=globalThis['_chs'+'Paint'];if(typeof f==='function')f();}} // its own loader, live by itself; the desk's data (the writers' names) only redraws what changed, by a built name (the part's own)
+  else if(tab==='market'){if(!bg)renderMarket();} // its own loaders
   else if(tab==='ask'){if(!bg||!(S._askS&&S._askS.cur))renderAsk();} // its own loader; the list follows the tags' names, a page on screen (a draft in hand) is left alone
   else if(tab==='lockers')renderLockers(); // names and booking numbers come from the desk's rows
   else if(tab==='store'){if(!bg)renderStore();} // its own loader: the desk's data has nothing for it
@@ -30278,6 +30327,620 @@ async function _tsmAddSave(){
   if(!d.pub&&_tsmV().f!=='pending'){_tsmV().f='pending';}else if(d.pub&&_tsmV().f==='pending')_tsmV().f='published';
   await _tsmLoad(true);
 }
+// ── MK-S1: the Marketplace, the staff section (2026-11-20, migration 20261121300000) ────────────────────────────────
+// The user: "add a marketplace section in the main website ... i want people to be able to sell products on this page".
+// The website shows the listings (micromobility.sa/marketplace); here staff look after them. /marketplace, under People
+// on the rail (the part staff-parts/market.js), with People's right in the database (_staff_mod('market') is checked as
+// 'community'), so the section is derived from People (ROLE_TABS, _modIds, _MOD_PARENT) and staff_set_access never
+// hears of it. It is offered only where the database has the tables: _mkProbe asks staff_market_mode once a page
+// (S._mkMode: 'full', false, or undefined while not asked), as _stoProbe does for the Store (_stoSecOk holds the test).
+// The rail's number is what waits for the team: listings held, open reports and shops waiting (staff_market_counts, at
+// most every five minutes, kept whole in S._mkCounts; S._mkN is their sum).
+// This region is S1's: the registry (the views, their names and numbers, the head and the body of the panel) and the
+// views Listings, Held, Reports and Sellers. Shops, Our listings, Commission, Settings and Categories are S2's (the
+// region MK-S2): the registry calls only _mkShopsHtml / _mkShopsLoad, _mkOursHtml / _mkOursLoad, _mkComHtml /
+// _mkComLoad, _mkSetHtml / _mkSetLoad and _mkCatsHtml / _mkCatsLoad, each behind a typeof test (_mkS2), and offers no
+// view whose two functions are not there; S2 calls _mkPaint(). State: S._mk here, S._mks there.
+// Staff never change a customer's words: a listing is hidden (with the reason its seller reads), restored, released
+// from a hold, or marked "Checked by our team". A conversation is read only once it is reported (staff_market_thread
+// refuses any other and writes each read down). Every write is logged (logAction / pushUndo); an account that reads
+// People without changing it sees no write button, and the database checks the right again.
+// The probe, the count, the rail's label and _mkPaint are core code (the rail and the polls call them); the rest is the part.
+function _mkAbsent(e){const c=String((e&&e.code)||'').toUpperCase(),m=String((e&&e.message)||'');return c==='PGRST202'||c==='42883'||/could not find the function|function [^ ]* does not exist/i.test(m);}
+async function _mkProbe(){
+  // asked again a minute after an ask that brought no answer; at once when that ask went before the staff session was confirmed
+  if(!sb||S._mkProbing||S.view!=='staff'||S._mkMode!==undefined||(S._mkProbeAt&&Date.now()-S._mkProbeAt<6e4&&(S._mkProbeAuth||!S._staffAuthed)))return;
+  S._mkProbing=true;S._mkProbeAt=Date.now();S._mkProbeAuth=!!S._staffAuthed;
+  let r;try{r=await sb.rpc('staff_market_mode');}catch(e){r={error:e};}
+  S._mkProbing=false;
+  if(r&&!r.error)S._mkMode=r.data==='full'?'full':false;
+  else if(r&&r.error&&(_mkAbsent(r.error)||(S._mkProbeAuth&&_errKind(r.error)==='perm')))S._mkMode=false; // no such function here, or not staff (a refusal that answers an ask sent before the session was confirmed is no answer)
+  if(S._mkMode===undefined)return; // the network: asked again a minute later, on a later paint
+  const want=S._mkWant&&Date.now()-S._mkWant<6e4;S._mkWant=null; // the address asked for the section within the minute: an answer that took a later ask no longer moves the page under the staffer
+  if(S._mkMode==='full'&&_deskTabOk('market'))_mkCount(true); // an account that cannot open the section asks for no count (the rail asks once it can: renderStaffTabs)
+  if(want&&S._mkMode==='full'&&S.view==='staff'&&S.staffTab!=='market'&&_deskTabOk('market')){setStaffTab('market');return;}
+  if(S.view==='staff')renderStaffTabs();
+}
+async function _mkCount(force){
+  if(!sb||S._mkMode!=='full'||S._mkCB||(!force&&S._mkCAt&&Date.now()-S._mkCAt<3e5))return;
+  S._mkCB=true;S._mkCAt=Date.now();
+  let r;try{r=await sb.rpc('staff_market_counts');}catch(e){r={error:e};}
+  S._mkCB=false;
+  const d=r&&!r.error?r.data:null;
+  if(d&&typeof d==='object'&&!Array.isArray(d)){
+    const n=k=>Math.max(0,Math.floor(Number(d[k]))||0),was=JSON.stringify(S._mkCounts||null);
+    S._mkCounts={on:d.on===true,held:n('held'),reports:n('reports'),shops_pending:n('shops_pending'),commission_due:n('commission_due'),live:n('live')};
+    S._mkN=S._mkCounts.held+S._mkCounts.reports+S._mkCounts.shops_pending;
+    if(JSON.stringify(S._mkCounts)!==was)_mkPaint(); // the views' own numbers
+  }
+  _mkRailSync();
+}
+// The rail's name and what waits for the team, in the language on screen (the label loop in render() leaves it alone).
+function _mkRailSync(){
+  const l=document.querySelector('#staff-tab-nav .tab-btn[data-stab="market"] .snav-lbl');if(!l)return;
+  const n=S._mkN|0,nm=t('mkTitle'),k=nm+'|'+n;if(l.dataset.k===k)return;l.dataset.k=k; // the name itself, not the language's code: a language's words can arrive after the paint that asked for them
+  l.innerHTML=esc(nm)+(n?` <span class="tab-badge" title="${esc(t('mkRailN').replace('{0}',n))}">${n}</span>`:'');
+}
+// Draws the section again when it is on screen: after a read or a write lands, here and in MK-S2.
+function _mkPaint(){if(S.view==='staff'&&S.staffTab==='market')renderMarket();}
+// ── The registry ──
+const MK_VIEWS=['listings','held','reports','sellers','shops','ours','commission','settings','cats'];
+const MK_VL={listings:'mkVListings',held:'mkVHeld',reports:'mkVReports',sellers:'mkVSellers',shops:'mkVShops',ours:'mkVOurs',commission:'mkVCom',settings:'mkVSet',cats:'mkVCats'};
+const MK_VN={held:'held',reports:'reports',shops:'shops_pending',commission:'commission_due'}; // a view's waiting number: a key of S._mkCounts
+const MK_ST={draft:'mkStDraft',live:'mkStLive',held:'mkStHeld',reserved:'mkStReserved',sold:'mkStSold',expired:'mkStExpired',hidden:'mkStHidden',deleted:'mkStDeleted'};
+const MK_KIND={private:'mkKPrivate',shop:'mkKShop',company:'mkKCompany'};
+const MK_HOLD={words:'mkHWords',serial:'mkHSerial',reports:'mkHReports',staff:'mkHStaff'};
+const MK_COND={new:'mkCNew',excellent:'mkCExcellent',good:'mkCGood',fair:'mkCFair',parts:'mkCParts'};
+const MK_FACT={brand:'mkFBrand',model:'mkFModel',year:'mkFYear',frame_size:'mkFFrame',wheel_size:'mkFWheel',size:'mkFSize',for_whom:'mkFFor'};
+const MK_WHOM={men:'mkWMen',women:'mkWWomen',unisex:'mkWUnisex',kids:'mkWKids'};
+const MK_DECL={complete:'mkDComplete',unmodified:'mkDUnmod',speed_25:'mkDSpeed',charger:'mkDCharger'};
+const MK_RSN={prohibited:'mkRProhibited',counterfeit:'mkRCounterfeit',stolen:'mkRStolen',misleading:'mkRMisleading',scam:'mkRScam',abuse:'mkRAbuse',spam:'mkRSpam',other:'mkROther'};
+const MK_RST={open:'mkRsOpen',actioned:'mkRsActioned',dismissed:'mkRsDismissed'};
+// A listing's history (market_events), in the desk's words: every action the database writes against a listing (its own,
+// a report's, and its conversations': read by staff, WhatsApp shared, a block and its end). An action it may add later
+// and that is not named here shows as the database wrote it.
+const MK_EV={publish:'mkPublished',hold:'mkStHeld',release:'mkEvRelease',hide:'mkStHidden',restore:'mkEvRestore',check:'mkChecked',uncheck:'mkEvUncheck',edit:'mkEvEdit',company_save:'mkEvEdit',
+  reserve:'mkStReserved',unreserve:'mkEvUnreserve',sold:'mkStSold',unsold:'mkEvUnsold',renew:'mkEvRenew',expire:'mkStExpired',delete:'mkStDeleted',report:'mkHReports',report_set:'mkEvReportSet',commission:'mkVCom',
+  thread_read:'mkEvThreadRead',wa_share:'mkWaShared',block:'mkBlocked',unblock:'mkEvUnblock'};
+// Why a listing is hidden: what staff pick [key, its name on this screen], and the sentence its seller reads, in English
+// and Arabic (the website shows hidden_reason as written, and a seller reads one of the two). "Other" is the note alone.
+const MK_WHY=[['item','mkWhyItem','This item may not be sold on the Marketplace.','لا يُسمح ببيع هذا المنتج في السوق.'],
+  ['fake','mkWhyFake','Counterfeit or copied items are not allowed.','لا يُسمح بالمنتجات المقلدة أو المنسوخة.'],
+  ['owner','mkWhyOwner','We could not confirm that this item is yours.','لم نتمكن من التأكد من ملكيتك لهذا المنتج.'],
+  ['wrong','mkWhyWrong','The listing does not describe the item as it is.','الإعلان لا يصف المنتج كما هو.'],
+  ['rules','mkWhyRules','This listing breaks the Marketplace rules.','هذا الإعلان يخالف قواعد السوق.'],
+  ['dup','mkWhyDup','This item is already listed.','هذا المنتج معروض في إعلان آخر.'],
+  ['contact','mkWhyContact','Listings may not contain links or phone numbers.','لا يُسمح بالروابط أو أرقام الهواتف في الإعلان.'],
+  ['other','mkWhyOther','','']];
+const MK_RSN_WHY={prohibited:'item',counterfeit:'fake',stolen:'owner',misleading:'wrong',scam:'rules',abuse:'rules',spam:'rules'}; // a report's reason, as the reason to hide for
+const MK_HIDEABLE=['live','reserved','held','sold','expired'];
+// The refusals of the staff functions (the contract's section 6), by the code before the colon.
+const MK_ERR={MKT_STATE:'mkErrState',MKT_GONE:'mkErrGone',BAD_INPUT:'mkErrInput',FORBIDDEN:'mkErrRight'};
+const MK_DONE={hide:'mkDoneHide',restore:'mkDoneRestore',release:'mkDoneRelease',check:'mkDoneCheck',uncheck:'mkDoneUncheck'};
+const MK_RDONE={dismissed:'mkDoneDismiss',actioned:'mkDoneAction',open:'mkDoneReopen'};
+const MK_SDONE={note:'mkDoneNote',strike:'mkDoneStrike',unstrike:'mkDoneUnstrike',suspend:'mkDoneSuspend',restore:'mkDoneUnsuspend',met:'mkDoneMet',unmet:'mkDoneUnmet'};
+// The Kingdom's cities a listing carries (the contract's section 1): the key, then its English and Arabic names. Arabic
+// and Urdu screens read the Arabic name, the others the English one (as the website does). "Another city" is not a
+// name: it is said in the language on screen (mkCityOther).
+const MK_CITY={jeddah:['Jeddah','جدة'],riyadh:['Riyadh','الرياض'],makkah:['Makkah','مكة المكرمة'],madinah:['Madinah','المدينة المنورة'],dammam:['Dammam','الدمام'],khobar:['Al Khobar','الخبر'],
+  dhahran:['Dhahran','الظهران'],taif:['Taif','الطائف'],tabuk:['Tabuk','تبوك'],buraydah:['Buraydah','بريدة'],unaizah:['Unaizah','عنيزة'],hail:['Hail','حائل'],abha:['Abha','أبها'],
+  'khamis-mushait':['Khamis Mushait','خميس مشيط'],jazan:['Jazan','جازان'],najran:['Najran','نجران'],'al-bahah':['Al Bahah','الباحة'],bisha:['Bisha','بيشة'],yanbu:['Yanbu','ينبع'],
+  rabigh:['Rabigh','رابغ'],thuwal:['Thuwal','ثول'],kaec:['King Abdullah Economic City','مدينة الملك عبدالله الاقتصادية'],jubail:['Jubail','الجبيل'],'al-ahsa':['Al Ahsa','الأحساء'],
+  qatif:['Qatif','القطيف'],'hafar-al-batin':['Hafar Al Batin','حفر الباطن'],'al-kharj':['Al Kharj','الخرج'],arar:['Arar','عرعر'],sakaka:['Sakaka','سكاكا'],alula:['AlUla','العلا'],other:[]};
+// S._mk: the view (the address may have set it before the part came), each list with its own read, and the one pop-up.
+function _mkM(){
+  const M=S._mk=S._mk||{};
+  if(!M.ok){
+    M.ok=1;M.view=MK_VIEWS.includes(M.view)?M.view:'listings';
+    Object.assign(M,{q:'',f:{status:'',kind:'',sport:'',city:''},L:{rows:null,total:0,err:false,busy:false,at:0,seq:0},H:{rows:null,err:false,busy:false,at:0},
+      R:{rows:null,f:'open',err:false,busy:false,at:0,seq:0},P:{rows:null,total:0,f:'',q:'',err:false,busy:false,at:0,seq:0},cats:null,catAt:0,catBusy:false,pop:null,wr:false,s2:{}});
+  }
+  return M;
+}
+// May this account change the Marketplace: People's edit right (the database asks _staff_mod('market', true) again).
+function _mkCan(){return _editOk('market')&&!_roNow();}
+function _mkArName(){return S.lang==='ar'||S.lang==='ur';}
+function _mkCity(k){if(k==='other')return t('mkCityOther');const c=_own(MK_CITY,k)?MK_CITY[k]:null;return c?c[_mkArName()?1:0]:String(k||'');}
+function _mkCatRow(slug){const C=_mkM().cats;return C&&_own(C,slug)?C[slug]:null;}
+function _mkCat(slug){const c=_mkCatRow(slug);return c?String((_mkArName()?c.name_ar:c.name_en)||c.name_en||slug):String(slug||'');}
+function _mkSportOf(slug){const c=_mkCatRow(slug);return c?String(c.parent||c.slug):String(slug||'').split('-')[0];}
+function _mkWhen(at){return at?fmtStamp(at):'';}
+function _mkDay(v){const d=String(v||'').slice(0,10);return /^\d{4}-\d{2}-\d{2}$/.test(d)?shortDate(d):'';}
+function _mkName(x){return'#'+(x&&x.id!=null?x.id:'')+(x&&x.title?' '+String(x.title).slice(0,60):'');}
+// A photo's address: a seller's is a name in the market bucket (public read; its small copy is <name>.w480.<ext>),
+// MicroMobility's own is a /media/market/... path the website serves.
+function _mkImg(n,small){
+  n=String(n||'');if(!n)return'';
+  if(n.charAt(0)==='/')return PAY_WEB+n+(small?'?w=480':'');
+  return SUPABASE_URL+'/storage/v1/object/public/market/'+(small?n.replace(/\.(jpg|webp)$/,'.w480.$1'):n);
+}
+// A small copy that is not there: the full one once, then no picture.
+function _on_mkImg(event,el){const f=el.getAttribute('data-full');if(f){el.removeAttribute('data-full');el.src=f;}else el.classList.add('mk-img-off');}
+function _mkThumb(n,cls){return n?`<img class="${cls}" src="${esc(_mkImg(n,1))}" data-full="${esc(_mkImg(n))}" alt="" loading="lazy" decoding="async" data-on-error="${_on('_on_mkImg',_EV,_EL)}">`:`<span class="${cls} mk-th-no">${_artIcon('camera',16)}</span>`;}
+function _mkPill(st){return`<span class="mk-pill mk-p-${esc(st)}">${esc(t(MK_ST[st]||'mkStDraft'))}</span>`;}
+function _mkTags(x){
+  const n=Number(x.reports_open)||0;
+  return _mkPill(x.status)+(x.status==='held'&&x.hold_reason?`<span class="mk-chip mk-c-warn">${esc(t(MK_HOLD[x.hold_reason]||'mkStHeld'))}</span>`:'')
+    +(n?`<span class="mk-chip mk-c-warn">${esc(t('mkRepN').replace('{0}',n))}</span>`:'')+(x.checked_at?`<span class="mk-chip mk-c-ok">${esc(t('mkChecked'))}</span>`:'');
+}
+function _mkKv(l,v){return v==null||v===''?'':`<div class="mk-kv"><span>${esc(l)}</span><b>${v}</b></div>`;}
+function _mkBtn(cls,label,...h){return`<button type="button" class="btn-sm ${cls}" data-on-click="${_on(...h)}"${_mkM().wr?' disabled':''}>${esc(label)}</button>`;}
+// A refusal in the desk's words; a state that moved under the page is read again.
+function _mkFail(r,ctx){
+  const e=r&&r.error,c=String((e&&e.message)||'').split(':')[0].trim();
+  if(e&&e.code==='READONLY')return; // the read-only notice has said why
+  if(_own(MK_ERR,c)){toast(t(MK_ERR[c]),'error');if(c==='MKT_STATE'||c==='MKT_GONE'){_mkAfter();_mkSheetLoad();}}
+  else _writeErr(r,ctx);
+}
+async function _mkUndo(fn,args){let u;try{u=await sb.rpc(fn,args);}catch(e){u={error:e};}if(u&&u.error){_writeErr(u,'market undo');return false;}_mkAfter();_mkSheetLoad();}
+// After a write: the rail's number, the list on screen read again, the pop-up and the section drawn again.
+function _mkAfter(){
+  const M=_mkM();M.L.at=M.H.at=M.R.at=M.P.at=0;
+  _mkCount(true);
+  const f=MK_LOAD[M.view];if(f)f(true);
+  _mkPopDraw();_mkPaint();
+}
+// The categories' names (the table itself, under its policy): the sport filter and a row's product type.
+async function _mkNamesLoad(){
+  const M=_mkM();if(!sb||M.catBusy||(M.catAt&&Date.now()-M.catAt<(M.cats?6e5:6e4)))return;
+  M.catBusy=true;M.catAt=Date.now();
+  let r;try{r=await sb.from('market_categories').select('slug,parent,name_en,name_ar,sort').order('sort');}catch(e){r={error:e};}
+  M.catBusy=false;
+  if(r&&!r.error&&Array.isArray(r.data)){const o={};r.data.forEach(c=>{if(c&&c.slug)o[c.slug]=c;});M.cats=o;_mkPaint();}
+}
+// ── Listings ──
+// staff_market_listings takes status, kind, q, limit and offset. The sport and the city go with them (a database that
+// reads them answers the right page) and are also applied here to the rows that came, so both filters work either way.
+async function _mkListLoad(force,more){
+  const M=_mkM(),L=M.L,F=M.f;
+  if(!sb||(more&&(L.busy||!L.rows))||(!force&&!more&&L.at&&Date.now()-L.at<6e4))return;
+  const seq=++L.seq,q=M.q.trim().slice(0,80),p={status:F.status||'all',limit:F.sport||F.city?200:100,offset:more?L.rows.length:0};
+  if(F.kind)p.kind=F.kind;if(q)p.q=q;if(F.sport)p.sport=F.sport;if(F.city)p.city=F.city;
+  const key=JSON.stringify([p.status,p.kind,p.q,p.sport,p.city]); // what is asked for: the rows on screen answer L.key
+  L.busy=true;L.at=Date.now();
+  let r;try{r=await sb.rpc('staff_market_listings',{p});}catch(e){r={error:e};}
+  if(seq!==L.seq)return; // a newer read is on its way
+  L.busy=false;
+  const d=r&&!r.error?r.data:null;
+  if(d&&Array.isArray(d.items)){
+    const add=more?d.items.filter(x=>!L.rows.some(y=>Number(y.id)===Number(x.id))):d.items;
+    L.rows=more?L.rows.concat(add):add;L.err=false;L.key=key;
+    L.total=more&&!add.length?L.rows.length:Math.max(Number(d.total)||0,L.rows.length);
+  }else if(more)toast(t('errConnection'),'error'); // Show more that brought nothing says so; the rows read so far stay
+  else{L.err=true;if(L.key!==key)L.rows=null;} // a search or a filter that could not be read shows the error with its retry, not the rows of the question before
+  _mkListPaint();
+}
+function _mkListPaint(){const h=document.getElementById('mk-list');if(h&&_mkM().view==='listings'&&S.view==='staff'&&S.staffTab==='market')h.innerHTML=_mkListHtml();else if(_mkM().view==='listings')_mkPaint();}
+function _mkLShown(){
+  const M=_mkM(),F=M.f;
+  return(M.L.rows||[]).filter(x=>(!F.sport||_mkSportOf(x.category)===F.sport)&&(!F.city||x.city===F.city)&&(!F.kind||x.seller_kind===F.kind)&&(!F.status||x.status===F.status));
+}
+function _mkQ(v){const M=_mkM();M.q=String(v||'');clearTimeout(M.qT);M.qT=setTimeout(()=>_mkListLoad(true),300);}
+function _mkF(k,v){const M=_mkM();if(!_own(M.f,k))return;M.f[k]=String(v||'');M.L.rows=null;_mkListLoad(true);renderMarket();}
+function _mkFDone(){const M=_mkM();M.L.rows=null;_mkListLoad(true);renderMarket();}
+function _mkMore(){_mkListLoad(false,true);_mkListPaint();}
+function _mkRowHtml(x,acts){
+  const id=Number(x.id),co=x.seller_kind==='company',who=co?t('mkKCompany'):(x.seller_kind==='shop'&&x.shop_name)||x.customer_name||'—';
+  const sub=[co?'':esc(t(MK_KIND[x.seller_kind]||'mkKPrivate')),x.customer_phone?`<bdi dir="ltr">${esc(x.customer_phone)}</bdi>`:''].filter(Boolean).join(' · ');
+  return`<div class="mk-row mk-st-${esc(x.status)}" data-lid="${id}">
+    <button type="button" class="mk-row-open" data-on-click="${_on('_mkOpen',id)}">${_mkThumb(x.photo,'mk-th')}
+      <span class="mk-r-main"><b dir="auto">${esc(x.title||t('mkNoTitle'))}</b><span class="mk-muted"><bdi dir="ltr">#${id}</bdi>${x.category?' · '+esc(_mkCat(x.category)):''}${x.city?' · '+esc(_mkCity(x.city)):''}</span></span>
+      <span class="mk-r-who"><b><bdi>${esc(who)}</bdi></b><span class="mk-muted">${sub}</span></span>
+      <span class="mk-r-amt">${x.price!=null?_money(x.price):''}</span>
+      <span class="mk-r-tags">${_mkTags(x)}</span>
+    </button>${acts?`<span class="mk-r-acts">${acts}</span>`:''}
+  </div>`;
+}
+function _mkListHtml(){
+  const M=_mkM(),L=M.L,F=M.f;
+  if(!L.rows)return L.err?_loadErr(esc(t('errConnection')),_on('_mkListLoad',true)):skeletonList();
+  const rows=_mkLShown(),more=L.rows.length<L.total;
+  if(!rows.length&&!more)return _emptyState(esc(t(M.q.trim()||F.status||F.kind||F.sport||F.city?'mkNoMatch':'mkNoList')));
+  return`<div class="am-meta mk-count">${esc(t('mkNList').replace('{0}',rows.length!==L.rows.length?rows.length:L.total))}</div><div class="mk-list">${rows.map(x=>_mkRowHtml(x)).join('')}</div>`
+    +(more?`<div class="mk-more"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_mkMore')}"${L.busy?' disabled':''}>${esc(t('mkMore'))}</button></div>`:'');
+}
+function _mkListingsHtml(){
+  const M=_mkM(),F=M.f;
+  const opt=(v,l,on)=>`<option value="${esc(v)}"${on?' selected':''}>${esc(l)}</option>`;
+  const sel=(k,label,opts)=>_fField(esc(label),`<select aria-label="${esc(label)}" data-on-change="${_on('_mkF',k,_P('value'))}">${opts}</select>`);
+  const sports=Object.values(M.cats||{}).filter(c=>!c.parent).sort((a,b)=>(Number(a.sort)||0)-(Number(b.sort)||0));
+  const main=sel('status',t('colStatus'),opt('',t('filterAll'),!F.status)+Object.keys(MK_ST).map(k=>opt(k,t(MK_ST[k]),F.status===k)).join(''))
+    +sel('kind',t('mkFKind'),opt('',t('filterAll'),!F.kind)+Object.keys(MK_KIND).map(k=>opt(k,t(MK_KIND[k]),F.kind===k)).join(''))
+    +sel('sport',t('mkFSport'),opt('',t('filterAll'),!F.sport)+sports.map(c=>opt(c.slug,_mkCat(c.slug),F.sport===c.slug)).join(''))
+    +sel('city',t('mkFCity'),opt('',t('filterAll'),!F.city)+Object.keys(MK_CITY).map(k=>opt(k,_mkCity(k),F.city===k)).join(''));
+  return`<div class="filter-bar">${listToolbar({key:'mkl',q:{v:M.q,fn:_on('_mkQ',_P('value')),ph:t('mkSearch')},f:[main,'',_fS(()=>_mkM().f,'status kind sport city'),_mkFDone]})}</div><div id="mk-list">${_mkListHtml()}</div>`;
+}
+// ── Held: by the blocked words, a serial number already on sale, reports, or a suspended seller ──
+async function _mkHeldLoad(force){
+  const M=_mkM(),H=M.H;
+  if(!sb||(!force&&(H.busy||(H.at&&Date.now()-H.at<6e4))))return;
+  const seq=H.seq=(H.seq||0)+1; // a read forced by a write goes even while an older one is out, and that older answer is dropped
+  H.busy=true;H.at=Date.now();
+  let r;try{r=await sb.rpc('staff_market_listings',{p:{status:'held',limit:200,offset:0}});}catch(e){r={error:e};}
+  if(seq!==H.seq)return;
+  H.busy=false;
+  const d=r&&!r.error?r.data:null,was=H.sig;
+  if(d&&Array.isArray(d.items)){H.rows=d.items;H.err=false;}else H.err=true;
+  H.sig=JSON.stringify([H.rows,H.err]);
+  if(M.view==='held'&&(force||H.sig!==was))_mkPaint();
+}
+function _mkHeldHtml(){
+  const M=_mkM(),H=M.H,ed=_mkCan();
+  if(!H.rows)return H.err?_loadErr(esc(t('errConnection')),_on('_mkHeldLoad',true)):skeletonList();
+  if(!H.rows.length)return _emptyState(esc(t('mkNoHeld')));
+  return`<div class="mk-list">${H.rows.map(x=>_mkRowHtml(x,ed?_mkBtn('btn-primary',t('mkRelease'),'_mkAct',Number(x.id),'release')+_mkBtn('btn-red',t('mkHide'),'_mkOpen',Number(x.id),'hide'):'')).join('')}</div>`;
+}
+// ── One action on a listing (staff_market_listing_set): hide with its reason, restore, release, check, uncheck ──
+function _mkRowOf(id){const M=_mkM();return(M.L.rows||[]).concat(M.H.rows||[]).find(x=>Number(x.id)===Number(id))||null;}
+function _mkPut(d){
+  const M=_mkM(),P=M.pop;
+  [M.L.rows,M.H.rows].forEach(l=>(l||[]).forEach(x=>{if(Number(x.id)===Number(d.id)){x.status=d.status;x.hold_reason=d.hold_reason;x.checked_at=d.checked_at;x.updated_at=d.updated_at;}}));
+  if(P&&P.t==='listing'&&P.id===Number(d.id))P.d=d;
+}
+async function _mkAct(id,act,note){
+  const M=_mkM();if(M.wr||!_own(MK_DONE,act))return false;
+  if(!_mkCan()){_roRefusal();return false;}
+  const pd=M.pop&&M.pop.t==='listing'&&M.pop.id===Number(id)&&M.pop.d,was=_mkRowOf(id)||pd||{id},st0=(pd||was).status; // st0: the state it leaves, as last read (the pop-up's read is the newer one)
+  M.wr=true;_mkPopDraw();_mkPaint();
+  let r;try{r=await sb.rpc('staff_market_listing_set',{p_listing:Number(id),p_action:act,p_note:note||null});}catch(e){r={error:e};}
+  M.wr=false;
+  if(r&&r.error){_mkFail(r,'market listing '+act);_mkPopDraw();_mkPaint();return false;}
+  const d=r.data&&r.data.listing,P=M.pop;
+  if(d&&typeof d==='object')_mkPut(d);
+  if(act==='hide'&&P&&P.t==='listing'&&P.id===Number(id)){P.mode='';P.bad='';}
+  // Undo takes a hide back with Restore only where Restore puts the listing where it was (on sale, sold, expired). One
+  // that was held or reserved would come back on sale, which nobody decided: that hide is logged with no Undo, and
+  // Restore stays a button of its own. The state before is the database's own word when its event says it.
+  const hev=act==='hide'&&d&&Array.isArray(d.events)?d.events.find(e=>e&&e.action==='hide'):null,from=(hev&&hev.detail&&hev.detail.status)||st0;
+  const msg=t(MK_DONE[act]).replace('{0}',_mkName(d||was)),meta={k:'market',e:'market_listings',id:String(id)},back=act==='hide'?(['live','sold','expired'].includes(from)?'restore':''):{check:'uncheck',uncheck:'check'}[act];
+  if(back)pushUndo(msg,()=>_mkUndo('staff_market_listing_set',{p_listing:Number(id),p_action:back,p_note:null}),meta);else logAction(msg,meta);
+  toast(msg,'success');
+  _mkAfter();
+  return true;
+}
+// ── The pop-up (one host, centred): a listing, a reported conversation, or a reason asked for ──
+function _mkPopDraw(){
+  const M=_mkM(),P=M.pop;let m=document.getElementById('mk-modal');
+  if(!P){if(m){m.style.display='none';m.innerHTML='';m._mkP=null;}return;}
+  if(!m){m=document.createElement('div');m.id='mk-modal';document.body.appendChild(m);}
+  const o=P.t==='listing'?_mkSheetHtml(P):P.t==='thread'?_mkThreadHtml(P):_mkAskHtml(P);
+  // The same pop-up drawn again (its read landed, a write, a photo picked) makes no second entrance and keeps its place.
+  const same=m._mkP===P,b0=same?m.querySelector('.mk-pop-b'):null,y=b0?b0.scrollTop:0;m._mkP=P;
+  m.style.display='block';
+  m.innerHTML=`<div class="modal-backdrop${same?' mk-still':''}" data-on-click="${_on('_on_mkBg',_EV,_EL)}"><div class="confirm-box mk-box${P.t==='ask'?' mk-box-s':''}" role="dialog" aria-modal="true" aria-labelledby="mk-pop-t">
+    <div class="mk-pop-h"><div class="mk-pop-t" id="mk-pop-t" dir="auto">${o.title}</div><button type="button" class="mk-x" data-on-click="${_on('_mkPopClose')}" aria-label="${esc(t('closeBtn'))}">&times;</button></div>
+    <div class="mk-pop-b">${o.body}</div>${o.acts?`<div class="mk-pop-a">${o.acts}</div>`:''}
+  </div></div>`;
+  if(y){const b=m.querySelector('.mk-pop-b');if(b)b.scrollTop=y;}
+}
+function _mkPopClose(){const M=_mkM();if(M.wr)return;M.pop=null;_mkPopDraw();}
+function _on_mkBg(event,el){if(event.target===el)_mkPopClose();}
+function _mkIn(k,v){const P=_mkM().pop;if(P&&(k==='why'||k==='note'||k==='val'))P[k]=String(v??'');}
+// An account's own window, opened from a pop-up of this section: the pop-up goes first.
+function _mkAcct(cid){const M=_mkM();M.pop=null;_mkPopDraw();openAccountHistory(String(cid));}
+// o: {rid, why} when Hide came from a report (the report is then marked actioned, and its reason picks the reason offered).
+function _mkOpen(id,mode,o){
+  const M=_mkM();if(M.wr)return;
+  M.pop={t:'listing',id:Number(id),d:null,err:'',mode:mode==='hide'&&_mkCan()?'hide':'',why:(o&&o.why)||'',note:'',rid:o&&o.rid!=null?Number(o.rid):null,ph:0,bad:''};
+  _mkPopDraw();_mkSheetLoad();
+}
+async function _mkSheetLoad(){
+  const P=_mkM().pop;if(!P||P.t!=='listing'||!sb)return;
+  let r;try{r=await sb.rpc('staff_market_listing_get',{p_listing:P.id});}catch(e){r={error:e};}
+  if(_mkM().pop!==P)return;
+  if(r&&!r.error&&r.data&&typeof r.data==='object'&&!Array.isArray(r.data)){P.d=r.data;P.err='';if(P.mode==='hide'&&!MK_HIDEABLE.includes(P.d.status))P.mode='';}
+  else if(!P.d)P.err=r&&!r.error?'gone':'net';
+  _mkPopDraw();
+}
+function _mkMode(k){
+  const P=_mkM().pop;if(!P||P.t!=='listing')return;
+  if(k&&!_mkCan()){_roRefusal();return;}
+  P.mode=k==='hide'?'hide':'';P.bad='';_mkPopDraw();
+  if(P.mode)setTimeout(()=>{const s=document.getElementById('mk-why');if(s)try{s.focus();}catch(_){}},60);
+}
+function _mkPh(i){const P=_mkM().pop;if(!P||P.t!=='listing')return;P.ph=Number(i)||0;_mkPopDraw();const b=document.querySelector('#mk-modal .mk-gal-b.on');if(b)try{b.focus({preventScroll:true});}catch(_){}} // the photo picked keeps the focus through the redraw (the keyboard stays where it was)
+// A seller as staff see them (StaffSeller): in a listing's pop-up.
+function _mkSellerKv(s){
+  const sus=s.status==='suspended',met=s.met_by_team?[esc(_mkDay(s.met_at)),s.met_by?`<bdi>${esc(s.met_by)}</bdi>`:''].filter(Boolean).join(' · ')||esc(t('mkMet')):'';
+  return _mkKv(t('colStatus'),`<span class="mk-pill mk-p-${sus?'hidden':'live'}">${esc(t(sus?'mkSuspended':'mkSellerOk'))}</span>${s.established?'':` <span class="mk-chip">${esc(t('mkNewAcct'))}</span>`}`)
+    +_mkKv(t('mkWhy'),sus&&s.suspended_reason?`<span dir="auto">${esc(s.suspended_reason)}</span>`:'')
+    +_mkKv(t('mkStrikes'),`<bdi dir="ltr">${Number(s.strikes)||0}</bdi>`)+_mkKv(t('mkMet'),met)
+    +_mkKv(t('mkStLive'),`<bdi dir="ltr">${Number(s.live)||0}</bdi>`)+_mkKv(t('mkStSold'),`<bdi dir="ltr">${Number(s.sold)||0}</bdi>`)
+    +_mkKv(t('mkAcctSince'),esc(_mkDay(s.account_created_at)))+_mkKv(t('mkTerms'),esc(_mkWhen(s.terms_at)))
+    +_mkKv(t('mkStaffNote'),s.staff_note?`<span dir="auto">${esc(s.staff_note)}</span>`:'');
+}
+function _mkSheetHtml(P){
+  const d=P.d,ed=_mkCan(),off=_mkM().wr?' disabled':'';
+  if(!d)return{title:`${esc(t('mkListing'))} <bdi dir="ltr">#${P.id}</bdi>`,body:P.err==='gone'?_emptyState(esc(t('mkErrGone'))):P.err?_loadErr(esc(t('errConnection')),_on('_mkSheetLoad')):skeletonList(),acts:''};
+  const id=Number(d.id),st=d.status,co=d.seller_kind==='company',s=d.seller,h=d.shop,kv=_mkKv;
+  const ltr=v=>`<bdi dir="ltr">${esc(v)}</bdi>`,usr=v=>`<bdi>${esc(v)}</bdi>`,txt=v=>`<span dir="auto">${esc(v)}</span>`;
+  const ph=Array.isArray(d.photos)?d.photos:[],cur=Math.max(0,Math.min(P.ph|0,ph.length-1)),pn=i=>esc(t('mkPhotoN').replace('{0}',i+1).replace('{1}',ph.length));
+  const gal=ph.length?`<div class="mk-gal"><a class="mk-gal-main" href="${esc(_mkImg(ph[cur]))}" target="_blank" rel="noopener noreferrer"><img src="${esc(_mkImg(ph[cur]))}" alt="${pn(cur)}"></a>${ph.length>1?`<div class="mk-gal-th">${ph.map((n,i)=>`<button type="button" class="mk-gal-b${i===cur?' on':''}" aria-label="${pn(i)}" aria-pressed="${i===cur}" data-on-click="${_on('_mkPh',i)}">${_mkThumb(n,'mk-gal-i')}</button>`).join('')}</div>`:''}</div>`
+    :`<div class="mk-muted">${esc(t('mkNoPhotos'))}</div>`;
+  const F=d.facts&&typeof d.facts==='object'?d.facts:{},D=d.declarations&&typeof d.declarations==='object'?d.declarations:{};
+  const facts=Object.keys(MK_FACT).filter(k=>F[k]!=null&&F[k]!=='').map(k=>kv(t(MK_FACT[k]),k==='for_whom'&&_own(MK_WHOM,F[k])?esc(t(MK_WHOM[F[k]])):usr(F[k]))).join('');
+  const decl=Object.keys(MK_DECL).filter(k=>D[k]===true).map(k=>t(MK_DECL[k])).join(' · ');
+  const cat=(_mkArName()?d.category_name_ar:d.category_name_en)||d.category_name_en||_mkCat(d.category);
+  const details=kv(t('mkPrice'),d.price!=null?_money(d.price)+(d.negotiable?' · '+esc(t('mkNegotiable')):''):'')
+    +kv(t('mkCond'),d.condition?esc(_own(MK_COND,d.condition)?t(MK_COND[d.condition]):d.condition):'')+kv(t('mkCat'),esc(cat))+kv(t('mkFCity'),d.city?esc(_mkCity(d.city)):'')+facts
+    +kv(t('mkSerial'),d.serial?`<bdi dir="ltr" class="mk-code">${esc(d.serial)}</bdi>`:'')+kv(t('mkDecl'),esc(decl))
+    +kv(t('mkShownAs'),co?'':usr(d.display_as||t('mkKPrivate')))+kv(t('mkThreads'),co?'':ltr(Number(d.threads)||0))
+    +kv(t('mkPublished'),esc(_mkWhen(d.published_at)))+kv(t('mkExpires'),esc(_mkWhen(d.expires_at)))
+    +kv(t('mkStSold'),d.sold_at?esc(_mkWhen(d.sold_at))+(d.sold_price!=null?' · '+_money(d.sold_price):''):'')
+    +kv(t('mkChecked'),d.checked_at?esc(_mkWhen(d.checked_at))+(d.checked_by?' · '+usr(d.checked_by):''):'')
+    +kv(t('mkStHidden'),st==='hidden'&&d.hidden_at?esc(_mkWhen(d.hidden_at))+(d.hidden_by?' · '+usr(d.hidden_by):''):'')
+    +kv(t('mkWhy'),st==='hidden'&&d.hidden_reason?txt(d.hidden_reason):'')+kv(t('mkUpdated'),esc(_mkWhen(d.updated_at)));
+  const seller=co?`<div class="mk-muted">${esc(t('mkOwnListing'))}</div>`
+    :kv(t('mkAcct'),d.customer_id?`<button type="button" class="mk-who" dir="auto" data-on-click="${_on('_mkAcct',d.customer_id)}">${esc(d.customer_name||'—')}</button>`:'')
+      +kv(t('mkPhone'),d.customer_phone?ltr(d.customer_phone):'')
+      +(h?kv(t('mkKShop'),usr(h.name_en||'')+(h.name_ar?' · '+usr(h.name_ar):''))+kv(t('mkCr'),h.cr_no?ltr(h.cr_no):'')+kv(t('mkVat'),h.vat_no?ltr(h.vat_no):''):'')
+      +(s?_mkSellerKv(s):'')
+      +(d.customer_id?`<div class="mk-acts"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_mkSelGo',d.customer_id)}">${esc(t('mkToSeller'))}</button></div>`:'');
+  const reps=(Array.isArray(d.reports)?d.reports:[]).map(r=>`<li><b>${esc(t(MK_RSN[r.reason]||'mkROther'))}</b> · ${esc(t(MK_RST[r.status]||'mkRsOpen'))} <span class="mk-muted">${esc(_mkWhen(r.created_at))}${r.reporter_name?` · <bdi>${esc(r.reporter_name)}</bdi>`:''}</span>${r.note?`<div dir="auto">${esc(r.note)}</div>`:''}</li>`).join('');
+  const evs=(Array.isArray(d.events)?d.events:[]).map(e=>{
+    const dt=e.detail&&typeof e.detail==='object'?e.detail:{},str=k=>typeof dt[k]==='string'?dt[k]:'';
+    // Under the action: why it was held (and the blocked word found), what a report said and how it was decided, each in
+    // the desk's words (the database keeps them as codes); otherwise the reason or the note as staff wrote it.
+    const n=e.action==='hold'&&_own(MK_HOLD,dt.reason)?t(MK_HOLD[dt.reason])+(str('word')?': '+str('word'):'')
+      :e.action==='report'&&_own(MK_RSN,dt.reason)?t(MK_RSN[dt.reason])
+      :e.action==='report_set'&&_own(MK_RST,dt.status)?[t(MK_RST[dt.status]),str('note')].filter(Boolean).join(' · ')
+      :str('reason')||str('note');
+    const by=e.actor_kind==='staff'?String(e.actor||''):t(e.actor_kind==='system'?'mkBySystem':'mkByCustomer');
+    return`<li><span class="mk-muted">${esc(_mkWhen(e.at))}</span> <b>${esc(_own(MK_EV,e.action)?t(MK_EV[e.action]):String(e.action||''))}</b>${by?` <span class="mk-muted">· <bdi>${esc(by)}</bdi></span>`:''}${n?`<div dir="auto">${esc(n)}</div>`:''}</li>`;}).join('');
+  const sec=(title,inner,cls)=>inner?`<div class="mk-sec${cls?' '+cls:''}"><div class="mk-h">${esc(title)}</div>${inner}</div>`:'';
+  let form='',acts='';
+  if(P.mode==='hide'&&ed){
+    const opt=(v,l)=>`<option value="${esc(v)}"${P.why===v?' selected':''}>${esc(l)}</option>`;
+    form=`<div class="mk-form" role="group" aria-labelledby="mk-hide-h"><div class="mk-h" id="mk-hide-h">${esc(t('mkHideH'))}</div>
+      <div class="form-group"><label for="mk-why">${esc(t('mkWhy'))}</label><select id="mk-why"${off} data-on-change="${_on('_mkIn','why',_P('value'))}">${opt('',t('mkWhyPick'))}${MK_WHY.map(w=>opt(w[0],t(w[1]))).join('')}</select></div>
+      <div class="form-group"><label for="mk-note">${esc(t('mkNote'))}</label><textarea id="mk-note" rows="2" maxlength="160" dir="auto"${off} data-on-input="${_on('_mkIn','note',_P('value'))}">${esc(P.note)}</textarea></div>
+      ${P.bad?`<div class="mk-bad" role="alert">${esc(t(P.bad))}</div>`:''}
+      <div class="mk-acts"><button type="button" class="btn-sm btn-red" data-on-click="${_on('_mkHideGo')}"${off}>${esc(t('mkHideGo'))}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_mkMode','')}"${off}>${esc(t('cancelBtn'))}</button></div></div>`;
+  }else if(ed){
+    if(st==='held')acts+=_mkBtn('btn-primary',t('mkRelease'),'_mkAct',id,'release');
+    if(st==='hidden')acts+=_mkBtn('btn-primary',t('mkRestore'),'_mkAct',id,'restore');
+    if(d.checked_at)acts+=_mkBtn('btn-secondary',t('mkUncheck'),'_mkAct',id,'uncheck');
+    else if(st==='live'||st==='reserved'||st==='held')acts+=_mkBtn('btn-secondary',t('mkCheck'),'_mkAct',id,'check');
+    if(MK_HIDEABLE.includes(st))acts+=_mkBtn('btn-red',t('mkHide'),'_mkMode','hide');
+  }
+  const body=form+gal+`<div class="mk-tags">${_mkTags({status:st,hold_reason:d.hold_reason,checked_at:d.checked_at,reports_open:(Array.isArray(d.reports)?d.reports:[]).filter(r=>r.status==='open').length})}</div>
+    <div class="mk-sec mk-kvs">${details}</div>${sec(t('mkTDesc'),d.description?`<p class="mk-text" dir="auto">${esc(d.description)}</p>`:'')}${sec(t('mkTFaults'),d.faults?`<p class="mk-text" dir="auto">${esc(d.faults)}</p>`:'')}
+    ${sec(t('mkTSeller'),seller,'mk-kvs')}${sec(t('mkVReports'),reps?`<ul class="mk-tl">${reps}</ul>`:'')}${sec(t('mkTHistory'),evs?`<ul class="mk-tl">${evs}</ul>`:'')}`;
+  return{title:`${esc(d.title||t('mkNoTitle'))} <bdi dir="ltr" class="mk-muted">#${id}</bdi>`,body,acts};
+}
+// Hide: the reason picked, as the sentence its seller reads in English and Arabic, then the note staff typed.
+async function _mkHideGo(){
+  const M=_mkM(),P=M.pop;if(!P||P.t!=='listing'||!P.d||M.wr)return;
+  const w=MK_WHY.find(x=>x[0]===P.why),note=String(P.note||'').replace(/\s+/g,' ').trim();
+  if(!w){P.bad='mkEWhy';_mkPopDraw();return;}
+  if(w[0]==='other'&&note.length<3){P.bad='mkENote';_mkPopDraw();return;}
+  const text=[w[2],w[3],note].filter(Boolean).join(' ').slice(0,300),rid=P.rid;
+  P.bad='';
+  if(!(await _mkAct(P.id,'hide',text)))return;
+  if(rid!=null){P.rid=null;await _mkRep(rid,'actioned','hide: '+text,true);}
+}
+// ── Reports: the open ones first ──
+async function _mkRepLoad(force){
+  const M=_mkM(),R=M.R;
+  if(!sb||(!force&&(R.busy||(R.at&&Date.now()-R.at<6e4))))return;
+  const seq=++R.seq,f=R.f;
+  R.busy=true;R.at=Date.now();
+  let r;try{r=await sb.rpc('staff_market_reports',{p_status:f==='all'?null:f});}catch(e){r={error:e};}
+  if(seq!==R.seq)return;
+  R.busy=false;
+  const d=r&&!r.error?r.data:null,was=R.sig;
+  if(d&&Array.isArray(d.items)){R.rows=d.items;R.err=false;}else R.err=true;
+  R.sig=JSON.stringify([R.rows,R.err]);
+  if(M.view==='reports'&&(force||R.sig!==was))_mkPaint();
+}
+function _mkRepF(k){const R=_mkM().R;R.f=_own(MK_RST,k)?k:'all';R.rows=null;_mkRepLoad(true);renderMarket();}
+function _mkRepOf(id){return(_mkM().R.rows||[]).find(x=>Number(x.id)===Number(id))||null;}
+function _mkRepName(x){return x&&x.listing_id!=null?_mkName({id:x.listing_id,title:x.listing_title}):'#'+(x&&x.id!=null?x.id:'');}
+function _mkRepRow(x){
+  const ed=_mkCan(),id=Number(x.id),open=x.status==='open',thr=x.target==='thread';
+  let acts=(x.listing_id!=null?_mkBtn('btn-secondary',t('mkOpenListing'),'_mkOpen',Number(x.listing_id)):'')+(thr&&x.thread_id!=null?_mkBtn('btn-secondary',t('mkReadThread'),'_mkThread',Number(x.thread_id)):'');
+  if(ed&&open){
+    acts+=_mkBtn('btn-secondary',t('mkDismiss'),'_mkRep',id,'dismissed');
+    if(x.listing_id!=null&&MK_HIDEABLE.includes(x.listing_status))acts+=_mkBtn('btn-secondary',t('mkHideGo'),'_mkOpen',Number(x.listing_id),'hide',{rid:id,why:MK_RSN_WHY[x.reason]||''});
+    if(x.reported_id)acts+=_mkBtn('btn-secondary',t('mkStrike'),'_mkAsk','strike',String(x.reported_id),id)+_mkBtn('btn-red',t('mkSuspend'),'_mkAsk','suspend',String(x.reported_id),id);
+  }else if(ed)acts+=_mkBtn('btn-secondary',t('mkReopen'),'_mkRep',id,'open');
+  const who=(cid,n,p)=>cid?`<button type="button" class="mk-who" dir="auto" data-on-click="${_on('_mkAcct',String(cid))}">${esc(n||'—')}</button>${p?` · <bdi dir="ltr">${esc(p)}</bdi>`:''}`:esc(n||'—');
+  return`<div class="mk-rep mk-rs-${esc(x.status)}" data-rid="${id}">
+    <div class="mk-rep-h"><span class="mk-pill mk-p-r-${esc(x.status)}">${esc(t(MK_RST[x.status]||'mkRsOpen'))}</span><span class="mk-chip">${esc(t(thr?'mkRTThread':'mkListing'))}</span><b>${esc(t(MK_RSN[x.reason]||'mkROther'))}</b><span class="mk-muted">${esc(_mkWhen(x.created_at))}</span></div>
+    ${x.listing_id!=null?`<div class="mk-rep-l"><b dir="auto">${esc(x.listing_title||t('mkNoTitle'))}</b> <bdi dir="ltr" class="mk-muted">#${Number(x.listing_id)}</bdi>${x.listing_status?' '+_mkPill(x.listing_status):''}</div>`:''}
+    ${x.note?`<p class="mk-text" dir="auto">${esc(x.note)}</p>`:''}
+    <div class="mk-meta"><span>${esc(t('mkRepBy'))}: ${who(x.reporter_id,x.reporter_name,x.reporter_phone)}</span><span>${esc(t('mkRepAbout'))}: ${who(x.reported_id,x.reported_name,'')}</span>
+      ${x.decided_at?`<span>${esc(t('mkDecided').replace('{0}',x.decided_by||'—').replace('{1}',_mkWhen(x.decided_at)))}${x.decision_note?` · <span dir="auto">${esc(x.decision_note)}</span>`:''}</span>`:''}</div>
+    ${acts?`<div class="mk-acts">${acts}</div>`:''}
+  </div>`;
+}
+function _mkReportsHtml(){
+  const R=_mkM().R,C=S._mkCounts||{};
+  const pill=(k,l,n)=>`<button type="button" class="filter-pill${R.f===k?' active':''}" aria-pressed="${R.f===k}" data-on-click="${_on('_mkRepF',k)}">${esc(l)}${n?` (${n})`:''}</button>`;
+  const head=`<div class="filter-bar"><div class="filter-row mk-pills">${pill('open',t('mkRsOpen'),Number(C.reports)||0)}${pill('actioned',t('mkRsActioned'))}${pill('dismissed',t('mkRsDismissed'))}${pill('all',t('filterAll'))}</div></div>`;
+  if(!R.rows)return head+(R.err?_loadErr(esc(t('errConnection')),_on('_mkRepLoad',true)):skeletonList());
+  const L=R.rows.filter(x=>R.f==='all'||x.status===R.f).sort((a,b)=>(a.status==='open'?0:1)-(b.status==='open'?0:1)); // they come newest first; the open ones lead
+  return head+(L.length?`<div class="mk-reps">${L.map(_mkRepRow).join('')}</div>`:_emptyState(esc(t(R.f==='open'?'mkNoRepOpen':'mkNoRep'))));
+}
+// One decision on a report (staff_market_report_set): it changes the report only. quiet: the action that settled it has said so.
+async function _mkRep(id,act,note,quiet){
+  const M=_mkM();if(M.wr||!_own(MK_RDONE,act))return false;
+  if(!_mkCan()){_roRefusal();return false;}
+  const x=_mkRepOf(id);
+  M.wr=true;_mkPaint();
+  let r;try{r=await sb.rpc('staff_market_report_set',{p_report:Number(id),p_action:act,p_note:note?String(note).slice(0,300):null});}catch(e){r={error:e};}
+  M.wr=false;
+  if(r&&r.error){_mkFail(r,'market report '+act);_mkPaint();return false;}
+  const d=r.data&&r.data.report,msg=t(MK_RDONE[act]).replace('{0}',_mkRepName(d||x||{id})),meta={k:'market',e:'market_reports',id:String(id)};
+  if(d&&typeof d==='object'){ // the answer, at once: in the list (a second tap finds the report decided) and in a listing's pop-up that names it
+    const put=l=>Array.isArray(l)?l.map(y=>Number(y.id)===Number(id)?d:y):l,P=M.pop;
+    M.R.rows=put(M.R.rows);if(P&&P.t==='listing'&&P.d)P.d.reports=put(P.d.reports);
+  }
+  if(act!=='open')pushUndo(msg,()=>_mkUndo('staff_market_report_set',{p_report:Number(id),p_action:'open',p_note:null}),meta);else logAction(msg,meta);
+  if(!quiet)toast(msg,'success');
+  _mkAfter();
+  return true;
+}
+// A reported conversation: read only when staff open it, and only once it is reported (the database writes each read down).
+function _mkThread(tid){const M=_mkM();if(M.wr)return;M.pop={t:'thread',id:Number(tid),d:null,err:''};_mkPopDraw();_mkThreadLoad();}
+async function _mkThreadLoad(){
+  const P=_mkM().pop;if(!P||P.t!=='thread'||!sb)return;
+  P.err='';P.d=null;_mkPopDraw();
+  let r;try{r=await sb.rpc('staff_market_thread',{p_thread:P.id});}catch(e){r={error:e};}
+  if(_mkM().pop!==P)return;
+  const e=r&&r.error,m=String((e&&e.message)||'');
+  if(!e&&r&&r.data&&typeof r.data==='object'&&!Array.isArray(r.data)){P.d=r.data;logAction(t('mkLogThread').replace('{0}',_mkName({id:P.d.listing_id,title:P.d.listing_title})),{k:'market',e:'market_threads',id:String(P.id)});}
+  else P.err=e&&(String(e.code)==='42501'||/^FORBIDDEN/.test(m))?'mkErrThread':(e&&/^MKT_GONE/.test(m))||!e?'mkErrGone':'net';
+  _mkPopDraw();
+}
+function _mkThreadHtml(P){
+  const d=P.d,title=esc(t('mkThreadT'));
+  if(!d)return{title,body:P.err==='net'?_loadErr(esc(t('errConnection')),_on('_mkThreadLoad')):P.err?_emptyState(esc(t(P.err))):skeletonList(),acts:''};
+  const who=(l,p,wa)=>`<div class="mk-kv"><span>${esc(l)}</span><b>${p&&p.id?`<button type="button" class="mk-who" dir="auto" data-on-click="${_on('_mkAcct',String(p.id))}">${esc(p.name||'—')}</button>`:'—'}${p&&p.phone?` · <bdi dir="ltr">${esc(p.phone)}</bdi>`:''}${p&&p.shown_as?` · ${esc(t('mkShownAs'))}: <bdi>${esc(p.shown_as)}</bdi>`:''}${wa?` · ${esc(t('mkWaShared'))}: ${esc(_mkWhen(wa))}`:''}</b></div>`;
+  const msgs=(Array.isArray(d.messages)?d.messages:[]).map(m=>`<li class="mk-msg mk-msg-${m.side==='seller'?'seller':'buyer'}"><span class="mk-msg-h"><b>${esc(t(m.side==='seller'?'mkTSeller':'mkBuyer'))}</b> <span class="mk-muted">${esc(_mkWhen(m.at))}</span></span><p class="mk-text" dir="auto">${esc(m.body||'')}</p></li>`).join('');
+  const body=`<div class="mk-sec mk-kvs"><div class="mk-kv"><span>${esc(t('mkListing'))}</span><b><span dir="auto">${esc(d.listing_title||t('mkNoTitle'))}</span> <bdi dir="ltr" class="mk-muted">#${Number(d.listing_id)}</bdi></b></div>${who(t('mkBuyer'),d.buyer,d.buyer_wa_at)}${who(t('mkTSeller'),d.seller,d.seller_wa_at)}${d.blocked?`<div class="mk-tags"><span class="mk-chip mk-c-warn">${esc(t('mkBlocked'))}</span></div>`:''}</div>
+    ${d.more?`<div class="mk-muted mk-msgs-more">${esc(t('mkMsgsMore'))}</div>`:''}${msgs?`<ol class="mk-msgs">${msgs}</ol>`:`<div class="mk-muted">${esc(t('mkNoMsgs'))}</div>`}`; // more: the database returned the newest messages only
+  return{title,body,acts:d.listing_id!=null?_mkBtn('btn-secondary',t('mkOpenListing'),'_mkOpen',Number(d.listing_id)):''};
+}
+// ── Sellers: the accounts that list (and, searched for, any account: so one can be marked "met by our team") ──
+async function _mkSelLoad(force,more){
+  const M=_mkM(),P=M.P;
+  if(!sb||(more&&(P.busy||!P.rows))||(!force&&!more&&P.at&&Date.now()-P.at<6e4))return;
+  const seq=++P.seq,q=P.q.trim().slice(0,80),p={status:P.f||'all',limit:100,offset:more?P.rows.length:0};
+  if(q)p.q=q;
+  const key=JSON.stringify([p.status,p.q]); // as in Listings: the rows on screen answer P.key
+  P.busy=true;P.at=Date.now();
+  let r;try{r=await sb.rpc('staff_market_sellers',{p});}catch(e){r={error:e};}
+  if(seq!==P.seq)return;
+  P.busy=false;
+  const d=r&&!r.error?r.data:null;
+  if(d&&Array.isArray(d.items)){
+    const add=more?d.items.filter(x=>!P.rows.some(y=>String(y.customer_id)===String(x.customer_id))):d.items;
+    P.rows=more?P.rows.concat(add):add;P.err=false;P.key=key;
+    P.total=more&&!add.length?P.rows.length:Math.max(Number(d.total)||0,P.rows.length);
+  }else if(more)toast(t('errConnection'),'error');
+  else{P.err=true;if(P.key!==key)P.rows=null;}
+  _mkSelPaint();
+}
+function _mkSelPaint(){const h=document.getElementById('mk-sel-list');if(h&&_mkM().view==='sellers'&&S.view==='staff'&&S.staffTab==='market')h.innerHTML=_mkSelListHtml();else if(_mkM().view==='sellers')_mkPaint();}
+function _mkSelQ(v){const P=_mkM().P;P.q=String(v||'');clearTimeout(P.qT);P.qT=setTimeout(()=>_mkSelLoad(true),300);}
+function _mkSelF(k){const P=_mkM().P;P.f=k==='ok'||k==='suspended'?k:'';P.rows=null;_mkSelLoad(true);renderMarket();}
+function _mkSelMore(){_mkSelLoad(false,true);_mkSelPaint();}
+function _mkSelOf(cid){const M=_mkM(),d=M.pop&&M.pop.t==='listing'&&M.pop.d;return(M.P.rows||[]).find(x=>String(x.customer_id)===String(cid))||(d&&d.seller&&String(d.seller.customer_id)===String(cid)?d.seller:null);}
+// A listing's seller, opened in Sellers: the view, searched for that account.
+function _mkSelGo(cid){const M=_mkM();if(M.wr)return;M.pop=null;_mkPopDraw();M.view='sellers';M.P.q=String(cid);M.P.f='';M.P.rows=null;_pushNav();_mkSelLoad(true);renderMarket();}
+function _mkSelRow(s){
+  const ed=_mkCan(),cid=String(s.customer_id),sus=s.status==='suspended',off=_mkM().wr?' disabled':'';
+  const meta=[t('mkStrikes')+': '+(Number(s.strikes)||0),t('mkStLive')+': '+(Number(s.live)||0),t('mkStSold')+': '+(Number(s.sold)||0),t('mkRepN').replace('{0}',Number(s.reports_open)||0),
+    _mkDay(s.account_created_at)?t('mkAcctSince')+': '+_mkDay(s.account_created_at):'',s.terms_at?t('mkTerms')+': '+_mkWhen(s.terms_at):''].filter(Boolean).join(' · ');
+  const met=s.met_by_team?[_mkDay(s.met_at),s.met_by].filter(Boolean).join(' · '):'';
+  return`<div class="mk-sel${sus?' mk-sel-off':''}" data-cid="${esc(cid)}">
+    <div class="mk-sel-h"><button type="button" class="mk-who" dir="auto" data-on-click="${_on('_mkAcct',cid)}">${esc(s.name||'—')}</button>${s.phone?`<bdi dir="ltr" class="mk-muted">${esc(s.phone)}</bdi>`:''}<span class="mk-pill mk-p-${sus?'hidden':'live'}">${esc(t(sus?'mkSuspended':'mkSellerOk'))}</span>${s.established?'':`<span class="mk-chip">${esc(t('mkNewAcct'))}</span>`}${s.shop_name?`<span class="mk-chip">${esc(t('mkKShop'))}: <bdi>${esc(s.shop_name)}</bdi></span>`:''}</div>
+    <div class="mk-meta"><span>${esc(meta)}</span>${sus&&s.suspended_reason?`<span>${esc(t('mkWhy'))}: <span dir="auto">${esc(s.suspended_reason)}</span>${s.suspended_at?' · '+esc(_mkWhen(s.suspended_at)):''}</span>`:''}${s.staff_note?`<span class="mk-sel-note">${esc(t('mkStaffNote'))}: <span dir="auto">${esc(s.staff_note)}</span></span>`:''}</div>
+    <div class="mk-acts"><label class="mk-tick"><input type="checkbox"${(s._met!=null?s._met:s.met_by_team)?' checked':''}${ed?off:' disabled'} data-on-change="${_on('_mkMet',cid,_P('checked'))}"><span>${esc(t('mkMet'))}</span>${met?`<span class="mk-muted">${esc(met)}</span>`:''}</label>
+      ${ed?_mkBtn('btn-secondary',t('mkStaffNote'),'_mkAsk','note',cid)+_mkBtn('btn-secondary',t('mkStrike'),'_mkAsk','strike',cid)+(Number(s.strikes)>0?_mkBtn('btn-secondary',t('mkUnstrike'),'_mkSeller',cid,'unstrike'):'')+(sus?_mkBtn('btn-primary',t('mkUnsuspend'),'_mkSeller',cid,'restore'):_mkBtn('btn-red',t('mkSuspend'),'_mkAsk','suspend',cid)):''}</div>
+  </div>`;
+}
+function _mkSelListHtml(){
+  const P=_mkM().P;
+  if(!P.rows)return P.err?_loadErr(esc(t('errConnection')),_on('_mkSelLoad',true)):skeletonList();
+  if(!P.rows.length)return _emptyState(esc(t(P.q.trim()||P.f?'mkNoMatch':'mkNoSel')));
+  return`<div class="am-meta mk-count">${esc(t('mkNSel').replace('{0}',P.total))}</div><div class="mk-sels">${P.rows.map(_mkSelRow).join('')}</div>`
+    +(P.rows.length<P.total?`<div class="mk-more"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_mkSelMore')}"${P.busy?' disabled':''}>${esc(t('mkMore'))}</button></div>`:'');
+}
+function _mkSellersHtml(){
+  const P=_mkM().P;
+  const pill=(k,l)=>`<button type="button" class="filter-pill${P.f===k?' active':''}" aria-pressed="${P.f===k}" data-on-click="${_on('_mkSelF',k)}">${esc(l)}</button>`;
+  return`<div class="filter-bar">${listToolbar({key:'mkp',q:{v:P.q,fn:_on('_mkSelQ',_P('value')),ph:t('mkSelSearch')},pills:pill('',t('filterAll'))+pill('ok',t('mkSellerOk'))+pill('suspended',t('mkSuspended'))})}</div><div id="mk-sel-list">${_mkSelListHtml()}</div>`;
+}
+// The tick keeps what was just chosen while the write is on its way (_met), and goes back when it is refused.
+function _mkMet(cid,on){const s=_mkSelOf(cid);if(s)s._met=!!on;_mkSeller(cid,on?'met':'unmet').then(ok=>{if(s)delete s._met;if(!ok)_mkPaint();});}
+// A reason (a strike, a suspension) or the staff note, asked for in the pop-up. rid: the report it settles.
+function _mkAsk(kind,cid,rid){
+  const M=_mkM();if(M.wr)return;
+  if(!_mkCan()){_roRefusal();return;}
+  const s=_mkSelOf(cid),r=rid!=null?_mkRepOf(rid):null;
+  M.pop={t:'ask',kind:kind==='note'||kind==='suspend'?kind:'strike',cid:String(cid),rid:rid!=null?Number(rid):null,name:String((s&&s.name)||(r&&r.reported_name)||cid),val:kind==='note'?String((s&&s.staff_note)||''):'',bad:''};
+  _mkPopDraw();
+}
+function _mkAskHtml(P){
+  const note=P.kind==='note',off=_mkM().wr?' disabled':'';
+  return{title:esc(t(note?'mkAskNote':P.kind==='suspend'?'mkAskSuspend':'mkAskStrike').replace('{0}',P.name)),
+    body:`<div class="form-group"><label for="mk-ask-v">${esc(t(note?'mkStaffNote':'mkWhy'))}</label><textarea id="mk-ask-v" rows="3" maxlength="${note?1000:300}" dir="auto"${off} data-on-input="${_on('_mkIn','val',_P('value'))}">${esc(P.val)}</textarea></div>${P.bad?`<div class="mk-bad" role="alert">${esc(t(P.bad))}</div>`:''}`,
+    acts:`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_mkPopClose')}"${off}>${esc(t('cancelBtn'))}</button><button type="button" class="btn-sm ${P.kind==='suspend'?'btn-red':'btn-primary'}" data-on-click="${_on('_mkAskGo')}"${off}>${esc(t(note?'saveBtn':P.kind==='suspend'?'mkSuspend':'mkStrike'))}</button>`};
+}
+async function _mkAskGo(){
+  const M=_mkM(),P=M.pop;if(!P||P.t!=='ask'||M.wr)return;
+  const v=String(P.val||'').trim(),note=P.kind==='note';
+  if(!note&&v.length<3){P.bad='mkENote';_mkPopDraw();return;}
+  P.bad='';
+  if(!(await _mkSeller(P.cid,P.kind,note?(v||null):v.slice(0,300))))return;
+  if(P.rid!=null)await _mkRep(P.rid,'actioned',P.kind+': '+v,true);
+}
+// One action on a seller (staff_market_seller_set): the note, a strike or one taken back, suspend and restore, met by our team.
+async function _mkSeller(cid,act,note){
+  const M=_mkM();if(M.wr||!_own(MK_SDONE,act))return false;
+  if(!_mkCan()){_roRefusal();return false;}
+  const was=_mkSelOf(cid);
+  M.wr=true;_mkPopDraw();_mkPaint();
+  let r;try{r=await sb.rpc('staff_market_seller_set',{p_customer:String(cid),p_action:act,p_note:note==null||note===''?null:String(note)});}catch(e){r={error:e};}
+  M.wr=false;
+  if(r&&r.error){_mkFail(r,'market seller '+act);_mkPopDraw();_mkPaint();return false;}
+  const s=r.data&&r.data.seller,P=M.pop;
+  if(s&&typeof s==='object'){
+    M.P.rows=(M.P.rows||[]).map(x=>String(x.customer_id)===String(cid)?s:x);
+    if(P&&P.t==='listing'&&P.d&&P.d.seller&&String(P.d.seller.customer_id)===String(cid))P.d.seller=s;
+  }
+  if(P&&P.t==='ask')M.pop=null; // the reason was for this
+  const msg=t(MK_SDONE[act]).replace('{0}',String((s&&s.name)||(was&&was.name)||cid)),meta={k:'market',e:'market_sellers',id:String(cid)};
+  const back=act==='note'?(was?'note':''):{strike:'unstrike',suspend:'restore',met:'unmet',unmet:'met'}[act];
+  if(back)pushUndo(msg,()=>_mkUndo('staff_market_seller_set',{p_customer:String(cid),p_action:back,p_note:back==='note'?(was.staff_note||null):null}),meta);else logAction(msg,meta);
+  toast(msg,'success');
+  _mkAfter();
+  return true;
+}
+// ── The panel: its head, the views, the body ──
+const MK_BODY={listings:_mkListingsHtml,held:_mkHeldHtml,reports:_mkReportsHtml,sellers:_mkSellersHtml};
+const MK_LOAD={listings:_mkListLoad,held:_mkHeldLoad,reports:_mkRepLoad,sellers:_mkSelLoad};
+const MK_HEAD={}; // a view's own buttons beside the title (none yet: each view of MK-S2 draws its own inside its body)
+// S2's views, by the seam's names only: [the body's markup, its load], or null while the two are not there.
+function _mkS2(v){
+  return v==='shops'?(typeof _mkShopsHtml==='function'&&typeof _mkShopsLoad==='function'?[_mkShopsHtml,_mkShopsLoad]:null)
+    :v==='ours'?(typeof _mkOursHtml==='function'&&typeof _mkOursLoad==='function'?[_mkOursHtml,_mkOursLoad]:null)
+    :v==='commission'?(typeof _mkComHtml==='function'&&typeof _mkComLoad==='function'?[_mkComHtml,_mkComLoad]:null)
+    :v==='settings'?(typeof _mkSetHtml==='function'&&typeof _mkSetLoad==='function'?[_mkSetHtml,_mkSetLoad]:null)
+    :v==='cats'?(typeof _mkCatsHtml==='function'&&typeof _mkCatsLoad==='function'?[_mkCatsHtml,_mkCatsLoad]:null):null;
+}
+function _mkViewOk(k){return _own(MK_BODY,k)||!!_mkS2(k);}
+// A view of S2's, opened: its load is asked (again after a minute, or at once when forced), and the section is drawn
+// once it settles. The load itself never paints.
+function _mkS2Load(v,force){
+  const f=_mkS2(v),at=_mkM().s2;if(!f||(!force&&at[v]&&Date.now()-at[v]<6e4))return;
+  at[v]=Date.now();
+  let p;try{p=f[1](!!force);}catch(_){p=null;}
+  Promise.resolve(p).then(_mkPaint,_mkPaint);
+}
+function _mkView(k){const M=_mkM();M.view=_mkViewOk(k)?k:'listings';_pushNav();renderMarket();}
+// The public page is linked only while the website shows it (marketplace.on, as staff_market_counts says): before that
+// its address may not be on the live website yet.
+function _mkHead(v){return(_own(MK_HEAD,v)?MK_HEAD[v]():'')+(S._mkCounts&&S._mkCounts.on?`<a class="btn-sm btn-secondary mk-open" href="${esc(PAY_WEB+'/marketplace')}" target="_blank" rel="noopener noreferrer">${esc(t('mkOpenPage'))}</a>`:'');}
+function renderMarket(){
+  const el=document.getElementById('tab-market');if(!el)return;
+  const M=_mkM();
+  if(S._mkMode!=='full'){el.innerHTML=`<h1 class="page-title">${esc(t('mkTitle'))}</h1><div class="form-section ws-mt0">${_emptyState(esc(t('mkNoDb')))}</div>`;return;}
+  if(!_mkViewOk(M.view))M.view='listings';
+  const v=M.view,C=S._mkCounts||{};
+  _mkCount();_mkNamesLoad();
+  if(_own(MK_LOAD,v))MK_LOAD[v]();else _mkS2Load(v);
+  const a=document.activeElement,fid=a&&a.id&&el.contains(a)?a.id:'',pos=fid&&typeof a.selectionStart==='number'?a.selectionStart:null; // a search in use
+  const tab=k=>{const n=Number(C[MK_VN[k]])||0;return`<button type="button" class="filter-pill${v===k?' active':''}" aria-pressed="${v===k}" data-mkv="${k}" data-on-click="${_on('_mkView',k)}">${esc(t(MK_VL[k]))}${n?` <span class="tab-badge">${n}</span>`:''}</button>`;};
+  let body;try{body=_own(MK_BODY,v)?MK_BODY[v]():_mkS2(v)[0]();}catch(e){console.error('marketplace view failed',e);body=_loadErr(esc(t('errSomethingWrong')),_on('_mkView',v));}
+  el.innerHTML=`<div class="section-header mk-head"><h1 class="page-title">${esc(t('mkTitle'))}</h1><div class="mk-head-acts">${_mkHead(v)}</div></div>
+    <div class="filter-bar mk-views"><div class="filter-row">${MK_VIEWS.filter(_mkViewOk).map(tab).join('')}</div></div>
+    <div class="form-section ws-mt0 mk-body mk-v-${v}">${body==null?'':body}</div>`;
+  const f=fid&&document.getElementById(fid);if(f){try{f.focus({preventScroll:true});if(pos!=null&&f.setSelectionRange)f.setSelectionRange(pos,pos);}catch(_){}}
+}
+// ── MK-S1 ends ──────────────────────────────────────────────────────────────────────────────────────────────────────
 // The page open in Ask is named in the address (/ask?ask=12.answers), so a reload, or a link sent to a colleague, comes
 // back to it. The router keeps a query it does not know (_navSearch), so the desk writes this one itself and takes it
 // away once the page or the section is left (setStaffTab calls this after the address moved; the part after each paint).
@@ -49338,17 +50001,17 @@ async function _pinApprove(what,opt){
 // only some of those (staff.modules_edit); null is everything its role allows. The role itself
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
-function _staffSections(){return['queue','waitlist','sessions','lockers','dashboard','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'].filter(_stoSecOk);}
-const SECTION_KEY={reports:'tabReports',dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',store:'tabStore',payments:'tabPayments',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ask:'tabAsk',testimonials:'qtTitle',chat:'chsRail',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+function _staffSections(){return['queue','waitlist','sessions','lockers','dashboard','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','market','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'].filter(_stoSecOk);}
+const SECTION_KEY={reports:'tabReports',dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',store:'tabStore',payments:'tabPayments',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ask:'tabAsk',testimonials:'qtTitle',chat:'chsRail',market:'mkTitle',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
 // Customers and Community are one section, People, since 2026-11-06 (id 'community'): a list naming either names it.
-function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('queue')&&!l.includes('waitlist'))l.push('waitlist');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');if(l.includes('community')&&!l.includes('ask'))l.push('ask');if(l.includes('community')&&!l.includes('testimonials'))l.push('testimonials');if(l.includes('community')&&!l.includes('chat'))l.push('chat');if(l.includes('cashier')){if(!l.includes('store'))l.push('store');if(!l.includes('payments'))l.push('payments');}return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08) and Ask (2026-11-13: it comes with People); one naming Bookings names the Waitlist (a view of it until 2026-11-09)
+function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('queue')&&!l.includes('waitlist'))l.push('waitlist');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');if(l.includes('community')&&!l.includes('ask'))l.push('ask');if(l.includes('community')&&!l.includes('testimonials'))l.push('testimonials');if(l.includes('community')&&!l.includes('chat'))l.push('chat');if(l.includes('community')&&!l.includes('market'))l.push('market');if(l.includes('cashier')){if(!l.includes('store'))l.push('store');if(!l.includes('payments'))l.push('payments');}return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08) and Ask (2026-11-13: it comes with People); one naming Bookings names the Waitlist (a view of it until 2026-11-09)
 // What _modIds adds back to a list that names the section's parent (Sessions, Lockers and the Waitlist with Bookings, Badge
 // requests with People). The database's staff_set_access knows only its own list of sections (none of these four on
 // 2026-11-09), so the Team page sends them only without their parent, where the database's refusal says so; with it they
 // would cost nothing to drop, since they come back on every read.
-const _MOD_PARENT={sessions:'queue',lockers:'queue',waitlist:'queue',badgereq:'community',ask:'community',testimonials:'community',chat:'community',store:'cashier',payments:'cashier'}; // Chat (2026-11-20) comes with People too // the Store and Payments (2026-11-10) come with Sales
+const _MOD_PARENT={sessions:'queue',lockers:'queue',waitlist:'queue',badgereq:'community',ask:'community',testimonials:'community',chat:'community',market:'community',store:'cashier',payments:'cashier'}; // Chat (2026-11-20) comes with People too // the Store and Payments (2026-11-10) come with Sales
 function _modSend(a){return Array.isArray(a)?a.filter(x=>!(_own(_MOD_PARENT,x)&&a.includes(_MOD_PARENT[x]))):a;}
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
 // Settings is every account's own page (_deskTabOk opens it to all) and is never one of the
@@ -83965,7 +84628,7 @@ function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
   if(st==='fnb')st='vendors'; // the section's id until 2026-10-03
-  return['queue','waitlist','sessions','lockers','cashier','store','payments','inventory','customers','community','badgereq','ask','testimonials','chat','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
+  return['queue','waitlist','sessions','lockers','cashier','store','payments','inventory','customers','community','badgereq','ask','testimonials','chat','market','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
 }
 // The tab iOS opens for a bike tag (2026-10-09, D15): when a staff tab is already open on this device, the
 // bike goes to it over the 'mm-staff' channel and this tab only says so - nothing is loaded. No answer
@@ -84456,6 +85119,7 @@ function _secPolls(full){
   if(_deskTabOk('ask'))_askCount(); // Ask's answers waiting for approval, on the rail (2026-11-13)
   if(_deskTabOk('testimonials'))_tsmCount(); // the testimonials waiting for review, on the rail (2026-11-18)
   if(_deskTabOk('chat'))_chsCount(); // the chat's reported messages nobody has looked at, on the rail (2026-11-20)
+  if(_deskTabOk('market'))_mkCount(); // the Marketplace: listings held, open reports and shops waiting, on the rail (2026-11-20)
 }
 // ── The online store and its payments (2026-11-10, migration 20261110150000) ─────────────────────
 // The website takes the money (Moyasar); the staff page fulfils orders, edits the products and decides refunds.
