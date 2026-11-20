@@ -16,6 +16,7 @@
 // 2026-11-18: Suggest a ride (its card in the feed, its own page S._hubView 'suggest', ride_suggestions_mine / ride_suggest);
 // its block is the last above window._hubRender.
 // 2026-11-18: the Ramadan season (its dates from hub_season, a card and the next session's accent; see _ssnCheck).
+// 2026-11-20: the feed in three parts behind a switch, Sessions, Challenges and Club (see the block above _feedHtml).
 /* global S, sb, esc, _on, getSession, _cssv, shortDate, t, _cuIc, sessionTime, _dayWord, _evName, _evOf, _evKindName, allSessions,
    _isCommunity, _sessPastDay, _sessEnded, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
    _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard, _bookingAhead, _ptnAll,
@@ -26,6 +27,10 @@ const HUB_T = {
   err: ['We could not do that. Please try again.', 'تعذّر ذلك. يرجى المحاولة مرة أخرى.', 'Action impossible. Veuillez réessayer.', 'No se pudo hacer. Inténtalo de nuevo.', 'Não foi possível. Tente novamente.', 'یہ نہیں ہو سکا۔ دوبارہ کوشش کریں۔', 'यह नहीं हो सका। फिर कोशिश करें।', 'Hindi ito nagawa. Pakisubukang muli.', 'यो हुन सकेन। फेरि प्रयास गर्नुहोस्।', 'এটি করা যায়নি। আবার চেষ্টা করুন।'],
   retry: ['Try again', 'حاول مرة أخرى', 'Réessayer', 'Reintentar', 'Tentar novamente', 'دوبارہ کوشش کریں', 'फिर कोशिश करें', 'Subukang muli', 'फेरि प्रयास गर्नुहोस्', 'আবার চেষ্টা করুন'],
   stale: ['Couldn’t refresh', 'تعذّر التحديث', 'Actualisation impossible', 'No se pudo actualizar', 'Não foi possível atualizar', 'تازہ نہیں ہو سکا', 'रीफ़्रेश नहीं हो सका', 'Hindi ma-refresh', 'रिफ्रेस गर्न सकिएन', 'রিফ্রেশ করা যায়নি'],
+  // The tab's three parts (2026-11-20): the switch's buttons.
+  secSess: ['Sessions', 'الجلسات', 'Séances', 'Sesiones', 'Sessões', 'سیشن', 'सत्र', 'Mga session', 'सत्रहरू', 'সেশন'],
+  secGoals: ['Challenges', 'التحديات', 'Défis', 'Retos', 'Desafios', 'چیلنجز', 'चुनौतियाँ', 'Mga hamon', 'चुनौतीहरू', 'চ্যালেঞ্জ'],
+  secClub: ['Club', 'النادي', 'Club', 'Club', 'Clube', 'کلب', 'क्लब', 'Club', 'क्लब', 'ক্লাব'],
   next: ['Your next session', 'جلستك القادمة', 'Votre prochaine séance', 'Tu próxima sesión', 'A sua próxima sessão', 'آپ کا اگلا سیشن', 'आपका अगला सत्र', 'Ang susunod mong session', 'तपाईंको अर्को सत्र', 'আপনার পরের সেশন'],
   nextOpen: ['Next session to book', 'الجلسة القادمة المتاحة للحجز', 'Prochaine séance à réserver', 'Próxima sesión para reservar', 'Próxima sessão para reservar', 'بکنگ کے لیے اگلا سیشن', 'बुक करने के लिए अगला सत्र', 'Susunod na session na mabu-book', 'बुक गर्न अर्को सत्र', 'বুক করার পরের সেশন'],
   ticket: ['Show ticket', 'عرض التذكرة', 'Voir le billet', 'Ver el billete', 'Ver o bilhete', 'ٹکٹ دکھائیں', 'टिकट दिखाएँ', 'Ipakita ang tiket', 'टिकट देखाउनुहोस्', 'টিকিট দেখান'],
@@ -136,6 +141,8 @@ function _hubSave(c, d) { try { localStorage.setItem(_HUB_KEY + c.id, JSON.strin
 function _hubVisitNow() {
   if (S._hubVisit && !S._hubSrc) return;
   S._hubVisit = { src: String(S._hubSrc || 'tab').slice(0, 24), due: true };
+  // A way in that shows the member's challenge (a badge's pop-up, the rating's last step, "You're booked") opens Challenges.
+  if (/^(badge|rating|booked)$/.test(S._hubVisit.src)) S._hubSec = 'goals';
   S._hubSrc = null;
 }
 (function _hubVisitWatch() {
@@ -264,6 +271,7 @@ function _hubRender() {
   if (!S._hub && c) { const disk = _hubDisk(c); if (disk) S._hub = { forId: c.id, at: disk.at, d: disk.d }; }
   const h = S._hub, d = h && h.d;
   _hubVisitNow();
+  if (HUB_VIEW_SEC[S._hubView]) S._hubSec = HUB_VIEW_SEC[S._hubView]; // a page of its own goes back to the part its card is in
   const ssn = _ssnKind(_ssnCheck());
   body.classList.toggle('hub-ssn-on', !!ssn);
   _mtFetch();
@@ -299,32 +307,78 @@ function _hubInvite() { const dep = window._hubDeps || {}; if (dep.inv) dep.inv(
 // The Updates list's way in (new features build F3, 2026-11-13): a button at the foot of the staff card, whichever of the
 // three it is. The page draws it (window._hubDeps.upd), and repaints it when the unread count lands.
 function _hubUpd(html) { const dep = window._hubDeps || {}, i = html.lastIndexOf('</div>'); return dep.upd && i >= 0 ? html.slice(0, i) + dep.upd() + html.slice(i) : html; }
+// ── The tab's three parts (the user, 2026-11-20: "divide the community section in the booking app into sections becuz it
+// looks so cluttered now") ──────────────────────────────────────────────────────────────────────────────────────────────
+// It was one feed of up to twenty cards. Now a switch under the title, as Account's (Account, Stats, Badges):
+//   Sessions:   the Ramadan card, the next session (the recap of the last one leading it on its day), the Build-up plan,
+//               My interests (they order Coming up), Coming up, the staff card with the Updates button;
+//   Challenges: the year (December and January), My month (from the 26th), the member's own challenge (or the first five
+//               rides), Plan my Saturdays, the season challenges, the club's goal;
+//   Club:       the club's own places: Ask, the Mentorship programme, a call for volunteers, Suggest a ride, the invitation.
+// "Couldn't refresh" and the birthday greeting sit above the parts, for all three. All three are drawn and two hidden, so a
+// switch draws nothing and keeps what is typed. A part with nothing in it has no button (no "nothing here" line, the owner's
+// rule of 2026-11-08); with one part only, no switch. S._hubSec names the part on screen (Sessions first); a page of its
+// own (Ask, mentorship, Suggest a ride, the year) goes back to the part holding its card, and a way in that shows the
+// member's challenge opens Challenges (_hubVisitNow).
+const HUB_SECS = [['sess', 'secSess'], ['goals', 'secGoals'], ['club', 'secClub']];
+const HUB_VIEW_SEC = { ask: 'club', mentor: 'club', suggest: 'club', chat: 'club', year: 'goals' };
+function _hubSecOf(parts) { // the part to show: the one picked, else the first with something in it
+  const k = S._hubSec;
+  return parts[k] ? k : (HUB_SECS.find(([x]) => parts[x]) || ['sess'])[0];
+}
+function _hubSecsHtml(parts, on) {
+  const ks = HUB_SECS.filter(([k]) => parts[k]);
+  if (ks.length < 2) return '';
+  return `<div class="hub-secs" role="group" aria-label="${esc(t('mbTitle'))}">${ks.map(([k, w]) => `<button type="button" class="hub-sec${k === on ? ' active' : ''}" aria-pressed="${k === on}" aria-controls="hub-pane-${k}" data-hub-sec="${k}" data-on-click="${_on('_hubSecSet', k)}">${_hT(w)}</button>`).join('')}</div>`;
+}
+// The switch: the parts are already drawn, so only which one shows changes (and a page scrolled past the switch goes back
+// to it, as Account's does).
+function _hubSecSet(k) {
+  if (!HUB_SECS.some(([x]) => x === k)) return;
+  S._hubSec = k;
+  const body = document.getElementById('hub-body'); if (!body) return;
+  body.querySelectorAll('.hub-sec').forEach((b) => { const on = b.getAttribute('data-hub-sec') === k; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+  body.querySelectorAll('.hub-pane').forEach((p) => { p.hidden = p.getAttribute('data-hub-sec') !== k; });
+  const bar = body.querySelector('.hub-secs');
+  if (bar && bar.getBoundingClientRect().top < 0) try { window.scrollTo({ top: 0 }); } catch (_) {}
+}
 function _feedHtml(c, d, stale) {
   const dep = window._hubDeps || {}, hero = _heroHtml(c, d);
   // A ride the member has just finished, with nothing else booked: its recap leads the page, before the next one to book.
   const staff = _hubUpd(_staffHtml(d));
+  const parts = {
+    sess: [
+      _ssnHtml(_ssnKind(_ssnMine())),
+      hero.recap ? staff : '',
+      hero.html,
+      _bupHtml(c), // the Build-up plan, right after the hero (2026-11-18)
+      _intHtml(false),
+      _soonHtml(c, hero.open),
+      hero.recap ? '' : staff,
+      _intHtml(true),
+    ].join(''),
+    goals: [
+      d.year ? _yrCardHtml(d.year) : '',
+      _monHtml(c, d),
+      _p5Html() || _meHtml(d.me),
+      _planHtml(),
+      (Array.isArray(d.goals) ? d.goals : []).map(_seasonHtml).join(''),
+      d.club ? _clubHtml(d.club) : '',
+    ].join(''),
+    club: [
+      _akCardHtml(),
+      _mtCardHtml(),
+      d.volunteer && dep.vol ? `<div class="hub-card hub-flat"><span class="hub-k">${_cuIc('people', 16)} ${_hT('vol')}</span><a class="btn-secondary hub-wide hub-link" href="${esc(dep.vol + '/#o/' + encodeURIComponent(d.volunteer))}" target="_blank" rel="noopener">${_hT('volBtn')}</a></div>` : '',
+      _rsgCardHtml(),
+      dep.inv ? `<div class="hub-card hub-flat"><button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_hubInvite')}">${esc(dep.invLabel())}</button></div>` : '',
+    ].join(''),
+  };
+  const on = _hubSecOf(parts);
   return [
-    _ssnHtml(_ssnKind(_ssnMine())),
+    _hubSecsHtml(parts, on),
     stale ? `<div class="hub-card hub-stale" role="status"><span>${_hT('stale')}</span><button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_hubRetry')}">${_hT('retry')}</button></div>` : '',
     d.birthday ? `<div class="hub-card hub-bday">${_cuIc('gift', 20)}<strong>${esc(_hF('bday', String((c && c.name) || '').trim().split(/\s+/)[0] || ''))}</strong></div>` : '',
-    hero.recap ? staff : '',
-    hero.html,
-    _bupHtml(c), // the Build-up plan, right after the hero (2026-11-18)
-    _intHtml(false),
-    d.year ? _yrCardHtml(d.year) : '',
-    _monHtml(c, d),
-    _soonHtml(c, hero.open),
-    _akCardHtml(),
-    _p5Html() || _meHtml(d.me),
-    _planHtml(),
-    (Array.isArray(d.goals) ? d.goals : []).map(_seasonHtml).join(''),
-    d.club ? _clubHtml(d.club) : '',
-    hero.recap ? '' : staff,
-    _mtCardHtml(),
-    d.volunteer && dep.vol ? `<div class="hub-card hub-flat"><span class="hub-k">${_cuIc('people', 16)} ${_hT('vol')}</span><a class="btn-secondary hub-wide hub-link" href="${esc(dep.vol + '/#o/' + encodeURIComponent(d.volunteer))}" target="_blank" rel="noopener">${_hT('volBtn')}</a></div>` : '',
-    _rsgCardHtml(),
-    dep.inv ? `<div class="hub-card hub-flat"><button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_hubInvite')}">${esc(dep.invLabel())}</button></div>` : '',
-    _intHtml(true),
+    ...HUB_SECS.filter(([k]) => parts[k]).map(([k]) => `<div class="hub-pane" id="hub-pane-${k}" data-hub-sec="${k}"${k === on ? '' : ' hidden'}>${parts[k]}</div>`),
   ].join('');
 }
 

@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
+import { hubPart } from './helpers/hub';
 
 // The mentorship programme (2026-11-13, migration 20261114050000): the Community tab's card and page (member-hub.js),
 // the two registrations (mentee and mentor), offers on the anonymous profiles, the student's answer, the match's
@@ -28,6 +29,7 @@ async function member(page: Page, first: Record<string, unknown> | null, fx: Fix
   await page.goto('/');
   await waitForSb(page);
   await page.evaluate(`setCustTab('members')`);
+  await hubPart(page, 'club'); // the programme's card sits in the tab's Club part (2026-11-20)
   return state;
 }
 
@@ -45,7 +47,7 @@ test.describe('@customer:members mentorship', () => {
 
   test('a database without the programme shows no card', async ({ page }) => {
     await member(page, null);
-    await expect(page.locator('#hub-body .hub-card').first()).toBeVisible();
+    await expect(page.locator('#hub-body .hub-pane:not([hidden]) .hub-card').first()).toBeVisible(); // the part on screen (2026-11-20)
     await page.waitForTimeout(400);
     await expect(page.locator('#hub-body .mt-card')).toHaveCount(0);
   });

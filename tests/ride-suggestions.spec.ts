@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
+import { hubPart } from './helpers/hub';
 
 // Suggest a ride (2026-11-18, migration 20261118210500; the user's pick: "Suggest a ride: a member sends staff a route, a
 // breakfast spot or an idea, and sees only their own suggestions, each marked Planned or Done. When one happens, an Updates
@@ -43,6 +44,7 @@ async function member(page: Page, fx: Fixtures = {}, path = '/') {
 async function openTab(page: Page) {
   await page.evaluate(`setCustTab('members')`);
   await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
+  await hubPart(page, 'club'); // the card sits in the tab's Club part (2026-11-20)
 }
 const card = (page: Page) => page.locator('#hub-body .rsg-card');
 const pageEl = (page: Page) => page.locator('#hub-body #rsg-page');
@@ -52,10 +54,9 @@ test.describe('@customer:members Suggest a ride', () => {
     const log = await member(page);
     await openTab(page);
     await expect(card(page)).toContainText('Suggest a ride');
-    // near the end of the feed: after every other card but the invitation
-    const order = await page.evaluate(`[...document.querySelectorAll('#hub-body > .hub-card')].map(e=>e.classList.contains('rsg-card')?'sg':e.querySelector('[data-on-click*="_hubInvite"]')?'inv':'x')`) as string[];
-    expect(order.indexOf('sg')).toBeGreaterThan(0);
-    if (order.includes('inv')) expect(order.indexOf('inv')).toBe(order.indexOf('sg') + 1);
+    // the Club part's last card but the invitation (2026-11-20)
+    const order = await page.evaluate(`[...document.querySelectorAll('#hub-pane-club > .hub-card')].map(e=>e.classList.contains('rsg-card')?'sg':e.querySelector('[data-on-click*="_hubInvite"]')?'inv':'x')`) as string[];
+    expect(order.slice(order.includes('inv') ? -2 : -1)).toEqual(order.includes('inv') ? ['sg', 'inv'] : ['sg']);
     expect(log.filter((x) => x.fn === 'ride_suggestions_mine')).toHaveLength(0); // nothing is read for the card itself
     await card(page).getByRole('button', { name: 'Make a suggestion' }).click();
     await expect(pageEl(page).locator('h2')).toHaveText('Suggest a ride');
@@ -172,7 +173,7 @@ test.describe('@customer:members Suggest a ride', () => {
     await member(page, { 'rpc:ride_suggestions_mine': absent('ride_suggestions_mine') });
     await openTab(page);
     await card(page).getByRole('button', { name: 'Make a suggestion' }).click();
-    await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
+    await expect(page.locator('#hub-pane-club')).toBeVisible(); // back on the part the card was in
     await expect(card(page)).toHaveCount(0);
     await expect(page.locator('#rsg-page')).toHaveCount(0);
   });

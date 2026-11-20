@@ -70,7 +70,7 @@ test.describe('@customer:members R3 where an open came from', () => {
     await expect(page.locator('#hub-body button', { hasText: 'Try again' })).toBeVisible();
     fail = false;
     await page.locator('#hub-body button', { hasText: 'Try again' }).click();
-    await expect(hero(page)).toBeVisible();
+    await expect(page.locator('#hub-pane-goals')).toBeVisible(); // a way in from the rating's last step opens Challenges (2026-11-20)
     expect(sent).toEqual(['rating', 'rating']);
     await page.evaluate(`_hubRetry()`);
     await expect.poll(() => sent).toEqual(['rating', 'rating', null]);
@@ -190,12 +190,12 @@ test.describe('@customer:members R9 R10 the next session', () => {
     const s = sess('2026-11-14', '2026-11-14', meet), q = [booking('q1', s.id, { status: 'done' })];
     const post = { id: 'post_14', auto: true, line: null, line_ar: null, riders: 120, rides: 120, first_rides: 11, leads: null, volunteers: null, prev_riders: 104, mine: 2, kind: 'saturday', date: '2026-11-14', img: false };
     await member(page, { sessions: [s, ...open], queue_entries: q, 'rpc:my_bookings': q, 'rpc:hub_feed': feed({ post }) }, '2026-11-14T12:00:00+03:00');
-    const order = (await page.evaluate(`[...document.querySelectorAll('#hub-body > *')].map(x=>x.classList.contains('hub-report')?'report':x.classList.contains('hub-hero')?'hero':'other')`)) as string[];
+    const order = (await page.evaluate(`[...document.querySelectorAll('#hub-pane-sess > *')].map(x=>x.classList.contains('hub-report')?'report':x.classList.contains('hub-hero')?'hero':'other')`)) as string[];
     expect(order.indexOf('report')).toBeLessThan(order.indexOf('hero'));
     await expect(hero(page).locator('.hub-k').first()).toHaveText('Next session to book');
     await page.clock.setFixedTime(new Date('2026-11-16T12:00:00+03:00')); // two days on it takes its own place again
     await page.evaluate(`_hubRender()`);
-    const later = (await page.evaluate(`[...document.querySelectorAll('#hub-body > *')].map(x=>x.classList.contains('hub-report')?'report':x.classList.contains('hub-hero')?'hero':'other')`)) as string[];
+    const later = (await page.evaluate(`[...document.querySelectorAll('#hub-pane-sess > *')].map(x=>x.classList.contains('hub-report')?'report':x.classList.contains('hub-hero')?'hero':'other')`)) as string[];
     expect(later.indexOf('report')).toBeGreaterThan(later.indexOf('hero'));
   });
 });

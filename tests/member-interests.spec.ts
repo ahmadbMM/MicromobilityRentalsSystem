@@ -44,7 +44,7 @@ test.describe('@customer:members My interests in the Community tab', () => {
     await member(page, { 'rpc:member_interests_get': got({ suggested: ['saturday', 'road'] }), 'rpc:member_interests_set': { ok: true, keys: ['farm'] } });
     const card = page.locator('#hub-body .int-card');
     await expect(card).toBeVisible();
-    await expect(page.locator('#hub-body > .hub-hero + .int-card')).toHaveCount(1);
+    await expect(page.locator('#hub-pane-sess > .hub-hero + .int-card')).toHaveCount(1);
     await expect(card.locator('.hub-k')).toHaveText('Your interests');
     await expect(card.locator('.int-chip')).toHaveCount(11); // Women's sessions: only for an account the database offers it to
     await expect(card).not.toContainText('Women');
@@ -69,7 +69,7 @@ test.describe('@customer:members My interests in the Community tab', () => {
     await expect.poll(() => sent.length).toBe(1);
     expect(sent[0]).toMatchObject({ p_id: 'c1', p_keys: ['farm'] });
     // saved: no longer after the hero; near the end with the picks and Change, and no toast
-    await expect(page.locator('#hub-body > .hub-hero + .int-card')).toHaveCount(0);
+    await expect(page.locator('#hub-pane-sess > .hub-hero + .int-card')).toHaveCount(0);
     await expect(card.locator('.mt-chips li')).toHaveText(['Farm House Nights']);
     await expect(page.locator('#int-change')).toHaveText('Change');
     await expect(page.locator('#int-change')).toBeFocused();
@@ -89,7 +89,7 @@ test.describe('@customer:members My interests in the Community tab', () => {
     await member(page, { 'rpc:member_interests_get': got({ saved: true, keys: ['women', 'swim'], offered: ALL }), 'rpc:member_interests_set': { ok: false, error: 'limit' } }, 'female');
     const card = page.locator('#hub-body .int-card');
     await expect(card.locator('.mt-chips li')).toHaveText(['Women’s sessions', 'Swimming']);
-    await expect(page.locator('#hub-body > .hub-hero + .int-card')).toHaveCount(0);
+    await expect(page.locator('#hub-pane-sess > .hub-hero + .int-card')).toHaveCount(0);
     await expect(card.locator('.int-chip')).toHaveCount(0);
     await page.locator('#int-change').click();
     await expect(card.locator('.int-chip')).toHaveCount(12);

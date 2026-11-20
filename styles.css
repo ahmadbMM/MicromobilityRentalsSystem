@@ -9290,6 +9290,16 @@ body:not(.view-staff) .hub-act{min-height:40px;flex:none;}
 body:not(.view-staff) .hub-act.on{border-color:var(--go);}
 body:not(.view-staff) .hub-given{flex:none;}
 body:not(.view-staff) .hub-card{background:var(--card);border:1px solid transparent;border-radius:var(--r-card);box-shadow:var(--pl-1);padding:16px 18px;margin-bottom:12px;color:var(--ink);}
+/* The Community tab's switch (2026-11-20): Sessions, Challenges, Club, drawn as Account's switch (Account, Stats, Badges);
+   on a phone it spans the page and the three share it. */
+body:not(.view-staff) #tab-members .hub-secs{display:flex;gap:2px;width:fit-content;max-width:100%;margin:14px 0 14px;padding:4px;border-radius:999px;background:var(--card-3);}
+body:not(.view-staff) #tab-members .hub-sec{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;border:0;border-radius:999px;background:transparent;color:var(--ink-2);font:inherit;font-size:var(--fs-15);font-weight:500;cursor:pointer;}
+body:not(.view-staff) #tab-members .hub-sec:hover{color:var(--ink);}
+body:not(.view-staff) #tab-members .hub-sec.active{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--pl-1);}
+@media(max-width:767px){
+  body:not(.view-staff) #tab-members .hub-secs{width:100%;}
+  body:not(.view-staff) #tab-members .hub-sec{flex:1 1 0;min-width:0;padding:0 8px;}
+}
 body:not(.view-staff) .hub-name{display:block;margin:4px 0 8px;}
 body:not(.view-staff) .hub-bar{height:10px;border-radius:999px;background:var(--card-3);margin:6px 0;overflow:hidden;}
 body:not(.view-staff) .hub-bar span{display:block;height:100%;width:var(--w,0);border-radius:999px;background:var(--go);}

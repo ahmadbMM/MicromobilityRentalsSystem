@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
+import { hubPart } from './helpers/hub';
 
 // Share a badge, a title or a finished challenge as a picture (new features build F12, 2026-11-13; badge-share.js). A
 // Share button sits in an earned badge's pop-up, under the member's title on Account > Badges and on a finished challenge
@@ -60,6 +61,7 @@ async function member(page: Page, fx: Fixtures = {}) {
   await waitForSb(page);
   await page.evaluate(`setCustTab('members')`);
   await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
+  await hubPart(page, 'goals'); // the challenges sit in the tab's Challenges part (2026-11-20)
 }
 // The browser's share sheet, stood in for: it takes files, and what it was handed is kept.
 const canShare = (page: Page) => page.evaluate(`navigator.canShare=(d)=>!!(d&&d.files&&d.files.length);navigator.share=(d)=>{window._shared=d;return Promise.resolve();}`);

@@ -1,5 +1,6 @@
 import { test, expect, type Page, type Request } from '@playwright/test';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
+import { hubPart } from './helpers/hub';
 
 // Titles for community members and the members list (the owner, 2026-11-02). Staff make and give
 // titles in Community > Titles; a member picks the one others see and can hide from the list; members
@@ -108,6 +109,7 @@ test.describe('@customer:account friend invite', () => {
     await page.evaluate(`setCustTab('account','invite')`);
     await expect(page.locator('#inv-mine')).toHaveCount(0);
     await page.evaluate(`setCustTab('members')`);
+    await hubPart(page, 'club'); // the invitation sits in the tab's Club part (2026-11-20)
     await expect(invite(page)).toBeVisible();
   });
 
@@ -134,6 +136,7 @@ test.describe('@customer:account friend invite', () => {
     await page.reload();
     await waitForSb(page);
     await page.evaluate(`setCustTab('members')`);
+    await hubPart(page, 'club');
     await invite(page).click();
     await expect.poll(() => page.evaluate('!!window._shared')).toBe(true);
     const text = await page.evaluate('window._shared.text') as string;
@@ -147,6 +150,7 @@ test.describe('@customer:account friend invite', () => {
     await page.reload();
     await waitForSb(page);
     await page.evaluate(`setCustTab('members')`);
+    await hubPart(page, 'club');
     await invite(page).click();
     await expect.poll(() => page.evaluate('window._opened')).toContain('https://wa.me/?text=');
     await page.evaluate(`S._invCode=null;window._opened=null;sb.rpc=()=>Promise.resolve({data:{ok:false,error:'member'}})`);

@@ -2,6 +2,7 @@ import { test, expect, type Page, type Route } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { stubSupabase, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
+import { hubPart } from './helpers/hub';
 
 // Plan my Saturdays (new features build F10, 2026-11-13): on the Community tab, beside the monthly challenge, the current
 // month's Saturdays as tick boxes. A tick books nothing and holds no place: it stores that the member plans to come, and
@@ -45,6 +46,7 @@ async function open(page: Page) {
   await waitForSb(page);
   await page.evaluate(`setCustTab('members')`);
   await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
+  await hubPart(page, 'goals'); // the card sits in the tab's Challenges part (2026-11-20)
 }
 // A member on the Community tab at a fixed Riyadh moment. `plan: false` leaves hub_plan to the fixtures (or to no stub).
 async function member(page: Page, o: { at?: string; sats?: string[]; on?: string[]; fx?: Fixtures; plan?: boolean } = {}) {
@@ -192,6 +194,7 @@ test.describe('@customer:members F10 Plan my Saturdays', () => {
     await expect(page.locator('#hub-body .hub-hero')).toHaveCount(0);
     release();
     await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
+    await hubPart(page, 'goals');
     await expect(boxes(page)).toHaveCount(4);
     expect(await ticked(page)).toEqual(['21']);
     expect(st.reads).toBe(1);

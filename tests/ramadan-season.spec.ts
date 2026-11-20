@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
+import { hubPart } from './helpers/hub';
 
 // The Ramadan season (2026-11-18; the user picked "Ramadan season (about 8 Feb to 8 Mar 2027): a Ramadan challenge from the
 // existing template, a season badge, an Eid ride and a Ramadan look for the tab"). Migration 20261118210900 seeds the two
@@ -46,8 +47,8 @@ test.describe('@customer:members the Ramadan season on the Community tab', () =>
     await expect(card(page)).toBeVisible();
     await expect(card(page)).toHaveText('Ramadan Kareem');
     await expect(card(page)).toHaveClass(/hub-ssn-ramadan/);
-    // first in the feed, before the next session's card
-    expect(await body(page).evaluate((b) => b.firstElementChild?.classList.contains('hub-ssn'))).toBe(true);
+    // first in the Sessions part (2026-11-20), before the next session's card
+    expect(await page.locator('#hub-pane-sess').evaluate((b) => b.firstElementChild?.classList.contains('hub-ssn'))).toBe(true);
     // the crescent and two lanterns are drawn, never an emoji, never an inline style
     const art = card(page).locator('svg.hub-ssn-art');
     await expect(art).toHaveAttribute('aria-hidden', 'true');
@@ -65,7 +66,8 @@ test.describe('@customer:members the Ramadan season on the Community tab', () =>
     expect(look.night).toBe('#0F1E3D');
     expect(look.bg).toContain('gradient');
     expect(look.k).toBe('rgb(243, 213, 142)'); // the gold, where the neon was
-    // the season challenge is the seeded one, its badge drawn as the new crescent
+    // the season challenge is the seeded one, its badge drawn as the new crescent (in the Challenges part)
+    await hubPart(page, 'goals');
     const season = page.locator('#hub-body .hub-card', { hasText: 'Ramadan Rhythm: 2 Sessions' });
     await expect(season).toBeVisible();
     expect(await season.locator('svg.hub-medal').evaluate((s) => s.innerHTML)).toContain('M15.6 3.2A9.3 9.3 0 1 0 15.6 20.8');
@@ -83,6 +85,7 @@ test.describe('@customer:members the Ramadan season on the Community tab', () =>
     await expect(card(page)).toHaveText('Eid Mubarak');
     await expect(card(page)).toHaveClass(/hub-ssn-eid/);
     await expect(body(page)).toHaveClass(/hub-ssn-on/);
+    await hubPart(page, 'goals');
     await expect(page.locator('#hub-body .hub-card', { hasText: 'Eid Ride' })).toBeVisible();
     await page.clock.setFixedTime(at('2027-03-13'));
     await page.evaluate(`_hubRender()`);

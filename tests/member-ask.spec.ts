@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
+import { hubPart } from './helpers/hub';
 
 // Ask in the Community tab (2026-11-13; the user: "add the asks questions in the community section in the bookings app"):
 // the feed's "Have your say" card (member-hub.js, ask_list) and the page a member answers in the app (member-ask.js:
@@ -38,6 +39,7 @@ async function member(page: Page, st: { list: Doc; page: Doc; live?: Doc; send?:
   await waitForSb(page);
   if (lang) await page.evaluate(`setLang(${JSON.stringify(lang)})`);
   await page.evaluate(`setCustTab('members')`);
+  await hubPart(page, 'club'); // Ask sits in the tab's Club part (2026-11-20)
 }
 const openPage = async (page: Page, title = 'Farm day ideas') => {
   const c = page.locator('#hub-body .ak-card');
@@ -70,7 +72,7 @@ test.describe('@customer:members Ask in the Community tab', () => {
 
   test('no open page, or a database without Ask: no card', async ({ page }) => {
     await member(page, { list: list([]), page: askPage([]) });
-    await expect(page.locator('#hub-body .hub-card').first()).toBeVisible();
+    await expect(page.locator('#hub-body .hub-pane:not([hidden]) .hub-card').first()).toBeVisible(); // the part on screen (2026-11-20)
     await expect(page.locator('#hub-body .ak-card')).toHaveCount(0);
   });
 

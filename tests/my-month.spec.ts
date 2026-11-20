@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { stubSupabase, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
+import { hubPart } from './helpers/hub';
 
 // The "My month" card on the Community tab (new features build F13, 2026-11-13; member-hub.js, migration
 // 20261114081300). From the 26th to the end of the month a member with two or more finished sessions that month sees
@@ -35,6 +36,7 @@ async function member(page: Page, today: string, fx: Fixtures = {}) {
   await waitForSb(page);
   await page.evaluate(`setCustTab('members')`);
   await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
+  await hubPart(page, 'goals'); // My month sits in the tab's Challenges part (2026-11-20)
   return all as Record<string, unknown>;
 }
 const rpcSent = (page: Page) => {
@@ -69,10 +71,9 @@ test.describe('@customer:members the My month card', () => {
     const reads = sent.filter((x) => x.fn === 'hub_month');
     expect(reads).toHaveLength(1);
     expect(reads[0]!.body).toEqual({ p_id: 'c1', p_token: 'tok-spec' });
-    // it sits under the next session's card and above what is coming up
-    const order = await page.evaluate(`[...document.querySelectorAll('#hub-body > *')].map(e=>e.id||e.className)`) as string[];
-    expect(order.indexOf('hub-mon')).toBeGreaterThan(order.findIndex((x) => x.includes('hub-hero')));
-    expect(order.indexOf('hub-mon')).toBe(order.findIndex((x) => x.includes('hub-hero')) + 1);
+    // it leads the Challenges part (2026-11-20), the year being the only card above it, and there is none in this read
+    const order = await page.evaluate(`[...document.querySelectorAll('#hub-pane-goals > *')].map(e=>e.id||e.className)`) as string[];
+    expect(order.indexOf('hub-mon')).toBe(0);
     // private: nothing about the club or anyone else in it, no emoji, no sideways scroll
     await expect(card(page)).not.toContainText(/club|member|rank|average|most|others/i);
     expect(EMOJI.test((await card(page).textContent()) || '')).toBe(false);
@@ -85,7 +86,7 @@ test.describe('@customer:members the My month card', () => {
     const sent = rpcSent(page);
     await page.addInitScript((v) => localStorage.setItem('cq_hubm_c1', v), JSON.stringify({ day: '2026-12-25', m: month({ today: '2026-12-25' }) }));
     await member(page, '2026-12-25', { 'rpc:hub_month': month({ today: '2026-12-25' }) });
-    await expect(page.locator('#hub-body .hub-card').first()).toBeVisible();
+    await expect(page.locator('#hub-body .hub-pane:not([hidden]) .hub-card').first()).toBeVisible(); // the part on screen (2026-11-20)
     await page.waitForTimeout(400);
     expect(asked(sent)).toBe(0);
     await expect(card(page)).toHaveCount(0);
@@ -118,7 +119,7 @@ test.describe('@customer:members the My month card', () => {
     await expect.poll(() => asked(sent)).toBe(1);
     await page.waitForTimeout(200);
     await expect(card(page)).toHaveCount(0);
-    await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
+    await expect(page.locator('#hub-pane-goals')).toBeVisible();
   });
 
   test('hidden under two sessions, shown from two', async ({ page }) => {
@@ -166,8 +167,8 @@ test.describe('@customer:members the My month card', () => {
     await expect.poll(() => asked(sent)).toBe(1);
     await expect(card(page)).toHaveCount(0);
     await expect(page.locator('#toast-container')).toHaveText('');
-    await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
-    await expect(page.locator('#hub-body')).toContainText('Your challenge');
+    await expect(page.locator('#hub-pane-goals')).toBeVisible();
+    await expect(page.locator('#hub-pane-goals')).toContainText('Your challenge');
     expect(await page.evaluate(`localStorage.getItem('cq_hubm_c1')`)).toBeNull();
     await page.evaluate(`_hubFetch(true)`);
     await expect.poll(() => sent.filter((x) => x.fn === 'hub_feed').length).toBeGreaterThan(1);

@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
+import { hubPart } from './helpers/hub';
 
 // The Community tab (rebuilt 2026-11-11, member-hub.js): one feed from one read (hub_feed) - the member's next session, what is
 // coming up, their own monthly challenge with a level to pick, a season challenge, the club goal with their own share, the
@@ -52,6 +53,89 @@ test.describe('@customer:members the Community tab', () => {
     expect(await page.evaluate(`Array.from({length:HUB_TIPS},(_,i)=>'tip'+i).filter(k=>!HUB_T[k])`)).toEqual([]);
   });
 
+  // The user, 2026-11-20: "divide the community section in the booking app into sections becuz it looks so cluttered now".
+  test('three parts behind a switch: Sessions first, then Challenges and Club, each card in its own part', async ({ page }) => {
+    const sent = rpcSent(page);
+    await member(page);
+    const sw = page.locator('#hub-body .hub-secs');
+    await expect(sw.getByRole('button')).toHaveText(['Sessions', 'Challenges', 'Club']);
+    await expect(sw.getByRole('button', { name: 'Sessions' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#hub-pane-sess')).toBeVisible();
+    await expect(page.locator('#hub-pane-goals')).toBeHidden();
+    await expect(page.locator('#hub-pane-club')).toBeHidden();
+    // where each card lives
+    await expect(page.locator('#hub-pane-sess .hub-hero')).toHaveCount(1);
+    await expect(page.locator('#hub-pane-sess .hub-soon')).toHaveCount(2);
+    await expect(page.locator('#hub-pane-sess')).toContainText('Tip of the week');
+    await expect(page.locator('#hub-pane-goals .hub-card', { hasText: 'Your challenge' })).toHaveCount(1);
+    await expect(page.locator('#hub-pane-goals .hub-card', { hasText: 'Season challenge' })).toHaveCount(1);
+    await expect(page.locator('#hub-pane-goals .hub-card', { hasText: 'Community goal' })).toHaveCount(1);
+    await expect(page.locator('#hub-pane-club .rsg-card')).toHaveCount(1);
+    await expect(page.locator('#hub-pane-club [data-on-click*="_hubInvite"]')).toHaveCount(1);
+    await expect(page.locator('#hub-body > .hub-card')).toHaveCount(0); // every card is in a part
+    // a switch shows one part and draws nothing (the parts are the same nodes, nothing is read), kept over a repaint
+    const feeds = sent.filter((x) => x.fn === 'hub_feed').length;
+    await page.evaluate(`document.getElementById('hub-pane-goals').dataset.mark='1'`);
+    await sw.getByRole('button', { name: 'Challenges' }).click();
+    await expect(page.locator('#hub-pane-goals')).toBeVisible();
+    await expect(page.locator('#hub-pane-goals')).toHaveAttribute('data-mark', '1');
+    await expect(page.locator('#hub-pane-sess')).toBeHidden();
+    await expect(sw.getByRole('button', { name: 'Challenges' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(sw.getByRole('button', { name: 'Sessions' })).toHaveAttribute('aria-pressed', 'false');
+    expect(sent.filter((x) => x.fn === 'hub_feed').length).toBe(feeds);
+    await page.evaluate(`_hubRender()`);
+    await expect(page.locator('#hub-pane-goals')).toBeVisible();
+    await sw.getByRole('button', { name: 'Club' }).click();
+    await expect(page.locator('#hub-pane-club')).toBeVisible();
+    await expect(page.locator('#hub-pane-goals')).toBeHidden();
+    // Suggest a ride's page goes back to the Club part it was opened from
+    await page.locator('#hub-pane-club .rsg-card button').click();
+    await expect(page.locator('#rsg-page')).toBeVisible();
+    await page.evaluate(`_rsgClose()`);
+    await expect(page.locator('#hub-pane-club')).toBeVisible();
+    // in Arabic, the switch's own words
+    await page.evaluate(`setLang('ar')`);
+    await expect(page.locator('#hub-body .hub-secs').getByRole('button')).toHaveText(['الجلسات', 'التحديات', 'النادي']);
+  });
+
+  test('a way in that shows the member\'s challenge opens Challenges; a part with nothing in it has no button', async ({ page }) => {
+    await member(page);
+    for (const src of ['badge', 'rating', 'booked']) {
+      await page.evaluate(`setCustTab('account')`);
+      await page.evaluate(`S._hubSec='sess';S._hubSrc=${JSON.stringify(src)};setCustTab('members')`);
+      await expect(page.locator('#hub-pane-goals')).toBeVisible();
+      await expect(page.locator('#hub-pane-sess')).toBeHidden();
+    }
+    // a plain open keeps the part the member left
+    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('members')`);
+    await expect(page.locator('#hub-pane-goals')).toBeVisible();
+    // no challenge, no season, no club goal and five rides done: Challenges has nothing, so no button and its part not drawn
+    await page.evaluate(`S._hub.d.me=null;S._hub.d.goals=[];S._hub.d.club=null;_hubRender()`);
+    await expect(page.locator('#hub-body .hub-p5')).toHaveCount(1); // still under five rides here: the path is its card
+    await page.evaluate(`window._hubDeps.p5=()=>null;_hubRender()`);
+    await expect(page.locator('#hub-body .hub-secs').getByRole('button')).toHaveText(['Sessions', 'Club']);
+    await expect(page.locator('#hub-pane-goals')).toHaveCount(0);
+    await expect(page.locator('#hub-pane-sess')).toBeVisible(); // the part picked has gone: the first one shows
+    // and with Sessions alone, no switch at all
+    await page.evaluate(`S._rsgOff=true;window._hubDeps.inv=null;_hubRender()`);
+    await expect(page.locator('#hub-body .hub-secs')).toHaveCount(0);
+    await expect(page.locator('#hub-pane-sess')).toBeVisible();
+  });
+
+  test('on a narrow phone the switch is one row across the page, nothing off the side', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 720 });
+    await member(page);
+    await page.evaluate(`setLang('tl')`); // the longest words of the ten
+    await expect(page.locator('#hub-body .hub-secs').getByRole('button')).toHaveText(['Mga session', 'Mga hamon', 'Club']);
+    const geo = await page.locator('#hub-body .hub-secs').evaluate((bar) => {
+      const r = bar.getBoundingClientRect(), b = [...bar.querySelectorAll('button')].map((x) => x.getBoundingClientRect());
+      const els = [...bar.querySelectorAll('button')];
+      return { n: b.length, oneRow: new Set(b.map((x) => Math.round(x.top))).size === 1, inside: b.every((x) => x.left >= r.left - 0.5 && x.right <= r.right + 0.5), h: b.map((x) => Math.round(x.height)), fits: els.every((x) => x.scrollWidth <= x.clientWidth), side: document.documentElement.scrollWidth <= window.innerWidth };
+    });
+    expect(geo).toEqual({ n: 3, oneRow: true, inside: true, h: [44, 44, 44], fits: true, side: true }); // each word on one line
+  });
+
   test('one read, no sub-menu, the page\'s Back, nothing about anyone else, and no sideways scroll', async ({ page }) => {
     const sent = rpcSent(page);
     await member(page);
@@ -86,6 +170,7 @@ test.describe('@customer:members the Community tab', () => {
   test('the member picks a level; it is sent and the challenge counts it', async ({ page }) => {
     const sent = rpcSent(page);
     await member(page, { queue_entries: rode5, 'rpc:hub_pick_level': { ok: true } });
+    await hubPart(page, 'goals');
     const card = page.locator('#hub-body .hub-card', { hasText: 'Your challenge' });
     await expect(card.locator('.hub-lv')).toHaveCount(3);
     await expect(card.locator('.hub-lv.on')).toHaveText('2');
@@ -132,6 +217,7 @@ test.describe('@customer:members the Community tab', () => {
   test('the year: a card that opens slides, never kudos, and the share is the member\'s own numbers', async ({ page }) => {
     await member(page, { 'rpc:hub_feed': feed({ year: { year: 2026, full: true, sessions: 12, saturdays: 8, first: '2026-06-13', kinds: ['saturday', 'rental'], busiest: '2026-10', sats_held: 22, club: 2104, club_first: '2026-06-07', badges: 3 } }) });
     await page.evaluate(`navigator.canShare=undefined;navigator.share=(d)=>{window._shared=d;return Promise.resolve();}`);
+    await hubPart(page, 'goals');
     const card = page.locator('#hub-body .hub-yr');
     await expect(card).toContainText('Your 2026 with MicroMobility');
     await expect(card).toContainText('June to December');
@@ -144,7 +230,7 @@ test.describe('@customer:members the Community tab', () => {
     await page.locator('#hub-body button', { hasText: 'Share my year' }).click();
     await expect.poll(() => page.evaluate('window._shared&&window._shared.text')).toBe('My 2026 with MicroMobility: 12 sessions, 8 Saturday rides.');
     await page.locator('#hub-body button', { hasText: 'Close' }).last().click();
-    await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
+    await expect(page.locator('#hub-pane-goals .hub-yr')).toBeVisible(); // back on the part its card is in
   });
 
   test('a failed read keeps the copy on the phone and offers to try again; without one it says so', async ({ page }) => {
