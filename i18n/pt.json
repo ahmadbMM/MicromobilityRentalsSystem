@@ -935,7 +935,7 @@
   "srrHFrom": "Contado",
   "srrByHand": "À mão",
   "srrBySys": "Sistema de reservas",
-  "srrNoteHand": "De {0} a {1}: os ciclistas de sábado foram contados à mão, mês a mês, e somados ao total, com um passeio todo sábado exceto os do Ramadã e o da Summer Splash Run. Ciclistas diferentes e cada tabela por passeio contam só o sistema de reservas, a partir de {2}.",
+  "srrNoteHand": "De {0} a {1}: os ciclistas de sábado foram contados à mão, mês a mês, e somados ao total, com um passeio todo sábado exceto os do Ramadã, o de 21 de março e o da Summer Splash Run. Ciclistas diferentes e cada tabela por passeio contam só o sistema de reservas, a partir de {2}.",
   "rp2Money": "Dinheiro",
   "rp2People": "Pessoas",
   "rp2Events": "Eventos",

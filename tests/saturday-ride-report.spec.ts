@@ -137,7 +137,7 @@ test.describe('@staff:reports the Saturday Social Ride report', () => {
     expect(html).toContain('<td class="rp-name"><bdi>January 2099</bdi></td><td><bdi>326</bdi></td><td><bdi>3</bdi></td><td><bdi>Booking system</bdi></td>');
     expect(html).toContain('<tr class="rp-b8"><td class="rp-name"><bdi>Total</bdi></td><td><bdi>511</bdi></td><td><bdi>8</bdi></td>');
     expect(html).toContain('24 Jan 2098 to 31 Jul 2098: Saturday riders counted by hand, month by month');
-    expect(html).toContain('with a ride every Saturday except those in Ramadan and the Summer Splash Run');
+    expect(html).toContain('with a ride every Saturday except those in Ramadan, 21 March and the Summer Splash Run');
     expect(html).toContain('booking system only, from 3 Jan 2099.');
   });
 
