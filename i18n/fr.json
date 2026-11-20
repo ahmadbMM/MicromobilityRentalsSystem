@@ -6981,6 +6981,8 @@
   "acChMutedTill": "En sourdine jusqu’au {0}",
   "acChMutedOpen": "En sourdine jusqu’à levée",
   "acChSend": "Envoyer",
+  "acChOld": "N’est plus affiché aux membres",
+  "acChMore": "Messages précédents",
   "acTab": "Page des membres",
   "acSub": "Les défis apparaissent sur la page Communauté des membres. Les autres onglets sont réservés à l’équipe : les membres n’en voient pas les résultats.",
   "acVote": "Cycliste du mois",

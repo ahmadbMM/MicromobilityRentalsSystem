@@ -6981,6 +6981,8 @@
   "acChMutedTill": "Silenciado hasta el {0}",
   "acChMutedOpen": "Silenciado hasta que se levante",
   "acChSend": "Enviar",
+  "acChOld": "Ya no se muestra a los miembros",
+  "acChMore": "Mensajes anteriores",
   "acTab": "Página de miembros",
   "acSub": "Los retos llegan a los miembros en su página Comunidad. Las demás pestañas son para el equipo: los miembros no ven sus resultados.",
   "acVote": "Ciclista del mes",

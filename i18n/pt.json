@@ -6981,6 +6981,8 @@
   "acChMutedTill": "Silenciado até {0}",
   "acChMutedOpen": "Silenciado até ser liberado",
   "acChSend": "Enviar",
+  "acChOld": "Já não é mostrada aos membros",
+  "acChMore": "Mensagens anteriores",
   "acTab": "Página dos membros",
   "acSub": "Os desafios chegam aos membros na página Comunidade. Os outros separadores são para a equipa: os membros não veem os resultados.",
   "acVote": "Ciclista do mês",

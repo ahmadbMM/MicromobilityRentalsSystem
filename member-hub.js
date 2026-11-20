@@ -1686,6 +1686,10 @@ async function _rsgSend() {
 // side; the box to write in stays at the foot of the screen. Migration 20261120203000.
 // - Reads: chat_read gives the newest 50, then only what came after the last one held (p_after) or the 50 before the
 //   first (Earlier messages). Never kept on the phone. Only the id read to is (cq_cht_seen_<account>), for the card.
+// - Six hours (the user, 2026-11-20: "delete chats when it completes 6 hours but keep it shown for staff and never
+//   delete them"; migration 20261120213000): the database sends members only the last six hours and says so with each
+//   read (`keep` seconds, on its own clock `now`), and the open page drops a message the moment it turns that old
+//   (_chtPrune). Staff keep every message; nothing here deletes one.
 // - Live: the page joins the realtime topic 'hub-chat' while it is open; the database sends an EMPTY 'tick' there for
 //   every change and the page then asks chat_read (the tick names nobody and carries no words). Ticks that bring nothing
 //   are answered less and less often (a topic anyone can write to must not make every phone read). Without a tick the
@@ -1720,10 +1724,11 @@ const CHT_ERR = { fast: 'chtFast', limit: 'chtLimit' };
 const _CHT_SEEN = 'cq_cht_seen_';
 // S._cht: {forId, rows (null until read), more, me {agreed, muted, until}, draft, err, busy, loading, again, fail, html, jump,
 // keep, fresh (others' messages that came while the reader was further up), rep {id: 1}, readAt, selfAt, tickT, tickGap,
-// tickNext}; per account, in memory only. S._chtN: {id, at, n} = the card's count. S._chtCh: the joined topic.
+// tickNext, ttl (how long a message is shown, ms; 0 = the database did not say) and skew (its clock less this phone's)};
+// per account, in memory only. S._chtN: {id, at, n} = the card's count. S._chtCh: the joined topic.
 function _chtState(c) {
   if (!c) return null;
-  if (!S._cht || S._cht.forId !== c.id) S._cht = { forId: c.id, rows: null, more: false, me: null, draft: '', err: '', busy: false, loading: false, again: false, fail: false, html: null, jump: true, keep: false, fresh: 0, rep: {}, readAt: 0, selfAt: 0, tickT: null, tickGap: 0, tickNext: 0 };
+  if (!S._cht || S._cht.forId !== c.id) S._cht = { forId: c.id, rows: null, more: false, me: null, draft: '', err: '', busy: false, loading: false, again: false, fail: false, html: null, jump: true, keep: false, fresh: 0, rep: {}, readAt: 0, selfAt: 0, tickT: null, tickGap: 0, tickNext: 0, ttl: 0, skew: 0 };
   return S._cht;
 }
 function _chtSeenId(c) { try { const v = Number(localStorage.getItem(_CHT_SEEN + c.id)); return v > 0 ? v : null; } catch (_) { return null; } }
@@ -1788,6 +1793,7 @@ function _chtWatch() {
   S._chtT = setInterval(() => {
     const g = S._cht;
     if (!_chtOn() || !_hCust()) { _chtLeave(); return; }
+    if (g && g.rows && g.rows.some((x) => _chtOld(g, x))) _hubRender(); // one has turned six hours old: it leaves the page
     if (document.visibilityState !== 'visible' || !g || g.rows === null || g.loading || _chtCool()) return;
     if (Date.now() - g.readAt >= (S._chtLive ? 45e3 : 12e3)) _chtFetch('new');
   }, 4e3);
@@ -1815,6 +1821,8 @@ async function _chtFetch(mode, viaTick) {
   else if (d && d.ok === false && d.error === 'member') { S._hubView = null; _chtLeave(); _hubFetch(true); return; } // no longer a member: the feed's read sends them on
   else if (d && d.ok === true && Array.isArray(d.rows)) {
     if (d.me) g.me = d.me;
+    const sn = Date.parse(d.now);
+    if (Number(d.keep) > 0 && sn) { g.ttl = Number(d.keep) * 1000; g.skew = sn - Date.now(); }
     if (first || d.reset) { g.rows = d.rows; g.more = !!d.more; g.jump = true; g.fresh = 0; got = true; }
     else if (args.p_before != null) {
       const have = new Set(g.rows.map((x) => x.id)), add = d.rows.filter((x) => !have.has(x.id));
@@ -1853,6 +1861,14 @@ function _chtDown() {
   _chtMark(g); _chtSync(g);
 }
 
+// Shown for six hours: older than the database's `keep`, on the database's clock.
+function _chtOld(g, x) { return g.ttl > 0 && Date.parse(x.at) < Date.now() + g.skew - g.ttl; }
+function _chtPrune(g) {
+  if (!g.ttl || !g.rows || !g.rows.length) return false;
+  const n = g.rows.length;
+  g.rows = g.rows.filter((x) => !_chtOld(g, x));
+  return g.rows.length !== n;
+}
 function _chtPaint(body, c) {
   const g = _chtState(c), key = c.id + '|' + (S.lang || 'en');
   if (g.rows === null) { if (!g.loading && !g.fail) _chtFetch('new'); }
@@ -1863,11 +1879,12 @@ function _chtPaint(body, c) {
     body.innerHTML = _chtPageHtml(key); g.html = null; g.jump = true;
     const ta = document.getElementById('cht-text'); if (ta) ta.value = g.draft;
   }
-  const L = document.getElementById('cht-log'), h = _chtLogHtml(g);
+  const aged = _chtPrune(g), L = document.getElementById('cht-log'), h = _chtLogHtml(g);
   if (L && g.html !== h) {
     const near = _chtNear(), sc = document.scrollingElement || document.documentElement, was = sc.scrollHeight;
     L.innerHTML = h; g.html = h;
-    if (g.keep) { try { window.scrollTo(0, window.scrollY + (sc.scrollHeight - was)); } catch (_) {} } // earlier messages went in above: the reader stays where they were
+    // earlier messages went in above, or old ones left the top: the reader stays where they were
+    if (g.keep || (aged && !near && !g.jump)) { try { window.scrollTo(0, window.scrollY + (sc.scrollHeight - was)); } catch (_) {} }
     else if (g.rows && (g.jump || near)) _chtDown();
     if (g.rows) g.jump = false;
     g.keep = false;

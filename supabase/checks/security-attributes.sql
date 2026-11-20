@@ -694,7 +694,20 @@ with expected(fname, want_definer, note) as (values
   ('session_opening', true, 'Remind me: an ungated session''s opening for the iPhone calendar file, no account (20261119600200)'),
   ('_open_remind_tick', true, 'Remind me: the mm-open-remind job writes push_outbox; no client grant (20261119600200)'),
   ('booking_note_set', true, 'Note for the desk: writes the caller''s own booking past RLS; token-checked (20261119600300)'),
-  ('_purge_old',                   true,  'retention: reaches every personal table; service_role only (20261009165000)')
+  ('_purge_old',                   true,  'retention: reaches every personal table; service_role only (20261009165000)'),
+  ('chat_read', true, 'the Community chat: reads hub_chat and the writers'' names, which no rider can read; token-checked, members only (20261120203000)'),
+  ('chat_peek', true, 'the Community chat: counts new messages in hub_chat; token-checked, members only (20261120203000)'),
+  ('chat_send', true, 'the Community chat: writes hub_chat and the member''s yes to their full name; token-checked, members only (20261120203000)'),
+  ('chat_remove', true, 'the Community chat: removes the caller''s own message; token-checked, members only (20261120203000)'),
+  ('chat_report', true, 'the Community chat: writes hub_chat_reports and hides a message at the third report; token-checked, members only (20261120203000)'),
+  ('staff_chat_send', true, 'the Community chat: the team''s message; _staff_mod(community, edit) (20261120203000)'),
+  ('staff_chat_set', true, 'the Community chat: staff remove a message or put it back; _staff_mod(community, edit) (20261120203000)'),
+  ('staff_chat_mute', true, 'the Community chat: staff stop an account writing; _staff_mod(community, edit) (20261120203000)'),
+  ('_chat_shown', true, 'the Community chat: reads customers and customer_tags for a message''s writer, inside the 6 hours; no client executes (20261120203000, 20261120213000)'),
+  ('_chat_row', true, 'the Community chat: a message as a member reads it, with the writer''s full name; no client executes (20261120203000)'),
+  ('_chat_tick', true, 'the Community chat: the hub_chat trigger sends the empty tick through realtime.send (20261120203000)'),
+  ('_chat_keep', false, 'the Community chat: how long members see a message, 6 hours; reads no table (20261120213000)'),
+  ('_chat_clean', false, 'the Community chat: cleans a message''s text; reads no table (20261120203000)')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

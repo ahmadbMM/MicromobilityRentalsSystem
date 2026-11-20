@@ -310,6 +310,25 @@ test.describe('@customer:members Community chat', () => {
     }
   });
 
+  test('six hours: a message leaves the open page the moment it turns six hours old, by the database\'s clock', async ({ page }) => {
+    // the database says how long a message is shown (keep, seconds) and what time it is (now); here its clock runs an
+    // hour ahead of this device's, so a message 5 h 30 min old by the device is already 6 h 30 min old by the database
+    const ago = (ms: number) => new Date(Date.now() - ms).toISOString(), H = 3600e3;
+    const row = (id: number, at: string, body: string): Msg => ({ id, at, day: at.slice(0, 10), body, team: false, mine: false, name: 'Omar Saleh', k: 'k-omar' });
+    const rows = [row(41, ago(5.5 * H), 'older than six hours by the database'), row(42, ago(5 * H - 5000), 'five seconds left'), row(43, ago(H), 'an hour old')];
+    await member(page);
+    await page.route('**/rest/v1/rpc/chat_read', (r) => {
+      const b = r.request().postDataJSON() as { p_after?: number };
+      return r.fulfill({ status: 200, headers: json, body: JSON.stringify(read({ rows: b.p_after == null ? rows : [], now: new Date(Date.now() + H).toISOString(), keep: 6 * 3600 })) });
+    });
+    await openChat(page);
+    await expect(rowsEl(page).locator('.cht-body')).toHaveText(['five seconds left', 'an hour old']); // 41 is past its six hours already
+    expect(await page.evaluate('S._cht.ttl')).toBe(6 * H);
+    await expect(rowsEl(page).locator('.cht-body')).toHaveText(['an hour old'], { timeout: 15000 }); // 42 turns six hours old on screen
+    // nothing asked the database to delete anything, and nothing is kept on the phone
+    expect(await page.evaluate(`Object.keys(localStorage).filter(k=>/cht/i.test(k))`)).toEqual(['cq_cht_seen_c1']);
+  });
+
   test('/members?hv=chat opens the chat from a cold link, and the address is cleaned', async ({ page }) => {
     await member(page, {}, '/members?src=push&hv=chat');
     await expect(pageEl(page).locator('h2')).toHaveText('Community chat');
@@ -392,19 +411,59 @@ test.describe('@build Community chat migration', () => {
     expect(sql).not.toMatch(/grant (insert|update|delete|all)[^;]*hub_chat/);
   });
 
-  test('the ping is empty and public; staff calls need the Community edit right; old messages go after 12 months', () => {
+  test('the ping is empty and public; staff calls need the Community edit right; the limits and the third report', () => {
     expect(sql).toContain(`perform realtime.send('{}'::jsonb, 'tick', 'hub-chat', false);`);
     for (const f of ['staff_chat_send', 'staff_chat_set', 'staff_chat_mute']) {
       expect(fnBody(f)).toContain(`if (select _staff_mod('community', true)) is not true then raise exception 'FORBIDDEN'`);
       expect(sql).toMatch(new RegExp(`revoke all on function public\\.${f}\\([^)]*\\) from public, anon;`));
     }
-    expect(sql).toContain(`delete from hub_chat m where m.created_at < now() - interval '12 months';`);
-    expect(sql).toContain(`perform cron.schedule('mm-chat-purge'`);
     // the limits and the third report
     expect(fnBody('chat_send')).toContain(`interval '5 minutes') >= 20`);
     expect(fnBody('chat_send')).toContain(`if p_agree is not true then return jsonb_build_object('ok', false, 'error', 'agree');`);
     expect(fnBody('chat_report')).toContain('v_n >= 3');
     expect(fnBody('chat_report')).toContain('m.customer_id = any(v_me)'); // never their own
+  });
+});
+
+// Members see a message for six hours, staff keep every message and nothing is deleted (the user, 2026-11-20: "delete chats
+// when it completes 6 hours but keep it shown for staff and never delete them"; migration 20261120213000).
+test.describe('@build Community chat, six hours', () => {
+  const sql = readFileSync(resolve(__dirname, '../supabase/migrations/20261120213000_community_chat_six_hours.sql'), 'utf8');
+  const body = (name: string, end = 'end $$;') => { const i = sql.indexOf(`create or replace function public.${name}(`); expect(i, name).toBeGreaterThan(-1); return sql.slice(i, sql.indexOf(end, i)); };
+
+  test('members read the last six hours only; the window is one function', () => {
+    expect(body('_chat_keep', '$$;\n')).toContain(`select interval '6 hours';`);
+    expect(body('_chat_shown', '$$;\n')).toContain('and m.created_at > now() - _chat_keep()');
+    expect(body('_chat_shown', '$$;\n')).toContain('m.removed_at is null');
+    expect(body('chat_read')).toContain(`'now', now(), 'keep', extract(epoch from _chat_keep())::integer,`);
+    for (const f of ['chat_read', 'chat_peek']) {
+      const b = body(f);
+      expect(b, f).toContain('where m.created_at > now() - _chat_keep() order by m.created_at limit 1;'); // the window found by time, not by walking the kept messages
+      expect((b.match(/from hub_chat m/g) || []).length, f).toBe((b.match(/m\.id >= v_min|m\.created_at > now\(\) - _chat_keep\(\) order by/g) || []).length); // every read starts inside it
+    }
+  });
+
+  test('nothing deletes a message any more: the daily job is unscheduled and its function dropped; staff still read the table', () => {
+    expect(sql).toContain(`perform cron.unschedule('mm-chat-purge');`);
+    expect(sql).toContain('drop function if exists public._chat_purge();');
+    expect(sql).not.toMatch(/delete from\s+(public\.)?hub_chat/);
+    expect(sql).not.toMatch(/drop (table|policy)|revoke [^;]* on (table )?public\.hub_chat /);
+    expect(sql).toContain('create index if not exists hub_chat_created_at on public.hub_chat (created_at);');
+  });
+
+  test('the rebuilt calls keep their checks, their definer rights and their grants', () => {
+    for (const f of ['chat_read', 'chat_peek', 'chat_send']) {
+      const b = body(f);
+      const tok = b.indexOf('not _cust_token_ok(p_id, p_token)'), mem = b.indexOf('not _member_active(p_id)');
+      expect(tok, `${f} token`).toBeGreaterThan(-1);
+      expect(mem, `${f} member`).toBeGreaterThan(tok);
+      expect(b.indexOf('from hub_chat'), `${f} reads after the checks`).toBeGreaterThan(mem);
+      expect(b, f).toMatch(/language plpgsql (stable|volatile) security definer set search_path to 'public'/);
+      expect(sql).toMatch(new RegExp(`grant execute on function public\\.${f}\\([^)]*\\) to anon, authenticated;`));
+    }
+    expect(body('chat_send')).toContain(`interval '5 minutes') >= 20`);
+    expect(body('chat_send')).toContain(`if p_agree is not true then return jsonb_build_object('ok', false, 'error', 'agree');`);
+    expect(sql.includes(String.fromCharCode(92))).toBe(false); // no backslash escape that a tool or a paste could misread
   });
 });
 
@@ -460,6 +519,9 @@ test.describe('@staff:community Chat', () => {
     await expect(cards(page).nth(2)).toContainText('Muted until lifted');
     await expect(cards(page).nth(2).getByRole('button', { name: 'Put back' })).toBeVisible();
     await expect(cards(page).nth(4).getByRole('button', { name: 'Keep' })).toHaveCount(0); // already looked at
+    // past its six hours a message says members no longer see it; a removed one says how it was removed instead
+    await expect(cards(page).nth(1).locator('.ac-ch-old')).toHaveText('No longer shown to members');
+    await expect(cards(page).nth(2).locator('.ac-ch-old')).toHaveCount(0);
     await page.evaluate(`window.__acct=[];window.openAccountHistory=(id)=>{window.__acct.push(id);}`);
     await cards(page).nth(1).getByRole('button', { name: 'Omar Saleh' }).click();
     expect(await page.evaluate('window.__acct')).toEqual(['c2']);
@@ -509,7 +571,7 @@ test.describe('@staff:community Chat', () => {
     });
     await page.route('**/rest/v1/rpc/staff_chat_send', (r) => {
       const b = r.request().postDataJSON() as { p_body: string };
-      return r.fulfill({ status: 200, headers: json, body: JSON.stringify({ id: 26, customer_id: null, staff_user: 'u-1', body: b.p_body, created_at: '2026-11-20T08:00:00Z', removed_at: null, removed_by: null, reports: 0, checked_at: null }) });
+      return r.fulfill({ status: 200, headers: json, body: JSON.stringify({ id: 26, customer_id: null, staff_user: 'u-1', body: b.p_body, created_at: new Date().toISOString(), removed_at: null, removed_by: null, reports: 0, checked_at: null }) });
     });
     await tab(page).locator('.filter-pill', { hasText: /^Chat/ }).click();
     const c24 = tab(page).locator('[data-ch="24"]'), c21 = tab(page).locator('[data-ch="21"]');
@@ -541,7 +603,31 @@ test.describe('@staff:community Chat', () => {
     expect(calls(log, 'staff_chat_send')[0]!.body).toEqual({ p_body: 'Route change: we start at the north gate' });
     await expect(cards(page).first()).toContainText('Route change: we start at the north gate');
     await expect(cards(page).first()).toContainText('Team');
+    await expect(cards(page).first().locator('.ac-ch-old')).toHaveCount(0); // written just now: members still see it
     await expect(box).toHaveValue('');
+  });
+
+  test('staff keep every message: Earlier messages reads the ones before the last shown, and a reload keeps them', async ({ page }) => {
+    const many = Array.from({ length: 300 }, (_, i) => ({ id: 1000 - i, customer_id: 'c2', staff_user: null, body: 'message ' + (1000 - i), created_at: '2026-11-19T10:00:00Z', removed_at: null, removed_by: null, reports: 0, checked_at: null }));
+    const older = [{ id: 700, customer_id: 'c1', staff_user: null, body: 'from last year', created_at: '2025-11-19T10:00:00Z', removed_at: null, removed_by: null, reports: 0, checked_at: null },
+      { id: 699, customer_id: 'c3', staff_user: null, body: 'the very first message', created_at: '2025-11-18T10:00:00Z', removed_at: null, removed_by: null, reports: 0, checked_at: null }];
+    await staff(page, { hub_chat: many });
+    const asked: string[] = [];
+    await page.route('**/rest/v1/hub_chat?**', (r) => {
+      const u = new URL(r.request().url()); asked.push(u.searchParams.get('id') || '');
+      return r.fulfill({ status: 200, headers: json, body: JSON.stringify(u.searchParams.get('id') ? older : many) });
+    });
+    await tab(page).locator('.filter-pill', { hasText: /^Chat/ }).click();
+    await expect(cards(page)).toHaveCount(300);
+    await tab(page).getByRole('button', { name: 'Earlier messages' }).click();
+    await expect(cards(page)).toHaveCount(302);
+    expect(asked).toContain('lt.701'); // the ones before the last one shown
+    await expect(cards(page).last()).toContainText('the very first message');
+    await expect(cards(page).last().locator('.ac-ch-old')).toHaveText('No longer shown to members'); // a year on, staff still read it
+    await expect(tab(page).getByRole('button', { name: 'Earlier messages' })).toHaveCount(0); // that was all of them
+    await page.evaluate('_acChLoad(true)'); // the newest page read again: the earlier ones stay under it
+    await page.waitForFunction('!S._acChBusy');
+    await expect(cards(page)).toHaveCount(302);
   });
 
   test('the list reads again by itself without touching the box; a view-only account sees no actions; a database without it has no pill', async ({ page }) => {

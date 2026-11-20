@@ -1074,7 +1074,7 @@ only their own suggestions, each marked Planned or Done. When one happens, an Up
 - **Privacy Notice:** the row after the Ask answers (en + ar), PRIVACY_VERSION unchanged (2026-11-18), nobody asked again.
 - **Spec:** `tests/ride-suggestions.spec.ts` (`@customer:members`, `@staff:community`).
 
-## The Community chat (2026-11-20, migration 20261120203000)
+## The Community chat (2026-11-20, migrations 20261120203000 and 20261120213000)
 
 The user, 2026-11-20: "can we create a live chat in the booking app but only for community members?", then, asked how a
 member appears, where the chat lives and what may be sent: "Full name", "One club chat", "Text only". Spec
@@ -1091,9 +1091,17 @@ member appears, where the chat lives and what may be sent: "Full name", "One clu
   500, text only; `removed_at` / `removed_by` self, staff or reports; `reports`; `checked_at` = staff looked),
   `hub_chat_members` (`agreed_at`, `muted_until`: null, a time, or `infinity` = until lifted) and `hub_chat_reports` (who
   reported what, once each). RLS on all three, staff read under `_staff_mod('community')`, nobody writes them directly.
-  `_chat_shown` is what members may see: not removed, its writer not archived, not asking for deletion, not blacklisted
-  (a member who left the Community keeps their old messages on the page). `_chat_purge` (pg_cron `mm-chat-purge`, daily)
-  deletes messages older than 12 months, as the Privacy Notice says.
+  `_chat_shown` is what members may see: not removed, not older than six hours, its writer not archived, not asking for
+  deletion, not blacklisted (a member who left the Community keeps their messages on the page for their six hours).
+- **Six hours for members, for ever for staff** (the user, 2026-11-20: "delete chats when it completes 6 hours but keep it
+  shown for staff and never delete them"; migration 20261120213000). `_chat_keep()` is the six hours, in one place.
+  Members' reads give the last six hours only, and `chat_read` says so with each answer (`keep` seconds, on the
+  database's clock `now`), so the open page drops a message the moment it turns that old (`_chtPrune`, never by the
+  phone's clock alone). NOTHING deletes a row of `hub_chat`: the first migration's daily job (`mm-chat-purge`,
+  `_chat_purge`, 12 months) is unscheduled and dropped, a member's Remove and staff's Remove only stamp `removed_at`,
+  and staff read every message. Do not add a purge, and do not write `hub_chat.created_at` by hand: the member's reads
+  find the first message inside the window by time (`hub_chat_created_at`) and start from that id, which holds only
+  while ids and times rise together. The table only grows, so a new read of it must start from an index, never walk it.
 - **The member's calls** (token-checked, active members only): `chat_read(p_id, p_token, p_after, p_before)` (the newest
   50; the 50 before an id; or what came after an id, with the last 15 seconds' messages just under it again for an insert
   committed late, and `reset` with the newest 50 when the page is over 100 behind; also `gone` = ids removed in the last
@@ -1124,9 +1132,12 @@ member appears, where the chat lives and what may be sent: "Full name", "One clu
   reported one (`staff_chat_set`), Mute for 1 day, 7 days or until lifted and Lift mute (`staff_chat_mute`, p_days null
   lifts, 0 = until lifted), and a box to write as the team (`staff_chat_send`). All need `_staff_mod('community', true)`.
   The list reads again every 20 s while the pill is on screen and only `#ac-ch-list` is drawn again (`_acChPaint`), so
-  the team's box keeps what is being typed. Every change goes to the staff log.
-- **Privacy Notice:** a row, a legal-basis line (consent, asked with the first message) and a retention line (12
-  months), English and Arabic, PRIVACY_VERSION 2026-11-20, nobody asked again; the website's copy is synced from it.
+  the team's box keeps what is being typed. Every change goes to the staff log. A message past its six hours carries
+  "No longer shown to members" (`AC_CH_KEEP_MS`, to change together with `_chat_keep()`), and "Earlier messages"
+  (`_acChMore`) reads the 300 before the last one shown, as far back as the chat goes; a reload keeps those pages.
+- **Privacy Notice:** a row, a legal-basis line (consent, asked with the first message) and a retention line (shown to
+  members for 6 hours; kept by staff and not deleted), English and Arabic, PRIVACY_VERSION 2026-11-20, nobody asked
+  again; the website's copy is synced from it. The notice says plainly that staff keep every message: keep it true.
 - **Website:** micromobility.sa/club shows a "Community chat" card that opens the chat in the booking app
   (`ChatCard`, `chatHref`); the chat itself is the app's only.
 - **Limits to know:** the free realtime plan counts every tick per listener (2 million messages a month, 200 sockets):

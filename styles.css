@@ -7024,6 +7024,7 @@ button.ca-chk{cursor:pointer;text-decoration:underline;text-underline-offset:2px
 .ac-ch-new{margin-bottom:14px}
 .ac-ch-new .btn-sm{margin-top:8px}
 .ac-ch-acts{flex-wrap:wrap}
+.ac-ch-more{display:block;margin:4px auto 0}
 .ac-ch-mute{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px}
 .mts-form textarea{width:100%;box-sizing:border-box;resize:vertical}
 .mts-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}

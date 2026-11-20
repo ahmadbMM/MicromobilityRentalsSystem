@@ -6981,6 +6981,8 @@
   "acChMutedTill": "Naka-mute hanggang {0}",
   "acChMutedOpen": "Naka-mute hanggang alisin",
   "acChSend": "Ipadala",
+  "acChOld": "Hindi na ipinapakita sa mga miyembro",
+  "acChMore": "Mga naunang mensahe",
   "acTab": "Pahina ng mga miyembro",
   "acSub": "Nakikita ng mga miyembro ang mga hamon sa kanilang Community page. Para sa staff ang ibang tab: hindi nakikita ng mga miyembro ang mga resulta nito.",
   "acVote": "Rider of the Month",
