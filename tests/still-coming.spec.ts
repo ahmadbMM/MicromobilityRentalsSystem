@@ -6,8 +6,10 @@ import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } fr
 // "Still coming?" the day before (new features build F2, 2026-11-13). From 24 hours before the time to turn up until the
 // session starts, a booking that holds a place shows "I'm coming" and "Can't come" on its ticket and on the Community
 // tab's card. "I'm coming" stamps the booking (booking_coming, migration 20261114080200) and one quiet chip takes the
-// buttons' place; "Can't come" opens the cancel dialog as it is. No line of text goes with them. Staff see a tick on the
-// roster. The evening-before reminder gains one sentence and links to the ticket. All Supabase traffic is stubbed.
+// buttons' place; "Can't come" opens the cancel dialog as it is, except on a Saturday Social Ride (2026-11-20), where one
+// centred box, "Not coming?", says the booking will be cancelled and its red button cancels it (reason cant_come). No line
+// of text goes with the buttons. Staff see a tick on the roster. The evening-before reminder gains one sentence and links to
+// the ticket; the website ticket's Can't come links there with no=1, which opens the same box. All Supabase traffic is stubbed.
 
 const SAT = '2026-11-14', NIGHT = '2026-11-20';
 const sat = (o: Record<string, unknown> = {}) => ({ id: SAT, day: 'Saturday', session_date: SAT, capacity: 40, status: 'open', created_at: 1, event_kind: 'community', ride_kind: 'saturday', paid_ride: false, needs_approval: true, hide_queue: false, bike_slots: '{"_time":"06:00 - 06:30","_total":40}', ...o });
@@ -40,6 +42,20 @@ async function rider(page: Page, rows: Record<string, unknown>[], at: string, fx
   await page.evaluate(`setCustTab('${tab}')`);
   return calls;
 }
+/** customer_booking_update answers a rider's cancel as the function does: the fixture's row is cancelled, so the read
+ *  after it sees it. Returns the patches sent. */
+async function cancels(page: Page, rows: Record<string, unknown>[]) {
+  const patches: Record<string, unknown>[] = [];
+  await page.route('**/rest/v1/rpc/customer_booking_update*', async (r) => {
+    const b = r.request().postDataJSON() as { p_entry_id: string; p_patch: Record<string, unknown> };
+    patches.push(b.p_patch);
+    const x = rows.find((y) => y.id === b.p_entry_id);
+    if (x) Object.assign(x, { status: b.p_patch.status, cancel_reason: b.p_patch.cancel_reason ?? null, cancelled_by: 'customer' });
+    await r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: 'true' });
+  });
+  return patches;
+}
+const box = (page: Page) => page.locator('#confirm-modal [role="dialog"]');
 const ticket = (page: Page) => page.locator('#tab-myrides .ticket-card').first();
 const still = (page: Page) => page.locator('#tab-myrides .ticket-card .stc-row');
 const hero = (page: Page) => page.locator('#hub-body .hub-hero');
@@ -86,17 +102,106 @@ test.describe('@customer:bookings "Still coming?" on the ticket', () => {
     expect(calls).toHaveLength(1);
   });
 
-  test('"Can\'t come" opens the cancel dialog as it is, and nothing is stamped', async ({ page }) => {
-    const calls = await rider(page, [row('q1', SAT)], '2026-11-13T07:00:00+03:00');
+  test('"Can\'t come" on a Saturday ride asks first in one centred box; keeping leaves it booked, the red button cancels every rider', async ({ page }) => {
+    const rows = [row('q1', SAT), row('q2', SAT, { name: 'Maya Haddad', queue_num: 5 })];
+    const calls = await rider(page, rows, '2026-11-13T07:00:00+03:00');
+    const patches = await cancels(page, rows);
+    const no = () => still(page).locator('button', { hasText: 'Can’t come' }).click();
+    await no();
+    await expect(box(page)).toBeVisible();
+    await expect(box(page).locator('#dlgt-confirm')).toHaveText('Not coming?');
+    await expect(box(page).locator('.chrome-dbody')).toHaveText('Not coming will cancel your booking. This cancels the booking for all 2 riders.');
+    await expect(box(page).locator('.chrome-dact button')).toHaveText(['Keep booking', 'Cancel booking']);
+    await expect(box(page).locator('.chrome-dact .btn-red')).toHaveText('Cancel booking');
+    for (const b of await box(page).locator('.chrome-dact button').all()) { const h = (await b.boundingBox())!.height; expect(h, 'one line').toBeLessThan(60); }
+    await expect(page.locator('#cancel-reason-modal [role="dialog"]')).not.toBeVisible(); // no list of reasons to close instead
+    // centred on the screen
+    const vp = page.viewportSize()!, bb = (await box(page).boundingBox())!;
+    expect(Math.abs(bb.y + bb.height / 2 - vp.height / 2)).toBeLessThan(vp.height * 0.15);
+    if (process.env.SHOT_DIR) await page.screenshot({ path: `${process.env.SHOT_DIR}/stc-no-box-${test.info().project.name}.png` });
+    // Keep booking, the cross and a tap outside all leave it booked
+    await box(page).locator('button', { hasText: 'Keep booking' }).click();
+    await expect(box(page)).toHaveCount(0);
+    await no();
+    await box(page).locator('.x-close').click();
+    await expect(box(page)).toHaveCount(0);
+    await no();
+    await page.locator('#confirm-modal .modal-backdrop').click({ position: { x: 4, y: 4 } });
+    await expect(box(page)).toHaveCount(0);
+    expect(patches).toEqual([]);
+    await expect(still(page).locator('button')).toHaveCount(2);
+    // the red button cancels the whole booking at once, with the reason staff read as Can't come
+    await no();
+    await box(page).locator('.btn-red').click();
+    await expect.poll(() => patches.length).toBe(2);
+    for (const p of patches) expect(p).toMatchObject({ status: 'cancelled', cancel_reason: 'cant_come' });
+    expect(patches.some((p) => 'cancel_note' in p)).toBe(false);
+    await expect.poll(() => page.evaluate(`S.queue.filter(e=>e.status==='cancelled').map(e=>e.id).sort()`)).toEqual(['q1', 'q2']);
+    await expect(still(page)).toHaveCount(0);
+    expect(calls).toHaveLength(0); // nothing stamped as coming
+  });
+
+  test('a single rider\'s box names one booking, in the page\'s language (Arabic)', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('cq_lang', 'ar'));
+    await rider(page, [row('q1', SAT)], '2026-11-13T07:00:00+03:00');
+    await still(page).locator('button', { hasText: 'لا أستطيع الحضور' }).click();
+    await expect(box(page).locator('#dlgt-confirm')).toHaveText('لن تحضر؟');
+    await expect(box(page).locator('.chrome-dbody')).toHaveText('اختيار عدم الحضور يُلغي حجزك.');
+    await expect(box(page).locator('.chrome-dact button')).toHaveText(['إبقاء الحجز', 'إلغاء الحجز']);
+  });
+
+  test('"Can\'t come" on any other session still opens the cancel dialog with its reasons, and nothing is stamped', async ({ page }) => {
+    const rows = [row('q1', NIGHT)];
+    const calls = await rider(page, rows, '2026-11-20T10:00:00+03:00');
+    const patches = await cancels(page, rows);
     await still(page).locator('button', { hasText: 'Can’t come' }).click();
     const dlg = page.locator('#cancel-reason-modal [role="dialog"]');
     await expect(dlg).toBeVisible();
     await expect(dlg.locator('#cr-title')).toHaveText(await page.evaluate(`t('cancelReasonTitle')`) as string);
     await expect(dlg.locator('input[name="cr-reason"]').first()).toBeAttached();
-    await expect(dlg.locator('button', { hasText: await page.evaluate(`t('keepBookingBtn')`) as string })).toBeVisible();
+    await expect(box(page)).toHaveCount(0);
     expect(calls).toHaveLength(0);
     await dlg.locator('button', { hasText: await page.evaluate(`t('keepBookingBtn')`) as string }).click();
     await expect(still(page).locator('button')).toHaveCount(2); // kept: the question still stands
+    expect(patches).toEqual([]);
+  });
+
+  test('the website ticket\'s Can\'t come (/my-bookings?tk=<booking>&no=1) opens the same box on that ticket', async ({ page }) => {
+    const rows = [row('q1', NIGHT), row('q8', SAT, { queue_num: 8 })];
+    await page.clock.setFixedTime(new Date('2026-11-13T07:00:00+03:00'));
+    await stubSupabase(page, { sessions: [sat(), night(), later], customers: [], queue_entries: rows, bikes: [], 'rpc:my_bookings': rows });
+    const patches = await cancels(page, rows);
+    await loginCustomer(page, { id: 'c1', name: 'Lina Haddad', gender: 'male' });
+    await page.goto('/my-bookings?tk=q8&no=1');
+    await waitForSb(page);
+    await expect(box(page).locator('#dlgt-confirm')).toHaveText('Not coming?');
+    await expect.poll(() => page.evaluate('location.pathname+location.search')).toBe('/my-bookings');
+    await box(page).locator('.btn-red').click();
+    await expect.poll(() => patches.length).toBe(1);
+    expect(patches[0]).toMatchObject({ status: 'cancelled', cancel_reason: 'cant_come' });
+    expect(rows.find((r) => r.id === 'q1')!.status).toBe('waiting'); // the other booking is untouched
+  });
+
+  test('without no=1, or where the ticket does not ask, the link only opens Bookings at that ticket', async ({ page }) => {
+    const rows = [row('q1', SAT)];
+    await page.clock.setFixedTime(new Date('2026-11-13T07:00:00+03:00'));
+    await stubSupabase(page, { sessions: [sat(), night(), later], customers: [], queue_entries: rows, bikes: [], 'rpc:my_bookings': rows });
+    const patches = await cancels(page, rows);
+    await loginCustomer(page, { id: 'c1', name: 'Lina Haddad', gender: 'male' });
+    await page.goto('/my-bookings?tk=q1');
+    await waitForSb(page);
+    await expect(still(page).locator('button')).toHaveCount(2);
+    await page.waitForTimeout(1200); // the link's look for the ticket has run
+    await expect(box(page)).toHaveCount(0);
+    await page.clock.setFixedTime(new Date('2026-11-12T12:00:00+03:00')); // more than 24 hours before the gathering: not asked yet
+    await page.goto('/my-bookings?tk=q1&no=1');
+    await waitForSb(page);
+    await expect(ticket(page)).toBeVisible();
+    await expect(still(page)).toHaveCount(0);
+    await page.waitForTimeout(1200);
+    await expect(box(page)).toHaveCount(0);
+    await expect(page.locator('#cancel-reason-modal [role="dialog"]')).not.toBeVisible();
+    expect(patches).toEqual([]);
   });
 
   test('every rider of the booking is confirmed by one tap', async ({ page }) => {
@@ -215,12 +320,25 @@ test.describe('@customer:members "Still coming?" on the Community card', () => {
     await expect(still(page).locator('.stc-ok')).toHaveText('Coming');
   });
 
-  test('"Can\'t come" on the card opens the cancel dialog; the card leaves at the start, and a waitlisted booking has none', async ({ page }) => {
+  test('a booking cancelled from the card\'s "Not coming?" leaves the card at once', async ({ page }) => {
+    const rows = [row('q1', SAT)];
+    await rider(page, rows, '2026-11-14T05:00:00+03:00', {}, 'members');
+    const patches = await cancels(page, rows);
+    await hero(page).locator('button', { hasText: 'Can’t come' }).click();
+    await box(page).locator('.btn-red').click();
+    await expect.poll(() => patches.length).toBe(1);
+    expect(patches[0]).toMatchObject({ status: 'cancelled', cancel_reason: 'cant_come' });
+    await expect(page.locator('#hub-body .stc-row')).toHaveCount(0);
+  });
+
+  test('"Can\'t come" on the card asks "Not coming?" as the ticket does; the card leaves at the start, and a waitlisted booking has none', async ({ page }) => {
     await rider(page, [row('q1', SAT)], '2026-11-14T05:00:00+03:00', {}, 'members');
     await expect(hero(page)).toHaveClass(/hub-hero-today/);
     await hero(page).locator('button', { hasText: 'Can’t come' }).click();
-    await expect(page.locator('#cancel-reason-modal [role="dialog"]')).toBeVisible();
-    await page.evaluate(`closeCancelReasonModal()`);
+    await expect(box(page).locator('#dlgt-confirm')).toHaveText('Not coming?');
+    await expect(box(page).locator('.chrome-dact .btn-red')).toHaveText('Cancel booking');
+    await box(page).locator('button', { hasText: 'Keep booking' }).click();
+    await expect(hero(page).locator('.stc-row button')).toHaveText(['I’m coming', 'Can’t come']);
     await page.clock.setFixedTime(new Date('2026-11-14T06:30:00+03:00')); // the ride starts: the card stays "today", the question goes
     await page.evaluate(`_hubRender()`);
     await expect(hero(page)).toHaveClass(/hub-hero-today/);
@@ -252,6 +370,8 @@ test.describe('@staff:bookings "Still coming?" on the roster', () => {
     await expect(mk).toHaveAttribute('aria-label', 'Confirmed coming');
     await expect(mk).toHaveAttribute('title', /^Confirmed coming · .*21:40/);
     for (const id of ['q2', 'q3', 'q4']) await expect(tr(id).locator('.stc-mk')).toHaveCount(0);
+    // a booking cancelled through a Saturday ride's "Not coming?" reads as Can't come (cancel_reason cant_come)
+    expect(await page.evaluate(`_cancelReasonText({cancelReason:'cant_come'})`)).toBe('Can’t come');
     if (process.env.SHOT_DIR) await page.locator('#tab-queue .queue-table').screenshot({ path: `${process.env.SHOT_DIR}/stc-roster.png` });
   });
 
@@ -260,7 +380,7 @@ test.describe('@staff:bookings "Still coming?" on the roster', () => {
     for (const l of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) {
       expect((pack(`staff-${l}.json`).stillMark || '').length, `staff ${l}`).toBeGreaterThan(3);
       const r = pack(`${l}.json`);
-      for (const k of ['stillYes', 'stillNo', 'stillOk', 'stillAsk']) expect((r[k] || '').length, `${l} ${k}`).toBeGreaterThan(2);
+      for (const k of ['stillYes', 'stillNo', 'stillOk', 'stillAsk', 'stcNoAsk', 'stcNoBody']) expect((r[k] || '').length, `${l} ${k}`).toBeGreaterThan(2);
       expect(r.stillMark, `${l}: the staff word stays out of the rider pack`).toBeUndefined();
     }
   });

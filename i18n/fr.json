@@ -1359,6 +1359,8 @@
   "stillNo": "Je ne peux pas venir",
   "stillOk": "Présent",
   "stillAsk": "Vous venez toujours ?",
+  "stcNoAsk": "Vous ne venez pas ?",
+  "stcNoBody": "Indiquer que vous ne venez pas annule votre réservation.",
   "rateTitle": "Comment s'est passée votre sortie ?",
   "waRateMsg": "Merci d'avoir roulé avec MicroMobility ! Comment s'est passée votre sortie ? Notez-la ici :\n\nشكراً لركوبك مع مايكروموبيليتي! كيف كانت رحلتك؟ قيّمها هنا:",
   "typePrefHint": "Nous le présélectionnerons à chaque réservation.",

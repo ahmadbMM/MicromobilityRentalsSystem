@@ -1359,6 +1359,8 @@
   "stillNo": "Hindi ako makakarating",
   "stillOk": "Darating",
   "stillAsk": "Darating ka pa rin ba?",
+  "stcNoAsk": "Hindi makakarating?",
+  "stcNoBody": "Kapag sinabi mong hindi ka makakarating, makakansela ang booking mo.",
   "rateTitle": "Kumusta ang iyong ride?",
   "waRateMsg": "Salamat sa pagsakay kasama ang MicroMobility! Kumusta ang iyong ride? I-rate ito dito:\n\nشكراً لركوبك مع مايكروموبيليتي! كيف كانت رحلتك؟ قيّمها هنا:",
   "typePrefHint": "Ipe-pre-select namin ito sa bawat booking mo.",

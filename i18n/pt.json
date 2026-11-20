@@ -1359,6 +1359,8 @@
   "stillNo": "Não posso ir",
   "stillOk": "Confirmado",
   "stillAsk": "Você ainda vem?",
+  "stcNoAsk": "Você não vai?",
+  "stcNoBody": "Se você disser que não vai, sua reserva será cancelada.",
   "rateTitle": "Como foi seu passeio?",
   "waRateMsg": "Obrigado por pedalar com a MicroMobility! Como foi seu passeio? Avalie aqui:\n\nشكراً لركوبك مع مايكروموبيليتي! كيف كانت رحلتك؟ قيّمها هنا:",
   "typePrefHint": "Vamos pré-selecionar isso toda vez que você reservar.",
