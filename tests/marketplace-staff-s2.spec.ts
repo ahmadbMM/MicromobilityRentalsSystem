@@ -342,8 +342,12 @@ test.describe('@staff:market Our listings', () => {
     await expect(d.locator('#mks-f-category optgroup')).toHaveCount(2);
     await expect(d.locator('#mks-f-category option[value="running-old"]')).toHaveCount(0);
     await expect(d.getByLabel('Frame or serial number')).toHaveCount(0);
+    await d.getByLabel('Category').focus();
     await d.getByLabel('Category').selectOption('cycling-bike-electric');
     for (const l of ['Brand', 'Model', 'Year', 'Frame size', 'Wheel size', 'Frame or serial number']) await expect(d.getByLabel(l, { exact: true })).toBeVisible();
+    // the form was drawn again for the category: the picker still has the focus, also once the dialogs' focus pass has run
+    await page.waitForTimeout(120);
+    await expect(d.getByLabel('Category')).toBeFocused();
     await expect(d.getByRole('group', { name: 'Declarations' }).getByRole('checkbox')).toHaveCount(4);
     await d.getByLabel('Category').selectOption('cycling-helmets');
     await expect(d.getByLabel('Size', { exact: true })).toBeVisible();
@@ -490,6 +494,22 @@ test.describe('@staff:market Our listings', () => {
     await expect(page.locator('.toast', { hasText: 'That step is no longer possible from its current status.' })).toHaveCount(1);
     await expect.poll(() => of(calls, 'staff_market_listings').length).toBe(2);
   });
+
+  test('the categories are part of the view: a failed read of them offers Try again, not an editor with nothing to pick', async ({ page }) => {
+    await staff(page);
+    let fail = true;
+    await page.route('**/rest/v1/market_categories**', async (route) => {
+      if (route.request().method() !== 'GET' || !fail) return route.fallback();
+      return route.fulfill({ status: 500, headers: { ...CORS, 'content-type': 'application/json' }, body: JSON.stringify({ code: 'XX000', message: 'boom', details: null, hint: null }) });
+    });
+    await open(page, 'ours');
+    await expect(panel(page).getByRole('button', { name: 'Try again' })).toBeVisible();
+    await expect(panel(page).getByRole('button', { name: 'New listing' })).toHaveCount(0);
+    fail = false;
+    await panel(page).getByRole('button', { name: 'Try again' }).click();
+    await expect(rowOf(page, 12).locator('.mks-meta')).toContainText('Road bikes');
+    await expect(panel(page).getByRole('button', { name: 'New listing' })).toBeVisible();
+  });
 });
 
 test.describe('@staff:market Commission', () => {
@@ -616,7 +636,29 @@ test.describe('@staff:market Settings', () => {
     await expect(p.getByRole('switch', { name: 'Marketplace on micromobility.sa' })).toBeDisabled();
     await expect(p.getByLabel('Commission (% of the sold price)')).toBeDisabled();
     await expect(p.getByLabel('Blocked words, one on each line')).toBeDisabled();
+    await expect(p.getByLabel('Rules version')).toBeDisabled();
     await expect(p.getByRole('button', { name: 'Save' })).toHaveCount(0);
+  });
+
+  test('the rules version (marketplace.terms_version) reads as the database reads it and is asked about before it is written', async ({ page }) => {
+    await staff(page);
+    const sc = writes(page, 'site_content');
+    await open(page, 'settings');
+    const p = panel(page), f = p.getByLabel('Rules version');
+    await expect(f).toHaveValue('2026-11-21'); // never saved here: the database's own default
+    await f.fill('2027 01');
+    await p.getByRole('button', { name: 'Save' }).click();
+    await expect(page.locator('.toast', { hasText: 'Check this field: Rules version' })).toHaveCount(1);
+    await expect(confirmBox(page)).toHaveCount(0);
+    expect(sc).toHaveLength(0);
+    await f.fill('2027-01-15');
+    await p.getByRole('button', { name: 'Save' }).click();
+    await expect(confirmBox(page)).toContainText('Change the rules version?');
+    await expect(confirmBox(page)).toContainText('Every seller is asked to accept the rules again before their next listing goes up.');
+    expect(sc).toHaveLength(0);
+    await confirmBox(page).getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => sc.length).toBe(1);
+    expect((sc[0].body as { key: string; value: unknown }[]).map((r) => [r.key, r.value])).toEqual([['marketplace.terms_version', '2027-01-15']]);
   });
 });
 

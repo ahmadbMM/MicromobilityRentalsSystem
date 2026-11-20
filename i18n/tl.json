@@ -10835,7 +10835,7 @@
   "mksShNoneWait": "Walang aplikasyong naghihintay.",
   "mksShCrN": "CR {0}",
   "mksShSlug": "Address ng page ng tindahan",
-  "mksShCr": "Commercial registration number",
+  "mksShCr": "Numero ng commercial registration",
   "mksShActivity": "Rehistradong aktibidad",
   "mksShVat": "VAT number",
   "mksShAddress": "Address",
@@ -10995,6 +10995,9 @@
   "mksCaNone": "Wala pang kategorya.",
   "mksCaDoneShow": "Ipinapakita na ang {0}.",
   "mksCaDoneHide": "Nakatago na ang {0}.",
+  "mksSeTerms": "Bersyon ng mga tuntunin",
+  "mksSeTermsQ": "Palitan ang bersyon ng mga tuntunin?",
+  "mksSeTermsBody": "Hihilingin sa bawat nagbebenta na tanggapin muli ang mga tuntunin bago ma-publish ang susunod nilang listing.",
   "dntLabel": "Tala para sa desk",
   "dntFail": "Hindi na-save ang tala mo para sa desk.",
   "dntRider": "Tala ng customer"

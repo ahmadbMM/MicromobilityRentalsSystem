@@ -10995,6 +10995,9 @@
   "mksCaNone": "Aucune catégorie pour l'instant.",
   "mksCaDoneShow": "{0} est affichée.",
   "mksCaDoneHide": "{0} est masquée.",
+  "mksSeTerms": "Version des règles",
+  "mksSeTermsQ": "Changer la version des règles ?",
+  "mksSeTermsBody": "Chaque vendeur devra accepter les règles à nouveau avant de publier sa prochaine annonce.",
   "dntLabel": "Note pour l'accueil",
   "dntFail": "Votre note pour l'accueil n'a pas été enregistrée.",
   "dntRider": "Note du client"

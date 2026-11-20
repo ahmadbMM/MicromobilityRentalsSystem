@@ -10995,6 +10995,9 @@
   "mksCaNone": "Aún no hay categorías.",
   "mksCaDoneShow": "{0} se muestra.",
   "mksCaDoneHide": "{0} está oculta.",
+  "mksSeTerms": "Versión de las normas",
+  "mksSeTermsQ": "¿Cambiar la versión de las normas?",
+  "mksSeTermsBody": "Cada vendedor tendrá que aceptar las normas de nuevo antes de publicar su próximo anuncio.",
   "dntLabel": "Nota para el mostrador",
   "dntFail": "Tu nota para el mostrador no se guardó.",
   "dntRider": "Nota del cliente"

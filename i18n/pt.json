@@ -10995,6 +10995,9 @@
   "mksCaNone": "Ainda não há categorias.",
   "mksCaDoneShow": "{0} está visível.",
   "mksCaDoneHide": "{0} está oculta.",
+  "mksSeTerms": "Versão das regras",
+  "mksSeTermsQ": "Alterar a versão das regras?",
+  "mksSeTermsBody": "Cada vendedor terá de aceitar as regras de novo antes de publicar o próximo anúncio.",
   "dntLabel": "Nota para o balcão",
   "dntFail": "Sua nota para o balcão não foi salva.",
   "dntRider": "Nota do cliente"

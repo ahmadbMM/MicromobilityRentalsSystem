@@ -15291,7 +15291,7 @@ body.view-staff.view-staff #mks-pop .confirm-box{width:min(var(--sf-dlg-l),calc(
 #mks-pop .chrome-dbody>*{flex-shrink:0;}
 #mks-pop .chrome-dbody>.mks-ph-add{align-self:flex-start;}
 #mks-pop .form-group,#tab-market .mks-set .form-group{margin:0;}
-#mks-pop :is(input[type=text],input[type=number],select,textarea),#tab-market .mks-set :is(input[type=number],textarea){width:100%;}
+#mks-pop :is(input[type=text],input[type=number],select,textarea),#tab-market .mks-set :is(input[type=text],input[type=number],textarea){width:100%;}
 #mks-pop .mks-err{color:var(--red);font-weight:600;font-size:var(--sf-fs-sm);}
 #mks-pop .mks-h{font-size:var(--sf-fs-sm);font-weight:600;color:var(--text);margin-top:4px;}
 #mks-pop .mks-del{margin-inline-end:auto;}
