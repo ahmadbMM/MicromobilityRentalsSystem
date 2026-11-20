@@ -117,7 +117,7 @@ test.describe('@customer:members the Community tab', () => {
     await expect(page.locator('#hub-body .hub-secs').getByRole('button')).toHaveText(['Sessions', 'Club']);
     await expect(page.locator('#hub-pane-goals')).toHaveCount(0);
     await expect(page.locator('#hub-pane-sess')).toBeVisible(); // the part picked has gone: the first one shows
-    // and with Sessions alone, no switch at all (the Community chat's card leads Club since 2026-11-20: off here, as on a
+    // and with Sessions alone, no switch at all (the Community chat, a corner button since 2026-11-20, is off here too, as on a
     // database without the chat)
     await page.evaluate(`S._rsgOff=true;S._chtOff=true;window._hubDeps.inv=null;_hubRender()`);
     await expect(page.locator('#hub-body .hub-secs')).toHaveCount(0);

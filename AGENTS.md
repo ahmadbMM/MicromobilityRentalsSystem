@@ -1118,15 +1118,24 @@ member appears, where the chat lives and what may be sent: "Full name", "One clu
   every 45 s while it is, never while hidden or under `_sbCooling()`. Never put a message, a name or an id in the tick,
   and never add `hub_chat` to the `supabase_realtime` publication (postgres_changes sends whole rows to every listener).
 - **Rider** (`member-hub.js`, the last block above `window._hubRender`; names `_cht*`, `S._cht`, `CHT_*`, `#cht-*`,
-  `.cht-*`): the card (first in the tab's Club part; its "N new" from `chat_peek` against `cq_cht_seen_<account>`, the only
-  thing kept on the phone) opens `S._hubView = 'chat'` (`/members?hv=chat`; closing it returns to the Club part, `HUB_VIEW_SEC`). The page is written once and then only `#cht-log`
+  `.cht-*`): the way in is a round button at the bottom end corner of every page of the app for a member (`#cht-fab`,
+  `_chtFab*` in app.src.html, so it needs no member-hub.js; the user, 2026-11-20: "show the chat in booking app as an icon at
+  the bottom corner of the page"; it replaced the card that led the Club part). It shows on the tabs and the signed-in
+  event picker, above the floating tab bar on a phone, on the left in Arabic and Urdu; not on the chat itself, nor while
+  a booking's Continue bar floats, the keyboard is up or a gate page holds the screen. Its count (a red pill, "Community
+  chat, N new" to a screen reader) comes from `chat_peek` against `cq_cht_seen_<account>` (the only thing kept on the
+  phone), asked at most every two minutes when a page paints or the app comes back into view, never on a socket of its
+  own; `S._chtN` is shared with member-hub.js, which zeroes it when the member reads to the end. A tap opens
+  `S._hubView = 'chat'` on the Community tab (`/members?hv=chat` opens it too) and Close goes back to the page the
+  button was on (`S._chtFrom`; the Community tab after a link); the tab bar's Community always shows the tab, not the
+  chat (`_commTap`). The page is written once and then only `#cht-log`
   (`_chtPaint`), so a read landing never takes away what is typed. Others' messages sit at the start edge under the full
   name, the member's own at the end edge, the team's outlined under "MicroMobility team". The box (`#cht-foot`) is
   sticky above the tab bar; at the end of the page the reader follows new messages, further up a "New messages" button
   shows. Enter sends only with a mouse and keyboard. One button a message: Remove on their own, Report on another
   member's (both ask first, in the app's centred confirm), none on the team's. A refusal is said over the box, no toast.
   The topic and the page's clock live only while the chat is on screen (`_chtJoin`, `_chtWatch`, `_chtLeave`). A
-  database without the functions (PGRST202) closes the page and hides the card.
+  database without the functions (PGRST202) closes the page and hides the button.
 - **Staff** (Community > Activities > Chat, `_acCh*`): the pill counts reported messages nobody has looked at; All /
   Reported / Removed / Muted; each card has the writer's name (opens `openAccountHistory`), Remove or Put back, Keep on a
   reported one (`staff_chat_set`), Mute for 1 day, 7 days or until lifted and Lift mute (`staff_chat_mute`, p_days null
@@ -1138,8 +1147,8 @@ member appears, where the chat lives and what may be sent: "Full name", "One clu
 - **Privacy Notice:** a row, a legal-basis line (consent, asked with the first message) and a retention line (shown to
   members for 6 hours; kept by staff and not deleted), English and Arabic, PRIVACY_VERSION 2026-11-20, nobody asked
   again; the website's copy is synced from it. The notice says plainly that staff keep every message: keep it true.
-- **Website:** micromobility.sa/club shows a "Community chat" card that opens the chat in the booking app
-  (`ChatCard`, `chatHref`); the chat itself is the app's only.
+- **Website:** micromobility.sa/club shows the same round button at the bottom corner of the members' area, opening
+  the chat in the booking app (`ChatButton`, `chatHref`; no count, the site keeps no copy); the chat itself is the app's only.
 - **Limits to know:** the free realtime plan counts every tick per listener (2 million messages a month, 200 sockets):
   1,000 messages a day read by 50 open pages is about 1.5 million a month. If the club outgrows it, lengthen the tick's
   answer or drop the tick for the page's own clock before paying for more.

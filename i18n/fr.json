@@ -1345,6 +1345,8 @@
   "anRatedShort": "notées",
   "rateThanks": "Merci d’avoir noté votre sortie.",
   "hubDotLbl": "Communauté, nouveau",
+  "chtFab": "Discussion de la communauté",
+  "chtFabNew": "Discussion de la communauté, {0} nouveaux",
   "hpFirst": "Votre première séance",
   "hpSecond": "Votre deuxième séance",
   "hpBack": "De retour ce mois-ci",

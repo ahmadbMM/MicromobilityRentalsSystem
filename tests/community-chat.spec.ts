@@ -5,8 +5,10 @@ import { stubSupabase, stubRealtime, unlockStaff, loginCustomer, waitForSb, type
 import { hubPart } from './helpers/hub';
 
 // The Community chat (2026-11-20, migration 20261120203000; the user: "can we create a live chat in the booking app but only
-// for community members?", then "Full name", "One club chat", "Text only"). The member's side is a card on the Community tab
-// (member-hub.js) and its own page; the staff side is Community > Activities > Chat. All Supabase traffic is stubbed, the
+// for community members?", then "Full name", "One club chat", "Text only"). The member's side is a round button at the bottom
+// corner of every page (app.src.html _chtFab*; the user, 2026-11-20: "show the chat in booking app as an icon at the bottom
+// corner of the page"; it was a card on the Community tab) and the chat's own page (member-hub.js); the staff side is
+// Community > Activities > Chat. All Supabase traffic is stubbed, the
 // realtime socket too; what only the database enforces (members only, the limits, the reports that hide a message, the mute)
 // is checked in the migration's own text below and was run on a local Postgres.
 
@@ -49,33 +51,31 @@ async function openTab(page: Page) {
   await page.evaluate(`setCustTab('members')`);
   await expect(page.locator('#hub-body .hub-hero')).toBeVisible();
 }
-// The card leads the Club part of the tab (the three parts of 2026-11-20), reached through the switch as a member does.
-async function openClub(page: Page) {
-  await openTab(page);
-  await hubPart(page, 'club');
-}
+// The way in: the round button at the bottom corner, on whatever page the member is on.
 async function openChat(page: Page) {
-  await openClub(page);
-  await card(page).getByRole('button', { name: 'Open the chat' }).click();
+  await expect(fab(page)).toBeVisible();
+  await fab(page).click();
   await expect(pageEl(page).locator('h2')).toHaveText('Community chat');
 }
-const card = (page: Page) => page.locator('#hub-body .cht-card');
+const fab = (page: Page) => page.locator('#cht-fab');
 const pageEl = (page: Page) => page.locator('#hub-body #cht-page');
 const rowsEl = (page: Page) => pageEl(page).locator('.cht-row');
 const dlg = (page: Page) => page.locator('#confirm-modal .confirm-box');
 const calls = (log: { fn: string; body: Record<string, unknown> }[], fn: string) => log.filter((x) => x.fn === fn);
 
 test.describe('@customer:members Community chat', () => {
-  test('the card counts what is new; the page shows each message under its writer\'s full name, the member\'s own on the other side, the team\'s by name', async ({ page }) => {
+  test('the corner button counts what is new and opens the chat: each message under its writer\'s full name, the member\'s own on the other side, the team\'s by name; Close goes back to the page it was opened from', async ({ page }) => {
     const { log } = await member(page, { 'rpc:chat_peek': { ok: true, n: 3 } });
-    await openClub(page);
-    await expect(card(page)).toContainText('Community chat');
-    expect(await page.evaluate(`document.querySelector('#hub-pane-club .hub-card')===document.querySelector('#hub-body .cht-card')`)).toBe(true); // it leads the Club part
-    await expect(card(page).locator('.cht-n')).toHaveText('3 new');
+    await page.evaluate(`setCustTab('myrides')`); // on any page, not only the Community tab
+    await expect(fab(page)).toBeVisible();
+    await expect(fab(page).locator('.cht-fab-n')).toHaveText('3');
+    await expect(fab(page)).toHaveAccessibleName('Community chat, 3 new');
     expect(calls(log, 'chat_peek')[0]!.body).toEqual({ p_id: 'c1', p_token: 'tok-spec', p_after: null }); // nothing read to the end on this phone yet
-    expect(calls(log, 'chat_read')).toHaveLength(0); // no message is read for the card
-    await card(page).getByRole('button', { name: 'Open the chat' }).click();
+    expect(calls(log, 'chat_read')).toHaveLength(0); // no message is read for the button
+    expect(await page.locator('#cht-fab svg').count()).toBe(1); // the app's own drawn mark, no emoji
+    await fab(page).click();
     await expect(pageEl(page).locator('h2')).toHaveText('Community chat');
+    await expect(fab(page)).toBeHidden(); // the chat is the page: no button over it
     await expect(rowsEl(page)).toHaveCount(4);
     expect(calls(log, 'chat_read')[0]!.body).toEqual({ p_id: 'c1', p_token: 'tok-spec' });
     // another member: the full name over the first of a run, not again over the second
@@ -103,10 +103,13 @@ test.describe('@customer:members Community chat', () => {
     await expect.poll(() => page.evaluate(`localStorage.getItem('cq_cht_seen_c1')`)).toBe('14');
     expect(await page.evaluate(`Object.keys(localStorage).filter(k=>/cht/i.test(k))`)).toEqual(['cq_cht_seen_c1']);
     expect(await page.evaluate(`JSON.stringify(localStorage).includes('Who is riding')`)).toBe(false);
-    // Close goes back to the Club part; the card no longer counts them
+    // Close goes back to Bookings, where the button was; it no longer counts them
     await pageEl(page).getByRole('button', { name: 'Close' }).click();
-    await expect(card(page)).toBeVisible();
-    await expect(card(page).locator('.cht-n')).toHaveCount(0);
+    await expect(page.locator('#tab-myrides')).toHaveClass(/\bactive\b/);
+    await expect(page.locator('#cht-page')).toHaveCount(0);
+    await expect(fab(page)).toBeVisible();
+    await expect(fab(page).locator('.cht-fab-n')).toHaveCount(0);
+    await expect(fab(page)).toHaveAccessibleName('Community chat');
     await expect.poll(() => page.evaluate('!!S._chtCh||!!S._chtT')).toBe(false); // the topic and the page's clock are let go
   });
 
@@ -334,19 +337,65 @@ test.describe('@customer:members Community chat', () => {
     await expect(pageEl(page).locator('h2')).toHaveText('Community chat');
     await expect(rowsEl(page)).toHaveCount(4);
     expect(new URL(page.url()).search).toBe('');
+    await pageEl(page).getByRole('button', { name: 'Close' }).click(); // nowhere to go back to: the Community tab
+    await expect(page.locator('#tab-members')).toHaveClass(/\bactive\b/);
+    await expect(page.locator('#cht-page')).toHaveCount(0);
   });
 
-  test('a database without it: no card; one that loses it while the page is open closes the page', async ({ page }) => {
-    await member(page, { 'rpc:chat_peek': absent('chat_peek') });
+  test('a database without it: no button; one that loses it while the page is open closes the page', async ({ page }) => {
+    const { log } = await member(page, { 'rpc:chat_peek': absent('chat_peek') });
+    await expect.poll(() => calls(log, 'chat_peek').length).toBeGreaterThan(0);
+    await expect(fab(page)).toBeHidden();
     await openTab(page);
-    await expect(card(page)).toHaveCount(0);
+    await expect(fab(page)).toBeHidden();
     await page.unrouteAll({ behavior: 'ignoreErrors' });
     await member(page, { 'rpc:chat_read': absent('chat_read') });
-    await openClub(page);
-    await card(page).getByRole('button', { name: 'Open the chat' }).click();
-    await expect(page.locator('#hub-pane-club')).toBeVisible(); // back in the Club part
+    await openTab(page);
+    await fab(page).click();
+    await expect(page.locator('#hub-body .hub-hero')).toBeVisible(); // back on the tab
     await expect(page.locator('#cht-page')).toHaveCount(0);
-    await expect(card(page)).toHaveCount(0);
+    await expect(fab(page)).toBeHidden();
+  });
+
+  test('the button sits at the bottom end corner, above the tab bar on a phone and on the left in Arabic; never for a rider who is not a member', async ({ page }, info) => {
+    await member(page);
+    await page.evaluate(`setCustTab('myrides')`);
+    await expect(fab(page)).toBeVisible();
+    const vp = page.viewportSize()!;
+    let b = (await fab(page).boundingBox())!;
+    expect(b.width).toBeGreaterThanOrEqual(44); // a thumb's size
+    expect(vp.width - (b.x + b.width)).toBeLessThan(24); // at the end edge
+    expect(vp.height - (b.y + b.height)).toBeLessThan(info.project.name === 'mobile' ? 160 : 40); // at the bottom
+    if (info.project.name === 'mobile') {
+      const nav = (await page.locator('#cust-bottom-nav').boundingBox())!;
+      expect(b.y + b.height).toBeLessThanOrEqual(nav.y); // above the floating tab bar, not on it
+    }
+    expect(await page.evaluate('document.documentElement.scrollWidth<=window.innerWidth')).toBe(true);
+    await page.evaluate(`setLang('ar')`);
+    await expect(fab(page)).toHaveAccessibleName('دردشة المجتمع');
+    b = (await fab(page).boundingBox())!;
+    expect(b.x).toBeLessThan(24); // the end edge is the left in Arabic
+    await page.evaluate(`setLang('en')`);
+    // the Community tab has it too, and no card for the chat any more
+    await openTab(page);
+    await expect(fab(page)).toBeVisible();
+    await hubPart(page, 'club');
+    await expect(page.locator('#hub-body .cht-card')).toHaveCount(0);
+    // the tab bar's Community shows the tab, not the chat the button opened
+    await fab(page).click();
+    await expect(pageEl(page)).toBeVisible();
+    await page.evaluate(`_commTap()`);
+    await expect(page.locator('#hub-body .hub-hero, #hub-body .hub-sec').first()).toBeVisible();
+    await expect(page.locator('#cht-page')).toHaveCount(0);
+    await expect(fab(page)).toBeVisible();
+    // not a member: no button and nothing asked
+    await page.unrouteAll({ behavior: 'ignoreErrors' });
+    const { log } = await member(page, { 'rpc:community_member': false, 'rpc:hub_pulse': { ok: true, member: false, dot: false, fresh: [] } });
+    await page.evaluate(`setCustTab('myrides')`);
+    await expect.poll(() => calls(log, 'community_member').length).toBeGreaterThan(0);
+    await page.waitForTimeout(300);
+    await expect(fab(page)).toBeHidden();
+    expect(calls(log, 'chat_peek')).toHaveLength(0);
   });
 
   test('a failed first read says so and Try again reads again', async ({ page }) => {
@@ -369,7 +418,9 @@ test.describe('@customer:members Community chat', () => {
     await openTab(page);
     const bad = await page.evaluate(`Object.entries(HUB_T).filter(([k])=>k.startsWith('cht')).filter(([k,v])=>v.length!==10||v.some(x=>!String(x).trim())).map(([k])=>k)`);
     expect(bad).toEqual([]);
-    expect(await page.evaluate(`Object.keys(HUB_T).filter(k=>k.startsWith('cht')).length`)).toBeGreaterThanOrEqual(19);
+    expect(await page.evaluate(`Object.keys(HUB_T).filter(k=>k.startsWith('cht')).length`)).toBeGreaterThanOrEqual(17);
+    // the corner button's two words live with the app's own (every language file, check-i18n's parity)
+    expect(await page.evaluate(`['chtFab','chtFabNew'].every(k=>LANG.en[k])`)).toBe(true);
     const native = await page.evaluate(`Object.entries(HUB_T).filter(([k])=>k.startsWith('cht')).filter(([k,v])=>/[०-९০-৯]/.test(v[8]+v[9])).map(([k])=>k)`);
     expect(native).toEqual([]);
     const holes = await page.evaluate(`Object.entries(HUB_T).filter(([k])=>k.startsWith('cht')).filter(([k,v])=>new Set(v.map(x=>(String(x).match(/\\{\\d\\}/g)||[]).sort().join())).size!==1).map(([k])=>k)`);

@@ -9457,11 +9457,37 @@ body:not(.view-staff) .rsg-body{margin:8px 0 4px;font-size:var(--fs-15);line-hei
 body:not(.view-staff) .rsg-reply{margin-top:10px;padding:10px 12px;border-radius:var(--r-ctl);background:var(--paper);border-inline-start:3px solid var(--go);}
 body:not(.view-staff) .rsg-reply-k{display:block;font-size:var(--fs-13);font-weight:600;color:var(--go-2);}
 body:not(.view-staff) .rsg-reply p{margin:4px 0 0;font-size:var(--fs-15);line-height:1.45;color:var(--ink);white-space:pre-line;overflow-wrap:anywhere;}
-/* The Community chat (member-hub.js _cht*, 2026-11-20; migration 20261120203000): its card, the messages (others at the
+/* The Community chat (member-hub.js _cht*, 2026-11-20; migration 20261120203000): its button, the messages (others at the
    start edge under their full name, the member's own at the end edge, the team's outlined) and the box, which stays at
    the foot of the screen above the tab bar */
-body:not(.view-staff) .cht-card-h{display:flex;align-items:center;gap:6px;}
-body:not(.view-staff) .cht-n{margin-inline-start:auto;flex:none;padding:3px 10px;border-radius:999px;background:var(--go-wash);color:var(--go-2);font-size:var(--fs-13);font-weight:600;}
+/* The button (app.src.html _chtFab*; the user, 2026-11-20: "show the chat in booking app as an icon at the bottom corner of
+   the page"): round, at the bottom end corner of the app's pages for a member, above the floating tab bar on a phone (its
+   58 + 12 + 10, and 12 of air), the count of new messages on its shoulder. It steps aside while a booking's Continue bar
+   floats, the keyboard is up or a gate page holds the screen; a pop-up covers it. */
+#cht-fab{display:none;}
+body:not(.view-staff):is(.view-customer,.view-picker) #cht-fab:not([hidden]){position:fixed;inset-inline-end:max(16px,env(safe-area-inset-right));bottom:calc(24px + env(safe-area-inset-bottom));z-index:105;
+  display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;padding:0;border:0;border-radius:50%;
+  background:var(--go);color:var(--paper);box-shadow:var(--lq-3);cursor:pointer;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .18s var(--ease-spring,ease);}
+html[dir="rtl"] body:not(.view-staff):is(.view-customer,.view-picker) #cht-fab:not([hidden]){inset-inline-end:max(16px,env(safe-area-inset-left));}
+body:not(.view-staff):is(.view-customer,.view-picker) #cht-fab:not([hidden]):active{transform:scale(.94);}
+body:not(.view-staff):is(.view-customer,.view-picker) #cht-fab:not([hidden]):hover{background:var(--go-2);}
+body:not(.view-staff) #cht-fab:focus-visible{outline:3px solid var(--go);outline-offset:3px;}
+body:not(.view-staff) #cht-fab .cu-ic{display:block;}
+body:not(.view-staff) .cht-fab-n{position:absolute;top:-3px;inset-inline-end:-3px;box-sizing:border-box;min-width:22px;height:22px;padding:0 6px;
+  border-radius:999px;background:var(--red);color:var(--paper);font-size:var(--fs-12);font-weight:600;line-height:22px;text-align:center;
+  font-variant-numeric:tabular-nums;box-shadow:0 0 0 2px var(--paper);pointer-events:none;}
+body:not(.view-staff).gate-page #cht-fab,
+body:not(.view-staff).view-customer:has(#tab-register.active .mm-reg-foot) #cht-fab,
+html.kb-open body:not(.view-staff) #cht-fab{display:none!important;}
+@media(max-width:767px){
+  body:not(.view-staff):is(.view-customer,.view-picker) #cht-fab:not([hidden]){inset-inline-end:max(14px,env(safe-area-inset-right));bottom:calc(max(10px,env(safe-area-inset-bottom)) + 82px);}
+  html[dir="rtl"] body:not(.view-staff):is(.view-customer,.view-picker) #cht-fab:not([hidden]){inset-inline-end:max(14px,env(safe-area-inset-left));}
+  /* the end of the page clears it as well as the bar */
+  body:not(.view-staff):is(.view-customer,.view-picker):has(#cht-fab:not([hidden])) #app-footer{padding-bottom:calc(156px + env(safe-area-inset-bottom));}
+}
+@media (prefers-reduced-motion:reduce){body:not(.view-staff):is(.view-customer,.view-picker) #cht-fab:not([hidden]){transition:none;transform:none;}}
+@media (forced-colors:active){body:not(.view-staff):is(.view-customer,.view-picker) #cht-fab:not([hidden]){border:2px solid ButtonText;}}
 body:not(.view-staff) .cht-log{display:flex;flex-direction:column;min-height:42vh;padding:4px 0 14px;}
 body:not(.view-staff) .cht-empty{margin:auto;padding:24px 0;color:var(--ink-2);font-size:var(--fs-15);text-align:center;}
 body:not(.view-staff) .cht-older{align-self:center;min-height:44px;margin-bottom:4px;}

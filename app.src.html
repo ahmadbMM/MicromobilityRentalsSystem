@@ -345,6 +345,9 @@ window.mmLoading=(function(){
       </button>
     </div>
 </nav>
+<!-- The Community chat's button (2026-11-20): a round one at the bottom end corner for a Community member, drawn and named by
+     _chtFabPaint; hidden until then. -->
+<button type="button" id="cht-fab" class="cht-fab" hidden aria-label="Community chat" data-on-click='["_chtFabTap"]'></button>
 
 
 <div id="vol-page"></div>
@@ -864,7 +867,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   promoMgrTitle:'Promo codes',promoCodeLabel:'Code',promoKindLabel:'Type',promoValueLabel:'Value',promoPercentOpt:'Percent (%)',promoFlatOpt:'Flat (SAR)',promoActiveLabel:'Active',promoInactiveLabel:'Inactive',promoAddBtn:'+ Add code',promoLimitsLabel:'Limits',promoExpiresLabel:'Expires',promoMaxUsesLabel:'Max uses',promoCustomerLabel:'One customer only',promoUnlimited:'Unlimited',promoAnyone:'Anyone',promoUntil:'until {0}',promoOneCustomer:'One customer',promoExpiredLabel:'Expired',promoUsedUpLabel:'Used up',promoExpiredMsg:'That code has expired.',promoUsedUpMsg:'That code has been fully used.',promoNotYoursMsg:'That code belongs to another account.',promoNoSuchCustomer:'No customer with that name.',promoLimitsMissing:'Limit columns missing - run 20260816120000_promo_limits.sql; the code was saved without limits.',promoNoCodes:'No promo codes yet.',promoSavedToast:'Promo code saved',
   myCurrentRides:'Upcoming',myPastRides:'Past rides',noPastRides:'No completed rides yet.',noCurrentRides:'Nothing booked yet.',qrNoSignal:'No signal to draw the code. Show this at the booth:',rzNextRide:'Next open ride',
   bookAgainBtn:'Book again',bookUsualBtn:'Book my usual',bookUsualToast:'Your usual booking is filled in. Just confirm.',rateRideBtn:'Rate your ride',rateBikeLabel:'Bike',rateExpLabel:'Experience',rateNoteLabel:'Comments (optional)',rateSubmitBtn:'Submit rating',rateTagsLabel:'What stood out?',rateTagRoute:'Route',rateTagPace:'Pace',rateTagBike:'Bike',rateTagStaff:'Staff',rateTagSafety:'Safety',rateTagFun:'Fun',anRatingsNav:'Ratings',anTagsTitle:'What riders mention',anTagsSub:'Every rating that carried a tag, counted once per rider.',anBySessionTitle:'By ride',anBySessionSub:'Ratings per ride night, newest first.',anRatedShort:'rated',rateThanks:'Thanks for rating your ride.',rateRunBtn:'Rate your run',rateRunTitle:'How was your run?',rateRunThanks:'Thanks for rating your run.',rateTitle:'How was your ride?',rgQ_service:'Service',rgQ_ride:'The ride',rgQ_ride_checkin:'Check-in and bike collection',rgQ_ride_staff:'Staff',rgQ_ride_route:'Route',rgQ_breakfast:'Breakfast',rgQ_bf_restaurant:'Restaurant',rgQ_bf_atmosphere:'Atmosphere',rgQ_bf_food:'Food',rgQ_overall:'Overall experience',rgWhy:'You gave {0}. Why, and what could be better?',rgWhyErr:'Tell us why.',rgPickErr:'Pick a score from 1 to 10.',cancelReasonPick:'Choose a reason above.',cancelReasonWrite:'Write the reason in the box above.',rgEndLo:'Poor',rgEndHi:'Great',rgSkipBf:'I did not stay for breakfast',rgBfShareNote:'Your breakfast answers may be shared with the restaurant, without your name.',anCatTitle:'Scores by question',anCatSub:'Average of each question in the detailed ratings, and how many were 8 or under',anLowN:'{0} at 8 or under',waRateMsg:'Thanks for riding with MicroMobility! How was your ride? Rate it here:\n\nشكراً لركوبك مع مايكروموبيليتي! كيف كانت رحلتك؟ قيّمها هنا:',waRateRunMsg:'Thanks for running with MicroMobility! How was your run? Rate it here:\n\nشكراً لمشاركتك في الجري مع مايكروموبيليتي! كيف كان الجري؟ قيّمه هنا:',rateSessBtn:'Rate your session',sessWord:'Session',commCueUnderReviewSess:'Reserved - the participant list is being finalised',rateSessTitle:'How was your session?',rateSessThanks:'Thanks for rating your session.',waRateSessMsg:'Thanks for joining MicroMobility! How was your session? Rate it here:\n\nشكراً لانضمامك إلى مايكروموبيليتي! كيف كانت الفعالية؟ قيّمها هنا:',regStep1TitleSess:'Choose your session',regStep1TitleOneSess:'Your session',noSessionsAvailSess:'No sessions are open for booking right now.',commFullWaitlistSess:'This session is full. You can still reserve: you’ll join the waitlist.',regStep2TitleSess:'Who is coming',qtyDecSess:'Decrease number of places',qtyIncSess:'Increase number of places',partLabel:'Participant',partName:'Participant’s full name',partNamePh:'Enter the participant’s full name',errGroupCapSess:'Up to {0} participants per booking on this session.',tkReservedSubSess:'Staff confirm each participant. Your code appears in Bookings once your place is confirmed.',regBookAnotherSess:'Book another session',seatLabel:'Place',commMembersMsgSess:'Our community sessions are for our community members. Apply for membership, and our team will review your application.',rejMsgSess:'Your reservation for this session wasn’t confirmed. Places are limited and we try to fit in as many people as we can.',rejNextSess:'We’d love to see you at the next session.',wgSubSess:'Our team booked you on this session. Read its waiver and agree to it to continue.',tkCueDoneSess:'Session done: {0}.',tkCueDoneNoDurSess:'Session done.',noShowSessMsg:'You were marked as a no-show for this session.',people2:'2 participants',peopleN:'{0} participants',mrNextSess:'Next session: {0} ({1})',myPastAny:'Past bookings',icsDescMeet:'Your MicroMobility booking. Be at the meeting point by the gathering time and show your ticket there.',wlcDoneSubSess:'See you there. Your ticket is in Bookings.',wlcLateSubSess:'The time to claim it ran out, so the place went to the next person. You are still on the waitlist.',wlcNoSubSess:'The place goes to the next person. You are still on the waitlist.',receiptTitleSess:'Booking receipt',receiptThankYouSess:'Thank you for joining us at MicroMobility!',cancelPartyNoteSess:'This cancels the booking for all {0} participants.',
-  hubDotLbl:'Community, new',hpFirst:'Your first session',hpSecond:'Your second session',hpBack:'Back this month',hpLevel:'{0} sessions this month',hpWithThis:'With this booking: {0} of {1}',p5Title:'Your first five rides',p5Of:'{0} of {1}',rsMoved:'Start moved',rsShortened:'Shortened',rsCancelled:'Cancelled',stillYes:'I’m coming',stillNo:'Can’t come',stillOk:'Coming',stillAsk:'Are you still coming?',stcNoAsk:'Not coming?',stcNoBody:'Not coming will cancel your booking.',
+  hubDotLbl:'Community, new',chtFab:'Community chat',chtFabNew:'Community chat, {0} new',hpFirst:'Your first session',hpSecond:'Your second session',hpBack:'Back this month',hpLevel:'{0} sessions this month',hpWithThis:'With this booking: {0} of {1}',p5Title:'Your first five rides',p5Of:'{0} of {1}',rsMoved:'Start moved',rsShortened:'Shortened',rsCancelled:'Cancelled',stillYes:'I’m coming',stillNo:'Can’t come',stillOk:'Coming',stillAsk:'Are you still coming?',stcNoAsk:'Not coming?',stcNoBody:'Not coming will cancel your booking.',
   typePrefHint:'We\'ll pre-select this each time you book.',
   heardLabel:'How did you hear about us?',heardDesk:'Added by our team',heard_instagram:'Instagram',heard_tiktok:'TikTok',heard_snapchat:'Snapchat',heard_x:'X (Twitter)',heard_facebook:'Facebook',heard_youtube:'YouTube',heard_whatsapp:'WhatsApp',heard_google:'Google search',heard_friend:'A friend or family',heard_invited:'Invited by MicroMobility',heard_passed_by:'Passed by the circuit',heard_event:'An event or exhibition',heard_hotel:'Hotel or tour',heard_school:'School or university',heard_work:'Work or my company',heard_community:'A community ride',heard_other:'Other',
   tagBlacklistWarn:'This person is marked as not fit for the community.',tagBlacklistDropComm:'Also remove the Community tag',
@@ -1571,7 +1574,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   promoMgrTitle:'رموز الخصم',promoCodeLabel:'الرمز',promoKindLabel:'النوع',promoValueLabel:'القيمة',promoPercentOpt:'نسبة (%)',promoFlatOpt:'مبلغ ثابت (SAR)',promoActiveLabel:'مفعّل',promoInactiveLabel:'غير مفعّل',promoAddBtn:'+ إضافة رمز',promoLimitsLabel:'الحدود',promoExpiresLabel:'ينتهي في',promoMaxUsesLabel:'أقصى عدد استخدامات',promoCustomerLabel:'لعميل واحد فقط',promoUnlimited:'غير محدود',promoAnyone:'أي شخص',promoUntil:'حتى {0}',promoOneCustomer:'عميل واحد',promoExpiredLabel:'منتهٍ',promoUsedUpLabel:'استُنفد',promoExpiredMsg:'انتهت صلاحية هذا الرمز.',promoUsedUpMsg:'تم استخدام هذا الرمز بالكامل.',promoNotYoursMsg:'هذا الرمز يخص حسابًا آخر.',promoNoSuchCustomer:'لا يوجد عميل بهذا الاسم.',promoLimitsMissing:'أعمدة الحدود غير موجودة - شغّل 20260816120000_promo_limits.sql؛ تم حفظ الرمز بدون حدود.',promoNoCodes:'لا توجد رموز خصم بعد.',promoSavedToast:'تم حفظ رمز الخصم',
   myCurrentRides:'القادمة',myPastRides:'الجولات السابقة',noPastRides:'لا توجد جولات مكتملة بعد.',noCurrentRides:'لا حجوزات قادمة بعد.',qrNoSignal:'لا توجد إشارة لرسم الرمز. اعرض هذا عند الكشك:',rzNextRide:'أقرب جولة متاحة',
   bookAgainBtn:'احجز مجدداً',bookUsualBtn:'احجز المعتاد',bookUsualToast:'تم تجهيز حجزك المعتاد - أكّد فقط.',rateRideBtn:'قيّم جولتك',rateBikeLabel:'الدراجة',rateExpLabel:'التجربة',rateNoteLabel:'ملاحظات (اختياري)',rateSubmitBtn:'إرسال التقييم',rateTagsLabel:'ما الذي لفت انتباهك؟',rateTagRoute:'المسار',rateTagPace:'السرعة',rateTagBike:'الدراجة',rateTagStaff:'الفريق',rateTagSafety:'السلامة',rateTagFun:'المتعة',anRatingsNav:'التقييمات',anTagsTitle:'ما يذكره الراكبون',anTagsSub:'كل تقييم حمل وسماً، يُحسب مرة لكل راكب.',anBySessionTitle:'حسب الجولة',anBySessionSub:'التقييمات لكل ليلة جولة، الأحدث أولاً.',anRatedShort:'قيّموا',rateThanks:'شكراً على تقييمك.',rateRunBtn:'قيّم الجري',rateRunTitle:'كيف كان الجري؟',rateRunThanks:'شكراً على تقييم الجري.',rateTitle:'كيف كانت جولتك؟',rgQ_service:'الخدمة',rgQ_ride:'الجولة',rgQ_ride_checkin:'تسجيل الحضور واستلام الدراجة',rgQ_ride_staff:'الفريق',rgQ_ride_route:'المسار',rgQ_breakfast:'الإفطار',rgQ_bf_restaurant:'المطعم',rgQ_bf_atmosphere:'الأجواء',rgQ_bf_food:'الطعام',rgQ_overall:'التجربة بشكل عام',rgWhy:'أعطيت {0}. ما السبب، وما الذي يمكن تحسينه؟',rgWhyErr:'يرجى إخبارنا بالسبب.',rgPickErr:'اختر تقييماً من 1 إلى 10.',cancelReasonPick:'اختر سببًا من الأعلى.',cancelReasonWrite:'اكتب السبب في المربع أعلاه.',rgEndLo:'ضعيف',rgEndHi:'ممتاز',rgSkipBf:'لم أبقَ للإفطار',rgBfShareNote:'قد تُشارَك إجاباتك عن الإفطار مع المطعم، دون ذكر اسمك.',anCatTitle:'التقييم حسب السؤال',anCatSub:'متوسط كل سؤال في التقييمات المفصّلة، وعدد التقييمات 8 أو أقل',anLowN:'{0} بتقييم 8 أو أقل',waRateMsg:'Thanks for riding with MicroMobility! How was your ride? Rate it here:\n\nشكراً لركوبك مع مايكروموبيليتي! كيف كانت جولتك؟ قيّمها هنا:',waRateRunMsg:'Thanks for running with MicroMobility! How was your run? Rate it here:\n\nشكراً لمشاركتك في الجري مع مايكروموبيليتي! كيف كان الجري؟ قيّمه هنا:',rateSessBtn:'قيّم الفعالية',sessWord:'الفعالية',commCueUnderReviewSess:'تم الحجز - يجري إعداد قائمة المشاركين',rateSessTitle:'كيف كانت الفعالية؟',rateSessThanks:'شكراً على تقييم الفعالية.',waRateSessMsg:'Thanks for joining MicroMobility! How was your session? Rate it here:\n\nشكراً لانضمامك إلى مايكروموبيليتي! كيف كانت الفعالية؟ قيّمها هنا:',regStep1TitleSess:'اختر فعاليتك',regStep1TitleOneSess:'فعاليتك',noSessionsAvailSess:'لا توجد فعاليات متاحة للحجز الآن.',commFullWaitlistSess:'هذه الفعالية مكتملة. يمكنك الحجز مع ذلك: ستنضم إلى قائمة الانتظار.',regStep2TitleSess:'من سيحضر',qtyDecSess:'إنقاص عدد المقاعد',qtyIncSess:'زيادة عدد المقاعد',partLabel:'المشارك',partName:'الاسم الكامل للمشارك',partNamePh:'أدخل الاسم الكامل',errGroupCapSess:'حتى {0} مشاركين لكل حجز في هذه الفعالية.',tkReservedSubSess:'يؤكد الفريق كل مشارك على حدة. يظهر رمزك في الحجوزات بعد تأكيد مقعدك.',regBookAnotherSess:'حجز فعالية أخرى',seatLabel:'المقعد',commMembersMsgSess:'فعاليات مجتمعنا مخصّصة لأعضاء المجتمع. قدّم طلب العضوية وسيراجع فريقنا طلبك.',rejMsgSess:'لم يتم تأكيد حجزك لهذه الفعالية. المقاعد محدودة ونحاول استيعاب أكبر عدد ممكن من المشاركين.',rejNextSess:'يسعدنا أن نراك في الفعالية القادمة.',wgSubSess:'سجّلك فريقنا في هذه الفعالية. اقرأ إقرارها ووافق عليه للمتابعة.',tkCueDoneSess:'انتهت الفعالية: {0}.',tkCueDoneNoDurSess:'انتهت الفعالية.',noShowSessMsg:'سجّلك الفريق غائباً عن هذه الفعالية.',people2:'مشاركان',peopleN:'{0} مشاركين',mrNextSess:'فعاليتك القادمة: {0} ({1})',myPastAny:'الحجوزات السابقة',icsDescMeet:'حجزك مع MicroMobility. كن في نقطة التجمع بحلول وقت التجمع واعرض تذكرتك هناك.',wlcDoneSubSess:'نراك هناك. تذكرتك في «الحجوزات».',wlcLateSubSess:'انتهى وقت التأكيد فانتقل المكان إلى الشخص التالي. ما زلت في قائمة الانتظار.',wlcNoSubSess:'ينتقل المكان إلى الشخص التالي. ما زلت في قائمة الانتظار.',receiptTitleSess:'إيصال الحجز',receiptThankYouSess:'شكراً لانضمامك إلينا في مايكروموبيليتي!',cancelPartyNoteSess:'سيُلغى الحجز لجميع المشاركين ({0}).',
-  hubDotLbl:'المجتمع، جديد',hpFirst:'جلستك الأولى',hpSecond:'جلستك الثانية',hpBack:'عُد هذا الشهر',hpLevel:'{0} جلسات هذا الشهر',hpWithThis:'مع هذا الحجز: {0} من {1}',p5Title:'جولاتك الخمس الأولى',p5Of:'{0} من {1}',rsMoved:'تغيّر وقت الانطلاق',rsShortened:'مُختصرة',rsCancelled:'أُلغيت',stillYes:'سأحضر',stillNo:'لا أستطيع الحضور',stillOk:'سيحضر',stillAsk:'هل ما زلت قادمًا؟',stcNoAsk:'لن تحضر؟',stcNoBody:'اختيار عدم الحضور يُلغي حجزك.',
+  hubDotLbl:'المجتمع، جديد',chtFab:'دردشة المجتمع',chtFabNew:'دردشة المجتمع، {0} جديدة',hpFirst:'جلستك الأولى',hpSecond:'جلستك الثانية',hpBack:'عُد هذا الشهر',hpLevel:'{0} جلسات هذا الشهر',hpWithThis:'مع هذا الحجز: {0} من {1}',p5Title:'جولاتك الخمس الأولى',p5Of:'{0} من {1}',rsMoved:'تغيّر وقت الانطلاق',rsShortened:'مُختصرة',rsCancelled:'أُلغيت',stillYes:'سأحضر',stillNo:'لا أستطيع الحضور',stillOk:'سيحضر',stillAsk:'هل ما زلت قادمًا؟',stcNoAsk:'لن تحضر؟',stcNoBody:'اختيار عدم الحضور يُلغي حجزك.',
   typePrefHint:'نختاره لك تلقائياً في كل حجز.',
   heardLabel:'كيف عرفت عنا؟',heardDesk:'أضافه فريقنا',heard_instagram:'Instagram',heard_tiktok:'TikTok',heard_snapchat:'Snapchat',heard_x:'X (Twitter)',heard_facebook:'Facebook',heard_youtube:'YouTube',heard_whatsapp:'WhatsApp',heard_google:'بحث جوجل',heard_friend:'صديق أو أحد الأقارب',heard_invited:'بدعوة من مايكروموبيليتي',heard_passed_by:'مررت بالحلبة',heard_event:'فعالية أو معرض',heard_hotel:'فندق أو جولة سياحية',heard_school:'مدرسة أو جامعة',heard_work:'العمل أو شركتي',heard_community:'جولة مجتمعية',heard_other:'غير ذلك',
   tagBlacklistWarn:'هذا الشخص مُدرج كغير مناسب للمجتمع.',tagBlacklistDropComm:'إزالة وسم المجتمع أيضاً',
@@ -16715,6 +16718,7 @@ function _commNavPaint(){
   [top,bot].forEach(b=>{if(!b)return;b.classList.toggle('has-dot',dot);if(dot)b.setAttribute('aria-label',t('hubDotLbl'));else b.removeAttribute('aria-label');});
   if(on)_pulse();
   _inbPulse();_inbBadge();
+  _chtFabPaint(); // the Community chat's button, for members only
 }
 // ── Community where members already are (2026-11-13, reports/Community tab reach after launch.md: R1, R4-R7) ──────────
 // One light read, hub_pulse (migration 20261114000100), for a member anywhere in the app: once the account's data is in
@@ -16752,11 +16756,59 @@ function _pulse(force){
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')try{_pulse();}catch(e){}});
 // The tab bar's Community: a tap while the dot is lit is counted as the dot's.
-function _commTap(){const c=S.loggedIn,p=S._pls;S._hubSrc=(c&&p&&p.id===c.id&&p.dot)||_inbN()>0?'dot':'tab';setCustTab('members');} // the dot is lit by an unread update too (F3)
+function _commTap(){if(S._hubView==='chat'){S._hubView=null;S._chtFrom=null;} // the chat has its own button: the tab bar's Community is the tab
+  const c=S.loggedIn,p=S._pls;S._hubSrc=(c&&p&&p.id===c.id&&p.dot)||_inbN()>0?'dot':'tab';setCustTab('members');} // the dot is lit by an unread update too (F3)
 function _hubGo(src){S._hubSrc=src;setCustTab('members');}
 function _hubDotOff(){S._hubDotOffAt=Date.now();if(S._pls)S._pls.dot=false;}
 // Signed out on /members (a link from WhatsApp in a browser that is not signed in): the sign-in, then the tab (R7).
 function _hubSignIn(){try{sessionStorage.setItem(_TABLINK_KEY,'members');}catch(e){}setTimeout(goLanding,0);}
+// ── The Community chat's button (the user, 2026-11-20: "show the chat in booking app as an icon at the bottom corner of the
+// page") ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+// It was a card leading the Community tab's Club part. Now a round button at the bottom end corner of every page of the app
+// for a Community member (the tabs and the signed-in event picker; above the floating tab bar on a phone), with how many
+// messages came since this phone last read to the end (chat_peek, at most every two minutes: when a page paints and when
+// the app comes back into view; never a socket of its own). It opens the chat (member-hub.js, S._hubView 'chat'), and the
+// chat's Close goes back to where it was opened from (S._chtFrom). Not on the chat itself, nor while a booking's Continue
+// bar floats, the keyboard is up or a gate page holds the screen (styles.css). A database without the chat: no button.
+// S._chtN {id, at, n} is shared with member-hub.js, which zeroes it when the member reads to the end.
+function _chtFabOn(){
+  if(S._chtOff||S.view==='staff'||_isStaffHost()||!_commNavOn())return false;
+  return !(S.view==='customer'&&S.custTab==='members'&&S._hubView==='chat'); // the chat is open: it is the page
+}
+function _chtFabPaint(){
+  const b=document.getElementById('cht-fab');if(!b)return;
+  const on=_chtFabOn(),c=S.loggedIn||getSession(),p=on&&c&&S._chtN&&S._chtN.id===c.id?S._chtN:null,n=p?p.n:0;
+  if(b.hidden===on)b.hidden=!on;
+  if(!on)return;
+  const nn=n>=100?'99+':String(n),lbl=n>0?t('chtFabNew').replace('{0}',nn):t('chtFab'); // by its words: a language pack that lands later names it again
+  if(b.getAttribute('aria-label')!==lbl)b.setAttribute('aria-label',lbl);
+  if(b.getAttribute('data-n')!==nn){b.setAttribute('data-n',nn);b.innerHTML=_cuIc('chat',26)+(n>0?`<span class="cht-fab-n" aria-hidden="true">${nn}</span>`:'');}
+  _chtFabPeek();
+}
+async function _chtFabPeek(force){
+  const c=S.loggedIn;if(!c||!c.session_token||typeof sb==='undefined'||!sb||S._chtOff||S._chtPeekBusy)return;
+  const p=S._chtN&&S._chtN.id===c.id?S._chtN:null;
+  if(!force&&p&&Date.now()-p.at<12e4)return;
+  let seen=null;try{const v=Number(localStorage.getItem('cq_cht_seen_'+c.id));seen=v>0?v:null;}catch(e){}
+  S._chtPeekBusy=true;
+  let r;try{r=await sb.rpc('chat_peek',{p_id:c.id,p_token:c.session_token,p_after:seen});}catch(e){r={error:e};}
+  S._chtPeekBusy=false;
+  const now=S.loggedIn;if(!now||now.id!==c.id)return; // signed out, or another account, meanwhile
+  const e=r&&r.error,d=r&&!e&&r.data,was=p?p.n:0;
+  if(e&&_rpcAbsent(e))S._chtOff=true;
+  else if(d&&d.ok===true)S._chtN={id:c.id,at:Date.now(),n:Math.max(0,Number(d.n)||0)};
+  else S._chtN={id:c.id,at:Date.now()-6e4,n:was}; // no answer: the count stays, asked again a minute on
+  _chtFabPaint();
+}
+function _chtFabTap(){
+  // where Close goes back to: the tab it was opened from, or the event picker; on the Community tab, the tab itself
+  S._chtFrom=S.view==='landing'?'landing':S.view==='customer'&&S.custTab!=='members'?S.custTab:null;
+  if(S._cht){S._cht.jump=true;S._cht.html=null;} // opened at its newest message, as the card did
+  S._hubView='chat';
+  try{window.scrollTo(0,0);}catch(e){} // the page it leaves may be scrolled; the chat then goes to its newest message itself
+  setCustTab('members');
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')try{_chtFabPaint();}catch(e){}});
 // ?src= on a link into the tab: wa-<anything> is a WhatsApp link staff sent, push a notification, any other a link, and
 // /members opened with none (not a reload or Back) a link too. Then it comes off the address.
 function _readHubSrc(pn){
@@ -16765,7 +16817,7 @@ function _readHubSrc(pn){
     if(v!==null||hv!==null){u.searchParams.delete('src');u.searchParams.delete('hv');history.replaceState(history.state,'',u.pathname+u.search+u.hash);}
     if(!pn||pn.view!=='customer'||pn.ctab!=='members')return;
     if(hv==='suggest')S._hubView='suggest'; // a suggestion's news (Suggest a ride, 20261118210500) opens the member's suggestions
-    if(hv==='chat')S._hubView='chat'; // /members?hv=chat opens the Community chat (20261120203000)
+    if(hv==='chat'){S._hubView='chat';S._chtFrom=null;} // /members?hv=chat opens the Community chat (20261120203000); its Close goes to the tab
     const nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];
     if(v===null&&nav&&nav.type!=='navigate')return;
     S._hubSrc=/^wa-/.test(v||'')?'wa':v==='push'?'push':'link';

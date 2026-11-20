@@ -17,13 +17,15 @@
 // its block is the last above window._hubRender.
 // 2026-11-18: the Ramadan season (its dates from hub_season, a card and the next session's accent; see _ssnCheck).
 // 2026-11-20: the feed in three parts behind a switch, Sessions, Challenges and Club (see the block above _feedHtml).
-// 2026-11-20: the Community chat (its card in the feed, its own page S._hubView 'chat', chat_read / chat_send; the one place
-// a member reads another member's full name, the owner's pick); its block is the last above window._hubRender.
+// 2026-11-20: the Community chat (its own page S._hubView 'chat', chat_read / chat_send; the one place a member reads another
+// member's full name, the owner's pick); its block is the last above window._hubRender. Its way in is a round button at the
+// bottom corner of every page (app.src.html _chtFab*, the user's "show the chat in booking app as an icon at the bottom
+// corner of the page"), no longer a card in the Club part.
 /* global S, sb, esc, _on, getSession, _cssv, shortDate, t, _cuIc, sessionTime, _dayWord, _evName, _evOf, _evKindName, allSessions,
    _isCommunity, _sessPastDay, _sessEnded, _bwOpen, _sessFull, _sgOk, _sgChip, _myRideGroups, _sessGet, getQueue, setCustTab, _locale,
    _mrBadgeList, _mrBadgeInfo, _rideKind, _skelHtml, _bdgMedal, toast, selectEvent, selectSessCard, _bookingAhead, _ptnAll,
    _arHold, _isApprovalRide, _commPublished, _needsBike, _typeClosed, _mfMarkHtml, todayStr,
-   NATIONALITIES, nationalityLabel, _natFor, _selOnce, askConfirm, closeConfirm, _EL, _EV, _sbCooling */
+   NATIONALITIES, nationalityLabel, _natFor, _selOnce, askConfirm, closeConfirm, _EL, _EV, _sbCooling, _chtFabPaint, goLanding */
 const HUB_LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn'];
 const HUB_T = {
   err: ['We could not do that. Please try again.', 'تعذّر ذلك. يرجى المحاولة مرة أخرى.', 'Action impossible. Veuillez réessayer.', 'No se pudo hacer. Inténtalo de nuevo.', 'Não foi possível. Tente novamente.', 'یہ نہیں ہو سکا۔ دوبارہ کوشش کریں۔', 'यह नहीं हो सका। फिर कोशिश करें।', 'Hindi ito nagawa. Pakisubukang muli.', 'यो हुन सकेन। फेरि प्रयास गर्नुहोस्।', 'এটি করা যায়নি। আবার চেষ্টা করুন।'],
@@ -279,7 +281,7 @@ function _hubRender() {
   _mtFetch();
   _akListFetch();
   _intFetch();
-  _chtPeek();
+  if (typeof _chtFabPaint === 'function') _chtFabPaint(); // the chat's button: its count, and hidden while the chat is open
   // An open's first read goes at once, the copy on the phone painted meanwhile. A failed read (the copy kept and marked
   // stale, or none at all) is tried again two minutes on too, not only by Retry.
   if ((S._hubVisit && S._hubVisit.due && !S._hubVisit.sent) || !h || (d && !h.stale && Date.now() - h.at >= 12e4) || ((h.stale || !d) && Date.now() - (h.failAt || 0) >= 12e4)) _hubFetch();
@@ -327,7 +329,7 @@ function _hubUpd(html) { const dep = window._hubDeps || {}, i = html.lastIndexOf
 // own (Ask, mentorship, Suggest a ride, the year) goes back to the part holding its card, and a way in that shows the
 // member's challenge opens Challenges (_hubVisitNow).
 const HUB_SECS = [['sess', 'secSess'], ['goals', 'secGoals'], ['club', 'secClub']];
-const HUB_VIEW_SEC = { ask: 'club', mentor: 'club', suggest: 'club', chat: 'club', year: 'goals' };
+const HUB_VIEW_SEC = { ask: 'club', mentor: 'club', suggest: 'club', year: 'goals' }; // the chat has no card: the part on screen stays
 function _hubSecOf(parts) { // the part to show: the one picked, else the first with something in it
   const k = S._hubSec;
   return parts[k] ? k : (HUB_SECS.find(([x]) => parts[x]) || ['sess'])[0];
@@ -372,7 +374,6 @@ function _feedHtml(c, d, stale) {
       d.club ? _clubHtml(d.club) : '',
     ].join(''),
     club: [
-      _chtCardHtml(), // the Community chat leads the Club part (2026-11-20)
       _akCardHtml(),
       _mtCardHtml(),
       d.volunteer && dep.vol ? `<div class="hub-card hub-flat"><span class="hub-k">${_cuIc('people', 16)} ${_hT('vol')}</span><a class="btn-secondary hub-wide hub-link" href="${esc(dep.vol + '/#o/' + encodeURIComponent(d.volunteer))}" target="_blank" rel="noopener">${_hT('volBtn')}</a></div>` : '',
@@ -1679,8 +1680,9 @@ async function _rsgSend() {
 
 // ── The Community chat (the user, 2026-11-20: "can we create a live chat in the booking app but only for community
 // members?"; asked how a member appears, where it lives and what may be sent: "Full name", "One club chat", "Text only")
-// One room for every active member. A card in the feed (how many new since this phone last read to the end, chat_peek)
-// opens a page of its own (S._hubView 'chat'; /members?hv=chat): the messages oldest to newest under their day, the
+// One room for every active member. The round button at the bottom corner of every page (app.src.html _chtFab*: how many
+// new since this phone last read to the end, chat_peek) opens a page of its own (S._hubView 'chat'; /members?hv=chat),
+// whose Close goes back to the page the button was on (S._chtFrom): the messages oldest to newest under their day, the
 // author's FULL NAME over a run of theirs (the owner's pick, the one exception here to "members see nothing of each
 // other"; nothing else about a member is ever sent), the team's under "MicroMobility team", the member's own on the other
 // side; the box to write in stays at the foot of the screen. Migration 20261120203000.
@@ -1701,8 +1703,6 @@ async function _rsgSend() {
 // A database without the functions (PGRST202) closes the page and hides the card.
 Object.assign(HUB_T, {
   chtTitle: ['Community chat', 'دردشة المجتمع', 'Discussion de la communauté', 'Chat de la comunidad', 'Chat da comunidade', 'کمیونٹی چیٹ', 'कम्युनिटी चैट', 'Chat ng Community', 'कम्युनिटी च्याट', 'কমিউনিটি চ্যাট'],
-  chtOpen: ['Open the chat', 'افتح الدردشة', 'Ouvrir la discussion', 'Abrir el chat', 'Abrir o chat', 'چیٹ کھولیں', 'चैट खोलें', 'Buksan ang chat', 'च्याट खोल्नुहोस्', 'চ্যাট খুলুন'],
-  chtNewN: ['{0} new', '{0} جديدة', '{0} nouveaux', '{0} nuevos', '{0} novas', '{0} نئے', '{0} नए', '{0} bago', '{0} नयाँ', '{0} নতুন'],
   chtLabel: ['Message', 'رسالة', 'Message', 'Mensaje', 'Mensagem', 'پیغام', 'संदेश', 'Mensahe', 'सन्देश', 'বার্তা'],
   chtEmpty: ['No messages yet.', 'لا توجد رسائل بعد.', 'Aucun message pour le moment.', 'Aún no hay mensajes.', 'Ainda não há mensagens.', 'ابھی کوئی پیغام نہیں۔', 'अभी कोई संदेश नहीं।', 'Wala pang mensahe.', 'अहिलेसम्म कुनै सन्देश छैन।', 'এখনও কোনো বার্তা নেই।'],
   chtOlder: ['Earlier messages', 'الرسائل السابقة', 'Messages précédents', 'Mensajes anteriores', 'Mensagens anteriores', 'پچھلے پیغامات', 'पहले के संदेश', 'Mga naunang mensahe', 'अघिल्ला सन्देशहरू', 'আগের বার্তাগুলো'],
@@ -1721,45 +1721,28 @@ Object.assign(HUB_T, {
   chtMutedTill: ['You cannot write in the chat until {0}.', 'لا يمكنك الكتابة في الدردشة حتى {0}.', 'Vous ne pouvez pas écrire dans la discussion avant le {0}.', 'No puedes escribir en el chat hasta el {0}.', 'Você não pode escrever no chat até {0}.', 'آپ {0} تک چیٹ میں نہیں لکھ سکتے۔', 'आप {0} तक चैट में नहीं लिख सकते।', 'Hindi ka makakasulat sa chat hanggang {0}.', 'तपाईं {0} सम्म च्याटमा लेख्न सक्नुहुन्न।', 'আপনি {0} পর্যন্ত চ্যাটে লিখতে পারবেন না।'],
 });
 const CHT_ERR = { fast: 'chtFast', limit: 'chtLimit' };
-const _CHT_SEEN = 'cq_cht_seen_';
+const _CHT_SEEN = 'cq_cht_seen_'; // the id read to; the corner button's count (app.src.html _chtFabPeek) asks from it
 // S._cht: {forId, rows (null until read), more, me {agreed, muted, until}, draft, err, busy, loading, again, fail, html, jump,
 // keep, fresh (others' messages that came while the reader was further up), rep {id: 1}, readAt, selfAt, tickT, tickGap,
 // tickNext, ttl (how long a message is shown, ms; 0 = the database did not say) and skew (its clock less this phone's)};
-// per account, in memory only. S._chtN: {id, at, n} = the card's count. S._chtCh: the joined topic.
+// per account, in memory only. S._chtN: {id, at, n} = the corner button's count. S._chtCh: the joined topic.
 function _chtState(c) {
   if (!c) return null;
   if (!S._cht || S._cht.forId !== c.id) S._cht = { forId: c.id, rows: null, more: false, me: null, draft: '', err: '', busy: false, loading: false, again: false, fail: false, html: null, jump: true, keep: false, fresh: 0, rep: {}, readAt: 0, selfAt: 0, tickT: null, tickGap: 0, tickNext: 0, ttl: 0, skew: 0 };
   return S._cht;
 }
-function _chtSeenId(c) { try { const v = Number(localStorage.getItem(_CHT_SEEN + c.id)); return v > 0 ? v : null; } catch (_) { return null; } }
 function _chtOn() { return S.custTab === 'members' && S._hubView === 'chat' && !!document.getElementById('cht-page'); }
 function _chtCool() { try { return typeof _sbCooling === 'function' && !!_sbCooling(); } catch (_) { return false; } }
 
-// The card: its count is asked when the tab paints, at most every two minutes.
-async function _chtPeek(force) {
-  const c = _hCust(); if (!c || !c.session_token || !sb || S._chtOff || S._chtPeekBusy) return;
-  const p = S._chtN && S._chtN.id === c.id ? S._chtN : null;
-  if (!force && p && Date.now() - p.at < 12e4) return;
-  S._chtPeekBusy = true;
-  let r; try { r = await sb.rpc('chat_peek', { ..._hTok(c), p_after: _chtSeenId(c) }); } catch (e) { r = { error: e }; }
-  S._chtPeekBusy = false;
-  const now = _hCust(); if (!now || now.id !== c.id) return;
-  const e = r && r.error, d = r && !e && r.data, was = p ? p.n : 0, wasOff = !!S._chtOff;
-  if (e && (e.code === 'PGRST202' || e.code === '42883')) S._chtOff = true;
-  else if (d && d.ok === true) S._chtN = { id: c.id, at: Date.now(), n: Math.max(0, Number(d.n) || 0) };
-  else S._chtN = { id: c.id, at: Date.now() - 6e4, n: was }; // no answer: the count stays, asked again in a minute
-  if (S.custTab === 'members' && !S._hubView && (wasOff !== !!S._chtOff || (S._chtN && S._chtN.id === c.id ? S._chtN.n : 0) !== was)) _hubRender();
+// Close: back to the page the corner button was on (a tab, or the event picker), else the Community tab.
+function _chtClose() {
+  const from = S._chtFrom; S._chtFrom = null;
+  S._hubView = null; _chtLeave();
+  if (from) { const b = document.getElementById('hub-body'); if (b) b.innerHTML = ''; } // the chat leaves the tab it hid in; the tab draws itself again when opened
+  if (from === 'landing') { goLanding(); return; }
+  if (from && from !== 'members') { setCustTab(from); return; }
+  _hubRender(); try { window.scrollTo(0, 0); } catch (_) {}
 }
-function _chtCardHtml() {
-  if (S._chtOff) return '';
-  const c = _hCust(), n = c && S._chtN && S._chtN.id === c.id ? S._chtN.n : 0;
-  return `<div class="hub-card hub-flat cht-card"><span class="hub-k cht-card-h">${_cuIc('chat', 16)} ${_hT('chtTitle')}${n > 0 ? ` <span class="cht-n">${esc(_hF('chtNewN', n >= 100 ? '99+' : n))}</span>` : ''}</span><button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_chtOpen')}">${_hT('chtOpen')}</button></div>`;
-}
-function _chtOpen() {
-  const g = _chtState(_hCust()); if (g) { g.jump = true; g.html = null; }
-  S._hubView = 'chat'; _hubRender();
-}
-function _chtClose() { S._hubView = null; _chtLeave(); _hubRender(); try { window.scrollTo(0, 0); } catch (_) {} }
 
 // The topic and the page's own clock: both live only while the chat is on screen.
 function _chtJoin() {
