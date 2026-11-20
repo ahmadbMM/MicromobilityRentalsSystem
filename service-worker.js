@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-284d201b15';
+const CACHE = 'mmcq-ce150c986e';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -28,13 +28,13 @@ const STAFF_JS = './staff.js?v=34ec76460a';
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
 const STAFF_PARTS = ["./staff-parts/analytics.js?v=63439c6d51","./staff-parts/community.js?v=b0c66e51d5","./staff-parts/bikes.js?v=eb4f7a42d5","./staff-parts/cashier.js?v=c581f11c97","./staff-parts/catalog.js?v=08c5345a69","./staff-parts/inventory.js?v=a56d0410bc","./staff-parts/website.js?v=049b58a7f0","./staff-parts/history.js?v=e6f5e5ee20","./staff-parts/wallet.js?v=4336c7103d","./staff-parts/workshop.js?v=dc4d4b506f","./staff-parts/ambassadors.js?v=8ff59be061","./staff-parts/messages.js?v=0c7b8a1be3","./staff-parts/volunteers.js?v=548c9df7c7","./staff-parts/vendors.js?v=6865ca075c","./staff-parts/sessions.js?v=a572cae059","./staff-parts/lockers.js?v=45da05e876","./staff-parts/ask.js?v=ffa99861b0","./staff-parts/testimonials.js?v=960c4855c3","./staff-parts/store.js?v=6fe02669ef","./staff-parts/sela.js?v=a7ece2ddf1","./staff-parts/vlap.js?v=9ef47c45ed","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=456e32cd8c","./staff-parts/settings.js?v=9df9bf09ca","./staff-parts/fleet.js?v=6c839872d1","./staff-parts/money.js?v=37c7b3c1b9","./staff-parts/desk.js?v=59cce0a050","./staff-parts/deskq.js?v=cc3cd11a1d","./staff-parts/kiosk.js?v=192ce76299","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=077e51d6db","./staff-parts/announce.js?v=b50b0cd752","./staff-parts/peopleapps.js?v=2b3cd960c4","./staff-parts/peoplemore.js?v=fdf2aa9e7c","./staff-parts/sessreport.js?v=1a966fbe89","./staff-parts/reports.js?v=2100d5dd68","./staff-parts/door.js?v=954a2d3ba3"];
-const APP_JS = './app.js?v=59c06dbca0';
+const APP_JS = './app.js?v=daa99b6c9c';
 const APP_CSS = './app.css?v=fb02a05c6e';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=ddcd520b24']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=08aaf120b2']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',

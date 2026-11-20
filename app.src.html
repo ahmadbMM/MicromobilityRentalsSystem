@@ -85145,17 +85145,25 @@ try{window.addEventListener('offline',()=>{S._rtConnected=false;_updateConnUI();
 (function(){
   let startY=0,pulling=false,dist=0;
   function eligible(){
-    // only a dialog on screen stops the pull (the sign-in markup stays in the page, hidden)
-    if(_visibleModals().length||[...document.querySelectorAll('.pay-menu-popup')].some(m=>m.getClientRects().length))return false;
+    // a dialog or the open sections menu stops the pull (the sign-in markup stays in the page, hidden)
+    if(_visibleModals().length||document.body.classList.contains('snav-open')||[...document.querySelectorAll('.pay-menu-popup')].some(m=>m.getClientRects().length))return false;
     if(S.view==='staff')return['queue','waitlist','sessions','community','volunteers','dashboard'].includes(S.staffTab); // Sessions, People, Volunteers and the Dashboard too (2026-11-06, ST03); the Waitlist, its own section since 2026-11-09, as under Bookings
     if(S.view==='customer')return S.custTab==='myrides';
     return false;
   }
   function ind(){let e=document.getElementById('ptr-ind');if(!e){e=document.createElement('div');e.id='ptr-ind';e.innerHTML='<div class="ptr-spin" aria-hidden="true"></div>';document.body.appendChild(e);}return e;}
   function sTop(){return window.scrollY||document.documentElement.scrollTop||document.body.scrollTop||0;}
+  // A drag down that starts in a box scrolled down scrolls that box back up; it is not a pull on the page. The pull took
+  // it whenever the page sat at its top, so the sections menu scrolled down could not be dragged back up (2026-11-20).
+  function innerScrolled(n){
+    for(;n&&n.nodeType===1&&n!==document.body&&n!==document.documentElement;n=n.parentElement){
+      if(n.scrollTop>0&&n.scrollHeight>n.clientHeight&&/auto|scroll/.test(getComputedStyle(n).overflowY))return true;
+    }
+    return false;
+  }
   function reset(el){el.classList.remove('ready','refreshing');el.style.transform='translateX(-50%) translateY(-64px)';el.style.opacity='0';}
   document.addEventListener('touchstart',e=>{
-    if(!eligible()||sTop()>2||e.touches.length!==1){pulling=false;return;}
+    if(!eligible()||sTop()>2||e.touches.length!==1||innerScrolled(e.target)){pulling=false;return;}
     startY=e.touches[0].clientY;pulling=true;dist=0;
   },{passive:true});
   document.addEventListener('touchmove',e=>{

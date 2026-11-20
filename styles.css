@@ -4269,7 +4269,7 @@
          its group heading. Shut, it takes no room at all. */
       body.view-staff #staff-tab-nav{
         display:none;flex-direction:column;align-items:stretch;height:auto;
-        position:sticky;top:var(--staff-stick);z-index:61;overflow-y:auto;
+        position:sticky;top:var(--staff-stick);z-index:61;overflow-y:auto;overscroll-behavior:contain; /* its scroll stays in the menu, not the page under the scrim */
         /* a strip of the scrim stays below it however many sections there are (2026-10-03: Vendors made
            the admin's list fill a 780px phone, and tapping outside could no longer close it) */
         max-height:calc(100vh - var(--staff-stick) - 48px);max-height:calc(100dvh - var(--staff-stick) - 48px);
