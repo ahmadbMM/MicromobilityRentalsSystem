@@ -246,11 +246,71 @@ test.describe('@staff:market the section', () => {
     expect(await page.evaluate(`JSON.stringify(SUB_PATHS.market)`)).toBe('{"listings":"","held":"held","reports":"reports","sellers":"sellers","shops":"shops","ours":"our-listings","commission":"commission","settings":"settings","cats":"categories"}');
     await page.evaluate(`_setSub('market','nope');renderMarket()`);
     await expect(view(page, 'listings')).toHaveAttribute('aria-pressed', 'true');
+    // Ctrl K opens the views too, as it does every section's
+    expect(await page.evaluate(`_n6tCmds().filter(c=>c.sub&&c.go[2]==='market').map(c=>c.l)`)).toEqual(expect.arrayContaining(['Marketplace › Held', 'Marketplace › Reports', 'Marketplace › Sellers']));
+    await page.evaluate(`_n6tCmd('sub','market','sellers')`);
+    await expect(view(page, 'sellers')).toHaveAttribute('aria-pressed', 'true');
+    expect(new URL(page.url()).pathname).toBe('/marketplace/sellers');
+    await view(page, 'listings').click();
     // the switch on: the head links the public page
     db.on = true;
     await page.evaluate(`_mkCount(true)`);
     await expect(sec(page).locator('.mk-open')).toHaveAttribute('href', 'https://micromobility.sa/marketplace');
     await expect(sec(page).locator('.mk-open')).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  test('the probe: no count for an account that cannot open the section; a refusal sent before the session was confirmed is no answer; an answer that came late leaves the page where the staffer is', async ({ page }) => {
+    const db = fresh();
+    await staff(page, db);
+    const modes = () => calls(db, 'staff_market_mode').length;
+    // the page as it is before the database has answered
+    const unasked = (pre = '') => page.evaluate(`(()=>{${pre}S._mkMode=undefined;S._mkProbeAt=0;S._mkCAt=0;S._mkCounts=null;S._mkN=0;})()`);
+    // Front Desk: the database has the Marketplace, this account does not open it, so nothing is counted for it
+    await page.evaluate(`setStaffRole('frontdesk')`);
+    await unasked();
+    const counts = calls(db, 'staff_market_counts').length;
+    await page.evaluate(`renderStaffTabs()`);
+    await page.waitForFunction(`S._mkMode==='full'&&!S._mkProbing`);
+    expect(await page.evaluate(`[_deskTabOk('market'),!!S._mkCAt]`)).toEqual([false, false]); // _mkCount stamps S._mkCAt the moment it asks
+    expect(calls(db, 'staff_market_counts')).toHaveLength(counts);
+    // ... and the rail asks once the account can open it
+    await page.evaluate(`setStaffRole('manager');renderStaffTabs()`);
+    await expect.poll(() => calls(db, 'staff_market_counts').length).toBe(counts + 1);
+    await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="market"] .tab-badge')).toHaveText('6');
+    await page.evaluate(`setStaffRole('admin');setStaffTab('queue')`);
+    // asked for by the address over a minute ago (the first ask got no answer): the answer no longer moves the page
+    await unasked(`S._mkWant=Date.now()-61e3;`);
+    await page.evaluate(`renderStaffTabs()`);
+    await page.waitForFunction(`S._mkMode==='full'&&!S._mkProbing`);
+    expect(await page.evaluate(`[S.staffTab,S._mkWant]`)).toEqual(['queue', null]);
+    // asked for a moment ago: not there yet, then opened once the database says it has it
+    await unasked();
+    expect(await page.evaluate(`(()=>{setStaffTab('market');return[S.staffTab==='market',typeof S._mkWant];})()`)).toEqual([false, 'number']);
+    await page.waitForFunction(`S._mkMode==='full'&&S.staffTab==='market'`);
+    // a permission refusal that answers an ask sent before the staff session was confirmed is not "no Marketplace":
+    // not asked again within the minute while still unconfirmed, asked at once when the session is confirmed
+    await page.evaluate(`setStaffTab('queue')`);
+    const authed = await page.evaluate(`S._staffAuthed===true`);
+    db.fail = { staff_market_mode: { code: '42501', message: 'permission denied for function staff_market_mode', status: 403 } };
+    await unasked(`S._staffAuthed=false;`);
+    let n = modes();
+    await page.evaluate(`renderStaffTabs()`);
+    await expect.poll(modes).toBe(n + 1);
+    await page.waitForFunction(`!S._mkProbing`);
+    expect(await page.evaluate(`(()=>{renderStaffTabs();return[S._mkMode===undefined,S._mkProbing];})()`)).toEqual([true, false]); // no answer, and not asked again
+    db.fail = undefined;
+    await page.evaluate(`S._staffAuthed=true;renderStaffTabs()`);
+    await page.waitForFunction(`S._mkMode==='full'&&!S._mkProbing`);
+    expect(modes()).toBe(n + 2);
+    // the same refusal to a confirmed session is an answer: no Marketplace for this page, and not asked again
+    db.fail = { staff_market_mode: { code: '42501', message: 'FORBIDDEN', status: 403 } };
+    await unasked();
+    n = modes();
+    await page.evaluate(`renderStaffTabs()`);
+    await page.waitForFunction(`S._mkMode===false`);
+    expect(await page.evaluate(`(()=>{renderStaffTabs();return[_deskTabOk('market'),!!S._mkProbing];})()`)).toEqual([false, false]);
+    expect(modes()).toBe(n + 1);
+    await page.evaluate(`S._staffAuthed=${authed}`);
   });
 });
 
@@ -323,10 +383,63 @@ test.describe('@staff:market Listings', () => {
     await staff(page, db);
     await expect(sec(page).locator('.mk-row')).toHaveCount(4);
     await expect(sec(page).locator('.mk-count')).toHaveText('Listings: 6');
+    // a Show more that could not be read says so, and the rows read so far stay
+    db.fail = { staff_market_listings: { code: 'XX000', message: 'spec: no answer' } };
+    await sec(page).locator('.mk-more button').click();
+    await expect(page.locator('.toast', { hasText: 'Connection error. Check your network.' })).toHaveCount(1);
+    await expect(sec(page).locator('.mk-row')).toHaveCount(4);
+    await expect(sec(page).locator('.mk-more button')).toBeEnabled();
+    db.fail = undefined;
     await sec(page).locator('.mk-more button').click();
     await expect(sec(page).locator('.mk-row')).toHaveCount(6);
     expect(last(db, 'staff_market_listings')).toEqual({ p: { status: 'all', limit: 100, offset: 4 } });
     await expect(sec(page).locator('.mk-more')).toHaveCount(0);
+    // a search that could not be read shows the error with its retry, never the rows of the question before
+    db.fail = { staff_market_listings: { code: 'XX000', message: 'spec: no answer' } };
+    await search(page, 'mkl', 'trek');
+    await expect(sec(page).locator('#mk-list .es-err')).toContainText('Connection error. Check your network.');
+    await expect(sec(page).locator('.mk-row')).toHaveCount(0);
+    db.fail = undefined;
+    await sec(page).locator('#mk-list .es-err button', { hasText: 'Try again' }).click();
+    await expect(sec(page).locator('.mk-row')).toHaveCount(1);
+    await expect(lrow(page, 11)).toHaveCount(1);
+    // the same question read again and not answered (the minute's refresh, the read after a write) keeps its rows
+    db.fail = { staff_market_listings: { code: 'XX000', message: 'spec: no answer' } };
+    await page.evaluate(`_mkListLoad(true)`);
+    await expect(lrow(page, 11)).toHaveCount(1);
+    await expect(sec(page).locator('#mk-list .es-err')).toHaveCount(0);
+  });
+
+  test('a listing\'s history is in the desk\'s words: why it was held and the word found, a report and its decision, a conversation read, WhatsApp shared, a block; "Another city" in the language on screen', async ({ page }) => {
+    const db = fresh();
+    db.listings.find((x) => x.id === 12)!.city = 'other';
+    const e = (id: number, actor_kind: string, actor: string | null, action: string, detail: Row = {}): Row => ({ id, at: AT, actor_kind, actor, action, listing_id: 12, detail });
+    db.events = [
+      e(9, 'customer', 'c9', 'unblock'), e(8, 'customer', 'c9', 'block'), e(7, 'customer', 'c2', 'wa_share'), e(6, 'staff', 'Spec Staff', 'thread_read'),
+      e(5, 'staff', 'Spec Staff', 'report_set', { status: 'dismissed', note: 'Looked at the photos.' }), e(4, 'customer', 'c9', 'report', { target: 'listing', reason: 'counterfeit' }),
+      e(3, 'system', null, 'hold', { title: 'Running shoes', reason: 'words', word: 'first copy', on: 'publish' }), e(2, 'staff', 'Spec Staff', 'hold', { reason: 'staff', on: 'suspend' }),
+      e(1, 'system', null, 'a_later_action'),
+    ];
+    await staff(page, db);
+    await expect(lrow(page, 12).locator('.mk-r-main')).toContainText('#12 · Shoes · Another city');
+    await lrow(page, 12).locator('.mk-row-open').click();
+    await expect(kv(page, 'City')).toContainText('Another city');
+    // the database keeps codes (words, staff, counterfeit, dismissed, thread_read ...): the desk reads words
+    await expect(pop(page).locator('.mk-sec', { hasText: 'History' }).locator('li')).toHaveText([
+      /Block lifted\s*· Customer$/, /One blocked the other\s*· Customer$/, /Shared WhatsApp\s*· Customer$/, /Conversation read\s*· Spec Staff$/,
+      /Report decided\s*· Spec Staff\s*Dismissed · Looked at the photos\.$/, /Reported\s*· Customer\s*Counterfeit$/,
+      /Held\s*· System\s*Blocked words: first copy$/, /Held\s*· Spec Staff\s*Seller suspended$/,
+      /a_later_action\s*· System$/, // an action the database adds later shows as written until it is named here
+    ]);
+    await pop(page).locator('.mk-x').click();
+    // in a language the cities have no names in, "Another city" is still said in it; so are the history's words
+    await page.evaluate(`setLang('fr')`);
+    await expect(lrow(page, 12).locator('.mk-r-main')).toContainText('Autre ville');
+    await lrow(page, 12).locator('.mk-row-open').click();
+    await expect(kv(page, 'Ville')).toContainText('Autre ville');
+    await expect(pop(page).locator('.mk-tl li', { hasText: 'Conversation lue' })).toHaveCount(1);
+    await expect(pop(page).locator('.mk-tl li', { hasText: 'Blocage levé' })).toHaveCount(1);
+    await expect(pop(page).locator('.mk-tl li', { hasText: 'Mots bloqués: first copy' })).toHaveCount(1);
   });
 
   test('a listing opens in a centred pop-up: its photos, facts, the whole serial number, the seller as staff see them, reports and history', async ({ page }) => {
@@ -346,6 +459,9 @@ test.describe('@staff:market Listings', () => {
     await pop(page).locator('.mk-gal-b').nth(2).click();
     await expect(pop(page).locator('.mk-gal-main img')).toHaveAttribute('src', new RegExp(`/market/l11/c{32}\\.jpg$`));
     await expect(pop(page).locator('.mk-gal-b').nth(2)).toHaveAttribute('aria-pressed', 'true');
+    await expect(pop(page).locator('.mk-gal-b').nth(2)).toBeFocused(); // the photo picked keeps the focus through the redraw
+    // ... and the pop-up, drawn again, does not make its entrance a second time
+    expect(await page.evaluate(`(()=>{const b=document.querySelector('#mk-modal .modal-backdrop');return[b.classList.contains('mk-still'),getComputedStyle(b).animationName,getComputedStyle(b.firstElementChild).animationName];})()`)).toEqual([true, 'none', 'none']);
     // facts
     await expect(kv(page, 'Price')).toContainText('SAR 6,500 · Negotiable');
     await expect(kv(page, 'Condition')).toContainText('Excellent');
@@ -361,6 +477,7 @@ test.describe('@staff:market Listings', () => {
     await expect(pop(page).locator('.mk-sec', { hasText: 'Known faults' })).toContainText('A scratch on the top tube.');
     // the seller's account as staff see it
     await expect(kv(page, 'Account').locator('.mk-who')).toHaveText('Sara Ahmed Ali');
+    await expect(kv(page, 'Account').locator('.mk-who')).toHaveAttribute('dir', 'auto'); // a name in the other alphabet keeps its own order
     await expect(kv(page, 'Phone')).toContainText('0551234567');
     await expect(kv(page, 'Strikes')).toContainText('0');
     await expect(kv(page, 'Status').locator('.mk-pill')).toHaveText('Active');
@@ -438,6 +555,7 @@ test.describe('@staff:market Listings', () => {
     await expect(kv(page, 'Reason')).toContainText('Seen on another site.');
     await expect(lrow(page, 11).locator('.mk-pill')).toHaveText('Hidden');
     await expect.poll(() => logged(page)).toContain('Marketplace: listing #11 Trek Domane SL 5 hidden');
+    expect(await page.evaluate(`S.undoStack.at(-1).label`)).toBe('Marketplace: listing #11 Trek Domane SL 5 hidden'); // it was on sale: Undo is Restore
     await expect(pop(page).locator('.mk-sec', { hasText: 'History' }).locator('li').first()).toContainText('Hidden');
     // Restore
     await expect(pop(page).locator('.mk-pop-a button')).toHaveText(['Restore']);
@@ -488,6 +606,10 @@ test.describe('@staff:market Held', () => {
     await pop(page).locator('#mk-why').selectOption('dup');
     await pop(page).locator('.mk-form button', { hasText: 'Hide listing' }).click();
     await expect.poll(() => last(db, 'staff_market_listing_set')).toEqual({ p_listing: 13, p_action: 'hide', p_note: 'This item is already listed. هذا المنتج معروض في إعلان آخر.' });
+    // a held listing that is hidden has no Undo: Restore would put it on sale, which it never was. It is logged, and Restore stays a button
+    await expect.poll(() => logged(page)).toContain('Marketplace: listing #13 Giant Talon hidden');
+    expect(await page.evaluate(`S.undoStack.some(u=>/#13 Giant Talon hidden/.test(u.label))`)).toBe(false);
+    await expect(pop(page).locator('.mk-pop-a button')).toHaveText(['Restore']);
     await pop(page).locator('.mk-x').click();
     await expect(sec(page)).toContainText('No listing is held.');
     await expect(view(page, 'held').locator('.tab-badge')).toHaveCount(0);
@@ -581,6 +703,9 @@ test.describe('@staff:market Reports', () => {
     const text = 'Counterfeit or copied items are not allowed. لا يُسمح بالمنتجات المقلدة أو المنسوخة.';
     await expect.poll(() => last(db, 'staff_market_listing_set')).toEqual({ p_listing: 12, p_action: 'hide', p_note: text });
     await expect.poll(() => set().at(-1)).toEqual({ p_report: 1, p_action: 'actioned', p_note: 'hide: ' + text });
+    // the pop-up still open on that listing shows the report as it now is
+    await expect(pop(page).locator('.mk-sec', { hasText: 'Reports' }).locator('li')).toContainText(['Actioned']);
+    await expect(pop(page).locator('.mk-tags')).not.toContainText('Open reports');
     await pop(page).locator('.mk-x').click();
     await expect(sec(page)).toContainText('No open reports.');
     await expect(view(page, 'reports').locator('.tab-badge')).toHaveCount(0);

@@ -14741,6 +14741,8 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
 #tab-market .mk-tick input{-webkit-appearance:checkbox;appearance:auto;position:static;flex:none;width:18px;height:18px;min-height:0;margin:0;padding:0;opacity:1;accent-color:var(--green);}
 #mk-modal .mk-box{width:min(94vw,680px);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden;}
 #mk-modal .mk-box-s{width:min(92vw,440px);}
+/* the same pop-up drawn again (a write, a photo picked): it is already on screen, so it does not fade and slide in a second time */
+#mk-modal .mk-still,#mk-modal .mk-still .mk-box{animation:none;}
 #mk-modal .mk-pop-h{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px;}
 #mk-modal .mk-pop-t{min-width:0;font-size:var(--sf-fs-lg);font-weight:600;overflow-wrap:anywhere;}
 #mk-modal .mk-x{flex:none;min-width:44px;min-height:44px;margin-block-start:-10px;margin-inline-end:-10px;padding:0 4px;border:0;background:transparent none;color:var(--muted);font-size:var(--sf-fs-xl);line-height:1;cursor:pointer;}
