@@ -382,6 +382,7 @@ window.mmLoading=(function(){
     <button class="tab-btn"        data-stab="badgereq"  data-on-click='["setStaffTab","badgereq"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Badge requests</span></button>
     <button class="tab-btn"        data-stab="ask"       data-on-click='["setStaffTab","ask"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ask</span></button>
     <button class="tab-btn"        data-stab="testimonials" data-on-click='["setStaffTab","testimonials"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Testimonials</span></button>
+    <button class="tab-btn"        data-stab="chat"      data-on-click='["setStaffTab","chat"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Chat</span></button>
     <span class="snav-group" data-group="snavPartners" role="heading" aria-level="2">Partners &amp; web</span>
     <button class="tab-btn"        data-stab="vendors"       data-on-click='["setStaffTab","vendors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Vendors</span></button>
     <button class="tab-btn"        data-stab="ambassadors" data-on-click='["setStaffTab","ambassadors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ambassadors</span></button>
@@ -412,6 +413,7 @@ window.mmLoading=(function(){
     <div id="tab-badgereq"  class="tab-panel"></div>
     <div id="tab-ask"       class="tab-panel"></div>
     <div id="tab-testimonials" class="tab-panel"></div>
+    <div id="tab-chat"      class="tab-panel"></div>
     <div id="tab-analytics"  class="tab-panel"></div>
     <div id="tab-history"   class="tab-panel"></div>
     <div id="tab-reports"   class="tab-panel"></div>
@@ -941,7 +943,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   acTplTitle:'Suggestions and templates',acTplHint:'Use fills in the form for you to check; nothing reaches members until you save. Targets are based on October 2026: 268 members took part, with 450 Saturday rides and 667 sessions in all.',acTplNow:'Suggested now',acTplAll:'Show all templates',acTplLess:'Show fewer',acTplUse:'Use',acTplReward:'A challenge\'s reward is a badge the app gives by itself: pick one under Badge for finishing. Nothing else is promised.',acIdeasTitle:'Activity ideas to run as a session',acTwOne:'An easy first step: about 6 in 10 members did this in October.',acTwTwo:'A realistic step up: about 3 in 10 members did this in October.',acTwThree:'A stretch: about 1 in 7 members did this in October.',acTwEvery:'For the regulars: about 1 in 20 members did this in October.',acTwFive:'Gets members trying more than Saturdays: about 1 in 12 did this in October.',acTwCool:'The cooler months: about half of the season’s Saturdays.',acTwRamadan:'A light target for a month when routines change. The dates are expected: check them against the moon sighting.',acTwFounding:'One session for each year since 1727, across February.',acTwNational:'Twice the National Day number: about two Saturdays of rides between 18 and 28 September.',acTwBike:'The UN’s World Bicycle Day, 3 June: the two Saturdays around it, with a modest target for the heat.',acIdCare:'Bike care clinic: a mechanic shows puncture repair and a basic check, then members try it.',acIdSkills:'Skills session for newer riders: starting, braking and riding in a group.',acIdBreakfast:'Breakfast ride: a shorter Saturday route that ends at a partner café.',acIdNight:'Ramadan night ride: an easy social ride after iftar.',acIdWomen:'Women’s ride: a session held for women members.',acIdDay:'Community day: a group ride with a bike check station and a relaxed finish.',
   acBadgeFor:'Badge for finishing',acBadgeNone:'No badge',acReport:'Saturday report',acRepNew:'New Saturday report',acRepRide:'Saturday ride',acRepLineEn:'Ride leader\'s line (English)',acRepLineAr:'Ride leader\'s line (Arabic)',acRepPhoto:'Photo (optional)',acRepRule:'This photo shows no people and nothing from a pool or women-only session.',acRepRuleNeed:'Tick the photo rule, or leave the photo out.',acRepUntil:'Shows until',acRepCounts:'{0} riders · {1} rides',acNumbers:'Numbers',acNumThis:'This month',acNumPrev:'Last month',acNumFirst:'First Saturday ride this month',acNumBack:'Came back within 4 weeks',acNumOpen:'Members who opened Community',acNumDays:'Days it was opened',acNumCh:'Challenges made',acNumPicked:'Levels picked',acNumMet:'Challenges met',acNumClub:'Club goal',
   acRxSrcT:'Opens by entry point',acRxSrcCol:'Entry point',acRxOpens:'Opens',acRxShare:'Share',acRxSrcTab:'Community tab',acRxSrcDot:'Dot on the tab',acRxSrcRating:'After a rating',acRxSrcBooked:'Booking confirmation',acRxSrcWa:'WhatsApp link',acRxSrcPush:'Push notification',acRxSrcBadge:'New badge pop-up',acRxSrcLink:'Other link',acRxTotal:'Total',acRxWeeksT:'Week by week, Saturday to Friday',acRxWeek:'Week',acRxOpeners:'Members who opened',acRxBooked:'Booked members',acRxBookedOpen:'Booked members who opened',acRxBack:'Came back from the week before',acRxAuto:'Automatic',acRxHidden:'Hidden',acRxHide:'Hide',acRxShow:'Show',acRxFirst:'{0} first Saturday rides',acRxLeads:'{0} ride leads',acRxVols:'{0} volunteers',acRxPrev:'Week before: {0} riders',acRxCopyWa:'Copy WhatsApp link',acRxCopied:'Link copied. Paste it in the club’s WhatsApp group.',acRxPhotoOff:'Remove photo',acRxGoalT:'Club goal by month',acRxGoalHelp:'The app sizes each month from the club’s pace. A target set here stays until you clear it.',acRxMonth:'Month',acRxStored:'Target {0}',acRxManual:'Set by staff',acRxSized:'Sized by the app',acRxSetT:'Set a month’s target',acRxChange:'Change',acRxClear:'Clear',acRxGoalBad:'Pick this month or a later one, and a target from 1 to 100000.',acRxRamT:'Ramadan dates',acRxRamYear:'Year',acRxRamFrom:'First day',acRxRamTo:'Last day',acRxRamOk:'Confirmed after the moon sighting',acRxRamConf:'Confirmed',acRxRamProj:'Projected, not confirmed',acRxRamAdd:'Add a year',acRxRamDays:'{0} days',acRxRamBad:'Give the year and both days: Ramadan starts in that year and lasts 29 or 30 days.',esMeetNameEn:'Meeting point name (English)',esMeetNameAr:'Meeting point name (Arabic)',esMeetCoord:'Meeting point coordinate',esMeetCoordHint:'lat, lng or a Google Maps or Apple Maps link',esMeetCoordOk:'Coordinate: {0}',esMeetCoordBad:'No coordinate found. Type lat, lng (for example 21.5433, 39.1728) or paste a map link that shows them.',esMeetMap:'Check on the map',esRs:'Ride status',esRsNormal:'Normal',esRsMoved:'Start moved',esRsShort:'Shortened',esRsCancel:'Cancelled',esRsCancelHint:'Riders see it as cancelled. Bookings and money stay as they are: Cancel session gives them back.',remKindPush:'Push, the evening before',
-  acSg:'Suggestions',acSgNew:'New',acSgPlanned:'Planned',acSgDone:'Done',acSgClosed:'Closed',acSgClose:'Close',acSgKRoute:'Route',acSgKBreakfast:'Breakfast spot',acSgKIdea:'Ride idea',acSgKOther:'Something else',acSgReply:'Reply to the member',acCh:'Chat',acChAll:'All',acChFlagged:'Reported',acChRemoved:'Removed',acChMuted:'Muted',acChWrite:'Message as the MicroMobility team',acChTeam:'Team',acChReports:'Reports: {0}',acChBySelf:'Removed by the member',acChByStaff:'Removed by staff',acChByReports:'Hidden after 3 reports',acChRemove:'Remove',acChBack:'Put back',acChKeep:'Keep',acChMute:'Mute',acChMute1:'1 day',acChMute7:'7 days',acChMuteOpen:'Until lifted',acChLift:'Lift mute',acChMutedTill:'Muted until {0}',acChMutedOpen:'Muted until lifted',acChSend:'Send',acChOld:'No longer shown to members',acChMore:'Earlier messages',
+  acSg:'Suggestions',acSgNew:'New',acSgPlanned:'Planned',acSgDone:'Done',acSgClosed:'Closed',acSgClose:'Close',acSgKRoute:'Route',acSgKBreakfast:'Breakfast spot',acSgKIdea:'Ride idea',acSgKOther:'Something else',acSgReply:'Reply to the member',chsRail:'Chat',chsTitle:'Community chat',chsWaitN:'{0} reported, waiting for a look',chsLive:'Live',chsPoll:'Refreshing every 15 seconds',chsSearch:'Search messages or names',chsAll:'All',chsFlagged:'Reported',chsDeleted:'Deleted',chsEditedF:'Edited',chsMuted:'Muted',chsWho:'Written by',chsWhoAll:'Everyone',chsWhoMem:'Members',chsWhoTeam:'Team',chsShown:'Members see it',chsShownYes:'Shown now',chsShownNo:'No longer shown',chsTeam:'MicroMobility team',chsReports:'Reports: {0}',chsBySelf:'Deleted by the member',chsByStaff:'Deleted by staff',chsByStaffN:'Deleted by {0}',chsByReports:'Hidden after 3 reports',chsEdited:'Edited',chsEditedBy:'Edited by {0}',chsOld:'No longer shown to members',chsEdit:'Edit',chsDelete:'Delete',chsBack:'Put back',chsKeep:'Keep',chsMute:'Mute',chsMute1:'1 day',chsMute7:'7 days',chsMuteOpen:'Until lifted',chsLift:'Lift mute',chsMutedTill:'Muted until {0}',chsMutedOpen:'Muted until lifted',chsWrite:'Message as the MicroMobility team',chsSend:'Send',chsMore:'Earlier messages',chsNew:'New messages',chsEditLbl:'Edit the message. Members will see "Edited by the team".',chsChanged:'Someone changed this message meanwhile. It now reads:',chsHist:'Earlier wording',chsNoDb:'The chat is not set up on the database yet.',chsErr:'Could not load the chat.',chsSearchAll:'Search all messages',chsNone:'No messages here.',
   acTab:'Members’ page',acSub:'Challenges reach members on their Community page. The other tabs are for staff: members do not see their results.',acVote:'Rider of the Month',acGoals:'Challenges',acSquads:'Squads',acPhotos:'Photos',acWelcome:'Welcome',acMissing:'Activities are not set up on the database yet.',acLoadErr:'Activities could not be loaded.',acNewRound:'New vote',acLabelEn:'Name (English), e.g. Rider of November',acLabelAr:'Name (Arabic)',acOpens:'First day',acCloses:'Last day',acTitleGive:'Title the winner gets (optional)',acNoTitle:'No title',acNeedAll:'Fill in both names and valid dates.',acVotes:'Votes',acVotesN:'{0} votes',acCrown:'Make winner',acWinner:'Winner: {0}',acNoVotes:'No votes yet.',acNewGoal:'New challenge or goal',acKind:'Type',acKindCh:'Challenge: each member\'s own count',acKindGo:'Community goal: everyone\'s total',acCounts:'What counts',acScopeSat:'Saturday rides',acScopeAll:'All community sessions',acTarget:'Target',acWho:'Who has counts',acCountOf:'{0} of {1}',acNone:'Nothing here yet.',acMembersN:'{0} members, code {1}',acSure:'Tap again to confirm',acApprove:'Approve',acReject:'Reject and delete',acReported:'A member asked to take this down',acOnWall:'On the wall',acWaiting:'Waiting for a decision',acNewMembers:'Members who joined in the last 30 days',acBuddy:'Welcome buddy',acNoBuddy:'No buddy yet',
   // My interests (2026-11-18, migration 20261118210300): the interests' names (INT_K), Ask's audience by interest, Activities' Send an update
   intTitle:'Interests',intSaturday:'Saturday Social Rides',intCircuit:'Circuit nights',intRoad:'Road bike rides',intPetromin:'Petromin nights',intWomen:'Women’s sessions',intLearn:'Learning and workshops',intRuns:'Runs',intRaces:'Races',intSwim:'Swimming',intYoga:'Yoga',intFarm:'Farm House Nights',intCharity:'Charity and blood donation',askAudInt:'Members by interest',askIntPick:'Pick at least one interest.',acUpdates:'Send an update',acUpdTo:'Who gets it',acUpdAll:'All members',acUpdEn:'Text in English',acUpdAr:'Text in Arabic',acUpdSend:'Send',acUpdConfirm:'Send this update to {0} members? It goes to their Updates list.',acUpdNeed:'Write the text in English and in Arabic.',acUpdLimit:'At most five updates an hour. Try again later.',acUpdSent:'Sent',acUpdNone:'No update sent yet.',acUpdN:'{0} members',
@@ -1649,7 +1651,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   acTplTitle:'اقتراحات وقوالب',acTplHint:'يملأ زر الاستخدام النموذج لتراجعه، ولا يصل شيء إلى الأعضاء قبل الحفظ. الأهداف مبنية على أكتوبر 2026: شارك 268 عضوًا، بواقع 450 رحلة سبت و667 مشاركة إجمالًا.',acTplNow:'مقترح الآن',acTplAll:'عرض كل القوالب',acTplLess:'عرض أقل',acTplUse:'استخدم',acTplReward:'جائزة التحدي شارة يمنحها التطبيق تلقائيًا: اخترها من «شارة الإنجاز». لا يُوعد بشيء آخر.',acIdeasTitle:'أفكار أنشطة تُقام كجلسة',acTwOne:'خطوة أولى سهلة: حققها نحو 6 من كل 10 أعضاء في أكتوبر.',acTwTwo:'خطوة واقعية للأعلى: حققها نحو 3 من كل 10 أعضاء في أكتوبر.',acTwThree:'هدف أصعب: حققه نحو عضو من كل 7 في أكتوبر.',acTwEvery:'للمواظبين: حققه نحو عضو من كل 20 في أكتوبر.',acTwFive:'يشجع الأعضاء على تجربة ما هو أبعد من السبت: حققه نحو عضو من كل 12 في أكتوبر.',acTwCool:'الأشهر الأبرد: نحو نصف أيام السبت في الموسم.',acTwRamadan:'هدف خفيف لشهر يتغير فيه الروتين. التواريخ متوقعة: راجعها بعد رؤية الهلال.',acTwFounding:'مشاركة عن كل عام منذ 1727، على مدار فبراير.',acTwNational:'ضعف رقم اليوم الوطني: نحو رحلات يومَي سبت بين 18 و28 سبتمبر.',acTwBike:'اليوم العالمي للدراجات من الأمم المتحدة، 3 يونيو: يوما السبت حوله، بهدف معتدل بسبب الحر.',acIdCare:'ورشة العناية بالدراجة: يشرح فني إصلاح الثقب والفحص الأساسي، ثم يجرّب الأعضاء.',acIdSkills:'جلسة مهارات للراكبين الجدد: الانطلاق والفرملة والركوب ضمن مجموعة.',acIdBreakfast:'رحلة الإفطار: مسار سبت أقصر ينتهي عند مقهى شريك.',acIdNight:'رحلة ليلية في رمضان: رحلة اجتماعية هادئة بعد الإفطار.',acIdWomen:'رحلة للنساء: جلسة مخصصة للعضوات.',acIdDay:'يوم المجتمع: رحلة جماعية مع محطة لفحص الدراجات وختام هادئ.',
   acBadgeFor:'شارة الإنجاز',acBadgeNone:'بلا شارة',acReport:'تقرير السبت',acRepNew:'تقرير سبت جديد',acRepRide:'رحلة السبت',acRepLineEn:'كلمة قائد الرحلة (بالإنجليزية)',acRepLineAr:'كلمة قائد الرحلة (بالعربية)',acRepPhoto:'صورة (اختياري)',acRepRule:'لا تُظهر هذه الصورة أي أشخاص، ولا شيئًا من جلسة سباحة أو جلسة للنساء فقط.',acRepRuleNeed:'ضع علامة على قاعدة الصورة، أو اترك الصورة.',acRepUntil:'يظهر حتى',acRepCounts:'{0} راكبًا · {1} رحلة',acNumbers:'الأرقام',acNumThis:'هذا الشهر',acNumPrev:'الشهر الماضي',acNumFirst:'أول رحلة سبت هذا الشهر',acNumBack:'عادوا خلال 4 أسابيع',acNumOpen:'أعضاء فتحوا المجتمع',acNumDays:'أيام فتحه',acNumCh:'تحديات أُنشئت',acNumPicked:'مستويات اختيرت',acNumMet:'تحديات أُنجزت',acNumClub:'هدف النادي',
   acRxSrcT:'مرات الفتح حسب نقطة الدخول',acRxSrcCol:'نقطة الدخول',acRxOpens:'مرات الفتح',acRxShare:'النسبة',acRxSrcTab:'تبويب المجتمع',acRxSrcDot:'النقطة على التبويب',acRxSrcRating:'بعد التقييم',acRxSrcBooked:'تأكيد الحجز',acRxSrcWa:'رابط واتساب',acRxSrcPush:'إشعار',acRxSrcBadge:'نافذة الشارة الجديدة',acRxSrcLink:'رابط آخر',acRxTotal:'المجموع',acRxWeeksT:'أسبوعًا بأسبوع، من السبت إلى الجمعة',acRxWeek:'الأسبوع',acRxOpeners:'أعضاء فتحوه',acRxBooked:'أعضاء حجزوا',acRxBookedOpen:'أعضاء حجزوا وفتحوه',acRxBack:'عادوا من الأسبوع السابق',acRxAuto:'تلقائي',acRxHidden:'مخفي',acRxHide:'إخفاء',acRxShow:'إظهار',acRxFirst:'{0} أول رحلة سبت',acRxLeads:'{0} قائد رحلة',acRxVols:'{0} متطوع',acRxPrev:'الأسبوع السابق: {0} راكبًا',acRxCopyWa:'نسخ رابط واتساب',acRxCopied:'نُسخ الرابط. الصقه في مجموعة واتساب النادي.',acRxPhotoOff:'إزالة الصورة',acRxGoalT:'هدف النادي حسب الشهر',acRxGoalHelp:'يحدّد التطبيق هدف كل شهر حسب وتيرة النادي. الهدف الذي تضعه هنا يبقى حتى تمسحه.',acRxMonth:'الشهر',acRxStored:'الهدف {0}',acRxManual:'حدّده الفريق',acRxSized:'حدّده التطبيق',acRxSetT:'تحديد هدف شهر',acRxChange:'تغيير',acRxClear:'مسح',acRxGoalBad:'اختر هذا الشهر أو شهرًا بعده، وهدفًا من 1 إلى 100000.',acRxRamT:'مواعيد رمضان',acRxRamYear:'السنة',acRxRamFrom:'أول يوم',acRxRamTo:'آخر يوم',acRxRamOk:'مؤكد بعد رؤية الهلال',acRxRamConf:'مؤكد',acRxRamProj:'متوقع، غير مؤكد',acRxRamAdd:'إضافة سنة',acRxRamDays:'{0} يومًا',acRxRamBad:'أدخل السنة واليومين: يبدأ رمضان في تلك السنة ويستمر 29 أو 30 يومًا.',esMeetNameEn:'اسم نقطة التجمع (بالإنجليزية)',esMeetNameAr:'اسم نقطة التجمع (بالعربية)',esMeetCoord:'إحداثيات نقطة التجمع',esMeetCoordHint:'خط العرض، خط الطول أو رابط من خرائط Google أو Apple',esMeetCoordOk:'الإحداثيات: {0}',esMeetCoordBad:'لم نجد إحداثيات. اكتب خط العرض، خط الطول (مثل 21.5433, 39.1728) أو الصق رابط خريطة يظهرها.',esMeetMap:'التحقق على الخريطة',esRs:'حالة الرحلة',esRsNormal:'عادية',esRsMoved:'تغيّر موعد الانطلاق',esRsShort:'مختصرة',esRsCancel:'ملغاة',esRsCancelHint:'يراها الركاب ملغاة. تبقى الحجوزات والمبالغ كما هي: زر إلغاء الجلسة يعيدها.',remKindPush:'إشعار، مساء اليوم السابق',
-  acSg:'الاقتراحات',acSgNew:'جديدة',acSgPlanned:'ضمن الخطة',acSgDone:'نُفّذت',acSgClosed:'مغلقة',acSgClose:'إغلاق',acSgKRoute:'مسار',acSgKBreakfast:'مكان للفطور',acSgKIdea:'فكرة جولة',acSgKOther:'شيء آخر',acSgReply:'الرد على العضو',acCh:'الدردشة',acChAll:'الكل',acChFlagged:'المبلّغ عنها',acChRemoved:'المحذوفة',acChMuted:'الموقوفون',acChWrite:'رسالة باسم فريق MicroMobility',acChTeam:'الفريق',acChReports:'البلاغات: {0}',acChBySelf:'حذفها العضو',acChByStaff:'حذفها الموظفون',acChByReports:'أُخفيت بعد 3 بلاغات',acChRemove:'حذف',acChBack:'إعادة',acChKeep:'إبقاء',acChMute:'إيقاف عن الكتابة',acChMute1:'يوم واحد',acChMute7:'7 أيام',acChMuteOpen:'حتى رفع الإيقاف',acChLift:'رفع الإيقاف',acChMutedTill:'موقوف حتى {0}',acChMutedOpen:'موقوف حتى رفع الإيقاف',acChSend:'إرسال',acChOld:'لم تعد تظهر للأعضاء',acChMore:'الرسائل السابقة',
+  acSg:'الاقتراحات',acSgNew:'جديدة',acSgPlanned:'ضمن الخطة',acSgDone:'نُفّذت',acSgClosed:'مغلقة',acSgClose:'إغلاق',acSgKRoute:'مسار',acSgKBreakfast:'مكان للفطور',acSgKIdea:'فكرة جولة',acSgKOther:'شيء آخر',acSgReply:'الرد على العضو',chsRail:'الدردشة',chsTitle:'دردشة المجتمع',chsWaitN:'{0} مبلّغ عنها بانتظار المراجعة',chsLive:'مباشر',chsPoll:'تتحدّث كل 15 ثانية',chsSearch:'ابحث في الرسائل أو الأسماء',chsAll:'الكل',chsFlagged:'المبلّغ عنها',chsDeleted:'المحذوفة',chsEditedF:'المعدّلة',chsMuted:'الموقوفون',chsWho:'الكاتب',chsWhoAll:'الجميع',chsWhoMem:'الأعضاء',chsWhoTeam:'الفريق',chsShown:'تظهر للأعضاء',chsShownYes:'تظهر الآن',chsShownNo:'لم تعد تظهر',chsTeam:'فريق MicroMobility',chsReports:'البلاغات: {0}',chsBySelf:'حذفها العضو',chsByStaff:'حذفها الموظفون',chsByStaffN:'حذفها {0}',chsByReports:'أُخفيت بعد 3 بلاغات',chsEdited:'معدّلة',chsEditedBy:'عدّلها {0}',chsOld:'لم تعد تظهر للأعضاء',chsEdit:'تعديل',chsDelete:'حذف',chsBack:'إعادة',chsKeep:'إبقاء',chsMute:'إيقاف عن الكتابة',chsMute1:'يوم واحد',chsMute7:'7 أيام',chsMuteOpen:'حتى رفع الإيقاف',chsLift:'رفع الإيقاف',chsMutedTill:'موقوف حتى {0}',chsMutedOpen:'موقوف حتى رفع الإيقاف',chsWrite:'رسالة باسم فريق MicroMobility',chsSend:'إرسال',chsMore:'الرسائل السابقة',chsNew:'رسائل جديدة',chsEditLbl:'عدّل الرسالة. سيرى الأعضاء «عدّلها الفريق».',chsChanged:'غيّر أحدٌ هذه الرسالة في الأثناء. نصّها الآن:',chsHist:'الصياغة السابقة',chsNoDb:'الدردشة غير مُعدّة في قاعدة البيانات بعد.',chsErr:'تعذّر تحميل الدردشة.',chsSearchAll:'ابحث في كل الرسائل',chsNone:'لا توجد رسائل هنا.',
   acTab:'صفحة الأعضاء',acSub:'تصل التحديات إلى الأعضاء في صفحة المجتمع. أما بقية التبويبات فللفريق فقط، ولا يرى الأعضاء نتائجها.',acVote:'راكب الشهر',acGoals:'التحديات',acSquads:'الفرق',acPhotos:'الصور',acWelcome:'الترحيب',acMissing:'لم يتم إعداد الأنشطة في قاعدة البيانات بعد.',acLoadErr:'تعذّر تحميل الأنشطة.',acNewRound:'تصويت جديد',acLabelEn:'الاسم (بالإنجليزية)',acLabelAr:'الاسم (بالعربية)',acOpens:'أول يوم',acCloses:'آخر يوم',acTitleGive:'اللقب الذي يناله الفائز (اختياري)',acNoTitle:'بلا لقب',acNeedAll:'أدخل الاسمين وتواريخ صحيحة.',acVotes:'الأصوات',acVotesN:'{0} صوت',acCrown:'اجعله الفائز',acWinner:'الفائز: {0}',acNoVotes:'لا توجد أصوات بعد.',acNewGoal:'تحدٍ أو هدف جديد',acKind:'النوع',acKindCh:'تحدٍ: عدد كل عضو',acKindGo:'هدف المجتمع: مجموع الجميع',acCounts:'ما يُحتسب',acScopeSat:'رحلات السبت',acScopeAll:'كل أنشطة المجتمع',acTarget:'الهدف',acWho:'من لديهم عدد',acCountOf:'{0} من {1}',acNone:'لا يوجد شيء هنا بعد.',acMembersN:'{0} أعضاء، الرمز {1}',acSure:'اضغط مرة أخرى للتأكيد',acApprove:'اعتماد',acReject:'رفض وحذف',acReported:'طلب عضو إزالة هذه الصورة',acOnWall:'على الحائط',acWaiting:'بانتظار القرار',acNewMembers:'الأعضاء المنضمون في آخر 30 يومًا',acBuddy:'رفيق الترحيب',acNoBuddy:'لا يوجد رفيق بعد',
   intTitle:'الاهتمامات',intSaturday:'جولات السبت الاجتماعية',intCircuit:'ليالي الحلبة',intRoad:'جولات الدراجات الطرقية',intPetromin:'ليالي بترومين',intWomen:'جلسات للسيدات',intLearn:'التعلّم وورش العمل',intRuns:'الجري',intRaces:'السباقات',intSwim:'السباحة',intYoga:'اليوغا',intFarm:'ليالي المزرعة',intCharity:'العمل الخيري والتبرع بالدم',askAudInt:'الأعضاء حسب الاهتمام',askIntPick:'اختر اهتمامًا واحدًا على الأقل.',acUpdates:'إرسال تحديث',acUpdTo:'من يصله',acUpdAll:'كل الأعضاء',acUpdEn:'النص بالإنجليزية',acUpdAr:'النص بالعربية',acUpdSend:'إرسال',acUpdConfirm:'هل تريد إرسال هذا التحديث إلى {0} من الأعضاء؟ سيصل إلى قائمة التحديثات لديهم.',acUpdNeed:'اكتب النص بالإنجليزية وبالعربية.',acUpdLimit:'خمسة تحديثات في الساعة كحدّ أقصى. حاول لاحقًا.',acUpdSent:'ما أُرسل',acUpdNone:'لم يُرسل أي تحديث بعد.',acUpdN:'{0} من الأعضاء',
   ttMineTitle:'لقبك',ttMineSub:'اختر اللقب الذي يظهر في حسابك.',ttMineNone:'ليس لديك لقب بعد. تأتي الألقاب من فريقنا ومن رحلات السبت التي تشارك فيها.',ttUntil:'حتى {0}',ttSaveErr:'تعذّر الحفظ. يرجى المحاولة مرة أخرى.',ttSaved:'تم الحفظ',mbTitle:'المجتمع',mbErr:'تعذّر تحميل هذه الصفحة. تحقق من اتصالك وحاول مرة أخرى.',mbRetry:'حاول مرة أخرى',mbLoading:'جارٍ التحميل...',ttTab:'الألقاب',ttSub:'ألقاب يحملها الأعضاء في حساباتهم.',ttNew:'لقب جديد',ttGive:'منح اللقب',ttAuto:'تلقائي عند بلوغ هذا العدد من رحلات السبت',ttAutoHint:'اتركه فارغًا لمنحه يدويًا.',ttAutoMeta:'تلقائي عند {0} رحلة سبت',ttHandMeta:'يمنحه الفريق',ttSearch:'ابحث عن الأعضاء بالاسم أو الجوال',ttLastDay:'آخر يوم (اختياري)',ttRetire:'إيقاف',ttRestore:'استعادة',ttRetiredMeta:'موقوف',ttNameReq:'أدخل الاسم بالإنجليزية أو العربية.',ttAutoBad:'أدخل عددًا صحيحًا من 1 إلى 1000 أو اتركه فارغًا.',ttEmpty:'لا توجد ألقاب بعد. أنشئ أول لقب.',ttMissing:'لم يتم إعداد الألقاب في قاعدة البيانات بعد.',ttLoadErr:'تعذّر تحميل الألقاب.',ttNights:'{0} رحلة سبت',ttSure:'اضغط مرة أخرى للحذف',ttLogSaved:'تم حفظ اللقب',ttLogGiven:'تم منح اللقب',ttLogTaken:'تم سحب اللقب',ttLogDeleted:'تم حذف اللقب',
@@ -2378,7 +2380,7 @@ function isAdmin(){return S.staffRole==='admin';}
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
 // Inside Riders the summary report stays admin-only (renderRiders).
 const DESK_TABS=['queue','waitlist','lockers','cashier','workshop']; // Lockers (2026-11-09): the desk gives them // the Waitlist (2026-11-09): a section of its own, opened by whoever opens Bookings // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
-const ROLE_TABS={volunteer:[],door:[],manager:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','waitlist','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','store','inventory'],owner:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
+const ROLE_TABS={volunteer:[],door:[],manager:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','waitlist','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','store','inventory'],owner:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
 function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]||DESK_TABS).filter(_stoSecOk);}
 // The Store and Payments (2026-11-10) are sections only where the database has them (staff_store_ready, _stoProbe): not on
 // the rail, not among the Team page's sections, not in "every section" anywhere else. A catalogue-only database
@@ -2390,7 +2392,7 @@ function _deskTabOk(tab){return tab==='settings'||tab==='reports'&&S.staffRole!=
 // call into (a return's fleet check, a void's reason, the night summary). Every other part comes the first time something asks for it (its stand-in fetches it).
 // Before the role is known nothing is held back. People's rarely opened views (peopleapps, peoplemore: staff round s10,
 // item 47) come only when one is opened; a session's report (sessreport) with the desk's parts.
-const STAFF_PART_TABS={reports:[],peopleapps:[],peoplemore:[],sessreport:['queue'],sessions:['sessions'],lockers:['lockers'],store:['store','payments'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],ask:['ask'],testimonials:['testimonials'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist'],announce:['queue','settings'],door:[]}; // door: fetched by its stand-in when a Door account signs in
+const STAFF_PART_TABS={reports:[],peopleapps:[],peoplemore:[],sessreport:['queue'],sessions:['sessions'],lockers:['lockers'],store:['store','payments'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],ask:['ask'],testimonials:['testimonials'],chat:['chat'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist'],announce:['queue','settings'],door:[]}; // door: fetched by its stand-in when a Door account signs in
 function _staffPartWanted(n){const tabs=STAFF_PART_TABS[n];if(!tabs||!S.staffRole)return true;return tabs.some(_deskTabOk);}
 // A staff account's own preferences (2026-10-09): staff.prefs through staff_my_prefs, with this
 // device's copy (cq_prefs, kept per account) read at once so a reload starts as the person left it.
@@ -8053,7 +8055,7 @@ let _navRestoring=false;
 // them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
-const STAFF_PATHS={reports:'reports',volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',store:'store',payments:'payments',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ask:'ask',testimonials:'testimonials',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
+const STAFF_PATHS={reports:'reports',volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',store:'store',payments:'payments',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ask:'ask',testimonials:'testimonials',chat:'chat',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',members:'members'};
 // The account page's three parts (the owner, 2026-11-09): Account at /account, then /account/stats and /account/badges.
 const ACC_VIEWS=['account','stats','badges'];
@@ -16606,6 +16608,7 @@ function setStaffTab(tab,o){
   else if(tab==='badgereq')renderBadgeRequests();
   else if(tab==='ask')renderAsk();
   else if(tab==='testimonials')renderTestimonials();
+  else if(tab==='chat')renderChat(); // the Community chat (2026-11-20, migration 20261120233000)
   else if(tab==='reports')renderReports(); // every report in one place (the reports rework, 2026-11-13)
   else if(tab==='lockers')renderLockers();
   else if(tab==='store')renderStore();
@@ -17006,7 +17009,7 @@ function _meetLL(s){
 }
 function _meetNm(s){return String((s&&((S.lang==='ar'&&s.meet_name_ar)||s.meet_name))||'').trim();}
 
-const _SNAV_ICON={reports:'print',store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',ask:'ask',testimonials:'quote',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={reports:'print',store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',ask:'ask',testimonials:'quote',chat:'chat',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   if(!_ART.bag)_ART.bag='<path opacity=".35" d="M4 8h16l-1.1 12.2A2 2 0 0 1 16.9 22H7.1a2 2 0 0 1-2-1.8z"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9h-2V6.5a2 2 0 0 0-4 0V9z"/>'; // the Store's mark (2026-11-10), kept here for the same reason
@@ -17116,6 +17119,8 @@ function renderStaffTabs(){
   _askRailSync();if(!S._askCAt&&S._staffAuthed&&_deskTabOk('ask'))_askCount(); // Ask's name, and the answers waiting for approval (then _secPolls)
   document.getElementById('tab-testimonials').classList.toggle('active',S.staffTab==='testimonials');
   _tsmRailSync();if(!S._tsmCAt&&S._staffAuthed&&_deskTabOk('testimonials'))_tsmCount(); // Testimonials' name, and those waiting for review (then _secPolls)
+  document.getElementById('tab-chat')      .classList.toggle('active',S.staffTab==='chat');
+  _chsRailSync();if(!S._chsCAt&&S._staffAuthed&&_deskTabOk('chat'))_chsCount(); // Chat's name, and the reported messages nobody has looked at (then _secPolls)
   document.getElementById('tab-history')   .classList.toggle('active',S.staffTab==='history');
   document.getElementById('tab-analytics') .classList.toggle('active',S.staffTab==='analytics');
   document.getElementById('tab-website')   .classList.toggle('active',S.staffTab==='website');
@@ -21196,7 +21201,7 @@ function _deferWhileTyping(tab){
   return true;
 }
 function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for something the staffer did
-  _dqInit();_stoTabLabelSync();_askRailSync();_tsmRailSync(); // the Store's, Payments', Ask's and Testimonials' names, in the language on screen
+  _dqInit();_stoTabLabelSync();_askRailSync();_tsmRailSync();_chsRailSync(); // the Store's, Payments', Ask's, Testimonials' and Chat's names, in the language on screen
   if(S.staffRole==='door'){_doorShow();return;}
   const tab=S.staffTab;
   if(bg&&['cashier','inventory','community','customers','bikes'].includes(tab)&&_deferWhileTyping(tab)){try{_ahRefresh();}catch(_){}try{_ntSync();}catch(_){}return;}
@@ -21209,6 +21214,7 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
   else if(tab==='community')renderCommunity();
   else if(tab==='badgereq'){if(!bg)renderBadgeRequests();} // its own loader: the desk's data has nothing for it
   else if(tab==='testimonials'){if(!bg)renderTestimonials();} // its own loader
+  else if(tab==='chat'){if(!bg)renderChat();else{const f=globalThis['_chs'+'Paint'];if(typeof f==='function')f();}} // its own loader, live by itself; the desk's data (the writers' names) only redraws what changed, by a built name (the part's own)
   else if(tab==='ask'){if(!bg||!(S._askS&&S._askS.cur))renderAsk();} // its own loader; the list follows the tags' names, a page on screen (a draft in hand) is left alone
   else if(tab==='lockers')renderLockers(); // names and booking numbers come from the desk's rows
   else if(tab==='store'){if(!bg)renderStore();} // its own loader: the desk's data has nothing for it
@@ -29908,6 +29914,24 @@ function _tsmRailSync(){
   const l=document.querySelector('#staff-tab-nav .tab-btn[data-stab="testimonials"] .snav-lbl');if(!l)return;
   const n=S._tsmN|0,k=S.lang+'|'+n;if(l.dataset.k===k)return;l.dataset.k=k;
   l.innerHTML=esc(t('qtTitle'))+(n?` <span class="tab-badge" title="${esc(t('qtWaitN').replace('{0}',n))}">${n}</span>`:'');
+}
+// ── Chat: the rail's number (2026-11-20, migration 20261120233000) ─────────────────────────────────────────────────
+// The chat's reported messages nobody has looked at (hub_chat_waiting), at most every two minutes, on any section
+// (_secPolls); the section's own reads set it too (_chsRowsSet). A database without the chat leaves the name alone.
+async function _chsCount(force){
+  if(!sb||S._chsCB||S._chsGone||(!force&&S._chsCAt&&Date.now()-S._chsCAt<12e4))return;
+  S._chsCB=true;S._chsCAt=Date.now();
+  let r;try{r=await sb.from('hub_chat').select('id,reports,checked_at').gt('reports',0).is('checked_at',null).limit(100);}catch(e){r={error:e};}
+  S._chsCB=false;
+  if(r&&!r.error&&Array.isArray(r.data))S._chsN=r.data.filter(x=>(Number(x.reports)||0)>0&&!x.checked_at).length;
+  else if(r&&r.error&&['PGRST205','42P01'].includes(String(r.error.code||'')))S._chsGone=true;
+  _chsRailSync();
+}
+// The rail's name and the reported messages waiting, in the language on screen (the label loop in render() leaves it alone).
+function _chsRailSync(){
+  const l=document.querySelector('#staff-tab-nav .tab-btn[data-stab="chat"] .snav-lbl');if(!l)return;
+  const n=S._chsN|0,k=S.lang+'|'+n;if(l.dataset.k===k)return;l.dataset.k=k;
+  l.innerHTML=esc(t('chsRail'))+(n?` <span class="tab-badge" title="${esc(t('chsWaitN').replace('{0}',n))}">${n>99?'99+':n}</span>`:'');
 }
 // ── Testimonials, the staff section (the user, 2026-11-18; migration 20261119120000) ─────────────────────────────────
 // /testimonials, under People on the rail (the part staff-parts/testimonials.js). People's right in the database
@@ -49304,17 +49328,17 @@ async function _pinApprove(what,opt){
 // only some of those (staff.modules_edit); null is everything its role allows. The role itself
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
-function _staffSections(){return['queue','waitlist','sessions','lockers','dashboard','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'].filter(_stoSecOk);}
-const SECTION_KEY={reports:'tabReports',dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',store:'tabStore',payments:'tabPayments',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ask:'tabAsk',testimonials:'qtTitle',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+function _staffSections(){return['queue','waitlist','sessions','lockers','dashboard','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'].filter(_stoSecOk);}
+const SECTION_KEY={reports:'tabReports',dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',store:'tabStore',payments:'tabPayments',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ask:'tabAsk',testimonials:'qtTitle',chat:'chsRail',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
 // Customers and Community are one section, People, since 2026-11-06 (id 'community'): a list naming either names it.
-function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('queue')&&!l.includes('waitlist'))l.push('waitlist');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');if(l.includes('community')&&!l.includes('ask'))l.push('ask');if(l.includes('community')&&!l.includes('testimonials'))l.push('testimonials');if(l.includes('cashier')){if(!l.includes('store'))l.push('store');if(!l.includes('payments'))l.push('payments');}return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08) and Ask (2026-11-13: it comes with People); one naming Bookings names the Waitlist (a view of it until 2026-11-09)
+function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('queue')&&!l.includes('waitlist'))l.push('waitlist');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');if(l.includes('community')&&!l.includes('ask'))l.push('ask');if(l.includes('community')&&!l.includes('testimonials'))l.push('testimonials');if(l.includes('community')&&!l.includes('chat'))l.push('chat');if(l.includes('cashier')){if(!l.includes('store'))l.push('store');if(!l.includes('payments'))l.push('payments');}return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08) and Ask (2026-11-13: it comes with People); one naming Bookings names the Waitlist (a view of it until 2026-11-09)
 // What _modIds adds back to a list that names the section's parent (Sessions, Lockers and the Waitlist with Bookings, Badge
 // requests with People). The database's staff_set_access knows only its own list of sections (none of these four on
 // 2026-11-09), so the Team page sends them only without their parent, where the database's refusal says so; with it they
 // would cost nothing to drop, since they come back on every read.
-const _MOD_PARENT={sessions:'queue',lockers:'queue',waitlist:'queue',badgereq:'community',ask:'community',testimonials:'community',store:'cashier',payments:'cashier'}; // the Store and Payments (2026-11-10) come with Sales
+const _MOD_PARENT={sessions:'queue',lockers:'queue',waitlist:'queue',badgereq:'community',ask:'community',testimonials:'community',chat:'community',store:'cashier',payments:'cashier'}; // Chat (2026-11-20) comes with People too // the Store and Payments (2026-11-10) come with Sales
 function _modSend(a){return Array.isArray(a)?a.filter(x=>!(_own(_MOD_PARENT,x)&&a.includes(_MOD_PARENT[x]))):a;}
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
 // Settings is every account's own page (_deskTabOk opens it to all) and is never one of the
@@ -79649,11 +79673,11 @@ function _commActivities(){
   if(S._acMissing)return _emptyState(t('acMissing'));
   if(S._acErr)return _emptyState(t('acLoadErr'));
   if(!S._ac)return`<div class="am-meta">${t('mbLoading')}</div>`;
-  const tab=S._acTabV||'goals',n=_acPendingN(),sg=_acSgNewN(),ch=_acChFlagN();
+  const tab=S._acTabV||'goals',n=_acPendingN(),sg=_acSgNewN();
   const pill=(k,l)=>`<button type="button" class="filter-pill${tab===k?' active':''}" data-on-click="${_on('_acSub',k)}">${l}</button>`;
   return`<div class="form-section cmy-mt0"><h2 class="form-title">${t('acTab')}</h2><div class="cmy-am-sub">${t('acSub')}</div>
-    <div class="filter-row">${pill('goals',t('acGoals'))}${pill('laps',t('acLaps'))}${pill('report',t('acReport'))}${pill('numbers',t('acNumbers'))}${pill('club',t('acNumClub'))}${pill('vote',t('acVote'))}${pill('squads',t('acSquads'))}${pill('photos',t('acPhotos')+(n?` (${n})`:''))}${S._acSgMissing?'':pill('suggest',t('acSg')+(sg?` (${sg})`:''))}${S._acChMissing?'':pill('chat',t('acCh')+(ch?` (${ch})`:''))}${pill('welcome',t('acWelcome'))}${pill('updates',t('acUpdates'))}</div>
-    <div class="cmy-mt12">${tab==='updates'?_acUpdHtml():tab==='vote'?_acVoteHtml():tab==='goals'?_acGoalsHtml():tab==='laps'?_acLapsHtml():tab==='report'?_acRepHtml():tab==='numbers'?_acNumHtml():tab==='club'?_acClubHtml():tab==='squads'?_acSquadsHtml():tab==='photos'?_acPhotosHtml():tab==='suggest'?_acSgHtml():tab==='chat'?_acChHtml():_acWelcomeHtml()}</div></div>`;
+    <div class="filter-row">${pill('goals',t('acGoals'))}${pill('laps',t('acLaps'))}${pill('report',t('acReport'))}${pill('numbers',t('acNumbers'))}${pill('club',t('acNumClub'))}${pill('vote',t('acVote'))}${pill('squads',t('acSquads'))}${pill('photos',t('acPhotos')+(n?` (${n})`:''))}${S._acSgMissing?'':pill('suggest',t('acSg')+(sg?` (${sg})`:''))}${pill('welcome',t('acWelcome'))}${pill('updates',t('acUpdates'))}</div>
+    <div class="cmy-mt12">${tab==='updates'?_acUpdHtml():tab==='vote'?_acVoteHtml():tab==='goals'?_acGoalsHtml():tab==='laps'?_acLapsHtml():tab==='report'?_acRepHtml():tab==='numbers'?_acNumHtml():tab==='club'?_acClubHtml():tab==='squads'?_acSquadsHtml():tab==='photos'?_acPhotosHtml():tab==='suggest'?_acSgHtml():_acWelcomeHtml()}</div></div>`;
 }
 // ── Send an update (My interests, 2026-11-18; migration 20261118210300): one line in English and in Arabic to the members
 // who picked an interest, or to every member, on their Updates list (staff_updates_interest; push stays dormant). The
@@ -79753,146 +79777,358 @@ async function _acSgReply(id){
   const el=document.getElementById('acs-r-'+id),v=String(el?el.value:'').trim();
   if(await _acSgWrite(id,{p_reply:v},t('acSgReply'))&&S._acSgDraft)delete S._acSgDraft[String(id)];
 }
-// ── Chat (the Community chat, 2026-11-20; migration 20261120203000) ─────────────────────────────────────────────────
-// What members write in the Community tab's chat, newest first, each with its writer's name (it opens their account
-// window). All / Reported (a member reported it and nobody has looked yet: the pill counts these) / Removed / Muted (the
-// accounts stopped from writing). Remove takes a message off every member's page, Put back returns it, Keep leaves a
-// reported one up and stops further reports hiding it; Mute stops an account writing for a day, a week or until lifted.
-// Staff write as "MicroMobility team". Read straight from hub_chat and hub_chat_members (staff read), again every 20 s
-// while this pill is on screen (only the list is drawn again, so the box keeps what is being typed); every change goes
-// through staff_chat_set / staff_chat_mute / staff_chat_send and to the staff log. A database without it hides the pill.
-// Members see a message for six hours; staff keep every one and nothing is deleted (the user, 2026-11-20: "delete chats
-// when it completes 6 hours but keep it shown for staff and never delete them"; migration 20261120213000). A message
-// past its six hours says "No longer shown to members" (AC_CH_KEEP_MS, the database's _chat_keep: change both together),
-// and "Earlier messages" reads the 300 before the last one shown, as far back as the chat goes.
-const AC_CH_KEEP_MS=216e5,AC_CH_PAGE=300,AC_CH_COLS='id,customer_id,staff_user,body,created_at,removed_at,removed_by,reports,checked_at';
-const AC_CH_F={all:'acChAll',flag:'acChFlagged',gone:'acChRemoved',mute:'acChMuted'};
-const AC_CH_BY={self:'acChBySelf',staff:'acChByStaff',reports:'acChByReports'};
-async function _acChLoad(force){
-  if(!sb||S._acChBusy||(!force&&S._acChAt&&Date.now()-S._acChAt<6e4))return;
-  S._acChBusy=true;S._acChAt=Date.now();let a,b;
-  try{[a,b]=await Promise.all([
-    sb.from('hub_chat').select(AC_CH_COLS).order('id',{ascending:false}).limit(AC_CH_PAGE),
-    sb.from('hub_chat_members').select('customer_id,muted_until,muted_at').not('muted_until','is',null)]);}catch(e){a={error:e||{message:'failed'}};}
-  S._acChBusy=false;
-  const c=String(a&&a.error&&a.error.code||'');S._acChMissing=c==='PGRST205'||c==='42P01';S._acChErr=!!(a&&a.error)&&!S._acChMissing;
-  if(a&&!a.error){
-    // the newest page again; the earlier pages already read stay under it
-    const fresh=Array.isArray(a.data)?a.data:[],low=fresh.length?fresh[fresh.length-1].id:0;
-    S._acCh=fresh.length>=AC_CH_PAGE?[...fresh,...(S._acCh||[]).filter(x=>x.id<low)]:fresh;
-    if(fresh.length<AC_CH_PAGE)S._acChEnd=true;
-    if(b&&!b.error&&Array.isArray(b.data))S._acChM=b.data;
-  }
-  if(S.view==='staff'&&_pplOn('activities')){if(S._acTabV==='chat'&&document.getElementById('ac-ch-list'))_acChPaint();else renderCommunity();}
+// ── Chat, the staff section (the user, 2026-11-20: "create a whole separate page in staff for chat and let them be able
+// to edit delete and modify messages in real time"; migration 20261120233000) ────────────────────────────────────────
+// /chat, under People on the rail (the part staff-parts/chat.js). People's right in the database (_staff_mod('community')),
+// so the section is derived from People (_modIds, _MOD_PARENT) and staff_set_access never hears of it; the rail's number
+// (reported messages nobody has looked at) is the core's _chsCount / _chsRailSync. It replaced Community > Members' page > Chat.
+// The room as members see it, oldest at the top, newest at the foot, under its day: every message for ever (members see
+// one for six hours, _chat_keep; nothing is deleted), each with its writer's name (it opens their account window), its
+// reports, how it was deleted, "Edited by" (it opens the earlier wordings, hub_chat_edits) and "No longer shown to
+// members". Editors (_editOk('community')) Edit (in place; staff_chat_edit with the words they saw, so a staffer who
+// edited it meanwhile is never overwritten blind: CHANGED shows the new words and the next Save replaces them), Delete
+// and Put back, Keep a reported one (staff_chat_set), Mute for a day, a week or until lifted (staff_chat_mute) and write
+// as the team (staff_chat_send); every change goes to the staff log. Members see an edited message's new words at once,
+// marked "Edited by the team", never the earlier ones.
+// Live: the page joins the PUBLIC topic hub-chat (the members' empty 'tick', and 'staff' for a report, a Keep or a mute)
+// and asks for what changed since its last read (hub_chat.changed_at); a tick whose read brought nothing doubles the
+// wait for the next (1.5 s to 30 s), as the members' page does. Without the socket it reads every 15 s, with it every
+// minute, never while hidden or under _sbCooling(). Only the rows that changed are drawn again, and the one being edited
+// is left alone, so neither box loses what is typed. A database before 20261120233000 is read without the new columns
+// and offers no Edit; one without the chat says so.
+const CHS_KEEP_MS=216e5,CHS_PAGE=300,CHS_COLS0='id,customer_id,staff_user,body,created_at,removed_at,removed_by,removed_user,reports,checked_at',CHS_COLS=CHS_COLS0+',edited_at,edited_user,changed_at';
+const CHS_F={all:'chsAll',flag:'chsFlagged',gone:'chsDeleted',edit:'chsEditedF',mute:'chsMuted'};
+const CHS_BY={self:'chsBySelf',staff:'chsByStaff',reports:'chsByReports'};
+function _chsState(){return S._chs||(S._chs={rows:null,by:new Map(),low:0,end:false,maxCh:0,old:false,busy:false,again:false,err:false,missing:false,mutes:[],f:'all',q:'',who:'all',shown:'all',ed:null,hist:{},pick:'',draft:'',found:null,foundQ:'',finding:false,live:false,ch:null,t:0,tickT:0,tickGap:0,tickNext:0,readAt:0,selfAt:0,paintAt:0,fresh:0,sig:null,ppl:null,saving:false});}
+function _chsOn(){return S.view==='staff'&&S.staffTab==='chat'&&!!document.getElementById('chs-log');}
+function _chsFlag(x){return(Number(x.reports)||0)>0&&!x.checked_at;}
+function _chsOld(x){return Date.now()-Date.parse(x.created_at)>CHS_KEEP_MS;}
+function _chsNorm(s){return String(s||'').toLocaleLowerCase();}
+function _chsCut(s){s=String(s||'').replace(/\s+/g,' ');return s.length>60?s.slice(0,59)+'…':s;}
+function _chsDay(at){return new Date(Date.parse(at)+108e5).toISOString().slice(0,10);} // Riyadh's day (UTC+3, no summer time)
+function _chsTime(at){try{const C=_chsState(),l=_locale();if(!C.fmt||C.fmt.l!==l)C.fmt={l,f:new Intl.DateTimeFormat(l,{hour:'numeric',minute:'2-digit',timeZone:KSA_TZ})};return C.fmt.f.format(new Date(at));}catch(_){return'';}}
+function _chsPerson(uid){const C=_chsState(),p=S._people&&S._people[uid];return!uid?'':(C.ppl&&C.ppl[uid])||(p&&(p.name||p.email))||'';}
+// the staff accounts' names, read once for this page (its own read: Team's loader lives in another part)
+function _chsPeople(){
+  const C=_chsState();if(C.ppl||!sb)return;C.ppl={};
+  Promise.resolve(sb.rpc('staff_people')).then(r=>{if(r&&!r.error&&Array.isArray(r.data)){C.ppl=Object.fromEntries(r.data.map(p=>[p.user_id,p.name||p.email||'']));if(_chsOn())_chsPaint();}},()=>{});
 }
+function _chsWhoName(x){if(!x.customer_id)return t('chsTeam');const c=_custById(x.customer_id);return(c&&c.name)||String(x.customer_id);}
+function _chsWho(cid){
+  const c=_custById(cid);
+  return c?`<button type="button" class="ca-link chs-who" data-on-click="${_on('openAccountHistory',String(c.id))}"><bdi>${esc(c.name||'—')}</bdi></button>`:`<span class="am-meta">${esc(String(cid||'—'))}</span>`;
+}
+// The rows the page holds: the newest pages read (ids from C.low up) and every reported one nobody has looked at.
+function _chsRowsSet(){
+  const C=_chsState();
+  C.rows=[...C.by.values()].filter(x=>x.id>=C.low||_chsFlag(x)).sort((a,b)=>a.id-b.id);
+  S._chsN=[...C.by.values()].filter(_chsFlag).length;S._chsCAt=Date.now();_chsRailSync();
+}
+function _chsPut(r){
+  const C=_chsState();if(!r||r.id==null)return;
+  C.by.set(r.id,{...(C.by.get(r.id)||{}),...r});
+  const x=Date.parse(r.changed_at);if(x>C.maxCh)C.maxCh=x;
+  _chsRowsSet();
+}
+// mode: 'first' (the newest page and the reported ones), 'new' (what changed since the last read), 'older' (the page before)
+async function _chsLoad(mode,viaTick){
+  const C=_chsState();if(!sb)return;
+  if(C.busy){if(mode==='new')C.again=true;return;}
+  const first=mode==='first'||C.rows===null;
+  if(!first&&mode==='older'&&(C.end||!C.low))return;
+  C.busy=true;
+  const cols=C.old?CHS_COLS0:CHS_COLS,since=!C.old&&C.maxCh?new Date(C.maxCh-5e3).toISOString():'';
+  let q=sb.from('hub_chat').select(cols);
+  if(mode==='older'&&!first)q=q.lt('id',C.low).order('id',{ascending:false}).limit(CHS_PAGE);
+  else if(!first&&since)q=q.gte('changed_at',since).order('changed_at',{ascending:true}).limit(1000);
+  else q=q.order('id',{ascending:false}).limit(CHS_PAGE);
+  let a,b,w;
+  try{[a,b,w]=await Promise.all([q,
+    mode==='older'&&!first?null:sb.from('hub_chat_members').select('customer_id,muted_until,muted_at').not('muted_until','is',null),
+    first?sb.from('hub_chat').select(cols).gt('reports',0).is('checked_at',null).order('id',{ascending:false}).limit(100):null]);}catch(e){a={error:e||{message:'failed'}};}
+  C.busy=false;C.readAt=Date.now();
+  const code=String(a&&a.error&&a.error.code||'');
+  if(code==='42703'&&!C.old){C.old=true;return _chsLoad('first');} // a database before 20261120233000: no changed_at, no edits
+  C.missing=code==='PGRST205'||code==='42P01';
+  let got=false;
+  if(a&&!a.error&&Array.isArray(a.data)){
+    C.err=false;
+    const hi=C.rows&&C.rows.length?C.rows[C.rows.length-1].id:0,rows=[...a.data,...((w&&!w.error&&Array.isArray(w.data))?w.data:[])];
+    for(const r of rows){
+      const was=C.by.get(r.id);
+      if(!was||JSON.stringify(was)!==JSON.stringify({...was,...r})){C.by.set(r.id,{...(was||{}),...r});got=true;if(!first&&!was&&r.id>hi&&r.customer_id)C.fresh++;}
+      const x=Date.parse(r.changed_at);if(x>C.maxCh)C.maxCh=x;
+    }
+    if(first||mode==='older'){const ids=a.data.map(r=>r.id);if(ids.length)C.low=C.low&&!first?Math.min(C.low,...ids):Math.min(...ids);if(a.data.length<CHS_PAGE)C.end=true;}
+    if(first&&!a.data.length)C.low=0;
+    if(!first&&mode==='new'&&!C.old&&a.data.length>=1000)C.again=true; // a burst over a thousand changes: read on
+    _chsRowsSet();
+  }else if(!C.missing)C.err=true;
+  if(b&&!b.error&&Array.isArray(b.data)&&JSON.stringify(b.data)!==JSON.stringify(C.mutes)){C.mutes=b.data;got=true;}
+  if(viaTick){C.tickGap=got||Date.now()-C.selfAt<4e3?0:Math.min(3e4,Math.max(1500,C.tickGap*2));C.tickNext=Date.now()+C.tickGap;}
+  if(S.view==='staff'&&S.staffTab==='chat'){if(first||C.missing||!document.getElementById('chs-log'))renderChat();else if(got||mode==='older')_chsPaint();}
+  if(C.again){C.again=false;_chsLoad('new');}
+}
+function _chsOlder(){const C=_chsState();C.keepPos=true;_chsLoad('older');}
 // 'open' = until lifted, a time = until then, null = not muted (or the time has passed).
-function _acChMutedOf(cid){
-  const m=(S._acChM||[]).find(x=>String(x.customer_id)===String(cid));if(!m||!m.muted_until)return null;
+function _chsMutedOf(cid){
+  const m=(_chsState().mutes||[]).find(x=>String(x.customer_id)===String(cid));if(!m||!m.muted_until)return null;
   return m.muted_until==='infinity'?'open':Date.parse(m.muted_until)>Date.now()?m.muted_until:null;
 }
-function _acChFlag(x){return(Number(x.reports)||0)>0&&!x.checked_at;}
-function _acChOld(x){return Date.now()-Date.parse(x.created_at)>AC_CH_KEEP_MS;}
-async function _acChMore(){
-  const R=S._acCh||[];if(!sb||S._acChBusy||!R.length)return;
-  const last=R[R.length-1].id;S._acChBusy=true;let r;
-  try{r=await sb.from('hub_chat').select(AC_CH_COLS).lt('id',last).order('id',{ascending:false}).limit(AC_CH_PAGE);}catch(e){r={error:e||{message:'failed'}};}
-  S._acChBusy=false;
-  if(!r||r.error){toast(t('acLoadErr'),'error');return;}
-  const got=Array.isArray(r.data)?r.data:[];
-  S._acCh=[...(S._acCh||[]),...got.filter(x=>x.id<last)];if(got.length<AC_CH_PAGE)S._acChEnd=true;
-  _acChPaint();
+function _chsMuteRows(){return(_chsState().mutes||[]).filter(m=>_chsMutedOf(m.customer_id));}
+function _chsShownNow(x){return!x.removed_at&&!_chsOld(x);}
+function _chsShownRows(){
+  const C=_chsState(),f=CHS_F[C.f]?C.f:'all',q=_chsNorm(String(C.q||'').trim());
+  let R=C.rows||[];
+  if(q&&C.found&&C.foundQ===String(C.q||'').trim()){const m=new Map(R.map(x=>[x.id,x]));C.found.forEach(x=>{if(!m.has(x.id))m.set(x.id,x);});R=[...m.values()].sort((a,b)=>a.id-b.id);}
+  return R.filter(x=>(f==='all'||(f==='flag'?_chsFlag(x):f==='gone'?!!x.removed_at:!!x.edited_at))
+    &&(C.who==='all'||(C.who==='team')===!x.customer_id)
+    &&(C.shown==='all'||(C.shown==='yes')===_chsShownNow(x))
+    &&(!q||_chsNorm(x.body).includes(q)||_chsNorm(_chsWhoName(x)).includes(q)));
 }
-function _acChFlagN(){_acChLoad();return(S._acCh||[]).filter(_acChFlag).length;}
-function _acChHtml(){
-  if(S._acChMissing)return _emptyState(t('acMissing'));
-  if(!S._acCh)return S._acChErr?_emptyState(t('acLoadErr')):`<div class="am-meta">${t('mbLoading')}</div>`;
-  _acChWatch();
-  const h=S._acChListH=_acChListHtml();
-  return`${_editOk('community')?`<div class="form-group mts-form ac-ch-new"><label for="ac-ch-text">${t('acChWrite')}</label><textarea id="ac-ch-text" maxlength="500" rows="2" dir="auto" data-on-input="${_on('_acChType',_EL)}">${esc(S._acChDraft||'')}</textarea>
-    <button type="button" class="btn-sm btn-primary" id="ac-ch-go" data-on-click="${_on('_acChSend')}">${t('acChSend')}</button></div>`:''}
-    <div id="ac-ch-list">${h}</div>`;
+function _chsPills(){
+  const C=_chsState(),f=CHS_F[C.f]?C.f:'all',R=C.rows||[];
+  const n={all:R.length,flag:R.filter(_chsFlag).length,gone:R.filter(x=>x.removed_at).length,edit:R.filter(x=>x.edited_at).length,mute:_chsMuteRows().length};
+  return Object.keys(CHS_F).filter(k=>k!=='edit'||!C.old).map(k=>`<button type="button" class="filter-pill${f===k?' active':''}" aria-pressed="${f===k}" data-on-click="${_on('_chsFilter',k)}">${esc(t(CHS_F[k]))} (${n[k]})</button>`).join('');
 }
-function _acChListHtml(){
-  const f=AC_CH_F[S._acChF]?S._acChF:'all',can=_editOk('community'),R=S._acCh||[];
-  const muted=(S._acChM||[]).filter(m=>_acChMutedOf(m.customer_id));
-  const n={all:R.length,flag:R.filter(_acChFlag).length,gone:R.filter(x=>x.removed_at).length,mute:muted.length};
-  const fp=k=>`<button type="button" class="filter-pill${f===k?' active':''}" aria-pressed="${f===k}" data-on-click="${_on('_acChFilter',k)}">${t(AC_CH_F[k])} (${n[k]})</button>`;
-  const rows=f==='mute'?muted.map(m=>_acChMuteCard(m,can)).join(''):R.filter(x=>f==='all'||(f==='flag'?_acChFlag(x):!!x.removed_at)).map(x=>_acChCard(x,can)).join('');
-  const more=f!=='mute'&&!S._acChEnd&&R.length>=AC_CH_PAGE?`<button type="button" class="btn-sm btn-secondary ac-ch-more" data-on-click="${_on('_acChMore')}">${t('acChMore')}</button>`:'';
-  return`<div class="filter-row" role="group" aria-label="${esc(t('acCh'))}">${Object.keys(AC_CH_F).map(fp).join('')}</div>${rows||_emptyState(t('acNone'))}${more}`;
+function _chsBar(){
+  const C=_chsState(),sel=(k,lbl,opts)=>`<select id="chs-f-${k}" aria-label="${esc(t(lbl))}" data-on-change="${_on('_chsSet',k,_EL)}">${opts.map(([v,l])=>`<option value="${v}"${C[k]===v?' selected':''}>${esc(t(l))}</option>`).join('')}</select>`;
+  const main=`<div class="filter-adv-in">${_fField(esc(t('chsWho')),sel('who','chsWho',[['all','chsWhoAll'],['mem','chsWhoMem'],['team','chsWhoTeam']]))}${_fField(esc(t('chsShown')),sel('shown','chsShown',[['all','chsAll'],['yes','chsShownYes'],['no','chsShownNo']]))}</div>`;
+  return listToolbar({key:'chs',q:{v:C.q,fn:_on('_chsQ',_EL),ph:t('chsSearch'),id:'chs-q'},
+    pills:`<span id="chs-pills" class="chs-pills" role="group" aria-label="${esc(t('chsRail'))}">${_chsPills()}</span>`,f:[main,'',_fS(()=>S._chs,'who shown'),renderChat]});
 }
-function _acChWho(cid){
-  const c=_custById(cid);
-  return c?`<button type="button" class="ca-link" data-on-click="${_on('openAccountHistory',String(c.id))}">${esc(c.name||'—')}</button>`:`<span class="am-meta">${esc(String(cid||'—'))}</span>`;
+function renderChat(){
+  const el=document.getElementById('tab-chat');if(!el)return;
+  const C=_chsState();
+  if(C.rows===null&&!C.busy&&!C.missing)_chsLoad('first');
+  _chsPeople();
+  const head=`<div class="chs-head"><h1 id="chs-title" class="page-title">${esc(t('chsTitle'))}</h1><span id="chs-live" class="chs-live${C.live?' on':''}">${esc(t(C.live?'chsLive':'chsPoll'))}</span></div>`;
+  if(C.missing){el.innerHTML=`${head}<div class="form-section ws-mt0 chs">${_emptyState(t('chsNoDb'))}</div>`;_chsLeave();return;}
+  const can=_editOk('community');
+  el.innerHTML=`${head}<div class="form-section ws-mt0 chs">${_chsBar()}
+    <div id="chs-log" class="chs-log" role="log" aria-labelledby="chs-title" tabindex="0">${C.rows===null?(C.err?_emptyState(t('chsErr')):`<div class="am-meta">${t('mbLoading')}</div>`):''}</div>
+    <button type="button" id="chs-new" class="btn-sm btn-primary chs-new" hidden data-on-click="${_on('_chsDown')}">${esc(t('chsNew'))}</button>
+    ${can?`<div class="chs-foot"><label for="chs-text" class="sr-only">${esc(t('chsWrite'))}</label><textarea id="chs-text" maxlength="500" rows="2" dir="auto" placeholder="${esc(t('chsWrite'))}" data-on-input="${_on('_chsType',_EL)}" data-on-keydown="${_on('_chsKey',_EV)}">${esc(C.draft||'')}</textarea><button type="button" class="btn-primary" id="chs-go" data-on-click="${_on('_chsSend')}">${esc(t('chsSend'))}</button></div>`:''}</div>`;
+  C.sig=null;
+  const L=document.getElementById('chs-log');
+  if(L)L.addEventListener('scroll',()=>{if(C.fresh&&_chsNear(L)){C.fresh=0;_chsNewSync();}},{passive:true});
+  if(C.rows!==null){_chsPaint();_chsDown();}
+  _chsJoin();_chsWatch();
 }
-function _acChMuteLine(cid){const m=_acChMutedOf(cid);return m?`<span class="mts-st mts-st-closed">${esc(m==='open'?t('acChMutedOpen'):t('acChMutedTill').replace('{0}',fmtStamp(m)))}</span>`:'';}
+function _chsItems(){
+  const C=_chsState(),out=[],none=()=>[['none',`<div class="chs-none" data-k="none">${_emptyState(t('chsNone'))}</div>`]];
+  if(C.f==='mute'){const mu=_chsMuteRows();return mu.length?mu.map(m=>['u:'+m.customer_id,_chsMuteCard(m)]):none();}
+  const R=_chsShownRows(),q=String(C.q||'').trim();
+  if(!C.end)out.push(['more',`<div class="chs-more-w" data-k="more"><button type="button" class="btn-sm btn-secondary chs-more" data-on-click="${_on('_chsOlder')}">${esc(t('chsMore'))}</button></div>`]);
+  if(q.length>=2&&!C.end&&C.foundQ!==q)out.push(['sall',`<div class="chs-more-w" data-k="sall"><button type="button" class="btn-sm btn-secondary"${C.finding?' disabled':''} data-on-click="${_on('_chsFind')}">${esc(t('chsSearchAll'))}</button></div>`]);
+  let day='';
+  for(const x of R){
+    const d=_chsDay(x.created_at);
+    if(d!==day){day=d;out.push(['d:'+d,`<div class="chs-day" data-k="d:${d}"><span>${esc(_dayWord(d)||shortDate(d))}</span></div>`]);}
+    out.push(['m:'+x.id,_chsRowHtml(x)]);
+  }
+  return R.length?out:[...out,...none()];
+}
+function _chsByTxt(x){
+  if(x.removed_by==='staff'&&x.removed_user&&_chsPerson(x.removed_user))return t('chsByStaffN').replace('{0}',_chsPerson(x.removed_user));
+  return t(CHS_BY[x.removed_by]||'chsDeleted');
+}
+function _chsMuteLine(cid){const m=_chsMutedOf(cid);return m?`<span class="mts-st mts-st-closed">${esc(m==='open'?t('chsMutedOpen'):t('chsMutedTill').replace('{0}',fmtStamp(m)))}</span>`:'';}
 // Mute opens its three lengths in place (key = which card asked); a muted account shows Lift mute instead.
-function _acChMuteBtns(cid,key){
-  if(_acChMutedOf(cid))return`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_acChMute',String(cid),-1)}">${t('acChLift')}</button>`;
-  if(S._acChPick!==key)return`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_acChPickMute',key)}">${t('acChMute')}</button>`;
-  return`<span class="ac-ch-mute" role="group" aria-label="${esc(t('acChMute'))}"><span class="am-meta ac-ch-mute-l" aria-hidden="true">${esc(t('acChMute'))}</span>${[[1,'acChMute1'],[7,'acChMute7'],[0,'acChMuteOpen']].map(([d,l])=>`<button type="button" class="btn-sm btn-red" data-on-click="${_on('_acChMute',String(cid),d)}">${t(l)}</button>`).join('')}<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_acChPickMute','')}">${t('cancelBtn')}</button></span>`;
+function _chsMuteBtns(cid,key){
+  if(_chsMutedOf(cid))return`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_chsMute',String(cid),-1)}">${esc(t('chsLift'))}</button>`;
+  if(_chsState().pick!==key)return`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_chsPickMute',key)}">${esc(t('chsMute'))}</button>`;
+  return`<span class="chs-mute" role="group" aria-label="${esc(t('chsMute'))}"><span class="am-meta" aria-hidden="true">${esc(t('chsMute'))}</span>${[[1,'chsMute1'],[7,'chsMute7'],[0,'chsMuteOpen']].map(([d,l])=>`<button type="button" class="btn-sm btn-red" data-on-click="${_on('_chsMute',String(cid),d)}">${esc(t(l))}</button>`).join('')}<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_chsPickMute','')}">${esc(t('cancelBtn'))}</button></span>`;
 }
-function _acChCard(x,can){
-  const id=String(x.id),team=!x.customer_id,flag=_acChFlag(x),n=Number(x.reports)||0;
-  return`<div class="mts-card${flag?' warn':''}${x.removed_at?' off':''}" data-ch="${esc(id)}"><div class="mts-head">${team?`<strong>${esc(t('acChTeam'))}</strong>`:_acChWho(x.customer_id)}${n?`<span class="mts-st${flag?' mts-st-pending':''}">${esc(t('acChReports').replace('{0}',n))}</span>`:''}${x.removed_at?`<span class="mts-st mts-st-closed">${esc(t(AC_CH_BY[x.removed_by]||'acChRemoved'))}</span>`:_acChOld(x)?`<span class="mts-st mts-st-closed ac-ch-old">${esc(t('acChOld'))}</span>`:''}${team?'':_acChMuteLine(x.customer_id)}</div>
-    <div class="am-meta">${esc(fmtStamp(x.created_at))}</div>
-    <div class="mts-text" dir="auto">${esc(x.body||'')}</div>
-    ${can?`<div class="cmy-am-tacts ac-ch-acts">${x.removed_at?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_acChSet',x.id,false)}">${t('acChBack')}</button>`:`${flag?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_acChSet',x.id,false)}">${t('acChKeep')}</button>`:''}<button type="button" class="btn-sm btn-red" data-on-click="${_on('_acChSet',x.id,true)}">${t('acChRemove')}</button>`}${team?'':_acChMuteBtns(x.customer_id,'m'+id)}</div>`:''}</div>`;
+function _chsRowHtml(x){
+  const C=_chsState(),id=String(x.id),team=!x.customer_id,flag=_chsFlag(x),n=Number(x.reports)||0,can=_editOk('community'),ed=!!C.ed&&String(C.ed.id)===id,h=C.hist[id];
+  const by=x.edited_user&&_chsPerson(x.edited_user),sp=team&&_chsPerson(x.staff_user);
+  const who=team?`<strong class="chs-who chs-who-team">${esc(t('chsTeam'))}</strong>${sp?`<span class="am-meta">· <bdi>${esc(sp)}</bdi></span>`:''}`:_chsWho(x.customer_id);
+  const chips=(n?`<span class="mts-st${flag?' mts-st-pending':''}">${esc(t('chsReports').replace('{0}',n))}</span>`:'')
+    +(x.removed_at?`<span class="mts-st mts-st-closed chs-gone">${esc(_chsByTxt(x))}</span>`:_chsOld(x)?`<span class="mts-st mts-st-closed chs-old">${esc(t('chsOld'))}</span>`:'')
+    +(x.edited_at?`<button type="button" class="mts-st chs-edtag" aria-expanded="${!!h}" data-on-click="${_on('_chsHist',x.id)}">${esc(by?t('chsEditedBy').replace('{0}',by):t('chsEdited'))}</button>`:'')
+    +(team?'':_chsMuteLine(x.customer_id));
+  const hist=!h?'':h==='load'?`<div class="chs-hist am-meta">${t('mbLoading')}</div>`:h==='err'?`<div class="chs-hist am-meta">${esc(t('chsErr'))}</div>`
+    :`<div class="chs-hist"><div class="chs-hist-h">${esc(t('chsHist'))}</div>${h.map(e=>`<div class="chs-hist-r"><span class="am-meta">${esc(fmtStamp(e.created_at))}${_chsPerson(e.staff_user)?` · <bdi>${esc(_chsPerson(e.staff_user))}</bdi>`:''}</span><p class="chs-hist-b" dir="auto">${esc(e.body_before||'')}</p></div>`).join('')}</div>`;
+  const acts=can&&!ed?`<div class="chs-acts">${C.old?'':`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_chsEdit',x.id)}">${esc(t('chsEdit'))}</button>`}${x.removed_at?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_chsSetRm',x.id,false)}">${esc(t('chsBack'))}</button>`:`${flag?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_chsSetRm',x.id,false)}">${esc(t('chsKeep'))}</button>`:''}<button type="button" class="btn-sm btn-red" data-on-click="${_on('_chsSetRm',x.id,true)}">${esc(t('chsDelete'))}</button>`}${team?'':_chsMuteBtns(x.customer_id,'m:'+id)}</div>`:'';
+  return`<article class="chs-msg${team?' chs-team':''}${flag?' warn':''}${x.removed_at?' off':''}" data-k="m:${id}" data-ch="${esc(id)}"><div class="chs-h">${who}<span class="chs-at">${esc(_chsTime(x.created_at))}</span>${chips}</div>${ed?_chsEdHtml(x):`<p class="chs-body" dir="auto">${esc(x.body||'')}</p>`}${hist}${acts}</article>`;
 }
-function _acChMuteCard(m,can){
-  return`<div class="mts-card" data-chm="${esc(String(m.customer_id))}"><div class="mts-head">${_acChWho(m.customer_id)}${_acChMuteLine(m.customer_id)}</div>${can?`<div class="cmy-am-tacts ac-ch-acts">${_acChMuteBtns(m.customer_id,'u'+m.customer_id)}</div>`:''}</div>`;
+function _chsMuteCard(m){
+  return`<article class="chs-msg" data-k="u:${esc(String(m.customer_id))}" data-chm="${esc(String(m.customer_id))}"><div class="chs-h">${_chsWho(m.customer_id)}${_chsMuteLine(m.customer_id)}</div>${_editOk('community')?`<div class="chs-acts">${_chsMuteBtns(m.customer_id,'u:'+m.customer_id)}</div>`:''}</article>`;
 }
-function _acChPaint(){
-  const L=document.getElementById('ac-ch-list');if(!L){renderCommunity();return;}
-  const h=_acChListHtml();if(S._acChListH!==h){L.innerHTML=h;S._acChListH=h;}
+function _chsEdHtml(x){
+  const E=_chsState().ed,v=E.text;
+  return`<div class="chs-ed"><label for="chs-ed" class="chs-ed-l am-meta">${esc(t('chsEditLbl'))}</label>
+    <div id="chs-ed-warn" class="chs-warn" role="alert" hidden><span>${esc(t('chsChanged'))}</span> <q id="chs-ed-now" dir="auto"></q></div>
+    <textarea id="chs-ed" maxlength="500" rows="3" dir="auto" data-on-input="${_on('_chsEdType',_EL)}" data-on-keydown="${_on('_chsEdKey',_EV)}">${esc(v)}</textarea>
+    <div class="chs-ed-f"><span class="am-meta" id="chs-ed-n">${v.length}/500</span><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_chsEdit',0)}">${esc(t('cancelBtn'))}</button><button type="button" class="btn-sm btn-primary" id="chs-ed-go" data-on-click="${_on('_chsEdSave')}">${esc(t('saveBtn'))}</button></div></div>`;
 }
-function _acChWatch(){
-  if(S._acChT)return;
-  S._acChT=setInterval(()=>{
-    if(S.view!=='staff'||!_pplOn('activities')||S._acTabV!=='chat'||!document.getElementById('ac-ch-list')){clearInterval(S._acChT);S._acChT=null;return;}
-    if(document.visibilityState==='visible'&&!_sbCooling())_acChLoad(true);
-  },2e4);
+// Draws only what changed: each item is keyed (m<id>, d<day>, more...), one whose markup is the same is left as it is,
+// and the message being edited keeps its box (and the caret) whatever else is drawn. force = an item key drawn again anyway.
+function _chsPaint(force){
+  const L=document.getElementById('chs-log');if(!L){if(_chsOn())renderChat();return;}
+  const C=_chsState();if(C.rows===null)return;
+  const near=_chsNear(L),h0=L.scrollHeight,t0=L.scrollTop,items=_chsItems(),keys=items.map(x=>x[0]),ek=C.ed?'m:'+C.ed.id:'';
+  const ae=document.activeElement,keep=ek&&force!==ek?L.querySelector(`[data-k="${ek}"]`):null,box=keep&&keep.querySelector('#chs-ed');
+  const s0=box&&ae===box?[box.selectionStart,box.selectionEnd]:null,kids=L.children,was=C.sig;
+  if(was&&kids.length===keys.length&&keys.every((k,i)=>kids[i].dataset.k===k)){
+    items.forEach(([k,h],i)=>{if(k===ek&&box)return;if(was.get(k)!==h||k===force){const tp=document.createElement('template');tp.innerHTML=h;kids[i].replaceWith(tp.content.firstElementChild);}});
+  }else{
+    L.innerHTML=items.map(x=>x[1]).join('');
+    if(box){const n=L.querySelector(`[data-k="${ek}"]`);if(n)n.replaceWith(keep);if(s0){box.focus({preventScroll:true});try{box.setSelectionRange(s0[0],s0[1]);}catch(_){}}}
+  }
+  // the message being edited keeps its box; its line on top (reports, deleted, edited by, muted) still follows what came
+  if(box&&keep.isConnected){const it=items.find(x=>x[0]===ek),tp=document.createElement('template');if(it){tp.innerHTML=it[1];const nh=tp.content.querySelector('.chs-h'),oh=keep.querySelector('.chs-h');if(nh&&oh&&nh.outerHTML!==oh.outerHTML)oh.replaceWith(nh);}}
+  C.sig=new Map(items);C.paintAt=Date.now();
+  if(C.ed)_chsEdSync();
+  const p=document.getElementById('chs-pills');if(p){const h=_chsPills();if(p.dataset.h!==h){p.innerHTML=h;p.dataset.h=h;}}
+  if(C.keepPos){C.keepPos=false;L.scrollTop=t0+(L.scrollHeight-h0);}
+  else if(near)_chsDown();
+  _chsNewSync();
 }
-function _acChFilter(k){S._acChF=k;S._acChPick='';_acChPaint();}
-function _acChType(el){S._acChDraft=String(el&&el.value||'');}
-function _acChPickMute(k){S._acChPick=k||'';_acChPaint();}
-async function _acChSend(){
-  const el=document.getElementById('ac-ch-text'),v=String(el?el.value:S._acChDraft||'').trim();
+function _chsNear(L){L=L||document.getElementById('chs-log');return!L||L.scrollHeight-L.scrollTop-L.clientHeight<80;}
+function _chsDown(){const C=_chsState(),L=document.getElementById('chs-log');if(L)L.scrollTop=L.scrollHeight;C.fresh=0;_chsNewSync();}
+function _chsNewSync(){const b=document.getElementById('chs-new');if(b)b.hidden=!(_chsState().fresh>0);}
+function _chsLiveSync(){const C=_chsState(),e=document.getElementById('chs-live');if(e){e.classList.toggle('on',!!C.live);e.textContent=t(C.live?'chsLive':'chsPoll');}}
+// ── live ──
+function _chsJoin(){
+  const C=_chsState();if(C.ch||!sb||!sb.channel)return;
+  try{
+    const ch=C.ch=sb.channel('hub-chat');
+    ch.on('broadcast',{event:'tick'},_chsTick).on('broadcast',{event:'staff'},_chsTick).subscribe(st=>{
+      if(C.ch!==ch)return;
+      const live=st==='SUBSCRIBED';
+      if(live&&!C.live&&C.rows!==null)_chsLoad('new'); // joined, or joined again: what changed meanwhile
+      C.live=live;_chsLiveSync();
+    });
+  }catch(_){C.ch=null;C.live=false;}
+}
+function _chsLeave(){
+  const C=_chsState(),ch=C.ch;C.ch=null;C.live=false;
+  if(ch)try{sb.removeChannel(ch);}catch(_){}
+  if(C.t){clearInterval(C.t);C.t=0;}
+  if(C.tickT){clearTimeout(C.tickT);C.tickT=0;}
+}
+function _chsTick(){
+  const C=_chsState();if(C.tickT||!_chsOn())return;
+  C.tickT=setTimeout(()=>{C.tickT=0;if(_chsOn()&&!_sbCooling())_chsLoad('new',true);},Math.max(300,C.tickNext-Date.now()));
+}
+function _chsWatch(){
+  const C=_chsState();if(C.t)return;
+  C.t=setInterval(()=>{
+    if(!_chsOn()){_chsLeave();return;}
+    if(Date.now()-C.paintAt>6e4)_chsPaint(); // a message that turned six hours old says so
+    if(document.visibilityState!=='visible'||C.busy||C.missing||_sbCooling())return;
+    if(Date.now()-C.readAt>=(C.live&&C.rows!==null?6e4:15e3))_chsLoad(C.rows===null?'first':'new'); // a first read that failed is asked again
+  },5e3);
+}
+// ── the toolbar ──
+function _chsQ(el){
+  const C=_chsState();C.q=String(el&&el.value||'');if(C.foundQ!==C.q.trim()){C.found=null;C.foundQ='';}
+  clearTimeout(C.qT);C.qT=setTimeout(()=>{_chsPaint();_chsDown();},150);
+}
+function _chsSet(k,el){const C=_chsState();C[k]=String(el&&el.value||'all');renderChat();}
+function _chsFilter(k){const C=_chsState();C.f=k;C.pick='';_chsPaint();_chsDown();}
+// Search all messages: the words (ilike) and the accounts whose name matches, the newest 300 of each, beside the page's own.
+async function _chsFind(){
+  const C=_chsState(),q=String(C.q||'').trim();if(q.length<2||!sb||C.finding)return;
+  C.finding=true;_chsPaint();
+  const nq=_chsNorm(q),ids=(S.customers||[]).filter(c=>_chsNorm(c.name).includes(nq)).slice(0,100).map(c=>String(c.id)),cols=C.old?CHS_COLS0:CHS_COLS;
+  let a,b;
+  try{[a,b]=await Promise.all([sb.from('hub_chat').select(cols).ilike('body','%'+q.replace(/[\\%_]/g,m=>'\\'+m)+'%').order('id',{ascending:false}).limit(CHS_PAGE),
+    ids.length?sb.from('hub_chat').select(cols).in('customer_id',ids).order('id',{ascending:false}).limit(CHS_PAGE):null]);}catch(e){a={error:e||{message:'failed'}};}
+  C.finding=false;
+  if(!a||a.error){toast(t('chsErr'),'error');_chsPaint();return;}
+  const m=new Map();[...(a.data||[]),...((b&&!b.error&&Array.isArray(b.data))?b.data:[])].forEach(r=>m.set(r.id,{...(C.by.get(r.id)||{}),...r}));
+  C.found=[...m.values()];C.foundQ=q;_chsPaint();_chsDown();
+}
+// ── edit ──
+function _chsEdit(id){
+  const C=_chsState(),was=C.ed?'m:'+C.ed.id:'';
+  if(!id){C.ed=null;if(was)_chsPaint(was);return;}
+  const x=C.by.get(Number(id));if(!x||C.old)return;
+  C.ed={id:x.id,text:x.body||'',was:x.body||'',cur:x.body||''};C.pick='';
+  if(was&&was!=='m:'+x.id)_chsPaint(was);
+  _chsPaint('m:'+x.id);
+  const box=document.getElementById('chs-ed');if(box){box.focus();try{box.setSelectionRange(box.value.length,box.value.length);}catch(_){}}
+}
+function _chsEdType(el){const E=_chsState().ed;if(!E)return;E.text=String(el&&el.value||'');const n=document.getElementById('chs-ed-n');if(n)n.textContent=E.text.length+'/500';}
+function _chsEdKey(ev){if(ev.key==='Escape'){ev.preventDefault();_chsEdit(0);}else if(ev.key==='Enter'&&(ev.ctrlKey||ev.metaKey)){ev.preventDefault();_chsEdSave();}}
+// Another staffer changed the message while this one edits it: say so, with its words now; the next Save replaces them.
+function _chsEdSync(force){
+  const C=_chsState(),E=C.ed;if(!E)return;
+  const x=C.by.get(E.id),w=document.getElementById('chs-ed-warn'),q=document.getElementById('chs-ed-now');if(!x||!w)return;
+  if(force||x.body!==E.was){w.hidden=false;if(q)q.textContent=x.body||'';E.cur=x.body||'';}
+}
+async function _chsEdSave(){
+  const C=_chsState(),E=C.ed;if(!E||C.saving)return;
+  const box=document.getElementById('chs-ed'),v=String(box?box.value:E.text).trim(),x=C.by.get(E.id);
+  if(!x)return;
+  if(!v){if(box)box.focus();return;}
+  if(v===x.body){_chsEdit(0);return;}
+  C.saving=true;const go=document.getElementById('chs-ed-go');if(go)go.disabled=true;
+  let r;try{r=await sb.rpc('staff_chat_edit',{p_mid:x.id,p_body:v,p_was:E.cur});}catch(e){r={error:e||{message:'failed'}};}
+  C.saving=false;if(go)go.disabled=false;
+  if(r&&r.error&&/CHANGED/.test(String(r.error.message||''))){await _chsLoad('new');_chsEdSync(true);return;}
+  if(_writeErr(r,'chat edit'))return;
+  C.selfAt=Date.now();
+  const before=x.body;
+  if(r.data&&r.data.id!=null)_chsPut(r.data);
+  if(C.ed&&C.ed.id===E.id)C.ed=null;
+  logAction(`${t('chsRail')}: ${_chsWhoName(x)} · ${t('chsEdit')} · ${_chsCut(before)} → ${_chsCut(v)}`);
+  _chsPaint('m:'+x.id);
+}
+async function _chsHist(id){
+  const C=_chsState(),k=String(id);if(!sb)return;
+  if(C.hist[k]){delete C.hist[k];_chsPaint('m:'+k);return;}
+  C.hist[k]='load';_chsPaint('m:'+k);
+  let r;try{r=await sb.from('hub_chat_edits').select('id,msg_id,body_before,body_after,staff_user,created_at').eq('msg_id',Number(id)).order('id',{ascending:false}).limit(50);}catch(e){r={error:e};}
+  if(!C.hist[k])return; // closed meanwhile
+  C.hist[k]=r&&!r.error&&Array.isArray(r.data)?r.data.filter(e=>String(e.msg_id)===k):'err';
+  _chsPaint('m:'+k);
+}
+// ── the team's box, Delete / Put back / Keep, Mute ──
+function _chsType(el){_chsState().draft=String(el&&el.value||'');}
+function _chsKey(ev){if(ev.key==='Enter'&&(ev.ctrlKey||ev.metaKey)){ev.preventDefault();_chsSend();}}
+function _chsPickMute(k){_chsState().pick=k||'';_chsPaint();}
+async function _chsSend(){
+  const C=_chsState(),el=document.getElementById('chs-text'),v=String(el?el.value:C.draft||'').trim();
   if(!v){if(el)el.focus();return;}
-  if(S._acChSaving)return;
-  S._acChSaving=true;const go=document.getElementById('ac-ch-go');if(go)go.disabled=true;
+  if(C.saving)return;
+  C.saving=true;const go=document.getElementById('chs-go');if(go)go.disabled=true;
   let r;try{r=await sb.rpc('staff_chat_send',{p_body:v});}catch(e){r={error:e||{message:'failed'}};}
-  S._acChSaving=false;if(go)go.disabled=false;
+  C.saving=false;if(go)go.disabled=false;
   if(_writeErr(r,'chat message'))return;
-  S._acChDraft='';if(el)el.value='';
-  if(r.data&&r.data.id!=null)S._acCh=[r.data,...(S._acCh||[]).filter(x=>String(x.id)!==String(r.data.id))];
-  logAction(`${t('acCh')}: ${t('acChTeam')} · ${v.length>60?v.slice(0,59)+'…':v}`);
-  _acChPaint();
+  C.selfAt=Date.now();C.draft='';if(el)el.value='';
+  if(r.data&&r.data.id!=null)_chsPut(r.data);
+  logAction(`${t('chsRail')}: ${t('chsTeam')} · ${_chsCut(v)}`);
+  _chsPaint();_chsDown();
 }
-async function _acChSet(id,removed){
-  const x=(S._acCh||[]).find(r=>String(r.id)===String(id));if(!x||S._acChSaving)return;
-  const what=removed?'acChRemove':x.removed_at?'acChBack':'acChKeep';
-  S._acChSaving=true;let r;try{r=await sb.rpc('staff_chat_set',{p_mid:x.id,p_removed:!!removed});}catch(e){r={error:e||{message:'failed'}};}
-  S._acChSaving=false;
+async function _chsSetRm(id,removed){
+  const C=_chsState(),x=C.by.get(Number(id));if(!x||C.saving)return;
+  const what=removed?'chsDelete':x.removed_at?'chsBack':'chsKeep';
+  C.saving=true;let r;try{r=await sb.rpc('staff_chat_set',{p_mid:x.id,p_removed:!!removed});}catch(e){r={error:e||{message:'failed'}};}
+  C.saving=false;
   if(_writeErr(r,'chat message'))return;
-  if(r.data&&r.data.id!=null)Object.assign(x,r.data);
-  const c=x.customer_id?_custById(x.customer_id):null;
-  logAction(`${t('acCh')}: ${x.customer_id?(c&&c.name)||x.customer_id:t('acChTeam')} · ${t(what)}`);
-  _acChPaint();
+  C.selfAt=Date.now();
+  if(r.data&&r.data.id!=null)_chsPut(r.data);
+  logAction(`${t('chsRail')}: ${_chsWhoName(x)} · ${t(what)} · ${_chsCut(x.body)}`);
+  _chsPaint('m:'+x.id);
 }
 // days: -1 lifts the mute, 0 = until lifted, 1 or 7 = that many days.
-async function _acChMute(cid,days){
-  if(S._acChSaving)return;
+async function _chsMute(cid,days){
+  const C=_chsState();if(C.saving)return;
   const d=Number(days)>=0?Number(days):null;
-  S._acChSaving=true;let r;try{r=await sb.rpc('staff_chat_mute',{p_customer:String(cid),p_days:d});}catch(e){r={error:e||{message:'failed'}};}
-  S._acChSaving=false;
+  C.saving=true;let r;try{r=await sb.rpc('staff_chat_mute',{p_customer:String(cid),p_days:d});}catch(e){r={error:e||{message:'failed'}};}
+  C.saving=false;
   if(_writeErr(r,'chat mute'))return;
-  S._acChM=(S._acChM||[]).filter(m=>String(m.customer_id)!==String(cid));
-  if(r.data&&r.data.muted_until)S._acChM.push({customer_id:String(cid),muted_until:r.data.muted_until,muted_at:r.data.muted_at});
-  S._acChPick='';
+  C.selfAt=Date.now();
+  C.mutes=(C.mutes||[]).filter(m=>String(m.customer_id)!==String(cid));
+  if(r.data&&r.data.muted_until)C.mutes.push({customer_id:String(cid),muted_until:r.data.muted_until,muted_at:r.data.muted_at});
+  C.pick='';
   const c=_custById(cid);
-  logAction(`${t('acCh')}: ${(c&&c.name)||cid} · ${d===null?t('acChLift'):t('acChMute')+' ('+t(d===0?'acChMuteOpen':d===1?'acChMute1':'acChMute7')+')'}`);
-  _acChPaint();
+  logAction(`${t('chsRail')}: ${(c&&c.name)||cid} · ${d===null?t('chsLift'):t('chsMute')+' ('+t(d===0?'chsMuteOpen':d===1?'chsMute1':'chsMute7')+')'}`);
+  _chsPaint();
 }
 function _acField(id,label,attrs,val){return`<div class="form-group"><label for="${id}">${t(label)}</label><input id="${id}" ${attrs} value="${esc(val||'')}"></div>`;}
 function _acVal(id){const e=document.getElementById(id);return e?String(e.value||'').trim():'';}
@@ -83716,7 +83952,7 @@ function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
   if(st==='fnb')st='vendors'; // the section's id until 2026-10-03
-  return['queue','waitlist','sessions','lockers','cashier','store','payments','inventory','customers','community','badgereq','ask','testimonials','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
+  return['queue','waitlist','sessions','lockers','cashier','store','payments','inventory','customers','community','badgereq','ask','testimonials','chat','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
 }
 // The tab iOS opens for a bike tag (2026-10-09, D15): when a staff tab is already open on this device, the
 // bike goes to it over the 'mm-staff' channel and this tab only says so - nothing is loaded. No answer
@@ -84206,6 +84442,7 @@ function _secPolls(full){
   if(_deskTabOk('community')){const f=globalThis['_apps'+'Probe'];if(typeof f==='function')f();} // the applications waiting, counted (s10, item 33): staff-half code, by name
   if(_deskTabOk('ask'))_askCount(); // Ask's answers waiting for approval, on the rail (2026-11-13)
   if(_deskTabOk('testimonials'))_tsmCount(); // the testimonials waiting for review, on the rail (2026-11-18)
+  if(_deskTabOk('chat'))_chsCount(); // the chat's reported messages nobody has looked at, on the rail (2026-11-20)
 }
 // ── The online store and its payments (2026-11-10, migration 20261110150000) ─────────────────────
 // The website takes the money (Moyasar); the staff page fulfils orders, edits the products and decides refunds.

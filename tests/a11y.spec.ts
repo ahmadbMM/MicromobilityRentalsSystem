@@ -80,7 +80,7 @@ test.describe('accessibility gate (any violation fails the build)', () => {
   // (staff round s10, item 43), and every list holds about twenty rows (officeFixtures), so the gate reads real tables.
   const STAFF_TABS = ['queue', 'dashboard', 'cashier', 'inventory', 'workshop', 'customers', 'community', 'ambassadors',
     'vendors', 'website', 'catalog', 'messages', 'analytics', 'history', 'team', 'settings',
-    'waitlist', 'sessions', 'lockers', 'badgereq', 'volunteers', 'store', 'payments', 'ask', 'testimonials'] as const; // Ask: 2026-11-13 (its page views are audited in tests/ask.spec.ts); Testimonials: 2026-11-18
+    'waitlist', 'sessions', 'lockers', 'badgereq', 'volunteers', 'store', 'payments', 'ask', 'testimonials', 'chat'] as const; // Chat: 2026-11-20 (its edit box and history in tests/community-chat.spec.ts); Ask: 2026-11-13 (its page views are audited in tests/ask.spec.ts); Testimonials: 2026-11-18
   for (const lang of ['en', 'ar'] as const) {
     for (const tab of STAFF_TABS) {
       test(`staff: ${tab} (${lang})`, async ({ page }) => {

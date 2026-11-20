@@ -706,6 +706,9 @@ with expected(fname, want_definer, note) as (values
   ('_chat_shown', true, 'the Community chat: reads customers and customer_tags for a message''s writer, inside the 6 hours; no client executes (20261120203000, 20261120213000)'),
   ('_chat_row', true, 'the Community chat: a message as a member reads it, with the writer''s full name; no client executes (20261120203000)'),
   ('_chat_tick', true, 'the Community chat: the hub_chat trigger sends the empty tick through realtime.send (20261120203000)'),
+  ('staff_chat_edit', true, 'the Community chat: staff edit a message and keep its earlier words in hub_chat_edits; _staff_mod(community, edit) (20261120233000)'),
+  ('_chat_tick_staff', true, 'the Community chat: hub_chat and hub_chat_members triggers send the empty staff broadcast through realtime.send (20261120233000)'),
+  ('_chat_changed', false, 'the Community chat: stamps hub_chat.changed_at on an update; reads only NEW (20261120233000)'),
   ('_chat_keep', false, 'the Community chat: how long members see a message, 6 hours; reads no table (20261120213000)'),
   ('_chat_clean', false, 'the Community chat: cleans a message''s text; reads no table (20261120203000)')
 )

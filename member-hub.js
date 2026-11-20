@@ -1714,6 +1714,7 @@ Object.assign(HUB_T, {
   chtRemove: ['Remove', 'حذف', 'Supprimer', 'Eliminar', 'Remover', 'ہٹائیں', 'हटाएँ', 'Alisin', 'हटाउनुहोस्', 'সরান'],
   chtReportQ: ['Report this message to the team?', 'هل تريد إبلاغ الفريق عن هذه الرسالة؟', 'Signaler ce message à l’équipe ?', '¿Denunciar este mensaje al equipo?', 'Denunciar esta mensagem à equipe?', 'اس پیغام کی ٹیم کو اطلاع دیں؟', 'इस संदेश की टीम को रिपोर्ट करें?', 'I-report ang mensaheng ito sa team?', 'यो सन्देश टिमलाई रिपोर्ट गर्ने?', 'এই বার্তাটি টিমকে রিপোর্ট করবেন?'],
   chtReport: ['Report', 'إبلاغ', 'Signaler', 'Denunciar', 'Denunciar', 'رپورٹ کریں', 'रिपोर्ट करें', 'I-report', 'रिपोर्ट गर्नुहोस्', 'রিপোর্ট করুন'],
+  chtEdited: ['Edited by the team', 'عدّلها الفريق', 'Modifié par l’équipe', 'Editado por el equipo', 'Editada pela equipe', 'ٹیم نے ترمیم کی', 'टीम ने संपादित किया', 'In-edit ng team', 'टिमले सम्पादन गर्‍यो', 'টিম সম্পাদনা করেছে'],
   chtReported: ['Reported', 'تم الإبلاغ', 'Signalé', 'Denunciado', 'Denunciada', 'رپورٹ ہو گیا', 'रिपोर्ट किया गया', 'Nai-report', 'रिपोर्ट गरियो', 'রিপোর্ট করা হয়েছে'],
   chtFast: ['You are sending too fast. Please try again in a moment.', 'أنت ترسل بسرعة كبيرة. يرجى المحاولة بعد لحظة.', 'Vous envoyez trop vite. Réessayez dans un instant.', 'Estás enviando demasiado rápido. Inténtalo en un momento.', 'Você está enviando rápido demais. Tente novamente em instantes.', 'آپ بہت تیزی سے بھیج رہے ہیں۔ ذرا دیر بعد دوبارہ کوشش کریں۔', 'आप बहुत तेज़ी से भेज रहे हैं। थोड़ी देर बाद फिर कोशिश करें।', 'Masyadong mabilis ang pagpapadala mo. Subukang muli maya-maya.', 'तपाईं धेरै छिटो पठाउँदै हुनुहुन्छ। केही बेरपछि फेरि प्रयास गर्नुहोस्।', 'আপনি খুব দ্রুত পাঠাচ্ছেন। একটু পরে আবার চেষ্টা করুন।'],
   chtLimit: ['You have sent many messages. Please try again in a few minutes.', 'أرسلت رسائل كثيرة. يرجى المحاولة بعد بضع دقائق.', 'Vous avez envoyé beaucoup de messages. Réessayez dans quelques minutes.', 'Has enviado muchos mensajes. Inténtalo en unos minutos.', 'Você enviou muitas mensagens. Tente novamente em alguns minutos.', 'آپ نے بہت سے پیغامات بھیجے ہیں۔ چند منٹ بعد دوبارہ کوشش کریں۔', 'आपने बहुत संदेश भेजे हैं। कुछ मिनट बाद फिर कोशिश करें।', 'Marami ka nang naipadalang mensahe. Subukang muli pagkalipas ng ilang minuto.', 'तपाईंले धेरै सन्देश पठाउनुभयो। केही मिनेटपछि फेरि प्रयास गर्नुहोस्।', 'আপনি অনেক বার্তা পাঠিয়েছেন। কয়েক মিনিট পরে আবার চেষ্টা করুন।'],
@@ -1815,6 +1816,9 @@ async function _chtFetch(mode, viaTick) {
       const add = d.rows.filter((x) => !have.has(x.id) && !gone.has(x.id)), n0 = g.rows.length;
       g.rows = g.rows.filter((x) => !gone.has(x.id));
       got = add.length > 0 || g.rows.length !== n0;
+      // the team edited a message on the page (20261120233000): its words are swapped in place, marked edited
+      const ed = new Map((Array.isArray(d.edits) ? d.edits : []).map((x) => [x.id, x]));
+      if (ed.size) g.rows = g.rows.map((x) => { const y = ed.get(x.id); if (!y || (y.body === x.body && !!y.ed === !!x.ed)) return x; got = true; return { ...x, body: y.body, ed: !!y.ed }; });
       if (add.length) { g.rows = [...g.rows, ...add].sort((a, b) => a.id - b.id); g.fresh += add.filter((x) => !x.mine).length; }
     }
   } else if (first) g.fail = true; // a later read that failed: what is shown stays, the page asks again by itself
@@ -1907,7 +1911,7 @@ function _chtRowHtml(x, prev, g) {
   const who = x.mine || run ? '' : `<span class="cht-who${x.team ? ' cht-who-team' : ''}"><bdi>${esc(x.team ? _hT('chtTeam') : x.name || _hT('chtMember'))}</bdi></span>`;
   const act = x.mine ? `<button type="button" class="cht-more" aria-label="${esc(_hT('chtRemove'))}" data-on-click="${_on('_chtMore', x.id)}">${_cuIc('trash', 18)}</button>`
     : x.team || rep ? '' : `<button type="button" class="cht-more" aria-label="${esc(_hT('chtReport'))}" data-on-click="${_on('_chtMore', x.id)}">${_cuIc('flag', 18)}</button>`;
-  return `<div class="cht-row${x.mine ? ' cht-mine' : ''}${x.team ? ' cht-team' : ''}${run ? ' cht-run' : ''}" data-id="${esc(String(x.id))}">${who}<div class="cht-line"><div class="cht-bub"><p class="cht-body" dir="auto">${esc(x.body || '')}</p><span class="cht-at">${esc(_chtTime(x.at))}</span></div>${act}</div>${rep ? `<span class="cht-rep">${_hT('chtReported')}</span>` : ''}</div>`;
+  return `<div class="cht-row${x.mine ? ' cht-mine' : ''}${x.team ? ' cht-team' : ''}${run ? ' cht-run' : ''}" data-id="${esc(String(x.id))}">${who}<div class="cht-line"><div class="cht-bub"><p class="cht-body" dir="auto">${esc(x.body || '')}</p><span class="cht-at">${x.ed ? `<span class="cht-ed">${_hT('chtEdited')}</span> · ` : ''}${esc(_chtTime(x.at))}</span></div>${act}</div>${rep ? `<span class="cht-rep">${_hT('chtReported')}</span>` : ''}</div>`;
 }
 // The foot as it stands: what was refused (or that the member is muted), the box and Send, the New messages button.
 function _chtSync(g) {

@@ -543,6 +543,8 @@ test.describe('@staff:store products: low stock, bulk prices, Duplicate, the edi
     await view(page, 'products');
     await page.locator('#tab-store .sto-prod', { hasText: 'City Bike' }).click();
     const pe = page.locator('#sto-pe [role="dialog"]');
+    // the editor's own reads (models, spec keys, the size chart, categories) redraw it as each lands: a drag starts once the photos stay put
+    await expect.poll(() => page.evaluate(() => new Promise<boolean>((ok) => { const el = document.querySelector('#sto-pe .sto-img'); setTimeout(() => ok(!!el && el.isConnected), 400); }))).toBe(true);
     // photos: the third one moved first by dragging it onto the first, then described and tagged with a colour
     if (test.info().project.name === 'mobile') await pe.locator('.sto-img').nth(2).locator('button', { hasText: 'Make cover' }).click(); // a phone moves photos with the buttons
     else {

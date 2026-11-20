@@ -8,7 +8,8 @@ import { hubPart } from './helpers/hub';
 // for community members?", then "Full name", "One club chat", "Text only"). The member's side is a round button at the bottom
 // corner of every page (app.src.html _chtFab*; the user, 2026-11-20: "show the chat in booking app as an icon at the bottom
 // corner of the page"; it was a card on the Community tab) and the chat's own page (member-hub.js); the staff side is
-// Community > Activities > Chat. All Supabase traffic is stubbed, the
+// the Chat section (/chat, since 2026-11-20, migration 20261120233000). All Supabase traffic is stubbed, the
+
 // realtime socket too; what only the database enforces (members only, the limits, the reports that hide a message, the mute)
 // is checked in the migration's own text below and was run on a local Postgres.
 
@@ -518,187 +519,374 @@ test.describe('@build Community chat, six hours', () => {
   });
 });
 
-// ── Staff: Community > Activities > Chat ────────────────────────────────────────────────────────────────────────────────
+// ── Staff: the Chat section (/chat, 2026-11-20, migration 20261120233000) ──────────────────────────────────────────────
+// The user: "create a whole separate page in staff for chat and let them be able to edit delete and modify messages in real time".
 const customers = [
   { id: 'c1', name: 'Lina Haddad', email: 'l@example.com', phone: '+966550000101', created_at: '2026-06-10T00:00:00Z' },
   { id: 'c2', name: 'Omar Saleh', email: 'o@example.com', phone: '+966550000102', created_at: '2026-06-11T00:00:00Z' },
   { id: 'c3', name: 'Sara Nasser', email: 's@example.com', phone: '+966550000103', created_at: '2026-06-12T00:00:00Z' },
 ];
+type ChatRow = { id: number; customer_id: string | null; staff_user: string | null; body: string; created_at: string; removed_at: string | null; removed_by: string | null;
+  removed_user: string | null; reports: number; checked_at: string | null; edited_at: string | null; edited_user: string | null; changed_at: string };
+const row = (o: Partial<ChatRow> & { id: number; body: string; created_at: string }): ChatRow => ({ customer_id: null, staff_user: null, removed_at: null, removed_by: null, removed_user: null, reports: 0, checked_at: null, edited_at: null, edited_user: null, changed_at: o.created_at, ...o });
 const chat = [
-  { id: 25, customer_id: null, staff_user: 'u-1', body: 'Meet at gate 2', created_at: '2026-11-20T06:00:00Z', removed_at: null, removed_by: null, reports: 0, checked_at: null },
-  { id: 24, customer_id: 'c2', staff_user: null, body: 'Buy my old bike, cheap', created_at: '2026-11-19T16:00:00Z', removed_at: null, removed_by: null, reports: 2, checked_at: null },
-  { id: 23, customer_id: 'c3', staff_user: null, body: 'Something rude', created_at: '2026-11-19T15:30:00Z', removed_at: '2026-11-19T15:40:00Z', removed_by: 'reports', reports: 3, checked_at: null },
-  { id: 22, customer_id: 'c1', staff_user: null, body: 'I am in', created_at: '2026-11-19T15:10:00Z', removed_at: null, removed_by: null, reports: 0, checked_at: null },
-  { id: 21, customer_id: 'c2', staff_user: null, body: 'Who is riding on Saturday?', created_at: '2026-11-19T15:00:00Z', removed_at: null, removed_by: null, reports: 1, checked_at: '2026-11-19T15:05:00Z' },
+  row({ id: 25, staff_user: 'u-1', body: 'Meet at gate 2', created_at: '2026-11-20T06:00:00Z' }),
+  row({ id: 24, customer_id: 'c2', body: 'Buy my old bike, cheap', created_at: '2026-11-19T16:00:00Z', reports: 2 }),
+  row({ id: 23, customer_id: 'c3', body: 'Something rude', created_at: '2026-11-19T15:30:00Z', removed_at: '2026-11-19T15:40:00Z', removed_by: 'reports', reports: 3 }),
+  row({ id: 22, customer_id: 'c1', body: 'I am in', created_at: '2026-11-19T15:10:00Z', edited_at: '2026-11-19T15:20:00Z', edited_user: 'u-2' }),
+  row({ id: 21, customer_id: 'c2', body: 'Who is riding on Saturday?', created_at: '2026-11-19T15:00:00Z', reports: 1, checked_at: '2026-11-19T15:05:00Z' }),
 ];
+const people = [{ user_id: 'u-1', name: 'Huda' }, { user_id: 'u-2', name: 'Faisal' }];
 async function staff(page: Page, fx: Fixtures = {}) {
   const log = rpcLog(page);
   await stubSupabase(page, { sessions: [], customers, queue_entries: [], bikes: [], staff_options: [],
     tags: [{ id: 'tag_saturday', slug: 'saturday', name: 'Community', color: 'green', locked: true }], customer_tags: [],
-    titles: [], customer_titles: [], rotm_rounds: [], hub_goals: [], squads: [], squad_members: [], hub_photos: [], member_welcome: [], hub_posts: [], badges: [],
-    ride_suggestions: [], hub_chat: chat, hub_chat_members: [{ customer_id: 'c3', muted_until: 'infinity', muted_at: '2026-11-19T15:45:00Z' }], ...fx });
+    hub_chat: chat, hub_chat_members: [{ customer_id: 'c3', muted_until: 'infinity', muted_at: '2026-11-19T15:45:00Z' }],
+    hub_chat_edits: [{ id: 1, msg_id: 22, body_before: 'I am inn', body_after: 'I am in', staff_user: 'u-2', created_at: '2026-11-19T15:20:00Z' }],
+    'rpc:staff_people': people, ...fx });
+  const rt = await stubRealtime(page);
   await unlockStaff(page);
-  await page.goto('/');
+  await page.goto('/chat');
   await waitForSb(page);
-  await page.waitForFunction('(S.customers||[]).length>0');
-  await page.evaluate(`S.staffRole='admin';setStaffTab('community');S.communityTab='activities';renderCommunity()`);
-  await page.waitForFunction('S._acAt>0&&!S._acBusy&&!!S._ac&&!!S._acCh');
-  return log;
+  await page.waitForFunction(`S.view==='staff'&&S.staffTab==='chat'`);
+  await page.waitForFunction('(S.customers||[]).length>0&&!!S._chs&&S._chs.rows!==null&&!S._chs.busy');
+  return { log, rt };
 }
-const tab = (page: Page) => page.locator('#tab-community');
-const cards = (page: Page) => tab(page).locator('[data-ch]');
-const fpill = (page: Page, re: RegExp) => tab(page).locator('#ac-ch-list .filter-pill', { hasText: re });
+const sec = (page: Page) => page.locator('#tab-chat');
+const msg = (page: Page, id: number) => sec(page).locator(`.chs-msg[data-ch="${id}"]`);
+const msgs2 = (page: Page) => sec(page).locator('.chs-msg[data-ch]');
+const fpill = (page: Page, re: RegExp) => sec(page).locator('#chs-pills .filter-pill', { hasText: re });
+const setRoute = (page: Page) => page.route('**/rest/v1/rpc/staff_chat_set', (r) => {
+  const b = r.request().postDataJSON() as { p_mid: number; p_removed: boolean };
+  const x = chat.find((y) => y.id === b.p_mid)!;
+  return r.fulfill({ status: 200, headers: json, body: JSON.stringify({ ...x, removed_at: b.p_removed ? '2026-11-20T07:00:00Z' : null, removed_by: b.p_removed ? 'staff' : null, removed_user: b.p_removed ? 'u-1' : null, checked_at: '2026-11-20T07:00:00Z', changed_at: '2026-11-20T07:00:00Z' }) });
+});
 
-test.describe('@staff:community Chat', () => {
-  test('the pill counts the reports nobody has looked at; All, Reported, Removed and Muted; the writer\'s name opens their account', async ({ page }) => {
+test.describe('@staff:chat the Chat section', () => {
+  test('its own page under People, with the reported messages waiting on the rail; the room oldest first under its day; the writer opens their account', async ({ page }) => {
     await staff(page);
-    const pill = tab(page).locator('.filter-pill', { hasText: /^Chat/ });
-    await expect(pill).toHaveText('Chat (2)'); // 24 and 23: reported, not yet looked at (21 was kept)
-    await pill.click();
+    expect(new URL(page.url()).pathname).toBe('/chat');
+    const order = await page.locator('#staff-tab-nav .tab-btn[data-stab]').evaluateAll((b) => b.map((x) => (x as HTMLElement).dataset.stab));
+    expect(order.indexOf('chat')).toBe(order.indexOf('testimonials') + 1);
+    await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="chat"] .tab-badge')).toHaveText('2'); // 24 and 23: reported, nobody looked (21 was kept)
+    await expect(sec(page).locator('h1')).toHaveText('Community chat');
+    await expect(sec(page).locator('#chs-log')).toHaveAttribute('role', 'log');
     await expect(fpill(page, /^All/)).toHaveText('All (5)');
     await expect(fpill(page, /^Reported/)).toHaveText('Reported (2)');
-    await expect(fpill(page, /^Removed/)).toHaveText('Removed (1)');
+    await expect(fpill(page, /^Deleted/)).toHaveText('Deleted (1)');
+    await expect(fpill(page, /^Edited/)).toHaveText('Edited (1)');
     await expect(fpill(page, /^Muted/)).toHaveText('Muted (1)');
-    await expect(cards(page)).toHaveCount(5); // newest first
-    await expect(cards(page).nth(0)).toContainText('Team');
-    await expect(cards(page).nth(0)).toContainText('Meet at gate 2');
-    await expect(cards(page).nth(0).getByRole('button', { name: 'Mute' })).toHaveCount(0); // nobody to mute on the team's own
-    await expect(cards(page).nth(1)).toContainText('Omar Saleh');
-    await expect(cards(page).nth(1)).toContainText('Reports: 2');
-    await expect(cards(page).nth(1).getByRole('button', { name: 'Keep' })).toBeVisible();
-    await expect(cards(page).nth(2)).toContainText('Hidden after 3 reports');
-    await expect(cards(page).nth(2)).toContainText('Muted until lifted');
-    await expect(cards(page).nth(2).getByRole('button', { name: 'Put back' })).toBeVisible();
-    await expect(cards(page).nth(4).getByRole('button', { name: 'Keep' })).toHaveCount(0); // already looked at
-    // past its six hours a message says members no longer see it; a removed one says how it was removed instead
-    await expect(cards(page).nth(1).locator('.ac-ch-old')).toHaveText('No longer shown to members');
-    await expect(cards(page).nth(2).locator('.ac-ch-old')).toHaveCount(0);
+    expect(await msgs2(page).evaluateAll((m) => m.map((x) => (x as HTMLElement).dataset.ch))).toEqual(['21', '22', '23', '24', '25']); // as members see it: newest at the foot
+    await expect(sec(page).locator('.chs-day')).toHaveCount(2);
+    await expect(msg(page, 25)).toContainText('MicroMobility team');
+    await expect(msg(page, 25)).toContainText('Huda'); // which of the team wrote it
+    await expect(msg(page, 25).getByRole('button', { name: 'Mute' })).toHaveCount(0);
+    await expect(msg(page, 24)).toContainText('Reports: 2');
+    await expect(msg(page, 24).getByRole('button', { name: 'Keep' })).toBeVisible();
+    await expect(msg(page, 24).locator('.chs-old')).toHaveText('No longer shown to members');
+    await expect(msg(page, 23)).toContainText('Hidden after 3 reports');
+    await expect(msg(page, 23)).toContainText('Muted until lifted');
+    await expect(msg(page, 23).getByRole('button', { name: 'Put back' })).toBeVisible();
+    await expect(msg(page, 22).locator('.chs-edtag')).toHaveText('Edited by Faisal');
+    await expect(msg(page, 21).getByRole('button', { name: 'Keep' })).toHaveCount(0); // already looked at
     await page.evaluate(`window.__acct=[];window.openAccountHistory=(id)=>{window.__acct.push(id);}`);
-    await cards(page).nth(1).getByRole('button', { name: 'Omar Saleh' }).click();
+    await msg(page, 24).getByRole('button', { name: 'Omar Saleh' }).click();
     expect(await page.evaluate('window.__acct')).toEqual(['c2']);
+    // the pills, the search, the Filters
     await fpill(page, /^Reported/).click();
-    await expect(cards(page)).toHaveCount(2);
-    await fpill(page, /^Removed/).click();
-    await expect(cards(page)).toHaveCount(1);
+    await expect(msgs2(page)).toHaveCount(2);
+    await fpill(page, /^Edited/).click();
+    await expect(msgs2(page)).toHaveCount(1);
     await fpill(page, /^Muted/).click();
-    await expect(tab(page).locator('[data-chm]')).toHaveCount(1);
-    await expect(tab(page).locator('[data-chm]')).toContainText('Sara Nasser');
-    expect(await page.locator('#ac-ch-list [style]').count()).toBe(0);
+    await expect(sec(page).locator('[data-chm]')).toHaveCount(1);
+    await expect(sec(page).locator('[data-chm]')).toContainText('Sara Nasser');
+    await fpill(page, /^All/).click();
+    if (!(await sec(page).locator('#chs-q').isVisible())) await sec(page).locator('[data-srch="chs"] .srch-btn').click(); // a phone folds the search into a button
+    await sec(page).locator('#chs-q').fill('saturday');
+    await expect(msgs2(page)).toHaveCount(1);
+    await sec(page).locator('#chs-q').fill('omar');
+    await expect(msgs2(page)).toHaveCount(2); // by the writer's name too
+    await sec(page).locator('#chs-q').fill('');
+    await sec(page).locator('[aria-controls="fm-chs"]').click();
+    await sec(page).locator('#chs-f-who').selectOption('team');
+    await expect(msgs2(page)).toHaveCount(1);
+    await expect(sec(page).locator('[aria-controls="fm-chs"]')).toContainText('(1)');
+    // the Members' page no longer has a Chat pill
+    expect(await page.evaluate(`typeof _acChHtml`)).toBe('undefined');
+    expect(await page.locator('#tab-chat [style]').count()).toBe(0);
   });
 
-  test('Remove, Keep and Put back go through staff_chat_set and to the staff log', async ({ page }) => {
-    const log = await staff(page);
-    await page.route('**/rest/v1/rpc/staff_chat_set', (r) => {
-      const b = r.request().postDataJSON() as { p_mid: number; p_removed: boolean };
-      const row = chat.find((x) => x.id === b.p_mid)!;
-      return r.fulfill({ status: 200, headers: json, body: JSON.stringify({ ...row, removed_at: b.p_removed ? '2026-11-20T07:00:00Z' : null, removed_by: b.p_removed ? 'staff' : null, checked_at: '2026-11-20T07:00:00Z' }) });
+  test('Edit: in place, with the words the staffer saw; the message says it was edited and by whom; its earlier wordings open', async ({ page }) => {
+    const { log } = await staff(page);
+    await page.route('**/rest/v1/rpc/staff_chat_edit', (r) => {
+      const b = r.request().postDataJSON() as { p_mid: number; p_body: string };
+      const x = chat.find((y) => y.id === b.p_mid)!;
+      return r.fulfill({ status: 200, headers: json, body: JSON.stringify({ ...x, body: b.p_body.trim(), edited_at: '2026-11-20T07:00:00Z', edited_user: 'u-1', changed_at: '2026-11-20T07:00:00Z' }) });
     });
-    await tab(page).locator('.filter-pill', { hasText: /^Chat/ }).click();
-    const c24 = tab(page).locator('[data-ch="24"]'), c23 = tab(page).locator('[data-ch="23"]'), c22 = tab(page).locator('[data-ch="22"]');
-    await c24.getByRole('button', { name: 'Keep' }).click();
+    const m = msg(page, 24);
+    await m.getByRole('button', { name: 'Edit' }).click();
+    const box = m.locator('#chs-ed');
+    await expect(box).toBeFocused();
+    await expect(box).toHaveValue('Buy my old bike, cheap');
+    await expect(m.getByText('Members will see "Edited by the team".')).toBeVisible();
+    await box.press('Escape'); // Escape leaves it as it was
+    await expect(m.locator('#chs-ed')).toHaveCount(0);
+    expect(calls(log, 'staff_chat_edit')).toHaveLength(0);
+    await m.getByRole('button', { name: 'Edit' }).click();
+    await m.locator('#chs-ed').fill('Selling a bike: [link removed by the team]');
+    await expect(m.locator('#chs-ed-n')).toHaveText('42/500');
+    await m.getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => calls(log, 'staff_chat_edit').length).toBe(1);
+    expect(calls(log, 'staff_chat_edit')[0]!.body).toEqual({ p_mid: 24, p_body: 'Selling a bike: [link removed by the team]', p_was: 'Buy my old bike, cheap' });
+    await expect(m.locator('.chs-body')).toHaveText('Selling a bike: [link removed by the team]');
+    await expect(m.locator('.chs-edtag')).toHaveText('Edited by Huda');
+    await expect(fpill(page, /^Edited/)).toHaveText('Edited (2)');
+    const said = await page.evaluate(`(S.fullLog||[]).map(x=>x.label).join(' | ')`) as string;
+    expect(said).toContain('Chat: Omar Saleh · Edit · Buy my old bike, cheap → Selling a bike: [link removed by the team]');
+    // the earlier wording of 22
+    await msg(page, 22).locator('.chs-edtag').click();
+    await expect(msg(page, 22).locator('.chs-hist')).toContainText('Earlier wording');
+    await expect(msg(page, 22).locator('.chs-hist-b')).toHaveText('I am inn');
+    await expect(msg(page, 22).locator('.chs-hist')).toContainText('Faisal');
+    await msg(page, 22).locator('.chs-edtag').click();
+    await expect(msg(page, 22).locator('.chs-hist')).toHaveCount(0);
+  });
+
+  test('two staff on one message: a Save over words that changed meanwhile is refused and shows them; the next Save replaces them knowingly', async ({ page }) => {
+    const { log } = await staff(page);
+    let n = 0;
+    await page.route('**/rest/v1/rpc/staff_chat_edit', (r) => {
+      const b = r.request().postDataJSON() as { p_mid: number; p_body: string };
+      if (n++ === 0) return r.fulfill({ status: 400, headers: json, body: JSON.stringify({ code: 'P0001', message: 'CHANGED', details: null, hint: null }) });
+      return r.fulfill({ status: 200, headers: json, body: JSON.stringify({ ...chat[1], body: b.p_body, edited_at: '2026-11-20T07:01:00Z', edited_user: 'u-1', changed_at: '2026-11-20T07:01:00Z' }) });
+    });
+    const m = msg(page, 24);
+    await m.getByRole('button', { name: 'Edit' }).click();
+    await m.locator('#chs-ed').fill('My version');
+    await expect(m.locator('#chs-ed-warn')).toBeHidden();
+    // meanwhile another staffer edited it; this page has not heard yet
+    const theirs = chat.map((x) => x.id === 24 ? { ...x, body: 'Their version', edited_at: '2026-11-20T07:00:00Z', edited_user: 'u-2', changed_at: '2026-11-20T07:00:00Z' } : x);
+    await page.route('**/rest/v1/hub_chat?**', (r) => r.fulfill({ status: 200, headers: json, body: JSON.stringify(theirs) }));
+    await m.getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => calls(log, 'staff_chat_edit').length).toBe(1);
+    expect(calls(log, 'staff_chat_edit')[0]!.body).toEqual({ p_mid: 24, p_body: 'My version', p_was: 'Buy my old bike, cheap' });
+    await expect(m.locator('#chs-ed-warn')).toBeVisible();
+    await expect(m.locator('#chs-ed-now')).toHaveText('Their version');
+    await expect(m.locator('.chs-edtag')).toHaveText('Edited by Faisal'); // the line on top follows; the box keeps what is typed
+    await expect(m.locator('#chs-ed')).toHaveValue('My version');
+    await m.getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => calls(log, 'staff_chat_edit').length).toBe(2);
+    expect(calls(log, 'staff_chat_edit')[1]!.body).toEqual({ p_mid: 24, p_body: 'My version', p_was: 'Their version' });
+    await expect(m.locator('.chs-body')).toHaveText('My version');
+    await expect(m.locator('#chs-ed')).toHaveCount(0);
+  });
+
+  test('Delete, Keep and Put back go through staff_chat_set and to the staff log; a deleted message stays for staff and says who', async ({ page }) => {
+    const { log } = await staff(page);
+    await setRoute(page);
+    await msg(page, 24).getByRole('button', { name: 'Keep' }).click();
     await expect.poll(() => calls(log, 'staff_chat_set').length).toBe(1);
     expect(calls(log, 'staff_chat_set')[0]!.body).toEqual({ p_mid: 24, p_removed: false });
-    await expect(c24.getByRole('button', { name: 'Keep' })).toHaveCount(0);
+    await expect(msg(page, 24).getByRole('button', { name: 'Keep' })).toHaveCount(0);
     await expect(fpill(page, /^Reported/)).toHaveText('Reported (1)');
-    await c23.getByRole('button', { name: 'Put back' }).click();
+    await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="chat"] .tab-badge')).toHaveText('1');
+    await msg(page, 23).getByRole('button', { name: 'Put back' }).click();
     await expect.poll(() => calls(log, 'staff_chat_set').length).toBe(2);
     expect(calls(log, 'staff_chat_set')[1]!.body).toEqual({ p_mid: 23, p_removed: false });
-    await expect(c23.getByRole('button', { name: 'Remove' })).toBeVisible();
-    await c22.getByRole('button', { name: 'Remove' }).click();
+    await expect(msg(page, 23).getByRole('button', { name: 'Delete' })).toBeVisible();
+    await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="chat"] .tab-badge')).toHaveCount(0);
+    await msg(page, 22).getByRole('button', { name: 'Delete' }).click(); // no question: Put back undoes it
     await expect.poll(() => calls(log, 'staff_chat_set').length).toBe(3);
     expect(calls(log, 'staff_chat_set')[2]!.body).toEqual({ p_mid: 22, p_removed: true });
-    await expect(c22).toContainText('Removed by staff');
-    await expect(c22.getByRole('button', { name: 'Put back' })).toBeVisible();
+    await expect(msg(page, 22)).toContainText('Deleted by Huda');
+    await expect(msg(page, 22).locator('.chs-body')).toHaveText('I am in'); // kept for staff
+    await expect(msg(page, 22).getByRole('button', { name: 'Put back' })).toBeVisible();
     const said = await page.evaluate(`(S.fullLog||[]).map(x=>x.label).join(' | ')`) as string;
-    expect(said).toContain('Chat: Lina Haddad · Remove');
+    expect(said).toContain('Chat: Lina Haddad · Delete · I am in');
     expect(said).toContain('Chat: Omar Saleh · Keep');
   });
 
-  test('Mute opens its three lengths; a muted account shows Lift mute; the team writes as the team', async ({ page }) => {
-    const log = await staff(page);
+  test('Mute opens its three lengths; a muted account shows Lift mute; the team writes as the team with Ctrl+Enter or Send', async ({ page }) => {
+    const { log } = await staff(page);
     await page.route('**/rest/v1/rpc/staff_chat_mute', (r) => {
       const b = r.request().postDataJSON() as { p_customer: string; p_days: number | null };
       return r.fulfill({ status: 200, headers: json, body: JSON.stringify({ customer_id: b.p_customer, agreed_at: null, muted_at: b.p_days == null ? null : '2026-11-20T07:00:00Z', muted_until: b.p_days == null ? null : b.p_days === 0 ? 'infinity' : '2099-01-01T00:00:00+00:00' }) });
     });
+    let id = 26;
     await page.route('**/rest/v1/rpc/staff_chat_send', (r) => {
       const b = r.request().postDataJSON() as { p_body: string };
-      return r.fulfill({ status: 200, headers: json, body: JSON.stringify({ id: 26, customer_id: null, staff_user: 'u-1', body: b.p_body, created_at: new Date().toISOString(), removed_at: null, removed_by: null, reports: 0, checked_at: null }) });
+      const at = new Date().toISOString();
+      return r.fulfill({ status: 200, headers: json, body: JSON.stringify(row({ id: id++, staff_user: 'u-1', body: b.p_body, created_at: at, changed_at: at })) });
     });
-    await tab(page).locator('.filter-pill', { hasText: /^Chat/ }).click();
-    const c24 = tab(page).locator('[data-ch="24"]'), c21 = tab(page).locator('[data-ch="21"]');
+    const c24 = msg(page, 24), c21 = msg(page, 21);
     await c24.getByRole('button', { name: 'Mute', exact: true }).click();
     await expect(c24.getByRole('group', { name: 'Mute' }).locator('button')).toHaveText(['1 day', '7 days', 'Until lifted', 'Cancel']);
-    await expect(c21.getByRole('group', { name: 'Mute' })).toHaveCount(0); // only the card that asked
+    await expect(c21.getByRole('group', { name: 'Mute' })).toHaveCount(0); // only the message that asked
     await c24.getByRole('button', { name: 'Cancel' }).click();
     await expect(c24.getByRole('group', { name: 'Mute' })).toHaveCount(0);
-    expect(calls(log, 'staff_chat_mute')).toHaveLength(0);
     await c24.getByRole('button', { name: 'Mute', exact: true }).click();
     await c24.getByRole('button', { name: '7 days' }).click();
     await expect.poll(() => calls(log, 'staff_chat_mute').length).toBe(1);
     expect(calls(log, 'staff_chat_mute')[0]!.body).toEqual({ p_customer: 'c2', p_days: 7 });
-    await expect(c24).toContainText('Muted until'); // both of this member's messages say so
-    await expect(c21).toContainText('Muted until');
+    await expect(c24).toContainText('Muted until');
+    await expect(c21).toContainText('Muted until'); // both of this member's messages say so
     await expect(fpill(page, /^Muted/)).toHaveText('Muted (2)');
     await c21.getByRole('button', { name: 'Lift mute' }).click();
     await expect.poll(() => calls(log, 'staff_chat_mute').length).toBe(2);
     expect(calls(log, 'staff_chat_mute')[1]!.body).toEqual({ p_customer: 'c2', p_days: null });
-    await expect(c24.getByRole('button', { name: 'Mute', exact: true })).toBeVisible();
     await expect(fpill(page, /^Muted/)).toHaveText('Muted (1)');
-    // the team's own message
-    const box = tab(page).getByLabel('Message as the MicroMobility team');
-    await tab(page).locator('#ac-ch-go').click(); // nothing typed: nothing sent
+    // the team's box
+    const box = sec(page).getByLabel('Message as the MicroMobility team');
+    await sec(page).locator('#chs-go').click(); // nothing typed: nothing sent
     expect(calls(log, 'staff_chat_send')).toHaveLength(0);
     await box.fill('  Route change: we start at the north gate  ');
-    await tab(page).locator('#ac-ch-go').click();
+    await sec(page).locator('#chs-go').click();
     await expect.poll(() => calls(log, 'staff_chat_send').length).toBe(1);
     expect(calls(log, 'staff_chat_send')[0]!.body).toEqual({ p_body: 'Route change: we start at the north gate' });
-    await expect(cards(page).first()).toContainText('Route change: we start at the north gate');
-    await expect(cards(page).first()).toContainText('Team');
-    await expect(cards(page).first().locator('.ac-ch-old')).toHaveCount(0); // written just now: members still see it
+    await expect(msgs2(page).last()).toContainText('Route change: we start at the north gate');
+    await expect(msgs2(page).last().locator('.chs-old')).toHaveCount(0); // written just now: members still see it
     await expect(box).toHaveValue('');
+    await box.fill('Second one');
+    await box.press('Control+Enter');
+    await expect.poll(() => calls(log, 'staff_chat_send').length).toBe(2);
+    await expect(msgs2(page).last()).toContainText('Second one');
   });
 
-  test('staff keep every message: Earlier messages reads the ones before the last shown, and a reload keeps them', async ({ page }) => {
-    const many = Array.from({ length: 300 }, (_, i) => ({ id: 1000 - i, customer_id: 'c2', staff_user: null, body: 'message ' + (1000 - i), created_at: '2026-11-19T10:00:00Z', removed_at: null, removed_by: null, reports: 0, checked_at: null }));
-    const older = [{ id: 700, customer_id: 'c1', staff_user: null, body: 'from last year', created_at: '2025-11-19T10:00:00Z', removed_at: null, removed_by: null, reports: 0, checked_at: null },
-      { id: 699, customer_id: 'c3', staff_user: null, body: 'the very first message', created_at: '2025-11-18T10:00:00Z', removed_at: null, removed_by: null, reports: 0, checked_at: null }];
-    await staff(page, { hub_chat: many });
+  test('live: a tick on the topic reads what changed since the last read; a new message and a change land without touching the boxes', async ({ page }) => {
+    const { rt } = await staff(page);
+    await page.waitForFunction('S._chs.live===true'); // the topic is joined
+    await expect(sec(page).locator('#chs-live')).toHaveText('Live');
     const asked: string[] = [];
+    let now = [...chat];
+    await page.route('**/rest/v1/hub_chat?**', (r) => {
+      const u = new URL(r.request().url()); asked.push(u.searchParams.get('changed_at') || '');
+      return r.fulfill({ status: 200, headers: json, body: JSON.stringify(u.searchParams.get('changed_at') ? now : chat) });
+    });
+    const box = sec(page).getByLabel('Message as the MicroMobility team');
+    await box.fill('Half typed');
+    await msg(page, 21).getByRole('button', { name: 'Edit' }).click();
+    await msg(page, 21).locator('#chs-ed').fill('Editing here');
+    now = [{ ...chat[1]!, body: 'Changed elsewhere', edited_at: '2026-11-20T07:00:00Z', edited_user: 'u-2', changed_at: '2026-11-20T07:00:00Z' },
+      row({ id: 26, customer_id: 'c3', body: 'Just arrived', created_at: '2026-11-20T07:00:05Z' })];
+    rt.broadcast('realtime:hub-chat', 'tick', {});
+    await expect(msg(page, 26)).toContainText('Just arrived');
+    await expect(msg(page, 24).locator('.chs-body')).toHaveText('Changed elsewhere');
+    await expect(msg(page, 24).locator('.chs-edtag')).toHaveText('Edited by Faisal');
+    expect(asked.some((x) => /^gte\.2026-11-20T05:59:5/.test(x))).toBe(true); // since the newest change it had read, less five seconds
+    await expect(box).toHaveValue('Half typed');
+    await expect(msg(page, 21).locator('#chs-ed')).toHaveValue('Editing here');
+    // a staff-only change (a report) comes as 'staff'
+    now = [{ ...chat[4]!, reports: 2, checked_at: null, changed_at: '2026-11-20T07:01:00Z' }];
+    await page.evaluate('S._chs.tickNext=0');
+    rt.broadcast('realtime:hub-chat', 'staff', {});
+    await expect(msg(page, 21)).toContainText('Reports: 2');
+    await expect(msg(page, 21).locator('#chs-ed')).toHaveValue('Editing here');
+    await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="chat"] .tab-badge')).toHaveText('3');
+  });
+
+  test('Earlier messages reads the page before the first one held; staff keep every message', async ({ page }) => {
+    const many = Array.from({ length: 300 }, (_, i) => row({ id: 1000 - i, customer_id: 'c2', body: 'message ' + (1000 - i), created_at: '2026-11-19T10:00:00Z' }));
+    const older = [row({ id: 700, customer_id: 'c1', body: 'from last year', created_at: '2025-11-19T10:00:00Z' }),
+      row({ id: 699, customer_id: 'c3', body: 'the very first message', created_at: '2025-11-18T10:00:00Z' })];
+    const asked: string[] = [];
+    await staff(page, { hub_chat: many });
     await page.route('**/rest/v1/hub_chat?**', (r) => {
       const u = new URL(r.request().url()); asked.push(u.searchParams.get('id') || '');
-      return r.fulfill({ status: 200, headers: json, body: JSON.stringify(u.searchParams.get('id') ? older : many) });
+      return r.fulfill({ status: 200, headers: json, body: JSON.stringify(u.searchParams.get('id') ? older : []) });
     });
-    await tab(page).locator('.filter-pill', { hasText: /^Chat/ }).click();
-    await expect(cards(page)).toHaveCount(300);
-    await tab(page).getByRole('button', { name: 'Earlier messages' }).click();
-    await expect(cards(page)).toHaveCount(302);
-    expect(asked).toContain('lt.701'); // the ones before the last one shown
-    await expect(cards(page).last()).toContainText('the very first message');
-    await expect(cards(page).last().locator('.ac-ch-old')).toHaveText('No longer shown to members'); // a year on, staff still read it
-    await expect(tab(page).getByRole('button', { name: 'Earlier messages' })).toHaveCount(0); // that was all of them
-    await page.evaluate('_acChLoad(true)'); // the newest page read again: the earlier ones stay under it
-    await page.waitForFunction('!S._acChBusy');
-    await expect(cards(page)).toHaveCount(302);
+    await expect(msgs2(page)).toHaveCount(300);
+    await sec(page).getByRole('button', { name: 'Earlier messages' }).click();
+    await expect(msgs2(page)).toHaveCount(302);
+    expect(asked).toContain('lt.701');
+    await expect(msgs2(page).first()).toContainText('the very first message');
+    await expect(msgs2(page).first().locator('.chs-old')).toHaveText('No longer shown to members'); // a year on, staff still read it
+    await expect(sec(page).getByRole('button', { name: 'Earlier messages' })).toHaveCount(0); // that was all of them
   });
 
-  test('the list reads again by itself without touching the box; a view-only account sees no actions; a database without it has no pill', async ({ page }) => {
+  test('a view-only account sees the room and no actions; a database without the chat says so; one before the edits offers no Edit', async ({ page }) => {
     await staff(page);
-    await tab(page).locator('.filter-pill', { hasText: /^Chat/ }).click();
-    const box = tab(page).getByLabel('Message as the MicroMobility team');
-    await box.fill('Typing a long');
-    await page.evaluate(`window.__box=document.getElementById('ac-ch-text');S._acCh=S._acCh.slice(0,2);_acChPaint()`);
-    await expect(cards(page)).toHaveCount(2);
-    expect(await page.evaluate(`window.__box===document.getElementById('ac-ch-text')&&window.__box.value`)).toBe('Typing a long');
-    // view only
-    await page.evaluate(`S._myEdit=[];renderCommunity()`);
-    await expect(cards(page)).toHaveCount(2);
-    await expect(tab(page).locator('#ac-ch-text')).toHaveCount(0);
-    await expect(cards(page).first().locator('button:not(.ca-link)')).toHaveCount(0);
-    // a database without the table
-    await page.unrouteAll({ behavior: 'ignoreErrors' });
-    await page.route('**/rest/v1/hub_chat?**', (r) => r.fulfill({ status: 404, headers: json, body: JSON.stringify({ code: 'PGRST205', message: `Could not find the table 'public.hub_chat' in the schema cache` }) }));
-    await page.evaluate(`S._myEdit=null;S._acTabV='goals';S._acChAt=0;_acChLoad(true)`);
-    await page.waitForFunction('S._acChMissing===true');
-    await expect(tab(page).locator('.filter-pill', { hasText: /^Chat/ })).toHaveCount(0);
+    await page.evaluate(`S._myEdit=[];renderChat()`);
+    await expect(msgs2(page)).toHaveCount(5);
+    await expect(sec(page).locator('#chs-text')).toHaveCount(0);
+    await expect(sec(page).locator('.chs-acts')).toHaveCount(0);
+    await page.evaluate(`S._myEdit=null`);
+    // a database before 20261120233000: the new columns are unknown
+    await page.route('**/rest/v1/hub_chat?**', (r) => {
+      const u = new URL(r.request().url());
+      if ((u.searchParams.get('select') || '').includes('changed_at')) return r.fulfill({ status: 400, headers: json, body: JSON.stringify({ code: '42703', message: 'column hub_chat.edited_at does not exist' }) });
+      return r.fulfill({ status: 200, headers: json, body: JSON.stringify(chat.map(({ edited_at: _e, edited_user: _u, changed_at: _c, ...x }) => x)) });
+    });
+    await page.evaluate(`S._chs=null;renderChat()`);
+    await page.waitForFunction('S._chs&&S._chs.old===true&&S._chs.rows&&S._chs.rows.length===5');
+    await expect(msgs2(page)).toHaveCount(5);
+    await expect(sec(page).getByRole('button', { name: 'Edit' })).toHaveCount(0);
+    await expect(sec(page).getByRole('button', { name: 'Delete' }).first()).toBeVisible();
+    await expect(fpill(page, /^Edited/)).toHaveCount(0);
+    // a database without the chat
+    await page.route('**/rest/v1/hub_chat**', (r) => r.fulfill({ status: 404, headers: json, body: JSON.stringify({ code: 'PGRST205', message: `Could not find the table 'public.hub_chat' in the schema cache` }) }));
+    await page.evaluate(`S._chs=null;renderChat()`);
+    await expect(sec(page)).toContainText('The chat is not set up on the database yet.');
+  });
+});
+
+test.describe('@customer:members Community chat, the team\'s edits', () => {
+  test('an edit reaches the open page: the words are swapped in place and marked "Edited by the team"', async ({ page }) => {
+    const { rt } = await member(page);
+    let i = 0;
+    await page.route('**/rest/v1/rpc/chat_read', (r) => {
+      const b = r.request().postDataJSON() as { p_after?: number };
+      return r.fulfill({ status: 200, headers: json, body: JSON.stringify(b.p_after == null ? read() : read({ rows: [], edits: i++ ? [] : [{ ...msgs[2], body: 'I am in [edited]', ed: true }] })) });
+    });
+    await openChat(page);
+    await expect(rowsEl(page)).toHaveCount(4);
+    await expect(pageEl(page).locator('.cht-ed')).toHaveCount(0);
+    await page.waitForFunction('S._chtLive===true');
+    rt.broadcast('realtime:hub-chat', 'tick', {});
+    const r13 = pageEl(page).locator('.cht-row[data-id="13"]');
+    await expect(r13.locator('.cht-body')).toHaveText('I am in [edited]');
+    await expect(r13.locator('.cht-ed')).toHaveText('Edited by the team');
+    await expect(rowsEl(page)).toHaveCount(4);
+    // the staff-only broadcast is not the members' tick
+    const before = await page.evaluate(`S._cht.readAt`);
+    rt.broadcast('realtime:hub-chat', 'staff', {});
+    await page.waitForTimeout(800);
+    expect(await page.evaluate(`S._cht.readAt`)).toBe(before);
+  });
+});
+
+// The staff page (20261120233000): staff edits are kept, members see they were edited, the live signals carry nothing.
+test.describe('@build Community chat, the staff page', () => {
+  const sql = readFileSync(resolve(__dirname, '../supabase/migrations/20261120233000_community_chat_staff_page.sql'), 'utf8');
+  const fnBody = (name: string) => { const i = sql.indexOf(`create or replace function public.${name}(`); expect(i, name).toBeGreaterThan(-1); return sql.slice(i, sql.indexOf('$$;', i)); };
+
+  test('an edit needs the Community edit right, keeps the earlier words and refuses words that changed meanwhile', () => {
+    const b = fnBody('staff_chat_edit');
+    expect(b).toContain(`if (select _staff_mod('community', true)) is not true then raise exception 'FORBIDDEN'`);
+    expect(b).toContain('_chat_clean(p_body)');
+    expect(b).toContain(`if p_was is not null and r.body is distinct from p_was then raise exception 'CHANGED'`);
+    expect(b.indexOf('insert into hub_chat_edits')).toBeLessThan(b.indexOf('update hub_chat m set body'));
+    expect(b).toContain('language plpgsql volatile security definer set search_path to');
+    expect(sql).toContain('revoke all on function public.staff_chat_edit(bigint, text, text) from public, anon;');
+    expect(sql).not.toMatch(/delete from (public\.)?hub_chat/); // nothing is ever deleted
+  });
+
+  test('the edits table is closed to riders, staff read only; members read that a message was edited, never the earlier words', () => {
+    expect(sql).toContain('alter table public.hub_chat_edits enable row level security;');
+    expect(sql).toContain('revoke all on public.hub_chat_edits from public, anon, authenticated;');
+    expect(sql).toContain(`create policy "staff read" on public.hub_chat_edits for select using ((select _staff_mod('community')));`);
+    const i = sql.indexOf('create or replace function public._chat_row('), r = sql.slice(i, sql.indexOf('$$;', i));
+    expect([...r.matchAll(/'(\w+)',\s/g)].map((m) => m[1]).sort()).toEqual(['at', 'body', 'day', 'ed', 'id', 'k', 'mine', 'name', 'team']);
+    expect(r).not.toMatch(/hub_chat_edits|body_before/);
+    const read = fnBody('chat_read');
+    expect(read.indexOf('not _cust_token_ok(p_id, p_token)')).toBeLessThan(read.indexOf('not _member_active(p_id)'));
+    expect(read).toContain(`m.edited_at > now() - interval '2 days' and _chat_shown(m)`);
+  });
+
+  test('the signals stay empty: an edit sends the members\' tick, a report, a Keep and a mute send the staff one', () => {
+    expect(fnBody('_chat_tick_staff')).toContain(`perform realtime.send('{}'::jsonb, 'staff', 'hub-chat', false);`);
+    expect(sql).toMatch(/create trigger hub_chat_tick_body after update of body on public\.hub_chat\s+for each row when \(old\.body is distinct from new\.body\) execute function public\._chat_tick\(\);/);
+    expect(sql).toContain('create trigger hub_chat_tick_staff after update of reports, checked_at on public.hub_chat');
+    expect(sql).toContain('create trigger hub_chat_members_tick_upd after update of muted_until on public.hub_chat_members');
+    expect(sql).not.toMatch(/supabase_realtime/);
   });
 });

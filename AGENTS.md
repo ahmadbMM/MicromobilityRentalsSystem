@@ -1074,7 +1074,7 @@ only their own suggestions, each marked Planned or Done. When one happens, an Up
 - **Privacy Notice:** the row after the Ask answers (en + ar), PRIVACY_VERSION unchanged (2026-11-18), nobody asked again.
 - **Spec:** `tests/ride-suggestions.spec.ts` (`@customer:members`, `@staff:community`).
 
-## The Community chat (2026-11-20, migrations 20261120203000 and 20261120213000)
+## The Community chat (2026-11-20, migrations 20261120203000, 20261120213000 and 20261120233000)
 
 The user, 2026-11-20: "can we create a live chat in the booking app but only for community members?", then, asked how a
 member appears, where the chat lives and what may be sent: "Full name", "One club chat", "Text only". Spec
@@ -1136,14 +1136,37 @@ member appears, where the chat lives and what may be sent: "Full name", "One clu
   member's (both ask first, in the app's centred confirm), none on the team's. A refusal is said over the box, no toast.
   The topic and the page's clock live only while the chat is on screen (`_chtJoin`, `_chtWatch`, `_chtLeave`). A
   database without the functions (PGRST202) closes the page and hides the button.
-- **Staff** (Community > Activities > Chat, `_acCh*`): the pill counts reported messages nobody has looked at; All /
-  Reported / Removed / Muted; each card has the writer's name (opens `openAccountHistory`), Remove or Put back, Keep on a
-  reported one (`staff_chat_set`), Mute for 1 day, 7 days or until lifted and Lift mute (`staff_chat_mute`, p_days null
-  lifts, 0 = until lifted), and a box to write as the team (`staff_chat_send`). All need `_staff_mod('community', true)`.
-  The list reads again every 20 s while the pill is on screen and only `#ac-ch-list` is drawn again (`_acChPaint`), so
-  the team's box keeps what is being typed. Every change goes to the staff log. A message past its six hours carries
-  "No longer shown to members" (`AC_CH_KEEP_MS`, to change together with `_chat_keep()`), and "Earlier messages"
-  (`_acChMore`) reads the 300 before the last one shown, as far back as the chat goes; a reload keeps those pages.
+- **Staff: the Chat section** (`/chat`, under People after Testimonials, its own part `staff-parts/chat.js`; names `_chs*`,
+  `S._chs`, `CHS_*`, `#chs-*`, `.chs-*`, keys `chs*`; the user, 2026-11-20: "create a whole separate page in staff for chat and
+  let them be able to edit delete and modify messages in real time"; it replaced Community > Members' page > Chat). People's
+  right in the database (`_staff_mod('community')`), so the section is derived from People (`_modIds`, `_MOD_PARENT`, the
+  manager's and owner's `ROLE_TABS`) and `staff_set_access` never hears of it. The rail counts the reported messages nobody
+  has looked at (`_chsCount` / `_chsRailSync` in the core, `hub_chat_waiting`; `_secPolls`). The page is the room as members
+  see it, oldest at the top, under Riyadh's day, in a scrolling `role="log"` box with the team's box under it: every message
+  for ever, each with the writer's name (opens `openAccountHistory`), the team's with which staffer wrote it
+  (`staff_people`, read by the part itself), Reports: N, how it was deleted (and by whom), "Edited by <staffer>" (opens the
+  earlier wordings from `hub_chat_edits`) and "No longer shown to members". Pills All / Reported / Deleted / Edited / Muted,
+  a search over the page's messages and names with "Search all messages" (`ilike` on the words, the matching accounts' ids),
+  Filters (Written by, Members see it). Editors (`_editOk('community')`): **Edit** in place (`staff_chat_edit(p_mid, p_body,
+  p_was)`: `p_was` = the words the staffer saw; when another staffer changed them meanwhile the box stays, the new words are
+  shown over it and the database refuses with CHANGED until the staffer has seen them), **Delete** / **Put back** / **Keep**
+  (`staff_chat_set`; Delete asks nothing, Put back undoes it; a deleted message is never removed from the table), Mute 1 day /
+  7 days / until lifted and Lift mute (`staff_chat_mute`), and write as the team (Send or Ctrl/Cmd+Enter, `staff_chat_send`).
+  Every change goes to the staff log, an edit with its words before and after. **Live:** the page joins the public topic
+  `hub-chat` for the members' `tick` and for `staff` (a report, a Keep, a mute) and reads only what changed since its last
+  read (`hub_chat.changed_at >= the newest it has read less 5 s`, `hub_chat_changed_at`); a tick that brought nothing doubles
+  the wait for the next (1.5 to 30 s); without the socket it reads every 15 s, with it every minute. `_chsPaint` draws only
+  the items whose markup changed (keys `m:<id>`, `d:<day>`, `u:<account>` - never `'m'+id`: the split reads a short literal
+  before `+` as a key prefix and pulled every m-key into the core), and the message being edited keeps its box and caret
+  while its top line follows. The desk's data arriving repaints it by a built name (`_renderStaffTab`). A database before
+  20261120233000 (no `changed_at`, 42703) is read whole each time and offers no Edit. `tests/community-chat.spec.ts`
+  (`@staff:chat`).
+- **Edits, for members** (20261120233000): `_chat_row` gains `ed` (edited by the team) and a `p_after` read of `chat_read`
+  gains `edits`, the messages still shown that were edited in the last two days, so an open page swaps the words in place and
+  marks them "Edited by the team" (`chtEdited`). Members never read the earlier words. `hub_chat_tick_body` sends the members'
+  tick for an edit; `_chat_tick_staff` (`hub_chat_tick_staff`, `hub_chat_members_tick_ins/_upd`) sends the empty `staff`
+  broadcast, which members' pages do not listen for. `hub_chat_edits` (RLS, staff read, written only by `staff_chat_edit`)
+  keeps every earlier wording; like `hub_chat`, nothing deletes from it.
 - **Privacy Notice:** a row, a legal-basis line (consent, asked with the first message) and a retention line (shown to
   members for 6 hours; kept by staff and not deleted), English and Arabic, PRIVACY_VERSION 2026-11-20, nobody asked
   again; the website's copy is synced from it. The notice says plainly that staff keep every message: keep it true.

@@ -391,7 +391,7 @@ test.describe('@staff:community badge requests', () => {
     await expect(page.locator('#tab-community .bdg-row').first()).toBeVisible();
     await expect(page.locator('#tab-community .bdr-row')).toHaveCount(0);
     await expect(page.locator('#tab-community .cmy-nav .filter-pill', { hasText: 'Badges' })).toHaveText('Badges');
-    expect(await page.evaluate(`JSON.stringify(_modIds(['community']))`)).toBe('["community","badgereq","ask","testimonials"]'); // and Ask (2026-11-13) and Testimonials (2026-11-18), which come with People too
+    expect(await page.evaluate(`JSON.stringify(_modIds(['community']))`)).toBe('["community","badgereq","ask","testimonials","chat"]'); // and Ask (2026-11-13), Testimonials (2026-11-18) and Chat (2026-11-20), which come with People too
     expect(await page.evaluate(`ROLE_TABS.manager.includes('badgereq')&&ROLE_TABS.owner.includes('badgereq')&&!DESK_TABS.includes('badgereq')`)).toBe(true);
     // G then R opens it
     await page.locator('body').press('g');
