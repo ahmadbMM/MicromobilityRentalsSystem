@@ -21,6 +21,7 @@ export const FILES = [
   'report.css', 'receipt.css', // the print windows' stylesheets (_reportShell, _ctPrintReceipt)
   'certificate.css', // the volunteer certificate's; its markup is assets/certificate.html (certificate/README.md)
   '404.css', // the 404 page's
+  'display.html', 'display.js', 'display.css', // the bike collection areas' TVs (2026-11-21, migration 20261121120000; the Android TV app in android-tv/ opens /display)
   'helper-path.js', // the Helper path card's own file, hand-written as member-hub.js is; fetched by members on Account (_hpShow)
   'company-challenge.js', // Account > Company challenge's own file, fetched when that page opens (F26)
   '_headers', '_redirects',

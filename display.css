@@ -1,0 +1,62 @@
+/* The bike collection areas' TVs (display.html, 2026-11-21; migration 20261121120000). One screen, 1920x1080 or 1280x720,
+   read from a few metres away: big type, high contrast, nothing to tap. */
+@font-face{font-family:'Rubik';font-style:normal;font-weight:300 900;font-display:swap;src:url(/fonts/Rubik-var-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Rubik';font-style:normal;font-weight:300 900;font-display:swap;src:url(/fonts/Rubik-var-arabic.woff2) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+0870-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC;}
+:root{--bg:#0b0f0d;--card:#16201b;--line:#2a3a32;--text:#f4f7f5;--muted:#a9b8b0;--road:#3b8cff;--hm:#00c46e;--area:var(--hm);--new:#ffd23f;--warn:#ffb020;}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:'Rubik',system-ui,sans-serif;overflow:hidden;cursor:none;}
+body.tv-road{--area:var(--road);}
+#tv{height:100vh;display:flex;flex-direction:column;padding:2.2vw 2.6vw 1.6vw;gap:1.6vw;}
+[lang="ar"]{font-family:'Rubik',system-ui,sans-serif;}
+.tv-boot-msg{margin:auto;font-size:3vw;color:var(--muted);display:flex;gap:1em;}
+
+/* header */
+.tv-top{display:flex;align-items:flex-end;justify-content:space-between;gap:2vw;padding-bottom:1.2vw;border-bottom:.35vw solid var(--area);}
+.tv-area{display:flex;flex-direction:column;gap:.2vw;min-width:0;}
+.tv-area-en{font-size:3.6vw;font-weight:700;line-height:1.05;}
+.tv-area-ar{font-size:3vw;font-weight:600;line-height:1.2;color:var(--area);}
+.tv-sess{margin-top:.4vw;font-size:1.5vw;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62vw;}
+.tv-side{display:flex;flex-direction:column;align-items:flex-end;gap:.4vw;flex:0 0 auto;}
+.tv-clock{font-size:4vw;font-weight:600;font-variant-numeric:tabular-nums;line-height:1;}
+.tv-count{font-size:1.5vw;color:var(--muted);}
+.tv-off{display:none;font-size:1.3vw;font-weight:600;color:var(--bg);background:var(--warn);padding:.25vw .8vw;border-radius:.4vw;}
+body.tv-offline .tv-off{display:inline-block;}
+
+/* the riders */
+.tv-grid{flex:1;min-height:0;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:min-content;align-content:start;gap:1.2vw;}
+.tv-card{position:relative;display:grid;grid-template-columns:1fr auto;grid-template-areas:"num size" "who who" "spec spec";column-gap:1vw;row-gap:.3vw;padding:1.2vw 1.4vw;background:var(--card);border:.25vw solid var(--line);border-radius:1vw;overflow:hidden;}
+.tv-card::before{content:"";position:absolute;inset:0 auto 0 0;width:.5vw;background:var(--area);}
+.tv-num{grid-area:num;font-size:4.2vw;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
+.tv-who{grid-area:who;font-size:1.9vw;font-weight:500;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tv-of{color:var(--muted);font-weight:400;}
+.tv-size{grid-area:size;align-self:start;min-width:6.4vw;padding:.4vw .9vw;border-radius:.7vw;background:var(--area);color:#06110b;text-align:center;font-size:4vw;font-weight:800;line-height:1;}
+.tv-size.tv-two{font-size:1.7vw;line-height:1.25;min-width:9vw;}
+.tv-size small{display:block;font-size:1vw;font-weight:600;letter-spacing:.04em;text-transform:uppercase;opacity:.75;margin-bottom:.15vw;}
+.tv-spec{grid-area:spec;display:flex;flex-wrap:wrap;align-items:center;gap:.4vw 1vw;margin-top:.3vw;font-size:1.7vw;color:var(--muted);}
+.tv-spec b{color:var(--text);font-weight:600;}
+.tv-tag{font-size:1.2vw;font-weight:600;padding:.15vw .6vw;border:.15vw solid var(--warn);color:var(--warn);border-radius:.4vw;}
+.tv-card.tv-new{border-color:var(--new);box-shadow:0 0 0 .25vw var(--new);}
+@media (prefers-reduced-motion:no-preference){.tv-card.tv-new{animation:tv-in 1s ease-in-out 3;}}
+@keyframes tv-in{0%,100%{transform:scale(1);}45%{transform:scale(1.03);}}
+.tv-more{grid-column:1/-1;font-size:2vw;color:var(--muted);text-align:center;padding:.6vw;}
+
+/* more riders, smaller cards */
+body.tv-d2 .tv-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:1vw;}
+body.tv-d2 .tv-num{font-size:3.3vw;}body.tv-d2 .tv-size{font-size:3.2vw;min-width:5.2vw;}body.tv-d2 .tv-who,body.tv-d2 .tv-spec{font-size:1.45vw;}
+body.tv-d3 .tv-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:.8vw;}
+body.tv-d3 .tv-card{padding:.8vw 1vw;}
+body.tv-d3 .tv-num{font-size:2.6vw;}body.tv-d3 .tv-size{font-size:2.5vw;min-width:4.2vw;}body.tv-d3 .tv-size.tv-two{font-size:1.2vw;min-width:6.5vw;}
+body.tv-d3 .tv-who,body.tv-d3 .tv-spec{font-size:1.15vw;}body.tv-d3 .tv-tag{font-size:.9vw;}
+
+.tv-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1vw;color:var(--muted);text-align:center;}
+.tv-empty-en{font-size:3.4vw;font-weight:600;}
+.tv-empty-ar{font-size:3vw;}
+
+/* pairing */
+.tv-pair{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2vw;text-align:center;}
+.tv-pair h1{margin:0;font-size:3.2vw;font-weight:700;}
+.tv-pair h1 span{display:block;font-size:2.8vw;font-weight:600;color:var(--hm);margin-top:.4vw;}
+.tv-code{font-size:13vw;font-weight:800;letter-spacing:.12em;line-height:1;font-variant-numeric:tabular-nums;padding:1.4vw 3vw;border:.4vw dashed var(--line);border-radius:2vw;direction:ltr;}
+.tv-how{font-size:1.8vw;color:var(--muted);max-width:70vw;line-height:1.45;margin:0;}
+.tv-how[lang="ar"]{font-size:1.7vw;}
+.tv-err{font-size:2.2vw;color:var(--warn);}

@@ -8553,6 +8553,43 @@ body.view-staff .ho-out-row{display:grid;grid-template-columns:auto 1fr auto aut
   body.view-staff .ho-spec,body.view-staff .ho-since,body.view-staff .ho-out-row .btn-sm{grid-column:2;}
 }
 
+/* ── Bookings > Collection: the bike collection areas and their TVs (2026-11-21, migration 20261121120000) ── */
+#co-host .co-areas{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px;}
+#co-host .co-tvbtn{margin-inline-start:auto;}
+#co-host .form-title{margin-top:16px;}
+#co-host .co-list{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+#co-host .co-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"num who acts" "num spec acts" "num meta acts";column-gap:12px;row-gap:2px;align-items:center;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--sf-r-ctl);background:var(--s1);color:var(--text);}
+#co-host .co-row .ho-num{grid-area:num;font-weight:600;font-size:var(--sf-fs-lg);min-width:44px;}
+#co-host .co-who{grid-area:who;font-size:var(--sf-fs-md);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#co-host .co-who b{font-weight:600;}
+#co-host .co-who small{color:var(--muted);font-size:var(--sf-fs-xs);font-weight:600;}
+#co-host .co-spec{grid-area:spec;font-size:var(--sf-fs-sm);color:var(--muted-l);}
+#co-host .co-spec b{color:var(--text);font-weight:600;}
+#co-host .co-meta{grid-area:meta;font-size:var(--sf-fs-xs);color:var(--muted);}
+#co-host .co-both{color:var(--orange);font-weight:600;}
+#co-host .co-off{color:var(--muted);font-style:italic;}
+#co-host .co-acts{grid-area:acts;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;}
+#co-host .co-hand{min-height:44px;min-width:96px;}
+#co-host .co-row-done{grid-template-areas:"num who acts" "num meta acts";opacity:.85;}
+@media(max-width:767px){
+  #co-host .co-row{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"num who" "num spec" "num meta" "acts acts";}
+  #co-host .co-row-done{grid-template-areas:"num who" "num meta" "acts acts";}
+  #co-host .co-acts{justify-content:flex-start;margin-top:8px;}
+  #co-host .co-tvbtn{margin-inline-start:0;}
+}
+#desk-sheet .tv-intro{margin:0 0 10px;color:var(--muted);font-size:var(--sf-fs-sm);}
+#desk-sheet .tv-h{margin:16px 0 8px;font-size:var(--sf-fs-md);font-weight:600;}
+#desk-sheet .tv-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+#desk-sheet .tv-item{padding:10px 12px;border:1px solid var(--border);border-radius:var(--sf-r-ctl);background:var(--s1);display:grid;gap:4px;}
+#desk-sheet .tv-name{font-size:var(--sf-fs-md);}
+#desk-sheet .tv-name b{font-weight:600;}
+#desk-sheet .tv-sub{font-size:var(--sf-fs-xs);color:var(--muted);}
+#desk-sheet .tv-on{color:var(--green);font-weight:600;}
+#desk-sheet .tv-acts{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
+#desk-sheet .tv-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;}
+#desk-sheet .tv-fields :is(input,select){width:100%;}
+#desk-sheet #tv-code{font-size:var(--sf-fs-xl);font-weight:600;letter-spacing:.12em;}
+
 /* Hand-over's two headings, and the sheet a tag tapped on a bike that is out opens (in the
    confirm dialog), without inline styles (2026-09-28; see the desk's dialogs above). */
 #ho-host .bkm-ho14{margin-top:14px;}

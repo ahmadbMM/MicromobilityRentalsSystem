@@ -44,6 +44,17 @@ export default tseslint.config(
       'no-empty': ['error', { allowEmptyCatch: true }],
     },
   },
+  // The collection-area TVs' page (display.html, 2026-11-21): a plain browser script, no app globals.
+  {
+    files: ['display.js'],
+    languageOptions: {
+      globals: {
+        document: 'readonly', window: 'readonly', setTimeout: 'readonly', clearTimeout: 'readonly', setInterval: 'readonly',
+        fetch: 'readonly', AbortController: 'readonly', location: 'readonly', localStorage: 'readonly', performance: 'readonly',
+      },
+    },
+    rules: { '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }] },
+  },
   // The wallet pass generator source also runs in the Workers runtime (bundled by build:wallet).
   {
     files: ['scripts/wallet/**/*.js'],

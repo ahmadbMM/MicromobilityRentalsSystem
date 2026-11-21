@@ -5211,3 +5211,34 @@ an ordinary staff add), so no Privacy Notice row.
 - **Sending.** Copy, WhatsApp to the account's WhatsApp number (else the booking's mobile; no number gives the share
   sheet) and Back. The WhatsApp link carries `data-wa-t="ann_invite"` and `data-wa-c` / `data-wa-b`, so `_waTap` logs it;
   Copy logs "Invitation copied · <name> · <session>" (kind whatsapp), so both show in the account's Messages sent.
+
+## The bike collection areas and their TVs (2026-11-21, migration 20261121120000)
+The user: "put tv screens in both bike collection areas, we have 2 bike collection areas, hybrid/mountain bikes area and
+road bikes area, that in realtime shows checked in bookings, shows their booking number height bike type and bike size".
+Their picks: an Android/Fire TV stick per TV running our own small app (they declined paying for Fully Kiosk Browser);
+each row shows the booking number, first name, the party's "1 of 3", height, type and size, with a chime; staff pick each
+TV's session; pairing by code; English + Arabic. A row was to leave when a bike is assigned, but the Give bike step is off
+(GIVE_BIKE_STEP, the owner 2026-10-12) and production's `bikes` table is empty, so it leaves on **Handed** instead (and
+after 30 minutes on the TV); a bike on the booking also clears it, for when the fleet comes back.
+- **Database.** `queue_entries.collect_area` ('road' | 'hm', null = by type: Road/Road Carbon/Gravel road, Hybrid/Mountain
+  hm, Kids/Any on both TVs), `handed_at`, `handed_by`; `staff_collect_set(id, area, handed, by)` is the one write (Bookings
+  editors, `_staff_mod('queue', true)`). `collection_screens` (one row per TV, closed to clients; only the secret's sha256
+  kept): `screen_pair_start()` and `screen_feed(token, etag)` for the TV (anon), `staff_screens`, `staff_screen_pair`,
+  `staff_screen_set`, `staff_screen_unpair` for staff. The feed answers `{state:'same'}` while its etag (md5 of the body)
+  is unchanged, so a TV polling every 3 s moves a few bytes; it carries Settings' `size_chart` and `kids_max_cm`.
+- **The TV page** is `display.html` + `display.js` + `display.css` at the root (in `FILES` of assemble-dist, served at
+  `/display` on either host; the service worker leaves it alone). Plain ES2017, no app boot. `npm run build:html` stamps
+  `SUPABASE_URL` / `SUPABASE_KEY` from app.src.html into display.js (CI's freshness step diffs it), so the staging copy
+  names its own database. It keeps its secret in `localStorage.mm_tv_token`; `unknown` starts pairing again. Sizes as
+  `bikeFit`; an Any rider with no area shows Road's and Hybrid's sizes; a new card is marked for 25 s with a WebAudio chime.
+- **Staff.** Bookings > **Collection** (`S.queueView='collect'`, `/bookings/collection`): the pill counts `_coWaitRows()`
+  (core: `_coWaits`, `_coAreaOf`, `_coSids` = the strip's session or all of today's). The page (`renderCollect`, desk part)
+  lists by this device's area (`cq_co_area`), Handed / Undo (Handed recently), and To Road / To Hybrid/Mountain for a Kids,
+  Any or unsorted rider. **TV screens** (`_tvOpen`, desk part, `_dkSheet`): the paired TVs (online within 3 min), Edit,
+  Unpair, and Pair a TV (code, area, session or "All of today's", name). The check-in window asks **Collection area** for a
+  Kids or Any rider, or one whose height fits a Kids bike (`_ciAreaHtml`, `_ciAreaPick`, core), written at the tap.
+- **The app** is `android-tv/` (Kotlin, one full-screen WebView of `https://staff.micromobility.sa/display`; staging flavor
+  the staging copy), built by `.github/workflows/android-tv.yml` into a GitHub release `tv-v1.0.<run>`. Signing needs the
+  four `TV_*` secrets, else each build is debug-signed and will not install over the last. `android-tv/README.md` has the
+  install steps for staff. Start on boot works on Fire OS 7 (Android 9); newer Android may need the app opened by hand.
+- Spec: `tests/collection.spec.ts`.

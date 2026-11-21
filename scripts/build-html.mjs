@@ -561,6 +561,21 @@ const psBefore = await readFile(psUrl, 'utf8');
 const ps = psBefore.replace(/^const SITE_ORIGIN = '[^']*';$/m, `const SITE_ORIGIN = '${origin}';`);
 if (!ps.includes(`const SITE_ORIGIN = '${origin}';`)) throw new Error('build: could not stamp the site origin into functions/api/push-send.js');
 if (ps !== psBefore) await writeFile(psUrl, ps);
+// The collection-area TVs' page (display.html, 2026-11-21) talks to the database with fetch alone: the build stamps the
+// app's own address and anon key into display.js, so a staging copy (scripts/staging-build.mjs rewrites app.src.html)
+// names the staging database there too.
+{
+  const sbUrl = (raw.match(/^const SUPABASE_URL\s*=\s*'([^']+)';/m) || [])[1];
+  const sbKey = (raw.match(/^const SUPABASE_KEY\s*=\s*'([^']+)';/m) || [])[1];
+  if (!sbUrl || !sbKey) throw new Error('build: could not read SUPABASE_URL / SUPABASE_KEY from app.src.html for display.js');
+  const dpUrl = new URL('../display.js', import.meta.url);
+  const dpBefore = await readFile(dpUrl, 'utf8');
+  const dp = dpBefore
+    .replace(/^const SUPABASE_URL = '[^']*';$/m, `const SUPABASE_URL = '${sbUrl}';`)
+    .replace(/^const SUPABASE_KEY = '[^']*';$/m, `const SUPABASE_KEY = '${sbKey}';`);
+  if (!dp.includes(`const SUPABASE_URL = '${sbUrl}';`) || !dp.includes(`const SUPABASE_KEY = '${sbKey}';`)) throw new Error('build: could not stamp the database into display.js');
+  if (dp !== dpBefore) await writeFile(dpUrl, dp);
+}
 
 // No build/tooling banner in the shipped file — index.html is public (View Source),
 // so the "edit app.src.html, not index.html" rule lives in AGENTS.md / CLAUDE.md instead.

@@ -1,0 +1,96 @@
+name: Android TV display app
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'android-tv/**'
+      - '.github/workflows/android-tv.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-tv-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GRADLE_VERSION: '8.11.1'
+  VERSION_NAME: 1.0.${{ github.run_number }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android-tv
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # A pinned Gradle from setup-gradle, so no wrapper jar is needed in the repo.
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+
+      - name: Signing key
+        env:
+          TV_KEYSTORE_BASE64: ${{ secrets.TV_KEYSTORE_BASE64 }}
+          TV_KEYSTORE_PASSWORD: ${{ secrets.TV_KEYSTORE_PASSWORD }}
+          TV_KEY_ALIAS: ${{ secrets.TV_KEY_ALIAS }}
+          TV_KEY_PASSWORD: ${{ secrets.TV_KEY_PASSWORD }}
+        run: |
+          if [ -n "$TV_KEYSTORE_BASE64" ] && [ -n "$TV_KEYSTORE_PASSWORD" ] && [ -n "$TV_KEY_ALIAS" ] && [ -n "$TV_KEY_PASSWORD" ]; then
+            printf '%s' "$TV_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/tv-release.jks"
+            echo "TV_KEYSTORE_FILE=$RUNNER_TEMP/tv-release.jks" >> "$GITHUB_ENV"
+            echo "Signed with the release key (TV_KEYSTORE_* secrets)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::TV signing secrets are missing; the APKs are signed with a throwaway debug key."
+            {
+              echo "## WARNING: signed with a debug key"
+              echo "The secrets TV_KEYSTORE_BASE64, TV_KEYSTORE_PASSWORD, TV_KEY_ALIAS and TV_KEY_PASSWORD are not all set,"
+              echo "so these APKs are signed with this run's debug key. A later build will NOT install over this one;"
+              echo "the old app would have to be uninstalled first (and the TV paired again)."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Build APKs
+        env:
+          TV_KEYSTORE_PASSWORD: ${{ secrets.TV_KEYSTORE_PASSWORD }}
+          TV_KEY_ALIAS: ${{ secrets.TV_KEY_ALIAS }}
+          TV_KEY_PASSWORD: ${{ secrets.TV_KEY_PASSWORD }}
+        run: gradle --no-daemon assembleProdRelease assembleStagingRelease -PtvVersionCode=${{ github.run_number }}
+
+      - name: Collect APKs
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/prod/release/app-prod-release.apk dist/mm-display.apk
+          cp app/build/outputs/apk/staging/release/app-staging-release.apk dist/mm-display-staging.apk
+          ls -l dist
+          echo "Version $VERSION_NAME (code ${{ github.run_number }})" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mm-display-${{ env.VERSION_NAME }}
+          path: android-tv/dist/*.apk
+          if-no-files-found: error
+
+      - name: GitHub release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: tv-v${{ env.VERSION_NAME }}
+          name: MM Display ${{ env.VERSION_NAME }}
+          target_commitish: ${{ github.sha }}
+          body: |
+            TV display app ${{ env.VERSION_NAME }}.
+            mm-display.apk is for the collection-area TVs; mm-display-staging.apk points at staging.
+            Install steps: android-tv/README.md
+          files: |
+            android-tv/dist/mm-display.apk
+            android-tv/dist/mm-display-staging.apk

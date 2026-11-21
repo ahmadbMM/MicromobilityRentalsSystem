@@ -62,7 +62,7 @@ npm run build:wallet --silent
 # alone, so a stale app.js, staff.js, staff part, pack, _headers (the CSP) or wallet function went
 # live from here while git held another; then five files the build also writes (the middleware's
 # hosts, the sitemap, robots.txt, the certificate's two) were missing (bug hunt 2026-11-18).
-GENERATED="index.html app.js app.css lang staff-parts service-worker.js functions/_middleware.js sitemap.xml robots.txt staff.js _headers certificate.css assets/certificate.html functions/api/wallet-pass.js functions/api/push-send.js"
+GENERATED="index.html app.js app.css lang staff-parts service-worker.js functions/_middleware.js sitemap.xml robots.txt staff.js display.js _headers certificate.css assets/certificate.html functions/api/wallet-pass.js functions/api/push-send.js"
 # shellcheck disable=SC2086
 git diff --quiet -- $GENERATED || {
   [ "${1:-}" = "--dirty" ] || { echo "✗ the build changed generated files — commit them (or --dirty):" >&2; git diff --stat -- $GENERATED | tail -5 >&2; exit 1; }
