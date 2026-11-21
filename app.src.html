@@ -18994,7 +18994,7 @@ const GS_SUBS={queue:'petromin:ridersTitle',sessions:'table:ssLayTable cal:calVi
   catalog:'categories:catViewCats fields:catViewFields',vendors:'requests:vndVReq venues:vndVVen tiers:vndVTier feedback:vndVFb',
   analytics:'revenue:anRevenue ridership:anRidership operations:anOperations fleet:anFleetSection months:anNavMonths ratings:anRatingsNav customers:anNavCustomers growth:anNavGrowth leaderboard:commTabLeaderboard community:anNavCommunity volunteers:tabVolunteers team:anNavTeam',
   team:'parttimers:ptTab',volunteers:'applications:zaTab roster:tabPeople sessions:zvTabSessions hours:zrTabHours activity:zvTabActivity settings:zvTabSettings',settings:'business:setTabBusiness pricing:setTabPricing',
-  market:'held:mkVHeld reports:mkVReports sellers:mkVSellers'}; // the Marketplace's first half (MK-S1); the second half's five views (shops, ours, commission, settings, cats) join this line with MK-S2
+  market:'held:mkVHeld reports:mkVReports sellers:mkVSellers shops:mkVShops ours:mkVOurs commission:mkVCom settings:mkVSet cats:mkVCats'}; // the Marketplace: the first half's views (MK-S1), then the second half's (MK-S2)
 // The views only some open, as their sections offer them: the admins' alone, History's money views by role, Analytics'
 // volunteers with the Volunteers section.
 function _gsSubOk(k,v){
@@ -25896,7 +25896,7 @@ async function _lkRentGo(){
 // waiting number moved, to count again (_mkCount), each through a typeof guard, so the views also run without the frame.
 // Reads and writes: the staff_market_* functions, the market_categories table under its policy, and site_content. A
 // refusal is said by its code (the part before the colon). Words: mks*. Styles: mks-* under #tab-market and #mks-pop.
-const MKS_CITIES=[['jeddah','Jeddah','جدة'],['riyadh','Riyadh','الرياض'],['makkah','Makkah','مكة المكرمة'],['madinah','Madinah','المدينة المنورة'],['dammam','Dammam','الدمام'],['khobar','Al Khobar','الخبر'],['dhahran','Dhahran','الظهران'],['taif','Taif','الطائف'],['tabuk','Tabuk','تبوك'],['buraydah','Buraydah','بريدة'],['unaizah','Unaizah','عنيزة'],['hail','Hail','حائل'],['abha','Abha','أبها'],['khamis-mushait','Khamis Mushait','خميس مشيط'],['jazan','Jazan','جازان'],['najran','Najran','نجران'],['al-bahah','Al Bahah','الباحة'],['bisha','Bisha','بيشة'],['yanbu','Yanbu','ينبع'],['rabigh','Rabigh','رابغ'],['thuwal','Thuwal','ثول'],['kaec','King Abdullah Economic City','مدينة الملك عبدالله الاقتصادية'],['jubail','Jubail','الجبيل'],['al-ahsa','Al Ahsa','الأحساء'],['qatif','Qatif','القطيف'],['hafar-al-batin','Hafar Al Batin','حفر الباطن'],['al-kharj','Al Kharj','الخرج'],['arar','Arar','عرعر'],['sakaka','Sakaka','سكاكا'],['alula','AlUla','العلا'],['other','Another city','مدينة أخرى']];
+const MKS_CITIES=[['jeddah','Jeddah','جدة'],['riyadh','Riyadh','الرياض'],['makkah','Makkah','مكة المكرمة'],['madinah','Madinah','المدينة المنورة'],['dammam','Dammam','الدمام'],['khobar','Al Khobar','الخبر'],['dhahran','Dhahran','الظهران'],['taif','Taif','الطائف'],['tabuk','Tabuk','تبوك'],['buraydah','Buraydah','بريدة'],['unaizah','Unaizah','عنيزة'],['hail','Hail','حائل'],['abha','Abha','أبها'],['khamis-mushait','Khamis Mushait','خميس مشيط'],['jazan','Jazan','جازان'],['najran','Najran','نجران'],['al-bahah','Al Bahah','الباحة'],['bisha','Bisha','بيشة'],['yanbu','Yanbu','ينبع'],['rabigh','Rabigh','رابغ'],['thuwal','Thuwal','ثول'],['kaec','King Abdullah Economic City','مدينة الملك عبدالله الاقتصادية'],['jubail','Jubail','الجبيل'],['al-ahsa','Al Ahsa','الأحساء'],['qatif','Qatif','القطيف'],['hafar-al-batin','Hafar Al Batin','حفر الباطن'],['al-kharj','Al Kharj','الخرج'],['arar','Arar','عرعر'],['sakaka','Sakaka','سكاكا'],['alula','AlUla','العلا'],['other']]; // "Another city" is said in the language on screen (mkCityOther, _mksCity)
 // A status's word and its pill's tone: a listing's, a shop's, and a commission's two states.
 const MKS_ST={draft:['mksStDraft',''],live:['mksStLive','mks-p-ok'],held:['mksStHeld','mks-p-warn'],reserved:['mksStReserved','mks-p-warn'],sold:['mksStSold',''],expired:['mksStExpired',''],hidden:['mksStHidden','mks-p-bad'],
   pending:['mksShPending','mks-p-warn'],approved:['mksShApproved','mks-p-ok'],rejected:['mksShRejected','mks-p-bad'],suspended:['mksShSuspended','mks-p-bad'],due:['mksCoDue','mks-p-warn'],got:['mksCoGot','mks-p-ok']};
@@ -25990,7 +25990,7 @@ function _mksWait(V,k){
   return'';
 }
 function _mksAgain(k){const f={shops:_mkShopsLoad,ours:_mkOursLoad,commission:_mkComLoad,settings:_mkSetLoad,cats:_mkCatsLoad}[k];if(!f)return;const p=f(true);_mksPaint();Promise.resolve(p).then(_mksPaint);}
-function _mksCity(k){const c=MKS_CITIES.find(x=>x[0]===k);return c?c[S.lang==='ar'||S.lang==='ur'?2:1]:k||'';}
+function _mksCity(k){if(k==='other')return t('mkCityOther');const c=MKS_CITIES.find(x=>x[0]===k);return c?c[S.lang==='ar'||S.lang==='ur'?2:1]:k||'';}
 function _mksCityOpts(){return[['',t('mksPick')],...MKS_CITIES.map(c=>[c[0],_mksCity(c[0])])];}
 function _mksDay(at){const d=at?_ksaDayOf(at):'';return d?shortDate(d):'';}
 function _mksPill(k){const s=MKS_ST[k];return s?`<span class="mks-pill${s[1]?' '+s[1]:''}">${esc(t(s[0]))}</span>`:'';}
@@ -31284,14 +31284,14 @@ async function _mkNamesLoad(){
   if(r&&!r.error&&Array.isArray(r.data)){const o={};r.data.forEach(c=>{if(c&&c.slug)o[c.slug]=c;});M.cats=o;_mkPaint();}
 }
 // ── Listings ──
-// staff_market_listings takes status, kind, q, limit and offset. The sport and the city go with them (a database that
-// reads them answers the right page) and are also applied here to the rows that came, so both filters work either way.
+// staff_market_listings takes status, kind, q, limit and offset (20261121300100 reads nothing else). The sport and the
+// city are applied here to the rows that came, 200 a read while either is set.
 async function _mkListLoad(force,more){
   const M=_mkM(),L=M.L,F=M.f;
   if(!sb||(more&&(L.busy||!L.rows))||(!force&&!more&&L.at&&Date.now()-L.at<6e4))return;
   const seq=++L.seq,q=M.q.trim().slice(0,80),p={status:F.status||'all',limit:F.sport||F.city?200:100,offset:more?L.rows.length:0};
-  if(F.kind)p.kind=F.kind;if(q)p.q=q;if(F.sport)p.sport=F.sport;if(F.city)p.city=F.city;
-  const key=JSON.stringify([p.status,p.kind,p.q,p.sport,p.city]); // what is asked for: the rows on screen answer L.key
+  if(F.kind)p.kind=F.kind;if(q)p.q=q;
+  const key=JSON.stringify([p.status,p.kind,p.q,F.sport||'',F.city||'']); // what is asked for: the rows on screen answer L.key
   L.busy=true;L.at=Date.now();
   let r;try{r=await sb.rpc('staff_market_listings',{p});}catch(e){r={error:e};}
   if(seq!==L.seq)return; // a newer read is on its way

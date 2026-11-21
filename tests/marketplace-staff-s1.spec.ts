@@ -155,6 +155,11 @@ async function marketDb(page: Page, db: Db) {
       else return no('BAD_INPUT', '22023');
       return ok({ seller: s });
     }
+    // the second half's reads (MK-S2), enough for the whole build's frame to open its views
+    if (fn === 'staff_market_shops') return ok({ items: [{ ...SHOP, address: null, map_url: null, phone: null, whatsapp: null, about_en: null, about_ar: null, returns_en: null, returns_ar: null, sells: null, logo: null,
+      decided_by: 'Spec Staff', decided_at: AT, decision_note: null, approved_at: AT, agreement_version: '2026-11-21', agreement_at: AT, created_at: AT, updated_at: AT }], total: 1 });
+    if (fn === 'staff_market_commission') return ok({ items: [{ listing_id: 16, title: 'Swim fins', seller_kind: 'private', customer_id: 'c1', customer_name: PEOPLE.c1.name, customer_phone: PEOPLE.c1.phone, shop_name: null,
+      sold_at: AT, sold_price: 100, commission_pct: 1, commission_due: 1, received: false, received_at: null, received_by: null, note: null }], total: 1, due_sum: 1, received_sum: 0 });
     return ok(null);
   });
   // a seller's photo is an object of the market bucket: the small copy of listing 11's second photo is not there
@@ -208,12 +213,13 @@ test.describe('@staff:market the section', () => {
     expect(calls(db, 'staff_market_mode')).toHaveLength(1);
   });
 
-  test('under People after Testimonials, at /marketplace, with what waits for the team on the rail; its right comes with People', async ({ page }) => {
+  test('under People after Testimonials and Chat, at /marketplace, with what waits for the team on the rail; its right comes with People', async ({ page }) => {
     const db = fresh();
     await staff(page, db);
     expect(new URL(page.url()).pathname).toBe('/marketplace');
     const order = await page.locator('#staff-tab-nav .tab-btn[data-stab]').evaluateAll((b) => b.map((x) => (x as HTMLElement).dataset.stab));
-    expect(order.indexOf('market')).toBe(order.indexOf('testimonials') + 1);
+    expect(order.indexOf('market')).toBe(order.indexOf('chat') + 1); // People: ... Testimonials, Chat (main, 2026-11-20), Marketplace
+    expect(order.indexOf('chat')).toBe(order.indexOf('testimonials') + 1);
     // 2 held + 2 open reports + 2 shops waiting
     await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="market"] .tab-badge')).toHaveText('6');
     await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="market"] .tab-badge')).toHaveAttribute('title', '6 waiting for the team');
@@ -369,11 +375,11 @@ test.describe('@staff:market Listings', () => {
     await expect(sec(page).locator('.mk-row')).toHaveCount(6);
     // the sport and the city go to the database and are applied to the rows that came
     await f('Sport').selectOption('cycling');
-    await expect.poll(() => last(db, 'staff_market_listings')).toEqual({ p: { status: 'all', limit: 200, offset: 0, sport: 'cycling' } });
+    await expect.poll(() => last(db, 'staff_market_listings')).toEqual({ p: { status: 'all', limit: 200, offset: 0 } }); // the database takes no sport: filtered here
     await expect(sec(page).locator('.mk-row')).toHaveCount(4);
     await expect(sec(page).locator('.mk-count')).toHaveText('Listings: 4');
     await f('City').selectOption('jeddah');
-    await expect.poll(() => last(db, 'staff_market_listings')).toEqual({ p: { status: 'all', limit: 200, offset: 0, sport: 'cycling', city: 'jeddah' } });
+    await expect.poll(() => last(db, 'staff_market_listings')).toEqual({ p: { status: 'all', limit: 200, offset: 0 } }); // nor a city
     await expect(sec(page).locator('.mk-row')).toHaveCount(3);
     await expect(fb).toContainText('(2)');
   });
@@ -868,6 +874,47 @@ test.describe('@staff:market rights, the second half\'s views, Arabic', () => {
     await page.evaluate(`window._mkShopsHtml=()=>{throw new Error('spec')};_mkPaint()`);
     await expect(sec(page).locator('.mk-views .filter-pill')).toHaveCount(9);
     await expect(sec(page).locator('.mk-body')).toContainText('Try again');
+  });
+
+  test('the whole build: the frame reaches the second half by the ten names of the seam, and all nine views open with their rows', async ({ page }) => {
+    const db = fresh();
+    await staff(page, db);
+    // the stand-in test above skips itself once MK-S2 is in the build; this one needs it there
+    expect(await page.evaluate(`['Shops','Ours','Com','Set','Cats'].map(n=>typeof window['_mk'+n+'Html']+'/'+typeof window['_mk'+n+'Load']).join()`))
+      .toBe(Array(5).fill('function/function').join());
+    await expect(sec(page).locator('.mk-views .filter-pill')).toHaveText([/^Listings$/, /^Held\s*2$/, /^Reports\s*2$/, /^Sellers$/, /^Shops\s*2$/, /^Our listings$/, /^Commission\s*1$/, /^Settings$/, /^Categories$/]);
+    // each S2 load is asked by the frame, through the seam's own names
+    await page.evaluate(`(()=>{window.__s2=[];for(const n of ['Shops','Ours','Com','Set','Cats']){const f=window['_mk'+n+'Load'];window['_mk'+n+'Load']=(force)=>{window.__s2.push(n);return f(force);};}})()`);
+    const steps: [string, string, string][] = [
+      ['listings', '/marketplace', '.mk-row[data-lid="11"]'],
+      ['held', '/marketplace/held', '.mk-row[data-lid="12"]'],
+      ['reports', '/marketplace/reports', '.mk-rep[data-rid="2"]'],
+      ['sellers', '/marketplace/sellers', '.mk-sel[data-cid="c2"]'],
+      ['shops', '/marketplace/shops', '.mks-row[data-mks="5"]'],
+      ['ours', '/marketplace/our-listings', '.mks-row[data-mks="15"]'],
+      ['commission', '/marketplace/commission', '.mks-row[data-mks="16"]'],
+      ['settings', '/marketplace/settings', '#mks-on'],
+      ['cats', '/marketplace/categories', '.mks-row[data-mks="cycling"]'],
+    ];
+    for (const [k, path, sel] of steps) {
+      await view(page, k).click();
+      await expect(view(page, k)).toHaveAttribute('aria-pressed', 'true');
+      expect(new URL(page.url()).pathname).toBe(path);
+      await expect(sec(page).locator(`.mk-body.mk-v-${k} ${sel}`)).toBeVisible();
+      await expect(sec(page).locator('.mk-body')).not.toContainText('Try again');
+    }
+    expect(await page.evaluate(`window.__s2.join()`)).toBe('Shops,Ours,Cats,Com,Set,Cats'); // Our listings reads the categories beside its rows
+    // what each asked of the database: the shops, our own listings (kind company), the commission
+    expect(calls(db, 'staff_market_shops')).toEqual([{ p_status: null }]);
+    expect(calls(db, 'staff_market_listings').some((b) => (b.p as Row).kind === 'company' && (b.p as Row).status === 'all')).toBe(true);
+    expect(calls(db, 'staff_market_commission').map((b) => (b.p as Row).state)).toEqual(['all']);
+    // a write of the second half asks the frame to draw again and count again: the rail's number is read at once
+    const before = calls(db, 'staff_market_counts').length;
+    await page.evaluate(`_mksCount();_mksPaint()`);
+    await expect.poll(() => calls(db, 'staff_market_counts').length).toBe(before + 1);
+    // Ctrl K offers the nine views
+    expect(await page.evaluate(`_n6tCmds().filter(c=>c.sub&&c.go[2]==='market').map(c=>c.l)`)).toEqual(['Marketplace › Held', 'Marketplace › Reports', 'Marketplace › Sellers',
+      'Marketplace › Shops', 'Marketplace › Our listings', 'Marketplace › Commission', 'Marketplace › Settings', 'Marketplace › Categories']);
   });
 
   test('Arabic: the section, its views and a listing read right to left, with the cities and product types in Arabic', async ({ page }) => {
