@@ -29,8 +29,8 @@
 --  3. Settings in site_content, each inserted once (on conflict do nothing) and read with its default when missing or
 --     of the wrong shape: marketplace.on, .commission_pct, .commission_how, .limits, .listing_days, .blocked_words,
 --     .auto_hold_reports, .terms_version, .purge_url. The public key reads every one but .blocked_words. The 15 sports and 97 product types are seeded the same way.
---  4. Storage: the public bucket market (800,000 bytes, JPEG or WebP). The public key may add a file only at a name
---     market_photo_slot issued, once (_mkt_photo_take); it can neither list nor remove a file. The website removes
+--  4. Storage: the public bucket market (800,000 bytes, JPEG or WebP). The public key can neither add, list nor
+--     remove a file: the website's photo route stores each file, at a name market_photo_slot issued, with the service key. The website removes
 --     the files the database let go of with the service key. No update policy.
 --  5. For customers (anon key + the account's id and session token, _cust_token_ok; a refusal is raised as a code,
 --     P0001, which is what a bare RAISE EXCEPTION uses): market_me, market_listing_save, market_photo_slot,
@@ -659,7 +659,7 @@ begin
   return found;
 end $$;
 revoke all on function public._mkt_photo_take(text, text) from public;
-grant execute on function public._mkt_photo_take(text, text) to anon, authenticated;
+revoke all on function public._mkt_photo_take(text, text) from anon, authenticated; -- no policy calls it any more (the lead, 2026-11-21)
 
 -- Has the database let go of this file: the slot of that photo, the small copy's name read as its full one, has
 -- gone_at set. No policy calls it since the cross-check (2026-11-21): the website removes let-go files with the
@@ -704,11 +704,11 @@ language sql stable security definer set search_path = public as $$
   select exists (select 1 from storage.objects f where f.bucket_id = 'market' and f.name = p_name)
 $$;
 
+-- (the lead, 2026-11-21) no insert policy for the public key: the website's photo route stores each file with the
+-- service key after its own checks (type by first bytes, pixel limits, metadata and GPS stripped), so a seller cannot
+-- put raw bytes at an issued name by calling the storage with the public key. Dropped for a database an earlier
+-- version reached.
 drop policy if exists "market photos add" on storage.objects;
-create policy "market photos add" on storage.objects
-  for insert to anon, authenticated
-  with check (bucket_id = 'market' and name ~ '^[ls][0-9]{1,12}/[0-9a-f]{32}(\.w480)?\.(jpg|webp)$'
-              and public._mkt_photo_take(bucket_id, name));
 -- (the cross-check, 2026-11-21) no "let go" / "see gone" policy for the public key any more: the website's purge
 -- removes with the service key, which no policy binds. Dropped here too, for a database the first version reached.
 drop policy if exists "market photos let go" on storage.objects;
@@ -2557,7 +2557,7 @@ begin
   grant execute on function public.market_purge_take(integer) to service_role;
   for r in select p.oid::regprocedure::text as sig from pg_proc p
             where p.pronamespace = 'public'::regnamespace and p.proname like '\_mkt\_%'
-              and p.proname <> '_mkt_photo_take' loop
+              loop
     execute format('revoke all on function %s from public, anon, authenticated', r.sig);
   end loop;
   -- the tables' own counters: nothing for a client either (default privileges hand a new sequence to the API roles)
@@ -2600,7 +2600,7 @@ begin
       raise exception '% has no search_path', r.sig;
     end if;
     -- no helper is executable by a client (the one a storage policy calls is, on purpose)
-    if r.proname like '\_mkt\_%' and r.proname <> '_mkt_photo_take'
+    if r.proname like '\_mkt\_%'
        and (has_function_privilege('anon', r.oid, 'execute') or has_function_privilege('authenticated', r.oid, 'execute')) then
       raise exception '% is executable by a client', r.sig;
     end if;
@@ -2616,8 +2616,12 @@ begin
   if has_function_privilege('anon', 'public._staff_mod(text,boolean)', 'execute') then
     raise exception '_staff_mod is executable by anon';
   end if;
-  if not has_function_privilege('anon', 'public._mkt_photo_take(text,text)', 'execute') then
-    raise exception 'the storage policy cannot run its check';
+  if has_function_privilege('anon', 'public._mkt_photo_take(text,text)', 'execute') then
+    raise exception '_mkt_photo_take is executable by anon';
+  end if;
+  if exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects'
+               and policyname = 'market photos add') then
+    raise exception 'the public key can still add files to the market bucket';
   end if;
   if exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects'
                and policyname in ('market photos let go', 'market photos see gone')) then
@@ -2657,8 +2661,8 @@ begin
   if (select count(*) from pg_policies where schemaname = 'public' and tablename = 'market_categories') <> 2 then
     raise exception 'market_categories does not have its two read policies';
   end if;
-  if (select count(*) from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'market photos %') <> 3 then
-    raise exception 'the bucket does not have its three policies';
+  if (select count(*) from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'market photos %') <> 2 then
+    raise exception 'the bucket does not have its two staff policies';
   end if;
   if not exists (select 1 from storage.buckets b where b.id = 'market' and b.public and b.file_size_limit = 800000) then
     raise exception 'the bucket market is missing';
@@ -2702,7 +2706,7 @@ notify pgrst, 'reload schema';
 -- the job, the ledger.
 -- select (select count(*) from pg_class where relnamespace = 'public'::regnamespace and relkind = 'r' and relname like 'market\_%' and relrowsecurity) as tables_rls_10,
 --        (select count(*) from pg_policies where schemaname = 'public' and tablename = 'market_categories') as category_policies_2,
---        (select count(*) from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'market photos %') as storage_policies_3,
+--        (select count(*) from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'market photos %') as storage_policies_2,
 --        (select count(*) from pg_proc where pronamespace = 'public'::regnamespace and proname like 'market\_%') as public_functions_23,
 --        (select count(*) from pg_proc where pronamespace = 'public'::regnamespace and proname like '\_mkt\_%') as helpers,
 --        has_function_privilege('anon', 'public.market_browse(jsonb)', 'execute') as anon_browse_true,

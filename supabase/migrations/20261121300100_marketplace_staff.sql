@@ -784,7 +784,7 @@ begin
   end loop;
   for r in select p.oid::regprocedure::text as sig from pg_proc p
             where p.pronamespace = 'public'::regnamespace and p.proname like '\_mkt\_%'
-              and p.proname <> '_mkt_photo_take' loop
+              loop
     execute format('revoke all on function %s from public, anon, authenticated', r.sig);
   end loop;
 end $grants$;
@@ -842,7 +842,7 @@ begin
                                               or not has_function_privilege('authenticated', r.oid, 'execute')) then
       raise exception '% is executable by anon, or not by staff', r.sig;
     end if;
-    if r.proname like '\_mkt\_%' and r.proname <> '_mkt_photo_take'
+    if r.proname like '\_mkt\_%'
        and (has_function_privilege('anon', r.oid, 'execute') or has_function_privilege('authenticated', r.oid, 'execute')) then
       raise exception '% is executable by a client', r.sig;
     end if;
