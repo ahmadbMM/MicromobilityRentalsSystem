@@ -343,7 +343,7 @@ test.describe('@staff:market Listings', () => {
     await expect(lrow(page, 13).locator('.mk-r-who')).toContainText('Wadi Cycles');
     await expect(lrow(page, 13).locator('.mk-r-who')).toContainText('Shop');
     await expect(lrow(page, 15).locator('.mk-r-who')).toHaveText('MicroMobility');
-    await expect(lrow(page, 15).locator('img.mk-th')).toHaveAttribute('src', 'https://micromobility.sa/media/market/fleet-1.jpg?w=480');
+    await expect(lrow(page, 15).locator('img.mk-th')).toHaveAttribute('src', 'https://micromobility.sa/media/market/fleet-1.jpg?w=640');
     await expect(lrow(page, 16).locator('.mk-th-no')).toHaveCount(1); // no photo: a drawn mark, never a broken picture
     // the search is the database's (title, number, serial, the seller's name or phone)
     await search(page, 'mkl', 'trek');

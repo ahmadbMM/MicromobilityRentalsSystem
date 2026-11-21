@@ -39,7 +39,11 @@
 --   * staff_market_sellers' search does not offer an account that was deleted (archived) and never sold;
 --   * a product type that listings name cannot be made a sport (BAD_INPUT): its listings would have no sport.
 --
--- Rollback: drop every function public.staff_market_* and the helpers _mkt_staff_seller(text),
+-- After the cross-check (2026-11-21), also: three storage policies on the site bucket's market/ folder for staff
+--   with the Marketplace right (change), so a People editor who is not an admin can add our listings' photos.
+--
+-- Rollback: drop policy if exists "market media staff add" / "market media staff see" / "market media staff remove"
+--   on storage.objects; drop every function public.staff_market_* and the helpers _mkt_staff_seller(text),
 --   _mkt_staff_shop(public.market_shops), _mkt_staff_report(public.market_reports), _mkt_reported(public.market_reports),
 --   _mkt_staff_listing(public.market_listings), _mkt_staff_commission(public.market_listings),
 --   _mkt_hold_all(text, text, text), _mkt_release_all(text, text);
@@ -780,15 +784,40 @@ begin
   end loop;
   for r in select p.oid::regprocedure::text as sig from pg_proc p
             where p.pronamespace = 'public'::regnamespace and p.proname like '\_mkt\_%'
-              and p.proname not in ('_mkt_photo_take', '_mkt_photo_gone') loop
+              and p.proname <> '_mkt_photo_take' loop
     execute format('revoke all on function %s from public, anon, authenticated', r.sig);
   end loop;
 end $grants$;
+
+-- ── Our listings' photos (the cross-check, 2026-11-21) ──────────────────────────────────────────────────────────────
+-- Staff who may change the Marketplace (_staff_mod('market', true): People edit) make MicroMobility's own listings
+-- (staff_market_company_save / _state), and those need a photo to go on sale. Their photos go into market/ of the
+-- site bucket through the staff app's uploader (<base36 time>-<up to 6 base36>.jpg|.png, and its .w640 / .w1280
+-- WebP copies), which took files from admins only ("site photos upload", 20260924150000): a manager with People
+-- edit could save a draft but never add a photo, so never publish it. These three let them add, see (the Storage
+-- API reads what it removes) and remove files there, and nowhere else in the bucket. No update policy: upload is
+-- never an overwrite (upsert false).
+drop policy if exists "market media staff add" on storage.objects;
+create policy "market media staff add" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'site' and name ~ '^market/[a-z0-9]{1,12}-[a-z0-9]{0,6}(\.(jpg|png)|\.w(640|1280)\.webp)$'
+              and (select public._staff_mod('market', true)));
+drop policy if exists "market media staff see" on storage.objects;
+create policy "market media staff see" on storage.objects
+  for select to authenticated
+  using (bucket_id = 'site' and name like 'market/%' and (select public._staff_mod('market', true)));
+drop policy if exists "market media staff remove" on storage.objects;
+create policy "market media staff remove" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'site' and name like 'market/%' and (select public._staff_mod('market', true)));
 
 -- ── Checks ───────────────────────────────────────────────────────────────────────────────────────────────────────
 do $chk$
 declare f text; r record;
 begin
+  if (select count(*) from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'market media staff %') <> 3 then
+    raise exception 'our listings'' photos do not have their three policies';
+  end if;
   foreach f in array array[
     'public.staff_market_mode()', 'public.staff_market_counts()', 'public.staff_market_listings(jsonb)',
     'public.staff_market_listing_get(bigint)', 'public.staff_market_listing_set(bigint,text,text)',
@@ -813,7 +842,7 @@ begin
                                               or not has_function_privilege('authenticated', r.oid, 'execute')) then
       raise exception '% is executable by anon, or not by staff', r.sig;
     end if;
-    if r.proname like '\_mkt\_%' and r.proname not in ('_mkt_photo_take', '_mkt_photo_gone')
+    if r.proname like '\_mkt\_%' and r.proname <> '_mkt_photo_take'
        and (has_function_privilege('anon', r.oid, 'execute') or has_function_privilege('authenticated', r.oid, 'execute')) then
       raise exception '% is executable by a client', r.sig;
     end if;
@@ -843,7 +872,7 @@ notify pgrst, 'reload schema';
 --        (select count(*) from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname like 'staff\_market\_%'
 --           and has_function_privilege('anon', p.oid, 'execute')) as open_to_anon_0,
 --        (select count(*) from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname like '\_mkt\_%'
---           and p.proname not in ('_mkt_photo_take', '_mkt_photo_gone')
+--           and p.proname <> '_mkt_photo_take'
 --           and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))) as open_helpers_0,
 --        has_function_privilege('authenticated', 'public.staff_market_counts()', 'execute') as staff_counts_true,
 --        (select name from supabase_migrations.schema_migrations where version = '20261121300100') as ledger;

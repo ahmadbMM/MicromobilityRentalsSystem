@@ -28,22 +28,23 @@
 --     market_messages, market_reports, market_blocks, market_events (the audit trail: no foreign keys, never deleted).
 --  3. Settings in site_content, each inserted once (on conflict do nothing) and read with its default when missing or
 --     of the wrong shape: marketplace.on, .commission_pct, .commission_how, .limits, .listing_days, .blocked_words,
---     .auto_hold_reports, .terms_version. The 15 sports and 97 product types are seeded the same way.
+--     .auto_hold_reports, .terms_version, .purge_url. The public key reads every one but .blocked_words. The 15 sports and 97 product types are seeded the same way.
 --  4. Storage: the public bucket market (800,000 bytes, JPEG or WebP). The public key may add a file only at a name
---     market_photo_slot issued, once (_mkt_photo_take), and may remove only a name the database marked gone
---     (_mkt_photo_gone). No update policy.
+--     market_photo_slot issued, once (_mkt_photo_take); it can neither list nor remove a file. The website removes
+--     the files the database let go of with the service key. No update policy.
 --  5. For customers (anon key + the account's id and session token, _cust_token_ok; a refusal is raised as a code,
 --     P0001, which is what a bare RAISE EXCEPTION uses): market_me, market_listing_save, market_photo_slot,
 --     market_listing_publish, market_listing_state, market_my_listings, market_shop_contact, market_shop_apply,
 --     market_shop_mine, market_thread_open, market_thread_send, market_threads, market_thread_get,
 --     market_share_whatsapp, market_unread, market_report, market_block.
---     For anyone: market_browse, market_listing_get, market_shop_get, market_shops, market_index, market_purge_take.
+--     For anyone: market_browse, market_listing_get, market_shop_get, market_shops, market_index.
+--     For the website's server alone (the service key): market_purge_take.
 --  6. The daily job _mkt_tick (pg_cron mm-market-tick, 21:40 UTC = 00:40 in Riyadh): takes a closed account's
 --     listings off sale, expires listings, deletes the ones expired 60 days ago, lets go of photos, deletes threads
 --     12 months after their last message, and asks the website to remove the files the database let go of.
 --
 -- Needs: customers (id, name, phone, whatsapp, whatsapp_same, birth_date, created_at, archived_at, merged_into),
--- queue_entries, site_content, staff; _cust_token_ok, _ip_gate, _ymd_ok, _member_active, _staff_mod,
+-- queue_entries, site_content, staff; is_staff, _cust_token_ok, _ip_gate, _ymd_ok, _member_active, _staff_mod,
 -- _staff_role_mods; _ask_text, _ask_norm, _ask_has_link, _ask_who (20261113010000_ask); _tm_short
 -- (20261119120000_testimonials). Nothing from the store or the payments tables.
 -- Not built: a push notification for a new message (the outbox writes into the booking app's Updates list, with its
@@ -65,9 +66,8 @@
 --     into another are deleted by the daily job, its shop taken down, and nobody can open a thread with it meanwhile;
 --   * a listing expired 60 days ago is deleted AND its photos let go of the same night (not 30 days later);
 --   * the service key may write market_categories (the hourly live-to-staging copy), as it does the store's catalogue;
---   * the daily job's call to the website is to micromobility.sa: from the staging database that reaches the live
---     website, which removes the live database's files, not staging's. Staging's files go when a selling route
---     removes them (the website's purgeLater), not by the night's call.
+--   * the daily job's call to the website goes to the address in marketplace.purge_url (seeded with the live
+--     website's; staging sets its own, see the cross-check below).
 --
 -- After the review (2026-11-21), also:
 --   * a photo counts as stored when its object is in storage.objects, not when the insert policy marked its slot:
@@ -86,15 +86,27 @@
 --   Locks: the account's (_mkt_account_lock, also taken by staff when they act on the account), then 'mkt:shops'
 --   when a shop is written, then rows, then a frame number's (_mkt_serial_lock).
 --
+-- After the cross-check (2026-11-21), also:
+--   * market_browse's sports and categories, for a shop's page (p.shop), name only what that shop has on sale;
+--   * marketplace.blocked_words is not readable with the public key (site_content's public read policy leaves that
+--     key out; a new policy lets staff read every key);
+--   * market_purge_take is the service key's alone, and the public key's "let go" / "see gone" storage policies are
+--     gone: the names it answers include photos never made public (a draft deleted before publishing) and photos the
+--     seller or staff withdrew, in a public-read bucket. The website calls it, and removes the files, with the
+--     service key;
+--   * the daily job posts to marketplace.purge_url (a micromobility.sa address of /api/market/purge), not to a fixed
+--     address: from staging's database the fixed one reached the live website, whose purge removes live's files.
+--
 -- Tested on a local Postgres 17 only (stub + tests in the session's scratch folder mk/db: mkstub.sh, fixtures.sql,
 -- tests_a.sql, tests_b.sql, tests_c.sql and race.sh (the review's: two connections at once), run.sh; see the commit
 -- body). Never run against a remote database by its author or its reviewer.
 --
 -- Rollback:
 --   select cron.unschedule('mm-market-tick');
---   drop policy if exists "market photos add" on storage.objects; drop policy if exists "market photos let go" on storage.objects;
---   drop policy if exists "market photos see gone" on storage.objects; drop policy if exists "market photos staff read" on storage.objects;
+--   drop policy if exists "market photos add" on storage.objects; drop policy if exists "market photos staff read" on storage.objects;
 --   drop policy if exists "market photos staff remove" on storage.objects;
+--   site_content's read policy as 20260924150000 made it: drop policy if exists "site content staff read" on
+--     public.site_content; create or replace "site content public read" for select to anon, authenticated using (true);
 --   drop every function public.market_*, public.staff_market_* and public._mkt_* (select oid::regprocedure from pg_proc
 --     where pronamespace = 'public'::regnamespace and (proname like 'market\_%' or proname like 'staff\_market\_%' or proname like '\_mkt\_%'));
 --   drop table if exists public.market_events, public.market_blocks, public.market_reports, public.market_messages,
@@ -527,8 +539,20 @@ insert into public.site_content (key, value, updated_by) values
   ('marketplace.listing_days', '60'::jsonb, 'migration 20261121300000'),
   ('marketplace.blocked_words', public._mkt_words_default(), 'migration 20261121300000'),
   ('marketplace.auto_hold_reports', '3'::jsonb, 'migration 20261121300000'),
-  ('marketplace.terms_version', '"2026-11-21"'::jsonb, 'migration 20261121300000')
+  ('marketplace.terms_version', '"2026-11-21"'::jsonb, 'migration 20261121300000'),
+  ('marketplace.purge_url', '"https://micromobility.sa/api/market/purge"'::jsonb, 'migration 20261121300000')
 on conflict (key) do nothing;
+
+-- (the cross-check, 2026-11-21) The blocked words are not for the public key: with the list in hand a seller writes
+-- around it. site_content stays public-read for every other key; staff read every key (the staff app's Marketplace
+-- Settings and Website editor). Rebuilt from 20260924150000_site_content ("site content public read": to anon,
+-- authenticated using true).
+drop policy if exists "site content public read" on public.site_content;
+create policy "site content public read" on public.site_content
+  for select to anon, authenticated using (key <> 'marketplace.blocked_words');
+drop policy if exists "site content staff read" on public.site_content;
+create policy "site content staff read" on public.site_content
+  for select to authenticated using ((select public.is_staff()));
 
 -- The sports (sort is the row's place times ten).
 insert into public.market_categories (slug, parent, name_en, name_ar, sort)
@@ -637,15 +661,16 @@ end $$;
 revoke all on function public._mkt_photo_take(text, text) from public;
 grant execute on function public._mkt_photo_take(text, text) to anon, authenticated;
 
--- The public key may remove (and, as the Storage API reads what it removes, see) only a file the database already
--- let go of: the slot of that photo, the small copy's name read as its full one, has gone_at set.
+-- Has the database let go of this file: the slot of that photo, the small copy's name read as its full one, has
+-- gone_at set. No policy calls it since the cross-check (2026-11-21): the website removes let-go files with the
+-- service key, so the public key can neither list nor remove them (a draft's photos were never public, and a name
+-- the public key could list was a working public address until the purge came by).
 create or replace function public._mkt_photo_gone(p_name text) returns boolean
 language sql stable security definer set search_path = public as $$
   select exists (select 1 from market_photo_slots s
                   where s.name = replace(coalesce(p_name, ''), '.w480.', '.') and s.gone_at is not null)
 $$;
-revoke all on function public._mkt_photo_gone(text) from public;
-grant execute on function public._mkt_photo_gone(text) to anon, authenticated;
+revoke all on function public._mkt_photo_gone(text) from public, anon, authenticated;
 
 -- What the storage holds is the truth about a name (see _mkt_photo_take: on the hosted service the policy's own mark
 -- is rolled back). A photo counts as stored when its object is in storage.objects; this stamps used_at (the full
@@ -684,14 +709,10 @@ create policy "market photos add" on storage.objects
   for insert to anon, authenticated
   with check (bucket_id = 'market' and name ~ '^[ls][0-9]{1,12}/[0-9a-f]{32}(\.w480)?\.(jpg|webp)$'
               and public._mkt_photo_take(bucket_id, name));
+-- (the cross-check, 2026-11-21) no "let go" / "see gone" policy for the public key any more: the website's purge
+-- removes with the service key, which no policy binds. Dropped here too, for a database the first version reached.
 drop policy if exists "market photos let go" on storage.objects;
-create policy "market photos let go" on storage.objects
-  for delete to anon, authenticated
-  using (bucket_id = 'market' and public._mkt_photo_gone(name));
 drop policy if exists "market photos see gone" on storage.objects;
-create policy "market photos see gone" on storage.objects
-  for select to anon, authenticated
-  using (bucket_id = 'market' and public._mkt_photo_gone(name));
 -- Staff with the Marketplace right (change) may also remove a file there, and see what they remove.
 drop policy if exists "market photos staff read" on storage.objects;
 create policy "market photos staff read" on storage.objects
@@ -1845,11 +1866,15 @@ begin
   -- the product types with something on sale: one probe of market_listings_category each. The LIMIT keeps each a
   -- probe of its own (never a join over every listing); the ORDER BY is what makes it the index's: without it the
   -- plan may walk the whole table "until the first match", which for a product type with nothing on sale is all of it.
+  -- A shop's page (p.shop) asks what THAT shop has on sale: only its listings count (the cross-check, 2026-11-21:
+  -- a shop's sport chips named every sport on the site, and a tap on one it has nothing in showed an empty grid).
+  -- The other filters are left out, as the contract says (the grid's chips are the site's).
   select coalesce(array_agg(c.slug), '{}') into v_on
     from market_categories c join market_categories sp on sp.slug = c.parent
    where c.visible and sp.visible
      and (select 1 from market_listings l
-           where l.category = c.slug and l.status in ('live', 'reserved') order by l.status limit 1) is not null;
+           where l.category = c.slug and l.status in ('live', 'reserved') and (v_shop is null or l.shop_id = v_shop)
+           order by l.status limit 1) is not null;
 
   return jsonb_build_object(
     'items', coalesce((select jsonb_agg(_mkt_card(l) order by o.ord)
@@ -1937,6 +1962,8 @@ $$;
 
 -- The photos the database let go of, for the website to remove from the storage. First it sees for itself which
 -- are already gone (neither copy is in storage.objects any more), then lists the oldest still waiting.
+-- The service key only (the cross-check, 2026-11-21): the names include photos that were never public (a draft
+-- deleted before it was published) or that the seller or staff withdrew, and the bucket is public-read.
 create or replace function public.market_purge_take(p_max integer default 100) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare v_max integer := least(greatest(coalesce(p_max, 100), 1), 200);
@@ -2377,7 +2404,7 @@ end $$;
 create or replace function public._mkt_tick() returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare l market_listings%rowtype; h market_shops%rowtype; v_expired integer := 0; v_deleted integer := 0; v_gone integer := 0;
-        v_slots integer := 0; v_threads integer := 0; v_closed integer := 0; n integer; v_post boolean := false;
+        v_slots integer := 0; v_threads integer := 0; v_closed integer := 0; n integer; v_post boolean := false; v_url text;
 begin
   -- 0. an account that was closed (archived, 20261111200000) or merged into another sells nothing: its listings
   --    are deleted (the whole row kept in the trail; photos follow the 30 days, a draft's go at once) and its shop
@@ -2474,13 +2501,20 @@ begin
      and exists (select 1 from pg_extension where extname = 'pg_net') then
     -- a call that cannot be queued (pg_net's own trouble) must not undo the night's work: the files wait for the
     -- next selling route's purge, or the next night
-    begin
-      perform net.http_post(url := 'https://micromobility.sa/api/market/purge', body := '{}'::jsonb,
-                            headers := '{"Content-Type":"application/json"}'::jsonb, timeout_milliseconds := 20000);
-      v_post := true;
-    exception when others then
-      v_post := false;
-    end;
+    -- The address is this database's own website's (marketplace.purge_url; the cross-check, 2026-11-21): staging's
+    -- database asks the staging website, whose purge reaches staging's storage. Missing, or not a micromobility.sa
+    -- address of that route: no call, and the files wait for a selling route's purge.
+    v_url := _mkt_setting('purge_url') #>> '{}';
+    if jsonb_typeof(_mkt_setting('purge_url')) = 'string'
+       and v_url ~ '^https://([a-z0-9-]+\.)*micromobility\.sa/api/market/purge$' then
+      begin
+        perform net.http_post(url := v_url, body := '{}'::jsonb,
+                              headers := '{"Content-Type":"application/json"}'::jsonb, timeout_milliseconds := 20000);
+        v_post := true;
+      exception when others then
+        v_post := false;
+      end;
+    end if;
   end if;
   return jsonb_build_object('closed', v_closed, 'expired', v_expired, 'deleted', v_deleted, 'photos_gone', v_gone,
                             'slots_cleared', v_slots, 'threads_deleted', v_threads, 'purge_asked', v_post);
@@ -2509,7 +2543,7 @@ begin
     'public.market_photo_slot(text,text,text,bigint,text)', 'public.market_listing_publish(text,text,bigint,text,boolean,text)',
     'public.market_listing_state(text,text,bigint,text,integer)', 'public.market_my_listings(text,text)',
     'public.market_browse(jsonb)', 'public.market_listing_get(bigint,text,text)', 'public.market_shop_get(text)',
-    'public.market_shops()', 'public.market_index()', 'public.market_purge_take(integer)',
+    'public.market_shops()', 'public.market_index()',
     'public.market_shop_contact(text,text,text)', 'public.market_shop_apply(text,text,jsonb)', 'public.market_shop_mine(text,text)',
     'public.market_thread_open(text,text,bigint,text,text)', 'public.market_thread_send(text,text,bigint,text)',
     'public.market_threads(text,text)', 'public.market_thread_get(text,text,bigint,bigint)',
@@ -2518,9 +2552,12 @@ begin
     execute format('revoke all on function %s from public', f);
     execute format('grant execute on function %s to anon, authenticated', f);
   end loop;
+  -- the purge's names: the website's server, with the service key only (the cross-check, 2026-11-21)
+  revoke all on function public.market_purge_take(integer) from public, anon, authenticated;
+  grant execute on function public.market_purge_take(integer) to service_role;
   for r in select p.oid::regprocedure::text as sig from pg_proc p
             where p.pronamespace = 'public'::regnamespace and p.proname like '\_mkt\_%'
-              and p.proname not in ('_mkt_photo_take', '_mkt_photo_gone') loop
+              and p.proname <> '_mkt_photo_take' loop
     execute format('revoke all on function %s from public, anon, authenticated', r.sig);
   end loop;
   -- the tables' own counters: nothing for a client either (default privileges hand a new sequence to the API roles)
@@ -2562,21 +2599,29 @@ begin
     if not exists (select 1 from unnest(coalesce(r.proconfig, '{}')) c where c like 'search_path=%') then
       raise exception '% has no search_path', r.sig;
     end if;
-    -- no helper is executable by a client (the two a storage policy calls are, on purpose)
-    if r.proname like '\_mkt\_%' and r.proname not in ('_mkt_photo_take', '_mkt_photo_gone')
+    -- no helper is executable by a client (the one a storage policy calls is, on purpose)
+    if r.proname like '\_mkt\_%' and r.proname <> '_mkt_photo_take'
        and (has_function_privilege('anon', r.oid, 'execute') or has_function_privilege('authenticated', r.oid, 'execute')) then
       raise exception '% is executable by a client', r.sig;
     end if;
-    if r.proname like 'market\_%' and not has_function_privilege('anon', r.oid, 'execute') then
+    if r.proname like 'market\_%' and r.proname <> 'market_purge_take' and not has_function_privilege('anon', r.oid, 'execute') then
       raise exception 'the website cannot reach %', r.sig;
+    end if;
+    if r.proname = 'market_purge_take'
+       and (has_function_privilege('anon', r.oid, 'execute') or has_function_privilege('authenticated', r.oid, 'execute')
+            or not has_function_privilege('service_role', r.oid, 'execute')) then
+      raise exception '% must be the service key''s alone', r.sig;
     end if;
   end loop;
   if has_function_privilege('anon', 'public._staff_mod(text,boolean)', 'execute') then
     raise exception '_staff_mod is executable by anon';
   end if;
-  if not has_function_privilege('anon', 'public._mkt_photo_take(text,text)', 'execute')
-     or not has_function_privilege('anon', 'public._mkt_photo_gone(text)', 'execute') then
-    raise exception 'the storage policies cannot run their checks';
+  if not has_function_privilege('anon', 'public._mkt_photo_take(text,text)', 'execute') then
+    raise exception 'the storage policy cannot run its check';
+  end if;
+  if exists (select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects'
+               and policyname in ('market photos let go', 'market photos see gone')) then
+    raise exception 'the public key can still list or remove let-go photos';
   end if;
   -- every table: row level security on, nothing for a client but reading the categories
   foreach tb in array array['market_categories', 'market_sellers', 'market_shops', 'market_listings', 'market_photo_slots',
@@ -2612,8 +2657,8 @@ begin
   if (select count(*) from pg_policies where schemaname = 'public' and tablename = 'market_categories') <> 2 then
     raise exception 'market_categories does not have its two read policies';
   end if;
-  if (select count(*) from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'market photos %') <> 5 then
-    raise exception 'the bucket does not have its five policies';
+  if (select count(*) from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'market photos %') <> 3 then
+    raise exception 'the bucket does not have its three policies';
   end if;
   if not exists (select 1 from storage.buckets b where b.id = 'market' and b.public and b.file_size_limit = 800000) then
     raise exception 'the bucket market is missing';
@@ -2621,8 +2666,14 @@ begin
   -- the settings and the seed
   if (select count(*) from site_content where key in ('marketplace.on', 'marketplace.commission_pct', 'marketplace.commission_how',
         'marketplace.limits', 'marketplace.listing_days', 'marketplace.blocked_words', 'marketplace.auto_hold_reports',
-        'marketplace.terms_version')) <> 8 then
+        'marketplace.terms_version', 'marketplace.purge_url')) <> 9 then
     raise exception 'a marketplace setting is missing';
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'site_content'
+                   and policyname = 'site content public read' and qual like '%marketplace.blocked_words%')
+     or not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'site_content'
+                      and policyname = 'site content staff read') then
+    raise exception 'the blocked words are readable with the public key';
   end if;
   if (select count(*) from market_categories where parent is null) < 15
      or (select count(*) from market_categories where parent is not null) < 97 then
@@ -2647,11 +2698,11 @@ commit;
 
 notify pgrst, 'reload schema';
 
--- check (read only): 10 tables with RLS, 2 + 5 policies, the functions, the bucket, the 8 settings, the categories,
+-- check (read only): 10 tables with RLS, 2 + 3 policies, the functions, the bucket, the 9 settings, the categories,
 -- the job, the ledger.
 -- select (select count(*) from pg_class where relnamespace = 'public'::regnamespace and relkind = 'r' and relname like 'market\_%' and relrowsecurity) as tables_rls_10,
 --        (select count(*) from pg_policies where schemaname = 'public' and tablename = 'market_categories') as category_policies_2,
---        (select count(*) from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'market photos %') as storage_policies_5,
+--        (select count(*) from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'market photos %') as storage_policies_3,
 --        (select count(*) from pg_proc where pronamespace = 'public'::regnamespace and proname like 'market\_%') as public_functions_23,
 --        (select count(*) from pg_proc where pronamespace = 'public'::regnamespace and proname like '\_mkt\_%') as helpers,
 --        has_function_privilege('anon', 'public.market_browse(jsonb)', 'execute') as anon_browse_true,
@@ -2659,7 +2710,7 @@ notify pgrst, 'reload schema';
 --        has_table_privilege('anon', 'public.market_listings', 'select') as anon_table_false,
 --        has_table_privilege('anon', 'public.market_categories', 'select') as anon_categories_true,
 --        (select public from storage.buckets where id = 'market') as bucket_public_true,
---        (select count(*) from site_content where key like 'marketplace.%') as settings_8,
+--        (select count(*) from site_content where key like 'marketplace.%') as settings_9,
 --        (select value from site_content where key = 'marketplace.on') as switch,
 --        (select count(*) from market_categories where parent is null) as sports_15,
 --        (select count(*) from market_categories where parent is not null) as product_types_97,
