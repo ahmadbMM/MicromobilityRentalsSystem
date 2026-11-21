@@ -5122,6 +5122,55 @@ rides. Then we publish them in a testimonials page." The website (mm-platform) s
 - Privacy Notice: a testimonials row, a consent line and a retention line (en and ar); `PRIVACY_VERSION` stays 2026-11-18
   and `PRIVACY_ASK_FROM` is unchanged (no re-ask). Tests: `tests/testimonials.spec.ts`.
 
+## Safety feedback (2026-11-21, migration 20261121400000)
+The user: "i dont want it to be an incident report but more of a way we can gather info and feedback on how we can make our
+services better and safer and more responsive". The picks: riders only, from their own booking; every past ride or session
+for 7 days after it ends; the account holder picks which rider on the booking (themselves or anyone they booked for);
+always named; staff see a list with a status and trends; a staff alert only for a crash or an injury; no email or SMS.
+- **Stored:** `safety_feedback` (one row per booking entry, `unique(entry_id)`; RLS on, nobody reads or writes it directly):
+  `kind` (none, near_miss, unsafe, fall, crash, injury), `injury_parts[]` and `injury_severity` (minor, first_aid, clinic,
+  hospital; only with a fall, crash or injury, severity required with an injury), `briefing` / `helmet_ok` / `bike_ok` /
+  `ready`, `causes[]` and `prevent` (not with "nothing happened"), `rate_speed` / `rate_care` / `rate_first_aid` (1-5, null =
+  not needed or not answered), `resp_comment`, `ideas`, `consent_at`, and staff's `status` (new, followed, closed),
+  `staff_note`, `staff_reply` (`replied_at`), `handled_by` / `handled_at`. Kept 3 years (pg_cron `mm-safety-feedback-purge`),
+  as the Privacy Notice says: keep the two together.
+- **Riders** (token-checked): `safety_mine(p_id, p_token)` = `{ok, now, items, entries}`: `items` the account's own (id,
+  entry_id, session_id, rider_name, kind, status, staff_reply, replied_at, created_at, date, title, title_ar; never the
+  answers), `entries` the booking entries it can still be sent about (entry_id, session_id, name, date, title, title_ar,
+  ended_at, until): status waiting/active/done, the session's window ended (`_sfy_end`: an end before its start is the next
+  day) and less than 7 days ago, none sent. `safety_send(p_id, p_token, p_entry, p_data jsonb)` refuses `signin`,
+  `consent`, `invalid`, `kind`, `severity`, `entry`, `early`, `late`, `dup`; answers that do not belong with the kind are
+  dropped, not refused. `safety_mine` and `staff_safety_list` are STABLE and in `_READ_RPC`.
+- **The rider's page** (`rider-safety.js`, fetched when first needed, `SFY_V`; names `_sfr*`, the page's own are `_sfy*`):
+  Account > Safety feedback, `/account/safety` (`ACC_PAGES` 'safety', no row on the menu). `?b=<entry>` on an arrival
+  names the booking (`_readSfyEntry`, then it comes off the address): **the website links here, keep the address**. In
+  the app the past booking's button (`_sfyBtn`, in `renderBookingTicket`'s past actions beside Rate) calls `_sfyGo(id)`.
+  The button shows while `safety_mine.entries` names one of the card's entries (before its answer, by `_sessEnded` and
+  the date); once sent it reads "Safety feedback: Received / Followed up / Closed" and opens what was sent with the
+  team's reply. `_sfyMineGet` is the one read for the card and the page (`S._sfyM`): from My bookings at most once in
+  five minutes and only with a past booking from the last 60 days (`_sfyCheck`), from the page once a minute; the past
+  stack is drawn again when the answer changes its buttons (`_sfyCards`). The form wears the testimonial form's classes
+  (`tst-pill`, `tst-sb`, `tst-ta`, `tst-err`, `tst-item`); a pill redraws the page and gives the focus back by `data-fk`.
+  Every refusal has its words (`SFR_ERR`). A database without the functions (PGRST202) hides the button for the page life.
+- **Staff**: section Safety feedback (`safety`, `/safety`, in Today after Lockers on the rail, the part
+  `staff-parts/safety.js`, `renderSafety`, names `_sfs*`, keys `sfs*`). The Bookings right in the database
+  (`_staff_mod('queue')` to read, with edit to write), so it is derived from Bookings in `_modIds` and `_MOD_PARENT` and
+  `staff_set_access` never hears of it; on the manager's and owner's `ROLE_TABS`, not the front desk's. New / Followed up /
+  Closed / All, search, Filters (what happened, cause, how serious; Advanced: session, from, to). Rows: what happened, how
+  serious, the status, the rider, the account (opens `openAccountHistory`), the session and its place, where they were
+  hurt, the before-the-ride answers, the causes and the texts, the three ratings drawn as stars. Mark followed up, Close,
+  Back to new (each with an Undo), Note and reply (`staff_safety_set(p_id, p_status, p_note, p_reply)`: null keeps, ''
+  clears; the reply shows on the rider's booking), each logged. On top, the trends over every one inside the Filters'
+  dates: what happened (crash and injury in red), the four causes most named, the three average ratings and the sessions
+  and places reported twice or more (a session's line filters to it). The rail's number is the new ones (`_sfsCount`,
+  `staff_safety_list('new')`, a `STAFF_ENTRY`, every five minutes through `_secPolls`). **The bell** (`NT_KINDS_OFF`
+  'sfy', its Settings switch in the Desk group) lists the NEW crash and injury ones only (`S._sfsUrg`); the other kinds
+  arrive quietly. `tests/safety-feedback.spec.ts` (`@customer:account`, `@staff:safety`, `@build`).
+- Privacy Notice: a Safety feedback row (what, optional with the tick, health information for an injury, staff only), a
+  legal-basis line (explicit consent with the tick) and a retention line (3 years), English and Arabic; `PRIVACY_VERSION`
+  2026-11-21, `PRIVACY_ASK_FROM` unchanged (nobody asked again). The website's copy must be synced from it (see the Chat
+  section's note on the three syncs).
+
 ## The customer features round (2026-11-19, migrations 20261119600100, 600200, 600300)
 
 The user asked "what features for customers can we add to the booking app that will enhance their experience" and

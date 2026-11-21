@@ -39,8 +39,10 @@ test.describe('@customer:account the account menu and its pages', () => {
   test('the menu: the profile card above the switch, the two tiles, rows with their values, Log out and Delete last', async ({ page }) => {
     await open(page);
     await expect(page.locator('#acc-id')).toContainText('Sara Khalid');
-    const card = await page.locator('#acc-id').boundingBox(), sw = await page.locator('#tab-account .acc-views').boundingBox();
-    expect(card!.y).toBeLessThan(sw!.y);
+    // both read in one go in the page: the profile's own read repaints the menu once it lands, and two separate
+    // boundingBox() calls could fall either side of that repaint (null for the card that was just replaced)
+    const [cardY, swY] = await page.evaluate(() => [document.getElementById('acc-id')!.getBoundingClientRect().y, document.querySelector('#tab-account .acc-views')!.getBoundingClientRect().y]);
+    expect(cardY).toBeLessThan(swY);
     await expect(page.locator('#acc-tv-wallet')).toContainText('70');
     await expect(page.locator('#acc-tv-invite')).toHaveText('K7MQ2X');
     await expect(page.locator('#acc-v-contact')).toHaveText('+966500000001');

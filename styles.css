@@ -10201,6 +10201,26 @@ body:not(.view-staff) .rh-ref{color:var(--ink);}
 body:not(.view-staff) .rh-talk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;}
 body:not(.view-staff) .rh-talk>a{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;min-height:48px;text-decoration:none;}
 
+/* ── Safety feedback (2026-11-21, rider-safety.js): Account > Safety feedback, opened from a past booking. It wears the
+   testimonial form's pieces (tst-f, tst-pill, tst-sb, tst-ta, tst-err, tst-item); these are its own ── */
+body:not(.view-staff) .sfy-for{display:flex;align-items:center;gap:8px;margin:0 0 8px;color:var(--ink);}
+body:not(.view-staff) .sfy-intro{margin:0 0 16px;}
+body:not(.view-staff) .sfy-q{margin:20px 0 10px;padding-top:14px;border-top:1px solid var(--line-2);}
+body:not(.view-staff) .sfy-stars{display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+body:not(.view-staff) .sfy-ta{min-height:84px;}
+body:not(.view-staff) .sfy-late{margin:0 0 12px;color:var(--amber);}
+body:not(.view-staff) .sfy-item{display:grid;gap:6px;}
+body:not(.view-staff) .sfy-st-followed{background:var(--go-wash);color:var(--go-2);}
+body:not(.view-staff) .sfy-st-closed{background:var(--card-2);color:var(--ink-3);}
+body:not(.view-staff) .sfy-st-new{background:var(--amber-wash);color:var(--amber);}
+body:not(.view-staff) .sfy-reply{margin-top:6px;padding:10px 12px;border-inline-start:3px solid var(--go);border-radius:var(--r-chip);background:var(--card-2);}
+body:not(.view-staff) .sfy-reply .tst-lbl{margin:0 0 4px;}
+body:not(.view-staff) .sfy-reply p{margin:0;color:var(--ink);line-height:1.5;white-space:pre-line;overflow-wrap:anywhere;}
+body:not(.view-staff) .sfy-more{margin-top:20px;}
+body:not(.view-staff) .sfy-tell{min-height:44px;}
+body:not(.view-staff) .sfy-due .tst-item-h{align-items:center;}
+.sfy-slot{display:contents;}
+body:not(.view-staff) .sfy-btn{min-height:44px;}
 /* ── Testimonials (2026-11-18, rider-testimonial.js): Account > Write a testimonial, the step after a 9 or 10 in the
    rating's pop-up and the one-time ask about an old comment. What it is about as pills, five drawn stars, the name as
    real radios with the line it shows under them; the rider's own below, each with its state ── */
@@ -14719,6 +14739,40 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
 #tab-badgereq .bdr-row.done>.bdg-item>:is(.bdg-m,.bdg-txt){opacity:.7;}
 #tab-badgereq .bdr-who{padding:0;border:0;background:none;color:var(--text);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
 /* ── Testimonials (staff, 2026-11-18): the summary, the switch and the page's link on top, then the list; Add testimonial ── */
+/* ── Safety feedback, the staff section (2026-11-21): the trends on top, then the rows, each with its answers ── */
+#tab-safety .sfs-trends{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 20px;margin:0 0 14px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--sf-r-card,12px);}
+#tab-safety .sfs-tcol{display:grid;align-content:start;gap:6px;min-width:0;}
+#tab-safety .sfs-th{font-size:var(--sf-fs-sm);font-weight:600;color:var(--text);}
+#tab-safety .sfs-tchips{display:flex;flex-wrap:wrap;gap:6px;}
+#tab-safety .sfs-tchip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border:1px solid var(--border);border-radius:999px;font-size:var(--sf-fs-xs);color:var(--muted);}
+#tab-safety .sfs-tchip b{color:var(--text);font-variant-numeric:tabular-nums;}
+#tab-safety .sfs-tchip.hot{border-color:currentColor;color:var(--red);}
+#tab-safety .sfs-avg{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:var(--sf-fs-sm);color:var(--muted);}
+#tab-safety .sfs-avg b{color:var(--text);font-variant-numeric:tabular-nums;}
+#tab-safety .sfs-replist{display:grid;gap:4px;margin:0;padding:0;list-style:none;font-size:var(--sf-fs-sm);}
+#tab-safety .sfs-count{margin:12px 0 4px;}
+#tab-safety .sfs-none{margin:14px 0;}
+#tab-safety .sfs-list-in{display:flex;flex-direction:column;}
+#tab-safety .sfs-row{display:grid;gap:6px;padding:12px 0;border-top:1px solid var(--border);}
+#tab-safety .sfs-row.sfs-hot.sfs-new{box-shadow:inset 3px 0 0 var(--red);padding-inline-start:10px;}
+#tab-safety .sfs-h{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;}
+#tab-safety .sfs-chip{display:inline-flex;align-items:center;padding:2px 8px;border:1px solid var(--border);border-radius:999px;font-size:var(--sf-fs-xs);font-weight:500;color:var(--muted);}
+#tab-safety :is(.sfs-k-crash,.sfs-k-injury){border-color:currentColor;color:var(--red);font-weight:600;}
+#tab-safety :is(.sfs-k-fall,.sfs-k-near_miss,.sfs-k-unsafe){border-color:currentColor;color:var(--orange);}
+#tab-safety .sfs-c-new{border-color:currentColor;color:var(--orange);}
+#tab-safety .sfs-c-followed{border-color:currentColor;color:var(--green);}
+#tab-safety .sfs-meta{display:flex;flex-wrap:wrap;gap:2px 16px;font-size:var(--sf-fs-sm);color:var(--muted);}
+#tab-safety .sfs-meta b{color:var(--text);}
+#tab-safety .sfs-txt{display:grid;gap:2px;}
+#tab-safety .sfs-k{font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);}
+#tab-safety .sfs-txt p{margin:0;font-size:var(--sf-fs-md);line-height:1.5;color:var(--text);white-space:pre-line;overflow-wrap:anywhere;}
+#tab-safety .sfs-rate{display:inline-flex;align-items:center;gap:4px;}
+#tab-safety .sfs-stars{display:inline-flex;gap:1px;color:var(--orange);}
+#tab-safety .sfs-star{fill:currentColor;opacity:.25;}
+#tab-safety .sfs-star.on{opacity:1;}
+#tab-safety .sfs-ed{display:grid;gap:4px;max-width:560px;}
+#tab-safety .sfs-ed textarea{width:100%;}
+#tab-safety .sfs-acts{display:flex;flex-wrap:wrap;gap:6px;}
 #tab-testimonials .tsm-top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin:0 0 14px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--sf-r-card,12px);}
 #tab-testimonials .tsm-sum{display:grid;gap:4px;min-width:0;}
 #tab-testimonials .tsm-avg{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:var(--sf-fs-md);color:var(--text);}

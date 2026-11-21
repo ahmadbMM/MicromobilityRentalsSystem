@@ -369,6 +369,7 @@ window.mmLoading=(function(){
     <button class="tab-btn"        data-stab="waitlist"  data-on-click='["setStaffTab","waitlist"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Waitlist</span></button>
     <button class="tab-btn"        data-stab="sessions"  data-on-click='["setStaffTab","sessions"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Sessions</span></button>
     <button class="tab-btn"        data-stab="lockers"   data-on-click='["setStaffTab","lockers"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Lockers</span></button>
+    <button class="tab-btn"        data-stab="safety"    data-on-click='["setStaffTab","safety"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Safety feedback</span></button>
     <button class="tab-btn"        data-stab="volunteers" data-on-click='["setStaffTab","volunteers"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Volunteers</span></button>
     <span class="snav-group" data-group="snavFleet" role="heading" aria-level="2">Fleet</span>
     <button class="tab-btn"        data-stab="inventory" data-on-click='["setStaffTab","inventory"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Inventory</span></button>
@@ -407,6 +408,7 @@ window.mmLoading=(function(){
     <div id="tab-waitlist"  class="tab-panel"></div>
     <div id="tab-sessions"  class="tab-panel"></div>
     <div id="tab-lockers"   class="tab-panel"></div>
+    <div id="tab-safety"    class="tab-panel"></div>
     <div id="tab-inventory"  class="tab-panel"></div>
     <div id="tab-cashier"   class="tab-panel"></div>
     <div id="tab-store"     class="tab-panel"></div>
@@ -1428,6 +1430,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   mkErrGone:"This no longer exists.",mkErrInput:"The database did not accept that.",mkErrRight:"This account cannot change the Marketplace.",mkDoneHide:"Marketplace: listing {0} hidden",mkDoneRestore:"Marketplace: listing {0} restored",mkDoneRelease:"Marketplace: listing {0} released",mkDoneCheck:"Marketplace: listing {0} marked checked by our team",mkDoneUncheck:"Marketplace: checked mark removed from listing {0}",mkDoneDismiss:"Marketplace: report on {0} dismissed",mkDoneAction:"Marketplace: report on {0} actioned",
   mkDoneReopen:"Marketplace: report on {0} reopened",mkDoneStrike:"Marketplace: strike added to {0}",mkDoneUnstrike:"Marketplace: strike removed from {0}",mkDoneSuspend:"Marketplace: {0} suspended",mkDoneUnsuspend:"Marketplace: suspension lifted for {0}",mkDoneMet:"Marketplace: {0} marked met by our team",mkDoneUnmet:"Marketplace: met mark removed from {0}",mkDoneNote:"Marketplace: staff note saved for {0}",mkLogThread:"Marketplace: read the reported conversation on listing {0}",mkEvRelease:"Released",
   mkEvRestore:"Restored",mkEvUncheck:"Checked mark removed",mkEvEdit:"Edited",mkEvUnreserve:"No longer reserved",mkEvUnsold:"Sale undone",mkEvRenew:"Renewed",mkEvReportSet:"Report decided",mkBySystem:"System",mkByCustomer:"Customer",mkMsgsMore:"Older messages are not shown.",mkEvThreadRead:"Conversation read",mkEvUnblock:"Block lifted",mkCityOther:"Another city",
+  sfyTitle:"Safety feedback",sfyBtn:"Safety feedback",sfyCardSt:"Safety feedback: {0}",sfyStNew:"Received",sfyStFol:"Followed up",sfyStClo:"Closed",sfsTitle:"Safety feedback",sfsNewN:"{0} new",sfsNoDb:"Safety feedback is not set up on the database yet.",sfsSearch:"Search name, phone, session or words",sfsFNew:"New",sfsFFol:"Followed up",sfsFClo:"Closed",sfsKind:"What happened",sfsKNone:"Nothing happened",sfsKNear:"Near miss",sfsKUnsafe:"Felt unsafe",sfsKFall:"Fall",sfsKCrash:"Crash",sfsKInjury:"Injury",sfsCause:"Cause",sfsCBike:"Bike condition",sfsCSize:"Bike size",sfsCRoute:"Route or road surface",sfsCPeople:"Other people or vehicles",sfsCSpeed:"Speed",sfsCWeather:"Weather",sfsCOther:"Something else",sfsSev:"How serious",sfsSMinor:"Minor",sfsSFa:"First aid",sfsSClinic:"Clinic or doctor",sfsSHosp:"Hospital",sfsParts:"Hurt",sfsPHead:"Head",sfsPFace:"Face",sfsPNeck:"Neck",sfsPShoulder:"Shoulder",sfsPArm:"Arm or elbow",sfsPHand:"Hand or wrist",sfsPChest:"Chest or ribs",sfsPBack:"Back",sfsPHip:"Hip",sfsPLeg:"Leg",sfsPKnee:"Knee",sfsPFoot:"Foot or ankle",sfsPOther:"Somewhere else",sfsBrief:"Briefing clear",sfsHelmet:"Helmet fit",sfsBikeFit:"Bike right and in good shape",sfsReady:"Felt ready",sfsAYes:"Yes",sfsAPartly:"Partly",sfsANo:"No",sfsANoBrief:"No briefing",sfsANoHelmet:"Wore none",sfsRSpeed:"Response speed",sfsRCare:"Care",sfsRFa:"First aid",sfsRNa:"not needed or not rated",sfsNoRate:"Not rated",sfsStarsOf:"{0} of 5 stars",sfsPrevent:"Would have prevented it",sfsComment:"About our response",sfsIdeas:"Ideas to make rides safer",sfsRider:"Rider",sfsAccount:"Account",sfsSession:"Session",sfsHandled:"Last change by {0}, {1}",sfsNote:"Note for the team",sfsReply:"Reply to the rider",sfsReplied:"Our reply",sfsReplyHint:"The rider sees this on their booking.",sfsNoteReply:"Note and reply",sfsSave:"Save",sfsMarkFol:"Mark followed up",sfsClose:"Close",sfsBackNew:"Back to new",sfsDoneFol:"Safety feedback followed up: {0}",sfsDoneClo:"Safety feedback closed: {0}",sfsDoneNew:"Safety feedback back to new: {0}",sfsDoneNote:"Safety feedback note saved: {0}",sfsDoneReply:"Safety feedback reply saved, shown to {0}",sfsNoChange:"Another device changed it first.",sfsNoneNew:"No new safety feedback.",sfsNoneHere:"None here.",sfsNoMatch:"Nothing matches the filter.",sfsNoneYet:"None yet",sfsShown:"Showing {0} of {1}",sfsTrends:"Trends",sfsTotal:"{0} sent",sfsTopCause:"Most common causes",sfsAvgT:"Average ratings",sfsAvgN:"from {0}",sfsRepeat:"Sessions and places reported twice or more",sfsRepN:"{0} reports",sfsFrom:"From",sfsTo:"To",ntkSfy:"Safety feedback: crashes and injuries",ntiSfy:"From {0}: {1}",ntSfy:"Crashes and injuries told in safety feedback: {0}",
   rlBtn:'Running late',rlAsk:'How late will you be?',rlMin:'{0} min',rlChip:'Running late, about {0} min',rlOnTime:'I’m on time',rlNoMore:'Too late to change this now',rlNoPlace:'This booking no longer holds a place',rlSt:'Running late · ~{0} min',rlSaidOpt:'Said running late',
   ormBtn:'Remind me',ormSet:'Reminder set',ormOpens:'Booking opens {0}',ormCal:'Add to my calendar',ormUpd:'Tell me in Updates',ormRm:'Remove reminder',ormIcsT:'Booking opens: {0}',ormIsOpen:'Booking is open now',ormNo:'A reminder can’t be set for this date',
   mksNoDb:"The marketplace is not set up on this database yet.",mksSaved:"Saved.",mksSavedX:"{0} saved.",mksNothing:"Nothing changed.",mksNoMatch:"Nothing matches.",mksOpen:"Open",mksPick:"Choose",mksOther:"Other",mksStatus:"Status",mksCity:"City",mksLive:"Listings on sale",mksNameEn:"Name (English)",mksNameAr:"Name (Arabic)",mksReason:"Reason (the owner reads it)",mksErrState:"That step is no longer possible from its current status.",mksErrGone:"It is no longer there.",mksErrDupCr:"Another shop already has this commercial registration number.",mksErrDupSlug:"Another shop already has this page address.",mksErrInput:"Check this field: {0}",mksErrBad:"The database did not accept that.",mksErrForbidden:"Your account does not have the right to do this.",mksErrPhotos:"Photos needed for this category: {0}.",mksErrSerial:"This category needs a frame or serial number.",mksErrDeclare:"Tick all four declarations for this category.",mksErrNewOnly:"This category takes new items only.",mksStDraft:"Draft",mksStLive:"Live",mksStHeld:"Held",mksStReserved:"Reserved",mksStSold:"Sold",mksStExpired:"Expired",mksStHidden:"Hidden",mksShPending:"Waiting",mksShApproved:"Approved",mksShRejected:"Rejected",mksShSuspended:"Suspended",mksShSearch:"Search name, CR number, owner or phone",mksShNone:"No shops here.",mksShNoneWait:"No applications waiting.",mksShCrN:"CR {0}",mksShSlug:"Shop page address",mksShCr:"Commercial registration number",mksShActivity:"Registered activity",mksShVat:"VAT number",mksShAddress:"Address",mksShMap:"Map link",mksShPhone:"Phone",mksShWa:"WhatsApp",mksShSells:"What it sells",mksShAboutEn:"About (English)",mksShAboutAr:"About (Arabic)",mksShRetEn:"Return terms (English)",mksShRetAr:"Return terms (Arabic)",mksShLogo:"Logo",mksShNoLogo:"Remove the logo",mksShOwner:"Owner",mksShApplied:"Applied",mksShAgreed:"Rules accepted",mksShApprovedAt:"First approved",mksShDecision:"Last decision",mksShApprove:"Approve",mksShReject:"Reject",mksShSuspend:"Suspend",mksShRestore:"Restore",mksShApproveQ:"Approve {0}?",mksShApproveBody:"Its shop page opens, and its owner's listings show as the shop's.",mksShDoneApprove:"{0} approved.",mksShDoneReject:"{0} rejected.",mksShDoneSuspend:"{0} suspended.",mksShDoneRestore:"{0} restored.",mksOuNew:"New listing",mksOuSearch:"Search title or number",mksOuNone:"No listings of our own yet.",mksOuUntitled:"Untitled draft",mksOuEditT:"Listing {0}",mksOuUntil:"Until {0}",mksFCat:"Category",mksFTitle:"Title",mksFDesc:"Description",mksFCond:"Condition",mksFFaults:"Known faults",mksFPrice:"Price (SAR)",mksFNeg:"The price is negotiable",mksFSerial:"Frame or serial number",mksFPhotos:"Photos",mksFFacts:"Details",mksFDecl:"Declarations",mksFBrand:"Brand",mksFModel:"Model",mksFYear:"Year",mksFFrame:"Frame size",mksFWheel:"Wheel size",mksFSize:"Size",mksFWhom:"For",mksWMen:"Men",mksWWomen:"Women",mksWUnisex:"Unisex",mksWKids:"Kids",mksCNew:"New",mksCExcellent:"Excellent",mksCGood:"Good",mksCFair:"Fair",mksCParts:"For parts or not working",mksDComplete:"Complete device",mksDUnmod:"Not modified",mksDSpeed:"Top assisted speed 25 km/h or less",mksDCharger:"Original charger included",mksPhAdd:"Add photos",mksPhAdding:"Uploading...",mksPhCover:"Cover",mksPhFirst:"Make cover",mksPhN:"Photo {0}",mksPhRemoveN:"Remove photo {0}",mksPhMax:"A listing takes up to 10 photos.",mksOuPublish:"Publish",mksOuReserve:"Mark reserved",mksOuSold:"Mark sold",mksOuLive:"Back to live",mksOuRenew:"Renew",mksOuSoldT:"Sold for how much? (SAR)",mksOuRemoveQ:"Remove {0}?",mksOuRemoveBody:"It leaves the marketplace. This cannot be undone.",mksOuDonePublish:"{0} is live.",mksOuDoneReserved:"{0} marked reserved.",mksOuDoneSold:"{0} marked sold.",mksOuDoneLive:"{0} is back on sale.",mksOuDoneRenew:"{0} renewed.",mksOuDoneRemoved:"{0} removed.",mksCoDue:"Due",mksCoGot:"Received",mksCoPeriod:"Period",mksCoPMonth:"This month",mksCoPLast:"Last month",mksCoPYear:"This year",mksCoPAll:"All time",mksCoTAsked:"Asked",mksCoTDue:"Still due",mksCoSold:"Sold {0}",mksCoGotBy:"Received {0} by {1}",mksCoMark:"Mark received",mksCoUnmark:"Not received",mksCoNoteT:"Commission received. Note (optional)",mksCoNone:"No commission here.",mksCoDoneGot:"Commission received: {0}",mksCoDoneUn:"Commission back to due: {0}",mksKPrivate:"Private seller",mksKShop:"Shop",mksSeOn:"Marketplace on micromobility.sa",mksSeOnQ:"Turn the marketplace on?",mksSeOnBody:"The Marketplace link shows in the website's header, search and sitemap, and anyone signed in can list an item.",mksSeOnBtn:"Turn on",mksSeOffQ:"Turn the marketplace off?",mksSeOffBody:"The link leaves the header, search and sitemap. Its pages still open by their address.",mksSeOffBtn:"Turn off",mksSeOnLog:"Marketplace turned on",mksSeOffLog:"Marketplace turned off",mksSeCom:"Commission",mksSePct:"Commission (% of the sold price)",mksSeHowEn:"How to pay it (English)",mksSeHowAr:"How to pay it (Arabic)",mksSeList:"Listings",mksSeDays:"Days a listing stays up",mksSeHold:"Reports that hold a listing",mksSeLimits:"Limits",mksSeNewDays:"Days an account counts as new",mksSeMsgs:"Messages a day, each account",mksSeNew:"New accounts",mksSeEst:"Established accounts",mksSeShops:"Shops",mksSePriceMax:"Highest price (SAR)",mksSeThreads:"New conversations a day",mksSeWa:"WhatsApp shares a day",mksSeLiveFirst:"Listings on sale in the first days",mksSeFirstDays:"First days",mksSeLiveAfter:"Listings on sale after that",mksSeWords:"Blocked words, one on each line",mksSeDiscard:"Discard changes",mksSeRange:"{0}: a number from {1} to {2}",mksSeLong:"{0}: {1} characters at most",mksSeWordsMax:"Up to 300 blocked words, each up to 40 characters.",mksSeSavedLog:"Marketplace settings saved: {0}",mksCaAddSport:"Add a sport",mksCaAddType:"Add a product type",mksCaNewSport:"New sport",mksCaNewType:"New product type in {0}",mksCaSlug:"Key (lower-case letters, digits and dashes)",mksCaSort:"Order",mksCaVisible:"Shown on the website",mksCaTier:"Rule",mksTOpen:"Any condition",mksTNew:"New items only",mksTDeclare:"With a declaration",mksCaSerial:"Frame or serial number needed",mksCaMinPh:"Fewest photos",mksCaFacts:"Details the listing form asks for",mksCaHide:"Hide",mksCaShow:"Show",mksCaTypes:"Product types",mksCaNone:"No categories yet.",mksCaDoneShow:"{0} is shown.",mksCaDoneHide:"{0} is hidden.",mksSeTerms:"Rules version",mksSeTermsQ:"Change the rules version?",mksSeTermsBody:"Every seller is asked to accept the rules again before their next listing goes up.",
@@ -2148,6 +2151,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   mkErrGone:"لم يعد موجوداً.",mkErrInput:"لم تقبل قاعدة البيانات ذلك.",mkErrRight:"هذا الحساب لا يمكنه تعديل السوق.",mkDoneHide:"السوق: أُخفي الإعلان {0}",mkDoneRestore:"السوق: أُعيد عرض الإعلان {0}",mkDoneRelease:"السوق: أُلغي إيقاف الإعلان {0}",mkDoneCheck:"السوق: وُضعت علامة «فحصه فريقنا» على الإعلان {0}",mkDoneUncheck:"السوق: أُزيلت علامة الفحص عن الإعلان {0}",mkDoneDismiss:"السوق: رُفض البلاغ عن {0}",mkDoneAction:"السوق: اتُّخذ إجراء في البلاغ عن {0}",
   mkDoneReopen:"السوق: أُعيد فتح البلاغ عن {0}",mkDoneStrike:"السوق: أُضيفت مخالفة إلى {0}",mkDoneUnstrike:"السوق: أُزيلت مخالفة عن {0}",mkDoneSuspend:"السوق: أُوقف {0}",mkDoneUnsuspend:"السوق: رُفع الإيقاف عن {0}",mkDoneMet:"السوق: سُجّل أن فريقنا قابل {0}",mkDoneUnmet:"السوق: أُزيلت علامة المقابلة عن {0}",mkDoneNote:"السوق: حُفظت ملاحظة الفريق عن {0}",mkLogThread:"السوق: قُرئت المحادثة المُبلَّغ عنها في الإعلان {0}",mkEvRelease:"أُلغي الإيقاف",
   mkEvRestore:"أُعيد العرض",mkEvUncheck:"أُزيلت علامة الفحص",mkEvEdit:"عُدّل",mkEvUnreserve:"أُلغي الحجز",mkEvUnsold:"أُلغي البيع",mkEvRenew:"جُدّد",mkEvReportSet:"قرار في بلاغ",mkBySystem:"النظام",mkByCustomer:"العميل",mkMsgsMore:"الرسائل الأقدم غير معروضة.",mkEvThreadRead:"قُرئت المحادثة",mkEvUnblock:"رُفع الحظر",mkCityOther:"مدينة أخرى",
+  sfyTitle:"ملاحظات السلامة",sfyBtn:"ملاحظات السلامة",sfyCardSt:"ملاحظات السلامة: {0}",sfyStNew:"تم الاستلام",sfyStFol:"تمت المتابعة",sfyStClo:"مغلقة",sfsTitle:"ملاحظات السلامة",sfsNewN:"{0} جديدة",sfsNoDb:"ملاحظات السلامة غير مُعدّة في قاعدة البيانات بعد.",sfsSearch:"ابحث بالاسم أو الجوال أو الجلسة أو الكلمات",sfsFNew:"جديدة",sfsFFol:"تمت متابعتها",sfsFClo:"مغلقة",sfsKind:"ما حدث",sfsKNone:"لم يحدث شيء",sfsKNear:"كاد يقع حادث",sfsKUnsafe:"شعر بعدم الأمان",sfsKFall:"سقوط",sfsKCrash:"اصطدام",sfsKInjury:"إصابة",sfsCause:"السبب",sfsCBike:"حالة الدراجة",sfsCSize:"مقاس الدراجة",sfsCRoute:"المسار أو سطح الطريق",sfsCPeople:"أشخاص آخرون أو مركبات",sfsCSpeed:"السرعة",sfsCWeather:"الطقس",sfsCOther:"شيء آخر",sfsSev:"مدى الخطورة",sfsSMinor:"بسيطة",sfsSFa:"إسعافات أولية",sfsSClinic:"عيادة أو طبيب",sfsSHosp:"مستشفى",sfsParts:"الإصابة في",sfsPHead:"الرأس",sfsPFace:"الوجه",sfsPNeck:"الرقبة",sfsPShoulder:"الكتف",sfsPArm:"الذراع أو المرفق",sfsPHand:"اليد أو المعصم",sfsPChest:"الصدر أو الأضلاع",sfsPBack:"الظهر",sfsPHip:"الورك",sfsPLeg:"الساق",sfsPKnee:"الركبة",sfsPFoot:"القدم أو الكاحل",sfsPOther:"مكان آخر",sfsBrief:"وضوح شرح السلامة",sfsHelmet:"مقاس الخوذة",sfsBikeFit:"الدراجة مناسبة وبحالة جيدة",sfsReady:"شعر بالاستعداد",sfsAYes:"نعم",sfsAPartly:"جزئياً",sfsANo:"لا",sfsANoBrief:"لم يكن هناك شرح",sfsANoHelmet:"لم يرتدِ خوذة",sfsRSpeed:"سرعة الاستجابة",sfsRCare:"العناية",sfsRFa:"الإسعافات الأولية",sfsRNa:"لم تكن مطلوبة أو لم تُقيَّم",sfsNoRate:"لم يُقيَّم",sfsStarsOf:"{0} من 5 نجوم",sfsPrevent:"ما كان سيمنعه",sfsComment:"عن استجابتنا",sfsIdeas:"أفكار لجولات أكثر أماناً",sfsRider:"الراكب",sfsAccount:"الحساب",sfsSession:"الجلسة",sfsHandled:"آخر تغيير بواسطة {0}، {1}",sfsNote:"ملاحظة للفريق",sfsReply:"الرد على الراكب",sfsReplied:"ردّنا",sfsReplyHint:"يرى الراكب هذا الرد في حجزه.",sfsNoteReply:"ملاحظة ورد",sfsSave:"حفظ",sfsMarkFol:"حدّدها كمتابَعة",sfsClose:"إغلاق",sfsBackNew:"أعدها إلى جديدة",sfsDoneFol:"تمت متابعة ملاحظات السلامة: {0}",sfsDoneClo:"أُغلقت ملاحظات السلامة: {0}",sfsDoneNew:"أُعيدت ملاحظات السلامة إلى جديدة: {0}",sfsDoneNote:"حُفظت ملاحظة على ملاحظات السلامة: {0}",sfsDoneReply:"حُفظ الرد على ملاحظات السلامة ويظهر لـ{0}",sfsNoChange:"غيّرها جهاز آخر قبلك.",sfsNoneNew:"لا توجد ملاحظات سلامة جديدة.",sfsNoneHere:"لا شيء هنا.",sfsNoMatch:"لا شيء يطابق الفلتر.",sfsNoneYet:"لا شيء بعد",sfsShown:"عرض {0} من {1}",sfsTrends:"الاتجاهات",sfsTotal:"{0} مُرسلة",sfsTopCause:"الأسباب الأكثر تكراراً",sfsAvgT:"متوسط التقييمات",sfsAvgN:"من {0}",sfsRepeat:"جلسات وأماكن ذُكرت مرتين أو أكثر",sfsRepN:"البلاغات: {0}",sfsFrom:"من",sfsTo:"إلى",ntkSfy:"ملاحظات السلامة: الاصطدامات والإصابات",ntiSfy:"من {0}: {1}",ntSfy:"اصطدامات وإصابات في ملاحظات السلامة: {0}",
   rlBtn:'سأتأخر',rlAsk:'كم ستتأخر؟',rlMin:'{0} دقيقة',rlChip:'سأتأخر نحو {0} دقيقة',rlOnTime:'سأصل في الموعد',rlNoMore:'فات وقت تغيير هذا الآن',rlNoPlace:'لم يعد لهذا الحجز مكان محجوز',rlSt:'سيتأخر · نحو {0} دقيقة',rlSaidOpt:'أبلغ أنه سيتأخر',
   ormBtn:'ذكّرني',ormSet:'تم ضبط التذكير',ormOpens:'يفتح الحجز {0}',ormCal:'أضف إلى تقويمي',ormUpd:'أخبرني في التحديثات',ormRm:'إزالة التذكير',ormIcsT:'يفتح الحجز: {0}',ormIsOpen:'الحجز مفتوح الآن',ormNo:'لا يمكن ضبط تذكير لهذا الموعد',
   mksNoDb:"السوق غير مُعدّ في قاعدة البيانات هذه بعد.",mksSaved:"تم الحفظ.",mksSavedX:"تم حفظ {0}.",mksNothing:"لم يتغيّر شيء.",mksNoMatch:"لا توجد نتائج مطابقة.",mksOpen:"فتح",mksPick:"اختر",mksOther:"أخرى",mksStatus:"الحالة",mksCity:"المدينة",mksLive:"الإعلانات المعروضة",mksNameEn:"الاسم (بالإنجليزية)",mksNameAr:"الاسم (بالعربية)",mksReason:"السبب (يقرؤه صاحب المتجر)",mksErrState:"لم تعد هذه الخطوة ممكنة من الحالة الحالية.",mksErrGone:"لم يعد موجوداً.",mksErrDupCr:"رقم السجل التجاري هذا مسجّل لمتجر آخر.",mksErrDupSlug:"عنوان الصفحة هذا مستخدم لمتجر آخر.",mksErrInput:"راجع هذا الحقل: {0}",mksErrBad:"لم تقبل قاعدة البيانات ذلك.",mksErrForbidden:"حسابك لا يملك صلاحية هذا الإجراء.",mksErrPhotos:"الصور المطلوبة لهذه الفئة: {0}.",mksErrSerial:"هذه الفئة تتطلب رقم الهيكل أو الرقم التسلسلي.",mksErrDeclare:"ضع علامة على الإقرارات الأربعة لهذه الفئة.",mksErrNewOnly:"هذه الفئة للمنتجات الجديدة فقط.",mksStDraft:"مسودة",mksStLive:"معروض",mksStHeld:"معلّق",mksStReserved:"محجوز",mksStSold:"مُباع",mksStExpired:"منتهٍ",mksStHidden:"مخفي",mksShPending:"بانتظار المراجعة",mksShApproved:"معتمد",mksShRejected:"مرفوض",mksShSuspended:"موقوف",mksShSearch:"ابحث بالاسم أو السجل التجاري أو المالك أو الجوال",mksShNone:"لا توجد متاجر هنا.",mksShNoneWait:"لا توجد طلبات بانتظار المراجعة.",mksShCrN:"سجل تجاري {0}",mksShSlug:"عنوان صفحة المتجر",mksShCr:"رقم السجل التجاري",mksShActivity:"النشاط المسجّل",mksShVat:"الرقم الضريبي",mksShAddress:"العنوان",mksShMap:"رابط الخريطة",mksShPhone:"الهاتف",mksShWa:"واتساب",mksShSells:"ماذا يبيع",mksShAboutEn:"نبذة (بالإنجليزية)",mksShAboutAr:"نبذة (بالعربية)",mksShRetEn:"شروط الإرجاع (بالإنجليزية)",mksShRetAr:"شروط الإرجاع (بالعربية)",mksShLogo:"الشعار",mksShNoLogo:"إزالة الشعار",mksShOwner:"المالك",mksShApplied:"تاريخ الطلب",mksShAgreed:"الموافقة على القواعد",mksShApprovedAt:"أول اعتماد",mksShDecision:"آخر قرار",mksShApprove:"اعتماد",mksShReject:"رفض",mksShSuspend:"إيقاف",mksShRestore:"إعادة التفعيل",mksShApproveQ:"اعتماد {0}؟",mksShApproveBody:"تُفتح صفحة المتجر، وتظهر إعلانات صاحبه باسم المتجر.",mksShDoneApprove:"تم اعتماد {0}.",mksShDoneReject:"تم رفض {0}.",mksShDoneSuspend:"تم إيقاف {0}.",mksShDoneRestore:"أُعيد تفعيل {0}.",mksOuNew:"إعلان جديد",mksOuSearch:"ابحث بالعنوان أو الرقم",mksOuNone:"لا توجد إعلانات خاصة بنا بعد.",mksOuUntitled:"مسودة بلا عنوان",mksOuEditT:"الإعلان {0}",mksOuUntil:"حتى {0}",mksFCat:"الفئة",mksFTitle:"العنوان",mksFDesc:"الوصف",mksFCond:"حالة المنتج",mksFFaults:"العيوب المعروفة",mksFPrice:"السعر (ريال)",mksFNeg:"السعر قابل للتفاوض",mksFSerial:"رقم الهيكل أو الرقم التسلسلي",mksFPhotos:"الصور",mksFFacts:"التفاصيل",mksFDecl:"الإقرارات",mksFBrand:"العلامة التجارية",mksFModel:"الموديل",mksFYear:"سنة الصنع",mksFFrame:"مقاس الهيكل",mksFWheel:"مقاس العجلة",mksFSize:"المقاس",mksFWhom:"لمن",mksWMen:"رجال",mksWWomen:"نساء",mksWUnisex:"للجنسين",mksWKids:"أطفال",mksCNew:"جديد",mksCExcellent:"ممتاز",mksCGood:"جيد",mksCFair:"مقبول",mksCParts:"لقطع الغيار أو لا يعمل",mksDComplete:"الجهاز كامل",mksDUnmod:"غير معدَّل",mksDSpeed:"أقصى سرعة بالمساعدة 25 كم/س أو أقل",mksDCharger:"مع الشاحن الأصلي",mksPhAdd:"إضافة صور",mksPhAdding:"جارٍ الرفع...",mksPhCover:"الغلاف",mksPhFirst:"اجعلها الغلاف",mksPhN:"الصورة {0}",mksPhRemoveN:"إزالة الصورة {0}",mksPhMax:"يقبل الإعلان 10 صور كحد أقصى.",mksOuPublish:"نشر",mksOuReserve:"تحديد كمحجوز",mksOuSold:"تحديد كمُباع",mksOuLive:"إعادة للعرض",mksOuRenew:"تجديد",mksOuSoldT:"بكم بيع؟ (ريال)",mksOuRemoveQ:"إزالة {0}؟",mksOuRemoveBody:"سيخرج من السوق. لا يمكن التراجع عن ذلك.",mksOuDonePublish:"{0} معروض الآن.",mksOuDoneReserved:"تم تحديد {0} كمحجوز.",mksOuDoneSold:"تم تحديد {0} كمُباع.",mksOuDoneLive:"عاد {0} للعرض.",mksOuDoneRenew:"تم تجديد {0}.",mksOuDoneRemoved:"تمت إزالة {0}.",mksCoDue:"مستحقة",mksCoGot:"مستلمة",mksCoPeriod:"الفترة",mksCoPMonth:"هذا الشهر",mksCoPLast:"الشهر الماضي",mksCoPYear:"هذه السنة",mksCoPAll:"كل الفترات",mksCoTAsked:"المطلوبة",mksCoTDue:"المتبقية",mksCoSold:"بيع في {0}",mksCoGotBy:"استُلمت {0} بواسطة {1}",mksCoMark:"تم الاستلام",mksCoUnmark:"لم تُستلم",mksCoNoteT:"استلام العمولة. ملاحظة (اختياري)",mksCoNone:"لا توجد عمولات هنا.",mksCoDoneGot:"استُلمت العمولة: {0}",mksCoDoneUn:"أُعيدت العمولة إلى المستحقة: {0}",mksKPrivate:"بائع فرد",mksKShop:"متجر",mksSeOn:"السوق على micromobility.sa",mksSeOnQ:"تشغيل السوق؟",mksSeOnBody:"يظهر رابط السوق في ترويسة الموقع والبحث وخريطة الموقع، ويستطيع كل من سجّل الدخول عرض منتج.",mksSeOnBtn:"تشغيل",mksSeOffQ:"إيقاف السوق؟",mksSeOffBody:"يختفي الرابط من الترويسة والبحث وخريطة الموقع. تبقى صفحاته تفتح بعنوانها.",mksSeOffBtn:"إيقاف",mksSeOnLog:"تم تشغيل السوق",mksSeOffLog:"تم إيقاف السوق",mksSeCom:"العمولة",mksSePct:"العمولة (% من سعر البيع)",mksSeHowEn:"طريقة دفعها (بالإنجليزية)",mksSeHowAr:"طريقة دفعها (بالعربية)",mksSeList:"الإعلانات",mksSeDays:"عدد أيام بقاء الإعلان",mksSeHold:"عدد البلاغات التي تعلّق الإعلان",mksSeLimits:"الحدود",mksSeNewDays:"عدد الأيام التي يُعد فيها الحساب جديداً",mksSeMsgs:"الرسائل في اليوم لكل حساب",mksSeNew:"الحسابات الجديدة",mksSeEst:"الحسابات الأقدم",mksSeShops:"المتاجر",mksSePriceMax:"أعلى سعر (ريال)",mksSeThreads:"محادثات جديدة في اليوم",mksSeWa:"مشاركات واتساب في اليوم",mksSeLiveFirst:"الإعلانات المعروضة في الأيام الأولى",mksSeFirstDays:"عدد الأيام الأولى",mksSeLiveAfter:"الإعلانات المعروضة بعد ذلك",mksSeWords:"الكلمات المحظورة، كلمة في كل سطر",mksSeDiscard:"تجاهل التغييرات",mksSeRange:"{0}: رقم من {1} إلى {2}",mksSeLong:"{0}: {1} حرفاً كحد أقصى",mksSeWordsMax:"حتى 300 كلمة محظورة، وكل منها حتى 40 حرفاً.",mksSeSavedLog:"حُفظت إعدادات السوق: {0}",mksCaAddSport:"إضافة رياضة",mksCaAddType:"إضافة نوع منتج",mksCaNewSport:"رياضة جديدة",mksCaNewType:"نوع منتج جديد في {0}",mksCaSlug:"المفتاح (أحرف إنجليزية صغيرة وأرقام وشرطات)",mksCaSort:"الترتيب",mksCaVisible:"تظهر في الموقع",mksCaTier:"القاعدة",mksTOpen:"أي حالة",mksTNew:"الجديد فقط",mksTDeclare:"مع إقرار",mksCaSerial:"يتطلب رقم الهيكل أو الرقم التسلسلي",mksCaMinPh:"أقل عدد من الصور",mksCaFacts:"التفاصيل التي يطلبها نموذج الإعلان",mksCaHide:"إخفاء",mksCaShow:"إظهار",mksCaTypes:"أنواع المنتجات",mksCaNone:"لا توجد فئات بعد.",mksCaDoneShow:"{0} ظاهرة الآن.",mksCaDoneHide:"{0} مخفية الآن.",mksSeTerms:"إصدار القواعد",mksSeTermsQ:"تغيير إصدار القواعد؟",mksSeTermsBody:"سيُطلب من كل بائع الموافقة على القواعد من جديد قبل نشر إعلانه التالي.",
@@ -2422,7 +2426,7 @@ function isAdmin(){return S.staffRole==='admin';}
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
 // Inside Riders the summary report stays admin-only (renderRiders).
 const DESK_TABS=['queue','waitlist','lockers','cashier','workshop']; // Lockers (2026-11-09): the desk gives them // the Waitlist (2026-11-09): a section of its own, opened by whoever opens Bookings // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
-const ROLE_TABS={volunteer:[],door:[],manager:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','market','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','waitlist','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','store','inventory'],owner:['dashboard','queue','waitlist','lockers','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','market','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
+const ROLE_TABS={volunteer:[],door:[],manager:['dashboard','queue','waitlist','lockers','safety','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','market','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','waitlist','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','store','inventory'],owner:['dashboard','queue','waitlist','lockers','safety','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','market','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
 function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]||DESK_TABS).filter(_stoSecOk);}
 // The Store and Payments (2026-11-10) are sections only where the database has them (staff_store_ready, _stoProbe): not on
 // the rail, not among the Team page's sections, not in "every section" anywhere else. A catalogue-only database
@@ -2435,7 +2439,7 @@ function _deskTabOk(tab){return tab==='settings'||tab==='reports'&&S.staffRole!=
 // call into (a return's fleet check, a void's reason, the night summary). Every other part comes the first time something asks for it (its stand-in fetches it).
 // Before the role is known nothing is held back. People's rarely opened views (peopleapps, peoplemore: staff round s10,
 // item 47) come only when one is opened; a session's report (sessreport) with the desk's parts.
-const STAFF_PART_TABS={reports:[],peopleapps:[],peoplemore:[],sessreport:['queue'],sessions:['sessions'],lockers:['lockers'],store:['store','payments'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],ask:['ask'],testimonials:['testimonials'],chat:['chat'],market:['market'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist'],announce:['queue','settings'],door:[]}; // door: fetched by its stand-in when a Door account signs in
+const STAFF_PART_TABS={safety:['safety'],reports:[],peopleapps:[],peoplemore:[],sessreport:['queue'],sessions:['sessions'],lockers:['lockers'],store:['store','payments'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],ask:['ask'],testimonials:['testimonials'],chat:['chat'],market:['market'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist'],announce:['queue','settings'],door:[]}; // door: fetched by its stand-in when a Door account signs in
 function _staffPartWanted(n){const tabs=STAFF_PART_TABS[n];if(!tabs||!S.staffRole)return true;return tabs.some(_deskTabOk);}
 // A staff account's own preferences (2026-10-09): staff.prefs through staff_my_prefs, with this
 // device's copy (cq_prefs, kept per account) read at once so a reload starts as the person left it.
@@ -3310,7 +3314,7 @@ let _sbWritesOut=0;
 // wait in the request lane like any read (2026-10-27: the rider's page reads checked against their
 // migrations - customer_my_badges to petromin_member at the end - and the consents, the deletion request
 // and the last-seen stamp left out, which write).
-const _READ_RPC=new Set(['staff_owner_choices','staff_customer_export','staff_archived_list','staff_archived_account','staff_customer_stats','hub_overview','hub_photos_list','hub_photo_img','staff_rotm_tally','staff_goal_progress','customer_my_titles','member_directory','staff_title_auto_holders','staff_sync','staff_people','list_sessions','my_bookings','customer_profile','customer_exists','customer_token_ok','customer_pwd_state','customer_fix_fields','community_member','promo_lookup','staff_resolve_bike','staff_phone_accounts','staff_email_for_phone','staff_inventory_costs','staff_inventory_extras','staff_ambassador_stats','staff_team_list','staff_team_more','staff_purge_preview','staff_operator_list','staff_sign_in_methods','staff_last_seen','staff_sign_in_lock','staff_undo_code_state','staff_audit_search','staff_invite_check','customer_my_badges','customer_emergency','customer_about','badge_catalog','badge_seasons','badge_weeks','customer_blood_type','customer_whatsapp','customer_purchases','ambassador_mine','petromin_member','customer_sport','testimonial_mine','staff_testimonials','staff_testimonial_photo','staff_market_mode','staff_market_counts','staff_market_listings','staff_market_listing_get','staff_market_reports','staff_market_thread','staff_market_sellers','staff_market_shops','staff_market_commission']);
+const _READ_RPC=new Set(['safety_mine','staff_safety_list','staff_owner_choices','staff_customer_export','staff_archived_list','staff_archived_account','staff_customer_stats','hub_overview','hub_photos_list','hub_photo_img','staff_rotm_tally','staff_goal_progress','customer_my_titles','member_directory','staff_title_auto_holders','staff_sync','staff_people','list_sessions','my_bookings','customer_profile','customer_exists','customer_token_ok','customer_pwd_state','customer_fix_fields','community_member','promo_lookup','staff_resolve_bike','staff_phone_accounts','staff_email_for_phone','staff_inventory_costs','staff_inventory_extras','staff_ambassador_stats','staff_team_list','staff_team_more','staff_purge_preview','staff_operator_list','staff_sign_in_methods','staff_last_seen','staff_sign_in_lock','staff_undo_code_state','staff_audit_search','staff_invite_check','customer_my_badges','customer_emergency','customer_about','badge_catalog','badge_seasons','badge_weeks','customer_blood_type','customer_whatsapp','customer_purchases','ambassador_mine','petromin_member','customer_sport','testimonial_mine','staff_testimonials','staff_testimonial_photo','staff_market_mode','staff_market_counts','staff_market_listings','staff_market_listing_get','staff_market_reports','staff_market_thread','staff_market_sellers','staff_market_shops','staff_market_commission']);
 function _fetchT(input,init){
   const m=String((init&&init.method)||(input&&input.method)||'GET').toUpperCase();
   const _rpc=m==='POST'&&/\/rest\/v1\/rpc\/([^/?#]+)/.exec(String((input&&input.url)||input));
@@ -5100,7 +5104,7 @@ function _waiverCopy(s,e){const k=_waiverKind(s);return k==='blood'?(_bldVis(e)?
 // Arabic carry the full text; every other language shows the English one under a line that
 // says so. Bump PRIVACY_VERSION with any change to the text - it is the date on the notice -
 // and PRIVACY_ASK_FROM with it when riders must confirm the change.
-const PRIVACY_VERSION='2026-11-20';
+const PRIVACY_VERSION='2026-11-21';
 // The last version riders must confirm. A change the owner decides needs no fresh confirmation
 // (2026-10-03: the breakfast-venue row; the same day, Instagram follower counts; 2026-10-05: the
 // emergency contact, said again where it is asked; 2026-10-06: Run for Her runners' details to Sela
@@ -5139,7 +5143,9 @@ const PRIVACY_VERSION='2026-11-20';
 // and the dates a rider asks to be told about when booking opens, kept until 30 days after they are told or the ask ends, deleted at
 // once when removed or when the date passes unsent; 2026-11-20: the Community chat: the messages a member writes, shown to the
 // other Community members with the writer's full name for 6 hours once the writer agrees with their first message, kept
-// and seen by staff without a time limit, and the reports members make about a message, staff only) moves
+// and seen by staff without a time limit, and the reports members make about a message, staff only; 2026-11-21: safety feedback,
+// what happened on a ride or session, an injury's details, the ratings of our response and the comments, sent by choice
+// with consent, seen by our staff, kept 3 years) moves
 // PRIVACY_VERSION, the date shown, but not this one;
 // an account that confirmed this version or any later one is not asked again.
 const PRIVACY_ASK_FROM='2026-10-02';
@@ -5173,6 +5179,7 @@ en:[
     ['Suggest a ride (Community members only): each suggestion you send (a route, a breakfast spot, a ride idea or something else, in your own words), when you sent it, and our team’s status and reply','Always optional: only if you send one. Seen by you and our staff; other members never see it. Kept until your account is deleted.','Planning rides and sessions around what our members suggest, and telling you in your Updates list when yours is planned or happens'],
     ['The Community chat (Community members only): the messages you write and when you sent them; that you agreed to your full name being shown; and which messages you reported to our team','Always optional: only if you write. Each message is shown with your full name to the other Community members for 6 hours, and to our staff; nothing else about you is shown. We ask you to agree to this with your first message. You can take any message of yours off the chat at any time, and our staff can remove a message or stop an account writing. Our staff keep every message, also after the 6 hours and after it is removed. A report is seen by our staff only.','So Community members can talk to each other and to our team, and to keep the chat suitable for everyone'],
     ['Testimonials: the words you write about our rides and services, your star rating, what it is about, your name as you choose to show it (your full name, your first name and last initial, or none), a photo if you add one, and, beside a name, the year you started riding with us and how many rides you have done','Always optional: only if you write one and tick that MicroMobility may publish it. Seen by our staff; once our staff publish it, by anyone on micromobility.sa. You can delete yours at any time in Account.','Publishing what riders say about us on our website, with your consent. A photo is deleted as soon as our team decides not to publish it.'],
+    ['Safety feedback: after a ride or session, what happened (nothing, a near miss, feeling unsafe, a fall, a crash or an injury), where you or the rider you booked for were hurt and how seriously, the safety briefing, the helmet and bike, what caused it and what would have prevented it, your ratings of how our team responded, and your comments and ideas','Always optional: only if you send it, and you tick that we may use it. An injury’s details are health information, which we ask for only to look after riders and make our rides safer. Seen by our staff only; never shown to other riders or published.','Making our rides and sessions safer and our response faster, and following up with you about what happened; our reply shows on your booking'],
     ['The mentorship programme (Community members only): if you register as a mentee, your university, field of study, city, country, starting year, the help you want, your goal and the mentor gender you prefer; if you register as a mentor, where and what you studied, your work, the places you know, how you can help and what you tell us','Optional: only if you register. A mentee’s university and field of study are shown to Community members without their name; their city, country, starting year, the help wanted, their goal and the mentor gender they prefer are seen by our staff only. What a mentor tells us is seen by our staff only; a short line about their experience, without their name, is shown to the one student our staff propose them to. Once you both accept, we share your first name and WhatsApp number with that one person. You can step back at any time; we then stop sharing them.','Matching students starting university with Community members who can help them, and following up on each match'],
     ['A blood donation event’s registration: your name, mobile number, birth date and nationality, whether you come as a donor or a visitor, which club or community you are from, your email address and blood type if you come as a donor, your gender if you come as a visitor, and whether you donated','Asked only when you register for a blood donation event. Seen by you, our staff and that event’s partners and third parties once you agree to share them. We never ask for or keep your ID or Iqama number.','Registering you for the event, and giving confirmed donors and checked-in visitors any reward the event offers'],
     ['Volunteering: the opportunities you register for, your message and preferred role, whether you are accepted, your role, when you start and finish, your volunteering hours, that you accepted the volunteer agreement, what you do on the volunteer portal, notes our team keeps, and our team’s rating of how each event you work went, with their comments','Only if you register to volunteer, or our team adds volunteering hours to your account. Seen by you and our staff, except our team’s notes, ratings and comments, which only our staff see.','Running volunteering at our events, your record of hours and your certificate, and choosing volunteers for later events'],
@@ -5214,6 +5221,7 @@ en:[
     '<strong>To share a mentor’s or a mentee’s first name and WhatsApp number with their match:</strong> your consent, which we ask for when you register and which you withdraw by stepping back.',
     '<strong>To publish your testimonial on our website:</strong> your consent, the box you tick when you send it, which you withdraw by deleting it.',
     '<strong>To show your full name with your messages in the Community chat:</strong> your consent, which we ask for with your first message; you withdraw it by taking your messages off the chat or by asking us to.',
+    '<strong>Safety feedback, including any injury details:</strong> your explicit consent, given with the tick when you send it; you can ask us to delete it at any time.',
   ]},
   {p:'<strong>We use your data only for the purposes above.</strong> If we ever want to use it for something else, we will ask you first, unless the law allows otherwise.'},
   {h:'If you don’t give us your data'},
@@ -5263,6 +5271,7 @@ en:[
     '<strong>The Saturdays you plan to come:</strong> deleted when the month ends.',
     '<strong>Your interests:</strong> kept until you change them or your account is deleted.',
     '<strong>Testimonials:</strong> kept until you delete yours or our staff remove it; a photo is deleted as soon as our team decides not to publish it.',
+    '<strong>Safety feedback:</strong> kept 3 years from when you send it, then deleted.',
     '<strong>Community chat messages:</strong> shown to members for 6 hours. After that, and from the moment you remove one, only our staff can see it; we keep these messages and do not delete them.',
   ]},
   {p:'To destroy data, we either delete it permanently from our database or remove everything that identifies you, so it can only be used in anonymous totals. Deleted data leaves our backups within 7 days.'},
@@ -5312,6 +5321,7 @@ ar:[
     ['اقترح جولة (لأعضاء المجتمع فقط): كل اقتراح ترسله (مسار، أو مكان للفطور، أو فكرة جولة، أو شيء آخر، بكلماتك)، ووقت إرساله، وحالته وردّ فريقنا عليه','اختياري دائماً: فقط إن أرسلت اقتراحاً. لا يراه إلا أنت وموظفونا، ولا يراه الأعضاء الآخرون أبداً. يُحفظ حتى حذف حسابك.','لتخطيط الجولات والفعاليات وفق ما يقترحه أعضاؤنا، ولإبلاغك في قائمة التحديثات عندما نخطط لاقتراحك أو ننفّذه'],
     ['دردشة المجتمع (لأعضاء المجتمع فقط): الرسائل التي تكتبها ووقت إرسالها، وموافقتك على إظهار اسمك الكامل، والرسائل التي أبلغت فريقنا عنها','اختياري دائماً: فقط إن كتبت. تظهر كل رسالة مع اسمك الكامل لأعضاء المجتمع الآخرين لمدة 6 ساعات، ولموظفينا، ولا يظهر عنك أي شيء آخر. نطلب موافقتك على ذلك مع أول رسالة ترسلها. يمكنك إزالة أي رسالة لك من الدردشة في أي وقت، ويمكن لموظفينا حذف رسالة أو إيقاف حساب عن الكتابة. يحتفظ موظفونا بكل رسالة، حتى بعد مرور 6 ساعات وبعد إزالتها. البلاغ لا يراه إلا موظفونا.','ليتمكن أعضاء المجتمع من التحدث مع بعضهم ومع فريقنا، وللحفاظ على الدردشة مناسبة للجميع'],
     ['الشهادات: الكلمات التي تكتبها عن جولاتنا وخدماتنا، وتقييمك بالنجوم، وموضوعها، واسمك كما تختار أن يظهر (اسمك الكامل، أو اسمك الأول والحرف الأول من اسم العائلة، أو دون اسم)، وصورة إن أضفتها، وإلى جانب الاسم السنة التي بدأت فيها الركوب معنا وعدد جولاتك','اختياري دائماً: فقط إن كتبت شهادة ووافقت على أن تنشرها MicroMobility. يراها موظفونا، وبعد أن ينشرها موظفونا يراها أي زائر لموقع micromobility.sa. يمكنك حذف شهادتك في أي وقت من «الحساب».','لنشر ما يقوله الراكبون عنا على موقعنا الإلكتروني، بموافقتك. تُحذف الصورة فور أن يقرر فريقنا عدم نشر الشهادة.'],
+    ['ملاحظات السلامة: بعد الجولة أو الفعالية، ما حدث (لا شيء، أو كاد يقع حادث، أو شعور بعدم الأمان، أو سقوط، أو اصطدام، أو إصابة)، وموضع إصابتك أو إصابة من حجزت له ومدى خطورتها، وشرح السلامة، والخوذة والدراجة، وسبب ما حدث وما كان سيمنعه، وتقييمك لاستجابة فريقنا، وتعليقاتك وأفكارك','اختياري دائماً: فقط إن أرسلتها ووافقت على أن نستخدمها. تفاصيل الإصابة معلومات صحية، ولا نطلبها إلا للعناية بالراكبين وجعل جولاتنا أكثر أماناً. لا يراها إلا موظفونا، ولا تُعرض على راكبين آخرين ولا تُنشر.','لجعل جولاتنا وفعالياتنا أكثر أماناً واستجابتنا أسرع، ولمتابعة ما حدث معك؛ ويظهر ردّنا في حجزك'],
     ['برنامج الإرشاد (لأعضاء المجتمع فقط): إن سجّلت كمسترشد: جامعتك وتخصصك ومدينتك ودولتك وسنة بدئك والمساعدة التي تريدها وهدفك وجنس المرشد الذي تفضّله؛ وإن سجّلت كمرشد: أين درست وماذا درست وعملك والأماكن التي تعرفها وكيف يمكنك المساعدة وما تخبرنا به','اختياري: فقط إذا سجّلت. تُعرض جامعة المسترشد وتخصصه لأعضاء المجتمع دون اسمه، ولا يرى مدينته ودولته وسنة بدئه والمساعدة التي يريدها وهدفه وجنس المرشد الذي يفضّله إلا موظفونا. وما يخبرنا به المرشد لا يراه إلا موظفونا، ويُعرض سطر قصير عن خبرته، دون اسمه، على الطالب الوحيد الذي يقترحه عليه موظفونا. وبعد قبولكما كليكما، نشارك اسمك الأول ورقم واتساب الخاص بك مع ذلك الشخص وحده. ويمكنك الانسحاب في أي وقت، وعندها نتوقف عن مشاركتهما.','مطابقة الطلاب الذين يبدؤون دراستهم الجامعية مع أعضاء المجتمع القادرين على مساعدتهم، ومتابعة كل مطابقة'],
     ['التسجيل في فعالية للتبرع بالدم: اسمك ورقم جوالك وتاريخ ميلادك وجنسيتك، وما إذا كنت ستحضر كمتبرع أم كزائر، والنادي أو المجتمع الذي تنتمي إليه، وبريدك الإلكتروني وفصيلة دمك إن حضرت كمتبرع، وجنسك إن حضرت كزائر، وما إذا كنت قد تبرعت','تُطلب فقط عند التسجيل في فعالية للتبرع بالدم. يطّلع عليها أنت وموظفونا والشركاء والأطراف الثالثة لتلك الفعالية بعد موافقتك على مشاركتها. لا نطلب رقم هويتك أو إقامتك ولا نحتفظ به.','تسجيلك في الفعالية، ومنح المتبرعين المؤكَّدين والزوار الذين سجّلوا حضورهم أي مكافأة تقدمها الفعالية'],
     ['التطوع: الفرص التي تسجل فيها، ورسالتك ودورك المفضل، وقبولك من عدمه، ودورك، ووقت بدئك وانتهائك، وساعات تطوعك، وموافقتك على إقرار المتطوع، وما تقوم به في بوابة المتطوعين، وملاحظات يحتفظ بها فريقنا، وتقييم فريقنا لأدائك في كل فعالية تعمل فيها مع تعليقاتهم','فقط إذا سجلت للتطوع، أو أضاف فريقنا ساعات تطوع إلى حسابك. يراها أنت وموظفونا، باستثناء ملاحظات فريقنا وتقييماته وتعليقاته، فلا يراها إلا موظفونا.','إدارة التطوع في فعالياتنا، وسجل ساعاتك وشهادتك، واختيار المتطوعين للفعاليات القادمة'],
@@ -5353,6 +5363,7 @@ ar:[
     '<strong>لمشاركة الاسم الأول ورقم واتساب للمرشد أو المسترشد مع من تتم مطابقته معه:</strong> موافقتك، ونطلبها عند تسجيلك، وتسحبها بالانسحاب.',
     '<strong>لنشر شهادتك على موقعنا الإلكتروني:</strong> موافقتك، أي المربع الذي تضع عليه علامة عند إرسالها، وتسحبها بحذف الشهادة.',
     '<strong>لإظهار اسمك الكامل مع رسائلك في دردشة المجتمع:</strong> موافقتك، ونطلبها مع أول رسالة ترسلها؛ وتسحبها بحذف رسائلك أو بطلب ذلك منا.',
+    '<strong>ملاحظات السلامة، بما فيها تفاصيل أي إصابة:</strong> موافقتك الصريحة، وتمنحها بوضع العلامة عند الإرسال؛ ويمكنك أن تطلب منا حذفها في أي وقت.',
   ]},
   {p:'<strong>لا نستخدم بياناتك إلا للأغراض المذكورة أعلاه.</strong> وإذا أردنا استخدامها لغرض آخر، فسنطلب موافقتك أولًا، ما لم يُجز النظام غير ذلك.'},
   {h:'إذا لم تزوّدنا ببياناتك'},
@@ -5402,6 +5413,7 @@ ar:[
     '<strong>أيام السبت التي تنوي الحضور فيها:</strong> تُحذف بانتهاء الشهر.',
     '<strong>اهتماماتك:</strong> نحتفظ بها حتى تغيّرها أو يُحذف حسابك.',
     '<strong>الشهادات:</strong> نحتفظ بها حتى تحذف شهادتك أو يزيلها موظفونا؛ وتُحذف الصورة فور أن يقرر فريقنا عدم نشر الشهادة.',
+    '<strong>ملاحظات السلامة:</strong> نحتفظ بها 3 سنوات من تاريخ إرسالها، ثم تُحذف.',
     '<strong>رسائل دردشة المجتمع:</strong> تظهر للأعضاء لمدة 6 ساعات. بعد ذلك، ومنذ لحظة إزالتك لرسالة، لا يراها إلا موظفونا؛ ونحتفظ بهذه الرسائل ولا نحذفها.',
   ]},
   {p:'لإتلاف البيانات، إما أن نحذفها نهائيًا من قاعدة بياناتنا، أو نزيل كل ما يحدد هويتك بحيث لا تُستخدم إلا في إحصاءات مجهولة الهوية. وتُزال البيانات المحذوفة من نسخنا الاحتياطية خلال 7 أيام.'},
@@ -8099,12 +8111,12 @@ let _navRestoring=false;
 // them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
-const STAFF_PATHS={reports:'reports',volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',store:'store',payments:'payments',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ask:'ask',testimonials:'testimonials',chat:'chat',market:'marketplace',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
+const STAFF_PATHS={reports:'reports',volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',safety:'safety',dashboard:'dashboard',cashier:'sales',store:'store',payments:'payments',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ask:'ask',testimonials:'testimonials',chat:'chat',market:'marketplace',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',members:'members'};
 // The account page's three parts (the owner, 2026-11-09): Account at /account, then /account/stats and /account/badges.
 const ACC_VIEWS=['account','stats','badges'];
 // The Account part is a menu whose rows open small pages (the user, 2026-11-10), each at /account/<page>.
-const ACC_PAGES=['personal','contact','residence','emergency','riding','sport','about','wallet','invite','ambassador','volunteer','purchases','company','notifications','updates','help','testimonial','delete'];
+const ACC_PAGES=['personal','contact','residence','emergency','riding','sport','about','wallet','invite','ambassador','volunteer','purchases','company','notifications','updates','help','testimonial','safety','delete'];
 // A signed-out visitor's two pages: Sign in at /, Create account at /signup (the owner, 2026-09-28),
 // so a link can open the sign-up itself. Signed in, /signup is just /.
 const SIGNUP_PATH='signup';
@@ -16657,6 +16669,7 @@ function setStaffTab(tab,o){
   else if(tab==='badgereq')renderBadgeRequests();
   else if(tab==='ask')renderAsk();
   else if(tab==='testimonials')renderTestimonials();
+  else if(tab==='safety')renderSafety(); // safety feedback (2026-11-21, migration 20261121400000)
   else if(tab==='chat')renderChat(); // the Community chat (2026-11-20, migration 20261120233000)
   else if(tab==='market')renderMarket();
   else if(tab==='reports')renderReports(); // every report in one place (the reports rework, 2026-11-13)
@@ -17059,7 +17072,7 @@ function _meetLL(s){
 }
 function _meetNm(s){return String((s&&((S.lang==='ar'&&s.meet_name_ar)||s.meet_name))||'').trim();}
 
-const _SNAV_ICON={reports:'print',store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',ask:'ask',testimonials:'quote',chat:'chat',market:'grid',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={reports:'print',store:'bag',payments:'wallet',waitlist:'promote',lockers:'lock',badgereq:'medal',ask:'ask',testimonials:'quote',chat:'chat',safety:'shield',market:'grid',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   if(!_ART.bag)_ART.bag='<path opacity=".35" d="M4 8h16l-1.1 12.2A2 2 0 0 1 16.9 22H7.1a2 2 0 0 1-2-1.8z"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9h-2V6.5a2 2 0 0 0-4 0V9z"/>'; // the Store's mark (2026-11-10), kept here for the same reason
@@ -17170,6 +17183,8 @@ function renderStaffTabs(){
   document.getElementById('tab-testimonials').classList.toggle('active',S.staffTab==='testimonials');
   _tsmRailSync();if(!S._tsmCAt&&S._staffAuthed&&_deskTabOk('testimonials'))_tsmCount(); // Testimonials' name, and those waiting for review (then _secPolls)
   document.getElementById('tab-chat')      .classList.toggle('active',S.staffTab==='chat');
+  document.getElementById('tab-safety')    .classList.toggle('active',S.staffTab==='safety');
+  _sfsRailSync();if(!S._sfsCAt&&S._staffAuthed&&_deskTabOk('safety'))_sfsCount(); // Safety feedback's name, and the new ones (then _secPolls)
   _chsRailSync();if(!S._chsCAt&&S._staffAuthed&&_deskTabOk('chat'))_chsCount(); // Chat's name, and the reported messages nobody has looked at (then _secPolls)
   document.getElementById('tab-market').classList.toggle('active',S.staffTab==='market');
   if(S._mkMode===undefined)_mkProbe();else{_mkRailSync();if(!S._mkCAt&&_deskTabOk('market'))_mkCount();} // the Marketplace: asked once whether the database has it, then its name and what waits for the team (then _secPolls)
@@ -19204,10 +19219,10 @@ const NT_KINDS=[['refheld','ntkRefHeld','community'],['long','ntkLong','queue'],
   ['watch','ntkWatch','community'], // someone a staffer watches books or arrives (People round, 2026-11-18)
 ];
 // The office's four queues (staff round s10, item 33): until then only numbers on the rail. Settings lists these after NT_KINDS.
-const NT_KINDS_OFF=[['bdr','ntkBdr','badgereq'],['stoord','ntkStoOrd','store'],['refowed','ntkRefOwed','payments'],['flags','ntkFlags','community'],['fup','ntkFup','community']]; // fup: follow-ups due today or overdue (s10b, migration 20261111180700)
+const NT_KINDS_OFF=[['bdr','ntkBdr','badgereq'],['stoord','ntkStoOrd','store'],['refowed','ntkRefOwed','payments'],['flags','ntkFlags','community'],['fup','ntkFup','community'],['sfy','ntkSfy','safety']]; // sfy: a new safety feedback telling of a crash or an injury (2026-11-21) // fup: follow-ups due today or overdue (s10b, migration 20261111180700)
 // Settings groups the switches by the section their lines open (s10, item 33): Desk, People, Fleet, Volunteers, and the
 // Office for every other section.
-const NT_GROUPS=[['presetDesk','queue sessions waitlist lockers'],['snavPeople','community badgereq'],['snavFleet','inventory workshop'],['tabVolunteers','volunteers'],['ntgOffice','']];
+const NT_GROUPS=[['presetDesk','queue sessions waitlist lockers safety'],['snavPeople','community badgereq'],['snavFleet','inventory workshop'],['tabVolunteers','volunteers'],['ntgOffice','']];
 // The office's queues in the bell (s10, item 33): badge requests waiting, store orders paid and waiting to be prepared,
 // refunds owed (due or failed) and accounts asked to fix their details, from what the rail's counts already read
 // (_bdrLoad, _stoCounts) and the Flagged list once People has read it; nothing new is read for them.
@@ -19218,6 +19233,7 @@ function _ntOffice(add){
   if(ok('payments'))add('refowed',(S._payDue||[]).map(r=>({id:r.id,txt:t('ntiRefOwed').replace('{0}',_money(r.amount,_NOISO)),at:r.created_at})),'payOwedBadge','warn',['_on_goPayRefunds'],Array.isArray(S._payDue));
   if(ok('community'))add('flags',(S._flags||[]).filter(x=>x&&x.status==='pending').map(x=>({id:x.id,txt:t('ntiFlags').replace('{0}',nm(x.customer_id)),at:x.flagged_at})),'ntFlags','warn',['_on_goCommunity','flagged'],Array.isArray(S._flags));
   {const f=globalThis['_fup'+'Bell'];if(typeof f==='function')f(add);} // follow-ups due today or overdue (s10b): People's part, by name
+  if(ok('safety'))add('sfy',(S._sfsUrg||[]).map(x=>({id:x.id,txt:t('ntiSfy').replace('{0}',x.rider_name||x.customer_name||'—').replace('{1}',t(x.kind==='crash'?'sfsKCrash':'sfsKInjury')),at:x.created_at})),'ntSfy','red',['setStaffTab','safety'],Array.isArray(S._sfsUrg)); // a new crash or injury told in safety feedback (2026-11-21); the rest arrive quietly
 }
 function _on_goPayRefunds(){S.payView='refunds';setStaffTab('payments');}
 // Applications before their list is read: one line while the count probe (_appsProbe) holds more than it first counted.
@@ -21254,7 +21270,7 @@ function _deferWhileTyping(tab){
   return true;
 }
 function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for something the staffer did
-  _dqInit();_stoTabLabelSync();_askRailSync();_tsmRailSync();_chsRailSync();_mkRailSync(); // the Store's, Payments', Ask's, Testimonials' and Chat's names, in the language on screen
+  _dqInit();_stoTabLabelSync();_askRailSync();_tsmRailSync();_chsRailSync();_mkRailSync();_sfsRailSync(); // the Store's, Payments', Ask's, Testimonials' and Chat's names, in the language on screen
   if(S.staffRole==='door'){_doorShow();return;}
   const tab=S.staffTab;
   if(bg&&['cashier','inventory','community','customers','bikes'].includes(tab)&&_deferWhileTyping(tab)){try{_ahRefresh();}catch(_){}try{_ntSync();}catch(_){}return;}
@@ -21267,6 +21283,7 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
   else if(tab==='community')renderCommunity();
   else if(tab==='badgereq'){if(!bg)renderBadgeRequests();} // its own loader: the desk's data has nothing for it
   else if(tab==='testimonials'){if(!bg)renderTestimonials();} // its own loader
+  else if(tab==='safety'){if(!bg)renderSafety();} // its own loader (2026-11-21)
   else if(tab==='chat'){if(!bg)renderChat();else{const f=globalThis['_chs'+'Paint'];if(typeof f==='function')f();}} // its own loader, live by itself; the desk's data (the writers' names) only redraws what changed, by a built name (the part's own)
   else if(tab==='market'){if(!bg)renderMarket();} // its own loaders
   else if(tab==='ask'){if(!bg||!(S._askS&&S._askS.cur))renderAsk();} // its own loader; the list follows the tags' names, a page on screen (a draft in hand) is left alone
@@ -22465,6 +22482,89 @@ function _tstAskDone(id){
   try{localStorage.setItem(TST_ASK_KEY+id,JSON.stringify({at:Date.now(),done:1}));}catch(_){}
   S._tma=null;_tstAskHost(null);setTimeout(_forceRatingPrompt,0);
 }
+// ── Safety feedback (the user, 2026-11-21: "i dont want it to be an incident report but more of a way we can gather info
+// and feedback on how we can make our services better and safer and more responsive"; migration 20261121400000) ──
+// Every past booking carries a Safety feedback button on its card from the moment it ends until 7 days after
+// (safety_mine.entries says which; before its answer the card judges by the session's end and date), and once sent the
+// button says its state (Received / Followed up / Closed) and opens what was sent with the team's reply. The page is
+// Account > Safety feedback (/account/safety; ?b=<entry> on an arrival names the booking, _readSfyEntry). Its code and
+// words, in eleven languages, are rider-safety.js, fetched when first needed (SFY_V); what it takes from the page is
+// _sfyDeps. The read is here (_sfyMineGet) so the card and the page share one answer: at most once in five minutes from
+// My bookings, once a minute from the page.
+const SFY_V=''; // build stamps a hash of rider-safety.js
+const SFY_DAYS=7;
+function _sfyMineGet(c,force){
+  if(!c||!c.session_token||!sb||S._sfyGone)return Promise.resolve(null);
+  const M=S._sfyM&&S._sfyM.id===c.id?S._sfyM:(S._sfyM={id:c.id,d:null,at:0,busy:false,err:'',p:null});
+  if(M.p)return M.p;
+  if(!force&&M.d&&Date.now()-M.at<6e4)return Promise.resolve(M.d);
+  M.busy=true;M.err='';
+  return(M.p=Promise.resolve(sb.rpc('safety_mine',{p_id:c.id,p_token:c.session_token})).then(r=>{
+    M.busy=false;M.p=null;M.at=Date.now();
+    const d=r&&!r.error?r.data:null;
+    if(d&&d.ok===true)M.d=d;
+    else if(r&&r.error&&_rpcAbsent(r.error)){M.err='gone';S._sfyGone=true;}
+    else M.err='net';
+    return M.d;
+  },()=>{M.busy=false;M.p=null;M.err='net';return M.d;}));
+}
+function _sfyLoad(){
+  window._sfyDeps={ic:_cuIc,tick:_tickHtml,tickSet:_tickSet,date:_tstDay,skel:skeletonList,offline:_offlineStop,absent:_rpcAbsent,mine:_sfyMineGet,cards:_sfyCards};
+  if(window._sfrPage)return Promise.resolve(true);
+  if(S._sfyLoading)return S._sfyLoading;
+  return(S._sfyLoading=new Promise(res=>{
+    const s=document.createElement('script');s.src='/rider-safety.js?v='+SFY_V;
+    s.onload=()=>{S._sfyLoading=null;res(!!window._sfrPage);};
+    s.onerror=()=>{S._sfyLoading=null;s.remove();res(false);};
+    document.head.appendChild(s);
+  }));
+}
+function _sfyPageOpen(){_sfyLoad().then(ok=>{if(ok)window._sfrPage();else toast(t('errConnection'),'error');});}
+// The card's button: the booking's entry, the page opened for it.
+function _sfyGo(id){S._sfyEntry=String(id||'');S._sfyF=null;setCustTab('account','safety');try{window.scrollTo(0,0);}catch(_){}}
+// An arrival at /account/safety?b=<entry> (the website's link): the booking it names, then the query comes off.
+function _readSfyEntry(pn){
+  try{
+    const u=new URL(location.href),b=u.searchParams.get('b');if(b===null)return;
+    if(pn&&pn.view==='customer'&&pn.ctab==='account'&&pn.sub==='safety'){S._sfyEntry=b.slice(0,80);u.searchParams.delete('b');history.replaceState(history.state,'',u.pathname+u.search+u.hash);}
+  }catch(_){}
+}
+// The past booking's button: its state once sent, Safety feedback while it can be sent, else nothing.
+function _sfyBtn(g){
+  const c=S.loggedIn;if(!c||!c.session_token||S._sfyGone||!g||!g.length)return'';
+  const ids=g.map(e=>String(e.id)),M=S._sfyM&&S._sfyM.id===c.id&&S._sfyM.d?S._sfyM.d:null;
+  const sent=M&&(M.items||[]).find(x=>ids.includes(String(x.entry_id)));
+  let due;
+  if(M)due=(M.entries||[]).find(x=>ids.includes(String(x.entry_id)));
+  else{
+    const p=g.find(e=>['waiting','active','done'].includes(e.status)),sess=p&&_sessDisp(p.sessionId),d=String((p&&(p.sessionDate||p.sessionId))||'').slice(0,10);
+    const from=new Date(Date.parse(todayStr()+'T12:00:00Z')-SFY_DAYS*864e5).toISOString().slice(0,10);
+    due=p&&sess&&_sessEnded(sess)&&d>=from?{entry_id:p.id}:null;
+  }
+  if(!sent&&!due)return'';
+  const st=sent?t(sent.status==='followed'?'sfyStFol':sent.status==='closed'?'sfyStClo':'sfyStNew'):'';
+  return`<button type="button" class="btn-sm btn-secondary cu-f1 sfy-btn" data-on-click="${_on("_sfyGo",String((sent||due).entry_id))}">${_cuIc('shield')} ${esc(sent?t('sfyCardSt').replace('{0}',st):t('sfyBtn'))}</button>`;
+}
+// The answer arrived (or a send changed it): the past stack is drawn again when its buttons would read differently.
+function _sfyCards(){
+  const c=S.loggedIn,h=document.getElementById('mr-past');if(!c||!h||S.custTab!=='myrides')return;
+  if(!(S._sfyM&&S._sfyM.d))return; // nothing read: the buttons drawn from the booking's own dates stay as they are
+  const sig=JSON.stringify([S._sfyM.d.items,S._sfyM.d.entries]);if(sig===S._sfySig)return;S._sfySig=sig;
+  // only the buttons whose words change are written again, never the stack: a pass someone is tapping or reading stays put
+  const tp=document.createElement('template');
+  for(const g of _myRideGroups(c).past){
+    const el=h.querySelector('.sfy-slot[data-sfy-g="'+CSS.escape(String(g[0].id))+'"]');if(!el)continue;
+    tp.innerHTML=_sfyBtn(g);if(el.innerHTML!==tp.innerHTML)el.innerHTML=tp.innerHTML;
+  }
+}
+// My bookings painted: asked at most once in five minutes, only with a past booking from the last 60 days on screen.
+function _sfyCheck(cust,past){
+  if(!cust||!cust.session_token||S._sfyGone||!past||!past.length)return;
+  const M=S._sfyM&&S._sfyM.id===cust.id?S._sfyM:null;if(M&&(M.p||M.d&&Date.now()-M.at<3e5))return;
+  const from=new Date(Date.now()-60*864e5).toISOString().slice(0,10);
+  if(!past.some(g=>String(g[0].sessionDate||g[0].sessionId||'').slice(0,10)>=from))return;
+  _sfyMineGet(cust,true).then(()=>{S._sfySig=null;_sfyCards();});
+}
 function renderBookingTicket(entries,opts){
   opts=opts||{};
   if(!entries||!entries.length)return'';
@@ -22597,7 +22697,7 @@ function renderBookingTicket(entries,opts){
       ${_rideKind(sess)==='snd96'?'':`<button class="btn-sm btn-secondary cu-act88" data-on-click="${_on("showRescheduleModal",primary.sessionId)}">${ICON_RESCHEDULE} ${t('rescheduleBtn')}</button>`}`}
       <button class="btn-sm btn-red cu-act88" data-on-click="${_on("showCancelReasonModal",primary.id)}">${t(_allWl?'leaveWlBtn':'cancelBooking')}</button>
     </div>`:((opts.bookAgain&&!opts.card)?`<div class="cu-tk-actions">
-      ${rateBtn}
+      ${rateBtn}<span class="sfy-slot" data-sfy-g="${esc(String(primary.id))}">${_sfyBtn(g) /* Safety feedback (2026-11-21) */}</span>
       ${(_isRun(sess)||_isRace(sess)||_isBlood(sess))?'':`<button class="btn-sm btn-green cu-act110" data-on-click="${_on("bookAgain",_ids)}">${_cuIc('again')} ${t('bookAgainBtn')}</button>`}
     </div>`:'');
   // cu-num-3: a one- or two-digit number ("#7", "#45"), which the circuit's ticket draws larger still (2026-11-15).
@@ -30781,6 +30881,209 @@ function _chsRailSync(){
   const n=S._chsN|0,k=S.lang+'|'+n;if(l.dataset.k===k)return;l.dataset.k=k;
   l.innerHTML=esc(t('chsRail'))+(n?` <span class="tab-badge" title="${esc(t('chsWaitN').replace('{0}',n))}">${n>99?'99+':n}</span>`:'');
 }
+// ── Safety feedback: the rail's number and the bell (2026-11-21, migration 20261121400000) ─────────────────────────
+// The new ones (staff_safety_list('new'): its counts and those rows) at most every five minutes, on any section
+// (_secPolls); the section's own read sets it too. A crash or an injury among the new ones is also a line in the bell
+// (NT_KINDS_OFF 'sfy', its Settings switch); every other kind arrives quietly, the rail's number only.
+async function _sfsCount(force){
+  if(!sb||S._sfsCB||S._sfsGone||(!force&&S._sfsCAt&&Date.now()-S._sfsCAt<3e5))return;
+  S._sfsCB=true;S._sfsCAt=Date.now();
+  let r;try{r=await sb.rpc('staff_safety_list',{p_status:'new'});}catch(e){r={error:e};}
+  S._sfsCB=false;
+  if(r&&!r.error&&r.data&&r.data.counts)_sfsCountSet(r.data);
+  else if(r&&r.error&&_rpcAbsent(r.error))S._sfsGone=true; // a database from before it: no number, and the section says so
+  _sfsRailSync();
+}
+function _sfsCountSet(d){
+  const n=Math.floor(Number((d.counts||{}).new))||0;S._sfsN=n>0?n:0;S._sfsCAt=Date.now();
+  S._sfsUrg=(d.items||[]).filter(x=>x.status==='new'&&(x.kind==='crash'||x.kind==='injury'));
+  try{_ntSync();}catch(_){}
+}
+// The rail's name and the new ones, in the language on screen (the label loop in render() leaves it alone).
+function _sfsRailSync(){
+  const l=document.querySelector('#staff-tab-nav .tab-btn[data-stab="safety"] .snav-lbl');if(!l)return;
+  const n=S._sfsN|0,k=S.lang+'|'+n;if(l.dataset.k===k)return;l.dataset.k=k;
+  l.innerHTML=esc(t('sfsTitle'))+(n?` <span class="tab-badge" title="${esc(t('sfsNewN').replace('{0}',n))}">${n>99?'99+':n}</span>`:'');
+}
+// ── Safety feedback, the staff section (the user, 2026-11-21: "i dont want it to be an incident report but more of a way
+// we can gather info and feedback on how we can make our services better and safer and more responsive"; migration
+// 20261121400000) ──
+// /safety, in Today after Lockers on the rail (the part staff-parts/safety.js). The Bookings right in the database
+// (_staff_mod('queue')), so the section is derived from Bookings (_modIds, _MOD_PARENT) and staff_set_access never hears
+// of it. What riders send from a past booking (rider-safety.js): what happened, where and how badly they were hurt,
+// before the ride, the cause and what would have prevented it, three ratings of our response, ideas. Staff mark it
+// followed up or close it (Back to new undoes either), keep a note for the team and reply to the rider (shown on their
+// booking); each change is logged with an Undo. On top, the trends over every one in the dates the filter gives: what
+// happened, the most common causes, the average ratings and the sessions and places reported twice or more.
+const SFS_KIND={none:'sfsKNone',near_miss:'sfsKNear',unsafe:'sfsKUnsafe',fall:'sfsKFall',crash:'sfsKCrash',injury:'sfsKInjury'};
+const SFS_CAUSE={bike_condition:'sfsCBike',bike_size:'sfsCSize',route:'sfsCRoute',other_people:'sfsCPeople',speed:'sfsCSpeed',weather:'sfsCWeather',other:'sfsCOther'};
+const SFS_SEV={minor:'sfsSMinor',first_aid:'sfsSFa',clinic:'sfsSClinic',hospital:'sfsSHosp'};
+const SFS_PART={head:'sfsPHead',face:'sfsPFace',neck:'sfsPNeck',shoulder:'sfsPShoulder',arm:'sfsPArm',hand:'sfsPHand',chest:'sfsPChest',back:'sfsPBack',hip:'sfsPHip',leg:'sfsPLeg',knee:'sfsPKnee',foot:'sfsPFoot',other:'sfsPOther'};
+const SFS_ANS={yes:'sfsAYes',partly:'sfsAPartly',no:'sfsANo'};
+const SFS_ST={new:'sfsFNew',followed:'sfsFFol',closed:'sfsFClo'};
+const SFS_DONE={new:'sfsDoneNew',followed:'sfsDoneFol',closed:'sfsDoneClo'};
+function _sfsV(){return S._sfsV||(S._sfsV={f:'new',q:'',kind:'',cause:'',sev:'',sess:'',from:'',to:'',n:40});}
+async function _sfsLoad(force){
+  if(!sb||S._sfsBusy||(!force&&S._sfsAt&&Date.now()-S._sfsAt<6e4))return;
+  S._sfsBusy=true;S._sfsAt=Date.now();
+  let r;try{r=await sb.rpc('staff_safety_list',{p_status:null});}catch(e){r={error:e};}
+  S._sfsBusy=false;
+  const was=S._sfsSig;
+  if(r&&!r.error&&r.data&&Array.isArray(r.data.items)){S._sfs=r.data;S._sfsErr=false;S._sfsGone=false;_sfsCountSet(r.data);}
+  else if(r&&r.error&&_rpcAbsent(r.error))S._sfsGone=true;
+  else S._sfsErr=true;
+  S._sfsSig=JSON.stringify([S._sfs||null,!!S._sfsErr,!!S._sfsGone]);
+  _sfsRailSync();
+  if(S.view==='staff'&&S.staffTab==='safety'&&(force||S._sfsSig!==was))renderSafety();
+}
+function _sfsGet(id){return((S._sfs&&S._sfs.items)||[]).find(x=>String(x.id)===String(id))||null;}
+function _sfsPaint(){if(S.view==='staff'&&S.staffTab==='safety')renderSafety();}
+function _sfsSet(k,v){const W=_sfsV();W[k]=String(v||'');W.n=40;renderSafety();}
+function _sfsQ(v){const W=_sfsV();W.q=String(v||'');W.n=40;const h=document.getElementById('sfs-list');if(h)h.innerHTML=_sfsListHtml();else renderSafety();}
+function _sfsMore(){_sfsV().n+=40;renderSafety();}
+function _sfsWho(x){return x?x.rider_name||x.customer_name||'':'';}
+function _sfsDay(x){return String(x.created_at||'').slice(0,10);}
+// Every one inside the dates the filter gives (the trends read these), then the status pill, search and other filters.
+function _sfsInDates(){const W=_sfsV();return((S._sfs&&S._sfs.items)||[]).filter(x=>(!W.from||_sfsDay(x)>=W.from)&&(!W.to||_sfsDay(x)<=W.to));}
+function _sfsHay(x){return[x.rider_name,x.customer_name,x.customer_phone,x.session_title,x.session_location,x.prevent,x.resp_comment,x.ideas,x.staff_note,x.staff_reply].filter(Boolean).join(' ').toLowerCase();}
+function _sfsShown(){
+  const W=_sfsV(),ws=W.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  return _sfsInDates().filter(x=>(W.f==='all'||x.status===W.f)&&(!W.kind||x.kind===W.kind)&&(!W.cause||(x.causes||[]).includes(W.cause))
+    &&(!W.sev||x.injury_severity===W.sev)&&(!W.sess||String(x.session_id)===W.sess)&&(!ws.length||(h=>ws.every(w=>h.includes(w)))(_sfsHay(x))));
+}
+// Stars, drawn (never a glyph): filled up to n of five.
+function _sfsStars(n){
+  n=Math.max(0,Math.min(5,Number(n)||0));
+  const one=on=>`<svg aria-hidden="true" class="sfs-star${on?' on':''}" width="14" height="14" viewBox="0 0 24 24"><path d="M12 3.6l2.55 5.2 5.75.84-4.16 4.05.98 5.72L12 16.7l-5.12 2.7.98-5.72L3.7 9.64l5.75-.84z"/></svg>`;
+  return`<span class="sfs-stars" role="img" aria-label="${esc(t('sfsStarsOf').replace('{0}',n))}">${[1,2,3,4,5].map(i=>one(i<=n)).join('')}</span>`;
+}
+function _sfsAvg(L,k){const v=L.map(x=>Number(x[k])).filter(n=>n>0);return v.length?{a:(Math.round(v.reduce((s,n)=>s+n,0)/v.length*10)/10).toFixed(1),n:v.length}:null;}
+function _sfsSessLbl(x){return[x.session_title,x.session_date?shortDate(String(x.session_date).slice(0,10)):''].filter(Boolean).join(' · ')||String(x.session_id||'—');}
+// On top: what happened, the causes most named, the average ratings and the repeats, over the dates the filter gives.
+function _sfsTrendsHtml(){
+  const L=_sfsInDates();
+  if(!L.length)return'';
+  const cnt=(arr)=>{const m=new Map();arr.forEach(k=>{if(k)m.set(k,(m.get(k)||0)+1);});return[...m.entries()].sort((a,b)=>b[1]-a[1]);};
+  const kinds=cnt(L.map(x=>x.kind)),causes=cnt(L.flatMap(x=>x.causes||[])).slice(0,4);
+  const bySess=cnt(L.map(x=>x.session_id&&String(x.session_id))).filter(([,n])=>n>1).slice(0,5);
+  const byPlace=cnt(L.map(x=>String(x.session_location||'').trim())).filter(([,n])=>n>1).slice(0,5);
+  const av=(k,l)=>{const a=_sfsAvg(L,k);return`<div class="sfs-avg"><span>${esc(t(l))}</span>${a?`<b dir="ltr">${esc(a.a)}</b>${_sfsStars(Math.round(Number(a.a)))}<span class="am-meta">${esc(t('sfsAvgN').replace('{0}',a.n))}</span>`:`<span class="am-meta">${esc(t('sfsNoRate'))}</span>`}</div>`;};
+  const chip=(l,n,hot)=>`<span class="sfs-tchip${hot?' hot':''}">${esc(l)} <b dir="ltr">${n}</b></span>`;
+  const rep=[...bySess.map(([sid,n])=>{const x=L.find(y=>String(y.session_id)===sid);return`<li><button type="button" class="ca-link sfs-rep" data-on-click="${_on('_sfsSet','sess',sid)}"><bdi>${esc(_sfsSessLbl(x))}</bdi></button> <span class="am-meta">${esc(t('sfsRepN').replace('{0}',n))}</span></li>`;}),
+    ...byPlace.map(([p,n])=>`<li><bdi>${esc(p)}</bdi> <span class="am-meta">${esc(t('sfsRepN').replace('{0}',n))}</span></li>`)];
+  return`<div class="sfs-trends" role="group" aria-label="${esc(t('sfsTrends'))}">
+    <div class="sfs-tcol"><div class="sfs-th">${esc(t('sfsKind'))} <span class="am-meta">${esc(t('sfsTotal').replace('{0}',L.length))}</span></div><div class="sfs-tchips">${kinds.map(([k,n])=>chip(t(SFS_KIND[k]||k),n,k==='crash'||k==='injury')).join('')}</div></div>
+    <div class="sfs-tcol"><div class="sfs-th">${esc(t('sfsTopCause'))}</div>${causes.length?`<div class="sfs-tchips">${causes.map(([k,n])=>chip(t(SFS_CAUSE[k]||k),n)).join('')}</div>`:`<span class="am-meta">${esc(t('sfsNoneYet'))}</span>`}</div>
+    <div class="sfs-tcol"><div class="sfs-th">${esc(t('sfsAvgT'))}</div>${av('rate_speed','sfsRSpeed')}${av('rate_care','sfsRCare')}${av('rate_first_aid','sfsRFa')}</div>
+    <div class="sfs-tcol"><div class="sfs-th">${esc(t('sfsRepeat'))}</div>${rep.length?`<ul class="sfs-replist">${rep.join('')}</ul>`:`<span class="am-meta">${esc(t('sfsNoneYet'))}</span>`}</div>
+  </div>`;
+}
+function _sfsListHtml(){
+  const W=_sfsV(),L=_sfsShown(),filt=!!(W.q.trim()||W.kind||W.cause||W.sev||W.sess||W.from||W.to);
+  if(!L.length)return`<div class="am-meta sfs-none">${esc(t(filt?'sfsNoMatch':W.f==='new'?'sfsNoneNew':'sfsNoneHere'))}</div>`;
+  return`<div class="am-meta sfs-count">${esc(t('sfsShown').replace('{0}',Math.min(W.n,L.length)).replace('{1}',L.length))}</div>
+    <div class="sfs-list-in">${L.slice(0,W.n).map(_sfsRow).join('')}</div>
+    ${L.length>W.n?`<button type="button" class="btn-secondary btn-sm sfs-more" data-on-click="${_on('_sfsMore')}">${esc(t('amShowMore').replace('{0}',Math.min(40,L.length-W.n)))}</button>`:''}`;
+}
+function _sfsRow(x){
+  const id=x.id,sid=esc(String(id)),ro=!_editOk('safety'),st=x.status,ed=S._sfsEd===id,hot=x.kind==='crash'||x.kind==='injury';
+  const b=(cls,fn,label,arg)=>`<button type="button" class="btn-sm ${cls}" data-on-click="${_on(fn,id,arg)}">${esc(label)}</button>`;
+  const who=x.customer_id?`<button type="button" class="ca-link sfs-who" data-on-click="${_on('openAccountHistory',x.customer_id)}"><bdi>${esc(x.customer_name||'—')}</bdi></button>${x.customer_phone?` · <bdi dir="ltr">${esc(x.customer_phone)}</bdi>`:''}`:'—';
+  const ans=(k,v,extra)=>v?`<span>${esc(t(k))}: ${esc(t(extra&&extra[v]||SFS_ANS[v]||v))}</span>`:'';
+  const line=(k,v)=>v?`<div class="sfs-txt"><span class="sfs-k">${esc(t(k))}</span><p dir="auto">${esc(v)}</p></div>`:'';
+  const rate=(k,v,na)=>`<span class="sfs-rate">${esc(t(k))}: ${v?_sfsStars(v):`<span class="am-meta">${esc(t(na?'sfsRNa':'sfsNoRate'))}</span>`}</span>`;
+  let acts='';
+  if(!ro){
+    if(st==='new')acts+=b('btn-primary','_sfsStatus',t('sfsMarkFol'),'followed');
+    if(st!=='closed')acts+=b('btn-secondary','_sfsStatus',t('sfsClose'),'closed');
+    if(st!=='new')acts+=b('btn-secondary','_sfsStatus',t('sfsBackNew'),'new');
+    acts+=`<button type="button" class="btn-sm btn-secondary" aria-expanded="${ed}" aria-controls="sfs-ed-${sid}" data-on-click="${_on('_sfsEdit',id)}">${esc(t('sfsNoteReply'))}</button>`;
+  }
+  const D=(S._sfsDraft||{})[id]||{};
+  const edHtml=ed&&!ro?`<div class="sfs-ed" id="sfs-ed-${sid}">
+      <div class="form-group"><label for="sfs-note-${sid}">${esc(t('sfsNote'))}</label><textarea id="sfs-note-${sid}" rows="2" maxlength="1000" dir="auto" data-on-input="${_on('_sfsDraftIn',id,'note',_EL)}">${esc(D.note!=null?D.note:x.staff_note||'')}</textarea></div>
+      <div class="form-group"><label for="sfs-reply-${sid}">${esc(t('sfsReply'))}</label><textarea id="sfs-reply-${sid}" rows="3" maxlength="1000" dir="auto" aria-describedby="sfs-rh-${sid}" data-on-input="${_on('_sfsDraftIn',id,'reply',_EL)}">${esc(D.reply!=null?D.reply:x.staff_reply||'')}</textarea><div class="am-meta" id="sfs-rh-${sid}">${esc(t('sfsReplyHint'))}</div></div>
+      <div class="sfs-acts">${b('btn-primary','_sfsSave',t('sfsSave'))}${b('btn-secondary','_sfsEdit',t('cancelBtn'))}</div></div>`:'';
+  return`<div class="sfs-row sfs-${esc(st)}${hot?' sfs-hot':''}" data-sid="${sid}">
+    <div class="sfs-h"><span class="sfs-chip sfs-k-${esc(x.kind)}">${esc(t(SFS_KIND[x.kind]||x.kind))}</span>${x.injury_severity?`<span class="sfs-chip">${esc(t(SFS_SEV[x.injury_severity]))}</span>`:''}<span class="sfs-chip sfs-c-${esc(st)}">${esc(t(SFS_ST[st]||'sfsFNew'))}</span><span class="am-meta">${esc(fmtStamp(x.created_at))}</span></div>
+    <div class="sfs-meta">
+      <span>${esc(t('sfsRider'))}: <b><bdi>${esc(x.rider_name||'—')}</bdi></b></span>
+      <span>${esc(t('sfsAccount'))}: ${who}</span>
+      <span>${esc(t('sfsSession'))}: <bdi>${esc(_sfsSessLbl(x))}</bdi>${x.session_location?` · <bdi>${esc(x.session_location)}</bdi>`:''}</span>
+    </div>
+    ${(x.injury_parts||[]).length?`<div class="sfs-meta"><span>${esc(t('sfsParts'))}: ${esc((x.injury_parts||[]).map(p=>t(SFS_PART[p]||p)).join(', '))}</span></div>`:''}
+    <div class="sfs-meta">${ans('sfsBrief',x.briefing,{none:'sfsANoBrief'})}${ans('sfsHelmet',x.helmet_ok,{none:'sfsANoHelmet'})}${ans('sfsBikeFit',x.bike_ok)}${ans('sfsReady',x.ready)}</div>
+    ${(x.causes||[]).length?`<div class="sfs-meta"><span>${esc(t('sfsCause'))}: ${esc((x.causes||[]).map(c=>t(SFS_CAUSE[c]||c)).join(', '))}</span></div>`:''}
+    ${line('sfsPrevent',x.prevent)}
+    <div class="sfs-meta">${rate('sfsRSpeed',x.rate_speed)}${rate('sfsRCare',x.rate_care)}${rate('sfsRFa',x.rate_first_aid,true)}</div>
+    ${line('sfsComment',x.resp_comment)}${line('sfsIdeas',x.ideas)}
+    ${line('sfsNote',x.staff_note)}${x.staff_reply?line('sfsReplied',x.staff_reply):''}
+    ${x.handled_at?`<div class="am-meta">${esc(t('sfsHandled').replace('{0}',x.handled_by||'—').replace('{1}',fmtStamp(x.handled_at)))}</div>`:''}
+    ${edHtml}
+    ${acts&&!ed?`<div class="sfs-acts">${acts}</div>`:''}
+  </div>`;
+}
+function _sfsEdit(id){S._sfsEd=S._sfsEd===id?null:id;if(S._sfsEd==null&&S._sfsDraft)delete S._sfsDraft[id];_sfsPaint();const n=document.getElementById('sfs-'+(S._sfsEd!=null?'note-':'x-')+id);if(n)try{n.focus({preventScroll:true});}catch(_){}}
+function _sfsDraftIn(id,k,el){const D=(S._sfsDraft=S._sfsDraft||{})[id]||(S._sfsDraft[id]={});D[k]=el.value;}
+async function _sfsWrite(x,args,ctx){
+  if(S._sfsWr)return null;S._sfsWr=true;
+  let r;try{r=await sb.rpc('staff_safety_set',{p_id:Number(x.id),p_status:null,p_note:null,p_reply:null,...args});}catch(e){r={error:e};}
+  S._sfsWr=false;
+  if(r&&r.error){_writeErr(r,ctx);_sfsPaint();return null;}
+  if(!(Number(r.data)>0)){toast(t('sfsNoChange'),'info');_sfsLoad(true);return null;}
+  return r;
+}
+// Followed up, Closed or Back to new: logged with an Undo that puts the status back.
+async function _sfsStatus(id,st){
+  const x=_sfsGet(id);if(!x||!SFS_ST[st]||x.status===st)return;
+  const prev=x.status;
+  if(!(await _sfsWrite(x,{p_status:st},'safety feedback '+st)))return;
+  const msg=t(SFS_DONE[st]).replace('{0}',_sfsWho(x));
+  pushUndo(msg,async()=>{let u;try{u=await sb.rpc('staff_safety_set',{p_id:Number(x.id),p_status:prev,p_note:null,p_reply:null});}catch(e){u={error:e};}if(u&&u.error){_writeErr(u,'safety feedback undo');return false;}_sfsLoad(true);},{k:'safety',e:'safety_feedback',id:String(x.id)});
+  toast(msg,'success');
+  await _sfsLoad(true);
+}
+// The note and the reply, as typed ('' clears one); a reply the rider then sees on their booking.
+async function _sfsSave(id){
+  const x=_sfsGet(id);if(!x)return;
+  const D=(S._sfsDraft||{})[id]||{},note=D.note!=null?String(D.note).trim():null,reply=D.reply!=null?String(D.reply).trim():null;
+  const nCh=note!=null&&note!==(x.staff_note||''),rCh=reply!=null&&reply!==(x.staff_reply||'');
+  if(!nCh&&!rCh){S._sfsEd=null;_sfsPaint();return;}
+  if(!(await _sfsWrite(x,{p_note:nCh?note:null,p_reply:rCh?reply:null},'safety feedback note')))return;
+  if(S._sfsDraft)delete S._sfsDraft[id];S._sfsEd=null;
+  const msg=t(rCh&&reply?'sfsDoneReply':'sfsDoneNote').replace('{0}',_sfsWho(x));
+  logAction(msg,{k:'safety',e:'safety_feedback',id:String(x.id)});
+  toast(msg,'success');
+  await _sfsLoad(true);
+}
+function renderSafety(){
+  const el=document.getElementById('tab-safety');if(!el)return;
+  _sfsLoad();
+  const D=S._sfs,W=_sfsV();
+  const a=document.activeElement,fid=a&&a.id&&el.contains(a)&&/^(sfs-q|sfs-(note|reply)-\d+)$/.test(a.id)?a.id:'',pos=fid?a.selectionStart:null; // a search or a note in use
+  let body;
+  if(S._sfsGone)body=_emptyState(t('sfsNoDb'));
+  else if(!D)body=S._sfsErr?_loadErr(t('errConnection'),_on('_sfsLoad',true)):skeletonList();
+  else{
+    const c=D.counts||{},n=k=>k==='all'?(Number(c.new)||0)+(Number(c.followed)||0)+(Number(c.closed)||0):Number(c[k])||0;
+    const pill=(k,l)=>`<button type="button" class="filter-pill${W.f===k?' active':''}" aria-pressed="${W.f===k}" data-on-click="${_on('_sfsSet','f',k)}">${esc(l)} (${n(k)})</button>`;
+    const opt=(v,l,on)=>`<option value="${esc(v)}"${on?' selected':''}>${esc(l)}</option>`;
+    const sel=(k,label,opts)=>_fField(esc(label),`<select aria-label="${esc(label)}" data-on-change="${_on('_sfsSet',k,_P('value'))}">${opts}</select>`);
+    const day=(k,label)=>_fField(esc(label),`<input type="date" aria-label="${esc(label)}" value="${esc(W[k])}" data-on-change="${_on('_sfsSet',k,_P('value'))}">`);
+    const sess=[...new Map((D.items||[]).filter(x=>x.session_id).map(x=>[String(x.session_id),x])).values()];
+    const main=sel('kind',t('sfsKind'),opt('',t('filterAll'),!W.kind)+Object.keys(SFS_KIND).map(k=>opt(k,t(SFS_KIND[k]),W.kind===k)).join(''))
+      +sel('cause',t('sfsCause'),opt('',t('filterAll'),!W.cause)+Object.keys(SFS_CAUSE).map(k=>opt(k,t(SFS_CAUSE[k]),W.cause===k)).join(''))
+      +sel('sev',t('sfsSev'),opt('',t('filterAll'),!W.sev)+Object.keys(SFS_SEV).map(k=>opt(k,t(SFS_SEV[k]),W.sev===k)).join(''));
+    const adv=sel('sess',t('sfsSession'),opt('',t('filterAll'),!W.sess)+sess.map(x=>opt(String(x.session_id),_sfsSessLbl(x),W.sess===String(x.session_id))).join(''))
+      +day('from',t('sfsFrom'))+day('to',t('sfsTo'));
+    body=`${_sfsTrendsHtml()}<div class="filter-bar">${listToolbar({key:'sfs',q:{v:W.q,fn:_on('_sfsQ',_P('value')),ph:t('sfsSearch')},
+        pills:pill('new',t('sfsFNew'))+pill('followed',t('sfsFFol'))+pill('closed',t('sfsFClo'))+pill('all',t('filterAll')),
+        f:[main,adv,[..._fS(_sfsV,'kind cause sev'),..._fS(_sfsV,'sess from to',true)],renderSafety]})}</div>
+      <div id="sfs-list">${_sfsListHtml()}</div>`;
+  }
+  el.innerHTML=`<h1 class="page-title">${esc(t('sfsTitle'))}</h1><div class="form-section ws-mt0">${body}</div>`;
+  const f=fid&&document.getElementById(fid);if(f){try{f.focus({preventScroll:true});if(pos!=null)f.setSelectionRange(pos,pos);}catch(_){}}
+}
 // ── Testimonials, the staff section (the user, 2026-11-18; migration 20261119120000) ─────────────────────────────────
 // /testimonials, under People on the rail (the part staff-parts/testimonials.js). People's right in the database
 // (_staff_mod('community')), so the section is derived from People (_modIds, _MOD_PARENT) and staff_set_access never
@@ -34670,6 +34973,7 @@ function renderMyRides(){
     <div class="analytics-section-title cu-mt30">${t(_anyNc?'myPastAny':'myPastRides')}${pastGroups.length?`<span class="mr-n">${pastGroups.length}</span>`:''}</div>
     ${pastCards}`;
   _lqNightWatch();
+  _sfyCheck(cust,pastGroups); // safety feedback's buttons on the past bookings (2026-11-21)
   try{_forceRatingPrompt();}catch(e){} // force the rating the moment a ride is marked completed (realtime fires this)
   _wakeSync(); // today's code on screen keeps the phone awake (_wakeWant)
 }
@@ -34873,6 +35177,7 @@ function renderAccount(){
     ${page('updates','<div id="inb-body" class="inb-body"></div>',1)}
     ${page('help','<div id="rh-help" class="rh-help"></div>',1)}
     ${page('testimonial','<div id="tst-page" class="tst-page"></div>',1)}
+    ${page('safety','<div id="sfy-page" class="sfy-page"></div>',1) /* Safety feedback (2026-11-21): no row on the menu, it opens from a past booking (_sfyGo) or its link */}
     ${page('delete',`
     ${(()=>{
       // Delete my account: a request staff act on within 30 days, withdrawable until then.
@@ -34902,6 +35207,7 @@ function renderAccount(){
   _cochLoad(cust);if(pg==='company')_cochOpen(); // the Company challenge row and its page (F26)
   if(pg==='help')_rhPageOpen();
   if(pg==='testimonial')_tstPageOpen(); // the testimonial page's own file (rider-testimonial.js)
+  if(pg==='safety')_sfyPageOpen(); // safety feedback's own file (rider-safety.js)
   _inbShow();
 }
 // The account page's parts (the owner, 2026-11-09: "divide the customer my account page into 3 separate pages account
@@ -34928,7 +35234,7 @@ function _accPage(){return ACC_PAGES.includes(S.accPage)?S.accPage:null;}
 function _accSub(){const v=_accView();return v!=='account'?v:(_accPage()||'');}
 function _accSubSet(sub){S.accView=ACC_VIEWS.includes(sub)?sub:'account';S.accPage=S.accView==='account'&&ACC_PAGES.includes(sub)?sub:null;}
 const _ACC_PG_T={personal:'accPgPersonal',contact:'accPgContact',residence:'accPgResidence',emergency:'accPgEmergency',riding:'accPgRiding',sport:'spTitle',about:'accPgAbout',
-  wallet:'cwTitle',invite:'refTitle',ambassador:'ambMineTitle',volunteer:'accVolTitle',purchases:'custPurchTitle',company:'cochTitle',notifications:'pushTitle',updates:'updTitle',help:'accPgHelp',testimonial:'tstRow',delete:'delTitle'};
+  wallet:'cwTitle',invite:'refTitle',ambassador:'ambMineTitle',volunteer:'accVolTitle',purchases:'custPurchTitle',company:'cochTitle',notifications:'pushTitle',updates:'updTitle',help:'accPgHelp',testimonial:'tstRow',safety:'sfyTitle',delete:'delTitle'};
 function _accPgTitle(k){return t(_ACC_PG_T[k]||'accountTitle');}
 // The profile columns each page writes (_saveAccount); every other column keeps the value on file.
 const ACC_PG_KEYS={personal:['name','birth_date','nationality','gender'],contact:['email','phone'],residence:['country','city'],riding:['height','type_preference'],about:['socials','profession','workplace','heard_from']};
@@ -34945,6 +35251,7 @@ function _accShow(){
   if(pg==='company')_cochOpen();
   if(pg==='help')_rhPageOpen();
   if(pg==='testimonial')_tstPageOpen(); // the testimonial page's own file (rider-testimonial.js)
+  if(pg==='safety')_sfyPageOpen(); // safety feedback's own file (rider-safety.js)
   _inbShow();
 }
 // Back and Forward landed on an account address (the tab is already open).
@@ -36236,6 +36543,7 @@ const _ART={
   cup:'<path opacity=".35" d="M3.5 9h13v5.5a5.5 5.5 0 0 1-5.5 5.5H9a5.5 5.5 0 0 1-5.5-5.5V9Z"/><path d="M16.5 10.6h1.3a2.7 2.7 0 0 1 0 5.4h-1.6M7.6 2.8c-.9 1.1.9 2.1 0 3.4M11.6 2.8c-.9 1.1.9 2.1 0 3.4M3 21.6h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
   moon:'<path d="M21.4 13.2A9.2 9.2 0 1 1 10.8 2.6a7.2 7.2 0 0 0 10.6 10.6Z"/><path opacity=".35" d="M17.4 2.2l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7.7-1.9Z"/>',
   chat:'<path opacity=".35" d="M4 3.5h16a2 2 0 0 1 2 2V15a2 2 0 0 1-2 2h-9.2L5.6 21v-4H4a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z"/><path d="M6.5 7.6h11v1.9h-11zm0 3.6h7.4v1.9H6.5z"/>', // a speech bubble: staff comments on the booking menu (2026-11-10)
+  shield:'<path opacity=".35" d="M12 2 20 5.2v6.1c0 5-3.4 8.9-8 10.7-4.6-1.8-8-5.7-8-10.7V5.2Z"/><path d="M10.9 7h2.2v3.9H17v2.2h-3.9V17h-2.2v-3.9H7v-2.2h3.9Z"/>', // a shield with a cross: Safety feedback on the rail (2026-11-21)
 };
 function _artIcon(kind,px){
   px=px||14;
@@ -50836,17 +51144,17 @@ async function _pinApprove(what,opt){
 // only some of those (staff.modules_edit); null is everything its role allows. The role itself
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
-function _staffSections(){return['queue','waitlist','sessions','lockers','dashboard','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','market','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'].filter(_stoSecOk);}
-const SECTION_KEY={reports:'tabReports',dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',store:'tabStore',payments:'tabPayments',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ask:'tabAsk',testimonials:'qtTitle',chat:'chsRail',market:'mkTitle',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+function _staffSections(){return['queue','waitlist','sessions','lockers','safety','dashboard','cashier','store','payments','inventory','workshop','community','badgereq','ask','testimonials','chat','market','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'].filter(_stoSecOk);}
+const SECTION_KEY={reports:'tabReports',dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',store:'tabStore',payments:'tabPayments',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ask:'tabAsk',testimonials:'qtTitle',chat:'chsRail',safety:'sfsTitle',market:'mkTitle',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
 // Customers and Community are one section, People, since 2026-11-06 (id 'community'): a list naming either names it.
-function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('queue')&&!l.includes('waitlist'))l.push('waitlist');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');if(l.includes('community')&&!l.includes('ask'))l.push('ask');if(l.includes('community')&&!l.includes('testimonials'))l.push('testimonials');if(l.includes('community')&&!l.includes('chat'))l.push('chat');if(l.includes('community')&&!l.includes('market'))l.push('market');if(l.includes('cashier')){if(!l.includes('store'))l.push('store');if(!l.includes('payments'))l.push('payments');}return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08) and Ask (2026-11-13: it comes with People); one naming Bookings names the Waitlist (a view of it until 2026-11-09)
+function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('queue')&&!l.includes('waitlist'))l.push('waitlist');if(l.includes('queue')&&!l.includes('safety'))l.push('safety');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');if(l.includes('community')&&!l.includes('ask'))l.push('ask');if(l.includes('community')&&!l.includes('testimonials'))l.push('testimonials');if(l.includes('community')&&!l.includes('chat'))l.push('chat');if(l.includes('community')&&!l.includes('market'))l.push('market');if(l.includes('cashier')){if(!l.includes('store'))l.push('store');if(!l.includes('payments'))l.push('payments');}return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08) and Ask (2026-11-13: it comes with People); one naming Bookings names the Waitlist (a view of it until 2026-11-09)
 // What _modIds adds back to a list that names the section's parent (Sessions, Lockers and the Waitlist with Bookings, Badge
 // requests with People). The database's staff_set_access knows only its own list of sections (none of these four on
 // 2026-11-09), so the Team page sends them only without their parent, where the database's refusal says so; with it they
 // would cost nothing to drop, since they come back on every read.
-const _MOD_PARENT={sessions:'queue',lockers:'queue',waitlist:'queue',badgereq:'community',ask:'community',testimonials:'community',chat:'community',market:'community',store:'cashier',payments:'cashier'}; // Chat (2026-11-20) comes with People too // the Store and Payments (2026-11-10) come with Sales
+const _MOD_PARENT={sessions:'queue',lockers:'queue',waitlist:'queue',safety:'queue',badgereq:'community',ask:'community',testimonials:'community',chat:'community',market:'community',store:'cashier',payments:'cashier'}; // Chat (2026-11-20) comes with People too // the Store and Payments (2026-11-10) come with Sales
 function _modSend(a){return Array.isArray(a)?a.filter(x=>!(_own(_MOD_PARENT,x)&&a.includes(_MOD_PARENT[x]))):a;}
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
 // Settings is every account's own page (_deskTabOk opens it to all) and is never one of the
@@ -85594,7 +85902,7 @@ function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
   if(st==='fnb')st='vendors'; // the section's id until 2026-10-03
-  return['queue','waitlist','sessions','lockers','cashier','store','payments','inventory','customers','community','badgereq','ask','testimonials','chat','market','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
+  return['queue','waitlist','sessions','lockers','safety','cashier','store','payments','inventory','customers','community','badgereq','ask','testimonials','chat','market','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
 }
 // The tab iOS opens for a bike tag (2026-10-09, D15): when a staff tab is already open on this device, the
 // bike goes to it over the 'mm-staff' channel and this tab only says so - nothing is loaded. No answer
@@ -85742,6 +86050,7 @@ function _bikeHereInstead(code,kind){try{sessionStorage.setItem('cq_bike_here','
   const _lapScan=_readLapParam(); // /?lap=: a circuit challenge's poster or tag, scanned at the start line (F25)
   const _isStaffUrl=new URLSearchParams(window.location.search).has('staff')||_staffEntry||!!_bikeCode||!!_lockerCode||_isStaffHost()||_pathStaff;
   if(!_isStaffUrl)_readEventLink(); // ?ev=&session= from micromobility.sa/experiences
+  if(!_isStaffUrl)_readSfyEntry(_pathNav); // /account/safety?b=<entry>: the booking safety feedback is about (2026-11-21)
   if(!_isStaffUrl)_readHubSrc(_pathNav); // /members?src=wa-recap: how the member came to the Community tab (R7)
   if(!_isStaffUrl)_readStcTk(_pathNav); // /my-bookings?tk=<booking>: the evening-before reminder's link to its ticket (F2)
   if(!_isStaffUrl&&_pathNav&&_pathNav.signup)S.authMode='signup'; // /signup opens Create account
@@ -86086,6 +86395,7 @@ function _secPolls(full){
   if(_deskTabOk('testimonials'))_tsmCount(); // the testimonials waiting for review, on the rail (2026-11-18)
   if(_deskTabOk('chat'))_chsCount(); // the chat's reported messages nobody has looked at, on the rail (2026-11-20)
   if(_deskTabOk('market'))_mkCount(); // the Marketplace: listings held, open reports and shops waiting, on the rail (2026-11-20)
+  if(_deskTabOk('safety'))_sfsCount(); // safety feedback's new ones on the rail, a crash or injury in the bell (2026-11-21)
 }
 // ── The online store and its payments (2026-11-10, migration 20261110150000) ─────────────────────
 // The website takes the money (Moyasar); the staff page fulfils orders, edits the products and decides refunds.

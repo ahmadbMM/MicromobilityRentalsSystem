@@ -157,6 +157,9 @@ if (!src.includes("const BRP_V=''")) throw new Error('build: BRP_V placeholder m
 src = src.replace("const BRP_V=''", `const BRP_V='${createHash('sha256').update(await readFile(new URL('../bike-report.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
 // rider-testimonial.js, the testimonial page, the step after a high rating and the old comment's ask (2026-11-18), the same way.
 if (!src.includes("const TST_V=''")) throw new Error('build: TST_V placeholder missing');
+// rider-safety.js, the safety feedback page (2026-11-21), the same way.
+if (!src.includes("const SFY_V=''")) throw new Error('build: SFY_V placeholder missing');
+src = src.replace("const SFY_V=''", `const SFY_V='${createHash('sha256').update(await readFile(new URL('../rider-safety.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
 src = src.replace("const TST_V=''", `const TST_V='${createHash('sha256').update(await readFile(new URL('../rider-testimonial.js', import.meta.url))).digest('hex').slice(0, 10)}'`);
 // rider-help.js, the Help page's own file (Account > Help, 2026-11-16), the same way.
 if (!src.includes("const RH_V=''")) throw new Error('build: RH_V placeholder missing');
