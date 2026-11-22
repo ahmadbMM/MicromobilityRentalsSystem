@@ -107,6 +107,25 @@ test.describe('@customer:ktri KAUST Triathlon', () => {
   });
 });
 
+test.describe('@customer:ktri KAUST Triathlon open to everyone', () => {
+  test('a rider who is not a member books it from the featured card, and sees only that date in Experiences', async ({ page }) => {
+    await stubSupabase(page, { sessions: [{ ...ktri, open_to_all: true }, sat], queue_entries: [], 'rpc:community_member': false });
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`window.__opened=[];window.open=(u)=>{window.__opened.push(u);return {opener:1};};goLanding()`);
+    const feat = page.locator('.feat-card.feat-kt').first();
+    await expect(feat).toContainText('Book your place in our group');
+    await feat.click();
+    await expect.poll(() => page.evaluate('S.selSession')).toBe(KT);
+    expect(await page.evaluate('window.__opened')).toEqual([]);
+    await expect(page.locator('#tab-register .sess-card')).toHaveCount(1);
+    await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
+    await expect.poll(() => page.evaluate('S.regStep')).toBe(2);
+    await expect(page.locator('#tab-register .kt-know')).toContainText('Sharafeyah branch');
+  });
+});
+
 test.describe('@staff:sessions KAUST Triathlon', () => {
   test('the new session form offers it: 50 places, its own id, its short name', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });

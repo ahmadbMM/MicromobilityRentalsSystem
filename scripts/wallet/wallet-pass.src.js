@@ -330,7 +330,7 @@ async function buildPkpass(b, cfg) {
         ...meetHeld ? [] : [{ key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` }],
         ...ridersBack,
         // and the club or community they answered (blood_club, 20261105150000)
-        ...ride === "ktri" ? [{ key: "ktri", label: "The race", value: "Enter and pay for your race on the KAUST Triathlon registration website: " + KTRI_REG_URL + " (closes Wed 2 Dec, 11:50 PM). Not living at KAUST? Apply for your gate pass with the link the organisers send after you register." }] : [],
+        ...ride === "ktri" ? [{ key: "ktri", label: "The race", value: "Bike collection: Sharafeyah branch, Thursday 3 Dec, during working hours. Enter and pay for your race on the KAUST Triathlon registration website: " + KTRI_REG_URL + " (closes Wed 2 Dec, 11:50 PM). Not living at KAUST? Apply for your gate pass with the link the organisers send after you register." }] : [],
         ...isBlood && b.blood_club ? [{ key: "club", label: "Club or community", value: String(b.blood_club) }] : [],
         ...addonsBack,
         ...lockersBack,
