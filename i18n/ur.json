@@ -3262,7 +3262,6 @@
   "scanSoundBtn": "آواز",
   "scanTorchBtn": "ٹارچ",
   "scanTorchFail": "ٹارچ آن نہیں ہوئی",
-  "scanDetailsBtn": "بکنگ کی تفصیلات",
   "scanAlreadyIn": "#{0} {1} پہلے ہی چیک اِن ہے",
   "scanInAt": "{0} سے",
   "scanOwes": "{0} ریال باقی",

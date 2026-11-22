@@ -3262,7 +3262,6 @@
   "scanSoundBtn": "Son",
   "scanTorchBtn": "Lampe torche",
   "scanTorchFail": "La lampe torche ne s'est pas allumée",
-  "scanDetailsBtn": "Détails de la réservation",
   "scanAlreadyIn": "#{0} {1} est déjà enregistré",
   "scanInAt": "depuis {0}",
   "scanOwes": "doit {0} SAR",

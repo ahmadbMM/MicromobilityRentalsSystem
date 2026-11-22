@@ -3262,7 +3262,6 @@
   "scanSoundBtn": "Sonido",
   "scanTorchBtn": "Linterna",
   "scanTorchFail": "La linterna no se encendió",
-  "scanDetailsBtn": "Detalles de la reserva",
   "scanAlreadyIn": "#{0} {1} ya está registrado",
   "scanInAt": "desde {0}",
   "scanOwes": "debe {0} SAR",

@@ -3262,7 +3262,6 @@
   "scanSoundBtn": "Bunyi",
   "scanTorchBtn": "Lampu suluh",
   "scanTorchFail": "Lampu suluh tidak menyala",
-  "scanDetailsBtn": "Butiran tempahan",
   "scanAlreadyIn": "#{0} {1} sudah mendaftar masuk",
   "scanInAt": "sejak {0}",
   "scanOwes": "berhutang SAR {0}",

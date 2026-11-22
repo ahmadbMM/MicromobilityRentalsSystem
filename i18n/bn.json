@@ -3404,7 +3404,6 @@
   "scanSoundBtn": "শব্দ",
   "scanTorchBtn": "টর্চ",
   "scanTorchFail": "টর্চ জ্বলেনি",
-  "scanDetailsBtn": "বুকিংয়ের বিবরণ",
   "scanAlreadyIn": "#{0} {1} আগেই চেক-ইন করেছেন",
   "scanInAt": "{0} থেকে",
   "scanOwes": "{0} SAR বাকি",

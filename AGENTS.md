@@ -1414,7 +1414,7 @@ Check-in and bike handling at the booth (the owner's first pain). Client only; `
   what they owe and whether they need a bike. In Keep scanning, the check-in confirmed from a scan shows as OK
   when the camera comes back (`_scanFlash`). Specs: OK can be gone before a slow machine looks, so record
   the banner with a MutationObserver (see the spec) rather than asserting it once.
-- **Booking details** (2026-11-02; the scanner's switch, `_scanDetails`, `cq_scan_details`, off by default, per device): a scan
+- **Booking details** (2026-11-02; always on since 2026-11-22, the user: "i want it to show automatically and always", so the scanner's switch and `cq_scan_details` are gone): a scan
   that keeps the camera up (a rider already in or returned, Express, a Petromin ticket under Express) lists bike type, height and
   size in `#scan-details`, the scanned rider first and then their party (`_scanDetailsOf`, `_scanDetailsOfRider`); every `say`
   clears it. A scan that opens the check-in or the Petromin pop-up shows them there.
