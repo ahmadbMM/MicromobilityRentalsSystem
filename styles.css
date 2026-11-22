@@ -11327,9 +11327,9 @@ body.view-staff :is(.sess-summary-chip,.sess-lc).th-event{
   --sf-ring:var(--sf-plum);border-color:rgba(var(--sf-plum-rgb),.38);}
 body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event),
 body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event):hover{background:var(--sf-chip-bg);}
-body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga):hover{border-color:var(--sf-ring);}
-body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga).active-sess,
-body.view-staff .sess-lc:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga).selected{
+body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri):hover{border-color:var(--sf-ring);}
+body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri).active-sess,
+body.view-staff .sess-lc:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri).selected{
   border-color:var(--sf-ring);box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(15,18,21,.16);}
 body.view-staff .sess-lc:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event){border-inline-start-width:1px;}
 /* the ride's name: its own colour on the light cards, Run for Her's in its poster's letters */
@@ -11890,8 +11890,8 @@ html[dir="rtl"][data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,
 html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-event{
   --sf-chip-bg:linear-gradient(to bottom right,#101318 0 55%,rgba(var(--sf-plum-rgb),.2) 100%) #101318;
   --sf-ring:var(--sf-plum);border-color:rgba(var(--sf-plum-rgb),.4);color:var(--text);}
-html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga).selected,
-html[data-staff-theme="dark"] body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga).active-sess{box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(0,0,0,.5);}
+html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri).selected,
+html[data-staff-theme="dark"] body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri).active-sess{box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(0,0,0,.5);}
 html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-runher .sess-chip-event,
 html[data-staff-theme="dark"] body.view-staff #tab-sessions .sess-lc.th-runher .ev-chip{color:#f49ac1;border-color:rgba(244,154,193,.5);}
 html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-event .sess-chip-event,
@@ -12558,13 +12558,13 @@ html[data-theme="dark"] body:not(.view-staff) .code-k-sat,html[data-staff-theme=
 /* ...but the white themed tickets (Saturday and every ordinary ride, Run for Her, events, Petromin, the pool, Victory Lap,
    Defe 5K, blood) keep the base inks: the pale ones are for dark screens and the dark tickets (the live night, JCC,
    Arena), and every rider page carries data-theme="dark", so the line above reached the white tickets too. */
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-rw{--code-k:#0a7a4b;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-rf{--code-k:#0f766e;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-rb{--code-k:#a16207;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-bd{--code-k:#c8102e;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-vl{--code-k:#1f7ae0;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-promo{--code-k:#8c3b6e;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga) .code-k-sat{--code-k:#1d4ed8;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-rw{--code-k:#0a7a4b;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-rf{--code-k:#0f766e;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-rb{--code-k:#a16207;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-bd{--code-k:#c8102e;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-vl{--code-k:#1f7ae0;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-promo{--code-k:#8c3b6e;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-sat{--code-k:#1d4ed8;}
 .code-full{display:inline-grid;grid-template-columns:auto minmax(0,1fr);column-gap:5px;align-items:center;padding:3px 8px;}
 .code-full .code-ic{grid-row:1;grid-column:1;}
 .code-full .code-c{grid-row:1;grid-column:2;font-weight:700;}
@@ -16556,3 +16556,111 @@ body.view-staff .ivt-box .ivt-add:disabled{opacity:.5;cursor:default;}
 @media (max-width:600px){#confirm-modal .bnw-ft-row{flex-direction:column;align-items:stretch;}}
 #confirm-modal .bnw-again{display:inline-flex;align-items:center;gap:4px;color:var(--green);font-size:var(--sf-fs-sm);font-weight:600;}
 :is(#confirm-modal,#desk-sheet) .bnw-go{display:inline-flex;align-items:center;gap:4px;}
+/* ════════════════════════════════════════════════════════════════════════
+   KAUST TRIATHLON (the user, 2026-11-22) - "Red Sea Dawn", from the race's own poster: a sky going pale to white,
+   the sea along the foot, KAUST in a heavy blue over Triathlon in navy, SWIM · BIKE · RUN spaced between two rules,
+   and the sun coming up over the water (the race starts at dawn). The date card, the featured card, the flow from the
+   race step on (body.ktri-skin), the ticket, the pop-ups, staff's chips and rows. Blue on white 6.2:1, navy 15:1.
+   ════════════════════════════════════════════════════════════════════════ */
+:root{--kt-blue:#1565B4;--kt-blue-dk:#0D4B8C;--kt-navy:#0F2540;--kt-ink-2:#3C5470;--kt-sky:#E6F1FB;--kt-sky-2:#F5F9FD;--kt-sea:#0E959A;--kt-sea-dk:#0B6F74;--kt-sun:#E8834A;}
+.ev-ktri{--ev:#1565B4;--ev-rgb:21,101,180;}
+body:not(.view-staff) .ev-ktri:not(.landing-event-card){--ev:#1565B4;--ev-rgb:21,101,180;}
+html[data-staff-theme="dark"] body.view-staff .ev-ktri{--ev:#6FB2F0;--ev-rgb:111,178,240;}
+/* the date card: the sky, the sea along the foot, the mark, KAUST Triathlon, SWIM · BIKE · RUN, when and where */
+body .sess-card.kt-card{position:relative;overflow:hidden;isolation:isolate;gap:6px;padding-top:14px;padding-bottom:30px;color:var(--kt-navy);
+  background:linear-gradient(180deg,var(--kt-sky) 0%,var(--kt-sky-2) 55%,#fff 100%);
+  border:1px solid rgba(21,101,180,.28);border-inline-start:3px solid var(--kt-blue);}
+body .sess-card.kt-card:hover:not(.sess-full){background:linear-gradient(180deg,#DCEBF9 0%,var(--kt-sky-2) 60%,#fff 100%);}
+body .sess-card.kt-card.sess-selected,
+body:not(.view-staff) .sess-day-list .sess-card.kt-card.sess-selected{border-color:rgba(21,101,180,.6);border-inline-start-color:var(--kt-blue);box-shadow:inset 0 0 0 2px var(--kt-blue);}
+body:not(.view-staff) .sess-card.kt-card .sess-tick{box-shadow:inset 0 0 0 1.5px rgba(21,101,180,.45);}
+body:not(.view-staff) .sess-card.kt-card.sess-selected .sess-tick{background:var(--kt-blue);box-shadow:none;}
+body .sess-card.kt-card:focus-visible{outline:2px solid var(--kt-blue);outline-offset:2px;}
+.kt-scene{position:absolute;z-index:-1;left:0;right:0;bottom:-1px;width:100%;height:26px;pointer-events:none;}
+.kt-scene .kt-sea1{fill:rgba(21,101,180,.16);}
+.kt-scene .kt-sea2{fill:rgba(14,149,154,.22);}
+.kt-card-top{display:flex;align-items:center;gap:10px;min-width:0;}
+.kt-card-mark{height:30px;width:auto;display:block;flex:none;}
+.kt-card-title,.kt-flow-name{font-family:'Rubik','IBM Plex Sans Arabic','Noto Sans Devanagari','Noto Sans Bengali',sans-serif;font-size:22px;font-weight:700;letter-spacing:-.2px;line-height:1.15;color:var(--kt-navy);overflow-wrap:anywhere;}
+body:not(.view-staff) :is(.kt-card-title,.kt-flow-name){font-family:'Rubik','IBM Plex Sans Arabic','Noto Sans Devanagari','Noto Sans Bengali',sans-serif;}
+.kt-k{font-weight:900;color:var(--kt-blue);letter-spacing:-.3px;}
+.kt-sbr{display:flex;align-items:center;gap:8px;min-width:0;font-size:10.5px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;color:var(--kt-navy);}
+.kt-sbr i{flex:1 1 auto;max-width:48px;height:1.5px;background:var(--kt-blue);opacity:.75;}
+:is(html[lang="ar"],html[lang="ur"]) .kt-sbr{letter-spacing:0;font-size:12px;}
+.kt-card-meta{display:flex;flex-wrap:wrap;align-items:center;gap:3px 9px;font-size:13px;font-weight:600;color:var(--kt-ink-2);min-width:0;}
+.kt-card-meta i{width:1px;height:12px;background:rgba(21,101,180,.35);display:inline-block;flex:none;}
+.kt-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;min-width:0;}
+.kt-card-with{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;color:var(--kt-blue-dk);min-width:0;overflow-wrap:anywhere;}
+/* the featured card on the event picker */
+body:not(.view-staff) .feat-card.feat-kt{position:relative;overflow:hidden;isolation:isolate;color:var(--kt-navy);padding-bottom:22px;background:linear-gradient(180deg,var(--kt-sky) 0%,var(--kt-sky-2) 60%,#fff 100%);border-color:rgba(21,101,180,.3);}
+body:not(.view-staff) .feat-card.feat-kt:focus-visible{outline-color:var(--kt-blue);}
+.feat-kt .kt-scene{height:22px;}
+.feat-kt .feat-date{background:#fff;box-shadow:inset 0 0 0 1px rgba(21,101,180,.2);}
+.feat-kt .feat-date b{color:var(--kt-navy);}
+.feat-kt .feat-date span{color:var(--kt-ink-2);}
+.feat-kt .feat-date .feat-wd{color:#fff;background:var(--kt-blue);}
+.feat-kt .feat-name.kt-card-title{font-size:20px;}
+.feat-kt .feat-meta{font-weight:600;color:var(--kt-ink-2);}
+.feat-kt .feat-meta>span:not(.sess-card-spots)::before{background:rgba(21,101,180,.35);}
+.feat-kt .feat-foot>span:nth-child(2):not(.sess-card-spots){color:var(--kt-blue-dk);font-weight:700;}
+.feat-kt .feat-go{color:var(--kt-blue);}
+/* the flow from the race step on, and the booked page: KAUST blue actions */
+body.ktri-skin:not(.view-staff){--go:#1565B4;--go-2:#0D4B8C;--go-wash:rgba(21,101,180,.12);--neon:#9CCBF3;--green-rgb:21,101,180;--accent2:rgba(21,101,180,.45);}
+body.ktri-skin:not(.view-staff) .toggle-btn.active{background:var(--kt-blue);border-color:var(--kt-blue);color:#fff;}
+.kt-flow-head{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;gap:14px;margin:0 0 16px;padding:14px 16px 26px;min-width:0;
+  background:linear-gradient(180deg,var(--kt-sky) 0%,var(--kt-sky-2) 60%,#fff 100%);border:1px solid rgba(21,101,180,.26);border-inline-start:3px solid var(--kt-blue);color:var(--kt-navy);}
+.kt-flow-mark{height:40px;width:auto;flex:none;display:block;}
+.kt-flow-copy{min-width:0;flex:1 1 auto;display:grid;gap:4px;}
+.kt-flow-name{font-size:20px;}
+/* the race step: five races, each a choice with its distances, its start and its entry fee */
+.kt-races{display:grid;gap:8px;}
+.kt-race{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:start;padding:12px 14px;background:#fff;border:1px solid rgba(15,37,64,.16);border-radius:var(--r-md,12px);color:var(--kt-navy);cursor:pointer;font:inherit;min-height:44px;}
+.kt-race:hover{border-color:rgba(21,101,180,.5);}
+.kt-race:focus-visible{outline:2px solid var(--kt-blue);outline-offset:2px;}
+.kt-race.active{border-color:var(--kt-blue);box-shadow:inset 0 0 0 1.5px var(--kt-blue);background:var(--kt-sky-2);}
+.kt-race-dot{flex:none;width:18px;height:18px;margin-top:2px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(15,37,64,.35);}
+.kt-race.active .kt-race-dot{box-shadow:inset 0 0 0 5px var(--kt-blue);}
+.kt-race-copy{display:grid;gap:2px;min-width:0;}
+.kt-race-name{font-weight:800;font-size:15px;}
+.kt-race-d{font-size:13px;color:var(--kt-ink-2);}
+.kt-race-meta{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:12.5px;font-weight:700;color:var(--kt-blue-dk);}
+.kt-races-sm .kt-race{padding:9px 12px;}
+.kt-races.grp-err,.kt-races.field-err{outline:2px solid var(--red,#c0362c);outline-offset:4px;border-radius:12px;}
+.kt-race-chip{display:inline-flex;align-items:center;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700;background:rgba(21,101,180,.12);color:var(--kt-blue-dk);white-space:nowrap;}
+/* when to report, the race, when entries close, the gate pass: on the race step and the ticket */
+.kt-know{display:grid;gap:6px;margin:10px 0;padding:10px 12px;background:var(--kt-sky-2);border:1px solid rgba(21,101,180,.2);border-inline-start:3px solid var(--kt-sea);color:var(--kt-navy);}
+.kt-know-step{margin-top:14px;}
+.kt-know-row{display:flex;flex-wrap:wrap;align-items:flex-start;gap:2px 10px;font-size:13px;line-height:1.4;min-width:0;}
+.kt-know-k{font-weight:800;color:var(--kt-blue-dk);min-width:96px;}
+.kt-know-v{min-width:0;flex:1 1 160px;overflow-wrap:anywhere;}
+.kt-know-d{color:var(--kt-ink-2);font-size:12.5px;}
+.kt-know-race .btn-sm{margin-inline-start:auto;}
+.kt-tk-pick{display:grid;gap:6px;}
+/* the pop-ups: "Have you registered?" and the way to the race's registration */
+#race-gate .rr-box.kt-gate{border-top:4px solid var(--kt-blue);}
+#race-gate .kt-gate .pg-title{color:var(--kt-navy);}
+body:not(.view-staff) .kt-gate .defe-reg-yn .toggle-btn.active{background:var(--kt-blue);border-color:var(--kt-blue);color:#fff;}
+body:not(.view-staff) .kt-gate .defe-reg-yn .toggle-btn.active::before{background:#CFE3F7;}
+body:not(.view-staff) :is(.defe-reg,#race-gate) .kt-reg-link{display:flex;align-items:center;justify-content:center;min-height:44px;text-decoration:none;text-align:center;background:var(--kt-blue);border-color:var(--kt-blue);color:#fff;}
+body:not(.view-staff) :is(.defe-reg,#race-gate) .kt-reg-link:hover{background:var(--kt-blue-dk);color:#fff;}
+.kt-reg-no .defe-reg-sub{color:var(--kt-ink-2);}
+.ticket-card.th-ktri .defe-reg{border-color:var(--kt-blue);color:var(--kt-navy);}
+.ticket-card.th-ktri .defe-reg.defe-reg-done{border-color:rgba(21,101,180,.3);background:var(--kt-sky-2);}
+.ticket-card.th-ktri .defe-reg.defe-reg-done .cu-ic{color:var(--kt-blue);}
+.kt-out .kt-out-mark{height:28px;width:auto;flex:none;}
+.kt-out .kt-out-go{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;}
+/* the ticket: the sky, the sea along its foot */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-ktri{
+  --night:#fff;--night-2:var(--kt-sky-2);--night-ink:var(--kt-navy);--night-ink-2:rgba(15,37,64,.7);--night-line:rgba(21,101,180,.2);--neon:var(--kt-blue);
+  --night-amber:#8A5300;--night-red:#B42318;--night-red-line:rgba(180,35,24,.35);color:var(--night-ink);
+  background:linear-gradient(180deg,var(--kt-sky) 0%,#fff 38%,#fff 88%,rgba(14,149,154,.12) 100%);border:1px solid rgba(21,101,180,.3);}
+.ticket-card .tk-logo-ev .tk-logo-ktri{height:30px;}
+/* staff: the date's chip and the Bookings row's colour */
+body.view-staff :is(.sess-summary-chip,.sess-lc).th-ktri{--sf-chip-bg:linear-gradient(180deg,var(--kt-sky) 0%,#fff 100%);--sf-ring:var(--kt-blue);border-color:rgba(21,101,180,.4);color:var(--kt-navy);background:var(--sf-chip-bg);}
+html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-ktri{--sf-chip-bg:linear-gradient(180deg,rgba(21,101,180,.22) 0%,#101318 100%);--sf-ring:#6FB2F0;border-color:rgba(111,178,240,.4);color:var(--text);}
+body.view-staff .sess-summary-chip.th-ktri .sess-chip-event{font-weight:600;color:var(--kt-blue);}
+html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-ktri .sess-chip-event{color:#6FB2F0;}
+body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-ktri{--rq-ev:#1565b4;}
+html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-ktri{--rq-ev:#6fb2f0;}
+html[data-staff-theme="dark"] body.view-staff .kt-race-chip{background:rgba(111,178,240,.16);color:#9CCBF3;}
+@media(max-width:400px){.kt-card-title{font-size:20px;}.kt-card-mark{height:26px;}.kt-flow-mark{height:34px;}.kt-know-k{min-width:0;width:100%;}.feat-kt .feat-name.kt-card-title{font-size:18px;}}

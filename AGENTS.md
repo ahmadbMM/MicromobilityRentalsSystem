@@ -2154,6 +2154,25 @@ database's `_yoga_entry_guard` ONE_PER_SESSION). Walk-ins allowed. `_isYoga(s)`.
   activity, `_yoga_entry_guard`). Session: `supabase/checks/yoga-session-2026-11-21.sql`, run after the app is live.
   Tests: `tests/yoga-session.spec.ts`.
 
+## KAUST Triathlon (2026-11-22)
+
+ride_kind `ktri`, id suffix `-kt`, first date 2026-12-04-kt (Coastline Recreation's race at KAUST Urban Beach; the race is
+entered and paid at `KTRI_REG_URL`, rec.coastline-fm.com). Featured (FEAT_KINDS) and shown to EVERY rider (`_infoShowSess`
+lets it through like Victory Lap); only community members book (open_to_all false, the members gate in the database).
+- A non-member's tap on the date card or the featured card goes to the registration website (`_ktGate` at the top of
+  `selectSessCard` and `_featOpen`): `window.open` in the tap when the members answer is known, else after it; a refused tab
+  shows `_ktOutModal` with the link. The Experiences list itself stays members only; non-members meet it on the event picker.
+- Booking: step 2 is the race (`_ktPanelHtml`, `S.regTriRace`, KTRI_RACES); the race is written AFTER the booking with
+  `customer_set_tri_race` (queue_entries.tri_race) so customer_create_booking is untouched. A failed write leaves it null and
+  the ticket's box (`_ktKnowHtml`) asks for it.
+- Then the Defe run's race gate, generalised (`_isRaceRegSess`): "Have you registered through the KAUST Triathlon registration
+  website?" at once and on every visit until Yes (race_reg, customer_set_race_reg now takes ktri too).
+- Look "Red Sea Dawn" (styles.css KAUST TRIATHLON, assets/ktri-mark.svg, `_ktScene`), ticket th-ktri, Apple pass KTRI_IMAGES
+  + REPORT BY / RACE STARTS / YOUR RACE, Google pass and ics know the kind. Staff: Bookings "Race" column (`_qc.kt`, report
+  col `kt`), the kind in the new session form (50 places), badge `kaust_triathlon` (staff give it, held only, BDG_RACE medal).
+- DB: migration 20261122150000_kaust_triathlon; the session row is supabase/checks/kaust-triathlon-session-2026-12-04.sql,
+  run only once the app is live. tests/kaust-triathlon.spec.ts.
+
 ## Farm House Night (2026-11-13)
 The Farmhouse Night (title_ar ليلة فارم هاوس; first named Nawar Farm House Night, renamed by the user
 2026-11-13 to The Little Farmhouse Night, then 2026-11-14 "remove little from the name of the farmhouse"), Thu 19 Nov 2026 at Farmhouse, Dhahban (map link in meet_url, the name in meet_name / meet_name_ar): arrival from 16:30, dinner 20:30. The user: approval like the Saturday Social Ride, inside MicroMobility
