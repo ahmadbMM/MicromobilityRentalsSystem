@@ -678,7 +678,7 @@ test.describe('@staff:payments Settings: the delivery as charged, pickup days, s
     // the legal line reads the website's defaults (Payments > Settings)
     await page.evaluate(`S.payView='settings';setStaffTab('payments')`);
     const pay = page.locator('#tab-payments');
-    await expect(pay.locator('#ps-lgen')).toHaveValue('Micromobility Company Ltd.');
+    await expect(pay.locator('#ps-lgen')).toHaveValue('MicroMobility Company Ltd.');
     await expect(pay.locator('#ps-cr')).toHaveValue('1009107240');
     await expect(pay.locator('#ps-vat')).toHaveValue('312555068900003');
     await view(page, 'settings');

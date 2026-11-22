@@ -79,7 +79,7 @@ test('Reply opens a frame in the sender\'s language; sending it marks the messag
   await expect(text).toHaveValue(/^مرحباً سارة،/); // no link in it, none on top (2026-11-18)
   await expect(text).toHaveValue(/M-0007/);
   await expect(dialog(page).locator('#sm-reply-lang')).toHaveValue('ar');
-  await text.fill('Hi Sara,\n\nYes, wheels are not covered.\n\nMicromobility team');
+  await text.fill('Hi Sara,\n\nYes, wheels are not covered.\n\nMicroMobility team');
   await expect(dialog(page).locator('a.sm-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/966551234567\?text=Hi%20Sara%2C%0A%0AYes%2C%20wheels/);
   await expect(dialog(page).locator('a.sm-mail')).toHaveAttribute('href', /^mailto:omar%40example\.test\?subject=/);
   // Following the link opens WhatsApp in a new tab; the page marks the message replied.

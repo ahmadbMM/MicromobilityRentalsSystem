@@ -1,7 +1,7 @@
 # Handoff: ERP-style reskin of the staff system (MicromobilityRentalsSystem)
 
 **Repo:** `WebDevMicromobility/MicromobilityRentalsSystem` (branch `main`)
-**Goal:** Rebuild the LOOK of the existing staff area (check-in, queue, POS, inventory, customers, analytics, settings) to match the Micromobility ERP design in this bundle. **Keep every current function, section, flow, and piece of logic exactly as it is** — same features, same data calls, same handlers. Only the layout and design change.
+**Goal:** Rebuild the LOOK of the existing staff area (check-in, queue, POS, inventory, customers, analytics, settings) to match the MicroMobility ERP design in this bundle. **Keep every current function, section, flow, and piece of logic exactly as it is** — same features, same data calls, same handlers. Only the layout and design change.
 
 ## About the design files
 
@@ -57,7 +57,7 @@ Key screens to mirror from the reference
 - **System** → repo settings/staff: settings forms in white cards, staff table with role chips.
 
 Print documents
-- Every staff print job (session report, receipts, Z-report) follows the Green Banner family: dark `#123019` banner with white logo + neon doc-type label, 4px `#03FF89→#0C7A3D` gradient rule, stat tiles, dark table head, signature row, footer. Full spec lives in the `design_handoff_session_report` bundle (README there); `Report Template B - Green Banner.dc.html` here is the visual truth. Company name: **Micromobility Co.**
+- Every staff print job (session report, receipts, Z-report) follows the Green Banner family: dark `#123019` banner with white logo + neon doc-type label, 4px `#03FF89→#0C7A3D` gradient rule, stat tiles, dark table head, signature row, footer. Full spec lives in the `design_handoff_session_report` bundle (README there); `Report Template B - Green Banner.dc.html` here is the visual truth. Company name: **MicroMobility Co.**
 - Keep `-webkit-print-color-adjust: exact` for dark banners/table heads.
 
 ## Bilingual / RTL

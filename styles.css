@@ -189,7 +189,7 @@
        The three cards are read as one set, so what is shared is the geometry: the same padding,
        the same band height, the same gap. Every logo then sits on one line and every name starts
        on another, which no row layout could do here — the marks' proportions are nothing alike
-       (the National Day lockup is 2.2:1, the Micromobility mark all but square), and a name
+       (the National Day lockup is 2.2:1, the MicroMobility mark all but square), and a name
        beside a mark starts wherever that mark happens to end.
        It was a row until Sep 2026, with the National Day card alone breaking to a poster because
        its lockup and its name would not fit side by side in a third of the picker. */
@@ -4086,7 +4086,7 @@
     html body .mm-on-dark{display:none;}
 
     /* ════════════════════════════════════════════════════════════════════════
-       STAFF ERP RESKIN — Micromobility ERP design (design_handoff_erp_reskin).
+       STAFF ERP RESKIN — MicroMobility ERP design (design_handoff_erp_reskin).
        Scoped to body.view-staff so the customer paper skin above is untouched.
        Desk #f2f2ec · cards #ffffff · hairlines #e2e2d8 · ink #111512 ·
        brand green #0c7a3d · dark surface #123019 / topbar+rail #0f1215 with

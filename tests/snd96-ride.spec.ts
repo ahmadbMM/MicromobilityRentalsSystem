@@ -548,7 +548,7 @@ test('it reads the same whether or not the takeover is up', async ({ page }) => 
 
 // ── Bike owners ride free ────────────────────────────────────────────────────
 // The National Day ride takes riders on their own bikes as well as on ours. An owner pays
-// nothing and takes none of the ride's places: those count Micromobility bikes. The circuit
+// nothing and takes none of the ride's places: those count MicroMobility bikes. The circuit
 // keeps its rental-only menu.
 
 async function toRiders(page: Page) {

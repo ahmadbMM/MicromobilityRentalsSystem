@@ -146,10 +146,10 @@ test('a failed save says so and keeps what was typed', async ({ page }) => {
   await waitForSb(page);
   await page.evaluate(`setStaffTab('website')`);
   const f = page.locator('input[data-web-key="coming_soon.eyebrow"][data-web-lang="en"]');
-  await f.fill('Micromobility KSA');
+  await f.fill('MicroMobility KSA');
   await page.locator('#web-save').click();
   await expect(page.locator('#err-bar-el')).toContainText('did not save'); // the error bar, like every refused write
-  await expect(f).toHaveValue('Micromobility KSA');
+  await expect(f).toHaveValue('MicroMobility KSA');
   await expect(page.locator('#web-save')).toBeEnabled();
 });
 

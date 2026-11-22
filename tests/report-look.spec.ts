@@ -77,6 +77,6 @@ test.describe('the printed reports', () => {
     expect(html).toContain('Nothing sold');
     expect(html).toContain('<div class="rx-title"><h1>Sunday'); // the day it closes
     expect(html).toContain('class="rx lk-b'); // a statement: the letterhead (Q4)
-    expect(html).toContain('<bdi>Micromobility Co.</bdi>'); // its full stop stays at its end in Arabic
+    expect(html).toContain('<bdi>MicroMobility Co.</bdi>'); // its full stop stays at its end in Arabic
   });
 });

@@ -446,7 +446,7 @@ test.describe('the Apple Wallet pass', () => {
     for (const p of [donor, visitor]) {
       const said = ['headerFields', 'primaryFields', 'secondaryFields', 'auxiliaryFields', 'backFields'].flatMap((k) => p.json.eventTicket[k].flatMap((y: { label: string; value: string }) => [y.label, y.value])).join(' | ');
       expect(said).not.toMatch(/\b(ride|rider|riders|bike|bikes)\b/i);
-      expect(p.json.description).toContain('Micromobility Blood Donation');
+      expect(p.json.description).toContain('MicroMobility Blood Donation');
     }
   });
 

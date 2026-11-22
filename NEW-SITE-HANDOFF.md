@@ -156,7 +156,7 @@ reads (`session_date >= today-365`).
 - Signed-in visitor (fresh visit, including remembered logins) → **PICK YOUR EVENT** page:
   exactly two cards — "Evening Circuit Session" (JCC; sub "Sun & Tue · 9-11pm · Road, Hybrid
   & Mountain"; JCC logo `jcc.png`, white-text variant `jcc-white.png` for dark theme) and
-  "Saturday Social Ride" (sub "Every Saturday · 2 levels · Complimentary from Micromobility";
+  "Saturday Social Ride" (sub "Every Saturday · 2 levels · Complimentary from MicroMobility";
   micromobility logo, `logo-dark.png` on light / `logo.png` on dark). Both cards ALWAYS show.
   Only a same-tab reload restores the previous in-app location.
 - Landing footer: subtle "Staff Access" button → staff credential prompt (or panel if unlocked).

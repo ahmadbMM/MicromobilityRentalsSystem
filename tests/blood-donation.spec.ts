@@ -27,7 +27,7 @@ test.describe('Blood Donation event', () => {
       const w = window as unknown as Record<string, (...a: unknown[]) => unknown>;
       return { kind: w._rideKind(s), bike: w._needsBike(s), name: w._evName(s), steps: w._regSteps(s), ev: w._evOf(s), community: w._evMatch(s, 'community') };
     }, blood);
-    expect(r).toEqual({ kind: 'blood', bike: false, name: 'Micromobility Blood Donation', steps: [1, 2, 3], ev: 'blood', community: false });
+    expect(r).toEqual({ kind: 'blood', bike: false, name: 'MicroMobility Blood Donation', steps: [1, 2, 3], ev: 'blood', community: false });
   });
 
   test('the pop-up shows the whole poster in English and Arabic, and must be confirmed', async ({ page }) => {
@@ -178,7 +178,7 @@ test.describe('@customer:blood Blood Donation registration', () => {
     // "Different types": all eight on the card
     await expect(page.locator('.bld-card .bld-ti')).toHaveCount(8);
     await expect(page.locator('.bld-card .bld-cause')).toContainText('Different types. One purpose.');
-    await expect(page.locator('.bld-card .lec-title')).toHaveText(/Micromobility Blood Donation/i);
+    await expect(page.locator('.bld-card .lec-title')).toHaveText(/MicroMobility Blood Donation/i);
     await pic.scrollIntoViewIfNeeded();
     await expect.poll(() => pic.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth)).toBe(1200);
     // the arm starts 40% down the picture

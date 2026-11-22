@@ -21,7 +21,7 @@ There are **three** kinds of ride, distinguished by two columns.
 | **Saturday Social Ride** | `community` | `saturday` or NULL | **true** | false | `_rideKind(s)==='saturday'` |
 | **Petromin's Wednesdays** | `community` | `petromin` | **false** | **true** | `_isGroupRide(s)` |
 | **Triathlon Pool Session** | `community` | `swim` | **true** | false | `!_needsBike(s)` |
-| **T100 Triathlon Prep** (was Micromobility Triathlon Workshop) | `community` | `workshop` | **true** | false | `_openToAll(s)` — `open_to_all=true` lifts the members gate; otherwise the Saturday shape, bike-free |
+| **T100 Triathlon Prep** (was MicroMobility Triathlon Workshop) | `community` | `workshop` | **true** | false | `_openToAll(s)` — `open_to_all=true` lifts the members gate; otherwise the Saturday shape, bike-free |
 
 ```js
 function _isCommunity(s){return s&&s.event_kind==='community';}                    // app.src.html:3631
@@ -198,7 +198,7 @@ reappeared as the evening went on and a 40-bike evening could serve more than 40
 
 ### 4.2 Own-bike riders never consume a place — except on the Petromin ride 🟣
 
-`type_preference = 'Own'` is outside the count on both sides. Places allocate **Micromobility
+`type_preference = 'Own'` is outside the count on both sides. Places allocate **MicroMobility
 bikes**, and a rider on their own bike takes none. Staff can therefore seat any number of bike
 owners on top of a "full" allocation.
 

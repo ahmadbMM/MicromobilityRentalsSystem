@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 
-// Saturday Social Ride spots meter the Micromobility rental bikes only: riders who
+// Saturday Social Ride spots meter the MicroMobility rental bikes only: riders who
 // bring their own bike ('Own' type preference) never consume a spot, so staff can
 // seat any number of bike owners on top of a "full" renter allocation.
 

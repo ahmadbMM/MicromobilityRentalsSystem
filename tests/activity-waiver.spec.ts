@@ -11,7 +11,7 @@ const WS = d(5) + '-tw', EV = d(4) + '-ev', SWIM = d(6) + '-sw';
 const sessions = [
   { id: WS, day: 'Tuesday', session_date: d(5), capacity: 30, spots: 30, status: 'open', created_at: 3,
     event_kind: 'community', ride_kind: 'workshop', needs_approval: true, hide_queue: true, paid_ride: false,
-    open_to_all: true, title: 'Micromobility Triathlon Workshop', bike_slots: '{"_time":"18:00 - 20:00","_total":30}' },
+    open_to_all: true, title: 'MicroMobility Triathlon Workshop', bike_slots: '{"_time":"18:00 - 20:00","_total":30}' },
   { id: EV, day: 'Friday', session_date: d(4), capacity: 30, spots: 30, status: 'open', created_at: 2,
     event_kind: 'community', ride_kind: 'event', paid_ride: true, price: 40, open_to_all: true, needs_approval: false,
     hide_queue: true, title: 'Bike maintenance class', bike_slots: '{"_time":"19:00 - 21:00"}' },

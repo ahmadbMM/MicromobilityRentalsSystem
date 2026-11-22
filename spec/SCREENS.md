@@ -98,7 +98,7 @@ Each has a `title` and an `aria-label` ending "(opens in a new tab)".
 
 1. **Open Sports Day** — `landJccCardTitle` / `landJccTitle`, meta `landJccMeta`
    ("Sun & Tue · 9-11pm"), JCC logo (`jcc.png`, `jcc-white.png` on dark).
-2. **Micromobility Experiences** — `landCommTitle`. **Logo only, no description** (this was changed
+2. **MicroMobility Experiences** — `landCommTitle`. **Logo only, no description** (this was changed
    deliberately). Umbrella over *every* non-JCC ride.
 
 Clicking sets `S.selEvent` and enters the Reserve wizard. The community card runs the **members
@@ -1506,7 +1506,7 @@ extracted pack [lang/ar.json](../lang/ar.json).
 |---|---|---|
 | `landChooseEvent` | Pick your event | اختر فعاليتك |
 | `landCommSoon` | Details coming soon | التفاصيل قريبًا |
-| `landCommTitle` | Micromobility Experiences | جولات مايكروموبيليتي |
+| `landCommTitle` | MicroMobility Experiences | جولات مايكروموبيليتي |
 | `landEventCommunity` | Community event | فعالية مجتمعية |
 | `landEventRide` | Circuit ride | جولة الحلبة |
 | `landEyebrow` | Rides & Events | جولات وفعاليات |
@@ -2321,7 +2321,7 @@ extracted pack [lang/ar.json](../lang/ar.json).
 | `landingSub` | Bicycle rentals & community rides in Jeddah | تأجير الدراجات وجولات مجتمعية في جدة |
 | `landingTitle` | MicroMobility Rentals | مايكرو موبيليتي للتأجير |
 | `lastName` | Last Name | اسم العائلة |
-| `lecKickerComm` | Micromobility | مايكرو موبيليتي |
+| `lecKickerComm` | MicroMobility | مايكرو موبيليتي |
 | `lifespanLabel` | Lifespan | مدة الخدمة |
 | `liveLabel` | Live | مباشر |
 | `lockBtn` | Lock | قفل |

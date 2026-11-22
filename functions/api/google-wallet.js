@@ -16,7 +16,7 @@
 // Without them the function answers 501 and the app hides its button.
 const SUPA_DEFAULT = "https://qpffkzmsfyilicwcsszz.supabase.co";
 const SAVE_URL = "https://pay.google.com/gp/v/save/";
-const KIND_NAMES = { blood: "Micromobility Blood Donation", yoga: "Hatha Yoga for Cyclists", farm: "Farm House Night", jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday Social Ride", petromin: "Petromin ride", swim: "Swim session", workshop: "T100 Triathlon Prep", snd96: "Saudi National Day 96 Ride", runher: "Run for Her", event: "Event", vlap: "Victory Lap", defe5k: "DEFE 5KM Run" };
+const KIND_NAMES = { blood: "MicroMobility Blood Donation", yoga: "Hatha Yoga for Cyclists", farm: "Farm House Night", jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday Social Ride", petromin: "Petromin ride", swim: "Swim session", workshop: "T100 Triathlon Prep", snd96: "Saudi National Day 96 Ride", runher: "Run for Her", event: "Event", vlap: "Victory Lap", defe5k: "DEFE 5KM Run" };
 // The kinds that hand out no bike (the app's KIND_TRAITS bike:false): their pass names no bike and no
 // riders (the owner, 2026-10-18: "make sure all non-cycling related sessions dont include anything about
 // cycling anywhere").

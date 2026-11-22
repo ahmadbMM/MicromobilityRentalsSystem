@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/supabase';
 
-// The Micromobility Triathlon Workshop is a community session with the Saturday ride's shape
+// The MicroMobility Triathlon Workshop is a community session with the Saturday ride's shape
 // — staff approve the list, the queue stays hidden, one place each, complimentary — that
 // involves no bicycle, and that ANYONE signed in may book: open_to_all on the session lifts
 // the members gate, in the app and in the database alike. It is featured on the landing page
@@ -13,7 +13,7 @@ const sessions = [
   {
     id: WS, day: 'Tuesday', session_date: '2099-03-10', capacity: 30, status: 'open', created_at: 2,
     event_kind: 'community', ride_kind: 'workshop', needs_approval: true, hide_queue: true, paid_ride: false,
-    open_to_all: true, spots: 30, title: 'Micromobility Triathlon Workshop',
+    open_to_all: true, spots: 30, title: 'MicroMobility Triathlon Workshop',
     meet_url: 'https://maps.example.test/hq', bike_slots: '{"_time":"18:00 - 20:00","_total":30}',
   },
   {
@@ -55,7 +55,7 @@ test('reached directly, the workshop list still opens without the members dialog
   await page.evaluate(`goLanding()`);
   await page.evaluate(`selectEvent('workshop')`);
   await expect.poll(() => page.evaluate('S.selEvent')).toBe('workshop');
-  await expect(page.locator('#tab-register')).toContainText('Micromobility Triathlon Workshop');
+  await expect(page.locator('#tab-register')).toContainText('MicroMobility Triathlon Workshop');
   await expect(page.locator('#tab-register .sess-partner')).toHaveText('In partnership with Saudi Triathlon Federation');
   expect(await page.evaluate(`document.getElementById('confirm-modal').style.display`)).not.toBe('block');
 });
