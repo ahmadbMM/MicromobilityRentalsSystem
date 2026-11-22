@@ -11405,5 +11405,17 @@
   "bdgKaustTriD": "Menamatkan KAUST Triathlon",
   "bdgKaustTriA": "Kerana melintasi garisan penamat KAUST Triathlon bersama komuniti MicroMobility: perlumbaan Olimpik, Sprint, satu bahagian relay atau Larian Future Champs. Diberikan oleh pasukan kami.",
   "ktBikeK": "Ambil basikal",
-  "ktBikeV": "Cawangan Sharafeyah · Khamis 3 Dis, dalam waktu bekerja"
+  "ktBikeV": "Cawangan Sharafeyah · Khamis 3 Dis, dalam waktu bekerja",
+  "ktBikeQ": "Basikal anda untuk perlumbaan",
+  "ktBikeRent": "Sewa basikal MicroMobility",
+  "ktBikeRentD": "Ambil di cawangan Sharafeyah pada Khamis 3 Dis, dalam waktu bekerja, dan bayar sewa di sana.",
+  "ktBikeOwn": "Saya ada basikal sendiri",
+  "ktBikeOwnD": "Bawa basikal sendiri ke perlumbaan.",
+  "ktBikePay": "{0}, dibayar di cawangan Sharafeyah",
+  "ktBikeYourK": "Basikal anda",
+  "ktErrBike": "Beritahu kami tentang basikal anda untuk perlumbaan.",
+  "ktMust": "Saya akan mendaftar dan membayar yuran perlumbaan di laman web KAUST Triathlon. Tempat saya di MicroMobility sahaja tidak mendaftarkan saya dalam perlumbaan.",
+  "ktErrMust": "Tandakan bahawa anda akan mendaftar dan membayar di laman web KAUST Triathlon.",
+  "ktRegMust": "Pendaftaran dan bayaran di laman web KAUST Triathlon adalah wajib. Anda belum dalam perlumbaan sehingga melakukannya. Jawab Ya selepas selesai.",
+  "ktOwnBike": "Basikal sendiri"
 }

@@ -11405,5 +11405,17 @@
   "bdgKaustTriD": "Natapos ang KAUST Triathlon",
   "bdgKaustTriA": "Sa pagtawid sa finish line ng KAUST Triathlon kasama ang MicroMobility community: ang Olympic na karera, ang Sprint, isang relay leg o ang Future Champs run. Ibinibigay ng aming team.",
   "ktBikeK": "Pagkuha ng bisikleta",
-  "ktBikeV": "Sangay sa Sharafeyah · Huwebes, 3 Dis, sa oras ng trabaho"
+  "ktBikeV": "Sangay sa Sharafeyah · Huwebes, 3 Dis, sa oras ng trabaho",
+  "ktBikeQ": "Ang bisikleta mo para sa karera",
+  "ktBikeRent": "Umupa ng bisikleta ng MicroMobility",
+  "ktBikeRentD": "Kunin ito sa sangay sa Sharafeyah sa Huwebes, 3 Dis, sa oras ng trabaho, at doon bayaran ang upa.",
+  "ktBikeOwn": "May sarili akong bisikleta",
+  "ktBikeOwnD": "Dalhin ang sarili mong bisikleta sa karera.",
+  "ktBikePay": "{0}, babayaran sa sangay sa Sharafeyah",
+  "ktBikeYourK": "Ang bisikleta mo",
+  "ktErrBike": "Sabihin sa amin ang tungkol sa bisikleta mo para sa karera.",
+  "ktMust": "Magpaparehistro ako at magbabayad ng bayad sa karera sa website ng KAUST Triathlon. Hindi ako nakapasok sa karera dahil lang sa puwesto ko sa MicroMobility.",
+  "ktErrMust": "I-tick na magpaparehistro at magbabayad ka sa website ng KAUST Triathlon.",
+  "ktRegMust": "Kailangang magparehistro at magbayad sa website ng KAUST Triathlon. Wala ka pa sa karera hangga't hindi mo ito ginagawa. Sumagot ng Oo kapag tapos na.",
+  "ktOwnBike": "Sariling bisikleta"
 }

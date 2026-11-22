@@ -254,6 +254,7 @@ async function buildPkpass(b, cfg) {
   const auxiliary = [];
   if (ride === "yoga") auxiliary.push({ key: "bring", label: "BRING", value: "Yoga mat" });
   if (triRace) auxiliary.push({ key: "race", label: "YOUR RACE", value: triRace[0] });
+  if (ride === "ktri" && b.type_preference && b.type_preference !== "None") auxiliary.push({ key: "bike", label: "BIKE", value: b.type_preference === "Own" ? "Own bike" : String(b.type_preference) + (b.size ? " " + b.size : "") });
   if (isBlood && startStr) auxiliary.push({ key: "hours", label: "HOURS", value: clock && clock.endMin != null ? `${startStr} - ${_hhmm(clock.endMin)}` : startStr });
   if (isBlood && !bloodVis && cfg.bloodType) auxiliary.push({ key: "blood_type", label: "BLOOD TYPE", value: cfg.bloodType === "unknown" ? "Not known" : cfg.bloodType });
   if (bikeType) auxiliary.push({ key: "bike", label: "BIKE", value: bikeType });
@@ -330,7 +331,7 @@ async function buildPkpass(b, cfg) {
         ...meetHeld ? [] : [{ key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` }],
         ...ridersBack,
         // and the club or community they answered (blood_club, 20261105150000)
-        ...ride === "ktri" ? [{ key: "ktri", label: "The race", value: "Bike collection: Sharafeyah branch, Thursday 3 Dec, during working hours. Enter and pay for your race on the KAUST Triathlon registration website: " + KTRI_REG_URL + " (closes Wed 2 Dec, 11:50 PM). Not living at KAUST? Apply for your gate pass with the link the organisers send after you register." }] : [],
+        ...ride === "ktri" ? [{ key: "ktri", label: "The race", value: (["Own", "None", "Any", ""].includes(String(b.type_preference || "")) ? "" : "Bike collection: Sharafeyah branch, Thursday 3 Dec, during working hours; the rental is paid there. ") + "You must register and pay for your race on the KAUST Triathlon registration website: " + KTRI_REG_URL + " (closes Wed 2 Dec, 11:50 PM). Not living at KAUST? Apply for your gate pass with the link the organisers send after you register." }] : [],
         ...isBlood && b.blood_club ? [{ key: "club", label: "Club or community", value: String(b.blood_club) }] : [],
         ...addonsBack,
         ...lockersBack,

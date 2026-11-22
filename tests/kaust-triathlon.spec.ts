@@ -70,6 +70,14 @@ test.describe('@customer:ktri KAUST Triathlon', () => {
     await expect(page.locator('#tab-register .kt-race')).toHaveCount(5);
     await page.locator('#tab-register .kt-race[data-race="spr"]').click();
     await expect(page.locator('#tab-register .kt-race[data-race="spr"]')).toHaveAttribute('aria-checked', 'true');
+    // the bike: asked, and the promise to register on the race's site is required
+    await page.locator('#kt-next').click();
+    expect(await page.evaluate('S.regStep')).toBe(2);
+    await page.locator('#tab-register .kt-bk[data-bike="own"]').click();
+    await expect(page.locator('#tab-register .kt-types')).toHaveCount(0);
+    await page.locator('#kt-next').click();
+    expect(await page.evaluate('S.regStep')).toBe(2);
+    await page.locator('#kt-must').check();
     await page.locator('#kt-next').click();
     await expect.poll(() => page.evaluate('S.regStep')).toBe(3);
     await expect(page.locator('#tab-register')).toContainText('Sprint');
@@ -77,15 +85,18 @@ test.describe('@customer:ktri KAUST Triathlon', () => {
     await page.locator('#reg-waiver-cb').check();
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
     await expect.poll(() => rows.length).toBe(1);
-    expect(rows[0]).toMatchObject({ session_id: KT, type_preference: 'None', price: 0 });
+    expect(rows[0]).toMatchObject({ session_id: KT, type_preference: 'Own', price: 0 });
     await expect.poll(() => sent.filter((x) => x.u === 'customer_set_tri_race').length).toBe(1);
     expect(sent.find((x) => x.u === 'customer_set_tri_race')!.b).toMatchObject({ p_id: 'c1', p_race: 'spr' });
     // the last step: the pop-up, No shows the registration website
     const gate = page.locator('#race-gate .rr-box.kt-gate');
     await expect(gate).toBeVisible();
     await expect(gate.locator('#rr-title')).toHaveText('Have you registered through the KAUST Triathlon registration website?');
-    await gate.locator('.defe-reg-yn .toggle-btn').nth(1).click();
     await expect(gate.locator('a.kt-reg-link')).toHaveAttribute('href', REG);
+    await gate.locator('.defe-reg-yn .toggle-btn').nth(1).click();
+    // No keeps it open: no Done, the registration is required
+    await expect(gate.locator('.pg-btn')).toHaveCount(0);
+    await expect(gate).toContainText('required');
     await expect.poll(() => sent.filter((x) => x.u === 'customer_set_race_reg').length).toBe(1);
     expect(sent.find((x) => x.u === 'customer_set_race_reg')!.b).toMatchObject({ p_answer: 'no' });
   });
@@ -122,7 +133,18 @@ test.describe('@customer:ktri KAUST Triathlon open to everyone', () => {
     await expect(page.locator('#tab-register .sess-card')).toHaveCount(1);
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
     await expect.poll(() => page.evaluate('S.regStep')).toBe(2);
+    await page.locator('#tab-register .kt-race[data-race="oly"]').click();
+    await expect(page.locator('#tab-register .kt-know')).not.toContainText('Sharafeyah branch');
+    await page.locator('#tab-register .kt-bk[data-bike="rent"]').click();
     await expect(page.locator('#tab-register .kt-know')).toContainText('Sharafeyah branch');
+    await page.locator('#tab-register .kt-types .toggle-btn[data-ty="Road"]').click();
+    await page.locator('#kt-h').fill('178');
+    await page.locator('#kt-must').check();
+    await page.locator('#kt-next').click();
+    await expect.poll(() => page.evaluate('S.regStep')).toBe(3);
+    expect(await page.evaluate('_ktBikeOf()')).toMatchObject({ type: 'Road', h: 178 });
+    // Future Champs is a run: no bike asked
+    expect(await page.evaluate(`(S.regTriRace='champs',[_ktBikeAsk(),_ktBikeOf().type])`)).toEqual([false, 'None']);
   });
 });
 

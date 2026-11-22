@@ -11405,5 +11405,17 @@
   "bdgKaustTriD": "Terminó el KAUST Triathlon",
   "bdgKaustTriA": "Por cruzar la meta del KAUST Triathlon con la comunidad MicroMobility: la carrera Olímpica, la Sprint, un tramo de relevos o la carrera Future Champs. La otorga nuestro equipo.",
   "ktBikeK": "Recogida de la bicicleta",
-  "ktBikeV": "Sucursal de Sharafeyah · jueves 3 de dic., en horario de atención"
+  "ktBikeV": "Sucursal de Sharafeyah · jueves 3 de dic., en horario de atención",
+  "ktBikeQ": "Tu bicicleta para la carrera",
+  "ktBikeRent": "Alquilar una bicicleta de MicroMobility",
+  "ktBikeRentD": "Recógela en la sucursal de Sharafeyah el jueves 3 de dic., en horario de atención, y paga el alquiler allí.",
+  "ktBikeOwn": "Tengo mi propia bicicleta",
+  "ktBikeOwnD": "Lleva tu propia bicicleta a la carrera.",
+  "ktBikePay": "{0}, se paga en la sucursal de Sharafeyah",
+  "ktBikeYourK": "Tu bicicleta",
+  "ktErrBike": "Cuéntanos sobre tu bicicleta para la carrera.",
+  "ktMust": "Me inscribiré y pagaré la cuota de la carrera en el sitio web del KAUST Triathlon. Mi plaza en MicroMobility por sí sola no me inscribe en la carrera.",
+  "ktErrMust": "Marca que te inscribirás y pagarás en el sitio web del KAUST Triathlon.",
+  "ktRegMust": "Inscribirse y pagar en el sitio web del KAUST Triathlon es obligatorio. No estás en la carrera hasta hacerlo. Responde Sí cuando lo hayas hecho.",
+  "ktOwnBike": "Bicicleta propia"
 }

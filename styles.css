@@ -16664,3 +16664,12 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-ktri{--rq-ev:#1565b4;}
 html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-ktri{--rq-ev:#6fb2f0;}
 html[data-staff-theme="dark"] body.view-staff .kt-race-chip{background:rgba(111,178,240,.16);color:#9CCBF3;}
 @media(max-width:400px){.kt-card-title{font-size:20px;}.kt-card-mark{height:26px;}.kt-flow-mark{height:34px;}.kt-know-k{min-width:0;width:100%;}.feat-kt .feat-name.kt-card-title{font-size:18px;}}
+/* the bike for the race, and the promise to register on the race's own site (2026-11-22) */
+.kt-bike{display:grid;gap:8px;margin-top:16px;}
+.kt-sub{font-weight:800;font-size:15px;color:var(--kt-navy);}
+.kt-rent{margin-top:6px;}
+.kt-types{flex-wrap:wrap;}
+.kt-must{display:flex;align-items:flex-start;gap:10px;margin-top:16px;padding:12px 14px;background:#fff;border:1.5px solid var(--kt-blue);border-radius:var(--r-md,12px);font-size:13.5px;font-weight:600;line-height:1.45;color:var(--kt-navy);cursor:pointer;}
+.kt-must input{flex:none;width:20px;height:20px;margin-top:1px;accent-color:var(--kt-blue);}
+#race-gate .kt-must-note{margin-top:12px;font-weight:700;color:var(--kt-navy);}
+.kt-bike-cell{margin-top:3px;font-size:var(--sf-fs-xs);color:var(--text-2,#555);}
