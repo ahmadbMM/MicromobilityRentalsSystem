@@ -60569,10 +60569,12 @@ function toggleScanDetails(){
   if(b){b.classList.toggle('active',_scanDetails);b.setAttribute('aria-pressed',_scanDetails?'true':'false');}
   if(!_scanDetails)_scanDetailsPaint();
 }
-function _scanDetailsPaint(rows){
+// A rider already checked in always shows them, switch or not (the user, 2026-11-22: "when scanning a qr
+// code for an already checked in booking show booking's height bike type and size"): force.
+function _scanDetailsPaint(rows,force){
   const el=document.getElementById('scan-details');if(!el)return;
   const cell=(k,v)=>`<div><dt>${t(k)}</dt><dd><bdi>${esc(v||'-')}</bdi></dd></div>`;
-  el.innerHTML=_scanDetails&&rows?rows.map(r=>`<div class="scan-dt"><div class="scan-dt-nm"><bdi>${esc(r.no)}</bdi> ${esc(r.name||'')}</div><dl class="scan-dt-grid">${r.who?cell('bldColRole',r.who):cell('bikeTypeLabel',typeLabel(r.type))+cell('heightLabel',r.height?`${r.height} ${t('cmUnit')}`:'')+cell('sizeWord',r.fit)}</dl></div>`).join(''):'';
+  el.innerHTML=(_scanDetails||force)&&rows?rows.map(r=>`<div class="scan-dt"><div class="scan-dt-nm"><bdi>${esc(r.no)}</bdi> ${esc(r.name||'')}</div><dl class="scan-dt-grid">${r.who?cell('bldColRole',r.who):cell('bikeTypeLabel',typeLabel(r.type))+cell('heightLabel',r.height?`${r.height} ${t('cmUnit')}`:'')+cell('sizeWord',r.fit)}</dl></div>`).join(''):'';
 }
 function _scanDetailsOf(e){
   const others=_partyOf(e).filter(x=>x.id!==e.id&&!['cancelled','removed','noshow'].includes(x.status));
@@ -61008,7 +61010,7 @@ function _scanTicket(entry,say){
     // a rider on their own bike or with none needs no bike from the rack (_bikeNotOurs)
     const owe=!entry.paid?Math.max(0,Math.round(((_freeSessIds.has(entry.sessionId)?0:(entry.price??DEFAULT_PRICE))+addonsCost(entryAddons(entry))-_walPaid(entry))*100)/100):0;
     const noBike=_awaitsBike(entry);
-    say([t('scanAlreadyIn').replace('{0}',entry.queueNum).replace('{1}',nm),at&&(t('scanInAt').replace('{0}',at)+(entry.checkedInBy?', '+entry.checkedInBy:'')),owe&&t('scanOwes').replace('{0}',owe),noBike&&t('statusNeedsBike')].filter(Boolean).join(' · ')+_noteTail(entry),'#ffb347');_scanDetailsPaint(_scanDetailsOf(entry));
+    say([t('scanAlreadyIn').replace('{0}',entry.queueNum).replace('{1}',nm),at&&(t('scanInAt').replace('{0}',at)+(entry.checkedInBy?', '+entry.checkedInBy:'')),owe&&t('scanOwes').replace('{0}',owe),noBike&&t('statusNeedsBike')].filter(Boolean).join(' · ')+_noteTail(entry),'#ffb347');_scanDetailsPaint(_scanDetailsOf(entry),true);
     // Return from the scan (the staff review, 2026-11-06, BK06): the return rush at the end of the night.
     if(!collecting&&!S._ciId&&_editOk('queue')){_scanExcept={go:()=>{closeScanModal(false);doReturn(entry.id);},lbl:'retTitle'};_scanExceptRender();}
     return;}
@@ -68417,7 +68419,7 @@ function _scanDetailsOfRider(r){
 // scan, each on the bike the pop-up would have planned, and the banner says who and on which bike.
 async function _scanRiderExpress(r,no,say){
   const todo=_riderParty(r).filter(x=>!x.checked_in_at);
-  if(!todo.length){say(t('scanAlreadyIn').replace('{0}',no).replace('{1}',r.name||'')+_noteTail(_riderEntry(r)),'#ffb347');_scanDetailsPaint(_scanDetailsOfRider(r));return;}
+  if(!todo.length){say(t('scanAlreadyIn').replace('{0}',no).replace('{1}',r.name||'')+_noteTail(_riderEntry(r)),'#ffb347');_scanDetailsPaint(_scanDetailsOfRider(r),true);return;}
   await _riderAct(todo.map(x=>x.id),_riderInPatch,_riderBookingIn);
   const done=todo.map(x=>(S.riders||[]).find(y=>String(y.id)===String(x.id))).filter(x=>x&&x.checked_in_at);
   if(!done.length){say(t('errChangedElsewhere'),'var(--red)');return;}

@@ -140,12 +140,18 @@ test.describe('@staff:bookings scanner feedback', () => {
     await expect(banner(page)).toHaveClass(/scan-bn-warn/);
   });
 
-  test('Booking details: off by default; on, a rider already in shows bike type, height and size, and the next scan clears it', async ({ page }) => {
+  test('Booking details: a rider already in shows bike type, height and size even with the switch off (2026-11-22); the next scan clears it', async ({ page }) => {
     await boot(page);
     await openScanner(page);
     const details = page.locator('#scan-details');
+    await expect(page.locator('#scan-details-btn')).toHaveAttribute('aria-pressed', 'false');
     await scan(page, 'MMC-5-eeee5555');
     await expect(banner(page)).toContainText('already checked in');
+    await expect(details).toContainText('#5 Riding Eid');
+    await expect(details).toContainText('Hybrid');
+    await expect(details).toContainText('175 cm');
+    await expect(details.locator('.scan-dt-grid dd').nth(2)).toHaveText('M');
+    await scan(page, 'MMC-6-nothere');
     await expect(details).toBeEmpty();
     await page.locator('#scan-details-btn').click();
     await expect(page.locator('#scan-details-btn')).toHaveAttribute('aria-pressed', 'true');
