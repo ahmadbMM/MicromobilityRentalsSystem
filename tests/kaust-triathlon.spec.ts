@@ -163,4 +163,19 @@ test.describe('@staff:sessions KAUST Triathlon', () => {
     expect(await page.evaluate(`_sessShort(allSessions().find(x=>x.id==='${KT}'))`)).toBe('Triathlon');
     expect(await page.evaluate(`_sfTheme(allSessions().find(x=>x.id==='${KT}'))`)).toBe('ktri');
   });
+  // the user, 2026-11-23: "in kaust bookings in staff panel show the type of race in the vertical page of the phone screen"
+  test('Bookings on a portrait phone: each card shows the race', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const row = (id: string, race: string | null, n: number) => ({ id, session_id: KT, session_day: 'Friday', session_date: '2099-12-04',
+      queue_num: n, name: 'Rider ' + n, phone: '+96650000000' + n, type_preference: 'None', size: '', status: 'waiting', paid: false,
+      price: 0, registered_at: '2099-11-22T10:00:00Z', tri_race: race, race_reg: 'yes' });
+    await stubSupabase(page, { sessions: [ktri, sat], bikes: [], queue_entries: [row('q1', 'oly', 1), row('q2', null, 2)] });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${KT}';renderStaffQueue()`);
+    const card = (id: string) => page.locator(`#tab-queue .queue-mobile-view .q-card[data-id="${id}"]`);
+    await expect(card('q1').locator('.rq-csub .kt-race-chip')).toContainText('Olympic');
+    await expect(card('q2').locator('.kt-race-chip')).toHaveCount(0);
+  });
 });
