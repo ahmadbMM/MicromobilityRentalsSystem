@@ -1448,7 +1448,7 @@ function _akShellHtml() {
 // to. The read is its own, never kept on the phone; a database without it hides the card.
 const INT_KEYS = ['saturday', 'circuit', 'road', 'petromin', 'women', 'learn', 'runs', 'races', 'swim', 'yoga', 'farm', 'charity'];
 // The kind each session counts under (the app's _rideKind); road, women and a triathlon event are read off the session.
-const INT_KIND = { saturday: 'saturday', jcc: 'circuit', petromin: 'petromin', workshop: 'learn', runher: 'runs', defe5k: 'runs', vlap: 'races', arena: 'races', swim: 'swim', yoga: 'yoga', farm: 'farm', blood: 'charity' };
+const INT_KIND = { saturday: 'saturday', jcc: 'circuit', petromin: 'petromin', workshop: 'learn', runher: 'runs', defe5k: 'runs', vlap: 'races', arena: 'races', swim: 'swim', yoga: 'yoga', farm: 'farm', blood: 'charity', paint: 'learn' };
 Object.assign(HUB_T, {
   intTitle: ['Your interests', 'اهتماماتك', 'Vos centres d’intérêt', 'Tus intereses', 'Os seus interesses', 'آپ کی دلچسپیاں', 'आपकी रुचियाँ', 'Ang iyong mga interes', 'तपाईंका रुचिहरू', 'আপনার আগ্রহ', 'Minat anda'],
   intSave: ['Save', 'حفظ', 'Enregistrer', 'Guardar', 'Salvar', 'محفوظ کریں', 'सहेजें', 'I-save', 'सेभ गर्नुहोस्', 'সংরক্ষণ করুন', 'Simpan'],

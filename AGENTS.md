@@ -2173,6 +2173,36 @@ lets it through like Victory Lap); only community members book (open_to_all fals
 - DB: migration 20261122150000_kaust_triathlon; the session row is supabase/checks/kaust-triathlon-session-2026-12-04.sql,
   run only once the app is live. tests/kaust-triathlon.spec.ts.
 
+## Tee Painting Workshop (2026-11-23)
+The user: "create a session that is exclusively for community members and put it under micromobility experiences only as
+featured, it is a micromobility t shirt coloring and painting", 130 SAR per person; first date Sat 28 Nov 2026 15:00-18:00 at
+Red Mug Caffe (map in meet_url), 20 places. Their answers: title "Tee Painting Workshop" (Arabic ورشة الرسم على التيشيرت),
+the way to pay "will be announced later", no T-shirt size question, first come first served, one place per account.
+`ride_kind 'paint'` (event_kind community, open_to_all false, no approval, hide_queue), id suffix `-tp` (NC_ID knows it).
+Members only (`_infoShowSess` does NOT let it through; the Experiences card's mark is a member's, as the farm's). Featured
+as made (FEAT_KINDS) inside MicroMobility Experiences (`_evMatch` community). KIND_TRAITS: no bike, no breakfast, no
+gathering (start and end, like yoga); activity waiver; one place per account (`_noGroupAdd`, the database's
+`_paint_entry_guard` ONE_PER_SESSION). Walk-ins allowed. `_isPaint(s)`.
+- **Price**: `paid_ride` true, `sessions.price` 130; `_evSeatPrice` prices it like an event's seat (review box, card foot,
+  Details' Price, the booking row), `_fare_now` on the server (migration). The way to pay is told later, so nothing says how
+  or where: the ticket's unpaid badge says Pending (as a race's), no `tkPayAmount` line, no Wallet-credit switch
+  (the review's, `_cwAfterBook`, `_cwPaySlot`), the Apple pass has no Payment field. Staff mark places paid as on any paid booking. The new
+  session form and the editor ask the price (`tpPerPerson`, 130 by default); the editor keeps paid_ride and the seats.
+- Look "Paint Splash": `assets/paint-mark.svg` (a white tee with a red brush stroke and paint drops), tokens `--tp-*` in
+  styles.css (red #C7362B title and actions, sunflower, teal, blue, navy ink, canvas #FFFDF7), Rubik 800 title.
+  `_tpSessCard` (date card with `_tpScene`: splashes and a brush stroke in the far corner, the price in its foot),
+  `body.paint-skin` from the review on and on the booked page (`_syncTpTheme`), `_tpHeadHtml`, ticket `th-paint` +
+  `_tpKnowHtml` (Where / When / What), Details fact `tpWhatK`/`tpWhatV` and about text `infoDtPaint` / site key
+  `experiences.dates.aboutPaint`, featured card `.feat-tp`. Staff: mark `brush` (`_CU.brush`, KIND_IC, SESS_MK_IC), short
+  name `snPaint`, chips `th-paint`, row `rq-ev-paint`, the new-session picker (20 places, 15:00 / 18:00 when no earlier
+  date of the kind, 130), Announcements type `paint` with `ann_paint` (EN and AR; the price written in the text).
+- Wallet: Apple pass `RIDES.paint` (canvas, navy, red labels), ENDS time, strip `PAINT_IMAGES` (render-art.mjs `paint`);
+  Google pass and the calendar feed know the kind (the venue's map from meet_url); push word `kind:paint`.
+- Migration `20261123150000_tee_painting` (promo kind list, `_session_kind`, `_updates_key`, `_vol_sess_name`,
+  `staff_record_waiver` activity, `booking_late`, `calendar_feed` featured kinds, `_fare_now`, `_paint_entry_guard`,
+  push words). Session: `supabase/checks/tee-painting-session-2026-11-28.sql`, run after the app AND the migration are
+  live. Tests: `tests/tee-painting.spec.ts`.
+
 ## Farm House Night (2026-11-13)
 The Farmhouse Night (title_ar ليلة فارم هاوس; first named Nawar Farm House Night, renamed by the user
 2026-11-13 to The Little Farmhouse Night, then 2026-11-14 "remove little from the name of the farmhouse"), Thu 19 Nov 2026 at Farmhouse, Dhahban (map link in meet_url, the name in meet_name / meet_name_ar): arrival from 16:30, dinner 20:30. The user: approval like the Saturday Social Ride, inside MicroMobility

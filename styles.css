@@ -11327,9 +11327,9 @@ body.view-staff :is(.sess-summary-chip,.sess-lc).th-event{
   --sf-ring:var(--sf-plum);border-color:rgba(var(--sf-plum-rgb),.38);}
 body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event),
 body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event):hover{background:var(--sf-chip-bg);}
-body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri):hover{border-color:var(--sf-ring);}
-body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri).active-sess,
-body.view-staff .sess-lc:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri).selected{
+body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri,.th-paint):hover{border-color:var(--sf-ring);}
+body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri,.th-paint).active-sess,
+body.view-staff .sess-lc:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri,.th-paint).selected{
   border-color:var(--sf-ring);box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(15,18,21,.16);}
 body.view-staff .sess-lc:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event){border-inline-start-width:1px;}
 /* the ride's name: its own colour on the light cards, Run for Her's in its poster's letters */
@@ -11890,8 +11890,8 @@ html[dir="rtl"][data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,
 html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-event{
   --sf-chip-bg:linear-gradient(to bottom right,#101318 0 55%,rgba(var(--sf-plum-rgb),.2) 100%) #101318;
   --sf-ring:var(--sf-plum);border-color:rgba(var(--sf-plum-rgb),.4);color:var(--text);}
-html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri).selected,
-html[data-staff-theme="dark"] body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri).active-sess{box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(0,0,0,.5);}
+html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri,.th-paint).selected,
+html[data-staff-theme="dark"] body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k,.th-yoga,.th-ktri,.th-paint).active-sess{box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(0,0,0,.5);}
 html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-runher .sess-chip-event,
 html[data-staff-theme="dark"] body.view-staff #tab-sessions .sess-lc.th-runher .ev-chip{color:#f49ac1;border-color:rgba(244,154,193,.5);}
 html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-event .sess-chip-event,
@@ -12558,13 +12558,13 @@ html[data-theme="dark"] body:not(.view-staff) .code-k-sat,html[data-staff-theme=
 /* ...but the white themed tickets (Saturday and every ordinary ride, Run for Her, events, Petromin, the pool, Victory Lap,
    Defe 5K, blood) keep the base inks: the pale ones are for dark screens and the dark tickets (the live night, JCC,
    Arena), and every rider page carries data-theme="dark", so the line above reached the white tickets too. */
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-rw{--code-k:#0a7a4b;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-rf{--code-k:#0f766e;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-rb{--code-k:#a16207;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-bd{--code-k:#c8102e;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-vl{--code-k:#1f7ae0;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-promo{--code-k:#8c3b6e;}
-body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri) .code-k-sat{--code-k:#1d4ed8;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri,.th-paint) .code-k-rw{--code-k:#0a7a4b;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri,.th-paint) .code-k-rf{--code-k:#0f766e;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri,.th-paint) .code-k-rb{--code-k:#a16207;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri,.th-paint) .code-k-bd{--code-k:#c8102e;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri,.th-paint) .code-k-vl{--code-k:#1f7ae0;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri,.th-paint) .code-k-promo{--code-k:#8c3b6e;}
+body:not(.view-staff) .ticket-card.tk-th:is(.th-comm,.th-saturday,.th-runher,.th-event,.th-petromin,.th-swim,.th-vlap,.th-defe5k,.th-blood,.th-yoga,.th-ktri,.th-paint) .code-k-sat{--code-k:#1d4ed8;}
 .code-full{display:inline-grid;grid-template-columns:auto minmax(0,1fr);column-gap:5px;align-items:center;padding:3px 8px;}
 .code-full .code-ic{grid-row:1;grid-column:1;}
 .code-full .code-c{grid-row:1;grid-column:2;font-weight:700;}
@@ -16673,3 +16673,89 @@ html[data-staff-theme="dark"] body.view-staff .kt-race-chip{background:rgba(111,
 .kt-must input{flex:none;width:20px;height:20px;margin-top:1px;accent-color:var(--kt-blue);}
 #race-gate .kt-must-note{margin-top:12px;font-weight:700;color:var(--kt-navy);}
 .kt-bike-cell{margin-top:3px;font-size:var(--sf-fs-xs);color:var(--text-2,#555);}
+/* ════════════════════════════════════════════════════════════════════════
+   TEE PAINTING WORKSHOP (the user, 2026-11-23) - drawing and colouring on MicroMobility T-shirts, a date inside
+   MicroMobility Experiences for members. "Paint Splash": a canvas-white ground, the four paint pots (a red, a
+   sunflower yellow, a teal and a blue) splashed in the far corner with a stroke of the brush through them, deep
+   navy ink, the red for the title and every action (5.6:1 on the canvas). The date card, the featured card, the
+   flow from the review on (body.paint-skin), the ticket, staff's chips and rows.
+   ════════════════════════════════════════════════════════════════════════ */
+:root{--tp-red:#C7362B;--tp-red-dk:#A12A21;--tp-sun:#F5B700;--tp-teal:#0E8C84;--tp-teal-ink:#0B6F69;--tp-blue:#2F6FDE;--tp-ink:#1F2A44;--tp-ink-2:#4A5370;--tp-canvas:#FFFDF7;--tp-wash:#FFF4E8;}
+.ev-paint{--ev:#C7362B;--ev-rgb:199,54,43;}
+body:not(.view-staff) .ev-paint:not(.landing-event-card){--ev:#C7362B;--ev-rgb:199,54,43;}
+html[data-staff-theme="dark"] body.view-staff .ev-paint{--ev:#F08A7E;--ev-rgb:240,138,126;}
+/* the date card: canvas white, the splashes in the far corner, the mark, the name, when and where, the price */
+body .sess-card.tp-card{position:relative;overflow:hidden;isolation:isolate;gap:6px;padding-top:14px;color:var(--tp-ink);
+  background-color:var(--tp-canvas);border:1px solid rgba(31,42,68,.16);border-inline-start:3px solid var(--tp-red);}
+body .sess-card.tp-card:hover:not(.sess-full){background-color:#FFF9EE;}
+body .sess-card.tp-card.sess-selected,
+body:not(.view-staff) .sess-day-list .sess-card.tp-card.sess-selected{background-color:var(--tp-wash);border-color:rgba(199,54,43,.55);border-inline-start-color:var(--tp-red);box-shadow:inset 0 0 0 2px var(--tp-red);}
+body:not(.view-staff) .sess-card.tp-card .sess-tick{box-shadow:inset 0 0 0 1.5px rgba(199,54,43,.45);}
+body:not(.view-staff) .sess-card.tp-card.sess-selected .sess-tick{background:var(--tp-red);box-shadow:none;}
+body .sess-card.tp-card:focus-visible{outline:2px solid var(--tp-red);outline-offset:2px;}
+.tp-scene{position:absolute;z-index:-1;bottom:-1px;inset-inline-end:-18px;width:168px;height:84px;pointer-events:none;}
+html[dir="rtl"] .tp-scene{transform:scaleX(-1);}
+.tp-scene .tp-stroke{fill:none;stroke:rgba(31,42,68,.10);stroke-width:7;stroke-linecap:round;}
+.tp-scene .tp-s1{fill:rgba(199,54,43,.20);}
+.tp-scene .tp-s2{fill:rgba(245,183,0,.30);}
+.tp-scene .tp-s3{fill:rgba(14,140,132,.22);}
+.tp-scene .tp-s4{fill:rgba(47,111,222,.24);}
+.tp-card-top{display:flex;align-items:center;gap:10px;min-width:0;}
+.tp-card-mark{height:32px;width:auto;display:block;flex:none;}
+.tp-card-title,body:not(.view-staff) :is(.tp-card-title,.tp-flow-name){font-family:'Rubik','IBM Plex Sans Arabic','Noto Sans Devanagari','Noto Sans Bengali',sans-serif;}
+.tp-card-title{font-size:21px;font-weight:800;letter-spacing:.1px;line-height:1.15;color:var(--tp-red);overflow-wrap:anywhere;}
+.tp-card-meta{display:flex;flex-wrap:wrap;align-items:center;gap:3px 9px;font-size:13px;font-weight:600;color:var(--tp-ink-2);min-width:0;}
+.tp-card-meta i{width:1px;height:12px;background:rgba(31,42,68,.3);display:inline-block;flex:none;}
+.tp-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;min-width:0;}
+.tp-card-price{font-size:13px;font-weight:800;color:var(--tp-teal-ink);min-width:0;}
+/* the flow from the review on, and the booked page */
+body.paint-skin:not(.view-staff){--go:#C7362B;--go-2:#A12A21;--go-wash:rgba(199,54,43,.12);--neon:#F7C6BF;--green-rgb:199,54,43;--accent2:rgba(199,54,43,.45);}
+body.paint-skin:not(.view-staff) .toggle-btn.active{background:var(--tp-red);border-color:var(--tp-red);color:#fff;}
+.tp-flow-head{position:relative;overflow:hidden;isolation:isolate;display:flex;align-items:center;gap:14px;margin:0 0 16px;padding:14px 16px;min-width:0;
+  background:radial-gradient(60% 140% at 100% 100%,rgba(245,183,0,.22) 0%,rgba(245,183,0,0) 60%),radial-gradient(40% 110% at 88% 0%,rgba(14,140,132,.16) 0%,rgba(14,140,132,0) 70%) var(--tp-canvas);
+  border:1px solid rgba(31,42,68,.16);border-inline-start:3px solid var(--tp-red);color:var(--tp-ink);}
+html[dir="rtl"] .tp-flow-head{background:radial-gradient(60% 140% at 0% 100%,rgba(245,183,0,.22) 0%,rgba(245,183,0,0) 60%),radial-gradient(40% 110% at 12% 0%,rgba(14,140,132,.16) 0%,rgba(14,140,132,0) 70%) var(--tp-canvas);}
+.tp-flow-mark{height:40px;width:auto;flex:none;display:block;}
+.tp-flow-copy{min-width:0;flex:1 1 auto;}
+.tp-flow-name{font-size:19px;font-weight:800;color:var(--tp-red);line-height:1.2;overflow-wrap:anywhere;}
+.tp-flow-sub{margin-top:3px;font-size:12.5px;font-weight:700;color:var(--tp-teal-ink);}
+/* the ticket's box: where, when and what */
+.tp-know{display:grid;gap:6px;margin:10px 0;padding:10px 12px;background:var(--tp-wash);border:1px solid rgba(199,54,43,.18);border-inline-start:3px solid var(--tp-sun);color:var(--tp-ink);}
+.tp-know-row{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:13px;line-height:1.4;min-width:0;}
+.tp-know-k{font-weight:800;color:var(--tp-red-dk);min-width:76px;}
+.tp-know-v{min-width:0;overflow-wrap:anywhere;}
+/* the ticket: canvas white, a wash of yellow and teal along its foot */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-paint{
+  --night:var(--tp-canvas);--night-2:var(--tp-wash);--night-ink:var(--tp-ink);--night-ink-2:rgba(31,42,68,.7);--night-line:rgba(31,42,68,.16);--neon:var(--tp-red);
+  --night-amber:#8A5300;--night-red:#B42318;--night-red-line:rgba(180,35,24,.35);color:var(--night-ink);
+  background:radial-gradient(70% 40% at 100% 100%,rgba(245,183,0,.20) 0%,rgba(245,183,0,0) 70%),radial-gradient(50% 30% at 80% 100%,rgba(14,140,132,.12) 0%,rgba(14,140,132,0) 70%) var(--tp-canvas);
+  border:1px solid rgba(199,54,43,.28);}
+html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-paint{
+  background:radial-gradient(70% 40% at 0% 100%,rgba(245,183,0,.20) 0%,rgba(245,183,0,0) 70%),radial-gradient(50% 30% at 20% 100%,rgba(14,140,132,.12) 0%,rgba(14,140,132,0) 70%) var(--tp-canvas);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-paint .ticket-num{font-family:'Rubik',sans-serif;font-weight:800;}
+.ticket-card .tk-logo-ev .tk-logo-paint{height:30px;}
+/* the featured card */
+body:not(.view-staff) .feat-card.feat-tp{position:relative;overflow:hidden;isolation:isolate;color:var(--tp-ink);background-color:var(--tp-canvas);
+  box-shadow:0 0 0 1px rgba(199,54,43,.22),0 1px 2px rgba(31,42,68,.08),0 8px 20px -8px rgba(31,42,68,.16);}
+body:not(.view-staff) .feat-card.feat-tp:focus-visible{outline-color:var(--tp-red);}
+.feat-tp .feat-date{background:var(--tp-wash);box-shadow:inset 0 0 0 1px rgba(199,54,43,.18);}
+.feat-tp .feat-date b{color:var(--tp-ink);}
+.feat-tp .feat-date span{color:var(--tp-ink-2);}
+.feat-tp .feat-date .feat-wd{color:#fff;background:var(--tp-red);}
+.feat-tp .feat-name.tp-card-title{font-size:20px;}
+.feat-tp .feat-meta{font-weight:600;color:var(--tp-ink-2);}
+.feat-tp .feat-meta>span:not(.sess-card-spots)::before{background:rgba(31,42,68,.3);}
+.feat-tp .feat-foot>span:nth-child(2):not(.sess-card-spots){color:var(--tp-teal-ink);font-weight:800;}
+.feat-tp .feat-go{color:var(--tp-red);}
+/* staff: the date's chip and the Bookings row's colour */
+body.view-staff :is(.sess-summary-chip,.sess-lc).th-paint{
+  --sf-chip-bg:radial-gradient(90% 140% at 100% 100%,rgba(245,183,0,.24) 0%,rgba(245,183,0,0) 60%) var(--tp-canvas);
+  --sf-ring:var(--tp-red);border-color:rgba(199,54,43,.4);color:var(--tp-ink);background:var(--sf-chip-bg);}
+html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-paint{
+  --sf-chip-bg:radial-gradient(90% 140% at 100% 100%,rgba(245,183,0,.16) 0%,rgba(16,19,24,0) 60%) #101318;
+  --sf-ring:#F08A7E;border-color:rgba(240,138,126,.4);color:var(--text);}
+body.view-staff .sess-summary-chip.th-paint .sess-chip-event{font-family:'Rubik',sans-serif;font-weight:600;font-size:var(--sf-fs-xs);color:var(--tp-red);}
+html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-paint .sess-chip-event{color:#F08A7E;}
+body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-paint{--rq-ev:#c7362b;}
+html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) .rq-ev-paint{--rq-ev:#f08a7e;}
+@media(max-width:400px){.tp-card-title{font-size:19px;}.tp-card-mark{height:28px;}.tp-flow-mark{height:34px;}.tp-know-k{min-width:0;width:100%;}.tp-scene{width:140px;height:70px;}.feat-tp .feat-name.tp-card-title{font-size:18px;}}

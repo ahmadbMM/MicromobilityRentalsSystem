@@ -192,6 +192,7 @@ export const FEED_WORDS = {
   blood: ['MicroMobility Blood Donation', 'مايكروموبيليتي التبرع بالدم', 'MicroMobility Don de sang', 'MicroMobility Donación de sangre', 'MicroMobility Doação de sangue', 'MicroMobility خون کا عطیہ', 'MicroMobility रक्तदान', 'MicroMobility Pagbibigay ng Dugo', 'MicroMobility रक्तदान', 'MicroMobility রক্তদান', 'Derma Darah MicroMobility'],
   yoga: ['Hatha Yoga for Cyclists', 'هاثا يوغا لراكبي الدراجات', 'Hatha yoga pour cyclistes', 'Hatha yoga para ciclistas', 'Hatha ioga para ciclistas', 'سائیکل سواروں کے لیے ہٹھ یوگا', 'साइकिल चालकों के लिए हठ योग', 'Hatha Yoga para sa mga Siklista', 'साइकल चालकहरूका लागि हठ योग', 'সাইক্লিস্টদের জন্য হঠ যোগ', 'Hatha Yoga untuk Penunggang Basikal'],
   ktri: ['KAUST Triathlon', 'ترايثلون كاوست', 'KAUST Triathlon', 'KAUST Triathlon', 'KAUST Triathlon', 'KAUST ٹرائیتھلون', 'KAUST ट्रायथलॉन', 'KAUST Triathlon', 'KAUST ट्राइथलन', 'KAUST ট্রায়াথলন', 'KAUST Triathlon'],
+  paint: ['Tee Painting Workshop', 'ورشة الرسم على التيشيرت', 'Atelier de peinture sur t-shirt', 'Taller de pintura de camisetas', 'Oficina de pintura de camisetas', 'ٹی شرٹ پینٹنگ ورکشاپ', 'टी-शर्ट पेंटिंग वर्कशॉप', 'Workshop sa Pagpipinta ng T-shirt', 'टी-सर्ट चित्रकला कार्यशाला', 'টি-শার্ট পেইন্টিং কর্মশালা', 'Bengkel Melukis Baju-T'],
   farm: ['Farm House Night', 'ليلة المزرعة', 'Soirée à la ferme', 'Noche en la granja', 'Noite na fazenda', 'فارم ہاؤس نائٹ', 'फ़ार्म हाउस नाइट', 'Farm House Night', 'फार्म हाउस नाइट', 'ফার্ম হাউস নাইট', 'Malam di Ladang'],
   saturday: ['Saturday Social Ride', 'جولة السبت الاجتماعية', 'Sortie sociale du samedi', 'Recorrido social del sábado', 'Passeio social de sábado', 'ہفتے کی سوشل رائیڈ', 'शनिवार सोशल राइड', 'Saturday Social Ride', 'शनिबार सामाजिक राइड', 'শনিবারের সোশ্যাল রাইড', 'Kayuhan Sosial Sabtu'],
   jcc: ['Jeddah Corniche Circuit', 'حلبة كورنيش جدة', 'Circuit de la Corniche de Djeddah', 'Circuito de la Corniche de Yeda', 'Circuito da Corniche de Jeddah', 'جدہ کورنیش سرکٹ', 'जेद्दाह कॉर्निश सर्किट', 'Jeddah Corniche Circuit', 'जेद्दा कोर्निश सर्किट', 'জেদ্দা কর্নিশ সার্কিট', 'Litar Corniche Jeddah'],
@@ -210,8 +211,8 @@ export const FEED_WORDS = {
   dVisit: ['Your MicroMobility booking. Arrive 10 minutes early and show your ticket when you arrive.', 'حجزك مع MicroMobility. احضر قبل الموعد بـ 10 دقائق واعرض تذكرتك عند وصولك.', 'Votre réservation MicroMobility. Arrivez 10 minutes en avance et présentez votre billet à votre arrivée.', 'Tu reserva de MicroMobility. Llega 10 minutos antes y muestra tu entrada al llegar.', 'A sua reserva MicroMobility. Chegue 10 minutos antes e mostre o seu bilhete ao chegar.', 'آپ کی MicroMobility بکنگ۔ 10 منٹ پہلے پہنچیں اور پہنچنے پر اپنا ٹکٹ دکھائیں۔', 'आपकी MicroMobility बुकिंग। 10 मिनट पहले पहुँचें और पहुँचने पर अपना टिकट दिखाएँ।', 'Ang iyong booking sa MicroMobility. Dumating nang 10 minuto nang maaga at ipakita ang iyong ticket pagdating mo.', 'तपाईंको MicroMobility बुकिङ। 10 मिनेट अगाडि आइपुग्नुहोस् र आइपुग्दा आफ्नो टिकट देखाउनुहोस्।', 'আপনার MicroMobility বুকিং। 10 মিনিট আগে পৌঁছান এবং পৌঁছে আপনার টিকিট দেখান।', 'Tempahan MicroMobility anda. Tiba 10 minit lebih awal dan tunjukkan tiket anda apabila tiba.'],
   alarm: ['Reminder: {0}', 'تذكير: {0}', 'Rappel : {0}', 'Recordatorio: {0}', 'Lembrete: {0}', 'یاد دہانی: {0}', 'रिमाइंडर: {0}', 'Paalala: {0}', 'सम्झना: {0}', 'অনুস্মারক: {0}', 'Peringatan: {0}'],
 };
-const FEED_KINDS = ['petromin', 'swim', 'workshop', 'runher', 'vlap', 'arena', 'defe5k', 'blood', 'yoga', 'farm', 'ktri', 'petromin'];
-const FEED_NO_BIKE = new Set(['swim', 'workshop', 'event', 'runher', 'vlap', 'arena', 'defe5k', 'blood', 'yoga', 'farm', 'ktri', 'swim']);
+const FEED_KINDS = ['petromin', 'swim', 'workshop', 'runher', 'vlap', 'arena', 'defe5k', 'blood', 'yoga', 'farm', 'ktri', 'paint', 'petromin'];
+const FEED_NO_BIKE = new Set(['swim', 'workshop', 'event', 'runher', 'vlap', 'arena', 'defe5k', 'blood', 'yoga', 'farm', 'ktri', 'paint', 'swim']);
 const FEED_GATHERS = new Set(['saturday', 'snd96', 'runher', 'vlap', 'farm']); // their times are "gathering, then start" (the Farm House Night: arrival, then dinner)
 const FEED_VENUE = { JCC: 'jcc', JYC: 'jyc', 'Gymnation, Tahlia Street': 'gym' };
 
@@ -273,7 +274,7 @@ function feedEvent(r, w, lang, origin) {
   // A ride whose spot is not told yet comes without its location (calendar_feed blanks it): it names none.
   const comm = r.ek === 'community' && r.rk !== 'snd96';
   const meetsAt = (comm && r.appr !== false) || kind === 'runher' || kind === 'defe5k' || kind === 'arena';
-  const link = club && r.held ? '' : feedUrl(r.meet), meet = (meetsAt || kind === 'yoga' || kind === 'farm' || kind === 'ktri') && link ? link : '';
+  const link = club && r.held ? '' : feedUrl(r.meet), meet = (meetsAt || kind === 'yoga' || kind === 'farm' || kind === 'ktri' || kind === 'paint') && link ? link : '';
   let lo = meet;
   if (!lo && !r.held) {
     const loc = feedText(r.loc) || (kind === 'runher' ? 'JYC' : kind === 'vlap' || kind === 'defe5k' || kind === 'blood' ? 'JCC' : '');

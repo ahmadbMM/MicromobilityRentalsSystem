@@ -274,6 +274,26 @@ test.describe('the Apple Wallet pass', () => {
     expect(Buffer.from(r.files!['strip@2x.png']).toString('base64')).toBe(P.YOGA_IMAGES['strip@2x.png']);
   });
 
+  // The Tee Painting Workshop (2026-11-23): canvas and the paint's red, its splash strip, when it ends, the venue, the price,
+  // and nothing about riding or how to pay (the way to pay is announced later).
+  test('a tee painting pass wears its own look, says when it ends, and never says how to pay or talks about riding', async () => {
+    const CYCLING = /\b(ride|rides|rider|riders|riding|bike|bikes|cycling|cycle)\b/i;
+    const tp = { ...circuit, event_kind: 'community', ride_kind: 'paint', paid_ride: true, price: 130, location: 'Red Mug Caffe', meet_url: 'https://maps.app.goo.gl/PrRpv2rXTSKH7meJ8', bike_slots: JSON.stringify({ _time: '15:00 - 18:00' }) };
+    const r = await pass({ ...booking, name: 'Sara', price: 130 }, tp);
+    expect(r.status).toBe(200);
+    expect([r.json.backgroundColor, r.json.foregroundColor, r.json.labelColor]).toEqual(['rgb(255,253,247)', 'rgb(31,42,68)', 'rgb(199,54,43)']);
+    const t = r.json.eventTicket, f = (list: { key: string }[], k: string) => list.find((x) => x.key === k) as { label: string; value: string } | undefined;
+    expect(f(t.secondaryFields, 'start')).toMatchObject({ label: 'STARTS', value: '3:00 PM' });
+    expect(f(t.secondaryFields, 'end')).toMatchObject({ label: 'ENDS', value: '6:00 PM' });
+    expect(f(t.backFields, 'venue')!.value).toBe('Red Mug Caffe');
+    expect(f(t.backFields, 'pay')).toBeUndefined();
+    const shown = [r.json.description, r.json.semantics.eventName, ...['headerFields', 'primaryFields', 'secondaryFields', 'auxiliaryFields', 'backFields'].flatMap((k) => t[k].flatMap((x: { label: string; value: unknown }) => [x.label, String(x.value)]))].join('\n');
+    expect(shown).not.toMatch(CYCLING);
+    expect(shown).not.toMatch(/booth/i);
+    const P = await import('../scripts/wallet/pass-images.js' as string);
+    expect(Buffer.from(r.files!['strip@2x.png']).toString('base64')).toBe(P.PAINT_IMAGES['strip@2x.png']);
+  });
+
   // Bug hunt 2026-11-18: every kind with no bikes has art of its own, never the default strip's bicycles (the Farm House
   // Night had none and wore them); and a session read that fails refuses the pass, never a circuit bike pass in its place.
   test('a session with no bikes never wears the bicycles, and a failed session read issues no pass', async () => {

@@ -11418,5 +11418,12 @@
   "ktMust": "Saya akan mendaftar dan membayar yuran perlumbaan di laman web KAUST Triathlon. Tempat saya di MicroMobility sahaja tidak mendaftarkan saya dalam perlumbaan.",
   "ktErrMust": "Tandakan bahawa anda akan mendaftar dan membayar di laman web KAUST Triathlon.",
   "ktRegMust": "Pendaftaran dan bayaran di laman web KAUST Triathlon adalah wajib. Anda belum dalam perlumbaan sehingga melakukannya. Jawab Ya selepas selesai.",
-  "ktOwnBike": "Basikal sendiri"
+  "ktOwnBike": "Basikal sendiri",
+  "evPaintName": "Bengkel Melukis Baju-T",
+  "snPaint": "Melukis",
+  "tpWhatK": "Apa",
+  "tpWhatV": "Lukis dan warnakan baju-T MicroMobility anda sendiri",
+  "tpPerPerson": "setiap orang",
+  "infoDtPaint": "Petang bersama komuniti melukis dan mewarna baju-T MicroMobility, {start} hingga {end}. Satu tempat bagi setiap ahli; tempat adalah terhad.",
+  "sessEventPaintHint": "Melukis baju-T untuk ahli komuniti: harga setiap orang, satu tempat seorang, siapa cepat dia dapat, kemudian senarai menunggu apabila tempat penuh. Ditampilkan dalam Pengalaman MicroMobility."
 }

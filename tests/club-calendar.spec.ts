@@ -211,9 +211,11 @@ test('@customer:account the migration: a switch on the rider\'s own row, and whi
   expect(feed).not.toMatch(/breakfast|\bs\.(price|capacity|spots)\b|\bq\.(name|email|phone|price)\b/);
   // FEAT_KINDS and the featurable kinds are the app's own
   const app = readFileSync('app.src.html', 'utf8');
-  // ...and the KAUST Triathlon (20261122150000) restates the feed with the kind added to both lists
-  expect(app).toContain("const FEAT_KINDS=['yoga','defe5k','farm','ktri'];");
+  // ...and the KAUST Triathlon (20261122150000) restates the feed with the kind added to both lists, then the Tee Painting
+  // Workshop (20261123150000)
+  expect(app).toContain("const FEAT_KINDS=['yoga','defe5k','farm','ktri','paint'];");
   expect(readFileSync('supabase/migrations/20261122150000_kaust_triathlon.sql', 'utf8')).toContain("then k.kind in ('yoga', 'defe5k', 'farm', 'ktri')");
+  expect(readFileSync('supabase/migrations/20261123150000_tee_painting.sql', 'utf8')).toContain("then k.kind in ('yoga', 'defe5k', 'farm', 'ktri', 'paint')");
   for (const f of ['calendar_link', 'calendar_feed', 'calendar_club_set']) {
     expect(code).toContain(`grant execute on function public.${f}(`);
     expect(readFileSync('supabase/checks/security-attributes.sql', 'utf8')).toContain(`('${f}',`);

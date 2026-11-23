@@ -11418,5 +11418,12 @@
   "ktMust": "Magpaparehistro ako at magbabayad ng bayad sa karera sa website ng KAUST Triathlon. Hindi ako nakapasok sa karera dahil lang sa puwesto ko sa MicroMobility.",
   "ktErrMust": "I-tick na magpaparehistro at magbabayad ka sa website ng KAUST Triathlon.",
   "ktRegMust": "Kailangang magparehistro at magbayad sa website ng KAUST Triathlon. Wala ka pa sa karera hangga't hindi mo ito ginagawa. Sumagot ng Oo kapag tapos na.",
-  "ktOwnBike": "Sariling bisikleta"
+  "ktOwnBike": "Sariling bisikleta",
+  "evPaintName": "Workshop sa Pagpipinta ng T-shirt",
+  "snPaint": "Pagpipinta",
+  "tpWhatK": "Ano",
+  "tpWhatV": "Pintahan at kulayan ang sarili mong MicroMobility T-shirt",
+  "tpPerPerson": "bawat tao",
+  "infoDtPaint": "Isang hapon kasama ang komunidad sa pagguhit at pagkukulay sa mga MicroMobility T-shirt, {start} hanggang {end}. Isang lugar bawat miyembro; limitado ang mga lugar.",
+  "sessEventPaintHint": "Pagpipinta ng T-shirt para sa mga miyembro ng komunidad: may presyo bawat tao, isang lugar bawat isa, kung sino ang nauna, at ang waitlist kapag puno na. Itinatampok sa MicroMobility Experiences."
 }

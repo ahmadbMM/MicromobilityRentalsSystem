@@ -11418,5 +11418,12 @@
   "ktMust": "Me inscribiré y pagaré la cuota de la carrera en el sitio web del KAUST Triathlon. Mi plaza en MicroMobility por sí sola no me inscribe en la carrera.",
   "ktErrMust": "Marca que te inscribirás y pagarás en el sitio web del KAUST Triathlon.",
   "ktRegMust": "Inscribirse y pagar en el sitio web del KAUST Triathlon es obligatorio. No estás en la carrera hasta hacerlo. Responde Sí cuando lo hayas hecho.",
-  "ktOwnBike": "Bicicleta propia"
+  "ktOwnBike": "Bicicleta propia",
+  "evPaintName": "Taller de pintura de camisetas",
+  "snPaint": "Pintura",
+  "tpWhatK": "Qué",
+  "tpWhatV": "Pinta y colorea tu propia camiseta MicroMobility",
+  "tpPerPerson": "por persona",
+  "infoDtPaint": "Una tarde con la comunidad para dibujar y colorear camisetas MicroMobility, de {start} a {end}. Una plaza por miembro; las plazas son limitadas.",
+  "sessEventPaintHint": "Pintura de camisetas para miembros de la comunidad: un precio por persona, una plaza cada uno, por orden de llegada, y luego la lista de espera cuando se llenen las plazas. Destacada en Experiencias MicroMobility."
 }

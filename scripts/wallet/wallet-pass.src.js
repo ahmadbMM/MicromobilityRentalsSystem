@@ -194,7 +194,7 @@ async function buildPkpass(b, cfg) {
   // (the Victory Lap and the DEFE run too, when staff gave one: they are races, not rides)
   const _loc = String((sess && sess.location) || "").trim();
   const _locName = { JCC: "Jeddah Corniche Circuit", JYC: "Jeddah Yacht Club" }[_loc] || _loc;
-  const venue = ride === "event" || isBlood ? _locName || "Jeddah Corniche Circuit" : (ride === "vlap" || ride === "defe5k" || ride === "yoga" || ride === "farm" || ride === "ktri") && _locName ? _locName : skin.venue;
+  const venue = ride === "event" || isBlood ? _locName || "Jeddah Corniche Circuit" : (ride === "vlap" || ride === "defe5k" || ride === "yoga" || ride === "farm" || ride === "ktri" || ride === "paint") && _locName ? _locName : skin.venue;
   const rideName = (sess && sess.title) || skin.venue;
   const numsDisplay = hideNum ? rideName : _numsDisplay(nums) || (b.queue_num != null ? `#${b.queue_num}` : rideName);
   const time = _sessClock(sess) || b.session_time || "";
@@ -250,7 +250,7 @@ async function buildPkpass(b, cfg) {
   if (ride === "ktri") { if (triRace) secondary.push({ key: "start", label: "RACE STARTS", value: triRace[1] }); }
   else if (startStr && !isBlood) secondary.push({ key: "start", label: ride === "farm" ? "DINNER" : isRun ? "RUN STARTS" : isRace ? "RACE STARTS" : bikeRide ? "RIDE STARTS" : "STARTS", value: startStr });
   // yoga ends at a time of its own (the app's ticket says start and end), and the mat comes with the member
-  if (ride === "yoga" && clock && clock.endMin != null) secondary.push({ key: "end", label: "ENDS", value: _hhmm(clock.endMin) });
+  if ((ride === "yoga" || ride === "paint") && clock && clock.endMin != null) secondary.push({ key: "end", label: "ENDS", value: _hhmm(clock.endMin) }); // and the Tee Painting Workshop (2026-11-23)
   const auxiliary = [];
   if (ride === "yoga") auxiliary.push({ key: "bring", label: "BRING", value: "Yoga mat" });
   if (triRace) auxiliary.push({ key: "race", label: "YOUR RACE", value: triRace[0] });
@@ -335,7 +335,8 @@ async function buildPkpass(b, cfg) {
         ...isBlood && b.blood_club ? [{ key: "club", label: "Club or community", value: String(b.blood_club) }] : [],
         ...addonsBack,
         ...lockersBack,
-        ...owes ? [{ key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." }] : [],
+        // the Tee Painting Workshop says no way to pay: it is announced later (2026-11-23)
+        ...owes && ride !== "paint" ? [{ key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." }] : [],
         { key: "help", label: "Good to know", value: bikeRide ? "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." : bloodVis ? "Show this pass at the registration desk." : isBlood ? "Show this pass at the registration desk, with your national ID or Iqama." : ride === "yoga" ? "Show this pass on arrival. Bring your yoga mat and wear comfortable clothing. All levels are welcome, no yoga experience needed." : "Show this pass on arrival." },
         { key: "ref", label: "Reference", value: barcodeMsg }
       ]
@@ -937,9 +938,9 @@ function _sessClock(sess) {
 // The KAUST Triathlon's races (the app's KTRI_RACES): name and start.
 const KTRI_RACES = { oly: ["Olympic", "06:30"], spr: ["Sprint", "07:30"], oly_team: ["Olympic relay team", "06:30"], spr_team: ["Sprint relay team", "07:30"], champs: ["Future Champs run", "09:00"] };
 const KTRI_REG_URL = "https://rec.coastline-fm.com/events/kaust-triathlon-2026/register";
-const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, petromin: false, swim: false, workshop: false, jcc: false, defe5k: false, yoga: false, farm: true, ktri: false };
+const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, petromin: false, swim: false, workshop: false, jcc: false, defe5k: false, yoga: false, farm: true, ktri: false, paint: false };
 // The kinds that hand out no bike (the app's KIND_TRAITS bike:false).
-const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true, blood: true, yoga: true, farm: true, ktri: true };
+const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true, blood: true, yoga: true, farm: true, ktri: true, paint: true };
 // Who a booking is for, by kind: riders only where there is a bike.
 function _people(ride) {
   if (ride === "runher" || ride === "defe5k") return { one: "Runner", many: "Runners" };
@@ -1005,6 +1006,8 @@ const RIDES = {
   farm:     { bg: "rgb(251,243,234)", fg: "rgb(58,30,20)", label: "rgb(138,63,39)", venue: "Farm House Night" },
   // The KAUST Triathlon (2026-11-22, styles.css th-ktri, "Red Sea Dawn"): white with the navy ink and KAUST blue labels (6.2:1)
   ktri:     { bg: "rgb(255,255,255)", fg: "rgb(15,37,64)", label: "rgb(21,101,180)", venue: "KAUST Triathlon" },
+  // The Tee Painting Workshop (2026-11-23, styles.css th-paint, "Paint Splash"): canvas white with the navy ink and the paint's red labels (5.6:1)
+  paint:    { bg: "rgb(255,253,247)", fg: "rgb(31,42,68)", label: "rgb(199,54,43)", venue: "Tee Painting Workshop" },
   jcc:      { bg: "rgb(6,52,111)", fg: "rgb(255,255,255)", label: "rgb(159,213,238)", venue: "Jeddah Corniche Circuit" }
 };
 function _rideOf(sess) {
@@ -1016,7 +1019,7 @@ function _rideOf(sess) {
   if (sess.ride_kind === "snd96") return "snd96";
   if (sess.event_kind !== "community") return "jcc";
   const k = sess.ride_kind;
-  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" || k === "vlap" || k === "defe5k" || k === "blood" || k === "yoga" || k === "farm" || k === "ktri" ? k : "saturday";
+  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" || k === "vlap" || k === "defe5k" || k === "blood" || k === "yoga" || k === "farm" || k === "ktri" || k === "paint" ? k : "saturday";
 }
 function _hhmm(min) {
   if (min == null) return "";
