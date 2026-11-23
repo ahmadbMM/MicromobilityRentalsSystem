@@ -2456,6 +2456,8 @@
   "custKpiNew7": "Novas esta semana",
   "custKpiNew30": "Novas em 30 dias",
   "custKpiMembers": "Membros da comunidade",
+  "custKpiMau": "Contas ativas no mês",
+  "custKpiMauMem": "Membros ativos no mês",
   "custKpiFlags": "À espera de correção",
   "custNewest": "Contas mais recentes",
   "custFlagFields": "{0} campos pedidos",

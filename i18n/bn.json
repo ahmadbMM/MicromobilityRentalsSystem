@@ -2584,6 +2584,8 @@
   "custKpiNew7": "এই সপ্তাহে নতুন",
   "custKpiNew30": "30 দিনে নতুন",
   "custKpiMembers": "কমিউনিটির সদস্য",
+  "custKpiMau": "মাসিক সক্রিয় অ্যাকাউন্ট",
+  "custKpiMauMem": "মাসিক সক্রিয় সদস্য",
   "custKpiFlags": "সংশোধনের অপেক্ষায়",
   "custNewest": "সবচেয়ে নতুন অ্যাকাউন্ট",
   "custFlagFields": "{0}টি ঘর চাওয়া হয়েছে",

@@ -2456,6 +2456,8 @@
   "custKpiNew7": "यो हप्ता नयाँ",
   "custKpiNew30": "30 दिनमा नयाँ",
   "custKpiMembers": "समुदायका सदस्य",
+  "custKpiMau": "मासिक सक्रिय खाता",
+  "custKpiMauMem": "मासिक सक्रिय सदस्य",
   "custKpiFlags": "सच्याइको पर्खाइमा",
   "custNewest": "सबैभन्दा नयाँ खाता",
   "custFlagFields": "{0} फिल्ड मागिएका",

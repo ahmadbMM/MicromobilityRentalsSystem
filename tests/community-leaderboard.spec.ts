@@ -43,9 +43,9 @@ test('People (the old Customers address too) opens on its overview, every tab of
   await tab.locator('.ppl-sub .filter-pill', { hasText: 'Summary' }).click();
   expect(await page.evaluate('location.pathname')).toBe('/people/summary');
   await expect(pills.first()).toHaveClass(/active/); // still the Overview group
-  await expect(tab.locator('.dash-kpi', { hasText: 'Accounts' }).locator('strong')).toHaveText('2');
+  await expect(tab.locator('.dash-kpi', { hasText: /^\S*Accounts$/ }).locator('strong')).toHaveText('2');
   // a figure opens its list
-  await tab.locator('.dash-kpi', { hasText: 'Accounts' }).click();
+  await tab.locator('.dash-kpi', { hasText: /^\S*Accounts$/ }).click();
   await expect(pills.nth(1)).toHaveClass(/active/); // the Accounts group
   await expect(tab.locator('#am-cust-rows')).toContainText('Amal Top');
   expect(await page.evaluate('location.pathname')).toBe('/people/accounts');

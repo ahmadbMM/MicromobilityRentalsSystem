@@ -77,6 +77,27 @@ test.describe('@staff:community last opened and last signed in', () => {
   });
 });
 
+// The user, 2026-11-23: "add a Monthly active users counter (For Members & For all accounts)". People > Summary: two
+// tiles, accounts and members that opened the app or the website in the last 30 days; each opens that list.
+test('@staff:community Summary counts monthly active accounts and members', async ({ page }) => {
+  const cs = [...customers, { id: 'a4', name: 'Huda Karim', email: 'huda.karim@gmail.com', created_at: '2026-06-13T09:00:00Z' }];
+  const sn = [...seen, { id: 'a3', seen_at: ago(20), via: 'web', signin_at: null }, { id: 'a4', seen_at: ago(40), via: 'app', signin_at: ago(1) }];
+  const ct = ['a1', 'a2', 'a4'].map((id) => ({ customer_id: id, tag_id: 'tag_saturday', added_at: 1 }));
+  await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [], customers: cs, tags: [], customer_tags: ct, staff_options: [], 'rpc:staff_last_seen': sn });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction('(S.customers||[]).length===4');
+  await page.evaluate(`setStaffTab('community');setCommTab('summary')`);
+  const all = page.locator('.dash-kpi', { hasText: 'Monthly active accounts' });
+  const mem = page.locator('.dash-kpi', { hasText: 'Monthly active members' });
+  await expect(all.locator('strong')).toHaveText('2'); // a1 (2 days) and a3 (20 days); a2 200 days, a4 40 days
+  await expect(mem.locator('strong')).toHaveText('1'); // a1: a3 is not a member
+  await mem.click();
+  await expect.poll(() => page.evaluate(`[S.communityTab,S.amSeen,S.amMember].join()`)).toBe('accounts,30,yes');
+  await expect.poll(() => page.locator('#am-cust-rows .am-row').evaluateAll((els) => els.map((e) => e.getAttribute('data-cust')))).toEqual(['a1']);
+});
+
 test('@customer the app stamps the rider as seen when it opens on a remembered session', async ({ page }) => {
   const calls: Record<string, unknown>[] = [];
   await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [], customers: [], 'rpc:customer_token_ok': true });
