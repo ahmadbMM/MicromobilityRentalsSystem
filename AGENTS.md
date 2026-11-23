@@ -2202,6 +2202,14 @@ gathering (start and end, like yoga); activity waiver; one place per account (`_
   `staff_record_waiver` activity, `booking_late`, `calendar_feed` featured kinds, `_fare_now`, `_paint_entry_guard`,
   push words). Session: `supabase/checks/tee-painting-session-2026-11-28.sql`, run after the app AND the migration are
   live. Tests: `tests/tee-painting.spec.ts`.
+- **Badge (2026-11-24, "create a badge for it")**: `tee_painting`, the workshop's tee with a brush stroke and three paint
+  drops cut out of it and a drop by its shoulder (glyph `tee`) on the workshop's own special medal, sunflower into red into
+  navy (`BDG_SPECIAL.paint`, `.sp-paint`; the catalogue row says red, its colour check holding only the eight plain
+  colours). Earned in `_mrBadges` by any row of the account checked in on a paint session, on site (active) or checked
+  out (done): the session's `ride_kind`, else the id's `-tp`, as the farm night's. Shown only once held (`hide`,
+  `BDG_HELD_ONLY`, `held_only` true), pops up once (`BDG_CHEER` `cq_bdg_tpw_`); staff can still give it by hand. Arabic
+  name = the session's own title, ورشة الرسم على التيشيرت. Catalogue row: migration `20261124100000_tee_painting_badge`
+  (sort 94). Tests: `tests/tee-painting.spec.ts`.
 
 ## Farm House Night (2026-11-13)
 The Farmhouse Night (title_ar ليلة فارم هاوس; first named Nawar Farm House Night, renamed by the user

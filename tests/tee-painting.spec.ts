@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows } from './helpers/supabase';
 
 // Tee Painting Workshop (the user, 2026-11-23): drawing and colouring on MicroMobility T-shirts, a featured date inside
@@ -156,5 +157,79 @@ test.describe('@staff:sessions Tee Painting Workshop', () => {
     const s = `allSessions().find(x=>x.id==='${TP}')`;
     expect(await page.evaluate(`[_sessShort(${s}),_sfTheme(${s}),KIND_IC.paint,SESS_MK_IC.paint,_editSeats(${s}),_noGroupAdd(${s})]`)).toEqual(['Painting', 'paint', 'brush', 'brush', true, true]);
     expect(await page.evaluate(`[ANN_TYPES.some(x=>x[0]==='paint'),ANN_HAS.includes('ann_paint')]`)).toEqual([true, true]);
+  });
+});
+
+// The Tee Painting Workshop badge (the user, 2026-11-24: "create a badge for it"): the workshop's tee with a brush stroke
+// and paint drops on its own medal, sunflower into red into navy, for the member checked in on a paint session (on site
+// or checked out). Shown only to those who hold it.
+test.describe('@customer:paint The Tee Painting Workshop badge', () => {
+  const row = (x: Record<string, unknown>) => ({ id: 'q1', session_id: TP, session_day: 'Saturday', session_date: '2099-11-28', queue_num: 3, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'active', paid: true, price: 130, registered_at: '2099-11-24T10:00:00Z', customer_id: 'c1', ...x });
+  async function rider(page: Page, x: Record<string, unknown>, sessions: unknown[] = [paint, sat]) {
+    const r = row(x);
+    await stubSupabase(page, {
+      sessions, queue_entries: [r], 'rpc:my_bookings': [r], 'rpc:community_member': true,
+      'rpc:customer_profile': [{ id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', phone: '+966500000001', birth_date: '1995-05-05', height: 165, type_preference: 'Any', nationality: 'Saudi Arabia' }],
+      'rpc:customer_update_profile': true,
+      'rpc:customer_emergency': [{ emergency_name: 'Nora Haddad', emergency_phone: '+966551234567', emergency_relation: 'sibling' }],
+    });
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('account')`);
+  }
+
+  test('checked in at the workshop: the painted tee on the paint medal, once with a pop-up', async ({ page }) => {
+    await rider(page, {});
+    const pop = page.locator('#badge-pop');
+    await expect(pop).toContainText('Tee Painting Workshop');
+    await expect(pop).toContainText('Come to one of our tee painting workshops.');
+    await expect(pop.locator('svg.bdg-m.bdg-sp')).toHaveCount(1);
+    await expect(pop.locator('.sp-paint')).not.toHaveCount(0);
+    await pop.getByRole('button', { name: 'Close' }).click();
+    await expect(page.locator('#tab-account .mr-badges .mr-badge.sp-paint', { hasText: 'Tee Painting Workshop' })).toHaveCount(1);
+    expect(await page.evaluate(`[BD_SYS.tee_painting,!!BDG_GLYPH.tee,BDG_HELD_ONLY.has('tee_painting'),BDG_CHEER.tee_painting]`)).toEqual([['tee', 'paint', 'bdgTeePaint'], true, true, 'cq_bdg_tpw_']);
+  });
+
+  for (const [what, x, ses] of [
+    ['checked out', { status: 'done' }, undefined],
+    ['a workshop over that the device no longer lists (read from the id)', { status: 'done', session_id: '2099-10-17-tp', session_date: '2099-10-17' }, [sat]],
+  ] as const) {
+    test(`${what} earns it too`, async ({ page }) => {
+      await rider(page, x, ses ? [...ses] : undefined);
+      await expect(page.locator('#badge-pop')).toContainText('Tee Painting Workshop');
+    });
+  }
+
+  for (const [what, x] of [
+    ['a place still waiting', { status: 'waiting' }],
+    ['a booking called off', { status: 'cancelled' }],
+    ['a member who never came', { status: 'noshow' }],
+    ['a Saturday ride ridden', { status: 'done', session_id: '2099-11-28-2', session_date: '2099-11-28', type_preference: 'Road', price: 0 }],
+  ] as const) {
+    test(`${what} does not get it, not even to earn`, async ({ page }) => {
+      await rider(page, x);
+      await expect(page.locator('#mr-badges-host')).toHaveCount(1);
+      await page.evaluate(`_mrBadgesMore()`);
+      await expect(page.locator('#tab-account .mr-badge', { hasText: 'Tee Painting Workshop' })).toHaveCount(0);
+    });
+  }
+
+  test('the Arabic page names it as the workshop is named', async ({ page }) => {
+    await rider(page, { status: 'done' });
+    await page.locator('#badge-pop').getByRole('button', { name: 'Close' }).click();
+    await page.evaluate(`setLang('ar')`);
+    await expect(page.locator('#tab-account .mr-badges .mr-badge.sp-paint')).toContainText('ورشة الرسم على التيشيرت'); // the Arabic pack arrives, then the page repaints
+    expect(await page.evaluate(`[t('bdgTeePaintD'),_bdgName({system:true,slug:'tee_painting'})]`)).toEqual(['احضر ورشة الرسم على التيشيرت معنا.', 'ورشة الرسم على التيشيرت']);
+  });
+
+  test('every language has it, and the migration adds it for holders only', async () => {
+    for (const code of ['es', 'fr', 'hi', 'ur', 'bn', 'ne', 'pt', 'tl', 'ms']) {
+      const pack = JSON.parse(readFileSync(`i18n/${code}.json`, 'utf8')) as Record<string, string>;
+      for (const k of ['bdgTeePaint', 'bdgTeePaintD', 'bdgTeePaintA']) expect(pack[k], `${code} ${k}`).toBeTruthy();
+    }
+    const sql = readFileSync('supabase/migrations/20261124100000_tee_painting_badge.sql', 'utf8');
+    expect(sql).toMatch(/'bd_tee_painting', 'tee_painting', 'tee', 'red'.*true, true, 94, true\)/);
+    expect(sql).toContain("values ('20261124100000', 'tee_painting_badge')");
   });
 });
