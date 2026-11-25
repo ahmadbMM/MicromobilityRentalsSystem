@@ -32,7 +32,7 @@ const sessions = [
   night('2099-12-05-rh', 'Saturday', { ...comm, ride_kind: 'runher', bike_slots: '{"_time":"06:00 - 06:30"}' }),
 ];
 
-async function boot(page: Page, opt: { width?: number; height?: number; templates?: Record<string, unknown>; role?: string } = {}) {
+async function boot(page: Page, opt: { width?: number; height?: number; templates?: Record<string, unknown>; role?: string; bare?: string[] } = {}) {
   await page.setViewportSize({ width: opt.width || 1440, height: opt.height || 1000 });
   await page.clock.setFixedTime(new Date(`${TODAY}T12:00:00+03:00`));
   await stubSupabase(page, { sessions, queue_entries: [], bikes: [], tags: [], customer_tags: [], customers: [],
@@ -42,6 +42,8 @@ async function boot(page: Page, opt: { width?: number; height?: number; template
   await waitForSb(page);
   await page.waitForFunction('allSessions().length>0');
   await page.evaluate(`${opt.role ? `S.staffRole='${opt.role}';` : ''}setStaffTab('queue');S.queueView='bookings';S.sfSession='${TODAY}-pw';renderStaffQueue()`);
+  // Every session type has its built-in texts since 2026-11-25; a test of a type with none takes its texts away here
+  if (opt.bare) await page.evaluate(`_annDef('wk_head','ar');for(const id of ${JSON.stringify(opt.bare)}){delete ANN_TPL.en[id];delete ANN_TPL.ar[id];const i=ANN_HAS.indexOf(id);if(i>=0)ANN_HAS.splice(i,1);}`);
 }
 const chip = (page: Page, id: string) => page.locator(`#sess-strip .wk-grid .sess-summary-chip[data-sid="${id}"]`);
 const dlg = (page: Page) => page.locator('#confirm-modal .ann-box');
@@ -186,7 +188,7 @@ test.describe('@staff:bookings the week on Bookings', () => {
   });
 
   test('a desk account sees no ride staff approve in the week, but its announcements speak of every session', async ({ page }) => {
-    await boot(page, { role: 'frontdesk' });
+    await boot(page, { role: 'frontdesk', bare: ['wk_farm', 'wk_yoga'] });
     await expect(chip(page, '2099-11-21-2')).toHaveCount(0);
     await expect(chip(page, '2099-11-19-fh')).toHaveCount(0);
     await expect(chip(page, '2099-11-17')).toHaveCount(1);
@@ -226,7 +228,7 @@ test.describe('@staff:bookings the week on Bookings', () => {
 
 test.describe('@staff:bookings the week\'s WhatsApp announcement', () => {
   test('with a block for every type it is the week in order, the cancelled and draft sessions left out', async ({ page }) => {
-    await boot(page, { templates: WRITTEN });
+    await boot(page, { templates: WRITTEN, bare: ['wk_farm', 'wk_yoga'] });
     await page.waitForFunction('S._tpl&&S._tpl.wk_farm');
     await openAnn(page, 'week');
     await expect(dlg(page).locator('#ann-text')).toHaveValue(WEEK_EN);
@@ -265,11 +267,14 @@ https://experiences.micromobility.sa/
 *فريق MicroMobility*`);
     // a week with no session says so; a week of only Run for Her misses its block
     expect(await page.evaluate(`JSON.stringify(_annWeek('2099-12-06','en'))`)).toBe('{"none":true}');
+    // a week of only Run for Her has its block since 2026-11-25; with it taken away the week asks for it
+    expect(await page.evaluate(`_annWeek('2099-11-29','en').txt`)).toContain('*Saturday | Run for Her*');
+    await page.evaluate(`delete ANN_TPL.en.wk_runher`);
     expect(await page.evaluate(`JSON.stringify(_annWeek('2099-11-29','en'))`)).toBe('{"miss":["runher"]}');
   });
 
   test('an admin writes a missing block from the announcement and comes back to it', async ({ page }) => {
-    await boot(page);
+    await boot(page, { bare: ['wk_farm', 'wk_yoga'] });
     const saved: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (r.method() === 'POST' && r.url().includes('/rest/v1/site_content')) saved.push(r.postDataJSON()); });
     await openAnn(page, 'week');
@@ -324,7 +329,19 @@ https://maps.app.goo.gl/zJLjmiaJgfJDKQwY7
     expect(swimF).not.toContain('الموقع');
     expect(swimF).toContain('11:30 ص – 12:45 م');
     // a type with no message of its own asks for one
+    // Run for Her has its own message since 2026-11-25; a type with none asks for one
+    expect(((await one('2099-12-05-rh')).txt as string).startsWith('Run for Her with MicroMobility *Saturday, 5th of December*')).toBe(true);
+    await page.evaluate(`delete ANN_TPL.en.ann_runher`);
     expect(await one('2099-12-05-rh')).toEqual({ miss: ['runher'] });
+  });
+
+  test('every session type has its weekly block and its own message built in, in English and Arabic', async ({ page }) => {
+    // the user, 2026-11-25: "create a whatsapp message for all sessions in the weekly announcement and session announcement"
+    await boot(page);
+    await page.evaluate(`_annDef('wk_head','ar')`);
+    const miss = await page.evaluate(`(()=>{const out=[];for(const[k]of ANN_TYPES)for(const id of ['wk_'+k,...(k==='saturday'?[]:['ann_'+k])])
+      for(const l of ['en','ar'])if(!ANN_HAS.includes(id)||!_annDef(id,l).trim())out.push(id+'/'+l);return out;})()`);
+    expect(miss).toEqual([]);
   });
 
   test('the built-in texts: English and Arabic, no emoji, the booking link before the place', async ({ page }) => {
@@ -342,7 +359,7 @@ https://maps.app.goo.gl/zJLjmiaJgfJDKQwY7
   });
 
   test('Settings lists the announcements that have a text, and one the admins wrote', async ({ page }) => {
-    await boot(page, { templates: { ann_runher: { en: 'Run for Her on {date}' } } });
+    await boot(page, { templates: { ann_runher: { en: 'Run for Her on {date}' } }, bare: ['wk_farm'] });
     await page.waitForFunction('S._tpl&&S._tpl.ann_runher');
     await page.evaluate(`setStaffTab('settings')`);
     const sec = page.locator('#tab-settings .set-card', { hasText: 'Message templates' });

@@ -99,7 +99,7 @@ test('an admin edits a message on Settings and it is saved for everyone', async 
   });
   await page.evaluate(`setStaffTab('settings')`);
   const sec = page.locator('#tab-settings .set-card', { hasText: 'Message templates' });
-  await expect(sec.locator('.tpl-row')).toHaveCount(54); // 2026-11-25: wk_wed and ann_wed, the Wednesday Community Ride's; 2026-11-23: ann_paint, the Tee Painting Workshop's announcement; 2026-11-19: ann_invite, the invitation to a session; 2026-11-16: the 14 WhatsApp announcements with a built-in text (ANN_HAS); 2026-11-13: lm_anniv, the first-ride anniversary card's line (F16); 2026-11-07: remind_late (BK13); 2026-10-09: the two messages to a selection (seg_ops, seg_news); R7: remind_24h, remind_2h, wl_offer
+  await expect(sec.locator('.tpl-row')).toHaveCount(76); // 2026-11-25 (later): the 22 announcements every other session type lacked (wk_ and ann_ for the pool, KAUST Triathlon, Run for Her, Victory Lap, Arena, DEFE, Blood Donation, T100, National Day; wk_ for yoga, farm, paint, event); 2026-11-25: wk_wed and ann_wed, the Wednesday Community Ride's; 2026-11-23: ann_paint, the Tee Painting Workshop's announcement; 2026-11-19: ann_invite, the invitation to a session; 2026-11-16: the 14 WhatsApp announcements with a built-in text (ANN_HAS); 2026-11-13: lm_anniv, the first-ride anniversary card's line (F16); 2026-11-07: remind_late (BK13); 2026-10-09: the two messages to a selection (seg_ops, seg_news); R7: remind_24h, remind_2h, wl_offer
   await sec.locator('.tpl-row[data-tpl="bd_wish"]').click();
   const ed = page.locator('#confirm-modal .tpl-box');
   await expect(ed.locator('#tpl-text')).toHaveValue(/Happy birthday, \{first_name\}!/); // the built-in text, its fill-in showing

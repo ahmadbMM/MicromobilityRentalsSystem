@@ -5080,6 +5080,13 @@ a switch; admins write the texts; the circuit's running hours are fixed text in 
 - `tests/week-announce.spec.ts`; specs that read cards of several weeks move the week (session-strip, staff-colours,
   session-marks, session-gender-staff, staff-a11y-names, queue-pass2).
 
+- **Every type has its texts built in (2026-11-25, the user: "create a whatsapp message for all sessions in the weekly
+  announcement and session announcement that doesnt have one yet")**: `wk_` and `ann_` in English and Arabic for every
+  ANN_TYPES entry (the Saturday ride's own message stays `_rmRideText`); KAUST Triathlon joined ANN_TYPES and ANN_NAME, and
+  ANN_NAME's Arabic names are the app's own (evRunHerName and the rest). A new session kind must add both blocks:
+  week-announce.spec.ts "every session type has its weekly block..." fails otherwise. Tests of the missing-block path take a
+  type's texts away in the page (`boot(page, { bare: [...] })`).
+
 ## Help and Help on the ride (2026-11-16, no migration)
 The user picked two of the booking app's new-section ideas ("do 1 5"). Spec: `tests/rider-help.spec.ts`
 (`@customer:bookings`, `@customer:account`, `@staff:messages`).

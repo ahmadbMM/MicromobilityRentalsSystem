@@ -44433,9 +44433,9 @@ const TPL_KEY='msg.templates';
 // in the announce part). Each has a block in the week's message (wk_<type>) and a message of its own (ann_<type>; the
 // Saturday ride's own is rm_ride, above). Settings lists the ones with a built-in text (ANN_HAS, the announce part's
 // ANN_TPL) or a text of the admins'; the others open from the announcement that misses them.
-const ANN_TYPES=[['jcc','evJccName'],['petromin','evPetroName'],['saturday','evSatName'],['swim_m','annSwimM'],['swim_f','annSwimF'],['swim','evSwimName'],['yoga','evYogaName'],['farm','evFarmName'],['paint','evPaintName'],['wed','evWedName'],['event','evEventName'],['runher','evRunHerName'],['vlap','evVlapName'],['arena','evArenaName'],['defe5k','evDefeName'],['blood','evBloodName'],['workshop','evWorkshopName'],['snd96','evSnd96Name']];
+const ANN_TYPES=[['jcc','evJccName'],['petromin','evPetroName'],['saturday','evSatName'],['swim_m','annSwimM'],['swim_f','annSwimF'],['swim','evSwimName'],['yoga','evYogaName'],['farm','evFarmName'],['paint','evPaintName'],['wed','evWedName'],['event','evEventName'],['runher','evRunHerName'],['vlap','evVlapName'],['arena','evArenaName'],['defe5k','evDefeName'],['blood','evBloodName'],['workshop','evWorkshopName'],['snd96','evSnd96Name'],['ktri','evKtriName']];
 const ANN_FILLS=['title','day','date','time','start_time','end_time','meet_time','bikes_from','place','place_link','instagram','booking_link'];
-const ANN_HAS=['wk_head','wk_foot','wk_jcc','wk_petromin','wk_saturday','wk_swim_m','wk_swim_f','ann_jcc','ann_petromin','ann_swim_m','ann_swim_f','ann_yoga','ann_farm','ann_paint','wk_wed','ann_wed','ann_event','ann_invite'];
+const ANN_HAS=['wk_head','wk_foot','wk_jcc','wk_petromin','wk_saturday','wk_swim_m','wk_swim_f','ann_jcc','ann_petromin','ann_swim_m','ann_swim_f','ann_yoga','ann_farm','ann_paint','wk_wed','ann_wed','ann_event','ann_invite','wk_swim','wk_yoga','wk_farm','wk_paint','wk_ktri','wk_event','wk_runher','wk_vlap','wk_arena','wk_defe5k','wk_blood','wk_workshop','wk_snd96','ann_swim','ann_ktri','ann_runher','ann_vlap','ann_arena','ann_defe5k','ann_blood','ann_workshop','ann_snd96'];
 // The invitation to a session (2026-11-19, _ivtOpen in the announce part): an announcement's fill-ins and the rider's first name.
 // time is the window of a session that does not gather; one that gathers has meet_time and start_time instead. Since 2026-11-20
 // the invite books the rider, so the place's own lines join them (_ivtText): status (saved, waiting for confirmation, on the
@@ -44773,8 +44773,8 @@ const ANN_JCC_MAP='https://maps.app.goo.gl/zJLjmiaJgfJDKQwY7'; // the circuit's 
 const ANN_MON={en:['January','February','March','April','May','June','July','August','September','October','November','December'],
   ar:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']};
 // A session with no title of its own is called by its type.
-const ANN_NAME={en:{jcc:'Jeddah Corniche Circuit',petromin:'Petromin Night',saturday:'Saturday Community Ride',swim_m:'Men’s Swimming',swim_f:'Women’s Swimming',swim:'Triathlon Pool Session',yoga:'Hatha Yoga for Cyclists',farm:'The Farmhouse Night',paint:'Tee Painting Workshop',wed:'Wednesday Community Ride',event:'Event',runher:'Run for Her',vlap:'Victory Lap',arena:'Arena Heros Hybrid Race',defe5k:'DEFE 5KM Run',blood:'Blood Donation',workshop:'T100 Triathlon Prep',snd96:'Saudi National Day 96 Ride'},
-  ar:{jcc:'حلبة كورنيش جدة',petromin:'ليلة بترومين',saturday:'جولة السبت الاجتماعية',swim_m:'سباحة الرجال',swim_f:'سباحة السيدات',swim:'جلسة السباحة للترايثلون',yoga:'يوغا هاثا لراكبي الدراجات',farm:'ليلة فارم هاوس',paint:'ورشة الرسم على التيشيرت',wed:'جولة الأربعاء المجتمعية',event:'فعالية',runher:'Run for Her',vlap:'Victory Lap',arena:'Arena Heros Hybrid Race',defe5k:'DEFE 5KM Run',blood:'التبرع بالدم',workshop:'T100 Triathlon Prep',snd96:'جولة اليوم الوطني 96'}};
+const ANN_NAME={en:{jcc:'Jeddah Corniche Circuit',petromin:'Petromin Night',saturday:'Saturday Community Ride',swim_m:'Men’s Swimming',swim_f:'Women’s Swimming',swim:'Triathlon Pool Session',yoga:'Hatha Yoga for Cyclists',farm:'The Farmhouse Night',paint:'Tee Painting Workshop',wed:'Wednesday Community Ride',event:'Event',runher:'Run for Her',vlap:'Victory Lap',arena:'Arena Heros Hybrid Race',defe5k:'DEFE 5KM Run',blood:'Blood Donation',workshop:'T100 Triathlon Prep',snd96:'Saudi National Day 96 Ride',ktri:'KAUST Triathlon'},
+  ar:{jcc:'حلبة كورنيش جدة',petromin:'ليلة بترومين',saturday:'جولة السبت الاجتماعية',swim_m:'سباحة الرجال',swim_f:'سباحة السيدات',swim:'جلسة السباحة للترايثلون',yoga:'يوغا هاثا لراكبي الدراجات',farm:'ليلة فارم هاوس',paint:'ورشة الرسم على التيشيرت',wed:'جولة الأربعاء المجتمعية',event:'فعالية',runher:'نركض لأجلها',vlap:'فيكتوري لاب',arena:'سباق أرينا هيروز الهجين',defe5k:'سباق دفء 5 كم',blood:'التبرع بالدم',workshop:'T100 التحضير للترايثلون',snd96:'جولة اليوم الوطني 96',ktri:'ترايثلون كاوست'}};
 // The built-in texts. A line whose fill-in is empty is left out (_tplFill), so a place or a link a session lacks takes
 // its line with it. The booking link comes before the place, the first link in the message (2026-11-14).
 const ANN_TPL={en:{
@@ -44953,6 +44953,190 @@ Location: {place}
 *No Registration & QR Code = No Participation*`,
 // The invitation to a session (2026-11-19, _ivtText): one text for every kind of session, the rider's first name on top;
 // since 2026-11-20 where the place stands, the bike, group or distance it holds, its number and the steps to take (IVT_MSG)
+wk_swim:`*{day} | {title}*
+{place}
+{time}
+Community Members only. All levels welcome.`,
+wk_yoga:`*{day} | {title}*
+{place}
+{time}
+Community Members only. Bring your own yoga mat.`,
+wk_farm:`*{day} | {title}*
+{place}
+Arrival {meet_time}, dinner {start_time}
+Community Members and their families, once the booking is approved.`,
+wk_paint:`*{day} | {title}*
+{place}
+{time}
+Community Members only. 130 SAR per person.`,
+wk_ktri:`*{day} | {title}*
+{place}
+{time}
+Community Members go together. Book your place with us, then enter the race on the KAUST Triathlon registration website.`,
+wk_event:`*{day} | {title}*
+{place}
+{time}
+Details on the booking page.`,
+wk_runher:`*{day} | {title}*
+{place}
+Meet up {meet_time}, run starts {start_time}
+Community Members only. Free, 3 km or 5 km.`,
+wk_vlap:`*{day} | {title}*
+{place}
+Doors {meet_time}, first heat {start_time}
+Singles and Doubles. Paid per athlete.`,
+wk_arena:`*{day} | {title}*
+{place}
+{time}
+Teams of two. Community Members only. Paid per athlete.`,
+wk_defe5k:`*{day} | {title}*
+{place}
+{time}
+Community Members only. Free.`,
+wk_blood:`*{day} | {title}*
+{place}
+{time}
+Open to everyone. Donors and visitors welcome.`,
+wk_workshop:`*{day} | {title}*
+{place}
+{time}
+Open to everyone. Free.`,
+wk_snd96:`*{day} | {title}*
+{place}
+Meet up {meet_time}, start {start_time}
+Open to everyone. Bike rental is paid.`,
+ann_swim:`MicroMobility’s {title} *{date}*
+
+{time}
+
+A swim session for triathletes. All levels welcome.
+
+Booking:
+{booking_link}
+
+Location: {place}
+{place_link}
+
+*No Registration & QR Code = No Participation*
+
+*Community Members Only*`,
+ann_ktri:`{title} with MicroMobility *{day}, {date}*
+
+{time}
+
+Swim, bike and run at KAUST Urban Beach: the Olympic or the Sprint race, on your own or as a relay team of three, and the Future Champs run for ages 10 to 15. Our community goes together. Book your place in the MicroMobility group first.
+
+Booking:
+{booking_link}
+
+Then enter the race on the KAUST Triathlon registration website:
+https://rec.coastline-fm.com/events/kaust-triathlon-2026/register
+
+Location: {place}
+{place_link}
+
+*Community Members Only*`,
+ann_runher:`{title} with MicroMobility *{day}, {date}*
+
+Meet up: *{meet_time}*
+Run starts: *{start_time}*
+
+A run for our community. Choose 3 km or 5 km when you book. Free.
+
+Booking:
+{booking_link}
+
+Location: {place}
+{place_link}
+
+*No Registration & QR Code = No Participation*
+
+*Community Members Only*`,
+ann_vlap:`{title} with MicroMobility *{day}, {date}*
+
+Doors open: *{meet_time}*
+First heat: *{start_time}*
+
+A hybrid fitness race, Singles or Doubles; a Doubles partner joins with the team code. Paid per athlete: the price and how to pay are on the booking page.
+
+Booking:
+{booking_link}
+
+Location: {place}
+{place_link}
+
+*No Registration & QR Code = No Participation*`,
+ann_arena:`{title} with MicroMobility *{day}, {date}*
+
+{time}
+
+A hybrid race for teams of two (two men or two women), Open or Elite. Paid per athlete: the price and how to pay are on the booking page.
+
+Booking:
+{booking_link}
+
+Location: {place}
+{place_link}
+
+*No Registration & QR Code = No Participation*
+
+*Community Members Only*`,
+ann_defe5k:`{title} with MicroMobility *{day}, {date}*
+
+{time}
+
+Run 5 km together with the MicroMobility community. Free.
+
+Booking:
+{booking_link}
+
+Location: {place}
+{place_link}
+
+*No Registration & QR Code = No Participation*
+
+*Community Members Only*`,
+ann_blood:`{title} *{day}, {date}*
+
+{time}
+
+Donate blood, or come to visit and support. Free and open to everyone.
+
+Booking:
+{booking_link}
+
+Location: {place}
+{place_link}
+
+*No Registration & QR Code = No Participation*`,
+ann_workshop:`{title} with MicroMobility *{day}, {date}*
+
+{time}
+
+Triathlon preparation in partnership with the Saudi Triathlon Federation. Free and open to everyone.
+
+Booking:
+{booking_link}
+
+Location: {place}
+{place_link}
+
+*No Registration & QR Code = No Participation*`,
+ann_snd96:`{title} with MicroMobility *{day}, {date}*
+
+Meet up: *{meet_time}*
+Ride starts: *{start_time}*
+
+Celebrate Saudi National Day on a ride with us. Open to everyone. Bike rental is paid.
+
+Booking:
+{booking_link}
+
+Location: {place}
+{place_link}
+
+*No Registration & QR Code = No Participation*
+*Helmet comes free with every bike*`,
 ann_invite:`Hi {first_name},
 
 You are invited to *{title}* with MicroMobility.
@@ -45154,6 +45338,190 @@ ann_event:`*{title}*
 {place_link}
 
 *لا مشاركة دون تسجيل ورمز QR*`,
+wk_swim:`*{day} | {title}*
+{place}
+{time}
+لأعضاء المجتمع فقط. جميع المستويات مرحب بها.`,
+wk_yoga:`*{day} | {title}*
+{place}
+{time}
+لأعضاء المجتمع فقط. أحضر سجادة اليوغا الخاصة بك.`,
+wk_farm:`*{day} | {title}*
+{place}
+الوصول {meet_time}، العشاء {start_time}
+لأعضاء المجتمع وعائلاتهم، بعد الموافقة على الحجز.`,
+wk_paint:`*{day} | {title}*
+{place}
+{time}
+لأعضاء المجتمع فقط. 130 ريال للشخص.`,
+wk_ktri:`*{day} | {title}*
+{place}
+{time}
+مجتمعنا يشارك معًا. احجز مكانك معنا، ثم سجّل في السباق عبر موقع تسجيل ترايثلون كاوست.`,
+wk_event:`*{day} | {title}*
+{place}
+{time}
+التفاصيل في صفحة الحجز.`,
+wk_runher:`*{day} | {title}*
+{place}
+التجمّع {meet_time}، انطلاق الجري {start_time}
+لأعضاء المجتمع فقط. مجانًا، 3 كم أو 5 كم.`,
+wk_vlap:`*{day} | {title}*
+{place}
+فتح الأبواب {meet_time}، أول جولة {start_time}
+فردي وزوجي. مدفوع لكل رياضي.`,
+wk_arena:`*{day} | {title}*
+{place}
+{time}
+فرق من شخصين. لأعضاء المجتمع فقط. مدفوع لكل رياضي.`,
+wk_defe5k:`*{day} | {title}*
+{place}
+{time}
+لأعضاء المجتمع فقط. مجانًا.`,
+wk_blood:`*{day} | {title}*
+{place}
+{time}
+مفتوحة للجميع. المتبرعون والزوار مرحب بهم.`,
+wk_workshop:`*{day} | {title}*
+{place}
+{time}
+مفتوحة للجميع. مجانًا.`,
+wk_snd96:`*{day} | {title}*
+{place}
+التجمّع {meet_time}، الانطلاق {start_time}
+مفتوحة للجميع. استئجار الدراجة مدفوع.`,
+ann_swim:`{title} من MicroMobility *{date}*
+
+{time}
+
+جلسة سباحة لرياضيي الترايثلون. جميع المستويات مرحب بها.
+
+الحجز:
+{booking_link}
+
+الموقع: {place}
+{place_link}
+
+*لا مشاركة دون تسجيل ورمز QR*
+
+*لأعضاء المجتمع فقط*`,
+ann_ktri:`{title} مع MicroMobility *{day} {date}*
+
+{time}
+
+سباحة ودراجة وجري في شاطئ كاوست الحضري: السباق الأولمبي أو السريع، فرديًا أو ضمن فريق تتابع من ثلاثة، وجري أبطال المستقبل للأعمار من 10 إلى 15. مجتمعنا يشارك معًا. احجز مكانك في مجموعة MicroMobility أولًا.
+
+الحجز:
+{booking_link}
+
+ثم سجّل في السباق عبر موقع تسجيل ترايثلون كاوست:
+https://rec.coastline-fm.com/events/kaust-triathlon-2026/register
+
+الموقع: {place}
+{place_link}
+
+*لأعضاء المجتمع فقط*`,
+ann_runher:`{title} مع MicroMobility *{day} {date}*
+
+التجمّع: *{meet_time}*
+انطلاق الجري: *{start_time}*
+
+جري لمجتمعنا. اختر 3 كم أو 5 كم عند الحجز. مجانًا.
+
+الحجز:
+{booking_link}
+
+الموقع: {place}
+{place_link}
+
+*لا مشاركة دون تسجيل ورمز QR*
+
+*لأعضاء المجتمع فقط*`,
+ann_vlap:`{title} مع MicroMobility *{day} {date}*
+
+فتح الأبواب: *{meet_time}*
+أول جولة: *{start_time}*
+
+سباق لياقة هجين، فردي أو زوجي؛ ينضم الشريك في الزوجي برمز الفريق. مدفوع لكل رياضي: السعر وطريقة الدفع في صفحة الحجز.
+
+الحجز:
+{booking_link}
+
+الموقع: {place}
+{place_link}
+
+*لا مشاركة دون تسجيل ورمز QR*`,
+ann_arena:`{title} مع MicroMobility *{day} {date}*
+
+{time}
+
+سباق هجين لفرق من شخصين (رجلان أو سيدتان)، مستوى مفتوح أو نخبة. مدفوع لكل رياضي: السعر وطريقة الدفع في صفحة الحجز.
+
+الحجز:
+{booking_link}
+
+الموقع: {place}
+{place_link}
+
+*لا مشاركة دون تسجيل ورمز QR*
+
+*لأعضاء المجتمع فقط*`,
+ann_defe5k:`{title} مع MicroMobility *{day} {date}*
+
+{time}
+
+اجرِ 5 كم مع مجتمع MicroMobility. مجانًا.
+
+الحجز:
+{booking_link}
+
+الموقع: {place}
+{place_link}
+
+*لا مشاركة دون تسجيل ورمز QR*
+
+*لأعضاء المجتمع فقط*`,
+ann_blood:`{title} *{day} {date}*
+
+{time}
+
+تبرّع بالدم، أو تعال للزيارة والدعم. مجانًا ومفتوحة للجميع.
+
+الحجز:
+{booking_link}
+
+الموقع: {place}
+{place_link}
+
+*لا مشاركة دون تسجيل ورمز QR*`,
+ann_workshop:`{title} مع MicroMobility *{day} {date}*
+
+{time}
+
+تحضير للترايثلون بالشراكة مع الاتحاد السعودي للترايثلون. مجانًا ومفتوحة للجميع.
+
+الحجز:
+{booking_link}
+
+الموقع: {place}
+{place_link}
+
+*لا مشاركة دون تسجيل ورمز QR*`,
+ann_snd96:`{title} مع MicroMobility *{day} {date}*
+
+التجمّع: *{meet_time}*
+الانطلاق: *{start_time}*
+
+احتفل باليوم الوطني السعودي في جولة معنا. مفتوحة للجميع. استئجار الدراجة مدفوع.
+
+الحجز:
+{booking_link}
+
+الموقع: {place}
+{place_link}
+
+*لا مشاركة دون تسجيل ورمز QR*
+*الخوذة مجانية مع كل دراجة*`,
 ann_invite:`مرحباً {first_name}،
 
 يسعدنا دعوتك إلى *{title}* مع MicroMobility.
