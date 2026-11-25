@@ -221,7 +221,7 @@ test.describe('@staff:community Suggestions', () => {
     const pill = tab(page).locator('.filter-pill', { hasText: /^Suggestions/ });
     await expect(pill).toHaveText('Suggestions (2)');
     await pill.click();
-    await expect(tab(page).locator('.filter-pill', { hasText: /^New/ })).toHaveText('New (2)');
+    await expect(tab(page).locator('.filter-pill', { hasText: /^New \(/ })).toHaveText('New (2)');
     await expect(tab(page).locator('.filter-pill', { hasText: /^Planned/ })).toHaveText('Planned (1)');
     await expect(tab(page).locator('.filter-pill', { hasText: /^Closed/ })).toHaveText('Closed (1)');
     const cards = tab(page).locator('[data-sg]');
