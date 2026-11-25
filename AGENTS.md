@@ -561,6 +561,19 @@ the account report's PIF column says the company (Yes when none) and its section
 grant gives no company. Writes repaint through `_rtPaint` (the Accounts row painter is in the community part; calling it
 from the desk core pulled the part into staff.js). tests/doctor-pif-tags.spec.ts.
 
+## The Raw carbon bike and Customized bike tags (2026-11-25, migration 20261125160000)
+
+`tags` rows `tag_raw_carbon` (slug `raw_carbon`, name "Raw carbon bike": the rider's own raw, unpainted carbon bike)
+and `tag_custom_bike` (slug `custom_bike`, name "Customized bike": a bike MicroMobility built or changed for the rider);
+locked, never auto-granted, staff-only. The user's picks on their pick page: Raw carbon bike the word RAW on a chip
+painted like carbon weave (two repeating gradients over carbon black `#24282f`; a faint inset edge and a lighter band
+`#8a939e` on the dark theme so it does not vanish on a dark row); Customized bike a wrench (`_PRO_SVG.cub`, 12px) and
+the word CUSTOM on workshop orange `#d9480f`. Two more `PRO_TAGS` rows (`k` rcb / cub, `sf` `sfRcb` / `sfCub`, `am`
+`amRcb` / `amCub`, `rk` `proRcb` / `proCub`) with the Doctor and PIF flags `acct`, `nt`, `np` (the user picked "Same as
+Doctor and PIF": bookings, beside the account name, band, filters, Reports; not the name colour, not printed). A row's
+`wd` is a word drawn on the chip: it is a mark like the HR letters, so it stays in English in every language
+(`_proFace`); the names (`rcbLabel` / `cubLabel`) follow the language. tests/raw-carbon-custom-bike-tags.spec.ts.
+
 ## Tapping a tag shows its name and description (2026-11-18)
 
 The user: "make clicking on a tag from staff shows the name and description of it". `_tagTap(id)` adds

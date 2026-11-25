@@ -6753,6 +6753,8 @@
   "pifCoOtherPh": "Nome da empresa",
   "pifCoChange": "Mudar empresa",
   "pifCoNeed": "Escreva o nome da empresa ou escolha Sem empresa.",
+  "rcbLabel": "Bike de carbono bruto",
+  "cubLabel": "Bike personalizada",
   "tagNoDesc": "Ainda sem descrição. Os administradores escrevem uma na página Etiquetas.",
   "snShareAll": "das contas listadas",
   "snAmongComm": "Membros da comunidade: {0} de {1}",

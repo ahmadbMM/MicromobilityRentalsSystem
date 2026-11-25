@@ -6753,6 +6753,8 @@
   "pifCoOtherPh": "Pangalan ng kumpanya",
   "pifCoChange": "Palitan ang kumpanya",
   "pifCoNeed": "I-type ang pangalan ng kumpanya, o piliin ang Walang kumpanya.",
+  "rcbLabel": "Raw carbon na bisikleta",
+  "cubLabel": "Customized na bisikleta",
   "tagNoDesc": "Wala pang paglalarawan. Isinusulat ito ng mga admin sa pahinang Mga Tag.",
   "snShareAll": "ng mga nakalistang account",
   "snAmongComm": "Mga miyembro ng komunidad: {0} sa {1}",

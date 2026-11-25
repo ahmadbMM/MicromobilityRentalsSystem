@@ -12425,6 +12425,17 @@ html[data-staff-theme="dark"] body.view-staff :is(#tab-queue,#tab-waitlist) :is(
 .pif-mk img{display:block;height:13px;width:auto;}
 .doc-row{--pro-c:#1971c2;--pro-cn:#74c0fc;}
 .pif-row{--pro-c:#8c6a2c;--pro-cn:#e0c48f;}
+/* The Raw carbon bike and Customized bike tags (2026-11-25, the user's picks): the word RAW on a chip that looks like
+   carbon weave in carbon black, and a wrench with the word CUSTOM on workshop orange. Shown as Doctor and PIF are. The
+   carbon chip gets a faint edge on the dark theme and a lighter band there, so neither melts into a dark row. */
+.rcb-mk,.cub-mk{width:auto;padding:0 4px;}
+.rcb-mk{background:repeating-linear-gradient(45deg,rgba(255,255,255,.13) 0 1.5px,transparent 1.5px 3px),repeating-linear-gradient(-45deg,rgba(0,0,0,.3) 0 1.5px,transparent 1.5px 3px),#24282f;}
+html[data-staff-theme="dark"] .rcb-mk{box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);}
+.cub-mk{background:#d9480f;}
+.cub-ico,.tag-svg .cub-ico{width:12px;height:12px;margin-inline-end:2px;}
+.rcb-row{--pro-c:#24282f;--pro-cn:#9aa3ad;}
+html[data-staff-theme="dark"] .rcb-row{--pro-c:#8a939e;}
+.cub-row{--pro-c:#d9480f;--pro-cn:#ffa94d;}
 .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row) td:first-child,.q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row),.ho-row.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row){box-shadow:inset 3px 0 0 var(--pro-c);}
 html[dir="rtl"] .queue-table tbody tr.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row) td:first-child,html[dir="rtl"] .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row),html[dir="rtl"] .ho-row.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row){box-shadow:inset -3px 0 0 var(--pro-c);}
 .q-card.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark,.ho-row.pro-row:not(.inf-row):not(.bdf-row):not(.food-row):not(.fwk-row).cm-row-mark{box-shadow:inset 3px 0 0 #0c7a3d,inset 6px 0 0 var(--pro-c);}
