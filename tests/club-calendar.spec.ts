@@ -216,6 +216,11 @@ test('@customer:account the migration: a switch on the rider\'s own row, and whi
   expect(app).toContain("const FEAT_KINDS=['yoga','defe5k','farm','ktri','paint'];");
   expect(readFileSync('supabase/migrations/20261122150000_kaust_triathlon.sql', 'utf8')).toContain("then k.kind in ('yoga', 'defe5k', 'farm', 'ktri')");
   expect(readFileSync('supabase/migrations/20261123150000_tee_painting.sql', 'utf8')).toContain("then k.kind in ('yoga', 'defe5k', 'farm', 'ktri', 'paint')");
+  // the Wednesday Community Ride (20261125170000): its own kind, featurable by the switch, never featured by default
+  const wc = readFileSync('supabase/migrations/20261125170000_wednesday_community_ride.sql', 'utf8');
+  expect(wc).toContain("'blood', 'yoga', 'farm', 'event', 'ktri', 'paint', 'wed') then s.ride_kind");
+  expect(wc).toContain("or (k.kind in ('saturday', 'petromin', 'swim', 'defe5k', 'yoga', 'farm', 'ktri', 'paint', 'wed')");
+  expect(wc).toContain("then k.kind in ('yoga', 'defe5k', 'farm', 'ktri', 'paint')");
   for (const f of ['calendar_link', 'calendar_feed', 'calendar_club_set']) {
     expect(code).toContain(`grant execute on function public.${f}(`);
     expect(readFileSync('supabase/checks/security-attributes.sql', 'utf8')).toContain(`('${f}',`);

@@ -5113,7 +5113,7 @@
        both the original "community = blue" rules and the staff reskin layer,
        which re-tints the same elements green. Same specificity, later wins. */
     .ev-jcc{--ev:var(--blue);--ev-rgb:var(--blue-rgb);}
-    .ev-saturday{--ev:var(--green);--ev-rgb:var(--green-rgb);}
+    .ev-saturday,.ev-wed{--ev:var(--green);--ev-rgb:var(--green-rgb);} /* the Wednesday Community Ride wears the Saturday ride's look (2026-11-25) */
     .ev-petromin{--ev:var(--red);--ev-rgb:var(--red-rgb);}
     /* The staff skin collapses --blue to ink (one accent colour for status), which turned the
        circuit's colour black on every staff screen. The ride keeps the house blue there. */
@@ -10572,7 +10572,7 @@ body:not(.view-staff){
   --motif-pool:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='8' viewBox='0 0 60 8'%3E%3Cpath d='M0 5c10-3 20-3 30 0s20 3 30 0' fill='none' stroke='%230D7D8F' stroke-width='1.4'/%3E%3C/svg%3E") left 0 bottom 0/60px 8px repeat-x,#E3F2F4;
   --motif-pm:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='8' viewBox='0 0 48 8'%3E%3Cpath d='M0 8l6-8h8l-6 8zM16 8l6-8h8l-6 8zM32 8l6-8h8l-6 8z' fill='%23A33B2E'/%3E%3C/svg%3E") right 14px bottom 0/48px 8px no-repeat;
 }
-body:not(.view-staff) .ev-saturday{--k:var(--k-sat);--k-tint:var(--k-sat-tint);--k-ink:var(--k-sat-ink);--k-art:var(--art-dawn);--k-motif:var(--motif-sat);}
+body:not(.view-staff) :is(.ev-saturday,.ev-wed){--k:var(--k-sat);--k-tint:var(--k-sat-tint);--k-ink:var(--k-sat-ink);--k-art:var(--art-dawn);--k-motif:var(--motif-sat);}
 body:not(.view-staff) .ev-swim{--k:var(--k-pool);--k-tint:var(--k-pool-tint);--k-ink:var(--k-pool-ink);--k-art:var(--art-pool);--k-motif:var(--motif-pool);}
 body:not(.view-staff) .ev-petromin{--k:var(--k-pm);--k-tint:var(--k-pm-tint);--k-ink:var(--k-pm-ink);--k-art:var(--art-pm);--k-motif:var(--motif-pm);}
 /* the drawing is an empty element, so Arabic turns it round without turning a word */
@@ -10604,7 +10604,7 @@ body:not(.view-staff) .sess-card>.k-art.sess-motif{position:absolute;inset:auto 
 body:not(.view-staff) .reg-foot-sum>bdi{white-space:normal;text-overflow:clip;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
 /* a date's Details sheet: the kind's drawing across its top (C3), the ride's number by its name (Q6), the route (D1) */
 body:not(.view-staff) .ev-info>.ev-info-art{display:block;height:72px;background:var(--k-art);border-start-start-radius:inherit;border-start-end-radius:inherit;}
-body:not(.view-staff) .ev-info.ev-saturday>.ev-info-art{background-position:center 80%;} /* the pink band, the sea and the lamps, not the promenade alone */
+body:not(.view-staff) .ev-info:is(.ev-saturday,.ev-wed)>.ev-info-art{background-position:center 80%;} /* the pink band, the sea and the lamps, not the promenade alone */
 body:not(.view-staff) .ev-info-no{font-weight:600;color:var(--ink-3);}
 body:not(.view-staff) .sr-route{display:block;width:100%;height:auto;margin:14px 0 2px;overflow:visible;}
 body:not(.view-staff) #reg-group-wrap .sr-route{margin:4px 0 12px;}

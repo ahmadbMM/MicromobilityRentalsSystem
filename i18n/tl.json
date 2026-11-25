@@ -11453,5 +11453,9 @@
   "tpWhatV": "Pintahan at kulayan ang sarili mong MicroMobility T-shirt",
   "tpPerPerson": "bawat tao",
   "infoDtPaint": "Isang hapon kasama ang komunidad sa pagguhit at pagkukulay sa mga MicroMobility T-shirt, {start} hanggang {end}. Isang lugar bawat miyembro; limitado ang mga lugar.",
-  "sessEventPaintHint": "Pagpipinta ng T-shirt para sa mga miyembro ng komunidad: may presyo bawat tao, isang lugar bawat isa, kung sino ang nauna, at ang waitlist kapag puno na. Itinatampok sa MicroMobility Experiences."
+  "sessEventPaintHint": "Pagpipinta ng T-shirt para sa mga miyembro ng komunidad: may presyo bawat tao, isang lugar bawat isa, kung sino ang nauna, at ang waitlist kapag puno na. Itinatampok sa MicroMobility Experiences.",
+  "evWedName": "Community Ride tuwing Miyerkules",
+  "snWed": "Miyerkules",
+  "infoDtWed": "Isang ride sa gabi para sa mga miyembro ng komunidad. Magkikita tayo nang {gather} sa simula ng Saturday Social Ride at aalis nang {start}. Walang takdang distansya o ruta. Ang renta ng bisikleta ay sa karaniwang presyo, babayaran sa desk; magdala ng sariling bisikleta at sumakay nang libre. May kasamang helmet ang bawat bisikleta.",
+  "sessEventWedHint": "Ride sa Miyerkules ng gabi para sa mga miyembro ng komunidad: unang dumating, unang mapagsisilbihan, walang approval, renta ng bisikleta sa karaniwang presyo na babayaran sa desk (libre ang sariling bisikleta), tagpuan sa simula ng Saturday ride. Walang limitasyon sa puwesto."
 }

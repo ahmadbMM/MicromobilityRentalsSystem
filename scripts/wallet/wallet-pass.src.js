@@ -938,7 +938,7 @@ function _sessClock(sess) {
 // The KAUST Triathlon's races (the app's KTRI_RACES): name and start.
 const KTRI_RACES = { oly: ["Olympic", "06:30"], spr: ["Sprint", "07:30"], oly_team: ["Olympic relay team", "06:30"], spr_team: ["Sprint relay team", "07:30"], champs: ["Future Champs run", "09:00"] };
 const KTRI_REG_URL = "https://rec.coastline-fm.com/events/kaust-triathlon-2026/register";
-const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, petromin: false, swim: false, workshop: false, jcc: false, defe5k: false, yoga: false, farm: true, ktri: false, paint: false };
+const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, petromin: false, swim: false, workshop: false, jcc: false, defe5k: false, yoga: false, farm: true, ktri: false, paint: false, wed: true };
 // The kinds that hand out no bike (the app's KIND_TRAITS bike:false).
 const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true, blood: true, yoga: true, farm: true, ktri: true, paint: true };
 // Who a booking is for, by kind: riders only where there is a bike.
@@ -973,6 +973,8 @@ function _gathersTime(sess) {
 const EXP = { bg: "rgb(255,255,255)", fg: "rgb(26,25,25)", label: "rgb(7,122,75)" };
 const RIDES = {
   saturday: { ...EXP, venue: "Saturday Social Ride" },
+  // The Wednesday Community Ride (2026-11-25): the Saturday ride's look, its own name
+  wed:      { ...EXP, venue: "Wednesday Community Ride" },
   // The one ride that does not take the near-black field the others use: a dark maroon read
   // as muddy brown rather than as a colour, and the salmon labels on it looked washed out.
   // Petromin commits to its red instead - the same rgb(163,59,46) the app tints this ride
@@ -1019,7 +1021,7 @@ function _rideOf(sess) {
   if (sess.ride_kind === "snd96") return "snd96";
   if (sess.event_kind !== "community") return "jcc";
   const k = sess.ride_kind;
-  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" || k === "vlap" || k === "defe5k" || k === "blood" || k === "yoga" || k === "farm" || k === "ktri" || k === "paint" ? k : "saturday";
+  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" || k === "vlap" || k === "defe5k" || k === "blood" || k === "yoga" || k === "farm" || k === "ktri" || k === "paint" || k === "wed" ? k : "saturday";
 }
 function _hhmm(min) {
   if (min == null) return "";

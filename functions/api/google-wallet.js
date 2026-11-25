@@ -16,7 +16,7 @@
 // Without them the function answers 501 and the app hides its button.
 const SUPA_DEFAULT = "https://qpffkzmsfyilicwcsszz.supabase.co";
 const SAVE_URL = "https://pay.google.com/gp/v/save/";
-const KIND_NAMES = { blood: "MicroMobility Blood Donation", yoga: "Hatha Yoga for Cyclists", farm: "Farm House Night", ktri: "KAUST Triathlon", paint: "Tee Painting Workshop", jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday Social Ride", petromin: "Petromin ride", swim: "Swim session", workshop: "T100 Triathlon Prep", snd96: "Saudi National Day 96 Ride", runher: "Run for Her", event: "Event", vlap: "Victory Lap", defe5k: "DEFE 5KM Run" };
+const KIND_NAMES = { blood: "MicroMobility Blood Donation", yoga: "Hatha Yoga for Cyclists", farm: "Farm House Night", ktri: "KAUST Triathlon", paint: "Tee Painting Workshop", wed: "Wednesday Community Ride", jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday Social Ride", petromin: "Petromin ride", swim: "Swim session", workshop: "T100 Triathlon Prep", snd96: "Saudi National Day 96 Ride", runher: "Run for Her", event: "Event", vlap: "Victory Lap", defe5k: "DEFE 5KM Run" };
 // The kinds that hand out no bike (the app's KIND_TRAITS bike:false): their pass names no bike and no
 // riders (the owner, 2026-10-18: "make sure all non-cycling related sessions dont include anything about
 // cycling anywhere").
@@ -72,7 +72,7 @@ function rideKind(sess) {
   if (!sess || sess.event_kind !== "community") return "jcc";
   // runher as the app's _rideKind and the Apple pass read it: an untitled Run for Her was named
   // "Saturday Social Ride" here (2026-10-07).
-  return ["petromin", "swim", "workshop", "runher", "event", "vlap", "defe5k", "blood", "yoga", "farm", "ktri", "paint"].includes(k) ? k : "saturday";
+  return ["petromin", "swim", "workshop", "runher", "event", "vlap", "defe5k", "blood", "yoga", "farm", "ktri", "paint", "wed"].includes(k) ? k : "saturday";
 }
 // The app's own tests (_isCommunity, _isApprovalRide, _commPublished), as the Apple pass reads them:
 // the National Day ride left the community umbrella, and a ride staff approve is one whose
@@ -81,7 +81,7 @@ function isCommunity(sess) { return !!sess && sess.event_kind === "community" &&
 function isApproval(sess) { return isCommunity(sess) && sess.needs_approval !== false; }
 function isPublished(sess) { return isCommunity(sess) && sess.hide_queue === false; }
 // Rides that gather store "gathering - start" in _time and have no end (the app's KIND_TRAITS.gathering).
-const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, farm: true }; // the Farm House Night: arrival, then dinner (bug hunt 2026-11-18)
+const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, farm: true, wed: true }; // the Farm House Night: arrival, then dinner (bug hunt 2026-11-18)
 // When the pass stops being a ticket: the ride's end on its own day (past midnight rolls into the
 // next one), or the end of the ride's day when its clock has no end. A Jeddah time, +03:00.
 function validUntil(b, sess) {

@@ -11453,5 +11453,9 @@
   "tpWhatV": "Pinte e colora a sua própria camiseta MicroMobility",
   "tpPerPerson": "por pessoa",
   "infoDtPaint": "Uma tarde com a comunidade para desenhar e colorir camisetas MicroMobility, das {start} às {end}. Um lugar por membro; os lugares são limitados.",
-  "sessEventPaintHint": "Pintura de camisetas para membros da comunidade: um preço por pessoa, um lugar cada, por ordem de chegada, e depois a lista de espera quando os lugares acabarem. Em destaque em Experiências MicroMobility."
+  "sessEventPaintHint": "Pintura de camisetas para membros da comunidade: um preço por pessoa, um lugar cada, por ordem de chegada, e depois a lista de espera quando os lugares acabarem. Em destaque em Experiências MicroMobility.",
+  "evWedName": "Passeio comunitário de quarta-feira",
+  "snWed": "Quarta-feira",
+  "infoDtWed": "Um passeio ao fim da tarde para os membros da comunidade. Encontramo-nos às {gather} no ponto de partida do passeio social de sábado e saímos às {start}. Sem distância nem percurso definidos. Aluguer de bicicleta ao preço habitual, pago no balcão; traga a sua própria bicicleta e pedale de graça. Cada bicicleta inclui capacete.",
+  "sessEventWedHint": "Passeio de quarta-feira à noite para membros da comunidade: por ordem de chegada, sem aprovação, aluguer de bicicleta ao preço habitual pago no balcão (bicicleta própria grátis), encontro na partida do passeio de sábado. Sem limite de lugares."
 }

@@ -11453,5 +11453,9 @@
   "tpWhatV": "Peignez et coloriez votre propre t-shirt MicroMobility",
   "tpPerPerson": "par personne",
   "infoDtPaint": "Un après-midi avec la communauté pour dessiner et colorier des t-shirts MicroMobility, de {start} à {end}. Une place par membre ; les places sont limitées.",
-  "sessEventPaintHint": "Peinture sur t-shirt pour les membres de la communauté : un prix par personne, une place chacun, premier arrivé premier servi, puis la liste d’attente une fois les places prises. Mis en avant dans Expériences MicroMobility."
+  "sessEventPaintHint": "Peinture sur t-shirt pour les membres de la communauté : un prix par personne, une place chacun, premier arrivé premier servi, puis la liste d’attente une fois les places prises. Mis en avant dans Expériences MicroMobility.",
+  "evWedName": "Sortie communautaire du mercredi",
+  "snWed": "Mercredi",
+  "infoDtWed": "Une sortie en soirée pour les membres de la communauté. Rendez-vous à {gather} au point de départ de la sortie sociale du samedi, départ à {start}. Pas de distance ni de parcours fixes. Location de vélo au tarif habituel, à régler au comptoir ; venez avec votre propre vélo et roulez gratuitement. Un casque est fourni avec chaque vélo.",
+  "sessEventWedHint": "Sortie du mercredi soir pour les membres de la communauté : premier arrivé premier servi, sans validation, location de vélo au tarif habituel réglée au comptoir (vélo personnel gratuit), rendez-vous au départ de la sortie du samedi. Pas de limite de places."
 }

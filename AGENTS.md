@@ -2224,6 +2224,47 @@ gathering (start and end, like yoga); activity waiver; one place per account (`_
   name = the session's own title, ورشة الرسم على التيشيرت. Catalogue row: migration `20261124100000_tee_painting_badge`
   (sort 94). Tests: `tests/tee-painting.spec.ts`.
 
+## Wednesday Community Ride (2026-11-25)
+The user: "create a new session called Wednesday Community Ride, a hybrid between Petromin Wednesday and Saturday Social
+Ride, starting point is the same as the Saturday social ride but bikes are not complimentary, it is paid the same way
+Petromin sessions are, community exclusive event, put it under MicroMobility Experiences but don't feature it, no specific
+distance or route, it starts at 7:00 PM, meeting at 6:30 PM". Their answers: every Wednesday from 2026-11-25, first come
+first served, the standard fare (no 50 SAR employee fare), no place limit for now, no ride groups / distance / route, Arabic
+name جولة الأربعاء المجتمعية, no badge.
+`ride_kind 'wed'` (event_kind community, open_to_all false, paid_ride true, sessions.price null, no approval, hide_queue),
+id suffix `-wc`. `_isWed(s)`. A bike ride: KIND_TRAITS `wed:{breakfast:false}` (bike yes, gathering yes). A date inside
+MicroMobility Experiences (`_evMatch` community), NOT in FEAT_KINDS (staff can still switch `_feat` on a date); members only
+(`_infoShowSess` does not let it through; its Experiences mark is a member's, as the farm's and the tee painting's).
+- **Times**: as the Saturday ride, `_time` is "meet up - start" ("18:30 - 19:00"): `sessionTime` says "Gathering 6:30 PM ·
+  Start 7 PM" (commGatherShort / commStartShort), the pass GATHERING TIME / RIDE STARTS, the feed and the hub card the same,
+  `booking_late` counts from the meet-up. The house words stay Gathering / Start (not "Meeting"), so every surface agrees.
+- **Where**: the Saturday ride's meeting point: `_meetsAt` takes it, so `_venueName` says "Meeting point" (meetPointLbl) and
+  the ticket's button and Details' Map open `meet_url` (the Saturday rows' https://maps.app.goo.gl/pdcMn1mGcCdabia7A?g_st=ic,
+  WC_MEET_URL; the new-session form fills it from the latest Saturday ride's, `_wcMeetUrl`). No route: `_rideRoute` answers
+  null (it drew the circuit for a bike ride with no location), the forms show no Route picker and no distance (`_rideKmField`,
+  `_rgKmSlot`); `_hasRideGroups` stays Saturday's.
+- **Money**: paid like a Petromin night's website booker: the ride_prices fare per type (57.5 Hybrid / Mountain / Kids, 75
+  Road), own bike free, no carbon (`_noCarbon`), pay at the desk (the ticket's booth line, the pass's Payment). No Wallet
+  credit switch, as on Petromin (`_cwReviewSlot`, `_cwPaySlot`, `_cwAfterBook`). Referral codes stay JCC / Petromin
+  (`_ref_code_guard` not extended). Server: `_fare_now` → `_booking_fare(entry,'wed',type)` finds no registration of source
+  'wed', so ride_prices; nothing keys a price on the kind.
+- **Places**: no limit = 500 places (WC_SPOTS, capacity and spots; the seats form, `_nsSeats` / `_editSeats`). Riders are
+  never told a count (`_wcNoCount`: the card never says "N left", Details' Places says Available, or Waitlist when full).
+  Own bikes take no place (only Petromin's do). A party of two per account (`_isGroupRide` takes it; the server's
+  `_group_ride_cap` group_ride_max). Walk-ins and Add rider allowed. The ride waiver.
+- **Look**: no theme of its own: the Saturday ride's (`.ev-wed` shares `.ev-saturday`'s tokens and art, KIND_ART; ticket
+  `th-saturday`, `_tkTheme`). Staff: short name `snWed` (Wednesday), mark `bike` (KIND_IC, SESS_MK_IC), row `rq-ev-comm`,
+  chips `ev-wed`; the new-session picker (meet 18:30, start 19:00, 500 places, the Saturday map, the hint
+  `sessEventWedHint`); the editor keeps paid_ride, no approval, the places. Announcements type `wed`: `wk_wed` and `ann_wed`
+  (EN, AR; the booking link before the map).
+- Wallet: Apple pass `RIDES.wed` (the Experiences white, the Saturday strip, `GATHERS.wed`); Google pass and the calendar
+  feed (FEED_WORDS.wed = evWedName in the eleven languages, a gathering kind meeting at its link) know the kind; member-hub
+  `INT_KIND.wed` = saturday.
+- Migration `20261125170000_wednesday_community_ride` (promo kind list, `_session_kind`, `_vol_sess_name`, `booking_late`,
+  `calendar_feed`, push words `kind:wed`). Sessions: `supabase/checks/wednesday-community-ride-sessions.sql` (every Wednesday
+  2026-11-25 to 2027-02-24), run after the app AND the migration are live; read-only check
+  `supabase/checks/wednesday-community-ride-check.sql`. Tests: `tests/wednesday-ride.spec.ts`.
+
 ## Farm House Night (2026-11-13)
 The Farmhouse Night (title_ar ليلة فارم هاوس; first named Nawar Farm House Night, renamed by the user
 2026-11-13 to The Little Farmhouse Night, then 2026-11-14 "remove little from the name of the farmhouse"), Thu 19 Nov 2026 at Farmhouse, Dhahban (map link in meet_url, the name in meet_name / meet_name_ar): arrival from 16:30, dinner 20:30. The user: approval like the Saturday Social Ride, inside MicroMobility

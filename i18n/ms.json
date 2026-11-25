@@ -11453,5 +11453,9 @@
   "tpWhatV": "Lukis dan warnakan baju-T MicroMobility anda sendiri",
   "tpPerPerson": "setiap orang",
   "infoDtPaint": "Petang bersama komuniti melukis dan mewarna baju-T MicroMobility, {start} hingga {end}. Satu tempat bagi setiap ahli; tempat adalah terhad.",
-  "sessEventPaintHint": "Melukis baju-T untuk ahli komuniti: harga setiap orang, satu tempat seorang, siapa cepat dia dapat, kemudian senarai menunggu apabila tempat penuh. Ditampilkan dalam Pengalaman MicroMobility."
+  "sessEventPaintHint": "Melukis baju-T untuk ahli komuniti: harga setiap orang, satu tempat seorang, siapa cepat dia dapat, kemudian senarai menunggu apabila tempat penuh. Ditampilkan dalam Pengalaman MicroMobility.",
+  "evWedName": "Kayuhan Komuniti Rabu",
+  "snWed": "Rabu",
+  "infoDtWed": "Kayuhan petang untuk ahli komuniti. Kita berkumpul pada {gather} di tempat permulaan Kayuhan Sosial Sabtu dan bertolak pada {start}. Tiada jarak atau laluan yang ditetapkan. Sewa basikal pada harga biasa, dibayar di kaunter; bawa basikal sendiri dan kayuh secara percuma. Setiap basikal disertakan topi keledar.",
+  "sessEventWedHint": "Kayuhan Rabu petang untuk ahli komuniti: siapa cepat dia dapat, tanpa kelulusan, sewa basikal pada harga biasa dibayar di kaunter (basikal sendiri percuma), berkumpul di tempat permulaan kayuhan Sabtu. Tiada had tempat."
 }
