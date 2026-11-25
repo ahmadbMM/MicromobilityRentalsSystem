@@ -576,7 +576,7 @@ export const STAFF_PARTS = {
   peopleapps: ['_commApplications', '_learnApplications', '_commMentors'], // + People > Mentorship (2026-11-13)
   peoplemore: ['_commBadges', '_commTitles', '_commActivities', '_commBirthdays', '_refRpHtml', '_commTags', '_commDuplicates',
     'renderCustActivity', 'showAccountReportOptions', 'printDefaultAccountReport', 'openSegmentActions',
-    '_commCompanies'], // 2026-11-13 (F26): Recognition > Company challenges (the list, a challenge's dialog, who joined)
+    '_commCompanies', '_pplNat'], // 2026-11-25: + People > New nationalities (its list, Invite and the rest). 2026-11-13 (F26): Recognition > Company challenges (the list, a challenge's dialog, who joined)
   // 2026-11-11 (item 47): a session's report - its options dialog and the sheets it prints or saves (the report, its CSV, the
   // breakfast report, the Saturday roster) - out of the desk's core: ~9 KB gzipped no desk parsed before its first paint.
   // The day sheet and the close-out stay in the core.

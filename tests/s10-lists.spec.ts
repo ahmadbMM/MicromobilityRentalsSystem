@@ -126,7 +126,7 @@ test.describe('@staff:lists People in five groups', () => {
     await boot(page, { customers: [{ id: 'c1', name: 'Lina Haddad', email: 'l@example.test', phone: '0551112222', created_at: iso(864e5) }] }, 'community');
     const tab = page.locator('#tab-community');
     const groups = tab.locator('.cmy-nav').first().locator('.filter-pill');
-    await expect(groups).toHaveText(['Overview', /^Accounts/, 'Membership', 'Recognition', 'Activity', 'More']);
+    await expect(groups).toHaveText(['Overview', /^Accounts/, 'Membership', /^New nationalities/, 'Recognition', 'Activity', 'More']);
     await groups.filter({ hasText: 'Recognition' }).click();
     expect(await page.evaluate('S.communityTab')).toBe('badges');
     await expect(tab.locator('.ppl-sub .filter-pill')).toHaveText(['Badges', 'Titles', 'Members’ page', 'Company challenges']); // Company challenges since F26 (2026-11-13)

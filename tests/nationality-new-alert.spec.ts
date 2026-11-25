@@ -29,63 +29,103 @@ async function open(page: import('@playwright/test').Page) {
   await page.evaluate(`localStorage.removeItem('cq_natnew_ok');_listOk.riders=true;setStaffTab('community');S.communityTab='overview';renderCommunity()`);
 }
 
-test('the community section opens on a big box naming them, newest first', async ({ page }) => {
+// The user, 2026-11-25: the list is its own People section, New nationalities (/people/nationalities); the overview keeps
+// a bar (Open, Got it) only while someone new waits.
+const sec = (page: import('@playwright/test').Page) => page.locator('#tab-community .nn-sec');
+async function openSec(page: import('@playwright/test').Page) {
   await open(page);
-  const box = page.locator('#tab-community .natnew-box');
-  await expect(box).toBeVisible();
-  await expect(box.locator('h3')).toHaveText('2 new nationalities in Customers');
+  await page.evaluate(`setCommTab('nationalities')`);
+  await expect(sec(page)).toBeVisible();
+}
+
+test('the overview has a bar naming them; New nationalities lists them, newest first', async ({ page }) => {
+  await open(page);
+  const bar = page.locator('#tab-community .natnew-box.natnew-min');
+  await expect(bar.locator('h3')).toHaveText('2 new nationalities in Customers');
+  await expect(page.locator('#tab-community .natnew-row')).toHaveCount(0);
+  await bar.getByRole('button', { name: 'Show list (2)' }).click();
+  await expect(sec(page)).toBeVisible();
+  await expect(page).toHaveURL(/\/people\/nationalities$/);
+  const box = sec(page);
   await expect(box.locator('.natnew-row')).toHaveCount(2);
   await expect(box.locator('.natnew-row').first()).toContainText('Farah India');
   await expect(box).toContainText('Ghazi Jordan');
   await expect(box).not.toContainText('Badr Saudi');
   await expect(box).not.toContainText('Hana Blank');
-  // on the overview only since the People review (2026-11-06, PP05): it headed every view
-  await page.evaluate(`setCommTab('tags')`);
-  await expect(page.locator('#tab-community .natnew-box')).toHaveCount(0);
+  // its own top-level group in People's nav, with the count of new ones
+  await expect(page.locator('#tab-community [data-ppl-grp="nationalities"]')).toHaveText('New nationalities (2)');
+  // not on other views
   await page.evaluate(`setCommTab('accounts')`);
   await expect(page.locator('#tab-community .natnew-box')).toHaveCount(0);
   // its rows open the account window, not the editor
-  await page.evaluate(`setCommTab('overview')`);
-  await page.locator('#tab-community .natnew-row').first().click();
+  await page.evaluate(`setCommTab('nationalities')`);
+  await sec(page).locator('.natnew-row').first().click();
   await expect(page.locator('#cust-modal #ah-title')).toHaveText('Farah India');
 });
 
-test('Got it folds the box to a bar until another such customer appears', async ({ page }) => {
+test('Got it takes the overview bar away until another such customer appears; the section keeps everyone', async ({ page }) => {
   await open(page);
   await page.locator('#tab-community .natnew-box').getByRole('button', { name: 'Got it' }).click();
-  await expect(page.locator('#tab-community .natnew-box.natnew-min')).toBeVisible();
-  await expect(page.locator('#tab-community .natnew-row')).toHaveCount(0);
-  await page.evaluate(`S.customers=[...S.customers,{id:'k9',name:'Ivo Brazil',email:'k9@example.test',nationality:'Brazil',created_at:new Date().toISOString()}];renderCommunity()`);
-  const box = page.locator('#tab-community .natnew-box');
-  await expect(box.locator('h3')).toHaveText('A new nationality in Customers');
-  await expect(box.locator('.natnew-row')).toHaveCount(1);
-  await expect(box).toContainText('Ivo Brazil');
+  await expect(page.locator('#tab-community .natnew-box')).toHaveCount(0);
+  await page.evaluate(`setCommTab('nationalities')`);
+  await expect(sec(page).locator('.natnew-row')).toHaveCount(2);
+  await expect(sec(page).getByRole('button', { name: 'Got it' })).toHaveCount(0);
+  await page.evaluate(`S.customers=[...S.customers,{id:'k9',name:'Ivo Brazil',email:'k9@example.test',nationality:'Brazil',created_at:new Date().toISOString()}];setCommTab('overview')`);
+  const bar = page.locator('#tab-community .natnew-box.natnew-min');
+  await expect(bar.locator('h3')).toHaveText('A new nationality in Customers');
+  await expect(bar.getByRole('button', { name: 'Show list (1)' })).toBeVisible();
 });
 
-// The owner, 2026-10-09: "i want the unique nationalities box to be accessible not one i click the got it
-// button it vanishes".
-test('after Got it, Show list opens everyone again and Hide list folds it', async ({ page }) => {
+test('each person has Invite and the other buttons; Invite marks them invited for the team', async ({ page }) => {
   await open(page);
-  await page.locator('#tab-community .natnew-box').getByRole('button', { name: 'Got it' }).click();
-  const bar = page.locator('#tab-community .natnew-box.natnew-min');
-  await expect(bar.locator('h3')).toHaveText('Nationalities no community member has yet');
-  await bar.getByRole('button', { name: 'Show list (2)' }).click();
-  const box = page.locator('#tab-community .natnew-box');
-  await expect(box).not.toHaveClass(/natnew-min/);
-  await expect(box.locator('.natnew-row')).toHaveCount(2);
-  await expect(box.getByRole('button', { name: 'Got it' })).toHaveCount(0);
-  await box.locator('#natnew-q').fill('jordan');
+  await page.evaluate(`S.customers=S.customers.map(c=>c.id==='k6'?{...c,phone:'+966500000006',ride_news:true}:c.id==='k7'?{...c,phone:'+962790000007'}:c);setCommTab('nationalities')`);
+  const box = sec(page);
+  await expect(box.locator('.dash-kpi').first()).toContainText('2');
+  const farah = box.locator('.nn-item').filter({ hasText: 'Farah India' });
+  const inv = farah.getByRole('link', { name: 'Invite' });
+  const href = decodeURIComponent((await inv.getAttribute('href'))!);
+  expect(href).toContain('https://wa.me/966500000006?text=');
+  expect(href).toContain('नमस्ते Farah'); // the language her nationality suggests (India: Hindi), as the reminders pick it
+  expect(href).toContain('https://micromobility.sa/community/registration?lang=hi');
+  const ghazi = decodeURIComponent((await box.locator('.nn-item').filter({ hasText: 'Ghazi Jordan' }).getByRole('link', { name: 'Invite' }).getAttribute('href'))!);
+  expect(ghazi).toContain('مرحبًا Ghazi'); // Jordan: Arabic
+  for (const name of ['Invite to a session', 'WhatsApp', 'Call', 'Copy message', 'New booking', 'Open account']) await expect(farah.getByRole(name === 'WhatsApp' || name === 'Call' ? 'link' : 'button', { name, exact: true })).toBeVisible();
+  // Ghazi has not agreed to news: said on his row
+  await expect(box.locator('.nn-item').filter({ hasText: 'Ghazi Jordan' })).toContainText('Not agreed to news');
+  await expect(farah).not.toContainText('Not agreed to news');
+  // invited (the click's own handler; the WhatsApp tab itself is not opened here)
+  const writes: unknown[] = [];
+  page.on('request', (r) => { if (['POST', 'PATCH'].includes(r.method()) && /staff_options/.test(r.url())) writes.push(r.postDataJSON()); });
+  await page.evaluate(`_nnInvited('k6','whatsapp')`);
+  await expect.poll(() => writes.length).toBeGreaterThan(0);
+  expect(JSON.stringify(writes[0])).toContain('natnew_inv');
+  await expect(farah.locator('.nn-chip-on')).toContainText('Invited');
+  await expect(farah.getByRole('link', { name: 'Invite again' })).toBeVisible();
+  // the Invited filter
+  await box.locator('#natnew-inv').selectOption('no');
   await expect(box.locator('.natnew-row')).toHaveCount(1);
-  await page.evaluate(`setCommTab('tags');setCommTab('overview')`); // stays open across People views (it shows on the overview)
-  await expect(page.locator('#tab-community .natnew-row')).toHaveCount(1);
-  await page.locator('#tab-community .natnew-box').getByRole('button', { name: 'Hide list' }).click();
-  await expect(page.locator('#tab-community .natnew-box.natnew-min')).toBeVisible();
+  await expect(box).toContainText('Ghazi Jordan');
+  await box.locator('#natnew-inv').selectOption('yes');
+  await expect(box.locator('.natnew-row')).toHaveCount(1);
+  await expect(box).toContainText('Farah India');
+  // Message all opens the group dialog with the list as filtered
+  await box.getByRole('button', { name: 'Message all (1)' }).click();
+  await expect(page.locator('#confirm-modal').getByRole('button', { name: 'Marketing' })).toHaveAttribute('aria-pressed', 'true');
+  expect(await page.evaluate(`[S._seg.ids,S._seg.tab,S._seg.kind]`)).toEqual([['k6'], 'msg', 'news']);
+});
+
+test('the nationalities nobody holds yet are listed under it', async ({ page }) => {
+  await openSec(page);
+  const none = sec(page).locator('.nn-none');
+  await none.locator('summary').click();
+  await expect(none.locator('.nn-nat').filter({ hasText: /^Brazil$/ })).toHaveCount(1);
+  await expect(none.locator('.nn-nat').filter({ hasText: /^India$/ })).toHaveCount(0);
 });
 
 test('a member from that nationality joining takes its customers off the list', async ({ page }) => {
   await open(page);
-  await page.evaluate(`S.customerTags=[...S.customerTags,{customer_id:'k6',tag_id:'tag_saturday',added_at:Date.now(),expires_at:null,starts_at:null}];renderCommunity()`);
-  const box = page.locator('#tab-community .natnew-box');
+  await page.evaluate(`S.customerTags=[...S.customerTags,{customer_id:'k6',tag_id:'tag_saturday',added_at:Date.now(),expires_at:null,starts_at:null}];setCommTab('nationalities')`);
+  const box = sec(page);
   await expect(box.locator('.natnew-row')).toHaveCount(1);
   await expect(box).not.toContainText('Farah India');
 });
@@ -102,11 +142,11 @@ test('the bell has a kind for it, with a line per customer', async ({ page }) =>
 
 // The owner, 2026-10-09: "add filters and search bar and sorting and customizability" to the box.
 test('the box can be searched, filtered, sorted and laid out', async ({ page }) => {
-  await open(page);
+  await openSec(page);
   await page.evaluate(`localStorage.removeItem('cq_natnew_view');S._nn=null;S.customers=[...S.customers,
     {id:'k10',name:'Zara Brazil',email:'zara@example.test',phone:'+966500000010',nationality:'Brazil',gender:'female',created_at:new Date(Date.now()-2*864e5).toISOString()},
     {id:'k11',name:'Amir Brazil',email:'amir@example.test',nationality:'Brazil',gender:'male',created_at:'2026-07-01T10:00:00Z'}];renderCommunity()`);
-  const box = page.locator('#tab-community .natnew-box');
+  const box = sec(page);
   const names = () => box.locator('.natnew-row .natnew-name').allTextContents();
   await expect(box.locator('.natnew-row')).toHaveCount(4);
   await expect(box.locator('.natnew-count')).toHaveText('4 of 4 customers');
@@ -149,9 +189,9 @@ test('the box can be searched, filtered, sorted and laid out', async ({ page }) 
 });
 
 test('Show more lists the rest past the chosen number', async ({ page }) => {
-  await open(page);
+  await openSec(page);
   await page.evaluate(`localStorage.setItem('cq_natnew_view',JSON.stringify({show:12}));S._nn=null;S.customers=[...S.customers,...Array.from({length:14},(_,i)=>({id:'b'+i,name:'Brazil '+i,email:'b'+i+'@example.test',nationality:'Brazil',created_at:'2026-08-0'+(1+i%9)+'T10:00:00Z'}))];renderCommunity()`);
-  const box = page.locator('#tab-community .natnew-box');
+  const box = sec(page);
   await expect(box.locator('.natnew-row')).toHaveCount(12);
   await box.getByRole('button', { name: 'Show 4 more' }).click();
   await expect(box.locator('.natnew-row')).toHaveCount(16);

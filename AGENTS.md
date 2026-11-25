@@ -2808,6 +2808,21 @@ management dashboard page"); on 2026-11-06 the user asked to merge them and make
   ids in `staff_options` `dup_ok`. The merge dialog says what the kept account takes. Undoing a merge asks and takes the PIN.
 - `tests/people-review.spec.ts`.
 
+### People > New nationalities (2026-11-25, no migration)
+The user: "on new nationalities/nationalities we don't have, add an invite button and include all buttons that can be added,
+make it as a new section in people page". The customers from a nationality no community member holds (`_natNewRows`).
+- **A group of its own** (`PPL_GROUPS` 'nationalities', `/people/nationalities`, `_pplNat` in the `peoplemore` part); the
+  group's pill counts the new ones since Got it (`_nnFreshN`). The overview keeps only a bar while someone new waits (Show
+  list, Got it: `_natNewBox`); the bell's `natnew` line opens the section. The search, filters, sort and layout are the
+  box's as before (`_nnToolbar`, `cq_natnew_view`), plus an Invited filter (`S._nn.inv`).
+- **Each person** (`_nnActs`): Invite (a WhatsApp chat with `NN_INV_MSG` in the language their nationality suggests,
+  `REM_NAT_LANG`, linking micromobility.sa/community/registration?lang=; with no number it copies the message), Invite to
+  a session (`_ivtOpen`), WhatsApp, Call, Copy message, Follow up, New booking, Open account, and Not invited once invited.
+  Invited is staff_options `natnew_inv` ({id, by, at}, any staffer, `_optMerge`) plus an Action Log line; a rider who has
+  not agreed to news is marked on the row. Message all opens the group dialog (`openSegmentActions`) on Message, as news.
+- Tiles: to invite, invited, nationalities with no member, nationalities with nobody yet; the last listed under the list.
+  `tests/nationality-new-alert.spec.ts`.
+
 ### The People round (2026-11-18, migration 20261118210000)
 The user's picks from a list of new People features ("2 3 5 6 7 8"). All in People's part (`_prd*`, listed in
 `_n6pAhLoad`), except the last bike, which is desk code. Strings start with `prd` (and `afu` for follow-ups).

@@ -8315,6 +8315,23 @@ body.view-staff .natnew-min{padding:10px 14px;border-width:1px;}
 body.view-staff .natnew-min .natnew-head{align-items:center;flex-wrap:wrap;gap:8px 12px;}
 body.view-staff .natnew-min .natnew-head svg{margin-top:0;}
 body.view-staff .natnew-min h3{flex:1 1 200px;font-size:var(--sf-fs-lg);}
+/* People > New nationalities (2026-11-25): each person a card, the row that opens the account and its buttons under it */
+body.view-staff .nn-sec{margin-top:0;}
+body.view-staff .nn-sec .natnew-list{grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));}
+body.view-staff .nn-item{display:flex;flex-direction:column;gap:8px;padding:8px;border:1px solid var(--sf-line,var(--border));border-radius:var(--sf-r-card);background:var(--sf-card,var(--card));}
+body.view-staff .nn-item .natnew-row{border:0;padding:4px 6px;min-height:40px;background:none;}
+body.view-staff .nn-acts{display:flex;flex-wrap:wrap;gap:6px;}
+body.view-staff .nn-acts .n6p-act{min-height:36px;display:inline-flex;align-items:center;gap:4px;text-decoration:none;}
+body.view-staff .nn-chip{flex-basis:100%;font-size:var(--sf-fs-xs);font-weight:600;color:var(--muted);}
+body.view-staff .nn-chip-on{color:var(--green,var(--blue));}
+body.view-staff .nn-kpis{margin-top:14px;}
+body.view-staff .nn-bulk{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;}
+body.view-staff .nn-bulk button{min-height:40px;display:inline-flex;align-items:center;gap:6px;}
+body.view-staff .nn-none{margin-top:16px;}
+body.view-staff .nn-none summary{cursor:pointer;font-weight:600;min-height:40px;display:flex;align-items:center;}
+body.view-staff .nn-none-l{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+body.view-staff .nn-nat{padding:4px 10px;border:1px solid var(--sf-line,var(--border));border-radius:999px;font-size:var(--sf-fs-sm);}
+body.view-staff .natnew-min .natnew-head .btn-primary,body.view-staff .natnew-min .natnew-head .btn-secondary{min-height:40px;}
 body.view-staff .dash-row{display:flex;align-items:center;gap:10px;width:100%;padding:10px 4px;border:0;border-bottom:1px solid var(--sf-line2);background:none;font:inherit;color:var(--text);text-align:start;cursor:pointer;min-height:44px;}
 body.view-staff .dash-row:last-child{border-bottom:0;}
 body.view-staff .dash-row-main{flex:1;min-width:0;display:flex;flex-direction:column;font-size:var(--sf-fs-sm);}
