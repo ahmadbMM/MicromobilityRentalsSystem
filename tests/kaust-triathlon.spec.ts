@@ -137,6 +137,9 @@ test.describe('@customer:ktri KAUST Triathlon open to everyone', () => {
     await expect(page.locator('#tab-register .kt-know')).not.toContainText('Sharafeyah branch');
     await page.locator('#tab-register .kt-bk[data-bike="rent"]').click();
     await expect(page.locator('#tab-register .kt-know')).toContainText('Sharafeyah branch');
+    // Road Carbon is rented too, at its own price (the user, 2026-11-25: "in kaust triathlon bike rentals include road carbon option")
+    await expect(page.locator('#tab-register .kt-types .toggle-btn[data-ty="Road Carbon"]')).toContainText('250');
+    expect(await page.evaluate(`_noCarbon(allSessions().find(x=>x.id==='${KT}'))`)).toBe(false);
     await page.locator('#tab-register .kt-types .toggle-btn[data-ty="Road"]').click();
     await page.locator('#kt-h').fill('178');
     await page.locator('#kt-must').check();

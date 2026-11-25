@@ -6289,7 +6289,7 @@ const CUST_TYPES=['Any','Road','Hybrid','Mountain','Kids','Road Carbon','Own'];
 // has no carbon row, so an employee on carbon pays 250 too). The circuit keeps them as ever.
 // The database holds the same rule in _comm_no_carbon (20260921210000).
 function bikeTypeOpts(allowOwn,noCarbon){return CUST_TYPES.filter(ty=>(ty!=='Own'||allowOwn)&&(ty!=='Road Carbon'||!noCarbon));}
-function _noCarbon(s){return _isCommunity(s)&&_rideKind(s)!=='petromin';}
+function _noCarbon(s){return _isCommunity(s)&&!['petromin','ktri'].includes(_rideKind(s));} // the KAUST Triathlon rents Road Carbon too (the user, 2026-11-25: "in kaust triathlon bike rentals include road carbon option"; _comm_no_carbon 20261125120000)
 // A bike type staff closed on this session (sessions.closed_types): the session stays open and riders book its other
 // types (the owner, 2026-11-03: "add an option to close a specific bike type for reservation instead of closing the
 // whole session"). The database holds the same rule in _type_closed_guard (20261103210000).
@@ -13877,8 +13877,8 @@ function _ktRaceOptsHtml(cur,set,arg){
     </button>`;}).join('');
 }
 // The bike for the race (the user, 2026-11-22: "ask them if they need a bike or if they are a bike owner if not dont take them
-// through the bike renting process"): a race with a bike leg asks rent or own; renting picks a type (the app's own, no Road
-// Carbon on a community date) and the height that sizes it, paid at the Sharafeyah branch at the type's usual price when the
+// through the bike renting process"): a race with a bike leg asks rent or own; renting picks a type (the app's own, Road
+// Carbon included since 2026-11-25) and the height that sizes it, paid at the Sharafeyah branch at the type's usual price when the
 // bike is collected (the user's pick: normal rental prices; the booking itself stays free). Future Champs is a run: no bike.
 function _ktBikeAsk(){return _ktRaceOk(S.regTriRace)&&S.regTriRace!=='champs';}
 function _ktBikeSet(v){S.regKtBike=v==='rent'?'rent':'own';renderRegister();}
@@ -13886,7 +13886,7 @@ function _ktTypeSet(ty){S.regKtType=ty;renderRegister();}
 function _ktHSet(v){S.regKtH=String(v||'').replace(/[^0-9]/g,'').slice(0,3);}
 function _ktMustSet(v){S.regKtMust=!!v;}
 function _ktHOk(){const h=Number(S.regKtH);return h>=100&&h<=250;}
-function _ktTypes(){return bikeTypeOpts(false,true).filter(ty=>ty!=='Any'&&ty!=='Own');}
+function _ktTypes(){return bikeTypeOpts(false,false).filter(ty=>ty!=='Any'&&ty!=='Own');}
 // What the booking's row carries: the type picked, Own, or None (no bike leg), with the height and its size when renting.
 function _ktBikeOf(){
   if(!_ktBikeAsk())return{type:'None',h:null,size:''};
