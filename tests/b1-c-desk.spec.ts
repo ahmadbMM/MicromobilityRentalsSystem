@@ -338,9 +338,11 @@ test.describe('@staff:bookings b1-c fares (2026-10-28)', () => {
     await expect(m.locator('#wi-name')).toBeVisible();
     await expect(m.locator('#wi-type-grp, [data-wi-type]')).toHaveCount(0);
     await m.locator('#wi-name').fill('Seat Holder');
-    await m.getByRole('button', { name: /\+ Add rider/ }).click();
+    await expect(m.locator('#wi-height')).toHaveCount(0); // no height without bikes (the owner, 2026-11-27)
+    await m.getByRole('button', { name: /\+ Add participant/ }).click();
     await expect(m.locator('#wi-r-name-0')).toBeVisible();
     await expect(m.locator('#wi-r-type-0')).toHaveCount(0);
+    await expect(m.locator('#wi-r-h-0')).toHaveCount(0);
     await page.evaluate('saveWalkin()');
     await expect.poll(() => rows.length).toBe(2);
     expect(rows.map((r) => r.type_preference)).toEqual(['None', 'None']);

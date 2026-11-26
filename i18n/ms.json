@@ -11463,5 +11463,19 @@
   "evWedName": "Kayuhan Komuniti Rabu",
   "snWed": "Rabu",
   "infoDtWed": "Kayuhan petang untuk ahli komuniti. Kita berkumpul pada {gather} di tempat permulaan Kayuhan Sosial Sabtu dan bertolak pada {start}. Tiada jarak atau laluan yang ditetapkan. Sewa basikal pada harga biasa, dibayar di kaunter; bawa basikal sendiri dan kayuh secara percuma. Setiap basikal disertakan topi keledar.",
-  "sessEventWedHint": "Kayuhan Rabu petang untuk ahli komuniti: siapa cepat dia dapat, tanpa kelulusan, sewa basikal pada harga biasa dibayar di kaunter (basikal sendiri percuma), berkumpul di tempat permulaan kayuhan Sabtu. Tiada had tempat."
+  "sessEventWedHint": "Kayuhan Rabu petang untuk ahli komuniti: siapa cepat dia dapat, tanpa kelulusan, sewa basikal pada harga biasa dibayar di kaunter (basikal sendiri percuma), berkumpul di tempat permulaan kayuhan Sabtu. Tiada had tempat.",
+  "closeOutBodyNc": "{0} peserta yang telah mendaftar masuk akan ditandakan Selesai dan {1} yang tidak pernah tiba akan ditandakan Tidak hadir. Peserta dalam senarai menunggu tidak disentuh.",
+  "coXMayArriveNc": "{0} peserta mungkin masih akan tiba.",
+  "coXAskTitleNc": "Peserta belum selesai",
+  "coXAskBodyNc": "{0} peserta masih belum selesai pada malam ini. Tutup hanya mengubah status; Tutup operasi menyelesaikan urusan mereka.",
+  "ciStepOfNc": "Peserta {0} daripada {1}",
+  "scanDoneNc": "#{0} {1} telah pun menamatkan sesi ini.",
+  "lfbTitleNc": "Lawatan terakhir",
+  "dashInNow": "Sudah daftar masuk",
+  "dashDoneTodayNc": "Selesai hari ini",
+  "dashBookedTodayNc": "Tempahan hari ini",
+  "beAddPersonBtn": "Tambah peserta",
+  "sntPhNc": "Contohnya: loker 4 dan 9 tersekat; sistem bunyi lewat tiba",
+  "scanExpressPartyNc": "✓ {0} peserta telah daftar masuk",
+  "ciAddScanHintNc": "Imbas tiket setiap peserta yang daftar masuk bersama #{0} {1}."
 }

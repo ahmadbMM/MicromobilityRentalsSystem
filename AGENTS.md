@@ -5436,3 +5436,25 @@ after 30 minutes on the TV); a bike on the booking also clears it, for when the 
   four `TV_*` secrets, else each build is debug-signed and will not install over the last. `android-tv/README.md` has the
   install steps for staff. Start on boot works on Fire OS 7 (Android 9); newer Android may need the app opened by hand.
 - Spec: `tests/collection.spec.ts`.
+
+## No bikes at check-in and check-out on a session without bikes (2026-11-27, no migration)
+The owner: "change all non bike related to not include anything related to bikes especially when checking in and out".
+A session without bikes is `_noCycle(s)` / `_ncEntry(e)` (KIND_TRAITS bike:false). Answers: Checked in (`tkStIn`)
+instead of On bike; no height and no size; "participants" instead of riders. Spec: `tests/non-bike-checkin.spec.ts`.
+- **Status word** `_stKey(e, st)` (beside STATUS_KEY): `tkStIn` for an active booking on such a session. Used by
+  `statusBadgeFor` (was blood only), the party row and card, the session's riders list, exports and prints, global
+  search, `_partyCountsLine` (`_nPeople` for the count), the booking card, reports (`_noCycle(sess)` beside `_run`).
+  `_ncQ()` (the roster shows one such session) names the Live count's and the status filter's figure.
+- **The two-hour bike rule** (overdue banner, the amber timer, the bell's Rides past 2 hours, My shift's Out too long)
+  counts bike sessions only.
+- **Check-in drawer**: `_hBadge` drops the height, size, type and Last bike (`_prdLastCi`) row; the NFC receipt is off;
+  a bike tag or sticker scanned while such a check-in is open is not routed into it (`_bikeArrived`, `_ciReceiveBike`);
+  Last ride is Last visit with no bike score (`lfbTitleNc`); party step "Participant n of m" (`ciStepOfNc`).
+- **Scanner**: details list names only (`nc` on `_scanDetailsOf` rows); `scanDoneNc`, `scanExpressPartyNc`,
+  `ciAddScanHintNc`; the add-booking search shows no bike type. **Door** card: no height, size or type.
+- **Walk-in form**: no height fields, "Add participant" (`beAddPersonBtn`) when the session has no bikes.
+- **Close-out**: `closeOutBodyNc` (S._coXC.nc), `coXMayArriveNc`, `coXAskTitleNc` / `coXAskBodyNc`; night notes
+  placeholder `sntPhNc`. Dashboard: `dashInNow`, `dashDoneTodayNc`, `dashBookedTodayNc` when any of today's sessions
+  has no bikes. Checklists and crew roles were already gated (`CK_BIKE`, `_crwRoles`).
+- Not changed: the Height report in Analytics, aria labels that say riders (ciPartyLabel, ciChainLabel), Hand-over
+  (off while GIVE_BIKE_STEP is false).

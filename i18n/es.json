@@ -11463,5 +11463,19 @@
   "evWedName": "Recorrido comunitario del miércoles",
   "snWed": "Miércoles",
   "infoDtWed": "Un recorrido nocturno para los miembros de la comunidad. Nos reunimos a las {gather} en el punto de salida del recorrido social del sábado y salimos a las {start}. Sin distancia ni ruta fijas. Alquiler de bicicleta a la tarifa habitual, que se paga en el mostrador; trae tu propia bicicleta y rueda gratis. Cada bicicleta incluye casco.",
-  "sessEventWedHint": "Recorrido del miércoles por la noche para miembros de la comunidad: por orden de llegada, sin aprobación, alquiler de bicicleta a la tarifa habitual pagado en el mostrador (bicicleta propia gratis), punto de encuentro en la salida del recorrido del sábado. Sin límite de plazas."
+  "sessEventWedHint": "Recorrido del miércoles por la noche para miembros de la comunidad: por orden de llegada, sin aprobación, alquiler de bicicleta a la tarifa habitual pagado en el mostrador (bicicleta propia gratis), punto de encuentro en la salida del recorrido del sábado. Sin límite de plazas.",
+  "closeOutBodyNc": "{0} participante(s) registrado(s) se marcarán como Completado y {1} que nunca llegaron como No se presentó. Los de la lista de espera no se tocan.",
+  "coXMayArriveNc": "{0} participante(s) aún pueden llegar.",
+  "coXAskTitleNc": "Reservas aún abiertas",
+  "coXAskBodyNc": "{0} reservas siguen abiertas en esta noche. Cerrar solo cambia el estado; Cerrar la noche las resuelve.",
+  "ciStepOfNc": "Participante {0} de {1}",
+  "scanDoneNc": "N.º{0} {1} ya terminó esta sesión.",
+  "lfbTitleNc": "Última visita",
+  "dashInNow": "Registrados ahora",
+  "dashDoneTodayNc": "Terminados hoy",
+  "dashBookedTodayNc": "Reservas de hoy",
+  "beAddPersonBtn": "Añadir participante",
+  "sntPhNc": "Por ejemplo: taquillas 4 y 9 atascadas; el equipo de sonido llegó tarde",
+  "scanExpressPartyNc": "✓ {0} participantes registrados",
+  "ciAddScanHintNc": "Escanea la entrada de cada participante que se registra con #{0} {1}."
 }

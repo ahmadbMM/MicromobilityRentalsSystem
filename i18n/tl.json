@@ -11463,5 +11463,19 @@
   "evWedName": "Community Ride tuwing Miyerkules",
   "snWed": "Miyerkules",
   "infoDtWed": "Isang ride sa gabi para sa mga miyembro ng komunidad. Magkikita tayo nang {gather} sa simula ng Saturday Social Ride at aalis nang {start}. Walang takdang distansya o ruta. Ang renta ng bisikleta ay sa karaniwang presyo, babayaran sa desk; magdala ng sariling bisikleta at sumakay nang libre. May kasamang helmet ang bawat bisikleta.",
-  "sessEventWedHint": "Ride sa Miyerkules ng gabi para sa mga miyembro ng komunidad: unang dumating, unang mapagsisilbihan, walang approval, renta ng bisikleta sa karaniwang presyo na babayaran sa desk (libre ang sariling bisikleta), tagpuan sa simula ng Saturday ride. Walang limitasyon sa puwesto."
+  "sessEventWedHint": "Ride sa Miyerkules ng gabi para sa mga miyembro ng komunidad: unang dumating, unang mapagsisilbihan, walang approval, renta ng bisikleta sa karaniwang presyo na babayaran sa desk (libre ang sariling bisikleta), tagpuan sa simula ng Saturday ride. Walang limitasyon sa puwesto.",
+  "closeOutBodyNc": "{0} naka-check in na kalahok ang mamarkahang Tapos na at {1} na hindi dumating ang mamarkahang Hindi Dumating. Hindi magagalaw ang mga kalahok sa waitlist.",
+  "coXMayArriveNc": "{0} kalahok ang maaari pang dumating.",
+  "coXAskTitleNc": "Mga booking na bukas pa",
+  "coXAskBodyNc": "{0} booking ang bukas pa sa gabing ito. Status lang ang binabago ng Isara; ang I-close out ang nag-aayos sa kanila.",
+  "ciStepOfNc": "Kalahok {0} sa {1}",
+  "scanDoneNc": "Natapos na ni #{0} {1} ang session na ito.",
+  "lfbTitleNc": "Huling pagbisita",
+  "dashInNow": "Naka-check in ngayon",
+  "dashDoneTodayNc": "Tapos ngayon",
+  "dashBookedTodayNc": "Mga booking ngayon",
+  "beAddPersonBtn": "Magdagdag ng kalahok",
+  "sntPhNc": "Halimbawa: naipit ang locker 4 at 9; nahuli ang sound system",
+  "scanExpressPartyNc": "✓ {0} kalahok ang naka-check in",
+  "ciAddScanHintNc": "I-scan ang ticket ng bawat kalahok na nagche-check in kasama ni #{0} {1}."
 }

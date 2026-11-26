@@ -136,7 +136,7 @@ test.describe('@staff:bookings b1-a close out settles the night correctly', () =
     await page.evaluate(`setStaffRole('frontdesk');closeOutSession('${EV}')`);
     await page.locator('#desk-sheet .ck-go').click(); // the close-night checklist comes first (D10, 2026-11-11)
     const box = page.locator('#confirm-modal .confirm-box');
-    await expect(box.locator('.co-x-early')).toHaveText('This session ends at 11 PM. 2 rider(s) may still arrive.');
+    await expect(box.locator('.co-x-early')).toHaveText('This session ends at 11 PM. 2 participant(s) may still arrive.');
     await expect(box.locator('.co-x-paid .co-x-row')).toHaveCount(1);
     await expect(box.locator('.co-x-paid')).toContainText('#1 Rider P');
     await expect(box.locator('.co-x-paid')).toContainText('They came');   // a session without bikes never says rode
