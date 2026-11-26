@@ -574,6 +574,18 @@ Doctor and PIF": bookings, beside the account name, band, filters, Reports; not 
 `wd` is a word drawn on the chip: it is a mark like the HR letters, so it stays in English in every language
 (`_proFace`); the names (`rcbLabel` / `cubLabel`) follow the language. tests/raw-carbon-custom-bike-tags.spec.ts.
 
+## The Banker tag (2026-11-26, migration 20261126150000)
+
+`tags` row `tag_banker` (slug `banker`, name "Banker": anyone who works in banking or finance); locked, never
+auto-granted, staff-only. The user's picks on their pick page: a bank drawn in lines (`_PRO_SVG.bnk`) on bank green
+`#14532d` (a faint chip edge and a lighter band `#40a066` on the dark theme), shown as Doctor and PIF are (`acct`, `nt`,
+`np`). Like PIF it may carry where the holder works in `customer_tags.note`: a bank from `BANK_COS`, one typed under
+Other, or none. The PIF company code is now shared by any `PRO_TAGS` row with `cos` (its list) and `ck` (its word
+prefix: `pifCoLabel`, `bnkCoLabel`, ...): `_proCoTag`, `_proCo`, `_proCoState`, `_proCoPick`, `_proCoOpts`,
+`_proCoRepHtml/Csv`; `_pifCo(cid)` and `_pifCoEdit(cid, tid)` keep their names, and the picker keeps the ids `#pif-co` /
+`#pif-co-other` for both tags. The `(pif|bnk)Co*` keys are built from `ck`, so they are listed in DYNAMIC_KEYS
+(scripts/split-staff.mjs); a new tag with a company list adds its prefix there. tests/banker-tag.spec.ts.
+
 ## Tapping a tag shows its name and description (2026-11-18)
 
 The user: "make clicking on a tag from staff shows the name and description of it". `_tagTap(id)` adds

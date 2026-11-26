@@ -347,6 +347,7 @@ export const DYNAMIC_KEYS = [
   /^ev[A-Z]\w*Name$/, // evJccName, evSatName, ...: NS_EV_NAME and the ride-kind fallbacks name them, some by ride kind at runtime
   /^bdg?[A-Z0-9]\w*[DA]$/, // bdFirstLapD, bdgMarshalA, ...: a badge's how-to and about lines, read as t(BD_SYS[slug][2]+'D'|'A')
   /^\w+_(zero|one|two|few|many|other)$/, // mrRides_one, ...: a count's plural forms, read by _tn(base, n) through Intl.PluralRules
+  /^(pif|bnk)Co[A-Z]\w*$/, // pifCoLabel, bnkCoNone, ...: a work tag's company words, read as t(p.ck+'CoLabel') (PRO_TAGS ck, 2026-11-26)
   /^pii(Via|Fld)_\w+$/, // piiVia_reveal, piiFld_phone: the core's look log (_piiLog, _piiExport) names them by the way and the field
 ];
 /**
