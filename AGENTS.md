@@ -2982,6 +2982,16 @@ the whole list. Every card also scanned all accounts up to four times (`_caAcct`
 - `fmtStamp` and `_bdDate` keep one `Intl.DateTimeFormat` per language (and shape): `toLocaleString` with options
   builds a new formatter on every call, which a list pays per row.
 
+## A Customer button on every application (2026-11-27)
+
+The user: "add a customer button on all applications that can do anything to a customer account", then "adding tags is
+included". `_appCustBtn(id)` (desk core, beside `openAccountHistory`) draws **Customer** (`custBtn`, an existing word) on
+every application card whose account is known, and opens the account window: its bar and More hold every action on the
+account (edit, tags, wallet, badges, a new booking, follow-up, flag, merge). A card with no account (a pending applicant
+who has none yet) has no button. The cards: community (`_caRow`) and learn to ride (`_laRow`) applications, volunteer
+applications (`_vaRow`), ambassadors (`_ambRow`), badge requests (`_bdrStRow`) and mentorship requests (`_mtsCard`). A
+new application list calls it in its actions row. `tests/application-customer-button.spec.ts`.
+
 ## Bookings in colour (2026-10-05)
 
 The owner: "make the session cards in the bookings page in staff website themed the same way they are themed in

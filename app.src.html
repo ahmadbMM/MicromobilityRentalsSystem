@@ -12865,7 +12865,7 @@ function _vaRow(v){
   return`<div class="vx-app${_vaHasProfile(v)?'':' vx-app-later'}" data-cust="${esc(id)}">
     <div class="vx-app-who"><div class="vx-name">${W.asel?`<button type="button" class="am-sel vx-selc" aria-pressed="${on}" aria-label="${esc(t('amSelBtn'))} · ${esc(nm)}" data-on-click="${_on("_vaSelToggle",id)}">${on?'&#10003;':''}</button>`:''}<b>${esc(nm)}</b></div><div class="am-meta"><bdi>${c.phone?_pii('phone',c.phone,id):''}</bdi>${_vmWaIc(wa)}</div><div class="am-meta">${esc(t('zaAppliedOn').replace('{0}',_bdgDay(v.profile_at||v.applied_at||v.created_at)))}</div><div>${_vxWaitHtml(v.profile_at||v.applied_at||v.created_at)}</div></div>
     <div class="vx-facts">${f('zaAge',age!=null?esc(String(age)):'–')}${f('zwDays',Array.isArray(v.days)&&v.days.length?esc(v.days.map(_n6wDay).join(' ')):'–')}${f('zvShirt',esc(v.shirt||'–'))}${f('zaRides',esc(String(rides)))}${f('zaNoShows',esc(String(ns)))}${v.skills?f('zwSkills',`<bdi>${esc(v.skills)}</bdi>`):''}${_vxMot(v)?f('zvMotive',esc(_vxMot(v))):''}</div>
-    <div class="vx-app-acts">${b('btn-green','active',false,t('zaApprove'))}${b('btn-secondary','active',true,t('zaTrust'))}${b('btn-muted','removed',false,t('zvDecline'))}</div>
+    <div class="vx-app-acts">${b('btn-green','active',false,t('zaApprove'))}${b('btn-secondary','active',true,t('zaTrust'))}${b('btn-muted','removed',false,t('zvDecline'))}${_appCustBtn(id)}</div>
   </div>`;
 }
 function _vaHtml(){
@@ -42342,7 +42342,7 @@ function _caRow(a){
     ${_caChecks(a,acct,age)}
     ${a.status==='pending'?_caRuleChips(a):''}
     ${_scCardHtml('community_app',a.id)}
-    <div class="ca-actions">${actions}${a.status==='pending'?'':fixBtns}${_apContact(a)}${_apHideBtn('ca',a)}</div>
+    <div class="ca-actions">${actions}${_appCustBtn(acct&&acct.id)}${a.status==='pending'?'':fixBtns}${_apContact(a)}${_apHideBtn('ca',a)}</div>
   </div>`;
 }
 // ── Applications, made the admins' own (the owner, 2026-10-07: "add more customization in it": views and bulk
@@ -44094,7 +44094,7 @@ function _laRow(a){
     ${acct&&_apSpOn('la')?_spLine(acct.id):''}
     ${sx.length?`<div class="ca-sx">${esc(t('sxFilterBtn'))}: ${sx.map(s=>esc(_sxText(s))).join(' · ')}</div>`:''}
     ${_scCardHtml('learn_app',a.id)}
-    <div class="ca-actions">${actions}${open?'':fix}${_apContact(a)}${_apHideBtn('la',a)}</div>
+    <div class="ca-actions">${actions}${_appCustBtn(acct&&acct.id)}${open?'':fix}${_apContact(a)}${_apHideBtn('la',a)}</div>
   </div>`;
 }
 // Handlers of the markup below.
@@ -67354,6 +67354,10 @@ async function _ahFetchOlder(custId){
     if(S._ah&&String(S._ah.custId)===String(custId))_ahRender();
   }catch(_){}
 }
+// The Customer button on every application card (the user, 2026-11-27: "add a customer button on all applications that can
+// do anything to a customer account", "adding tags is included"): it opens the account window, whose bar and More hold
+// every action on the account (edit, tags, wallet, badges, a booking, follow-up, flag, merge). Nothing when no account.
+function _appCustBtn(id){return id?`<button type="button" class="btn-sm btn-secondary app-cust-btn" data-on-click="${_on("openAccountHistory",String(id))}">${_artIcon('person',13)} ${esc(t('custBtn'))}</button>`:'';}
 // tab: the part it opens on (_ahTab); the "Bookings & history" buttons open it on the rides.
 function openAccountHistory(custId,fromEditor,tab){
   if(!custId)return;
@@ -71249,7 +71253,7 @@ function _ambRow(a){
     </div>
     ${redHtml}
     ${a.staff_notes?`<div class="ws-line ws-staff-note"><span>${t('wsLblStaffNotes')}</span>${esc(a.staff_notes)}</div>`:''}
-    <div class="ca-actions">${flow}${B('amb-notes','smNotesBtn',['_ambNotes',id])}</div>
+    <div class="ca-actions">${flow}${_appCustBtn(acct&&acct.id)}${B('amb-notes','smNotesBtn',['_ambNotes',id])}</div>
   </div>`;
 }
 function _ambShown(){
@@ -80375,7 +80379,7 @@ function _bdrStRow(r){
     <div class="bdr-side">${pf}${p?'':hide}</div></div>
     ${p?`<div class="bdr-dec">
       <div class="form-group"><label for="bdr-n-${esc(String(r.id))}">${t('bdgNoteLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><input id="bdr-n-${esc(String(r.id))}" type="text" maxlength="140" value="${esc((S._bdrNote||{})[r.id]||'')}" placeholder="${esc(t('bdrStNotePh'))}" data-on-input="${_on("_bdrNoteIn",r.id,_EL)}"></div>
-      <div class="bdr-acts">${_bdgCanGive(b)?`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_bdrGive",r.id)}">${t(held?'bdrStClose':'bdgGiveBtn')}</button>`:''}<button type="button" class="btn-sm ${sure?'btn-red':'btn-secondary'}" data-on-click="${_on("_bdrDecline",r.id)}">${t(sure?'bdrStDeclineSure':'bdrStDecline')}</button>${hide}</div>
+      <div class="bdr-acts">${_bdgCanGive(b)?`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_bdrGive",r.id)}">${t(held?'bdrStClose':'bdgGiveBtn')}</button>`:''}<button type="button" class="btn-sm ${sure?'btn-red':'btn-secondary'}" data-on-click="${_on("_bdrDecline",r.id)}">${t(sure?'bdrStDeclineSure':'bdrStDecline')}</button>${_appCustBtn(c&&c.id)}${hide}</div>
     </div>`:''}
   </div>`;
 }
@@ -81582,7 +81586,7 @@ function _mtsCard(p,O,K,warn){
     <div class="mts-who"><span class="mts-k">${t('mtsStudent')}</span>${_mtsPerson(p.customer_id)}${pref?` <span class="mts-pref">${esc(pref)}</span>`:''}</div>
     ${notMember?`<div class="mts-warn">${esc(t('mtsNotMember'))}</div>`:''}
     ${p.staff_note?`<div class="mts-text am-meta">${esc(p.staff_note)}</div>`:''}
-    <div class="cmy-am-tacts">${acts.join('')}</div>
+    <div class="cmy-am-tacts">${acts.join('')}${_appCustBtn(_custById(p.customer_id)&&p.customer_id)}</div>
     <div class="mts-offers"><div class="mts-k">${esc(t('mtsOffersN').replace('{0}',live.length))}</div>${live.map(o=>_mtsOffer(p,o,K)).join('')}
       ${past.length?`<details class="mts-past"><summary>${esc(t('mtsPastN').replace('{0}',past.length))}</summary>${past.map(o=>_mtsOffer(p,o,K)).join('')}</details>`:''}</div></div>`;
 }
