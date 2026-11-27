@@ -40807,7 +40807,7 @@ function showCommAddModal(group){
   else if(!S._caSess||!sess.find(s=>s.id===S._caSess))S._caSess=_sessFirstLive(sess).id;
   S._caDest=S._caDest||'list';
   S._caOwn=false;S._caRg=null;S._caKm=null;
-  S._caSel=null;S._caSelArr=[];
+  S._caSel=null;S._caSelArr=[];S._caTag='';
   renderCommAddModal();
 }
 function _caToggleSel(id){
@@ -40823,12 +40823,25 @@ function _on_caSess(v){S._caSess=v;renderCommAddModal();}
 function _on_caDest(d){S._caDest=d;renderCommAddModal();}
 function _on_caOwn(v){S._caOwn=v;}
 function _caRgSet(g){S._caRg=g;renderCommAddModal();}
+// The Tag filter (the user, 2026-11-27: "in add rider modal, add a tag filter to show all accounts under a specific tag"):
+// a tag picked lists every account holding it now (an active row), not the first 8 or 30; the search narrows within it.
+function _on_caTag(v){S._caTag=v||'';const w=document.getElementById('ca-rows');if(w)w.innerHTML=_caRows();}
+function _caTagSel(){
+  const tags=_tagsShown().slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
+  if(S._caTag&&!tags.some(tg=>tg.id===S._caTag))S._caTag='';
+  return '<div class="form-group cmy-mb8"><label for="ca-tag">'+t('zvFTag')+'</label>'
+    +'<select id="ca-tag" data-on-change="'+_on('_on_caTag',_P('value'))+'">'
+    +'<option value="">'+esc(t('filterAll'))+'</option>'
+    +tags.map(tg=>'<option value="'+esc(tg.id)+'"'+(tg.id===S._caTag?' selected':'')+'>'+esc(tg.name||tg.id)+'</option>').join('')
+    +'</select></div>';
+}
 function _caKmSet(k){S._caKm=_runKmOk(k)?Number(k):null;renderCommAddModal();}
 function _caRows(){
-  const q=(S._caSearch||'').trim();
+  const q=(S._caSearch||'').trim(),tag=S._caTag||'';
   const list=(S.customers||[])
+    .filter(c=>!tag||_ctRowsFor(c.id).some(ct=>ct.tag_id===tag&&_tagActive(ct)))
     .filter(c=>!q||_dkXAcctHit(c,q)) // folded, as every staff search (the staff review, 2026-10-28)
-    .slice(0,q?30:8);
+    .slice(0,tag?Infinity:q?30:8);
   const satTag=(S.tags||[]).find(tg=>tg.id==='tag_saturday');
   const sess=_sessGet(S._caSess);
   return list.map(c=>{
@@ -40889,6 +40902,7 @@ function renderCommAddModal(){
     +(_ownOk?('<label class="cmy-ca-own">'
     +'<input type="checkbox"'+(S._caOwn?' checked':'')+' data-on-change="'+_on('_on_caOwn',_P('checked'))+'" class="cmy-ca-own-cb">'
     +t('commAddOwnBike')+'</label>'):'') // nobody brings their own bike to a pool session
+    +_caTagSel()
     +'<div class="form-group cmy-mb8"><label for="ca-search">'+t('commAddSearchLbl')+'</label>'
     +'<input id="ca-search" type="text" value="'+esc(_q)+'" placeholder="'+esc(t('commAddSearchPh'))+'" data-on-input="'+_on('_caSearchInput',_P('value'))+'" autocomplete="off"></div>'
     +'<div id="ca-rows" class="cmy-ca-rows">'+_caRows()+'</div>'
@@ -40899,7 +40913,7 @@ function renderCommAddModal(){
     +'</div></div></div>';
   if(document.activeElement&&document.activeElement.id!=='ca-search'){const i=document.getElementById('ca-search');if(i&&S._caSearch)i.focus();}
 }
-function closeCommAddModal(){const m=document.getElementById('comm-add-modal');if(m){m.style.display='none';m.innerHTML='';}S._caSel=null;S._caSelArr=[];S._caGroup=false;S._caSearch='';}
+function closeCommAddModal(){const m=document.getElementById('comm-add-modal');if(m){m.style.display='none';m.innerHTML='';}S._caSel=null;S._caSelArr=[];S._caGroup=false;S._caSearch='';S._caTag='';}
 function saveCommAdd(){return _busyRun('commAdd',_saveCommAdd);}
 // Book accounts onto a ride as staff do by hand: the Add rider dialog, and an application approved
 // straight onto a Saturday ride. people are accounts ({id,name,email,phone,height,type_preference}).

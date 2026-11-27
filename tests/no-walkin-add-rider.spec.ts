@@ -42,6 +42,6 @@ test('Walk-in: not on the pool session, a Saturday ride or Run for Her; Add ride
   expect(wi.sort()).toEqual([NIGHT, PW, EV].sort());
   await page.evaluate(`document.getElementById('walkin-modal').style.display='none'`);
   await page.evaluate(`showCommAddModal()`);
-  const ca = await page.locator('#comm-add-modal select option').evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
+  const ca = await page.locator('#ca-sess option').evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
   expect(ca.sort()).toEqual([SAT, RUN, POOL, EV].sort());
 });

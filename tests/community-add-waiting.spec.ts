@@ -56,7 +56,7 @@ test('Final list approves at once; a ride without approval shows no destination 
   await page.evaluate(`S._caSel='c1';_saveCommAdd()`);
   await expect.poll(() => rows.length).toBe(1);
   expect(rows[0]).toMatchObject({ status: 'waiting', approval: 'approved' });
-  await page.selectOption('#comm-add-modal select', EV);
+  await page.selectOption('#ca-sess', EV);
   await expect(dest(page, 'Final list')).toHaveCount(0);
   await expect(dest(page, 'Waiting')).toHaveCount(0);
 });
