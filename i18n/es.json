@@ -11488,5 +11488,7 @@
   "bdLrSilverA": "El segundo puesto de la clasificación Ruta más larga, hombres y mujeres por separado. Pasa a quien ruede más lejos: una ruta cuenta cuando nuestro equipo introduce o aprueba su distancia.",
   "bdLrBronze": "Ruta más larga: Bronce",
   "bdLrBronzeD": "Tener la tercera ruta más larga medida entre los miembros",
-  "bdLrBronzeA": "El tercer puesto de la clasificación Ruta más larga, hombres y mujeres por separado. Pasa a quien ruede más lejos: una ruta cuenta cuando nuestro equipo introduce o aprueba su distancia."
+  "bdLrBronzeA": "El tercer puesto de la clasificación Ruta más larga, hombres y mujeres por separado. Pasa a quien ruede más lejos: una ruta cuenta cuando nuestro equipo introduce o aprueba su distancia.",
+  "anNavDistances": "Distancias",
+  "dbdAddDist": "Añadir distancia"
 }

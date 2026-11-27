@@ -4,8 +4,8 @@
 //
 // Riders: the page opened from the Community tab's Leaderboard part and from /leaderboard (a link anyone may open, signed
 // in or not). Four boards (Longest ride, This month, Lifetime, This year), men and women apart; only members are ranked,
-// and a row shows a name only for a rider who switched it on (customers.board_public; "Member" otherwise). The signed-in
-// rider sees their own place, the switch, Share (the picture is drawn by badge-share.js, kind 'dist') and Add a distance:
+// each row with the rider's full name (the user, 2026-11-28: "show all full names on the leaderboard"). The signed-in
+// rider sees their own place, Share (the picture is drawn by badge-share.js, kind 'dist') and Add a distance:
 // one ride, or a total over dates, with a picture or a PDF as proof, for staff to approve. Nothing about anyone else but
 // the place, the distance and an opted-in name; no count of riders.
 // Staff: the Distance leaderboards section under Analytics > Leaderboard (_dbdStaff): the boards with full names, the
@@ -31,13 +31,13 @@ const DBD_T = {
   km: ['{0} km', '{0} كم', '{0} km', '{0} km', '{0} km', '{0} کلومیٹر', '{0} किमी', '{0} km', '{0} किमी', '{0} কিমি', '{0} km'],
   mi: ['{0} mi', '{0} ميل', '{0} mi', '{0} mi', '{0} mi', '{0} میل', '{0} मील', '{0} mi', '{0} माइल', '{0} মাইল', '{0} batu'],
   onlyMembers: ['Only community members are ranked.', 'يُرتَّب أعضاء المجتمع فقط.', 'Seuls les membres de la communauté sont classés.', 'Solo se clasifica a los miembros de la comunidad.', 'Só os membros da comunidade são classificados.', 'صرف کمیونٹی کے اراکین کی درجہ بندی ہوتی ہے۔', 'केवल कम्युनिटी के सदस्यों की रैंकिंग होती है।', 'Mga miyembro lang ng komunidad ang nira-rank.', 'समुदायका सदस्यहरूको मात्र स्थान तोकिन्छ।', 'শুধু কমিউনিটির সদস্যদের র‍্যাঙ্ক করা হয়।', 'Hanya ahli komuniti yang disenaraikan.'],
-  nameSw: ['Show my name on the leaderboards', 'إظهار اسمي في لوحات المتصدرين', 'Afficher mon nom dans les classements', 'Mostrar mi nombre en las clasificaciones', 'Mostrar o meu nome nas classificações', 'لیڈر بورڈز پر میرا نام دکھائیں', 'लीडरबोर्ड पर मेरा नाम दिखाएँ', 'Ipakita ang pangalan ko sa mga leaderboard', 'लिडरबोर्डमा मेरो नाम देखाउनुहोस्', 'লিডারবোর্ডে আমার নাম দেখান', 'Tunjukkan nama saya di papan pendahulu'],
-  nameSwSub: ['Your first name and the first letter of your last name', 'اسمك الأول وأول حرف من اسم عائلتك', 'Votre prénom et l’initiale de votre nom', 'Tu nombre y la inicial de tu apellido', 'O seu primeiro nome e a inicial do apelido', 'آپ کا پہلا نام اور آخری نام کا پہلا حرف', 'आपका पहला नाम और उपनाम का पहला अक्षर', 'Ang unang pangalan mo at unang titik ng apelyido', 'तपाईंको पहिलो नाम र थरको पहिलो अक्षर', 'আপনার প্রথম নাম ও পদবির প্রথম অক্ষর', 'Nama pertama dan huruf pertama nama akhir anda'],
   add: ['Add a distance', 'إضافة مسافة', 'Ajouter une distance', 'Añadir una distancia', 'Adicionar uma distância', 'فاصلہ شامل کریں', 'दूरी जोड़ें', 'Magdagdag ng distansya', 'दूरी थप्नुहोस्', 'দূরত্ব যোগ করুন', 'Tambah jarak'],
   kRide: ['One ride', 'رحلة واحدة', 'Une sortie', 'Una ruta', 'Uma pedalada', 'ایک سواری', 'एक सवारी', 'Isang biyahe', 'एउटा सवारी', 'একটি রাইড', 'Satu kayuhan'],
   kTotal: ['A total over dates', 'مجموع خلال فترة', 'Un total sur une période', 'Un total en un periodo', 'Um total num período', 'مدت کا کل فاصلہ', 'एक अवधि का कुल', 'Kabuuan sa mga petsa', 'अवधिको जम्मा', 'একটি সময়ের মোট', 'Jumlah dalam tempoh'],
   cKm: ['Distance (km)', 'المسافة (كم)', 'Distance (km)', 'Distancia (km)', 'Distância (km)', 'فاصلہ (کلومیٹر)', 'दूरी (किमी)', 'Distansya (km)', 'दूरी (किमी)', 'দূরত্ব (কিমি)', 'Jarak (km)'],
   cDay: ['Day of the ride', 'يوم الرحلة', 'Jour de la sortie', 'Día de la ruta', 'Dia da pedalada', 'سواری کا دن', 'सवारी का दिन', 'Araw ng biyahe', 'सवारीको दिन', 'রাইডের দিন', 'Hari kayuhan'],
+  opt: ['(optional)', '(اختياري)', '(facultatif)', '(opcional)', '(opcional)', '(اختیاری)', '(वैकल्पिक)', '(opsyonal)', '(ऐच्छिक)', '(ঐচ্ছিক)', '(pilihan)'],
+  noDate: ['No date', 'بلا تاريخ', 'Sans date', 'Sin fecha', 'Sem data', 'تاریخ نہیں', 'कोई तारीख नहीं', 'Walang petsa', 'मिति छैन', 'তারিখ নেই', 'Tiada tarikh'],
   cFrom: ['From', 'من', 'Du', 'Desde', 'De', 'سے', 'से', 'Mula', 'देखि', 'থেকে', 'Dari'],
   cTo: ['To', 'إلى', 'Au', 'Hasta', 'Até', 'تک', 'तक', 'Hanggang', 'सम्म', 'পর্যন্ত', 'Hingga'],
   cNote: ['Comment (optional)', 'تعليق (اختياري)', 'Commentaire (facultatif)', 'Comentario (opcional)', 'Comentário (opcional)', 'تبصرہ (اختیاری)', 'टिप्पणी (वैकल्पिक)', 'Komento (opsyonal)', 'टिप्पणी (ऐच्छिक)', 'মন্তব্য (ঐচ্ছিক)', 'Komen (pilihan)'],
@@ -47,7 +47,7 @@ const DBD_T = {
   cSend: ['Send for approval', 'إرسال للموافقة', 'Envoyer pour validation', 'Enviar para aprobación', 'Enviar para aprovação', 'منظوری کے لیے بھیجیں', 'मंज़ूरी के लिए भेजें', 'Ipadala para maaprubahan', 'स्वीकृतिका लागि पठाउनुहोस्', 'অনুমোদনের জন্য পাঠান', 'Hantar untuk kelulusan'],
   cSent: ['Sent. Our team will check it.', 'تم الإرسال. سيراجعه فريقنا.', 'Envoyé. Notre équipe va le vérifier.', 'Enviado. Nuestro equipo lo revisará.', 'Enviado. A nossa equipa vai verificar.', 'بھیج دیا گیا۔ ہماری ٹیم اسے دیکھے گی۔', 'भेज दिया गया। हमारी टीम इसे देखेगी।', 'Naipadala. Titingnan ito ng aming team.', 'पठाइयो। हाम्रो टोलीले जाँच गर्नेछ।', 'পাঠানো হয়েছে। আমাদের দল দেখে নেবে।', 'Dihantar. Pasukan kami akan menyemaknya.'],
   cancel: ['Cancel', 'إلغاء', 'Annuler', 'Cancelar', 'Cancelar', 'منسوخ کریں', 'रद्द करें', 'Kanselahin', 'रद्द गर्नुहोस्', 'বাতিল', 'Batal'],
-  eKm: ['Enter 1 to 300 km for one ride, or up to 50,000 km for a total.', 'أدخل من 1 إلى 300 كم لرحلة واحدة، أو حتى 50,000 كم للمجموع.', 'Saisissez 1 à 300 km pour une sortie, ou jusqu’à 50 000 km pour un total.', 'Introduce de 1 a 300 km para una ruta, o hasta 50.000 km para un total.', 'Indique 1 a 300 km para uma pedalada, ou até 50 000 km para um total.', 'ایک سواری کے لیے 1 سے 300 کلومیٹر، یا کل کے لیے 50,000 کلومیٹر تک لکھیں۔', 'एक सवारी के लिए 1 से 300 किमी, या कुल के लिए 50,000 किमी तक लिखें।', 'Maglagay ng 1 hanggang 300 km para sa isang biyahe, o hanggang 50,000 km para sa kabuuan.', 'एउटा सवारीका लागि 1 देखि 300 किमी, वा जम्माका लागि 50,000 किमीसम्म लेख्नुहोस्।', 'একটি রাইডের জন্য 1 থেকে 300 কিমি, বা মোটের জন্য 50,000 কিমি পর্যন্ত লিখুন।', 'Masukkan 1 hingga 300 km untuk satu kayuhan, atau sehingga 50,000 km untuk jumlah.'],
+  eKm: ['Enter a distance of 1 km or more.', 'أدخل مسافة 1 كم أو أكثر.', 'Saisissez une distance d’au moins 1 km.', 'Introduce una distancia de 1 km o más.', 'Indique uma distância de 1 km ou mais.', '1 کلومیٹر یا اس سے زیادہ فاصلہ لکھیں۔', '1 किमी या उससे अधिक दूरी लिखें।', 'Maglagay ng distansyang 1 km o higit pa.', '1 किमी वा बढी दूरी लेख्नुहोस्।', '1 কিমি বা তার বেশি দূরত্ব লিখুন।', 'Masukkan jarak 1 km atau lebih.'],
   eDate: ['Check the dates: none can be after today.', 'تحقق من التواريخ: لا يمكن أن يكون أي منها بعد اليوم.', 'Vérifiez les dates : aucune ne peut être après aujourd’hui.', 'Revisa las fechas: ninguna puede ser posterior a hoy.', 'Verifique as datas: nenhuma pode ser depois de hoje.', 'تاریخیں دیکھیں: کوئی بھی آج کے بعد کی نہیں ہو سکتی۔', 'तारीखें देखें: कोई भी आज के बाद की नहीं हो सकती।', 'Suriin ang mga petsa: walang puwedeng lampas ngayong araw.', 'मितिहरू जाँच्नुहोस्: कुनै पनि आजपछिको हुन सक्दैन।', 'তারিখগুলো দেখুন: কোনোটিই আজকের পরে হতে পারে না।', 'Semak tarikh: tiada yang boleh selepas hari ini.'],
   eProof: ['Add a picture or a PDF (2 MB at most) that shows the distance.', 'أضف صورة أو ملف PDF (2 ميغابايت كحد أقصى) يُظهر المسافة.', 'Ajoutez une image ou un PDF (2 Mo maximum) montrant la distance.', 'Añade una imagen o un PDF (2 MB como máximo) que muestre la distancia.', 'Adicione uma imagem ou um PDF (2 MB no máximo) que mostre a distância.', 'ایسی تصویر یا PDF (زیادہ سے زیادہ 2 MB) شامل کریں جس میں فاصلہ نظر آئے۔', 'ऐसा चित्र या PDF (अधिकतम 2 MB) जोड़ें जिसमें दूरी दिखे।', 'Magdagdag ng larawan o PDF (hanggang 2 MB) na nagpapakita ng distansya.', 'दूरी देखिने तस्बिर वा PDF (बढीमा 2 MB) थप्नुहोस्।', 'দূরত্ব দেখা যায় এমন ছবি বা PDF (সর্বোচ্চ 2 MB) যোগ করুন।', 'Tambah gambar atau PDF (maksimum 2 MB) yang menunjukkan jarak.'],
   eLimit: ['You have 3 waiting already. Our team will answer them first.', 'لديك 3 بانتظار المراجعة. سيرد فريقنا عليها أولًا.', 'Vous en avez déjà 3 en attente. Notre équipe y répondra d’abord.', 'Ya tienes 3 pendientes. Nuestro equipo las responderá primero.', 'Já tem 3 em espera. A nossa equipa responde-lhes primeiro.', 'آپ کی 3 پہلے سے زیرِ انتظار ہیں۔ ہماری ٹیم پہلے ان کا جواب دے گی۔', 'आपकी 3 पहले से प्रतीक्षा में हैं। हमारी टीम पहले उनका जवाब देगी।', 'May 3 ka nang naghihintay. Sasagutin muna ng aming team ang mga iyon.', 'तपाईंका 3 पहिले नै पर्खाइमा छन्। हाम्रो टोलीले पहिले तिनको जवाफ दिनेछ।', 'আপনার 3টি আগে থেকেই অপেক্ষায় আছে। আমাদের দল আগে সেগুলোর উত্তর দেবে।', 'Anda sudah ada 3 yang menunggu. Pasukan kami akan menjawabnya dahulu.'],
@@ -165,12 +165,12 @@ function _dbdRowsHtml(hit) {
   return `<ol class="dbd-list">${hit.rows.map((r) => `<li class="dbd-row${r.mine ? ' mine' : ''}">
       <span class="dbd-r">${esc(String(r.r))}</span>
       <span class="dbd-md">${r.medal ? _dbdMedal(r.medal, 'dbd-medal') : ''}</span>
-      <bdi class="dbd-nm">${esc(r.mine ? _dT('you') : r.name || _dT('member'))}</bdi>
+      <bdi class="dbd-nm">${esc(r.name || _dT('member'))}${r.mine ? ` <span class="dbd-you">${esc(_dT('you'))}</span>` : ''}</bdi>
       <span class="dbd-km" dir="ltr">${esc(_dbdKm(r.km))}</span></li>`).join('')}</ol>`;
 }
 function _dbdMineHtml(c, hit) {
   const D = _dbdState(), M = D.mine && D.mine.forId === c.id ? D.mine : null, me = hit && !hit.err ? hit.me : null;
-  const pub = me ? !!me.public : M ? !!M.public : false, member = me ? !!me.member : M ? !!M.member : true;
+  const member = me ? !!me.member : M ? !!M.member : true;
   const val = D.b === 'lifetime' ? M && M.lifetime : D.b === 'year' ? M && M.year : D.b === 'longest' ? M && M.best : me && me.km;
   const ranked = me && me.r;
   return `<div class="dbd-me">
@@ -179,7 +179,6 @@ function _dbdMineHtml(c, hit) {
         <div class="dbd-me-km" dir="ltr">${val ? esc(_dbdKm(ranked ? me.km : val)) : ''}</div>
       </div>
       ${member ? '' : `<p class="dbd-note">${esc(_dT('onlyMembers'))}</p>`}
-      <label class="cw-sw dbd-pub" for="dbd-pub"><input type="checkbox" role="switch" id="dbd-pub"${pub ? ' checked' : ''} data-on-change="${_on('_dbdPub', _P('checked'))}"><span class="cw-sw-box" aria-hidden="true"></span><span class="cw-sw-txt"><b>${esc(_dT('nameSw'))}</b><small>${esc(_dT('nameSwSub'))}</small></span></label>
       <div class="dbd-acts">
         ${ranked ? `<button type="button" class="btn-primary" data-on-click="${_on('_dbdShare')}">${_cuIc('share', 16)}<span>${esc(_dbdW('share', 'Share'))}</span></button>` : ''}
         <button type="button" class="btn-secondary" data-on-click="${_on('_dbdClaimOpen')}">${_cuIc('plus', 16)}<span>${esc(_dT('add'))}</span></button>
@@ -192,7 +191,7 @@ function _dbdClaimsHtml(c) {
   const st = (x) => x.source === 'staff' ? _dT('stStaff') : x.status === 'approved' ? _dT('stOk') : x.status === 'declined' ? _dT('stNo') : _dT('stWait');
   return `<div class="dbd-mine"><h3 class="dbd-h">${esc(_dT('mine'))}</h3><ul class="dbd-cl">${L.map((x) => `<li class="dbd-ci st-${esc(x.source === 'staff' ? 'staff' : x.status)}">
       <div class="dbd-ci-t"><b dir="ltr">${esc(_dbdKm(x.km))}</b> <span>${esc(x.kind === 'total' ? _dT('kTotal') : _dT('kRide'))}</span></div>
-      <div class="dbd-ci-d">${esc(x.kind === 'total' && x.from ? _bdgDay(x.from + 'T12:00:00Z') + ' – ' + _bdgDay(x.d + 'T12:00:00Z') : _bdgDay(x.d + 'T12:00:00Z'))}</div>
+      <div class="dbd-ci-d">${esc(!x.d ? _dT('noDate') : x.kind === 'total' && x.from ? _bdgDay(x.from + 'T12:00:00Z') + ' – ' + _bdgDay(x.d + 'T12:00:00Z') : _bdgDay(x.d + 'T12:00:00Z'))}</div>
       <div class="dbd-ci-s"><span class="dbd-pill">${esc(st(x))}</span>${x.reply ? ` <bdi class="dbd-reply">${esc(x.reply)}</bdi>` : ''}${x.status === 'pending' && x.source === 'claim' ? ` <button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_dbdWithdraw', x.id)}">${esc(_dT('withdraw'))}</button>` : ''}</div>
     </li>`).join('')}</ul></div>`;
 }
@@ -218,15 +217,6 @@ function _dbdPaint() {
       ${c ? _dbdClaimsHtml(c) : ''}
     </div></div>`;
   const b = el.querySelector('.dbd-body'); if (b && top) b.scrollTop = top;
-}
-async function _dbdPub(on) {
-  const c = _dbdCust(); if (!c) return;
-  let r;
-  try { r = await sb.rpc('customer_board_public', { p_id: c.id, p_token: c.session_token, p_on: !!on }); } catch (e) { r = { error: e }; }
-  const a = r && !r.error && r.data;
-  if (!a || !a.ok) { toast(_dT('eNet'), 'error'); _dbdPaint(); return; }
-  const D = _dbdState(); D.cache = {}; if (D.mine) D.mine.public = !!on;
-  _dbdPaint(); _dbdFetch(D.b, D.g);
 }
 // The picture: the board's name, the distance, the place and the board's gender; the medal for a podium place on the
 // longest ride, else the road; the leaderboard's address at its foot (badge-share.js draws it and hands it to the share sheet).
@@ -309,9 +299,9 @@ function _dbdClaimFile(el) {
 }
 async function _dbdClaimSend() {
   const d = S._dbdC, c = _dbdCust(); if (!d || d.busy || !c) return;
-  const km = _dbdRead(d.km), max = d.kind === 'total' ? 50000 : 300, today = todayStr(), ymd = /^\d{4}-\d\d-\d\d$/;
+  const km = _dbdRead(d.km), today = todayStr(), ymd = /^\d{4}-\d\d-\d\d$/;
   const fail = (k) => { d.err = _dT(k); _dbdClaimPaint(); };
-  if (!(km >= 1 && km <= max)) return fail('eKm');
+  if (!(km >= 1 && km <= 99999)) return fail('eKm'); // no maximum for a ride (the user, 2026-11-28); the column holds 99,999 km
   if (!ymd.test(d.d) || d.d > today || (d.kind === 'total' && (!ymd.test(d.from) || d.from > d.d))) return fail('eDate');
   if (!d.proof) return fail('eProof');
   d.busy = true; d.err = ''; _dbdClaimPaint();
@@ -366,7 +356,8 @@ function _dbdStPaint() {
   const T = _dbdSt(), can = !_dbdDep.can || _dbdDep.can();
   const sw = (k, list, on) => `<div class="filter-row cmy-mb6">${list.map(([v, w]) => `<button type="button" class="filter-pill${v === on ? ' active' : ''}" aria-pressed="${v === on}" data-on-click="${_on('_dbdStSet', k, v)}">${esc(w)}</button>`).join('')}</div>`;
   const wait = (T.rows || []).filter((x) => x.status === 'pending'), done = (T.rows || []).filter((x) => x.status !== 'pending').slice(0, 40);
-  const kmTxt = (x) => _dbdKm(x.km) + ' · ' + (x.kind === 'total' ? _dT('kTotal') + ' · ' + x.date_from + ' – ' + x.ride_date : _dT('kRide') + ' · ' + x.ride_date);
+  const when = (x) => !x.ride_date ? _dT('noDate') : x.kind === 'total' && x.date_from ? x.date_from + ' – ' + x.ride_date : x.ride_date;
+  const kmTxt = (x) => _dbdKm(x.km) + ' · ' + (x.kind === 'total' ? _dT('kTotal') : _dT('kRide')) + ' · ' + when(x);
   h.innerHTML = `<h2 class="dbd-st-title"><span>${esc(_dT('sTitle'))}</span>${can ? `<button type="button" class="btn-sm btn-primary" data-on-click="${_on('_dbdStAddOpen')}">${esc(_dT('add'))}</button>` : ''}</h2>
     <p class="dbd-st-hint">${esc(_dT('sPodium'))}</p>
     ${T.err ? `<div class="dbd-err" role="alert"><span>${esc(_dT('loadErr'))}</span><button type="button" class="btn-secondary btn-sm" data-on-click="${_on('_dbdStLoad')}">${esc(_dT('retry'))}</button></div>` : ''}
@@ -385,8 +376,8 @@ function _dbdStPaint() {
     <div class="filter-row cmy-mb6">${[['male', _dT('men')], ['female', _dT('women')]].map(([v, w]) => `<button type="button" class="filter-pill${v === T.g ? ' active' : ''}" aria-pressed="${v === T.g}" data-on-click="${_on('_dbdStSet', 'g', v)}">${esc(w)}</button>`).join('')}
       <button type="button" class="filter-pill dbd-st-mem${T.members ? ' active' : ''}" aria-pressed="${T.members}" data-on-click="${_on('_dbdStSet', 'members', !T.members)}">${esc(_dT('sMembers'))}</button></div>
     ${T.board ? `<table class="data-table dbd-st-t"><tbody>${T.board.map((r) => `<tr><td class="dbd-st-r">${esc(String(r.r))}</td>
-      <td><button type="button" class="link-btn" data-on-click="${_on('_dbdStAcct', r.id)}"><bdi>${esc(r.name || '')}</bdi></button>${r.member ? '' : ` <span class="dbd-pill">${esc(_dT('sNotMember'))}</span>`}${r.public ? ` <span class="dbd-pill">${esc(_dT('sPub'))}</span>` : ''}</td>
-      <td dir="ltr">${esc(_dbdKm(r.km))}</td><td>${esc(r.src === 'entry' ? _dT('sSrcEnt') : _dT('sSrcSes'))}</td><td dir="ltr">${esc(String(r.d || ''))}</td></tr>`).join('')}</tbody></table>`
+      <td><button type="button" class="link-btn" data-on-click="${_on('_dbdStAcct', r.id)}"><bdi>${esc(r.name || '')}</bdi></button>${r.member ? '' : ` <span class="dbd-pill">${esc(_dT('sNotMember'))}</span>`}</td>
+      <td dir="ltr">${esc(_dbdKm(r.km))}</td><td>${esc(r.src === 'entry' ? _dT('sSrcEnt') : _dT('sSrcSes'))}</td><td dir="ltr">${esc(r.d ? String(r.d) : _dT('noDate'))}</td></tr>`).join('')}</tbody></table>`
       : T.err ? '' : `<div class="dbd-wait" role="status"></div>`}
     ${done.length ? `<h3 class="dbd-h">${esc(_dT('sEntries'))}</h3><table class="data-table dbd-st-t"><tbody>${done.map((x) => `<tr>
       <td><button type="button" class="link-btn" data-on-click="${_on('_dbdStAcct', x.customer_id)}"><bdi>${esc(_dbdStName(x.customer_id))}</bdi></button></td>
@@ -440,7 +431,7 @@ async function _dbdStProof(id) {
 function _dbdStProofClose() { const m = document.getElementById('confirm-modal'); if (m) { m.style.display = 'none'; m.innerHTML = ''; } }
 // Add a distance for an account: one ride or a total, approved at once.
 function _dbdStAddOpen() {
-  S._dbdA = { q: '', id: '', kind: 'ride', km: '', d: todayStr(), from: '', note: '', busy: false };
+  S._dbdA = { q: '', id: '', kind: 'ride', km: '', d: '', from: '', note: '', busy: false }; // no date unless staff give one (the user, 2026-11-28)
   _dbdStAddPaint();
   const f = document.getElementById('dbd-a-q'); if (f) try { f.focus(); } catch (_) {}
 }
@@ -468,10 +459,10 @@ function _dbdStAddPaint() {
         <div id="dbd-a-hits" class="dbd-hits"></div></div>
       <div class="dbd-sw dbd-kinds" role="group" aria-labelledby="dbd-a-title">${radio('ride', _dT('kRide'))}${radio('total', _dT('kTotal'))}</div>
       <div class="form-group"><label for="dbd-a-km">${esc(_dT('cKm'))}</label><input id="dbd-a-km" type="text" inputmode="decimal" maxlength="8" dir="ltr" value="${esc(A.km)}"${off} data-on-input="${_on('_dbdStAddIn', 'km', _DBD_EL)}"></div>
-      ${A.kind === 'total' ? `<div class="form-row"><div class="form-group"><label for="dbd-a-from">${esc(_dT('cFrom'))}</label><input id="dbd-a-from" type="date" max="${today}" value="${esc(A.from)}"${off} data-on-input="${_on('_dbdStAddIn', 'from', _DBD_EL)}"></div>
-        <div class="form-group"><label for="dbd-a-d">${esc(_dT('cTo'))}</label><input id="dbd-a-d" type="date" max="${today}" value="${esc(A.d)}"${off} data-on-input="${_on('_dbdStAddIn', 'd', _DBD_EL)}"></div></div>
+      ${A.kind === 'total' ? `<div class="form-row"><div class="form-group"><label for="dbd-a-from">${esc(_dT('cFrom'))} <span class="label-hint">${esc(_dT('opt'))}</span></label><input id="dbd-a-from" type="date" max="${today}" value="${esc(A.from)}"${off} data-on-input="${_on('_dbdStAddIn', 'from', _DBD_EL)}"></div>
+        <div class="form-group"><label for="dbd-a-d">${esc(_dT('cTo'))} <span class="label-hint">${esc(_dT('opt'))}</span></label><input id="dbd-a-d" type="date" max="${today}" value="${esc(A.d)}"${off} data-on-input="${_on('_dbdStAddIn', 'd', _DBD_EL)}"></div></div>
         <p class="dbd-st-hint">${esc(_dT('sTotalHint'))}</p>`
-      : `<div class="form-group"><label for="dbd-a-d">${esc(_dT('cDay'))}</label><input id="dbd-a-d" type="date" max="${today}" value="${esc(A.d)}"${off} data-on-input="${_on('_dbdStAddIn', 'd', _DBD_EL)}"></div>`}
+      : `<div class="form-group"><label for="dbd-a-d">${esc(_dT('cDay'))} <span class="label-hint">${esc(_dT('opt'))}</span></label><input id="dbd-a-d" type="date" max="${today}" value="${esc(A.d)}"${off} data-on-input="${_on('_dbdStAddIn', 'd', _DBD_EL)}"></div>`}
       <div class="form-group"><label for="dbd-a-note">${esc(_dT('sNote'))}</label><input id="dbd-a-note" type="text" maxlength="300" value="${esc(A.note)}"${off} data-on-input="${_on('_dbdStAddIn', 'note', _DBD_EL)}"></div>
       <div class="cmy-rej-act"><button type="button" class="btn-secondary"${off} data-on-click="${_on('_dbdStAddClose')}">${esc(_dT('cancel'))}</button>
         <button type="button" class="btn-primary" id="dbd-a-save"${off} data-on-click="${_on('_dbdStAddSave')}">${esc(_dT('add'))}</button></div>
@@ -480,13 +471,14 @@ function _dbdStAddPaint() {
 }
 async function _dbdStAddSave() {
   const A = S._dbdA; if (!A || A.busy) return;
-  const km = _dbdRead(A.km), max = A.kind === 'total' ? 50000 : 300, today = todayStr(), ymd = /^\d{4}-\d\d-\d\d$/;
+  const km = _dbdRead(A.km), today = todayStr(), ymd = /^\d{4}-\d\d-\d\d$/, d = String(A.d || '').trim(), f = A.kind === 'total' ? String(A.from || '').trim() : '';
   if (!A.id) { toast(_dT('sFind'), 'error'); return; }
-  if (!(km >= 1 && km <= max)) { toast(_dT('eKm'), 'error'); return; }
-  if (!ymd.test(A.d) || A.d > today || (A.kind === 'total' && (!ymd.test(A.from) || A.from > A.d))) { toast(_dT('eDate'), 'error'); return; }
+  if (!(km >= 1 && km <= 99999)) { toast(_dT('eKm'), 'error'); return; }
+  // the dates are optional: none at all, or a day that is not after today (a total's From needs its To)
+  if ((d && (!ymd.test(d) || d > today)) || (f && (!ymd.test(f) || !d || f > d))) { toast(_dT('eDate'), 'error'); return; }
   A.busy = true; _dbdStAddPaint();
   let r;
-  try { r = await sb.rpc('staff_distance_add', { p_customer: A.id, p_kind: A.kind, p_km: Math.round(km * 10) / 10, p_date: A.d, p_from: A.kind === 'total' ? A.from : null, p_note: A.note.trim() || null, p_session: null }); } catch (e) { r = { error: e }; }
+  try { r = await sb.rpc('staff_distance_add', { p_customer: A.id, p_kind: A.kind, p_km: Math.round(km * 10) / 10, p_date: d || null, p_from: f || null, p_note: A.note.trim() || null, p_session: null }); } catch (e) { r = { error: e }; }
   if (S._dbdA !== A) return;
   A.busy = false;
   const a = r && !r.error && r.data;
@@ -496,5 +488,15 @@ async function _dbdStAddSave() {
   _dbdStLoad();
 }
 
+// From an account's own window: Add a distance with that account already picked.
+function _dbdStAddFor(id, dep) {
+  _dbdDep = dep || _dbdDep || {};
+  _dbdStAddOpen();
+  const A = S._dbdA; if (!A) return;
+  A.id = String(id || ''); A.q = _dbdStName(A.id);
+  _dbdStAddPaint();
+  const f = document.getElementById('dbd-a-km'); if (f) try { f.focus(); } catch (_) {}
+}
 window._dbdOpen = _dbdOpen;
+window._dbdStAddFor = _dbdStAddFor;
 window._dbdStaff = _dbdStaff;

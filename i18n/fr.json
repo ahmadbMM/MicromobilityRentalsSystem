@@ -11488,5 +11488,7 @@
   "bdLrSilverA": "La deuxième place du classement Plus longue sortie, hommes et femmes à part. Elle passe à qui roule plus loin : une sortie compte dès que notre équipe saisit ou valide sa distance.",
   "bdLrBronze": "Plus longue sortie : Bronze",
   "bdLrBronzeD": "Détenir la troisième plus longue sortie mesurée parmi les membres",
-  "bdLrBronzeA": "La troisième place du classement Plus longue sortie, hommes et femmes à part. Elle passe à qui roule plus loin : une sortie compte dès que notre équipe saisit ou valide sa distance."
+  "bdLrBronzeA": "La troisième place du classement Plus longue sortie, hommes et femmes à part. Elle passe à qui roule plus loin : une sortie compte dès que notre équipe saisit ou valide sa distance.",
+  "anNavDistances": "Distances",
+  "dbdAddDist": "Ajouter une distance"
 }

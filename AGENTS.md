@@ -5492,7 +5492,8 @@ the rider switches it on; Gold / Silver / Bronze to each gender's top three; a s
   other bike ride = `_km.all`, none without one: the same count as `_rideKm`), plus every approved `ride_distances` row:
   kind `ride` (all four boards) or `total` over `date_from..ride_date` (lifetime; year when it starts this year). Members
   only, not merged / archived / deletion asked, male or female (`_lr_board`). **Equal figures share a rank** (`rank()`).
-  Rows carry r, km, name (only with `customers.board_public`, as "Sara A.", `_lr_name`), medal, mine. No count of riders.
+  Rows carry r, km, name (every rider's full name since 20261128150000, the user 2026-11-28: "show all full names on the
+  leaderboard"; `customers.board_public` and its switch are gone from the page), medal, mine. No count of riders.
   Every distance shows in kilometres and miles, "90 km · 55.9 mi" (`_dbdKm`, 1 km = 0.621371 mi, one decimal; the user,
   2026-11-28: "show the mileage in miles and km in the leaderboard"): rows, own place, own distances, the picture, staff.
 - **Podium**: `lr_gold` / `lr_silver` / `lr_bronze` (held only, automatic; medals `lr1`-`lr3` in `BDG_RACE`, "#1" on the
@@ -5515,3 +5516,8 @@ the rider switches it on; Gold / Silver / Bronze to each gender's top three; a s
 - **Privacy**: notice 2026-11-27 rows (no re-ask); the proof is dropped the moment staff answer (`_ride_dist_drop_proof`).
 - `tests/distance-leaderboards.spec.ts`; the suite's stub answers `distance_board`, `customer_distances` and
   `staff_distance_board` empty by default.
+- **2026-11-28 (migration 20261128150000, the user)**: full names for everyone; no km maximum (one ride or a total; 99,999 is
+  only the column's room); a distance staff enter needs no date (it counts on Longest ride and Lifetime, not This month /
+  This year). Its own Analytics view **Distances** (`/analytics/distances`, `S.anView='distances'`, mounted from
+  `_applyAnView`), and **Add distance** in every account window's bar for People / Community editors (`_dbdAddFor` ->
+  `_dbdStAddFor`, the account already picked; `_dbdStaffDeps` lends the same things to both ways in).

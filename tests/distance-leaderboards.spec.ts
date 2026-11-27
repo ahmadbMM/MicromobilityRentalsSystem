@@ -3,8 +3,8 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb, type Fixtures } fr
 import { hubPart } from './helpers/hub';
 
 // The distance leaderboards (the user, 2026-11-27; migration 20261127180000, distance-board.js). Four boards (Longest ride,
-// This month, Lifetime, This year), men and women apart, members only, a name only for a rider who switched it on; the
-// signed-in rider's own place, the switch, Share (badge-share.js draws the picture) and Add a distance: one ride or a total
+// This month, Lifetime, This year), men and women apart, members only, every rider's full name (the user, 2026-11-28); the
+// signed-in rider's own place, Share (badge-share.js draws the picture) and Add a distance: one ride or a total
 // over dates, with a picture or a PDF as proof, for staff to approve. Gold, Silver and Bronze (lr_gold / lr_silver /
 // lr_bronze) move in the database. Staff: Analytics > Leaderboard > Distance leaderboards. All Supabase traffic is stubbed.
 
@@ -15,10 +15,10 @@ const feed = { ok: true, today: '2026-11-27', me: null, club: null, goals: [], n
 const board = (o: Record<string, unknown> = {}) => ({
   ok: true, board: 'longest', gender: 'female',
   rows: [
-    { r: 1, km: 120, name: 'Lina O.', medal: 1, mine: false },
-    { r: 2, km: 90, name: null, medal: 2, mine: true },
-    { r: 3, km: 40, name: null, medal: null, mine: false },
-    { r: 3, km: 40, name: 'Nada K.', medal: null, mine: false },
+    { r: 1, km: 120, name: 'Lina Omar', medal: 1, mine: false },
+    { r: 2, km: 90, name: 'Sara Ahmed', medal: 2, mine: true },
+    { r: 3, km: 40, name: 'Huda Saleh', medal: null, mine: false },
+    { r: 3, km: 40, name: 'Nada Khalid Ali', medal: null, mine: false },
   ],
   me: { r: 2, km: 90, public: false, member: true, gender: 'female' }, ...o,
 });
@@ -42,7 +42,7 @@ async function boards(page: Page, answers: Record<string, unknown | ((b: Record<
 const page$ = (page: Page) => page.locator('#dbd-page');
 
 test.describe('riders', () => {
-  test('/leaderboard opens the boards over the start page for anyone: names only where switched on, the medals, no counts', async ({ page }) => {
+  test('/leaderboard opens the boards over the start page for anyone: full names, the medals, no counts', async ({ page }) => {
     const calls: Call[] = [];
     await stubSupabase(page, { sessions: [sat('2099-01-03')], customers: [], queue_entries: [], bikes: [] });
     await boards(page, { distance_board: (b: Record<string, unknown>) => board({ me: undefined, gender: b.p_gender, rows: board().rows.map((r) => ({ ...r, mine: false })) }) }, calls);
@@ -53,9 +53,10 @@ test.describe('riders', () => {
     expect(new URL(page.url()).pathname).toBe('/'); // the address goes back to the start page
     const rows = p.locator('.dbd-row');
     await expect(rows).toHaveCount(4);
-    await expect(rows.nth(0)).toContainText('Lina O.');
+    await expect(rows.nth(0)).toContainText('Lina Omar');
     await expect(rows.nth(0)).toContainText('120 km · 74.6 mi');
-    await expect(rows.nth(1)).toContainText('Member'); // no name without the switch
+    await expect(rows.nth(1)).toContainText('Sara Ahmed'); // every full name (the user, 2026-11-28)
+    await expect(rows.nth(3)).toContainText('Nada Khalid Ali');
     await expect(rows.nth(0).locator('svg.bdg-race')).toHaveCount(1); // Gold
     await expect(rows.nth(2).locator('.dbd-r')).toHaveText('3');
     await expect(rows.nth(3).locator('.dbd-r')).toHaveText('3'); // equal distances share the place
@@ -74,10 +75,10 @@ test.describe('riders', () => {
     await expect(p).toHaveCount(0);
   });
 
-  test('a member opens a board from the Community tab: their place, the name switch, Share and their distances', async ({ page }) => {
+  test('a member opens a board from the Community tab: their place, their name marked You, Share and their distances', async ({ page }) => {
     const calls: Call[] = [];
     await stubSupabase(page, { sessions: [sat('2099-01-03')], customers: [], queue_entries: [], bikes: [], 'rpc:community_member': true, 'rpc:hub_feed': feed });
-    await boards(page, { distance_board: () => board(), customer_distances: () => mine(), customer_board_public: (b: Record<string, unknown>) => ({ ok: true, public: b.p_on }) }, calls);
+    await boards(page, { distance_board: () => board(), customer_distances: () => mine() }, calls);
     await loginCustomer(page, { id: 'c1', name: 'Sara Ahmed', gender: 'female' });
     await page.goto('/');
     await waitForSb(page);
@@ -87,7 +88,9 @@ test.describe('riders', () => {
     const p = page$(page);
     await expect(p.locator('.dbd-me-r')).toHaveText('#2');
     await expect(p.locator('.dbd-me-km')).toHaveText('90 km · 55.9 mi'); // in kilometres and miles (2026-11-28)
-    await expect(p.locator('.dbd-row.mine')).toContainText('You');
+    await expect(p.locator('.dbd-row.mine')).toContainText('Sara Ahmed');
+    await expect(p.locator('.dbd-row.mine .dbd-you')).toHaveText('You');
+    await expect(p.getByRole('switch')).toHaveCount(0); // no name switch: every name shows
     await expect(p.getByRole('button', { name: 'Women', exact: true })).toHaveAttribute('aria-pressed', 'true'); // the rider's own gender first
     expect(calls.find((c) => c.name === 'distance_board')!.body).toMatchObject({ p_board: 'longest', p_gender: 'female', p_id: 'c1', p_token: 'tok-spec' });
     // their distances: a declined total with the team's reply
@@ -98,9 +101,6 @@ test.describe('riders', () => {
     await p.getByRole('button', { name: 'Lifetime' }).click();
     await expect(p.locator('.dbd-me-km')).toHaveText('90 km · 55.9 mi'); // ranked: the board's own figure for them
     await p.getByRole('button', { name: 'Longest ride' }).click();
-    // the switch
-    await p.getByRole('switch', { name: /Show my name/ }).check({ force: true }); // the switch's box is drawn over the hidden input
-    await expect.poll(() => calls.find((c) => c.name === 'customer_board_public')?.body).toMatchObject({ p_id: 'c1', p_on: true });
     // Share: the picture of their place, with the leaderboard's address
     await page.evaluate(`navigator.canShare=(d)=>!!(d&&d.files&&d.files.length);navigator.share=(d)=>{window._shared=d;return Promise.resolve();}`);
     await p.getByRole('button', { name: 'Share' }).click();
@@ -125,10 +125,10 @@ test.describe('riders', () => {
     await p.getByRole('button', { name: 'Add a distance' }).click();
     const d = page.locator('#confirm-modal .dbd-c');
     await expect(d.getByRole('dialog', { name: 'Add a distance' }).or(d)).toBeVisible();
-    await d.locator('#dbd-c-km').fill('301');
+    await d.locator('#dbd-c-km').fill('0');
     await d.getByRole('button', { name: 'Send for approval' }).click();
-    await expect(d.getByRole('alert')).toContainText('1 to 300 km');
-    await d.locator('#dbd-c-km').fill('142,5');
+    await expect(d.getByRole('alert')).toContainText('1 km or more');
+    await d.locator('#dbd-c-km').fill('342,5'); // no maximum for a ride (the user, 2026-11-28)
     await d.getByRole('button', { name: 'Send for approval' }).click();
     await expect(d.getByRole('alert')).toContainText('picture or a PDF');
     expect(calls.some((c) => c.name === 'customer_distance_claim')).toBe(false);
@@ -185,10 +185,33 @@ test.describe('staff', () => {
     await unlockStaff(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`S.anView='leaderboard';setStaffTab('analytics')`);
+    await page.evaluate(`S.anView='distances';setStaffTab('analytics')`);
   }
 
-  test('Analytics > Leaderboard: the board with full names, a claim approved with the km staff read, one added for an account', async ({ page }) => {
+  test('its own Analytics view: /analytics/distances, one tap from the Analytics menu', async ({ page }) => {
+    const calls: Call[] = [];
+    await staff(page, calls);
+    const tab = page.locator('#tab-analytics');
+    await tab.locator('.an-nav-btn[data-anview="leaderboard"]').click();
+    await expect(page.locator('#an-dist-host')).toBeHidden(); // not under Leaderboard any more
+    await tab.locator('.an-nav-btn[data-anview="distances"]').click();
+    await expect(page.locator('#an-dist-host .dbd-st-title')).toBeVisible();
+    expect(new URL(page.url()).pathname).toBe('/analytics/distances');
+  });
+
+  test('an account window adds a distance for that account, already picked', async ({ page }) => {
+    const calls: Call[] = [];
+    await staff(page, calls);
+    await page.evaluate(`openAccountHistory('c1')`);
+    await page.getByRole('button', { name: 'Add distance', exact: true }).click();
+    const d = page.locator('#confirm-modal .dbd-c');
+    await expect(d.locator('#dbd-a-q')).toHaveValue('Sara Ahmed');
+    await d.locator('#dbd-a-km').fill('212.4');
+    await d.getByRole('button', { name: 'Add a distance' }).click();
+    await expect.poll(() => calls.find((x) => x.name === 'staff_distance_add')?.body).toMatchObject({ p_customer: 'c1', p_km: 212.4, p_date: null });
+  });
+
+  test('Analytics > Distances: the board with full names, a claim approved with the km staff read, one added for an account', async ({ page }) => {
     const calls: Call[] = [];
     await staff(page, calls);
     const h = page.locator('#an-dist-host');
@@ -209,11 +232,11 @@ test.describe('staff', () => {
     const d = page.locator('#confirm-modal .dbd-c');
     await d.locator('#dbd-a-q').fill('Lina');
     await d.locator('.dbd-hit', { hasText: 'Lina Omar' }).click();
-    await d.locator('#dbd-a-km').fill('165');
-    await d.locator('#dbd-a-d').fill('2026-11-25');
+    await d.locator('#dbd-a-km').fill('465'); // no maximum, and no date needed (the user, 2026-11-28)
+    await expect(d.locator('#dbd-a-d')).toHaveValue('');
     await d.locator('#dbd-a-note').fill('Ride lead GPS');
     await d.getByRole('button', { name: 'Add a distance' }).click();
-    await expect.poll(() => calls.find((x) => x.name === 'staff_distance_add')?.body).toMatchObject({ p_customer: 'c2', p_kind: 'ride', p_km: 165, p_date: '2026-11-25', p_from: null, p_note: 'Ride lead GPS' });
+    await expect.poll(() => calls.find((x) => x.name === 'staff_distance_add')?.body).toMatchObject({ p_customer: 'c2', p_kind: 'ride', p_km: 465, p_date: null, p_from: null, p_note: 'Ride lead GPS' });
     // the entry staff made can be removed, after a confirm
     await h.locator('.dbd-st-t').last().getByRole('button', { name: 'Remove' }).click();
     await page.locator('#confirm-modal').getByRole('button', { name: 'Remove' }).last().click();

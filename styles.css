@@ -16860,3 +16860,4 @@ body.dbd-on{overflow:hidden;}
   body:not(.view-staff) #tab-members .hub-secs .hub-sec:first-child:nth-last-child(4),
   body:not(.view-staff) #tab-members .hub-secs .hub-sec:first-child:nth-last-child(4) ~ .hub-sec{padding:0 4px;font-size:var(--fs-12);}
 }
+.dbd-you{display:inline-block;margin-inline-start:6px;padding:1px 8px;border-radius:999px;background:var(--green);color:#fff;font-size:var(--fs-12);font-weight:600;vertical-align:middle;}
