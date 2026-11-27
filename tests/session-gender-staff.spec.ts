@@ -205,7 +205,7 @@ test.describe('@staff:sessions pool gender', () => {
     const rows = sent(page, 'queue_entries', 'POST');
     await page.evaluate(`setStaffTab('queue');S.sfSession='${SWIM_F}';showCommAddModal()`);
     const dlg = page.locator('#comm-add-modal');
-    await expect(dlg.locator('select')).toContainText('Pool, women');
+    await expect(dlg.locator('#ca-sess')).toContainText('Pool, women');
     await expect(dlg.locator('.spk-btn')).toContainText('Pool, women'); // the picker's button names the pick
     const man = dlg.locator('.cmy-ca-row', { hasText: 'Omar Man' });
     await expect(man).toBeDisabled();
