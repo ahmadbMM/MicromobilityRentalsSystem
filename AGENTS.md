@@ -5485,6 +5485,8 @@ the rider switches it on; Gold / Silver / Bronze to each gender's top three; a s
   kind `ride` (all four boards) or `total` over `date_from..ride_date` (lifetime; year when it starts this year). Members
   only, not merged / archived / deletion asked, male or female (`_lr_board`). **Equal figures share a rank** (`rank()`).
   Rows carry r, km, name (only with `customers.board_public`, as "Sara A.", `_lr_name`), medal, mine. No count of riders.
+  Every distance shows in kilometres and miles, "90 km · 55.9 mi" (`_dbdKm`, 1 km = 0.621371 mi, one decimal; the user,
+  2026-11-28: "show the mileage in miles and km in the leaderboard"): rows, own place, own distances, the picture, staff.
 - **Podium**: `lr_gold` / `lr_silver` / `lr_bronze` (held only, automatic; medals `lr1`-`lr3` in `BDG_RACE`, "#1" on the
   green ribbon) go to each gender's three longest **measured** single rides (staff entered or approved: the session
   distances tie dozens at 40 km, the user's pick), the earlier ride first on a tie (`_lr_podium`). `_lr_podium_sync()`

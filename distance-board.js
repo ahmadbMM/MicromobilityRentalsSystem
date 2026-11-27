@@ -29,6 +29,7 @@ const DBD_T = {
   you: ['You', 'أنت', 'Vous', 'Tú', 'Você', 'آپ', 'आप', 'Ikaw', 'तपाईं', 'আপনি', 'Anda'],
   member: ['Member', 'عضو', 'Membre', 'Miembro', 'Membro', 'رکن', 'सदस्य', 'Miyembro', 'सदस्य', 'সদস্য', 'Ahli'],
   km: ['{0} km', '{0} كم', '{0} km', '{0} km', '{0} km', '{0} کلومیٹر', '{0} किमी', '{0} km', '{0} किमी', '{0} কিমি', '{0} km'],
+  mi: ['{0} mi', '{0} ميل', '{0} mi', '{0} mi', '{0} mi', '{0} میل', '{0} मील', '{0} mi', '{0} माइल', '{0} মাইল', '{0} batu'],
   onlyMembers: ['Only community members are ranked.', 'يُرتَّب أعضاء المجتمع فقط.', 'Seuls les membres de la communauté sont classés.', 'Solo se clasifica a los miembros de la comunidad.', 'Só os membros da comunidade são classificados.', 'صرف کمیونٹی کے اراکین کی درجہ بندی ہوتی ہے۔', 'केवल कम्युनिटी के सदस्यों की रैंकिंग होती है।', 'Mga miyembro lang ng komunidad ang nira-rank.', 'समुदायका सदस्यहरूको मात्र स्थान तोकिन्छ।', 'শুধু কমিউনিটির সদস্যদের র‍্যাঙ্ক করা হয়।', 'Hanya ahli komuniti yang disenaraikan.'],
   nameSw: ['Show my name on the leaderboards', 'إظهار اسمي في لوحات المتصدرين', 'Afficher mon nom dans les classements', 'Mostrar mi nombre en las clasificaciones', 'Mostrar o meu nome nas classificações', 'لیڈر بورڈز پر میرا نام دکھائیں', 'लीडरबोर्ड पर मेरा नाम दिखाएँ', 'Ipakita ang pangalan ko sa mga leaderboard', 'लिडरबोर्डमा मेरो नाम देखाउनुहोस्', 'লিডারবোর্ডে আমার নাম দেখান', 'Tunjukkan nama saya di papan pendahulu'],
   nameSwSub: ['Your first name and the first letter of your last name', 'اسمك الأول وأول حرف من اسم عائلتك', 'Votre prénom et l’initiale de votre nom', 'Tu nombre y la inicial de tu apellido', 'O seu primeiro nome e a inicial do apelido', 'آپ کا پہلا نام اور آخری نام کا پہلا حرف', 'आपका पहला नाम और उपनाम का पहला अक्षर', 'Ang unang pangalan mo at unang titik ng apelyido', 'तपाईंको पहिलो नाम र थरको पहिलो अक्षर', 'আপনার প্রথম নাম ও পদবির প্রথম অক্ষর', 'Nama pertama dan huruf pertama nama akhir anda'],
@@ -95,7 +96,10 @@ function _dbdW(k, d) { const dep = _dbdLent(); let w = null; try { w = dep.words
 function _dbdCust() { const c = S.loggedIn || (typeof getSession === 'function' ? getSession() : null); return c && c.id && c.session_token ? c : null; }
 // A distance as the page writes it: a whole number without its point, else one decimal; Latin digits in every language.
 function _dbdNum(v) { const n = Math.round((Number(v) || 0) * 10) / 10; return Number.isInteger(n) ? String(n) : n.toFixed(1); }
-function _dbdKm(v) { return _dF('km', _dbdNum(v)); }
+// Every distance in kilometres and miles (the user, 2026-11-28: "show the mileage in miles and km in the leaderboard"); the
+// miles are worked out from the km (1 km = 0.621371 mi), to one decimal.
+const DBD_MI = 0.621371;
+function _dbdKm(v) { return _dF('km', _dbdNum(v)) + ' · ' + _dF('mi', _dbdNum((Number(v) || 0) * DBD_MI)); }
 // A typed number: Arabic and Persian digits and a comma for the point are read too.
 function _dbdRead(v) {
   const s = String(v == null ? '' : v).replace(/[٠-٩]/g, (c) => String(c.charCodeAt(0) - 1632)).replace(/[۰-۹]/g, (c) => String(c.charCodeAt(0) - 1776)).replace(/[٫,]/g, '.').trim();

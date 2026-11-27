@@ -54,7 +54,7 @@ test.describe('riders', () => {
     const rows = p.locator('.dbd-row');
     await expect(rows).toHaveCount(4);
     await expect(rows.nth(0)).toContainText('Lina O.');
-    await expect(rows.nth(0)).toContainText('120 km');
+    await expect(rows.nth(0)).toContainText('120 km · 74.6 mi');
     await expect(rows.nth(1)).toContainText('Member'); // no name without the switch
     await expect(rows.nth(0).locator('svg.bdg-race')).toHaveCount(1); // Gold
     await expect(rows.nth(2).locator('.dbd-r')).toHaveText('3');
@@ -86,17 +86,17 @@ test.describe('riders', () => {
     await page.locator('#hub-pane-board').getByRole('button', { name: 'Longest ride' }).click();
     const p = page$(page);
     await expect(p.locator('.dbd-me-r')).toHaveText('#2');
-    await expect(p.locator('.dbd-me-km')).toHaveText('90 km');
+    await expect(p.locator('.dbd-me-km')).toHaveText('90 km · 55.9 mi'); // in kilometres and miles (2026-11-28)
     await expect(p.locator('.dbd-row.mine')).toContainText('You');
     await expect(p.getByRole('button', { name: 'Women', exact: true })).toHaveAttribute('aria-pressed', 'true'); // the rider's own gender first
     expect(calls.find((c) => c.name === 'distance_board')!.body).toMatchObject({ p_board: 'longest', p_gender: 'female', p_id: 'c1', p_token: 'tok-spec' });
     // their distances: a declined total with the team's reply
-    await expect(p.locator('.dbd-ci')).toContainText('3000 km');
+    await expect(p.locator('.dbd-ci')).toContainText('3000 km · 1864.1 mi');
     await expect(p.locator('.dbd-ci')).toContainText('Declined');
     await expect(p.locator('.dbd-ci')).toContainText('Overlaps your rides');
     // Lifetime shows their own total
     await p.getByRole('button', { name: 'Lifetime' }).click();
-    await expect(p.locator('.dbd-me-km')).toHaveText('90 km'); // ranked: the board's own figure for them
+    await expect(p.locator('.dbd-me-km')).toHaveText('90 km · 55.9 mi'); // ranked: the board's own figure for them
     await p.getByRole('button', { name: 'Longest ride' }).click();
     // the switch
     await p.getByRole('switch', { name: /Show my name/ }).check({ force: true }); // the switch's box is drawn over the hidden input
@@ -108,7 +108,7 @@ test.describe('riders', () => {
     await expect(img).toBeVisible();
     const alt = await img.getAttribute('alt');
     expect(alt).toContain('Longest ride');
-    expect(alt).toContain('90 km');
+    expect(alt).toContain('90 km · 55.9 mi');
     expect(alt).toContain('#2 · Women');
     await page.locator('#badge-pop #shr-go').click();
     await expect.poll(() => page.evaluate('window._shared && window._shared.files && window._shared.files[0].name')).toBe('micromobility-longest.png');
@@ -198,7 +198,7 @@ test.describe('staff', () => {
     // the claim waiting
     const c = h.locator('.dbd-st-c');
     await expect(c).toContainText('Lina Omar');
-    await expect(c).toContainText('142.5 km');
+    await expect(c).toContainText('142.5 km · 88.5 mi');
     await expect(c).toContainText('Garmin ride');
     await c.locator('input[inputmode="decimal"]').fill('140');
     await c.getByRole('textbox', { name: /Reply/ }).fill('Counted to the last full km');

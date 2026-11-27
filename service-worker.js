@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-c51403e0a7';
+const CACHE = 'mmcq-cb715926f2';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -28,7 +28,7 @@ const STAFF_JS = './staff.js?v=9e97b5983a';
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
 const STAFF_PARTS = ["./staff-parts/analytics.js?v=a24fe18ff7","./staff-parts/community.js?v=5a838f7e0d","./staff-parts/bikes.js?v=eb4f7a42d5","./staff-parts/cashier.js?v=6924152a5a","./staff-parts/catalog.js?v=08c5345a69","./staff-parts/inventory.js?v=a56d0410bc","./staff-parts/website.js?v=60c51f9c57","./staff-parts/history.js?v=ea5c7f69e7","./staff-parts/wallet.js?v=4336c7103d","./staff-parts/workshop.js?v=dc4d4b506f","./staff-parts/ambassadors.js?v=8294b5519c","./staff-parts/messages.js?v=0c7b8a1be3","./staff-parts/volunteers.js?v=7abb8ab8d9","./staff-parts/vendors.js?v=6865ca075c","./staff-parts/sessions.js?v=7810a2f572","./staff-parts/lockers.js?v=45da05e876","./staff-parts/ask.js?v=ffa99861b0","./staff-parts/chat.js?v=f175c63be9","./staff-parts/safety.js?v=9a626fff66","./staff-parts/testimonials.js?v=960c4855c3","./staff-parts/market.js?v=e3e7e43911","./staff-parts/store.js?v=6514228f02","./staff-parts/sela.js?v=a7ece2ddf1","./staff-parts/vlap.js?v=3c8739690f","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=6d8a6aff51","./staff-parts/settings.js?v=7652c71768","./staff-parts/fleet.js?v=6c839872d1","./staff-parts/money.js?v=37c7b3c1b9","./staff-parts/desk.js?v=beff71ea83","./staff-parts/deskq.js?v=cc3cd11a1d","./staff-parts/kiosk.js?v=192ce76299","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=75c3a711a1","./staff-parts/announce.js?v=1fefd46a9c","./staff-parts/peopleapps.js?v=5e353f37de","./staff-parts/peoplemore.js?v=180399c3d8","./staff-parts/sessreport.js?v=91207a0af6","./staff-parts/reports.js?v=08b28fbf1d","./staff-parts/door.js?v=d887f832ad"];
-const APP_JS = './app.js?v=9bdacd935e';
+const APP_JS = './app.js?v=0b5e2981ee';
 const APP_CSS = './app.css?v=3ff78bd5d8';
 const SHELL = [
   SHELL_KEY,
