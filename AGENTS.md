@@ -5521,3 +5521,6 @@ the rider switches it on; Gold / Silver / Bronze to each gender's top three; a s
   This year). Its own Analytics view **Distances** (`/analytics/distances`, `S.anView='distances'`, mounted from
   `_applyAnView`), and **Add distance** in every account window's bar for People / Community editors (`_dbdAddFor` ->
   `_dbdStAddFor`, the account already picked; `_dbdStaffDeps` lends the same things to both ways in).
+- **All genders (migration 20261128170000, the user 2026-11-28)**: `distance_board` / `staff_distance_board` take `p_gender
+  'all'`: everyone ranked together. The switch reads All / Men / Women; a signed-out visitor starts on All, a signed-in
+  rider on their own gender. The podium stays per gender (a row's medal is the rider's own).

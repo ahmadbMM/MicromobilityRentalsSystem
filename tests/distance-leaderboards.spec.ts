@@ -62,7 +62,11 @@ test.describe('riders', () => {
     await expect(rows.nth(3).locator('.dbd-r')).toHaveText('3'); // equal distances share the place
     await expect(p.locator('.dbd-me')).toHaveCount(0); // signed out: no own card, no Add a distance
     const first = calls.find((c) => c.name === 'distance_board')!;
-    expect(first.body).toMatchObject({ p_board: 'longest', p_id: null, p_token: null });
+    expect(first.body).toMatchObject({ p_board: 'longest', p_gender: 'all', p_id: null, p_token: null }); // signed out: everyone together
+    await expect(p.getByRole('button', { name: 'All', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await p.getByRole('button', { name: 'Men', exact: true }).click();
+    await expect.poll(() => calls.some((c) => c.name === 'distance_board' && c.body.p_gender === 'male')).toBe(true);
+    await p.getByRole('button', { name: 'All', exact: true }).click();
     // the other boards and the other gender ask again
     await p.getByRole('button', { name: 'Lifetime' }).click();
     await expect.poll(() => calls.filter((c) => c.name === 'distance_board').some((c) => c.body.p_board === 'lifetime')).toBe(true);
@@ -218,6 +222,8 @@ test.describe('staff', () => {
     await expect(h.locator('.dbd-st-title')).toContainText('Distance leaderboards');
     await expect(h.locator('.dbd-st-t').first()).toContainText('Sara Ahmed');
     expect(calls.find((c) => c.name === 'staff_distance_board')!.body).toMatchObject({ p_board: 'longest', p_gender: 'female', p_members: true });
+    await h.getByRole('button', { name: 'All', exact: true }).click(); // all genders together (2026-11-28)
+    await expect.poll(() => calls.some((x) => x.name === 'staff_distance_board' && x.body.p_gender === 'all')).toBe(true);
     // the claim waiting
     const c = h.locator('.dbd-st-c');
     await expect(c).toContainText('Lina Omar');

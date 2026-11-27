@@ -25,6 +25,7 @@ const DBD_T = {
   lifetimeP: ['Kilometres ridden', 'الكيلومترات المقطوعة', 'Kilomètres parcourus', 'Kilómetros recorridos', 'Quilómetros percorridos', 'طے کیے گئے کلومیٹر', 'तय किए गए किलोमीटर', 'Kilometrong nabiyahe', 'पार गरिएका किलोमिटर', 'চালানো কিলোমিটার', 'Kilometer dikayuh'],
   yearP: ['Kilometres this year', 'كيلومترات هذا العام', 'Kilomètres cette année', 'Kilómetros este año', 'Quilómetros este ano', 'اس سال کے کلومیٹر', 'इस साल के किलोमीटर', 'Kilometro ngayong taon', 'यो वर्षका किलोमिटर', 'এই বছরের কিলোমিটার', 'Kilometer tahun ini'],
   men: ['Men', 'الرجال', 'Hommes', 'Hombres', 'Homens', 'مرد', 'पुरुष', 'Lalaki', 'पुरुष', 'পুরুষ', 'Lelaki'],
+  all: ['All', 'الكل', 'Tous', 'Todos', 'Todos', 'سب', 'सभी', 'Lahat', 'सबै', 'সবাই', 'Semua'],
   women: ['Women', 'النساء', 'Femmes', 'Mujeres', 'Mulheres', 'خواتین', 'महिलाएँ', 'Babae', 'महिला', 'নারী', 'Wanita'],
   you: ['You', 'أنت', 'Vous', 'Tú', 'Você', 'آپ', 'आप', 'Ikaw', 'तपाईं', 'আপনি', 'Anda'],
   member: ['Member', 'عضو', 'Membre', 'Miembro', 'Membro', 'رکن', 'सदस्य', 'Miyembro', 'सदस्य', 'সদস্য', 'Ahli'],
@@ -131,7 +132,7 @@ function _dbdOpen(opts) {
   const D = _dbdState(), c = _dbdCust();
   const o = opts || {};
   if (o.board && DBD_BOARDS.includes(o.board)) D.b = o.board;
-  if (!D.g) D.g = c && c.gender === 'female' ? 'female' : c && c.gender === 'male' ? 'male' : 'male';
+  if (!D.g) D.g = c && c.gender === 'female' ? 'female' : c && c.gender === 'male' ? 'male' : 'all'; // signed out: everyone together
   D.open = true; D.from = document.activeElement;
   _dbdPaint();
   const box = document.querySelector('#dbd-page .dbd-box'); if (box) try { box.focus({ preventScroll: true }); } catch (_) {}
@@ -148,7 +149,7 @@ function _dbdClose() {
 }
 function _dbdSet(k, v) {
   const D = _dbdState();
-  if (k === 'b' && DBD_BOARDS.includes(v)) D.b = v; else if (k === 'g' && (v === 'male' || v === 'female')) D.g = v; else return;
+  if (k === 'b' && DBD_BOARDS.includes(v)) D.b = v; else if (k === 'g' && (v === 'male' || v === 'female' || v === 'all')) D.g = v; else return; // 'all': everyone together (2026-11-28)
   const c = _dbdCust(), hit = D.cache[_dbdKey(D.b, D.g)];
   _dbdPaint();
   if (!hit || hit.err || Date.now() - hit.at > 6e4 || hit.forId !== (c ? c.id : '')) _dbdFetch(D.b, D.g);
@@ -210,7 +211,7 @@ function _dbdPaint() {
     <div class="dbd-head"><h2 id="dbd-title" class="dbd-title">${esc(_dT('title'))}</h2><button type="button" class="chrome-x x-close" aria-label="${esc(_dbdW('close', 'Close'))}" data-on-click="${_on('_dbdClose')}">&times;</button></div>
     <div class="dbd-body">
       ${_dbdSwitch('b', DBD_BOARDS.map((b) => [b, _dbdBoardName(b)]), D.b)}
-      ${_dbdSwitch('g', [['male', _dT('men')], ['female', _dT('women')]], D.g)}
+      ${_dbdSwitch('g', [['all', _dT('all')], ['male', _dT('men')], ['female', _dT('women')]], D.g)}
       ${sub ? `<p class="dbd-sub">${esc(sub)}</p>` : ''}
       ${c ? _dbdMineHtml(c, hit) : ''}
       ${_dbdRowsHtml(hit)}
@@ -226,7 +227,7 @@ function _dbdShare() {
   const M = D.mine && D.mine.forId === c.id ? D.mine : null, medal = D.b === 'longest' && M && M.medal ? DBD_MEDAL[M.medal] : null;
   const label = D.b === 'month' ? _dT('monthP') : D.b === 'lifetime' ? _dT('lifetimeP') : D.b === 'year' ? _dT('yearP') : _dT('longest');
   _shrLoad({ kind: 'dist', sub0: {
-    label, name: _dbdKm(me.km), level: '#' + me.r + ' · ' + _dT(D.g === 'female' ? 'women' : 'men'), date: '',
+    label, name: _dbdKm(me.km), level: D.g === 'all' ? '#' + me.r : '#' + me.r + ' · ' + _dT(D.g === 'female' ? 'women' : 'men'), date: '',
     medal: medal ? { icon: medal[0], color: medal[1] } : { icon: 'road', color: 'green' },
     file: 'micromobility-' + D.b, foot: DBD_LINK,
   } });
@@ -346,7 +347,7 @@ async function _dbdStLoad() {
 }
 function _dbdStSet(k, v) {
   const T = _dbdSt();
-  if (k === 'b' && DBD_BOARDS.includes(v)) T.b = v; else if (k === 'g' && (v === 'male' || v === 'female')) T.g = v; else if (k === 'members') T.members = !!v; else return;
+  if (k === 'b' && DBD_BOARDS.includes(v)) T.b = v; else if (k === 'g' && (v === 'male' || v === 'female' || v === 'all')) T.g = v; else if (k === 'members') T.members = !!v; else return;
   T.board = null; _dbdStPaint(); _dbdStLoad();
 }
 function _dbdStIn(k, id, el) { const T = _dbdSt(); (T[k] = T[k] || {})[id] = String(el.value || ''); }
@@ -373,7 +374,7 @@ function _dbdStPaint() {
         ${can ? `<button type="button" class="btn-sm btn-primary" data-on-click="${_on('_dbdStAnswer', x.id, true)}">${esc(_dT('sApprove'))}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_dbdStAnswer', x.id, false)}">${esc(_dT('sDecline'))}</button>` : ''}
       </div></div>`).join('')}</div>` : ''}
     ${sw('b', DBD_BOARDS.map((b) => [b, _dbdBoardName(b)]), T.b)}
-    <div class="filter-row cmy-mb6">${[['male', _dT('men')], ['female', _dT('women')]].map(([v, w]) => `<button type="button" class="filter-pill${v === T.g ? ' active' : ''}" aria-pressed="${v === T.g}" data-on-click="${_on('_dbdStSet', 'g', v)}">${esc(w)}</button>`).join('')}
+    <div class="filter-row cmy-mb6">${[['all', _dT('all')], ['male', _dT('men')], ['female', _dT('women')]].map(([v, w]) => `<button type="button" class="filter-pill${v === T.g ? ' active' : ''}" aria-pressed="${v === T.g}" data-on-click="${_on('_dbdStSet', 'g', v)}">${esc(w)}</button>`).join('')}
       <button type="button" class="filter-pill dbd-st-mem${T.members ? ' active' : ''}" aria-pressed="${T.members}" data-on-click="${_on('_dbdStSet', 'members', !T.members)}">${esc(_dT('sMembers'))}</button></div>
     ${T.board ? `<table class="data-table dbd-st-t"><tbody>${T.board.map((r) => `<tr><td class="dbd-st-r">${esc(String(r.r))}</td>
       <td><button type="button" class="link-btn" data-on-click="${_on('_dbdStAcct', r.id)}"><bdi>${esc(r.name || '')}</bdi></button>${r.member ? '' : ` <span class="dbd-pill">${esc(_dT('sNotMember'))}</span>`}</td>
