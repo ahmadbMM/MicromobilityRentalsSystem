@@ -5435,6 +5435,14 @@ after 30 minutes on the TV); a bike on the booking also clears it, for when the 
   `SUPABASE_URL` / `SUPABASE_KEY` from app.src.html into display.js (CI's freshness step diffs it), so the staging copy
   names its own database. It keeps its secret in `localStorage.mm_tv_token`; `unknown` starts pairing again. Sizes as
   `bikeFit`; an Any rider with no area shows Road's and Hybrid's sizes; a new card is marked for 25 s with a WebAudio chime.
+- **The board (2026-11-28, migration 20261128120000).** The user picked a departure board from four layouts (cards, size
+  racks, board, next-up; the canvas https://claude.ai/artifact/DDmd7RgZaCC7DDRz9tkcAo), for staff only, dark, with every
+  extra: one row per rider, oldest first (Booking, Rider, Height, Bike, Size, Waiting, EN + AR heads); the minutes since
+  `at` by the database's clock, amber from `LATE_MIN` (10); a yellow NEW tag and the chime for 25 s; a party's rows kept
+  together at its first check-in under one area-coloured bar (`order()`, the feed's `g`: 8 hex of md5 of the group, else
+  the account, only for a party of 2+; a feed without it shows rows alone); lost connection dims the list under a fixed
+  amber banner with the time of the last list (`#tv-off-at`). 10 rows fill the screen; 11-26 two columns (`tv-d2`),
+  27-42 three without height and type (`tv-d3`), then "+N more". The page repaints each new minute so the waits move.
 - **Staff.** Bookings > **Collection** (`S.queueView='collect'`, `/bookings/collection`): the pill counts `_coWaitRows()`
   (core: `_coWaits`, `_coAreaOf`, `_coSids` = the strip's session or all of today's). The page (`renderCollect`, desk part)
   lists by this device's area (`cq_co_area`), Handed / Undo (Handed recently), and To Road / To Hybrid/Mountain for a Kids,

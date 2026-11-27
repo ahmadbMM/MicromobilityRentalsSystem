@@ -12,8 +12,9 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   var POLL_MS = 3000;          // paired: a few bytes per tick while nothing moves (the etag)
   var PAIR_POLL_MS = 3000;     // waiting for staff to type the code
   var OFFLINE_AFTER_MS = 15000;
-  var NEW_FOR_MS = 25000;      // a new card stays marked this long
-  var MAX_CARDS = 42;
+  var NEW_FOR_MS = 25000;      // a new row stays marked this long
+  var MAX_ROWS = 42;
+  var LATE_MIN = 10;           // waiting this many minutes turns amber
 
   var AREA = {
     road: { en: 'Road bikes', ar: 'دراجات الطريق' },
@@ -28,7 +29,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
   var KIDS_MAX = 144;
 
   var token = read(TOKEN_KEY);
-  var etag = null, last = null, lastOk = Date.now(), clockSkew = 0, seen = null, newAt = {}, timer = 0, audio = null;
+  var etag = null, last = null, lastOk = Date.now(), clockSkew = 0, seen = null, newAt = {}, timer = 0, audio = null, paintedAt = 0, paintedMin = -1;
 
   function read(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
   function write(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) { /* storage off: pairs again after a reload */ } }
@@ -89,7 +90,10 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     }, function () { offline(); later(tick, POLL_MS * 2); });
   }
   function offline() {
-    if (Date.now() - lastOk > OFFLINE_AFTER_MS) document.body.classList.add('tv-offline');
+    if (Date.now() - lastOk > OFFLINE_AFTER_MS) {
+      document.body.classList.add('tv-offline');
+      var at = $('tv-off-at'); if (at) at.textContent = clock(lastOk);
+    }
   }
 
   function applyChart(d) {
@@ -115,25 +119,77 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     if (!(Number(r.h) > 0)) return r.size ? '<div class="tv-size">' + esc(r.size) + '</div>' : '';
     if (ty === 'Any' && !r.area) { // an Any booking still to be sent to one area: both charts' sizes
       var a = fit(r.h, 'Road'), b = fit(r.h, 'Hybrid');
-      if (a === b) return '<div class="tv-size">' + sizeWord(a) + '</div>';
-      return '<div class="tv-size tv-two"><small>Road</small>' + sizeWord(a) + '<br><small>Hybrid</small>' + sizeWord(b) + '</div>';
+      if (a === b) return '<div class="tv-size' + (a === 'Kids' ? ' tv-kids' : '') + '">' + sizeWord(a) + '</div>';
+      return '<div class="tv-size tv-two"><span>Road ' + esc(a) + '</span><span>Hybrid ' + esc(b) + '</span></div>';
     }
     var z = fit(r.h, ty === 'Any' ? (area === 'road' ? 'Road' : 'Hybrid') : ty);
-    return '<div class="tv-size' + (z === 'Kids' ? ' tv-two' : '') + '">' + sizeWord(z) + '</div>';
+    return '<div class="tv-size' + (z === 'Kids' ? ' tv-kids' : '') + '">' + sizeWord(z) + '</div>';
   }
-  function sizeWord(z) { return z === 'Kids' ? 'Kids<br><span lang="ar">أطفال</span>' : esc(z); }
+  function sizeWord(z) { return z === 'Kids' ? 'Kids <span lang="ar">أطفال</span>' : esc(z); }
 
+  // the sessions' English names on one line, their Arabic names on the next (one line held both and cut the Arabic off)
   function sessLine(d) {
     var s = d.sessions || [];
-    if (!s.length) return 'No session today · <span lang="ar" dir="rtl">لا توجد جلسة اليوم</span>';
-    return s.map(function (x) { return esc(x.title || x.day || '') + (x.title_ar ? ' · <span lang="ar" dir="rtl">' + esc(x.title_ar) + '</span>' : ''); }).join('  |  ');
+    if (!s.length) return 'No session today';
+    return s.map(function (x) { return esc(x.title || x.day || ''); }).join('  |  ');
   }
+  function sessLineAr(d) {
+    var s = d.sessions || [];
+    if (!s.length) return 'لا توجد جلسة اليوم';
+    return s.map(function (x) { return esc(x.title_ar || ''); }).filter(Boolean).join('  |  ');
+  }
+
+  // the board (the user's pick, 2026-11-28): one row per rider, oldest first, a party's rows kept together at its first
+  // check-in (the feed's 'g', 20261128120000; without it every row stands alone). Up to 10 rows fill the screen; more
+  // split into two columns (26), then three (42) with height and type left out; past that "+N more".
+  function order(rows) {
+    var groups = [], at = {};
+    rows.forEach(function (r) {
+      var k = r.g ? 'g' + r.g : 'r' + r.id;
+      if (!at[k]) { at[k] = { list: [] }; groups.push(at[k]); }
+      at[k].list.push(r);
+    });
+    var out = [];
+    groups.forEach(function (g, gi) {
+      g.list.sort(function (a, b) { return (Number(a.pos) || 0) - (Number(b.pos) || 0); });
+      g.list.forEach(function (r, i) {
+        var n = g.list.length;
+        out.push({ r: r, gi: gi, join: n < 2 ? '' : i === 0 ? ' tv-pf' : i === n - 1 ? ' tv-pl' : ' tv-pm' });
+      });
+    });
+    return out;
+  }
+  function waitMins(r) {
+    var t = Date.parse(r.at || '');
+    if (!(t > 0)) return null;
+    return Math.max(0, Math.floor((Date.now() + clockSkew - t) / 60000));
+  }
+  function rowHtml(x, d, multi) {
+    var r = x.r, ty = TYPE[r.type] || [r.type || 'Any', ''], isNew = !!newAt[r.id], m = waitMins(r);
+    var of = Number(r.of) > 1 ? '<span class="tv-of">' + Number(r.pos) + ' of ' + Number(r.of) + '</span>' : '';
+    var sess = '';
+    if (multi) { var s = (d.sessions || []).filter(function (y) { return y.id === r.sid; })[0]; if (s) sess = '<span class="tv-of">' + esc(s.title || '') + '</span>'; }
+    var tags = (isNew ? '<span class="tv-newtag">NEW · <span lang="ar">جديد</span></span>' : '') +
+      (!r.area ? '<span class="tv-tag">Either area · <span lang="ar" dir="rtl">أي منطقة</span></span>' : '');
+    var wait = isNew || m === 0 ? 'Just now' : m == null ? '' : m + ' min';
+    return '<li class="tv-row' + x.join + (x.gi % 2 ? ' tv-alt' : '') + (isNew ? ' tv-new' : '') + '">' +
+      '<div class="tv-num">#' + esc(r.n == null ? '' : r.n) + '</div>' +
+      '<div class="tv-who"><bdi class="tv-name">' + esc(r.name || '') + '</bdi>' + of + sess + tags + '</div>' +
+      '<div class="tv-h">' + (Number(r.h) > 0 ? Number(r.h) + ' <span>cm</span>' : '') + '</div>' +
+      '<div class="tv-type">' + esc(ty[0]) + (ty[1] ? ' <span lang="ar" dir="rtl">' + esc(ty[1]) + '</span>' : '') + '</div>' +
+      '<div class="tv-sz">' + sizeHtml(r, d.area === 'road' ? 'road' : 'hm') + '</div>' +
+      '<div class="tv-wait' + (m != null && m >= LATE_MIN && !isNew ? ' tv-late' : '') + '">' + wait + '</div>' +
+      '</li>';
+  }
+  var HEADS = '<div class="tv-heads"><div>BOOKING <span lang="ar">الحجز</span></div><div>RIDER <span lang="ar">الراكب</span></div>' +
+    '<div class="tv-h">HEIGHT <span lang="ar">الطول</span></div><div class="tv-type">BIKE <span lang="ar">الدراجة</span></div>' +
+    '<div class="tv-c">SIZE <span lang="ar">المقاس</span></div><div class="tv-r">WAITING <span lang="ar">الانتظار</span></div></div>';
 
   function paint(d) {
     var area = d.area === 'road' ? 'road' : 'hm', A = AREA[area];
     var rows = (d.rows || []).slice();
     var now = Date.now();
-    // a card that was not there on the last paint is new (not on the first paint after a load)
+    // a row that was not there on the last paint is new (not on the first paint after a load)
     var ids = {}, fresh = false;
     rows.forEach(function (r) {
       ids[r.id] = 1;
@@ -143,49 +199,53 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     seen = ids;
     if (fresh) chime();
 
-    var many = rows.length > MAX_CARDS ? rows.length - MAX_CARDS : 0;
-    var shown = many ? rows.slice(0, MAX_CARDS) : rows;
-    var dens = shown.length <= 12 ? '' : shown.length <= 20 ? ' tv-d2' : ' tv-d3';
+    var list = order(rows);
+    var many = list.length > MAX_ROWS ? list.length - MAX_ROWS : 0;
+    var shown = many ? list.slice(0, MAX_ROWS) : list;
+    var cols = shown.length <= 10 ? 1 : shown.length <= 26 ? 2 : 3;
     var multi = (d.sessions || []).length > 1;
-    document.body.className = 'tv-' + area + dens;
+    document.body.className = 'tv-' + area + (cols > 1 ? ' tv-d' + cols : '');
+    paintedAt = now;
 
-    var head = '<header class="tv-top"><div class="tv-area"><div class="tv-area-en">' + esc(A.en) + (d.label ? ' · ' + esc(d.label) : '') + '</div>' +
-      '<div class="tv-area-ar" lang="ar" dir="rtl">' + esc(A.ar) + '</div>' +
-      '<div class="tv-sess">' + sessLine(d) + '</div></div>' +
-      '<div class="tv-side"><div class="tv-clock" id="tv-clock">' + clock() + '</div>' +
-      '<div class="tv-count">' + rows.length + ' waiting · <span lang="ar" dir="rtl">' + rows.length + ' بالانتظار</span></div>' +
-      '<div class="tv-off">Reconnecting… · <span lang="ar" dir="rtl">جارٍ إعادة الاتصال…</span></div></div></header>';
+    var head = '<header class="tv-top"><div class="tv-area"><span class="tv-area-en">' + esc(A.en) + '</span>' +
+      '<span class="tv-area-ar" lang="ar" dir="rtl">' + esc(A.ar) + '</span></div>' +
+      '<div class="tv-mid"><div class="tv-sess">' + sessLine(d) + (d.label ? ' · ' + esc(d.label) : '') + '</div>' +
+      '<div class="tv-sub">' + (sessLineAr(d) ? '<span lang="ar" dir="rtl">' + sessLineAr(d) + '</span> · ' : '') + 'Oldest first</div></div>' +
+      '<div class="tv-side"><div class="tv-count"><b>' + rows.length + '</b> waiting<br><span lang="ar" dir="rtl">بالانتظار</span></div>' +
+      '<div class="tv-clock" id="tv-clock">' + clock() + '</div></div></header>' +
+      '<div class="tv-off" role="status"><span>Reconnecting · this list is from <b id="tv-off-at">' + clock(paintedAt) + '</b> and may be out of date</span>' +
+      '<span lang="ar" dir="rtl">جارٍ إعادة الاتصال · القائمة قد لا تكون محدّثة</span></div>';
 
     var body;
     if (!rows.length) {
-      body = '<section class="tv-empty"><div class="tv-empty-en">No riders waiting for a bike</div>' +
+      body = '<section class="tv-empty"><svg class="tv-bike" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="17" r="3.5"></circle><circle cx="18.5" cy="17" r="3.5"></circle><path d="M5.5 17 9 9h6l3.5 8M9 9 12 17h1.5M15 9l-1-3h-2.5"></path></svg>' +
+        '<div class="tv-empty-en">Nobody waiting for a bike</div>' +
         '<div class="tv-empty-ar" lang="ar" dir="rtl">لا يوجد أحد بانتظار دراجته</div></section>';
     } else {
-      body = '<ol class="tv-grid">' + shown.map(function (r) {
-        var ty = TYPE[r.type] || [r.type || 'Any', ''];
-        var of = Number(r.of) > 1 ? ' <span class="tv-of">· ' + Number(r.pos) + ' of ' + Number(r.of) + '</span>' : '';
-        var sess = multi ? (function () { var s = (d.sessions || []).filter(function (x) { return x.id === r.sid; })[0]; return s ? '<span>' + esc(s.title || '') + '</span>' : ''; })() : '';
-        var either = !r.area ? '<span class="tv-tag">Either area · <span lang="ar" dir="rtl">أي منطقة</span></span>' : '';
-        return '<li class="tv-card' + (newAt[r.id] ? ' tv-new' : '') + '">' +
-          '<div class="tv-num">#' + esc(r.n == null ? '' : r.n) + '</div>' +
-          sizeHtml(r, area) +
-          '<div class="tv-who"><bdi>' + esc(r.name || '') + '</bdi>' + of + '</div>' +
-          '<div class="tv-spec">' + (Number(r.h) > 0 ? '<span><b>' + Number(r.h) + '</b> cm</span>' : '') +
-          '<span><b>' + esc(ty[0]) + '</b>' + (ty[1] ? ' <span lang="ar" dir="rtl">' + esc(ty[1]) + '</span>' : '') + '</span>' + either + sess + '</div>' +
-          '</li>';
-      }).join('') + (many ? '<li class="tv-more">+' + many + ' more · <span lang="ar" dir="rtl">+' + many + ' آخرون</span></li>' : '') + '</ol>';
+      var per = Math.ceil(shown.length / cols), parts = [];
+      for (var c = 0; c < cols; c++) {
+        var chunk = shown.slice(c * per, (c + 1) * per);
+        if (chunk.length) parts.push('<div class="tv-col">' + HEADS + '<ol class="tv-list">' + chunk.map(function (x) { return rowHtml(x, d, multi); }).join('') + '</ol></div>');
+      }
+      body = '<section class="tv-board">' + parts.join('') + '</section>' +
+        (many ? '<div class="tv-more">+' + many + ' more · <span lang="ar" dir="rtl">+' + many + ' آخرون</span></div>' : '');
     }
     $('tv').innerHTML = head + body;
   }
 
   // the Riyadh time by the database's clock (a TV's own clock is often wrong)
-  function clock() {
-    var t = new Date(Date.now() + clockSkew + 3 * 3600000);
+  function clock(ms) {
+    var t = new Date((ms || Date.now()) + clockSkew + 3 * 3600000);
     var h = t.getUTCHours(), m = t.getUTCMinutes();
     return (h % 12 || 12) + ':' + (m < 10 ? '0' : '') + m + (h < 12 ? ' AM' : ' PM');
   }
   function paintClock() { var c = $('tv-clock'); if (c) c.textContent = clock(); }
-  setInterval(function () { paintClock(); if (last) { var n = Date.now(); if (Object.keys(newAt).some(function (k) { return n - newAt[k] > NEW_FOR_MS; })) paint(last); } }, 5000);
+  setInterval(function () {
+    paintClock();
+    if (!last || document.body.classList.contains('tv-offline')) return;
+    var n = Date.now(), mi = Math.floor((n + clockSkew) / 60000);
+    if (mi !== paintedMin || Object.keys(newAt).some(function (k) { return n - newAt[k] > NEW_FOR_MS; })) { paintedMin = mi; paint(last); }
+  }, 5000);
 
   // two short notes (the calling screen's chime, app.src.html _qclChime); a TV that refuses sound stays silent
   function chime() {

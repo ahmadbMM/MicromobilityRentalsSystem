@@ -190,22 +190,49 @@ test.describe('@build the collection-area TV page', () => {
     expect(await page.evaluate(`localStorage.getItem('mm_tv_token')`)).toBe('tok-0123456789abcdef0123456789');
     // paired: the Hybrid & Mountain area
     await expect(page.locator('.tv-area-en')).toHaveText('Hybrid & Mountain bikes', { timeout: 10000 });
-    const card = (n: number) => page.locator('.tv-card').filter({ hasText: `#${n}` });
-    await expect(page.locator('.tv-card')).toHaveCount(3);
-    await expect(card(1)).toContainText('Sara · 1 of 2');
+    const card = (n: number) => page.locator('.tv-row').filter({ hasText: `#${n}` });
+    await expect(page.locator('.tv-row')).toHaveCount(3);
+    await expect(card(1)).toContainText('Sara1 of 2');
+    await expect(card(1).locator('.tv-wait')).toHaveText('19 min'); // checked in 14:41, the database says 15:00
+    await expect(card(1).locator('.tv-wait')).toHaveClass(/tv-late/); // 10 minutes and more turn amber
     await expect(card(1).locator('.tv-size')).toHaveText('M');
     await expect(card(2).locator('.tv-size')).toContainText('Road'); // an Any rider with no area: Road S and Hybrid M
     await expect(card(2).locator('.tv-size')).toContainText('S');
     await expect(card(2)).toContainText('Either area');
     await expect(card(3).locator('.tv-size')).toContainText('Kids');
-    await expect(page.locator('.tv-card.tv-new')).toHaveCount(0); // the first paint marks nobody
+    await expect(page.locator('.tv-row.tv-new')).toHaveCount(0); // the first paint marks nobody
     // the feed sends its etag back; the fourth rider arrives marked new
     await expect(card(4)).toBeVisible({ timeout: 10000 });
     await expect(card(4).locator('.tv-size')).toHaveText('L');
     await expect(card(4)).toHaveClass(/tv-new/);
+    await expect(card(4)).toContainText('NEW');
+    await expect(card(4).locator('.tv-wait')).toHaveText('Just now');
     const feeds = asked.filter((a) => a.fn === 'screen_feed');
     expect(feeds[0].body).toMatchObject({ p_token: 'tok-0123456789abcdef0123456789', p_etag: null });
     expect(feeds.some((f) => f.body.p_etag === 'e1')).toBe(true);
+  });
+
+  test('a party stays together under its first check-in, and a lost connection dims the list with its age', async ({ page }) => {
+    let down = false;
+    await tv(page, [
+      { state: 'pairing', code: '482913' },
+      PAIRED([R(1, 'Sara'), R(2, 'Faisal', { pos: 1, of: 3, g: 'aa11bb22' }), R(3, 'Lina'),
+        R(4, 'Omar', { pos: 3, of: 3, g: 'aa11bb22', type: 'Kids', h: 130 }), R(5, 'Noura', { pos: 2, of: 3, g: 'aa11bb22' })], 'e1'),
+    ]);
+    await page.route('**/rpc/screen_feed', (route) => (down ? route.abort() : route.fallback()));
+    await page.goto('/display.html');
+    await expect(page.locator('.tv-row')).toHaveCount(5, { timeout: 10000 });
+    await expect(page.locator('.tv-row .tv-name')).toHaveText(['Sara', 'Faisal', 'Noura', 'Omar', 'Lina']);
+    await expect(page.locator('.tv-row.tv-pf')).toContainText('Faisal');
+    await expect(page.locator('.tv-row.tv-pm')).toContainText('Noura');
+    await expect(page.locator('.tv-row.tv-pl')).toContainText('Omar');
+    await expect(page.locator('.tv-row').filter({ hasText: 'Omar' }).locator('.tv-size')).toContainText('Kids');
+    await expect(page.locator('.tv-off')).toBeHidden();
+    down = true;
+    await expect(page.locator('body')).toHaveClass(/tv-offline/, { timeout: 30000 });
+    await expect(page.locator('.tv-off')).toBeVisible();
+    await expect(page.locator('.tv-off')).toContainText('may be out of date');
+    await expect(page.locator('.tv-row')).toHaveCount(5); // the last list stays up, dimmed
   });
 
   test('an unpaired TV (unknown secret) starts pairing again', async ({ page }) => {
