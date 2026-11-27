@@ -130,7 +130,7 @@ test.describe('@customer:members the Community tab', () => {
     await page.setViewportSize({ width: 320, height: 720 });
     await member(page);
     await page.evaluate(`setLang('tl')`); // the longest words of the ten
-    await expect(page.locator('#hub-body .hub-secs').getByRole('button')).toHaveText(['Mga session', 'Mga hamon', 'Leaderboard', 'Club']);
+    await expect(page.locator('#hub-body .hub-secs').getByRole('button')).toHaveText(['Mga session', 'Mga hamon', 'Ranggo', 'Club']);
     const geo = await page.locator('#hub-body .hub-secs').evaluate((bar) => {
       const r = bar.getBoundingClientRect(), b = [...bar.querySelectorAll('button')].map((x) => x.getBoundingClientRect());
       const els = [...bar.querySelectorAll('button')];

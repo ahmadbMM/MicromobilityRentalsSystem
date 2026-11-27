@@ -22373,10 +22373,11 @@ function _dbdLoad(run){
   // What distance-board.js takes from the page's words, named here so the build keeps them on the riders' side.
   window._dbdDeps={words:()=>({share:t('tcShare'),close:t('closeWord')})};
   if(window._dbdOpen){run();return;}
+  S._dbdRun=run; // the latest ask waits for the file: a repaint while it loads (the staff section's host is drawn anew) is not lost
   if(S._dbdLoading)return;S._dbdLoading=true;
   const s=document.createElement('script');s.src='/distance-board.js?v='+DBD_V;
-  s.onload=()=>{S._dbdLoading=false;if(window._dbdOpen)run();};
-  s.onerror=()=>{S._dbdLoading=false;s.remove();toast(t('mbErr'),'error');}; // not fetched (offline): said, and the next tap asks again
+  s.onload=()=>{S._dbdLoading=false;const r=S._dbdRun;S._dbdRun=null;if(window._dbdOpen&&r)r();};
+  s.onerror=()=>{S._dbdLoading=false;S._dbdRun=null;s.remove();toast(t('mbErr'),'error');}; // not fetched (offline): said, and the next tap asks again
   document.head.appendChild(s);
 }
 function _dbdPage(o){_dbdLoad(()=>window._dbdOpen(o));}
@@ -74423,8 +74424,8 @@ function _anBoardPaint(){
 // The distance leaderboards' staff section (distance-board.js): the boards with full names, the claims to approve, the
 // distances staff enter. Filled into #an-dist-host after every paint of the Leaderboard view.
 function _dbdStaffMount(){
-  const h=document.getElementById('an-dist-host');if(!h)return;
-  _dbdLoad(()=>{if(h.isConnected)window._dbdStaff(h,{
+  if(!document.getElementById('an-dist-host'))return;
+  _dbdLoad(()=>{const h=document.getElementById('an-dist-host');if(h)window._dbdStaff(h,{
     find:q=>(S.customers||[]).filter(c=>c&&!c.merged_into&&!c.archived_at&&_dkXAcctHit(c,q)),
     name:id=>(_custById(id)||{}).name||'',open:id=>openAccountHistory(id),can:()=>_editOk('community'),
     ask:(body,fn)=>confirmDialog({title:t('removeBtn'),body:esc(body),confirmLabel:t('removeBtn'),confirmClass:'btn-red',onConfirm:fn}),

@@ -16800,7 +16800,7 @@ body:not(.view-staff) #tab-members .hub-secs .hub-sec:first-child:nth-last-child
 body:not(.view-staff) #tab-members .hub-secs .hub-sec:first-child:nth-last-child(4) ~ .hub-sec{padding:0 12px;}
 @media (max-width:520px){
   body:not(.view-staff) #tab-members .hub-secs .hub-sec:first-child:nth-last-child(4),
-  body:not(.view-staff) #tab-members .hub-secs .hub-sec:first-child:nth-last-child(4) ~ .hub-sec{padding:0 4px;font-size:var(--fs-13);}
+  body:not(.view-staff) #tab-members .hub-secs .hub-sec:first-child:nth-last-child(4) ~ .hub-sec{flex:1 1 auto;padding:0 6px;font-size:var(--fs-13);}
 }
 .hub-lb .hub-lb-go{display:grid;gap:8px;margin-top:12px;}
 body.dbd-on{overflow:hidden;}
@@ -16858,5 +16858,5 @@ body.dbd-on{overflow:hidden;}
 .dbd-st .dbd-st-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 6px;font-size:var(--sf-fs-17,17px);font-weight:600;}
 @media (max-width:360px){
   body:not(.view-staff) #tab-members .hub-secs .hub-sec:first-child:nth-last-child(4),
-  body:not(.view-staff) #tab-members .hub-secs .hub-sec:first-child:nth-last-child(4) ~ .hub-sec{padding:0 2px;font-size:var(--fs-12);letter-spacing:-.01em;}
+  body:not(.view-staff) #tab-members .hub-secs .hub-sec:first-child:nth-last-child(4) ~ .hub-sec{padding:0 4px;font-size:var(--fs-12);}
 }

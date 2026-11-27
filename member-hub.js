@@ -35,7 +35,7 @@ const HUB_T = {
   secSess: ['Sessions', 'الجلسات', 'Séances', 'Sesiones', 'Sessões', 'سیشن', 'सत्र', 'Mga session', 'सत्रहरू', 'সেশন', 'Sesi'],
   secGoals: ['Challenges', 'التحديات', 'Défis', 'Retos', 'Desafios', 'چیلنجز', 'चुनौतियाँ', 'Mga hamon', 'चुनौतीहरू', 'চ্যালেঞ্জ', 'Cabaran'],
   secClub: ['Club', 'النادي', 'Club', 'Club', 'Clube', 'کلب', 'क्लब', 'Club', 'क्लब', 'ক্লাব', 'Kelab'],
-  secBoard: ['Leaderboard', 'المتصدرون', 'Classement', 'Clasificación', 'Classificação', 'لیڈر بورڈ', 'लीडरबोर्ड', 'Leaderboard', 'लिडरबोर्ड', 'লিডারবোর্ড', 'Pendahulu'],
+  secBoard: ['Leaderboard', 'المتصدرون', 'Classement', 'Clasificación', 'Classificação', 'لیڈر بورڈ', 'लीडरबोर्ड', 'Ranggo', 'लिडरबोर्ड', 'লিডারবোর্ড', 'Pendahulu'],
   lbT: ['Distance leaderboards', 'لوحات المسافات', 'Classements des distances', 'Clasificaciones de distancia', 'Classificações de distância', 'فاصلے کے لیڈر بورڈز', 'दूरी के लीडरबोर्ड', 'Mga leaderboard ng distansya', 'दूरीका लिडरबोर्ड', 'দূরত্বের লিডারবোর্ড', 'Papan pendahulu jarak'],
   lbLongest: ['Longest ride', 'أطول رحلة', 'Plus longue sortie', 'Ruta más larga', 'Pedalada mais longa', 'سب سے لمبی سواری', 'सबसे लंबी सवारी', 'Pinakamahabang biyahe', 'सबैभन्दा लामो सवारी', 'দীর্ঘতম রাইড', 'Kayuhan terpanjang'],
   lbLifetime: ['Lifetime', 'كل الأوقات', 'Depuis le début', 'Total', 'Total', 'اب تک', 'अब तक', 'Kabuuan', 'अहिलेसम्म', 'সর্বমোট', 'Sepanjang masa'],
