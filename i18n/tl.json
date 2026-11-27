@@ -1941,6 +1941,8 @@
   "bdgNotePh": "Mababasa niya ito kasama ng badge",
   "bdgGiveBtn": "Ibigay ang badge",
   "bdgGiven": "Naibigay ang badge: {0} kay {1}",
+  "bdgGiveMany": "Ibigay ang mga badge",
+  "bdgGivenMany": "Naibigay ang mga badge: {0} kay {1}",
   "bdgTaken": "Binawi ang badge: {0} kay {1}",
   "bdgTake": "Bawiin",
   "bdgTakeSure": "Bawiin ito?",

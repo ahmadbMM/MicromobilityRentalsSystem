@@ -984,7 +984,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdgSub:'Riders see their badges on their account page. Give one to a rider with the Badges button on their row in Accounts, or here to everyone who rode a ride.',bdgNone:'No badges yet',
   bdgGiveTitle:'Give a badge',bdgAllHeld:'They hold every badge there is to give.',
   bdgNoteLabel:'Note for the rider',bdgNotePh:'They read it with the badge',
-  bdgGiveBtn:'Give badge',bdgGiven:'Badge given: {0} to {1}',
+  bdgGiveBtn:'Give badge',bdgGiven:'Badge given: {0} to {1}',bdgGiveMany:'Give badges',bdgGivenMany:'Badges given: {0} to {1}',
   bdgTaken:'Badge taken back: {0} from {1}',bdgTake:'Take back',
   bdgTakeSure:'Take it back?',bdgByRiding:'Earned by riding',
   bdgGivenLine:'Given {0} by {1}',bdgAuto:'Earned by riding',
@@ -1710,7 +1710,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdgSub:'يرى الراكبون أوسمتهم في صفحة حسابهم. امنح راكباً وساماً من زر الأوسمة في صفّه ضمن الحسابات، أو امنحه هنا لكل من ركب في جولة.',bdgNone:'لا أوسمة بعد',
   bdgGiveTitle:'منح وسام',bdgAllHeld:'لديه كل الأوسمة المتاحة للمنح.',
   bdgNoteLabel:'ملاحظة للراكب',bdgNotePh:'يقرؤها مع الوسام',
-  bdgGiveBtn:'منح الوسام',bdgGiven:'مُنح الوسام: {0} إلى {1}',
+  bdgGiveBtn:'منح الوسام',bdgGiven:'مُنح الوسام: {0} إلى {1}',bdgGiveMany:'منح الأوسمة',bdgGivenMany:'مُنحت الأوسمة: {0} إلى {1}',
   bdgTaken:'سُحب الوسام: {0} من {1}',bdgTake:'سحب',
   bdgTakeSure:'سحبه؟',bdgByRiding:'مكتسب بالركوب',
   bdgGivenLine:'مُنح في {0} بواسطة {1}',bdgAuto:'يُكتسب بالركوب',
@@ -80121,9 +80121,11 @@ function _bdgStripHtml(cid){
 function _bdgStrips(){const hs=document.querySelectorAll('.bdg-strip-host');if(!hs.length)return;_bdgLoad();hs.forEach(h=>{h.innerHTML=_bdgStripHtml(h.dataset.cid);});}
 // One rider's badges: what they hold (given, with who gave it and the note; or earned by riding) and
 // the ones left to give, each with an optional note the rider reads beside it.
-function _bdgOpen(cid){S._bdgDlg={cid,pick:null,note:''};S._bdgSure=null;_bdgLoad(!!S._bdgErr);_bdgDlgPaint(true);} // the read first, so the dialog opens on Loading; after a failed read, opening it is a retry
+function _bdgOpen(cid){S._bdgDlg={cid,pick:[],note:''};S._bdgSure=null;_bdgLoad(!!S._bdgErr);_bdgDlgPaint(true);} // the read first, so the dialog opens on Loading; after a failed read, opening it is a retry
 function _bdgDlgClose(){S._bdgDlg=null;S._bdgSure=null;closeConfirm();}
-function _bdgPick(id){const d=S._bdgDlg;if(!d)return;d.pick=d.pick===id?null:id;_bdgDlgPaint();}
+// Several badges may be picked and given together (the user, 2026-11-27: "allow to give multiple badges
+// and select them at the same time"): a tap adds a badge to the pick, a second tap takes it out.
+function _bdgPick(id){const d=S._bdgDlg;if(!d)return;const p=d.pick||(d.pick=[]),i=p.indexOf(id);if(i<0)p.push(id);else p.splice(i,1);_bdgDlgPaint();}
 // Each badge's "i" (the owner, 2026-09-29), as beside a bike type: it opens, under the badge, what it
 // means, how it is earned and a dated badge's windows; a second tap closes it.
 function _bdgInfoTog(id){const d=S._bdgDlg;if(!d)return;d.info=d.info===id?null:id;_bdgDlgPaint();}
@@ -80150,33 +80152,39 @@ function _bdgDlgPaint(open){
   // A badge with an earning rule comes from riding (the owner, 2026-10-02: "dont let staff give them
   // manually"); an admin may give any (_bdgCanGive). One already earned by riding is not offered again.
   const give=_bdgSorted().filter(b=>_bdgCanGive(b)&&!has.has(b.id)&&!(b.auto&&ride.has(b.slug))&&!(b.system&&all.has(b.slug)));
+  const gIds=new Set(give.map(b=>b.id));d.pick=(d.pick||[]).filter(id=>gIds.has(id)); // one given meanwhile drops out of the pick
+  const pk=d.pick,one=pk.length===1?_bdgById(pk[0]):null;
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__bdgDlg_1",_EV,_EL)}"><div class="confirm-box bdg-dlg" role="dialog" aria-modal="true" aria-label="${esc(t('mrBadgesTitle'))} · ${esc(c.name||'')}">
     <div class="bdg-head"><div class="bdg-title">${t('mrBadgesTitle')} · ${esc(c.name||'')}</div><button type="button" class="bdg-x x-close" data-on-click="${_on("_bdgDlgClose")}" aria-label="${esc(t('closeBtn'))}">&times;</button></div>
     ${!_bdgOk()?`<div class="am-meta">${t(S._bdgBusy?'loadingLabel':S._bdgErr?'errConnection':'bdgNoDb')}</div>`:`
     <div class="bdg-list">${rows||`<div class="am-meta">${t('bdgNone')}</div>`}</div>
     <h2 class="form-title bdg-sec">${t('bdgGiveTitle')}</h2>
-    ${give.length?`<div class="bdg-grid">${give.map(b=>`<div class="bdg-pickw"><button type="button" class="bdg-pick${d.pick===b.id?' on':''}" aria-pressed="${d.pick===b.id}" title="${esc(_bdgDesc(b))}" data-on-click="${_on("_bdgPick",b.id)}">${_bdgMedal(b.icon,_bdgCol(b))}<span>${esc(_bdgName(b))}</span></button>${_bdgInfoBtn(b)}</div>${_bdgInfoPanel(b)}`).join('')}</div>`:`<div class="am-meta">${t('bdgAllHeld')}</div>`}
-    ${d.pick?`<div class="bdg-desc am-meta">${esc(_bdgDesc(_bdgById(d.pick)))}</div><div class="form-group bdg-notef"><label for="bdg-note">${t('bdgNoteLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><input id="bdg-note" type="text" maxlength="140" value="${esc(d.note)}" placeholder="${esc(t('bdgNotePh'))}" data-on-input="${_on("_on__bdgDlg_2",_EV,_EL)}"></div>`:''}`}
-    <div class="bdg-foot"><button type="button" class="btn-secondary" data-on-click="${_on("_bdgDlgClose")}">${t('closeBtn')}</button>${d.pick?`<button type="button" class="btn-primary" data-on-click="${_on("_bdgGive")}">${t('bdgGiveBtn')}</button>`:''}</div>
+    ${give.length?`<div class="bdg-grid">${give.map(b=>`<div class="bdg-pickw"><button type="button" class="bdg-pick${pk.includes(b.id)?' on':''}" aria-pressed="${pk.includes(b.id)}" title="${esc(_bdgDesc(b))}" data-on-click="${_on("_bdgPick",b.id)}">${_bdgMedal(b.icon,_bdgCol(b))}<span>${esc(_bdgName(b))}</span></button>${_bdgInfoBtn(b)}</div>${_bdgInfoPanel(b)}`).join('')}</div>`:`<div class="am-meta">${t('bdgAllHeld')}</div>`}
+    ${pk.length?`${one?`<div class="bdg-desc am-meta">${esc(_bdgDesc(one))}</div>`:''}<div class="form-group bdg-notef"><label for="bdg-note">${t('bdgNoteLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><input id="bdg-note" type="text" maxlength="140" value="${esc(d.note)}" placeholder="${esc(t('bdgNotePh'))}" data-on-input="${_on("_on__bdgDlg_2",_EV,_EL)}"></div>`:''}`}
+    <div class="bdg-foot"><button type="button" class="btn-secondary" data-on-click="${_on("_bdgDlgClose")}">${t('closeBtn')}</button>${pk.length?`<button type="button" class="btn-primary" data-on-click="${_on("_bdgGive")}">${t(pk.length>1?'bdgGiveMany':'bdgGiveBtn')}</button>`:''}</div>
   </div></div>`;
 }
 async function _bdgGive(){
-  const d=S._bdgDlg;if(!d||!d.pick||d.busy)return;
-  const b=_bdgById(d.pick),c=_custById(d.cid)||{};if(!_bdgCanGive(b))return;
-  const row={customer_id:d.cid,badge_id:b.id,note:String(d.note||'').trim().slice(0,140)||null,awarded_by:(_opName()||'Staff').slice(0,60),awarded_at:new Date().toISOString()};
-  const rows=_bdgWithLower([row]);
+  const d=S._bdgDlg;if(!d||!d.pick||!d.pick.length||d.busy)return;
+  const bs=d.pick.map(_bdgById).filter(b=>b&&_bdgCanGive(b)),c=_custById(d.cid)||{};if(!bs.length)return;
+  const note=String(d.note||'').trim().slice(0,140)||null,by=(_opName()||'Staff').slice(0,60),at=new Date().toISOString();
+  const mine=bs.map(b=>({customer_id:d.cid,badge_id:b.id,note,awarded_by:by,awarded_at:at}));
+  const rows=_bdgWithLower(mine);
   d.busy=true;
   const r=await sb.from('customer_badges').upsert(rows,{onConflict:'customer_id,badge_id',ignoreDuplicates:true}).select('customer_id,badge_id');
   d.busy=false;
   if(_writeErr(r,'give badge'))return;
-  d.pick=null;d.note='';
+  d.pick=[];d.note='';
   const went=_bdgWentIn(rows,r);_bdgMerge(went);
-  if(!went.includes(row)){_bdgAfter(row.customer_id);_bdgLoad(true);return;} // given meanwhile from another desk: theirs stands, read it
-  const msg=t('bdgGiven').replace('{0}',_bdgName(b)).replace('{1}',c.name||'');
+  const gave=mine.filter(x=>went.includes(x));
+  if(gave.length<mine.length)_bdgLoad(true); // some given meanwhile from another desk: theirs stand, read them
+  if(!gave.length){_bdgAfter(d.cid);return;}
+  const names=gave.map(x=>_bdgName(_bdgById(x.badge_id))).join(', ');
+  const msg=t(gave.length>1?'bdgGivenMany':'bdgGiven').replace('{0}',names).replace('{1}',c.name||'');
   toast(msg);
-  pushUndo(msg,async()=>{if(!await _bdgUngive(went,'undo badge'))return false;_bdgDrop(went);_bdgAfter(row.customer_id);});
-  _bdgAfter(row.customer_id);
+  pushUndo(msg,async()=>{if(!await _bdgUngive(went,'undo badge'))return false;_bdgDrop(went);_bdgAfter(d.cid);});
+  _bdgAfter(d.cid);
 }
 async function _bdgTake(cid,bid){
   const old=(S.custBadges||[]).find(x=>x.customer_id===cid&&x.badge_id===bid),b=_bdgById(bid),c=_custById(cid)||{};

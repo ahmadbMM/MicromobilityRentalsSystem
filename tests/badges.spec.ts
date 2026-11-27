@@ -116,6 +116,28 @@ test.describe('@staff:community badges', () => {
     expect(EMOJI.test(await modal(page).innerText())).toBe(false);
   });
 
+  test('several badges are picked at once and given in one write, with one undo', async ({ page }) => {
+    await staff(page);
+    await community(page, 'accounts');
+    const sent = writes(page, 'customer_badges');
+    await page.locator('#am-cust-rows .am-row[data-cust="c1"] .am-bdg-btn').click();
+    await modal(page).locator('.bdg-pick', { hasText: 'Marshal' }).click();
+    await modal(page).locator('.bdg-pick', { hasText: 'Night Owl' }).click();
+    await modal(page).locator('.bdg-pick', { hasText: 'Champion' }).click();
+    await modal(page).locator('.bdg-pick', { hasText: 'Champion' }).click(); // a second tap takes it out again
+    await expect(modal(page).locator('.bdg-pick.on')).toHaveText(['Marshal', 'Night Owl']);
+    await expect(modal(page).locator('.bdg-desc')).toHaveCount(0); // one badge's line only when one is picked
+    await modal(page).locator('#bdg-note').fill('Great night');
+    await modal(page).getByRole('button', { name: 'Give badges', exact: true }).click();
+    await expect.poll(() => sent.length).toBe(1);
+    const body = sent[0].postDataJSON() as { badge_id: string; note: string }[];
+    expect(body.map((x) => x.badge_id).sort()).toEqual(['bd_cnight', 'bd_marshal']);
+    expect(body.every((x) => x.note === 'Great night')).toBe(true);
+    await expect(modal(page).locator('.bdg-pick')).toHaveText(['Champion']);
+    await expect(modal(page).locator('.bdg-pick.on')).toHaveCount(0);
+    expect(await page.evaluate('(S.undoStack.at(-1)||{}).label')).toBe('Badges given: Marshal, Night Owl to Lina Haddad');
+  });
+
   test('Community > Badges lists holders, gives to everyone who rode a ride, and an admin\'s new badge is drawn', async ({ page }) => {
     await staff(page);
     await community(page, 'badges');

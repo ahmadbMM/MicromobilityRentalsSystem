@@ -1941,6 +1941,8 @@
   "bdgNotePh": "Ele lê junto com a conquista",
   "bdgGiveBtn": "Conceder conquista",
   "bdgGiven": "Conquista concedida: {0} para {1}",
+  "bdgGiveMany": "Conceder conquistas",
+  "bdgGivenMany": "Conquistas concedidas: {0} para {1}",
   "bdgTaken": "Conquista retirada: {0} de {1}",
   "bdgTake": "Retirar",
   "bdgTakeSure": "Retirar mesmo?",

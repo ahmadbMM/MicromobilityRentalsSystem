@@ -1941,6 +1941,8 @@
   "bdgNotePh": "Mereka membacanya bersama lencana",
   "bdgGiveBtn": "Beri lencana",
   "bdgGiven": "Lencana diberikan: {0} kepada {1}",
+  "bdgGiveMany": "Beri lencana",
+  "bdgGivenMany": "Lencana diberikan: {0} kepada {1}",
   "bdgTaken": "Lencana ditarik balik: {0} daripada {1}",
   "bdgTake": "Tarik balik",
   "bdgTakeSure": "Tarik balik lencana ini?",

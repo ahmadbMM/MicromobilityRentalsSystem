@@ -1941,6 +1941,8 @@
   "bdgNotePh": "La leerá junto a la insignia",
   "bdgGiveBtn": "Otorgar insignia",
   "bdgGiven": "Insignia otorgada: {0} a {1}",
+  "bdgGiveMany": "Otorgar insignias",
+  "bdgGivenMany": "Insignias otorgadas: {0} a {1}",
   "bdgTaken": "Insignia retirada: {0} a {1}",
   "bdgTake": "Retirar",
   "bdgTakeSure": "¿Retirarla?",

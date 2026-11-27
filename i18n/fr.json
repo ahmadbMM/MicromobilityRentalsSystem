@@ -1941,6 +1941,8 @@
   "bdgNotePh": "Il le lira avec le badge",
   "bdgGiveBtn": "Donner le badge",
   "bdgGiven": "Badge donné : {0} à {1}",
+  "bdgGiveMany": "Donner les badges",
+  "bdgGivenMany": "Badges donnés : {0} à {1}",
   "bdgTaken": "Badge retiré : {0} à {1}",
   "bdgTake": "Retirer",
   "bdgTakeSure": "Le retirer ?",
