@@ -54,15 +54,16 @@ test.describe('@customer:members the Community tab', () => {
   });
 
   // The user, 2026-11-20: "divide the community section in the booking app into sections becuz it looks so cluttered now".
-  test('three parts behind a switch: Sessions first, then Challenges and Club, each card in its own part', async ({ page }) => {
+  test('four parts behind a switch: Sessions first, then Challenges, Leaderboard and Club, each card in its own part', async ({ page }) => {
     const sent = rpcSent(page);
     await member(page);
     const sw = page.locator('#hub-body .hub-secs');
-    await expect(sw.getByRole('button')).toHaveText(['Sessions', 'Challenges', 'Club']);
+    await expect(sw.getByRole('button')).toHaveText(['Sessions', 'Challenges', 'Leaderboard', 'Club']);
     await expect(sw.getByRole('button', { name: 'Sessions' })).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#hub-pane-sess')).toBeVisible();
     await expect(page.locator('#hub-pane-goals')).toBeHidden();
     await expect(page.locator('#hub-pane-club')).toBeHidden();
+    await expect(page.locator('#hub-pane-board')).toBeHidden();
     // where each card lives
     await expect(page.locator('#hub-pane-sess .hub-hero')).toHaveCount(1);
     await expect(page.locator('#hub-pane-sess .hub-soon')).toHaveCount(2);
@@ -72,6 +73,7 @@ test.describe('@customer:members the Community tab', () => {
     await expect(page.locator('#hub-pane-goals .hub-card', { hasText: 'Community goal' })).toHaveCount(1);
     await expect(page.locator('#hub-pane-club .rsg-card')).toHaveCount(1);
     await expect(page.locator('#hub-pane-club [data-on-click*="_hubInvite"]')).toHaveCount(1);
+    await expect(page.locator('#hub-pane-board .hub-lb button')).toHaveText(['Longest ride', 'Lifetime', 'This year']); // the distance leaderboards (2026-11-27)
     await expect(page.locator('#hub-body > .hub-card')).toHaveCount(0); // every card is in a part
     // a switch shows one part and draws nothing (the parts are the same nodes, nothing is read), kept over a repaint
     const feeds = sent.filter((x) => x.fn === 'hub_feed').length;
@@ -95,7 +97,7 @@ test.describe('@customer:members the Community tab', () => {
     await expect(page.locator('#hub-pane-club')).toBeVisible();
     // in Arabic, the switch's own words
     await page.evaluate(`setLang('ar')`);
-    await expect(page.locator('#hub-body .hub-secs').getByRole('button')).toHaveText(['الجلسات', 'التحديات', 'النادي']);
+    await expect(page.locator('#hub-body .hub-secs').getByRole('button')).toHaveText(['الجلسات', 'التحديات', 'المتصدرون', 'النادي']);
   });
 
   test('a way in that shows the member\'s challenge opens Challenges; a part with nothing in it has no button', async ({ page }) => {
@@ -114,12 +116,12 @@ test.describe('@customer:members the Community tab', () => {
     await page.evaluate(`S._hub.d.me=null;S._hub.d.goals=[];S._hub.d.club=null;_hubRender()`);
     await expect(page.locator('#hub-body .hub-p5')).toHaveCount(1); // still under five rides here: the path is its card
     await page.evaluate(`window._hubDeps.p5=()=>null;_hubRender()`);
-    await expect(page.locator('#hub-body .hub-secs').getByRole('button')).toHaveText(['Sessions', 'Club']);
+    await expect(page.locator('#hub-body .hub-secs').getByRole('button')).toHaveText(['Sessions', 'Leaderboard', 'Club']);
     await expect(page.locator('#hub-pane-goals')).toHaveCount(0);
     await expect(page.locator('#hub-pane-sess')).toBeVisible(); // the part picked has gone: the first one shows
     // and with Sessions alone, no switch at all (the Community chat, a corner button since 2026-11-20, is off here too, as on a
     // database without the chat)
-    await page.evaluate(`S._rsgOff=true;S._chtOff=true;window._hubDeps.inv=null;_hubRender()`);
+    await page.evaluate(`S._rsgOff=true;S._chtOff=true;window._hubDeps.inv=null;window._hubDeps.board=null;_hubRender()`);
     await expect(page.locator('#hub-body .hub-secs')).toHaveCount(0);
     await expect(page.locator('#hub-pane-sess')).toBeVisible();
   });
@@ -128,13 +130,13 @@ test.describe('@customer:members the Community tab', () => {
     await page.setViewportSize({ width: 320, height: 720 });
     await member(page);
     await page.evaluate(`setLang('tl')`); // the longest words of the ten
-    await expect(page.locator('#hub-body .hub-secs').getByRole('button')).toHaveText(['Mga session', 'Mga hamon', 'Club']);
+    await expect(page.locator('#hub-body .hub-secs').getByRole('button')).toHaveText(['Mga session', 'Mga hamon', 'Leaderboard', 'Club']);
     const geo = await page.locator('#hub-body .hub-secs').evaluate((bar) => {
       const r = bar.getBoundingClientRect(), b = [...bar.querySelectorAll('button')].map((x) => x.getBoundingClientRect());
       const els = [...bar.querySelectorAll('button')];
       return { n: b.length, oneRow: new Set(b.map((x) => Math.round(x.top))).size === 1, inside: b.every((x) => x.left >= r.left - 0.5 && x.right <= r.right + 0.5), h: b.map((x) => Math.round(x.height)), fits: els.every((x) => x.scrollWidth <= x.clientWidth), side: document.documentElement.scrollWidth <= window.innerWidth };
     });
-    expect(geo).toEqual({ n: 3, oneRow: true, inside: true, h: [44, 44, 44], fits: true, side: true }); // each word on one line
+    expect(geo).toEqual({ n: 4, oneRow: true, inside: true, h: [44, 44, 44, 44], fits: true, side: true }); // each word on one line
   });
 
   test('one read, no sub-menu, the page\'s Back, nothing about anyone else, and no sideways scroll', async ({ page }) => {

@@ -11479,5 +11479,14 @@
   "beAddPersonBtn": "Tambah peserta",
   "sntPhNc": "Contohnya: loker 4 dan 9 tersekat; sistem bunyi lewat tiba",
   "scanExpressPartyNc": "✓ {0} peserta telah daftar masuk",
-  "ciAddScanHintNc": "Imbas tiket setiap peserta yang daftar masuk bersama #{0} {1}."
+  "ciAddScanHintNc": "Imbas tiket setiap peserta yang daftar masuk bersama #{0} {1}.",
+  "bdLrGold": "Kayuhan Terpanjang: Emas",
+  "bdLrGoldD": "Memegang kayuhan tunggal terpanjang yang diukur dalam kalangan ahli",
+  "bdLrGoldA": "Tempat pertama di papan pendahulu Kayuhan terpanjang, lelaki dan wanita berasingan. Ia berpindah kepada sesiapa yang mengayuh lebih jauh: kayuhan dikira sebaik sahaja pasukan kami merekod atau meluluskan jaraknya.",
+  "bdLrSilver": "Kayuhan Terpanjang: Perak",
+  "bdLrSilverD": "Memegang kayuhan tunggal kedua terpanjang yang diukur dalam kalangan ahli",
+  "bdLrSilverA": "Tempat kedua di papan pendahulu Kayuhan terpanjang, lelaki dan wanita berasingan. Ia berpindah kepada sesiapa yang mengayuh lebih jauh: kayuhan dikira sebaik sahaja pasukan kami merekod atau meluluskan jaraknya.",
+  "bdLrBronze": "Kayuhan Terpanjang: Gangsa",
+  "bdLrBronzeD": "Memegang kayuhan tunggal ketiga terpanjang yang diukur dalam kalangan ahli",
+  "bdLrBronzeA": "Tempat ketiga di papan pendahulu Kayuhan terpanjang, lelaki dan wanita berasingan. Ia berpindah kepada sesiapa yang mengayuh lebih jauh: kayuhan dikira sebaik sahaja pasukan kami merekod atau meluluskan jaraknya."
 }

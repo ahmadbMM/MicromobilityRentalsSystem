@@ -11479,5 +11479,14 @@
   "beAddPersonBtn": "Adicionar participante",
   "sntPhNc": "Por exemplo: cacifos 4 e 9 encravados; o som chegou atrasado",
   "scanExpressPartyNc": "✓ {0} participantes com check-in",
-  "ciAddScanHintNc": "Digitalize o bilhete de cada participante que faz check-in com #{0} {1}."
+  "ciAddScanHintNc": "Digitalize o bilhete de cada participante que faz check-in com #{0} {1}.",
+  "bdLrGold": "Pedalada mais longa: Ouro",
+  "bdLrGoldD": "Ter a pedalada mais longa medida entre os membros",
+  "bdLrGoldA": "O primeiro lugar da classificação Pedalada mais longa, homens e mulheres à parte. Passa para quem pedalar mais longe: uma pedalada conta quando a nossa equipa regista ou aprova a distância.",
+  "bdLrSilver": "Pedalada mais longa: Prata",
+  "bdLrSilverD": "Ter a segunda pedalada mais longa medida entre os membros",
+  "bdLrSilverA": "O segundo lugar da classificação Pedalada mais longa, homens e mulheres à parte. Passa para quem pedalar mais longe: uma pedalada conta quando a nossa equipa regista ou aprova a distância.",
+  "bdLrBronze": "Pedalada mais longa: Bronze",
+  "bdLrBronzeD": "Ter a terceira pedalada mais longa medida entre os membros",
+  "bdLrBronzeA": "O terceiro lugar da classificação Pedalada mais longa, homens e mulheres à parte. Passa para quem pedalar mais longe: uma pedalada conta quando a nossa equipa regista ou aprova a distância."
 }

@@ -187,6 +187,11 @@ export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrit
       // console (every Account open asks it; deep-smoke and modal-smoke count console errors); tests/learn-ladder.spec.ts
       // gives the database without it (PGRST202) by name
       if (body === undefined && rpc[1] === 'learn_ladder') body = null;
+      // the distance leaderboards (20261127180000): empty boards unless a spec gives an answer, and no 404 in the console
+      // (Analytics > Leaderboard asks the staff board on every paint); tests/distance-leaderboards.spec.ts
+      if (body === undefined && rpc[1] === 'staff_distance_board') body = [];
+      if (body === undefined && rpc[1] === 'distance_board') body = { ok: true, rows: [] };
+      if (body === undefined && rpc[1] === 'customer_distances') body = { ok: true, best: null, lifetime: 0, year: 0, public: false, member: true, medal: null, claims: [] };
       if (body === undefined && rpc[1] === 'list_sessions') body = fixtures['sessions'] || [];
       // The desk's one-call functions (production since 2026-09; the page no longer carries the
       // multi-write fallbacks, 2026-10-04): answered as the server would, from the fixtures.

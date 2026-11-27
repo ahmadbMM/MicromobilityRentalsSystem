@@ -5468,3 +5468,40 @@ instead of On bike; no height and no size; "participants" instead of riders. Spe
   has no bikes. Checklists and crew roles were already gated (`CK_BIKE`, `_crwRoles`).
 - Not changed: the Height report in Analytics, aria labels that say riders (ciPartyLabel, ciChainLabel), Hand-over
   (off while GIVE_BIKE_STEP is false).
+
+## Distance leaderboards (2026-11-27, migration 20261127180000)
+
+The user: "create a new leaderboard badge that has the longest distance in one ride ... put a leaderboard in the website and
+app for it and allow people to share them on social media apps ... change the badge if someone surpassed the account badge
+holder so its dynamic", then "add a leaderboard for distance lifetime and distance year to date and let customers apply to it
+manually by add image or pdf that proves it and staff approves it". Their picks: staff enter a rider's distance and riders
+claim one (any ride anywhere, a proof required) for staff to approve; men and women apart; members only; a name only after
+the rider switches it on; Gold / Silver / Bronze to each gender's top three; a share picture with the board's link.
+
+- **Four boards** (`distance_board(p_board, p_gender, p_id, p_token)`, anon may read): `longest` (longest single ride ever),
+  `month` (longest single ride this month), `lifetime` and `year` (every km added up; Riyadh's calendar). What counts
+  (`_lr_rides`): every finished bike session once (paid, free or own bike; Saturday = its group's `_km`, else 20 / 40; any
+  other bike ride = `_km.all`, none without one: the same count as `_rideKm`), plus every approved `ride_distances` row:
+  kind `ride` (all four boards) or `total` over `date_from..ride_date` (lifetime; year when it starts this year). Members
+  only, not merged / archived / deletion asked, male or female (`_lr_board`). **Equal figures share a rank** (`rank()`).
+  Rows carry r, km, name (only with `customers.board_public`, as "Sara A.", `_lr_name`), medal, mine. No count of riders.
+- **Podium**: `lr_gold` / `lr_silver` / `lr_bronze` (held only, automatic; medals `lr1`-`lr3` in `BDG_RACE`, "#1" on the
+  green ribbon) go to each gender's three longest **measured** single rides (staff entered or approved: the session
+  distances tie dozens at 40 km, the user's pick), the earlier ride first on a tie (`_lr_podium`). `_lr_podium_sync()`
+  moves them (customer_badges, awarded_by `record`) with an Updates row (push_words `lrtop` / `lrpassed`) after every
+  write here and every 15 minutes (cron `mm-long-ride`). `_bdgCanGive` refuses them: staff never give them by hand.
+  A measured ride also brings the 20-100 km Clubs it reaches (`_lr_clubs`, awarded_by `distance`, taken back with it).
+- **Riders**: `distance-board.js` (`DBD_V`, lazy, its own words in 11 languages), opened by `_dbdPage(o)` from the Community
+  tab's 4th part **Leaderboard** (member-hub.js `HUB_SECS` `board`, `_hubBoard`, `_hubDeps.board`) and from **/leaderboard**
+  (`BOARD_PATH`, `{root:true,board:true}`: the start page with the boards over it; in APP_ROUTE of the middleware, the
+  service worker and serve.mjs). Own place, Show my name (`customer_board_public`), Share (badge-share.js kind `dist`,
+  `sub.foot` = the board's address), Add a distance (`customer_distance_claim`: one ride 1-300 km or a total up to 50,000,
+  dates up to today in the last five years, a picture or PDF required, three waiting at most), Your distances with Take
+  back (`customer_distance_withdraw`). The page sits at z-index 190, under every pop-up (the claim form is #confirm-modal).
+- **Staff**: Analytics > Leaderboard, section `#an-dist-host` filled by `_dbdStaffMount` -> `_dbdStaff(host, dep)`: claims
+  waiting (View proof, km to count, reply, Approve / Decline: `staff_distance_answer`), the board with full names
+  (`staff_distance_board`, members only or everyone), Add a distance for an account (`staff_distance_add`), entries with
+  Remove (`staff_distance_remove`). People / Community editors only (`_staff_mod('community', true)`).
+- **Privacy**: notice 2026-11-27 rows (no re-ask); the proof is dropped the moment staff answer (`_ride_dist_drop_proof`).
+- `tests/distance-leaderboards.spec.ts`; the suite's stub answers `distance_board`, `customer_distances` and
+  `staff_distance_board` empty by default.

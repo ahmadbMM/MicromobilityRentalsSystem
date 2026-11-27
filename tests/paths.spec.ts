@@ -33,8 +33,9 @@ test.describe('the three lists of addresses agree', () => {
     const staffPaths = [...app.match(/const STAFF_PATHS=\{([^}]+)\}/)![1].matchAll(/:'([a-z/-]+)'/g)].map((m) => m[1].split('/')[0]);
     const custPaths = [...app.match(/const CUST_PATHS=\{([^}]+)\}/)![1].matchAll(/:'([a-z-]+)'/g)].map((m) => m[1]);
     const signupPath = app.match(/const SIGNUP_PATH='([a-z-]+)'/)![1]; // Create account, a signed-out visitor's second page
+    const boardPath = app.match(/const BOARD_PATH='([a-z-]+)'/)![1]; // the distance leaderboards' link (2026-11-27)
     const legacy = ['community', 'customers']; // People's addresses before 2026-11-06, still served and still opening it
-    const router = [...new Set([...staffPaths, ...legacy, ...custPaths, signupPath])].sort();
+    const router = [...new Set([...staffPaths, ...legacy, ...custPaths, signupPath, boardPath])].sort();
     const mw = names(read('functions/_middleware.js'), /const APP_ROUTE = \/\^\\\/\(\?:([a-z|-]+)\)/);
     const sw = names(read('service-worker.js'), /const APP_ROUTE = \/\^\\\/\(\?:([a-z|-]+)\)/);
     expect(mw).toEqual(router);

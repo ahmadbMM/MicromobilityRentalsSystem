@@ -11479,5 +11479,14 @@
   "beAddPersonBtn": "Añadir participante",
   "sntPhNc": "Por ejemplo: taquillas 4 y 9 atascadas; el equipo de sonido llegó tarde",
   "scanExpressPartyNc": "✓ {0} participantes registrados",
-  "ciAddScanHintNc": "Escanea la entrada de cada participante que se registra con #{0} {1}."
+  "ciAddScanHintNc": "Escanea la entrada de cada participante que se registra con #{0} {1}.",
+  "bdLrGold": "Ruta más larga: Oro",
+  "bdLrGoldD": "Tener la ruta más larga medida entre los miembros",
+  "bdLrGoldA": "El primer puesto de la clasificación Ruta más larga, hombres y mujeres por separado. Pasa a quien ruede más lejos: una ruta cuenta cuando nuestro equipo introduce o aprueba su distancia.",
+  "bdLrSilver": "Ruta más larga: Plata",
+  "bdLrSilverD": "Tener la segunda ruta más larga medida entre los miembros",
+  "bdLrSilverA": "El segundo puesto de la clasificación Ruta más larga, hombres y mujeres por separado. Pasa a quien ruede más lejos: una ruta cuenta cuando nuestro equipo introduce o aprueba su distancia.",
+  "bdLrBronze": "Ruta más larga: Bronce",
+  "bdLrBronzeD": "Tener la tercera ruta más larga medida entre los miembros",
+  "bdLrBronzeA": "El tercer puesto de la clasificación Ruta más larga, hombres y mujeres por separado. Pasa a quien ruede más lejos: una ruta cuenta cuando nuestro equipo introduce o aprueba su distancia."
 }

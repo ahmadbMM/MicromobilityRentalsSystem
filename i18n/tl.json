@@ -11479,5 +11479,14 @@
   "beAddPersonBtn": "Magdagdag ng kalahok",
   "sntPhNc": "Halimbawa: naipit ang locker 4 at 9; nahuli ang sound system",
   "scanExpressPartyNc": "✓ {0} kalahok ang naka-check in",
-  "ciAddScanHintNc": "I-scan ang ticket ng bawat kalahok na nagche-check in kasama ni #{0} {1}."
+  "ciAddScanHintNc": "I-scan ang ticket ng bawat kalahok na nagche-check in kasama ni #{0} {1}.",
+  "bdLrGold": "Pinakamahabang Biyahe: Gold",
+  "bdLrGoldD": "Hawak ang pinakamahabang nasukat na biyahe sa mga miyembro",
+  "bdLrGoldA": "Ang unang puwesto sa leaderboard ng Pinakamahabang biyahe, hiwalay ang lalaki at babae. Lilipat ito sa mas malayo ang mabibiyahe: bibilang ang biyahe kapag naitala o inaprubahan ng aming team ang distansya nito.",
+  "bdLrSilver": "Pinakamahabang Biyahe: Silver",
+  "bdLrSilverD": "Hawak ang ikalawang pinakamahabang nasukat na biyahe sa mga miyembro",
+  "bdLrSilverA": "Ang ikalawang puwesto sa leaderboard ng Pinakamahabang biyahe, hiwalay ang lalaki at babae. Lilipat ito sa mas malayo ang mabibiyahe: bibilang ang biyahe kapag naitala o inaprubahan ng aming team ang distansya nito.",
+  "bdLrBronze": "Pinakamahabang Biyahe: Bronze",
+  "bdLrBronzeD": "Hawak ang ikatlong pinakamahabang nasukat na biyahe sa mga miyembro",
+  "bdLrBronzeA": "Ang ikatlong puwesto sa leaderboard ng Pinakamahabang biyahe, hiwalay ang lalaki at babae. Lilipat ito sa mas malayo ang mabibiyahe: bibilang ang biyahe kapag naitala o inaprubahan ng aming team ang distansya nito."
 }

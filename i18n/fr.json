@@ -11479,5 +11479,14 @@
   "beAddPersonBtn": "Ajouter un participant",
   "sntPhNc": "Par exemple : casiers 4 et 9 bloqués ; la sono est arrivée en retard",
   "scanExpressPartyNc": "✓ {0} participants enregistrés",
-  "ciAddScanHintNc": "Scannez le billet de chaque participant qui s’enregistre avec #{0} {1}."
+  "ciAddScanHintNc": "Scannez le billet de chaque participant qui s’enregistre avec #{0} {1}.",
+  "bdLrGold": "Plus longue sortie : Or",
+  "bdLrGoldD": "Détenir la plus longue sortie mesurée parmi les membres",
+  "bdLrGoldA": "La première place du classement Plus longue sortie, hommes et femmes à part. Elle passe à qui roule plus loin : une sortie compte dès que notre équipe saisit ou valide sa distance.",
+  "bdLrSilver": "Plus longue sortie : Argent",
+  "bdLrSilverD": "Détenir la deuxième plus longue sortie mesurée parmi les membres",
+  "bdLrSilverA": "La deuxième place du classement Plus longue sortie, hommes et femmes à part. Elle passe à qui roule plus loin : une sortie compte dès que notre équipe saisit ou valide sa distance.",
+  "bdLrBronze": "Plus longue sortie : Bronze",
+  "bdLrBronzeD": "Détenir la troisième plus longue sortie mesurée parmi les membres",
+  "bdLrBronzeA": "La troisième place du classement Plus longue sortie, hommes et femmes à part. Elle passe à qui roule plus loin : une sortie compte dès que notre équipe saisit ou valide sa distance."
 }

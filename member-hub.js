@@ -35,6 +35,11 @@ const HUB_T = {
   secSess: ['Sessions', 'الجلسات', 'Séances', 'Sesiones', 'Sessões', 'سیشن', 'सत्र', 'Mga session', 'सत्रहरू', 'সেশন', 'Sesi'],
   secGoals: ['Challenges', 'التحديات', 'Défis', 'Retos', 'Desafios', 'چیلنجز', 'चुनौतियाँ', 'Mga hamon', 'चुनौतीहरू', 'চ্যালেঞ্জ', 'Cabaran'],
   secClub: ['Club', 'النادي', 'Club', 'Club', 'Clube', 'کلب', 'क्लब', 'Club', 'क्लब', 'ক্লাব', 'Kelab'],
+  secBoard: ['Leaderboard', 'المتصدرون', 'Classement', 'Clasificación', 'Classificação', 'لیڈر بورڈ', 'लीडरबोर्ड', 'Leaderboard', 'लिडरबोर्ड', 'লিডারবোর্ড', 'Pendahulu'],
+  lbT: ['Distance leaderboards', 'لوحات المسافات', 'Classements des distances', 'Clasificaciones de distancia', 'Classificações de distância', 'فاصلے کے لیڈر بورڈز', 'दूरी के लीडरबोर्ड', 'Mga leaderboard ng distansya', 'दूरीका लिडरबोर्ड', 'দূরত্বের লিডারবোর্ড', 'Papan pendahulu jarak'],
+  lbLongest: ['Longest ride', 'أطول رحلة', 'Plus longue sortie', 'Ruta más larga', 'Pedalada mais longa', 'سب سے لمبی سواری', 'सबसे लंबी सवारी', 'Pinakamahabang biyahe', 'सबैभन्दा लामो सवारी', 'দীর্ঘতম রাইড', 'Kayuhan terpanjang'],
+  lbLifetime: ['Lifetime', 'كل الأوقات', 'Depuis le début', 'Total', 'Total', 'اب تک', 'अब तक', 'Kabuuan', 'अहिलेसम्म', 'সর্বমোট', 'Sepanjang masa'],
+  lbYear: ['This year', 'هذا العام', 'Cette année', 'Este año', 'Este ano', 'اس سال', 'इस साल', 'Ngayong taon', 'यो वर्ष', 'এই বছর', 'Tahun ini'],
   next: ['Your next session', 'جلستك القادمة', 'Votre prochaine séance', 'Tu próxima sesión', 'A sua próxima sessão', 'آپ کا اگلا سیشن', 'आपका अगला सत्र', 'Ang susunod mong session', 'तपाईंको अर्को सत्र', 'আপনার পরের সেশন', 'Sesi anda seterusnya'],
   nextOpen: ['Next session to book', 'الجلسة القادمة المتاحة للحجز', 'Prochaine séance à réserver', 'Próxima sesión para reservar', 'Próxima sessão para reservar', 'بکنگ کے لیے اگلا سیشن', 'बुक करने के लिए अगला सत्र', 'Susunod na session na mabu-book', 'बुक गर्न अर्को सत्र', 'বুক করার পরের সেশন', 'Sesi seterusnya untuk ditempah'],
   ticket: ['Show ticket', 'عرض التذكرة', 'Voir le billet', 'Ver el billete', 'Ver o bilhete', 'ٹکٹ دکھائیں', 'टिकट दिखाएँ', 'Ipakita ang tiket', 'टिकट देखाउनुहोस्', 'টিকিট দেখান', 'Tunjuk tiket'],
@@ -312,6 +317,7 @@ function _hubRender() {
 }
 
 function _hubInvite() { const dep = window._hubDeps || {}; if (dep.inv) dep.inv(); }
+function _hubBoard(b) { const dep = window._hubDeps || {}; if (dep.board) dep.board({ board: b }); }
 // The Updates list's way in (new features build F3, 2026-11-13): a button at the foot of the staff card, whichever of the
 // three it is. The page draws it (window._hubDeps.upd), and repaints it when the unread count lands.
 function _hubUpd(html) { const dep = window._hubDeps || {}, i = html.lastIndexOf('</div>'); return dep.upd && i >= 0 ? html.slice(0, i) + dep.upd() + html.slice(i) : html; }
@@ -322,13 +328,14 @@ function _hubUpd(html) { const dep = window._hubDeps || {}, i = html.lastIndexOf
 //               My interests (they order Coming up), Coming up, the staff card with the Updates button;
 //   Challenges: the year (December and January), My month (from the 26th), the member's own challenge (or the first five
 //               rides), Plan my Saturdays, the season challenges, the club's goal;
+//   Leaderboard: the distance leaderboards' ways in (2026-11-27, distance-board.js);
 //   Club:       the club's own places: Ask, the Mentorship programme, a call for volunteers, Suggest a ride, the invitation.
 // "Couldn't refresh" and the birthday greeting sit above the parts, for all three. All three are drawn and two hidden, so a
 // switch draws nothing and keeps what is typed. A part with nothing in it has no button (no "nothing here" line, the owner's
 // rule of 2026-11-08); with one part only, no switch. S._hubSec names the part on screen (Sessions first); a page of its
 // own (Ask, mentorship, Suggest a ride, the year) goes back to the part holding its card, and a way in that shows the
 // member's challenge opens Challenges (_hubVisitNow).
-const HUB_SECS = [['sess', 'secSess'], ['goals', 'secGoals'], ['club', 'secClub']];
+const HUB_SECS = [['sess', 'secSess'], ['goals', 'secGoals'], ['board', 'secBoard'], ['club', 'secClub']];
 const HUB_VIEW_SEC = { ask: 'club', mentor: 'club', suggest: 'club', year: 'goals' }; // the chat has no card: the part on screen stays
 function _hubSecOf(parts) { // the part to show: the one picked, else the first with something in it
   const k = S._hubSec;
@@ -380,6 +387,8 @@ function _feedHtml(c, d, stale) {
       _rsgCardHtml(),
       dep.inv ? `<div class="hub-card hub-flat"><button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_hubInvite')}">${esc(dep.invLabel())}</button></div>` : '',
     ].join(''),
+    // The distance leaderboards (2026-11-27): one way into each board; the page itself is distance-board.js.
+    board: dep.board ? `<div class="hub-card hub-lb"><span class="hub-k">${_cuIc('flag', 16)} ${_hT('lbT')}</span><div class="hub-lb-go">${[['longest', 'lbLongest'], ['lifetime', 'lbLifetime'], ['year', 'lbYear']].map(([b, w]) => `<button type="button" class="btn-secondary hub-wide" data-on-click="${_on('_hubBoard', b)}">${_hT(w)}</button>`).join('')}</div></div>` : '',
   };
   const on = _hubSecOf(parts);
   return [

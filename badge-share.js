@@ -108,6 +108,8 @@ function _shrSubject(job, c) {
   // A member's "My month" card (new features build F13): worded where the card is drawn (member-hub.js, _monSub), with
   // its numbers as `lines` under the month's name.
   if (job.kind === 'month') return typeof _monSub === 'function' ? _monSub(c, _sLtr) : null;
+  // A distance from the leaderboards (distance-board.js, 2026-11-27): worded there, with the board's own address at the foot.
+  if (job.kind === 'dist') return job.sub0 && job.sub0.name ? job.sub0 : null;
   return null;
 }
 
@@ -237,7 +239,7 @@ async function _shrDraw(sub, first, a) {
   if (sub.level) said.push(sub.level);
   if (sub.date) said.push(sub.date);
   if (Array.isArray(sub.lines)) said.push(...sub.lines);
-  x.fillStyle = SHR_INK.foot; x.font = `400 40px ${fam}`; put('experiences.micromobility.sa', 1790);
+  x.fillStyle = SHR_INK.foot; x.font = `400 40px ${fam}`; put(sub.foot || 'experiences.micromobility.sa', 1790);
   let blob = null;
   try { blob = await new Promise((res) => cv.toBlob(res, 'image/png')); } catch (_) { blob = null; }
   if (!blob) { // a browser that will not read back a canvas holding the svg pictures: drawn again without them
